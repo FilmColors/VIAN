@@ -1,0 +1,43 @@
+************************Header***************************
+
+************************Result***************************
+Directory:     ['/Users/gaudenz/Desktop/Mara/elan/app/extensions/\\\\130.60.131.134\\studi\\Filme\\frueher_Film\\', '/Users/gaudenz/Desktop/Mara/elan/app/extensions/\\\\130.60.131.134\\studi\\Filme\\mittlere_Filme\\', '/Users/gaudenz/Desktop/Mara/elan/app/extensions/\\\\130.60.131.134\\studi\\Filme\\spaete_Filme\\']
+Total Folders: 0
+
+
+*******************File Information**********************
+n-Correct      n-Multiple     n-Incorrect    n-Not-Started  n-Total        
+0              0              0              0              0              
+
+
+************************Details***************************
+Legend
+PR: Pre-Naming Nomeclature
+MS: Missing Segmentation
+AL: Everything OK
+
+
+         Status       n-Movies         n-ELAN    n-Filemaker     n-Segment.      n-Folders     n-Indexing    n-Timestamp    n-PreNaming       n-Others               Path 
+
+
+
+*************************Total***************************
+                      n-Movies         n-ELAN    n-Filemaker     n-Segment.      n-Folders     n-Indexing    n-Timestamp    n-PreNaming       n-Others                    
+Total:                       0              0              0              0              0              0              0              0              0
+
+
+**********************File Formats***********************
+
+
+
+*************Suspicious Shots Nomenclature****************
+*************************Overview*************************
+         Length        n-Files
+**************************Details*************************
+
+**********************************************************
+**********************************************************
+
+
+************************Details**************************
+*********Suspicious Shots Nomenclature Details************

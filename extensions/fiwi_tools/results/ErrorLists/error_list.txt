@@ -1,0 +1,13 @@
+********************HEADER*****************
+*******************Summary*****************
+ Total Files:	531
+Total Errors:	530
+****************Error Files****************
+********************UNIX*******************
+Unknown Nomenclature     //130.60.131.134/studi/Filme/FIWI/SCR/
+
+
+*******************Windows*****************
+Unknown Nomenclature     \\130.60.131.134\studi\Filme\FIWI\SCR\
+
+

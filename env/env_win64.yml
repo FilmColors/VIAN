@@ -1,0 +1,45 @@
+name: mara_win
+channels:
+- anaconda
+- menpo
+- anaconda-fusion
+- defaults
+dependencies:
+- icu=57.1=vc9_0
+- jpeg=9b=vc9_0
+- libpng=1.6.30=vc9_1
+- openssl=1.0.2l=vc9_0
+- pyqt=5.6.0=py27_2
+- qt=5.6.2=vc9_6
+- sip=4.18=py27_0
+- zlib=1.2.11=vc9_0
+- mkl=2017.0.3=0
+- numpy=1.13.1=py27_0
+- pip=9.0.1=py27_1
+- python=2.7.13=1
+- setuptools=27.2.0=py27_1
+- vs2008_runtime=9.00.30729.5054=0
+- wheel=0.29.0=py27_0
+- enum=0.4.4=py27_0
+- opencv3=3.1.0=py27_0
+- pip:
+  - backports-abc==0.5
+  - bkcharts==0.2
+  - bokeh==0.12.7
+  - certifi==2017.7.27.1
+  - cycler==0.10.0
+  - enum34==1.1.6
+  - functools32==3.2.3.post2
+  - futures==3.1.1
+  - jinja2==2.9.6
+  - markupsafe==1.0
+  - matplotlib==2.0.2
+  - pyparsing==2.2.0
+  - python-dateutil==2.6.1
+  - pytz==2017.2
+  - pyyaml==3.12
+  - singledispatch==3.4.0.3
+  - six==1.10.0
+  - tornado==4.5.2
+prefix: C:\dev\anaconda\envs\mara_win
+
