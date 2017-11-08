@@ -1,0 +1,4 @@
+source activate mara_osx
+cd "${0%/*}"
+cd mara
+python main.py
