@@ -886,6 +886,7 @@ class TimebarDrawing(QtWidgets.QWidget):
         self.a = 50
         self.b = 200
         self.c = 1000
+        self.time_offset = 0
 
     def paintEvent(self, QPaintEvent):
         qp = QtGui.QPainter()
@@ -896,15 +897,15 @@ class TimebarDrawing(QtWidgets.QWidget):
         qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
         pen.setColor(QtGui.QColor(255, 255, 255))
         qp.fillRect(self.rect(),self.background_color)
-        t_start = int(float(self.pos().x()) * self.timeline.scale / 1000)
-        t_end = int(t_start + float(self.width() * self.timeline.scale / 1000))
-
+        t_start = float(self.pos().x()) * self.timeline.scale / 1000
+        t_end = t_start + float(self.width() * self.timeline.scale / 1000)
+        self.time_offset = 0
         if self.timeline.scale <= self.a:
-            for i in range(t_start, t_end):
+            for i in range(int(t_start), int(t_end)):
 
             #for i in range(int(self.timeline.duration) / 1000):
                 # pos = i * 1000 / self.timeline.scale
-                pos = float(i - t_start) / self.timeline.scale * 1000
+                pos = round(float(i - t_start) / self.timeline.scale * 1000 + self.time_offset)
                 if i % 2 == 0:
                     s = ms_to_string(i * 1000)
                     qp.drawText(QtCore.QPoint(pos - (len(s) / 2) * 7, 8), s)
@@ -923,10 +924,10 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.a  < self.timeline.scale <= self.b:
-            for i in range(t_start, t_end):
+            for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 # pos = i * 1000 / self.timeline.scale
-                pos = float(i - t_start) / self.timeline.scale * 1000
+                pos = float(i - t_start) / self.timeline.scale * 1000 + self.time_offset
                 if i % 30 == 0:
                     s = ms_to_string(i * 1000)
                     qp.drawText(QtCore.QPoint(pos - (len(s)/2)*7, 8), s)
@@ -945,11 +946,11 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.b  < self.timeline.scale <= self.c:
-            for i in range(t_start, t_end):
+            for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 paint = True
                 # pos = i * 1000 / self.timeline.scale
-                pos = float(i - t_start) / self.timeline.scale * 1000
+                pos = float(i - t_start) / self.timeline.scale * 1000 + self.time_offset
                 if i % 60 == 0:
                     pen.setWidth(1)
                     s = ms_to_string(i * 1000)
@@ -972,11 +973,11 @@ class TimebarDrawing(QtWidgets.QWidget):
 
         if self.c < self.timeline.scale:
 
-            for i in range(t_start, t_end):
+            for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 paint = True
                 # pos = i * 1000 / self.timeline.scale
-                pos = float(i - t_start) / self.timeline.scale * 1000
+                pos = float(i - t_start) / self.timeline.scale * 1000 + self.time_offset
                 if i % 600 == 0:
                     pen.setWidth(1)
                     s = ms_to_string(i * 1000)
