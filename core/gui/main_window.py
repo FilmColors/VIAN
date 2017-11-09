@@ -45,7 +45,6 @@ __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Production"
 
 
-
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self,vlc_instance, vlc_player):
         super(MainWindow, self).__init__()
@@ -278,7 +277,7 @@ class MainWindow(QtWidgets.QMainWindow):
         loading_screen.hide()
         self.switch_perspective(Perspective.Annotation.name)
 
-        self.load_project("projects/ratatouille/Ratatouille.eext")
+        # self.load_project("projects/ratatouille/Ratatouille.eext")
         self.show()
 
         # if self.is_darwin:
@@ -505,7 +504,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_load_project(self):
         self.set_overlay_visibility(False)
-        path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION)
+        path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
         self.set_overlay_visibility(True)
         path = path[0]
         self.load_project(path)
@@ -932,6 +931,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_timestep_update(-1)
 
     def dispatch_on_changed(self, receiver = None, item = None):
+        print "OnChange"
         if receiver is not None:
             for r in receiver:
                 r.on_changed(self.project, item)

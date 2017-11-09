@@ -88,6 +88,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         value= self.scrollArea.horizontalScrollBar().value()
         self.frame_Controls.move(self.scrollArea.mapToParent(QtCore.QPoint(value, 0)))
         self.relative_corner = QtCore.QPoint(value, 0)
+        self.time_bar.move(self.relative_corner)
+        print self.frame_Bars.size()
 
     def scroll_v(self):
         value = self.scrollArea.verticalScrollBar().value()
@@ -167,15 +169,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def paintEvent(self, QPaintEvent):
         self.frame_outer.setFixedSize(self.frame_Bars.size())
         self.frame_Controls.setFixedSize(self.controls_width, self.height())
-        self.frame_Bars.setFixedSize(self.duration, self.height())
+        self.frame_Bars.setFixedSize(self.duration /self.scale, self.height())
         self.time_scrubber.setFixedHeight(self.height())
         super(Timeline, self).paintEvent(QPaintEvent)
 
     def update_time_bar(self):
         if self.time_bar is None:
             self.time_bar = TimebarDrawing(self.frame_Bars, self)
-        self.time_bar.move(0, 0)
-        self.time_bar.resize(self.duration/ self.scale, self.time_bar_height)
+        self.time_bar.move(self.relative_corner.x(), 0)
+        self.time_bar.resize(self.width() - self.controls_width, self.time_bar_height)
         self.time_bar.show()
 
     def update_ui(self):
@@ -183,7 +185,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         value = self.scrollArea.verticalScrollBar().value()
 
         self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
-        self.time_bar.setFixedSize(self.duration / self.scale + self.controls_width, self.time_bar_height)
+        # self.time_bar.setFixedSize(self.duration / self.scale + self.controls_width, self.time_bar_height)
+        self.time_bar.setFixedSize(self.width() - self.controls_width, self.time_bar_height)
         self.time_bar.raise_()
 
 
@@ -209,6 +212,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         if loc_y + self.bar_height < 400:
             loc_y = 400 - self.bar_height
+
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width, loc_y + self.bar_height)
         self.frame_Controls.setFixedSize(self.controls_width, self.frame_Bars.height())
 
@@ -329,9 +333,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.update()
 
             side_offset = center_point - delta * self.scale
+            self.time_scrubber.move(self.curr_movie_time / self.scale - 5, 0)
 
             self.scrollArea.horizontalScrollBar().setValue(side_offset / self.scale)
-            self.time_scrubber.move(self.curr_movie_time / self.scale - 5, 0)
+
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
@@ -882,8 +887,6 @@ class TimebarDrawing(QtWidgets.QWidget):
         self.b = 200
         self.c = 1000
 
-
-
     def paintEvent(self, QPaintEvent):
         qp = QtGui.QPainter()
         qp.begin(self)
@@ -893,11 +896,15 @@ class TimebarDrawing(QtWidgets.QWidget):
         qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
         pen.setColor(QtGui.QColor(255, 255, 255))
         qp.fillRect(self.rect(),self.background_color)
-        # t_start = self.timeline.relative_corner.x() / 1000
-        # t_end = self.timeline.relative_corner.x() + self.timeline.width() / 1000
+        t_start = int(float(self.pos().x()) * self.timeline.scale / 1000)
+        t_end = int(t_start + float(self.width() * self.timeline.scale / 1000))
+
         if self.timeline.scale <= self.a:
-            for i in range(int(self.timeline.duration) / 1000):
-                pos = i * 1000 / self.timeline.scale
+            for i in range(t_start, t_end):
+
+            #for i in range(int(self.timeline.duration) / 1000):
+                # pos = i * 1000 / self.timeline.scale
+                pos = float(i - t_start) / self.timeline.scale * 1000
                 if i % 2 == 0:
                     s = ms_to_string(i * 1000)
                     qp.drawText(QtCore.QPoint(pos - (len(s) / 2) * 7, 8), s)
@@ -916,8 +923,10 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.a  < self.timeline.scale <= self.b:
-            for i in range(int(self.timeline.duration) / 1000):
-                pos = i * 1000 / self.timeline.scale
+            for i in range(t_start, t_end):
+            #for i in range(int(self.timeline.duration) / 1000):
+                # pos = i * 1000 / self.timeline.scale
+                pos = float(i - t_start) / self.timeline.scale * 1000
                 if i % 30 == 0:
                     s = ms_to_string(i * 1000)
                     qp.drawText(QtCore.QPoint(pos - (len(s)/2)*7, 8), s)
@@ -936,9 +945,11 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.b  < self.timeline.scale <= self.c:
-            for i in range(int(self.timeline.duration) / 1000):
+            for i in range(t_start, t_end):
+            #for i in range(int(self.timeline.duration) / 1000):
                 paint = True
-                pos = i * 1000 / self.timeline.scale
+                # pos = i * 1000 / self.timeline.scale
+                pos = float(i - t_start) / self.timeline.scale * 1000
                 if i % 60 == 0:
                     pen.setWidth(1)
                     s = ms_to_string(i * 1000)
@@ -961,9 +972,11 @@ class TimebarDrawing(QtWidgets.QWidget):
 
         if self.c < self.timeline.scale:
 
-            for i in range(int(self.timeline.duration) / 1000):
+            for i in range(t_start, t_end):
+            #for i in range(int(self.timeline.duration) / 1000):
                 paint = True
-                pos = i * 1000 / self.timeline.scale
+                # pos = i * 1000 / self.timeline.scale
+                pos = float(i - t_start) / self.timeline.scale * 1000
                 if i % 600 == 0:
                     pen.setWidth(1)
                     s = ms_to_string(i * 1000)
@@ -1005,9 +1018,9 @@ class TimebarDrawing(QtWidgets.QWidget):
             if self.was_playing:
                 self.timeline.main_window.player.pause()
 
-            pos = self.mapToParent(QMouseEvent.pos()).x()-5
+            pos = self.mapToParent(QMouseEvent.pos()).x()
             self.timeline.time_scrubber.move(pos, 0)
-            self.timeline.main_window.player.set_media_time(pos * self.timeline.scale + 5)
+            self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             if self.timeline.is_fast_selecting:
                 self.timeline.start_selector(old_pos)
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
@@ -1018,7 +1031,7 @@ class TimebarDrawing(QtWidgets.QWidget):
 
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
-            pos = self.mapToParent(QMouseEvent.pos()).x() - 5
+            pos = self.mapToParent(QMouseEvent.pos()).x()
             self.timeline.time_scrubber.move(pos, 0)
             self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             if self.timeline.is_fast_selecting and self.timeline.selector is not None:
