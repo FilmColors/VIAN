@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>674</width>
+    <width>776</width>
     <height>391</height>
    </rect>
   </property>
@@ -116,6 +116,43 @@
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QFrame" name="frame_naming_convention">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QComboBox" name="cB_Naming1"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cB_Naming2"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cB_Naming3"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cB_Naming4"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cB_Naming5"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cB_Naming6"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Nomenclature</string>
        </property>
       </widget>
      </item>

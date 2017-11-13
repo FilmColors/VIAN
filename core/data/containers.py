@@ -156,7 +156,6 @@ class ElanExtensionProject(IHasName):
         self.dispatch_changed()
 
     def get_main_segmentation(self):
-        print len(self.segmentation)
         if len(self.segmentation) > 0:
             return self.segmentation[self.main_segmentation_index]
             # return self.segmentation[0]
@@ -174,11 +173,13 @@ class ElanExtensionProject(IHasName):
 
     def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)
-        self.screenshot_groups[0].add_screenshots(screenshot)
+        screenshot.set_project(self)
 
+        self.screenshot_groups[0].add_screenshots(screenshot)
         if group == 0 and self.active_screenshot_group is not None and self.active_screenshot_group is not self.screenshot_groups[0]:
             self.active_screenshot_group.add_screenshots(screenshot)
-        screenshot.set_project(self)
+
+
         self.sort_screenshots()
         self.undo_manager.to_undo((self.add_screenshot, [screenshot]),(self.remove_screenshot, [screenshot]))
         self.dispatch_changed()
@@ -209,10 +210,25 @@ class ElanExtensionProject(IHasName):
                 shot_id_global += 1
 
     def remove_screenshot(self, screenshot):
-        self.screenshots.remove(screenshot)
-        self.sort_screenshots()
-        self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
-        self.dispatch_changed()
+        for grp in self.screenshot_groups:
+            for s in grp.screenshots:
+                if s not in self.screenshots:
+                    self.screenshots.append(s)
+
+        if screenshot in self.screenshots:
+            for grp in self.screenshot_groups:
+                grp.remove_screenshots(screenshot)
+                print grp.get_name()
+
+            self.screenshots.remove(screenshot)
+            self.sort_screenshots()
+            self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
+            self.dispatch_changed()
+        else:
+            print "Not Found"
+
+
+
 
     def add_analysis(self, analyze):
         analyze.set_project(self)
@@ -1162,6 +1178,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.shot_id_segm = shot_id_segm
         self.movie_timestamp = timestamp
         self.creation_timestamp = str(datetime.datetime.now())
+        self.screenshot_group = ""
         self.notes = ""
         self.annotation_is_visible = False
         self.timeline_visibility = True
@@ -1279,6 +1296,8 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
     def set_name(self, name):
         self.name = name
+        for s in self.screenshots:
+            s.screenshot_group = self.name
         self.dispatch_on_changed()
 
     def add_screenshots(self, shots):
@@ -1286,12 +1305,14 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
             shots = [shots]
         for s in shots:
             self.screenshots.append(s)
+            s.screenshot_group = self.get_name()
 
     def remove_screenshots(self, shots):
         if not isinstance(shots, list):
             shots = [shots]
         for s in shots:
-            self.screenshots.remove(s)
+            if s in self.screenshots:
+                self.screenshots.remove(s)
 
     def get_type(self):
         return SCREENSHOT_GROUP
@@ -1312,7 +1333,9 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
         for s in serialization['shots']:
             shot = self.project.get_by_id(s)
+            shot.screenshot_group = self.name
             self.screenshots.append(shot)
+
 
         return self
 

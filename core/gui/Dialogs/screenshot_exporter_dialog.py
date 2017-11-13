@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout,
 from PyQt5 import uic
 from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
 from core.gui.ewidgetbase import EDialogWidget
-from core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum
+from core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum, get_enum_value
 import os
 import cv2
 
@@ -18,6 +18,28 @@ class DialogScreenshotExporter(EDialogWidget):
 
         self.types = [(e.name) for e in ImageType]
 
+        self.nomenclature = []
+        self.naming_cbs = [self.cB_Naming1, self.cB_Naming2,
+                           self.cB_Naming3, self.cB_Naming4,
+                           self.cB_Naming5, self.cB_Naming6]
+
+        for s in ScreenshotNamingConventionOptions:
+            self.nomenclature.append(s.name)
+
+        self.default = ["Scene_ID", "Shot_ID_Segment", "Shot_Group", "Movie_ID", "empty", "empty"]
+
+        for i, cb in enumerate(self.naming_cbs):
+            for s in ScreenshotNamingConventionOptions:
+                print s
+                cb.addItem(s.name)
+
+
+            index = cb.findText(self.default[i])
+            cb.setCurrentIndex(index)
+
+
+
+
         self.checkBox_OverrideV.stateChanged.connect(self.on_override_visibility_changed)
         self.checkBox_Visibility.setEnabled(self.override_visibility)
         self.cB_ImageFormat.addItems(self.types)
@@ -25,7 +47,6 @@ class DialogScreenshotExporter(EDialogWidget):
         self.folder_path = self.main_window.project.folder + self.main_window.settings.DIR_SCREENSHOTS
         self.lineEdit_Folder.setText(self.folder_path)
         self.lineEdit_Folder.editingFinished.connect(self.on_edit_path_finished)
-
 
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Cancel.clicked.connect(self.on_cancel)
@@ -49,8 +70,21 @@ class DialogScreenshotExporter(EDialogWidget):
         quality = self.QualitySlider.value()
         if not self.override_visibility:
             visibility = None
-        self.manager.export_screenshots(path, visibility, image_type, quality)
+
+        n1 = self.cB_Naming1.currentText()
+        n2 = self.cB_Naming2.currentText()
+        n3 = self.cB_Naming3.currentText()
+        n4 = self.cB_Naming4.currentText()
+        n5 = self.cB_Naming5.currentText()
+        n6 = self.cB_Naming6.currentText()
+
+        naming = [n1, n2, n3, n4, n5, n6]
+
+        self.manager.export_screenshots(path, visibility, image_type, quality, naming)
         self.close()
+
+
+
 
     def on_cancel(self):
         self.close()

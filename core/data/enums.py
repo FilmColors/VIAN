@@ -12,6 +12,7 @@ class ScreenshotNamingConventionOptions(Enum):
     Creation_Timestamp = ("Screenshot", "creation_timestamp")
     Shot_ID_Global = ("Screenshot", "shot_id_global")
     Shot_ID_Segment = ("Screenshot", "shot_id_segm")
+    Shot_Group = ("Screenshot", "screenshot_group")
 
     # Movie Attributes
     Movie_ID = ("Movie", "movie_id")

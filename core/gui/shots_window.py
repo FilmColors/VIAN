@@ -406,7 +406,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.rubberband_rect = QtCore.QRectF(0.0, 0.0, 0.0, 0.0)
             super(ScreenshotsManagerWidget, self).mouseReleaseEvent(QMouseEvent)
 
-    def export_screenshots(self, dir, visibility = None, image_type = None, quality = None):
+    def export_screenshots(self, dir, visibility = None, image_type = None, quality = None, naming = None):
         screenshots = []
         if len(self.selected_images) == 0:
             self.main_window.print_message("No Screenshots selected", "red")
@@ -415,8 +415,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         for item in self.images:
             screenshots.append(item.screenshot_obj)
 
-
-        exporter = ScreenshotsExporter(self.main_window.settings, self.main_window.project)
+        exporter = ScreenshotsExporter(self.main_window.settings, self.main_window.project, naming)
         if not os.path.isdir(dir):
             os.mkdir(dir)
 

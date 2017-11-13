@@ -947,7 +947,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_timestep_update(-1)
 
     def dispatch_on_changed(self, receiver = None, item = None):
-        print "OnChange"
         if receiver is not None:
             for r in receiver:
                 r.on_changed(self.project, item)

@@ -4,13 +4,17 @@ from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, I
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
 class ScreenshotsExporter():
-    def __init__(self, settings, project):
+    def __init__(self, settings, project, naming):
         self.settings = settings
         self.project = project
+        self.naming = naming
 
     def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100):
         for s in screenshots:
-            name = build_file_name(self.settings, s, self.project.movie_descriptor)
+            if self.naming is None:
+                name = build_file_name(self.settings.SCREENSHOTS_EXPORT_NAMING, s, self.project.movie_descriptor)
+            else:
+                name = build_file_name(self.naming, s, self.project.movie_descriptor)
             file_name = dir + name
 
 
@@ -30,6 +34,8 @@ class ScreenshotsExporter():
             if image_type.value == ImageType.PNG.value:
                 compression = np.clip(int(float(100 - quality) / 10),0,9)
                 cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
+
+            print file_name
 
 class SegmentationExporter(IConcurrentJob):
     def __init__(self, file_path, export_ms = False, ):
@@ -54,27 +60,34 @@ class SegmentationExporter(IConcurrentJob):
             output.write(result)
 
 
-def build_file_name(settings, screenshot, movie_descriptor):
+def build_file_name(naming, screenshot, movie_descriptor):
     file_name = "/"
-    for i, name in enumerate(settings.SCREENSHOTS_EXPORT_NAMING):
+
+    for i, name in enumerate(naming):
         if name is not ScreenshotNamingConventionOptions.empty.name:
             value = get_enum_value(ScreenshotNamingConventionOptions, name)
             object_type = value[0]
             object_attr = value[1]
 
-            print object_attr
+
 
             if object_type == "Screenshot":
+                if object_attr == "screenshot_group":
+                    file_name = file_name[:-1]
                 file_name += str(getattr(screenshot, object_attr))
 
             if object_type == "Movie":
                 file_name += str(getattr(movie_descriptor, object_attr))
                 print file_name
 
-            if i < len(settings.SCREENSHOTS_EXPORT_NAMING) - 1:
-                if get_enum_value(ScreenshotNamingConventionOptions, settings.SCREENSHOTS_EXPORT_NAMING[i + 1])[1] == 0:
+            if i < len(naming) - 1:
+                if get_enum_value(ScreenshotNamingConventionOptions, naming[i + 1])[1] == 0:
                     break
                 else:
                     file_name += "_"
+
+
+    file_name = file_name.replace("__", "")
+    file_name = file_name.replace("All Shots_", "_")
 
     return file_name
