@@ -53,7 +53,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         #self.descriptor_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_movie.png"))
 
         # Segmentation
-        self.segmentation_group = SegmentationOutlinerGroupItem(self.project_item, 0)
+        self.segmentation_group = SegmentationOutlinerRootItem(self.project_item, 0)
         for i, st in enumerate(p.get_segmentations()):
             segmentation_item =  SegmentationOutlinerItem(self.segmentation_group, i, st)
             self.item_list.append(segmentation_item)
@@ -65,13 +65,22 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 segment_item = SegmentOutlinerItem(segmentation_item, i, s)
                 self.item_list.append(segment_item)
         # Screenshots
-        self.screenshot_group = ScreenshotGroupOutlinerItem(self.project_item, 1)
-        for i, scr in enumerate(p.get_screenshots()):
-            screenshot =  ScreenshotOutlinerItem(self.screenshot_group, i, scr)
-            self.item_list.append(screenshot)
+        self.screenshot_group = ScreenshotRootOutlinerItem(self.project_item, 1)
+        for i, scr_grp in enumerate(p.screenshot_groups):
+            scr_group =  ScreenshotGroupOutlinerItem(self.screenshot_group, i, scr_grp)
+
+            if scr_grp is self.project().active_screenshot_group:
+                scr_group.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
+
+            for j, scr in enumerate(scr_grp.screenshots):
+                screenshot = ScreenshotOutlinerItem(scr_group, i, scr)
+                self.item_list.append(screenshot)
+        # for i, scr in enumerate(p.get_screenshots()):
+        #     screenshot =  ScreenshotOutlinerItem(self.screenshot_group, i, scr)
+        #     self.item_list.append(screenshot)
 
         # Annotations
-        self.annotation_group = AnnotationLayerOutlinerGroupItem(self.project_item, 2)
+        self.annotation_group = AnnotationLayerOutlinerRootItem(self.project_item, 2)
         for i,l in enumerate(self.main_window.project.get_annotation_layers()):
             layer_item = AnnotationLayerOutlinerItem(self.annotation_group, i, l)
             self.item_list.append(layer_item)
@@ -80,7 +89,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 self.item_list.append(annotation_item)
 
 
-        self.analyzes_group = AnalyzesOutlinerGroupItem(self.project_item, 3)
+        self.analyzes_group = AnalyzesOutlinerRootItem(self.project_item, 3)
         for i, a in enumerate(self.main_window.project.analysis):
             analysis_item = AnalyzesOutlinerItem(self.analyzes_group, i, a)
             self.item_list.append(analysis_item)
@@ -283,11 +292,15 @@ class OutlinerTreeWidget(QTreeWidget):
         if self.currentItem() is None:
             return
 
-        containers = []
-        for item in self.selectedItems():
-            if item.has_item is True:
-                containers.append(item.get_container())
-        context_menu = open_context_menu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()),containers, self.project)
+        if isinstance(self.selectedItems()[0], ScreenshotRootOutlinerItem):
+            context_menu = open_context_menu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()), [],
+                                           self.project, screenshot_root=True)
+        else:
+            containers = []
+            for item in self.selectedItems():
+                if item.has_item is True:
+                    containers.append(item.get_container())
+            context_menu = open_context_menu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()), containers, self.project)
 
 
 class QOutlinerLineEdit(QLineEdit):
@@ -376,16 +389,16 @@ class AbstractOutlinerItem(QTreeWidgetItem):
 #         self.setText(0, self.annotation.get_name())
 
 
-class SegmentationOutlinerGroupItem(AbstractOutlinerItem):
+class SegmentationOutlinerRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
-        super(SegmentationOutlinerGroupItem, self).__init__(parent, index)
+        super(SegmentationOutlinerRootItem, self).__init__(parent, index)
         self.update_item()
 
     def set_name(self, name):
         "Not implemented"
 
     def update_item(self):
-        super(SegmentationOutlinerGroupItem, self).update_item()
+        super(SegmentationOutlinerRootItem, self).update_item()
         self.setText(0, "Segmentations")
 
 
@@ -429,9 +442,9 @@ class SegmentOutlinerItem(AbstractOutlinerItem):
         self.setText(0, str(str(self.segment.ID) + "\t" +self.segment.additional_identifiers[0]))
 
 
-class AnnotationLayerOutlinerGroupItem(AbstractOutlinerItem):
+class AnnotationLayerOutlinerRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
-        super(AnnotationLayerOutlinerGroupItem, self).__init__(parent, index)
+        super(AnnotationLayerOutlinerRootItem, self).__init__(parent, index)
         self.setText(0, "Annotation Layers")
 
 
@@ -485,11 +498,27 @@ class AnnotationOutlinerItem(AbstractOutlinerItem):
         self.setText(1, self.annotation.a_type.name)
 
 
-class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
+class ScreenshotRootOutlinerItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
-        super(ScreenshotGroupOutlinerItem, self).__init__(parent, index)
+        super(ScreenshotRootOutlinerItem, self).__init__(parent, index)
         self.setText(0, "Screenshots")
 
+class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, screenshot_group):
+        super(ScreenshotGroupOutlinerItem, self).__init__(parent, index)
+        self.item = screenshot_group
+        self.setText(0, screenshot_group.get_name())
+        self.has_item = True
+        self.is_editable = True
+
+    def get_container(self):
+        return self.item
+
+    def set_name(self, name):
+        self.item.set_name(name)
+
+    def get_name(self):
+        return self.item.get_name()
 
 class ScreenshotOutlinerItem(AbstractOutlinerItem):
     def __init__(self, parent, index, screenshot):
@@ -522,6 +551,7 @@ class ProjectOutlinerItem(AbstractOutlinerItem):
         self.has_item = True
 
         self.update_item()
+
     def get_container(self):
         return self.project
 
@@ -555,9 +585,9 @@ class MovieDescriptorOutlinerItem(AbstractOutlinerItem):
         self.setText(0, self.movie_descriptor.movie_name)
 
 
-class AnalyzesOutlinerGroupItem(AbstractOutlinerItem):
+class AnalyzesOutlinerRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
-        super(AnalyzesOutlinerGroupItem, self).__init__(parent, index)
+        super(AnalyzesOutlinerRootItem, self).__init__(parent, index)
         self.update_item()
 
     def set_name(self, name):

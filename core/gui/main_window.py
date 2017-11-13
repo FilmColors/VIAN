@@ -157,7 +157,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_history_view()
         self.create_concurrent_task_viewer()
 
-
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
 
         # self.tabifyDockWidget(self.annotation_toolbar, self.screenshot_toolbar)

@@ -22,11 +22,13 @@ ANNOTATION_LAYER = 3
 SCREENSHOT = 4
 MOVIE_DESCRIPTOR = 5
 ANALYSIS = 6
+SCREENSHOT_GROUP = 7
 
 
 class ElanExtensionProject(IHasName):
     def __init__(self, main_window, path = "", name = ""):
         self.undo_manager = UndoRedoManager()
+
         self.path = path
         self.name = name
         self.id_list = []
@@ -38,12 +40,17 @@ class ElanExtensionProject(IHasName):
         self.main_segmentation_index = 0
         self.movie_descriptor = MovieDescriptor(project=self)
         self.analysis = []
+        self.screenshot_groups = []
+        self.add_screenshot_group("All Shots", initial=True)
+        self.active_screenshot_group = self.screenshot_groups[0]
+        self.active_screenshot_group.is_current = True
 
         self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
         self.main_window = main_window
         self.selected = []
+
 
     def highlight_types(self, types):
 
@@ -165,8 +172,12 @@ class ElanExtensionProject(IHasName):
     def get_segmentations(self):
         return self.segmentation
 
-    def add_screenshot(self, screenshot):
+    def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)
+        self.screenshot_groups[0].add_screenshots(screenshot)
+
+        if group == 0 and self.active_screenshot_group is not None and self.active_screenshot_group is not self.screenshot_groups[0]:
+            self.active_screenshot_group.add_screenshots(screenshot)
         screenshot.set_project(self)
         self.sort_screenshots()
         self.undo_manager.to_undo((self.add_screenshot, [screenshot]),(self.remove_screenshot, [screenshot]))
@@ -176,6 +187,9 @@ class ElanExtensionProject(IHasName):
         if self.get_main_segmentation():
             self.get_main_segmentation().update_segment_ids()
             self.screenshots.sort(key=lambda x: x.movie_timestamp, reverse=False)
+
+            for grp in self.screenshot_groups:
+                grp.screenshots.sort(key=lambda x: x.movie_timestamp, reverse=False)
 
             for s in self.screenshots:
                 s.update_scene_id(self.get_main_segmentation())
@@ -253,6 +267,30 @@ class ElanExtensionProject(IHasName):
 
     def get_screenshots(self):
         return self.screenshots
+
+    def add_screenshot_group(self, name = "New Screenshot Group", initial = False, group = None):
+        if not group:
+            grp = ScreenshotGroup(self, name)
+        else:
+            grp = group
+
+        self.screenshot_groups.append(grp)
+        if not initial:
+            self.dispatch_changed()
+
+    def remove_screenshot_group(self, grp):
+        if grp is not self.screenshot_groups[0]:
+            self.screenshot_groups.remove(grp)
+            self.dispatch_changed()
+
+    def set_current_screenshot_group(self, grp):
+        self.active_screenshot_group.is_current = False
+        self.active_screenshot_group = grp
+        grp.is_current = True
+        self.dispatch_changed()
+
+    def get_active_screenshots(self):
+        return self.active_screenshot_group.screenshots
 
     def create_annotation_layer(self,name, t_start, t_stop):
         layer = AnnotationLayer(name, t_start, t_stop)
@@ -401,6 +439,20 @@ class ElanExtensionProject(IHasName):
         for d in my_dict['analyzes']:
             new = Analysis().deserialize(d)
             self.add_analysis(new)
+
+        try:
+            old = self.screenshot_groups
+            self.screenshot_groups = []
+
+            for e in my_dict['screenshot_groups']:
+                new = ScreenshotGroup(self).deserialize(e)
+                self.add_screenshot_group(group=new)
+            self.active_screenshot_group = self.screenshot_groups[0]
+            self.screenshot_groups[0].is_current = True
+        except Exception as e:
+            self.screenshot_groups = old
+            print e.message
+            self.main_window.print_message("Screenshot Group import failed", "Red")
 
         self.sort_screenshots()
         self.undo_manager.clear()
@@ -1211,6 +1263,58 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def delete(self):
         self.project.remove_screenshot(self)
 
+class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
+    def __init__(self, project, name = "New Screenshot Group"):
+        IProjectContainer.__init__(self)
+        self.set_project(project)
+        self.name = name
+        self.screenshots = []
+        self.notes = ""
+        self.is_current = False
+
+
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+        self.dispatch_on_changed()
+
+    def add_screenshots(self, shots):
+        if not isinstance(shots, list):
+            shots = [shots]
+        for s in shots:
+            self.screenshots.append(s)
+
+    def remove_screenshots(self, shots):
+        if not isinstance(shots, list):
+            shots = [shots]
+        for s in shots:
+            self.screenshots.remove(s)
+
+    def get_type(self):
+        return SCREENSHOT_GROUP
+
+    def serialize(self):
+        shot_ids = []
+        for s in self.screenshots:
+            shot_ids.append(s.get_id())
+
+        data = dict(
+            name=self.name,
+            shots = shot_ids
+        )
+        return data
+
+    def deserialize(self, serialization):
+        self.name = serialization['name']
+
+        for s in serialization['shots']:
+            shot = self.project.get_by_id(s)
+            self.screenshots.append(shot)
+
+        return self
 
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
     def __init__(self, project, movie_name = "No Movie Name", movie_path = "", movie_id = -0001, year = 1800, source = "", duration = 100):

@@ -91,7 +91,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.relative_corner = QtCore.QPoint(value, 0)
         self.time_bar.move(self.relative_corner)
 
-
     def scroll_v(self):
         value = self.scrollArea.verticalScrollBar().value()
         self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
@@ -138,8 +137,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.items.append(item)
         self.update_ui()
 
-    def add_screenshots(self, screenshots):
-        control = TimelineControl(self.frame_Controls,self, name = "Screenshots")
+    def add_screenshots(self, screenshots, screenshot_group, grp_name = "Screenshots", ):
+        control = TimelineControl(self.frame_Controls, self, name = grp_name, item=screenshot_group)
         bars = ScreenshotBar(self.frame_Bars, self, screenshots)
         item = [control, [bars], self.bar_height]
         self.item_screenshots.append(item)
@@ -229,7 +228,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for l in project.annotation_layers:
             self.add_annotation_layer(l)
 
-        self.add_screenshots(project.screenshots)
+        for grp in project.screenshot_groups:
+            self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
         self.update_time_bar()
         self.update_ui()
@@ -247,7 +247,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             if l.get_timeline_visibility() is True:
                 self.add_annotation_layer(l)
 
-        self.add_screenshots(project.screenshots)
+        for grp in project.screenshot_groups:
+            self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
         self.update_time_bar()
         self.update_ui()
@@ -577,6 +578,7 @@ class TimelineBar(QtWidgets.QFrame):
 class TimebarSlice(QtWidgets.QWidget):
     def __init__(self, parent, item, timeline):
         super(TimebarSlice, self).__init__(parent)
+        self.locked = False
         self.timeline = timeline
         self.item = item
         self.show()
@@ -584,7 +586,7 @@ class TimebarSlice(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.border_width = 10
         self.offset = QtCore.QPoint(0,0)
-        self.locked = False
+
 
         self.color = (232, 174, 12, 100)
         if item.get_type() == ANNOTATION_LAYER:

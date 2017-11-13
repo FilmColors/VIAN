@@ -7,9 +7,14 @@ from core.data import containers as con
 from core.data.computation import parse_file_path
 
 
-def open_context_menu(main_window, pos, containers, project):
-    if len(containers) == 0:
+def open_context_menu(main_window, pos, containers, project, screenshot_root = False):
+
+
+    if len(containers) == 0 and screenshot_root == False:
         return None
+
+    elif len(containers) == 0 and screenshot_root == True:
+        cm = ScreenshotRootContexMenu(main_window, pos, project)
 
     else:
         container_type = containers[0].get_type()
@@ -44,6 +49,10 @@ def open_context_menu(main_window, pos, containers, project):
             cm = ScreenshotContextMenu(main_window, pos, screenshots)
             return cm
 
+        if container_type == con.SCREENSHOT_GROUP:
+            screenshots_grp = containers
+            cm = ScreenshotGroupContexMenu(main_window, pos, screenshots_grp, project)
+            return cm
 
         else:
             cm = ContextMenu(main_window, pos)
@@ -253,6 +262,7 @@ class LayerContextMenu(ContextMenu):
             else:
                 s.unlock()
 
+
 class AnnotationContextMenu(ContextMenu):
     def __init__(self, parent, pos, annotation):
         super(AnnotationContextMenu, self).__init__(parent, pos)
@@ -327,6 +337,7 @@ class SegmentContexMenu(ContextMenu):
             s.project.remove_segment(s)
         self.close()
 
+
 class MovieDescriptorContextMenu(ContextMenu):
     def __init__(self, parent, pos, movie_descriptor):
         super(MovieDescriptorContextMenu, self).__init__(parent, pos)
@@ -341,3 +352,35 @@ class MovieDescriptorContextMenu(ContextMenu):
         self.movie_descriptor.movie_path = path
         self.main_window.player.open_movie(path)
         self.main_window.dispatch_on_changed()
+
+class ScreenshotGroupContexMenu(ContextMenu):
+    def __init__(self, parent, pos, screenshot_group, project):
+        super(ScreenshotGroupContexMenu, self).__init__(parent, pos)
+        self.screenshot_group = screenshot_group[0]
+        self.project = project
+
+        self.action_set_active = self.addAction("Set as Active Screenshot Group")
+        self.action_set_active.triggered.connect(self.on_set_active)
+
+        self.action_delete = self.addAction("Remove Screenshot Group")
+        self.action_delete.triggered.connect(self.on_remove)
+        self.popup(pos)
+
+    def on_remove(self):
+        self.hide()
+        self.project.remove_screenshot_group(self.screenshot_group)
+
+    def on_set_active(self):
+        self.project.set_current_screenshot_group(self.screenshot_group)
+
+class ScreenshotRootContexMenu(ContextMenu):
+    def __init__(self, parent, pos, project):
+        super(ScreenshotRootContexMenu, self).__init__(parent, pos)
+        self.project = project
+
+        self.action_new = self.addAction("New Screenshot Group")
+        self.action_new.triggered.connect(self.on_new_screenshot_group)
+        self.popup(pos)
+
+    def on_new_screenshot_group(self):
+        self.project.add_screenshot_group()

@@ -24,6 +24,9 @@ class IProjectContainer:
         self.outliner_highlighted = False
         self.unique_id = -1
 
+    def get_id(self):
+        return self.unique_id
+
     def set_expanded(self, expanded):
         self.outliner_expanded = expanded
 

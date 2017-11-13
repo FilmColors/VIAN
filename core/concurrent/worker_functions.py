@@ -43,6 +43,7 @@ def store_project_concurrent(args, sign_progress):
     screenshots_ann = []
     segmentations = []
     analyzes = []
+    screenshot_groups = []
 
     for a in project.annotation_layers:
         a_layer.append(a.serialize())
@@ -62,6 +63,9 @@ def store_project_concurrent(args, sign_progress):
     for d in project.analysis:
         analyzes.append(d.serialize())
 
+    for e in project.screenshot_groups:
+        screenshot_groups.append(e.serialize())
+
     data = dict(
         path=project.path,
         name=project.name,
@@ -73,7 +77,8 @@ def store_project_concurrent(args, sign_progress):
         segmentation=segmentations,
         analyzes=analyzes,
         movie_descriptor=project.movie_descriptor.serialize(),
-        version=project.main_window.version
+        version=project.main_window.version,
+        screenshot_groups=screenshot_groups
 
     )
     sign_progress(0.6)

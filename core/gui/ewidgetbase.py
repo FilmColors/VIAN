@@ -33,8 +33,9 @@ class EDockWidget(QDockWidget):
 
             super(EDockWidget, self).resizeEvent( *args, **kwargs)
 
-            self.main_window.update_player_size()
-            self.main_window.update_overlay()
+            if self.project():
+                self.main_window.update_player_size()
+                self.main_window.update_overlay()
 
 
     def dockLocationChanged(self, Qt_DockWidgetArea):

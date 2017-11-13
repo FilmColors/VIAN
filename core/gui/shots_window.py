@@ -5,7 +5,7 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QDockWidget, QGraphicsTextItem
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QDockWidget, QGraphicsTextItem, QAction
 
 from core.data.computation import *
 from core.data.containers import Screenshot
@@ -110,6 +110,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         width = 0
         height = 0
         scene_counter = 1
+        n_per_segment_counter = 0
         #TODO image might be NONE
         for i, screenshot in enumerate(screenshots):
             if screenshot.annotation_is_visible and screenshot.img_blend is not None:
@@ -117,6 +118,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             else:
                 image = screenshot.img_movie
 
+            n_per_segment_counter += 1
             qgraph, qpixmap = numpy_to_qt_image(image)
 
             w = qpixmap.width()
@@ -152,6 +154,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 segm_caption.setPos(QtCore.QPointF(border_width/2, y))
                 self.segmentation_captions.append(segm_caption)
 
+                segm_counter = self.scene.addText(" n-Shots: " + str(n_per_segment_counter), font)
+                segm_counter.setDefaultTextColor(QColor(255, 255, 255))
+                segm_counter.setPos(QtCore.QPointF(border_width / 2, y + 200))
+                self.segmentation_captions.append(segm_counter)
+                n_per_segment_counter = 0
+
                 break
 
             # If the next Screenshot is from a different Scene ID, add a spacer Line
@@ -160,6 +168,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 segm_caption.setDefaultTextColor(QColor(255, 255, 255))
                 segm_caption.setPos(QtCore.QPointF(border_width/2, y))
                 self.segmentation_captions.append(segm_caption)
+
+                segm_counter = self.scene.addText(" n-Shots: " + str(n_per_segment_counter), font)
+                segm_counter.setDefaultTextColor(QColor(255, 255, 255))
+                segm_counter.setPos(QtCore.QPointF(border_width / 2, y + 200))
+                self.segmentation_captions.append(segm_counter)
+                n_per_segment_counter = 0
 
                 y += self.y_offset + height
                 p1 = QtCore.QPointF(0, y)
@@ -260,9 +274,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.images = []
         self.captions = []
         if self.main_window.project is not None:
-            self.add_images(self.main_window.project.get_screenshots())
-
-            if len(self.main_window.project.get_screenshots()) > 0:
+            # self.add_images(self.main_window.project.get_screenshots())
+            self.add_images(self.main_window.project.get_active_screenshots())
+            if len(self.main_window.project.get_active_screenshots()) > 0:
                 size = self.sceneRect().width() / self.images[0].pixmap().width() * 10
                 self.font.setPixelSize(size)
                 self.update_caption()
@@ -343,7 +357,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.select_image(sel, dispatch=False)
 
     def update_caption(self):
-        s = self.main_window.project.get_screenshots()
+        s = self.main_window.project.get_active_screenshots()
         for i, c in enumerate(self.captions):
 
             caption = self.create_caption_text(s[i])
