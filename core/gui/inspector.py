@@ -135,7 +135,7 @@ class AttributesScreenshot(QWidget):
         self.lbl_timestamp.setText(ms_to_string(self.descriptor.movie_timestamp))
         self.lbl_segment_id.setText(str(self.descriptor.scene_id))
         self.lbl_global_id.setText(str(self.descriptor.shot_id_global))
-        self.lbl_segm_id.setText(ms_to_string(self.descriptor.shot_id_segm))
+        self.lbl_segm_id.setText(str(self.descriptor.shot_id_segm))
 
         self.lbl_Preview.setPixmap(numpy_to_qt_image(self.descriptor.img_movie, target_width=400)[1])
         self.show()

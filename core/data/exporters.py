@@ -62,16 +62,19 @@ def build_file_name(settings, screenshot, movie_descriptor):
             object_type = value[0]
             object_attr = value[1]
 
-
-
+            print object_attr
 
             if object_type == "Screenshot":
                 file_name += str(getattr(screenshot, object_attr))
+
             if object_type == "Movie":
                 file_name += str(getattr(movie_descriptor, object_attr))
+                print file_name
 
-            if i < len(settings.SCREENSHOTS_EXPORT_NAMING)-1:
-                file_name += "_"
-
+            if i < len(settings.SCREENSHOTS_EXPORT_NAMING) - 1:
+                if get_enum_value(ScreenshotNamingConventionOptions, settings.SCREENSHOTS_EXPORT_NAMING[i + 1])[1] == 0:
+                    break
+                else:
+                    file_name += "_"
 
     return file_name

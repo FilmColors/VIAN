@@ -144,7 +144,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 self.screenshot_group.removeChild(self.screenshot_group.child(i))
 
     def on_changed(self, project, item):
-        print item
         if item:
             self.update_tree(item)
         else:

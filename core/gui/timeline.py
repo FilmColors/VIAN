@@ -71,6 +71,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
 
         self.scrollArea.wheelEvent = self.func_tes
+        self.main_window.onTimeStep.connect(self.on_timestep_update)
 
         # self.update_timer = QtCore.QTimer()
         # self.update_timer.setInterval(100)
@@ -89,7 +90,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Controls.move(self.scrollArea.mapToParent(QtCore.QPoint(value, 0)))
         self.relative_corner = QtCore.QPoint(value, 0)
         self.time_bar.move(self.relative_corner)
-        print self.frame_Bars.size()
+
 
     def scroll_v(self):
         value = self.scrollArea.verticalScrollBar().value()
@@ -171,13 +172,16 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Controls.setFixedSize(self.controls_width, self.height())
         self.frame_Bars.setFixedSize(self.duration /self.scale, self.height())
         self.time_scrubber.setFixedHeight(self.height())
+        self.update_time_bar()
         super(Timeline, self).paintEvent(QPaintEvent)
 
     def update_time_bar(self):
         if self.time_bar is None:
             self.time_bar = TimebarDrawing(self.frame_Bars, self)
         self.time_bar.move(self.relative_corner.x(), 0)
-        self.time_bar.resize(self.width() - self.controls_width, self.time_bar_height)
+        # self.time_bar.resize(self.width() - self.controls_width, self.time_bar_height)
+        self.time_bar.setFixedWidth(self.width() - self.controls_width)
+        self.time_bar.update()
         self.time_bar.show()
 
     def update_ui(self):
@@ -216,7 +220,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width, loc_y + self.bar_height)
         self.frame_Controls.setFixedSize(self.controls_width, self.frame_Bars.height())
 
-
     def on_loaded(self, project):
         self.clear()
         self.time_bar.close()
@@ -230,6 +233,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.update_time_bar()
         self.update_ui()
+        self.scroll_h()
 
     def on_changed(self, project, item):
         self.clear()
@@ -425,6 +429,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def create_segmentation(self):
         self.project().create_segmentation("New Segmentation")
 
+    def resizeEvent(self, QResizeEvent):
+        super(Timeline, self).resizeEvent(QResizeEvent)
+
 
 class TimelineControl(QtWidgets.QWidget):
     def __init__(self, parent,timeline, item = None, name = "No Name"):
@@ -493,6 +500,10 @@ class TimelineControl(QtWidgets.QWidget):
         # Title of the Control
 
         qp.drawText(QtCore.QPoint(0,10), self.name)
+
+        if isinstance(self.item, ILockable):
+            if self.item.is_locked():
+                qp.drawPixmap(QtCore.QRect(0, 25, 16, 16), QPixmap("qt_ui/icons/icon_locked.png"))
         # qp.drawLine(QtCore.QPoint(0, self.height()), QtCore.QPoint(self.width(), self.height()))
         if self.is_selected:
             qp.fillRect(QtCore.QRect(0,0,self.width(), self.height() - 10), QtGui.QColor(200, 200, 255, 50))
@@ -573,6 +584,7 @@ class TimebarSlice(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.border_width = 10
         self.offset = QtCore.QPoint(0,0)
+        self.locked = False
 
         self.color = (232, 174, 12, 100)
         if item.get_type() == ANNOTATION_LAYER:
@@ -589,13 +601,21 @@ class TimebarSlice(QtWidgets.QWidget):
         self.is_selected = False
 
     def paintEvent(self, QPaintEvent):
-        if self.is_hovered:
-            col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 80)
-        else:
-            col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 50)
+        self.locked = False
+        if isinstance(self.item, ILockable):
+            self.locked = self.item.is_locked()
 
-        if self.is_selected:
-            col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 100)
+        if self.locked :
+            col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 20)
+
+        else:
+            if self.is_hovered:
+                col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 80)
+            else:
+                col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 50)
+
+            if self.is_selected:
+                col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 100)
 
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
@@ -612,93 +632,94 @@ class TimebarSlice(QtWidgets.QWidget):
         qp.end()
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
-            self.is_selected = True
-            self.timeline.project().set_selected(None, self.item)
-            self.offset = self.mapToParent(QMouseEvent.pos())
-            self.curr_size = self.size()
-            self.curr_pos = self.pos()
-            self.update()
+        if not self.locked:
+            if QMouseEvent.buttons() & Qt.LeftButton:
+                self.is_selected = True
+                self.timeline.project().set_selected(None, self.item)
+                self.offset = self.mapToParent(QMouseEvent.pos())
+                self.curr_size = self.size()
+                self.curr_pos = self.pos()
+                self.update()
 
-        if QMouseEvent.buttons() & Qt.RightButton:
-            open_context_menu(self.timeline.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
+            if QMouseEvent.buttons() & Qt.RightButton:
+                open_context_menu(self.timeline.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
 
     def mouseReleaseEvent(self, QMouseEvent):
         # if the the movement is smaller than the grid-size ignore it
-
-        if np.abs(self.pos().x() * self.timeline.scale - self.item.get_start()) < self.timeline.settings.GRID_SIZE and \
-             np.abs(self.width() * self.timeline.scale - (self.item.get_end() - self.item.get_start())) < self.timeline.settings.GRID_SIZE:
-            self.move(self.item.get_start()/self.timeline.scale, 0)
-            self.resize((self.item.get_end() - self.item.get_start()) / self.timeline.scale, self.height())
-            return
-
-        if self.mode == "center":
-            self.item.move(int(self.pos().x() * self.timeline.scale), int((self.pos().x() + self.width()) * self.timeline.scale))
-            return
-        if self.mode == "left":
-            self.item.set_start(int(self.pos().x() * self.timeline.scale))
-            return
-        if self.mode == "right":
-            self.item.set_end(int((self.pos().x() + self.width()) * self.timeline.scale))
-            return
-
-    def enterEvent(self, QEvent):
-        self.is_hovered = True
-
-    def leaveEvent(self, QEvent):
-        self.is_hovered = False
-
-    def mouseMoveEvent(self, QMouseEvent):
-
-        if QMouseEvent.buttons() & Qt.LeftButton:
-            pos = self.mapToParent(QMouseEvent.pos())
-            target = pos - self.offset
-            tx = self.timeline.round_to_grid(target.x())
-            ty = self.timeline.round_to_grid(target.y())
-            target = QtCore.QPoint(tx, ty)
-
-            if self.mode == "right":
-                x = np.clip(self.curr_size.width() + target.x(),self.curr_pos.x() - self.offset.x() + 5,None)
-                self.resize(x, self.height())
-                self.update()
-                return
-
-            if self.mode == "left":
-                x = np.clip(self.curr_pos.x() + target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
-                w = np.clip(self.curr_size.width() - target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
-                self.move(x, 0)
-                self.resize(w, self.height())
-                self.update()
+        if not self.locked:
+            if np.abs(self.pos().x() * self.timeline.scale - self.item.get_start()) < self.timeline.settings.GRID_SIZE and \
+                 np.abs(self.width() * self.timeline.scale - (self.item.get_end() - self.item.get_start())) < self.timeline.settings.GRID_SIZE:
+                self.move(self.item.get_start()/self.timeline.scale, 0)
+                self.resize((self.item.get_end() - self.item.get_start()) / self.timeline.scale, self.height())
                 return
 
             if self.mode == "center":
-                x = np.clip(self.curr_pos.x() + target.x(), 0, self.parent().width()-self.width())
-                self.move(x, 0)
-                self.update()
+                self.item.move(int(self.pos().x() * self.timeline.scale), int((self.pos().x() + self.width()) * self.timeline.scale))
+                return
+            if self.mode == "left":
+                self.item.set_start(int(self.pos().x() * self.timeline.scale))
+                return
+            if self.mode == "right":
+                self.item.set_end(int((self.pos().x() + self.width()) * self.timeline.scale))
                 return
 
+    def enterEvent(self, QEvent):
+        if not self.locked:
+            self.is_hovered = True
 
+    def leaveEvent(self, QEvent):
+        if not self.locked:
+            self.is_hovered = False
 
-        else:
-            # Moving the Left Sid
-            if  self.mapFromGlobal(self.cursor().pos()).x() < self.border_width:
-                self.mode = "left"
-                self.setCursor(QtGui.QCursor(Qt.SizeHorCursor))
-                return
+    def mouseMoveEvent(self, QMouseEvent):
+        if not self.locked:
+            if QMouseEvent.buttons() & Qt.LeftButton:
+                pos = self.mapToParent(QMouseEvent.pos())
+                target = pos - self.offset
+                tx = self.timeline.round_to_grid(target.x())
+                ty = self.timeline.round_to_grid(target.y())
+                target = QtCore.QPoint(tx, ty)
 
-            # Moving the Right Side
-            if  self.mapFromGlobal(self.cursor().pos()).x() > self.width() - self.border_width:
-                self.mode = "right"
-                self.setCursor(QtGui.QCursor(Qt.SizeHorCursor))
-                return
+                if self.mode == "right":
+                    x = np.clip(self.curr_size.width() + target.x(),self.curr_pos.x() - self.offset.x() + 5,None)
+                    self.resize(x, self.height())
+                    self.update()
+                    return
 
-            # Moving the whole widget
-            if self.border_width <= self.mapFromGlobal(self.cursor().pos()).x() <= self.width() - self.border_width:
-                self.mode = "center"
-                self.setCursor(QtGui.QCursor(Qt.SizeAllCursor))
-                return
+                if self.mode == "left":
+                    x = np.clip(self.curr_pos.x() + target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
+                    w = np.clip(self.curr_size.width() - target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
+                    self.move(x, 0)
+                    self.resize(w, self.height())
+                    self.update()
+                    return
+
+                if self.mode == "center":
+                    x = np.clip(self.curr_pos.x() + target.x(), 0, self.parent().width()-self.width())
+                    self.move(x, 0)
+                    self.update()
+                    return
+    
             else:
-                self.setCursor(QtGui.QCursor(Qt.ArrowCursor))
+                # Moving the Left Sid
+                if  self.mapFromGlobal(self.cursor().pos()).x() < self.border_width:
+                    self.mode = "left"
+                    self.setCursor(QtGui.QCursor(Qt.SizeHorCursor))
+                    return
+
+                # Moving the Right Side
+                if  self.mapFromGlobal(self.cursor().pos()).x() > self.width() - self.border_width:
+                    self.mode = "right"
+                    self.setCursor(QtGui.QCursor(Qt.SizeHorCursor))
+                    return
+
+                # Moving the whole widget
+                if self.border_width <= self.mapFromGlobal(self.cursor().pos()).x() <= self.width() - self.border_width:
+                    self.mode = "center"
+                    self.setCursor(QtGui.QCursor(Qt.SizeAllCursor))
+                    return
+                else:
+                    self.setCursor(QtGui.QCursor(Qt.ArrowCursor))
 
     def update(self, *__args):
         super(TimebarSlice, self).update(*__args)
@@ -901,6 +922,8 @@ class TimebarDrawing(QtWidgets.QWidget):
         t_end = t_start + float(self.width() * self.timeline.scale / 1000)
         self.time_offset = 0
         if self.timeline.scale <= self.a:
+            if not self.timeline.main_window.player.playing:
+                self.timeline.main_window.drawing_overlay.show_opencv_image()
             for i in range(int(t_start), int(t_end)):
 
             #for i in range(int(self.timeline.duration) / 1000):
@@ -924,6 +947,8 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.a  < self.timeline.scale <= self.b:
+            if not self.timeline.main_window.player.playing:
+                self.timeline.main_window.drawing_overlay.show_opencv_image()
             for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 # pos = i * 1000 / self.timeline.scale
@@ -946,6 +971,7 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.b  < self.timeline.scale <= self.c:
+            self.timeline.main_window.drawing_overlay.hide_opencv_image()
             for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 paint = True

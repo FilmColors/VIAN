@@ -414,6 +414,7 @@ class FiwiFetcher():
 
         if input_movies is not None:
             self.movie_objs = input_movies
+
         if len(self.movie_objs) == 0:
             return [False, "No Movies Found"]
 
@@ -1136,6 +1137,7 @@ class FIWIParserWindow(QMainWindow):
         self.fetcher.movies_dirs = [self.input_folder]
 
         result = self.fetcher.fetch_movies()
+        print self.fetcher.movie_objs[0].filemaker_ID
         if result is True:
             self.edit_ELAN.setStyleSheet("color: green;")
             self.edit_ELAN.setText(self.fetcher.movie_objs[0].elan_path)

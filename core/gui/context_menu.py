@@ -161,9 +161,16 @@ class SegmentationContextMenu(ContextMenu):
         else:
             self.action_set_timeline_visibility = self.addAction("Show in Timeline")
 
+        if self.segmentation[0].is_locked():
+            self.action_set_locked = self.addAction("Unlock Segmentation")
+        else:
+            self.action_set_locked = self.addAction("Lock Segmentation")
+        self.action_set_locked.triggered.connect(self.toggle_lock)
+
         self.action_cleanup_borders = self.addAction("Cleanup Borders")
         self.action_cleanup_borders.triggered.connect(self.cleanup_borders)
         self.action_set_timeline_visibility.triggered.connect(self.toggle_timeline_visiblity)
+
         self.action_delete.triggered.connect(self.on_delete)
         self.action_set_as_main.triggered.connect(self.on_set_main)
 
@@ -174,6 +181,15 @@ class SegmentationContextMenu(ContextMenu):
     def cleanup_borders(self):
         for s in self.segmentation:
             s.cleanup_borders()
+
+    def toggle_lock(self):
+        self.hide()
+        new_status = not self.segmentation[0].is_locked()
+        for s in self.segmentation:
+            if new_status:
+                s.lock()
+            else:
+                s.unlock()
 
     def toggle_timeline_visiblity(self):
         self.hide()
@@ -207,6 +223,12 @@ class LayerContextMenu(ContextMenu):
             self.action_set_timeline_visibility = self.addAction("Show in Timeline")
         self.action_set_timeline_visibility.triggered.connect(self.toggle_timeline_visiblity)
 
+        if self.layer[0].is_locked():
+            self.action_set_locked = self.addAction("Unlock Layer")
+        else:
+            self.action_set_locked = self.addAction("Lock Layer")
+        self.action_set_locked.triggered.connect(self.toggle_lock)
+
         self.popup(pos)
 
     def on_delete(self):
@@ -222,6 +244,14 @@ class LayerContextMenu(ContextMenu):
             s.set_timeline_visibility(visibility)
         self.hide()
 
+    def toggle_lock(self):
+        self.hide()
+        new_status = not self.layer[0].is_locked()
+        for s in self.layer:
+            if new_status:
+                s.lock()
+            else:
+                s.unlock()
 
 class AnnotationContextMenu(ContextMenu):
     def __init__(self, parent, pos, annotation):

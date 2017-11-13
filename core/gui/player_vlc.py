@@ -59,7 +59,7 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
         self.aspect_ratio = 0
         self.movie_size = (720,480)
         self.millis_per_sample = 0
-        self.fps = 30
+        self.fps = 24
         self.playing = False
         self.volume = 0
         self.mute = False
@@ -267,6 +267,7 @@ class Player_VLC(VideoPlayer):
         self.millis_per_sample = 40
         self.volume = 50
         fps = self.media_player.get_fps()
+        print "FPS:", self.media_player.get_fps()
         if fps != 0:
             self.fps = fps
 

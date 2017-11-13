@@ -46,7 +46,7 @@ class IProjectContainer:
 
     def set_notes(self, notes):
         self.notes = notes
-        self.dispatch_on_changed(item=self)
+        # self.dispatch_on_changed(item=self)
 
 
 class ITimeRange():
@@ -66,6 +66,20 @@ class ITimeRange():
     def move(self, start, end):
         print "ITimelineItem: Not Implemented", self
 
+class ILockable():
+    def __init__(self):
+        self.locked = False
+
+    def lock(self):
+        self.locked = True
+        self.dispatch_on_changed()
+
+    def unlock(self):
+        self.locked = False
+        self.dispatch_on_changed()
+
+    def is_locked(self):
+        return self.locked
 
 class ITimelineItem:
     def set_timeline_visibility(self, visibility):

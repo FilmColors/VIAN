@@ -7,10 +7,11 @@ from matplotlib.figure import Figure
 
 
 class EDockWidget(QDockWidget):
-    def __init__(self, main_window):
+    def __init__(self, main_window, limit_size = True):
         super(EDockWidget, self).__init__()
         self.main_window = main_window
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
+        self.limit_size = limit_size
 
 
         if QScreen.physicalDotsPerInch(QApplication.screens()[0]) > 300:
@@ -24,15 +25,16 @@ class EDockWidget(QDockWidget):
 
     def resizeEvent(self, *args, **kwargs):
         # Keeping the size of the Dockwidgets
-        if self.maximumWidth() != self.max_width:
-            self.areas = self.main_window.dockWidgetArea(self)
-            if self.areas == Qt.LeftDockWidgetArea or self.areas == Qt.RightDockWidgetArea:
-                self.setMaximumWidth(self.max_width)
+        if self.limit_size:
+            if self.maximumWidth() != self.max_width:
+                self.areas = self.main_window.dockWidgetArea(self)
+                if self.areas == Qt.LeftDockWidgetArea or self.areas == Qt.RightDockWidgetArea:
+                    self.setMaximumWidth(self.max_width)
 
-        super(EDockWidget, self).resizeEvent( *args, **kwargs)
+            super(EDockWidget, self).resizeEvent( *args, **kwargs)
 
-        self.main_window.update_player_size()
-        self.main_window.update_overlay()
+            self.main_window.update_player_size()
+            self.main_window.update_overlay()
 
 
     def dockLocationChanged(self, Qt_DockWidgetArea):

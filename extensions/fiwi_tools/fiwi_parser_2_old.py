@@ -16,7 +16,7 @@ from core.gui.Dialogs.file_dialogs import MultiDirFileDialog
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtWidgets
-
+from segmentation_fetcher import SegmentationFetcher
 # class FiwiParserExtension(GAPlugin):
 #     def __init__(self, main_window):
 #         super(FiwiParserExtension, self).__init__(main_window)
@@ -313,6 +313,8 @@ class FiwiFetcher():
         with open("results/all_movies.pickle", "wb") as f:
             pickle.dump(self.movie_objs, f)
 
+        return self.movie_objs
+
     def fetch_databse_movies(self):
         scr_folder = glob.glob(self.database_dir + "SCR/*")
         result = []
@@ -322,12 +324,99 @@ class FiwiFetcher():
             result.append([int(s[0]), int(s[1]), int(s[2])])
         self.database_movies = result
 
+    def fetch_nomenclature_shots(self):
+        print "FETCHING NOMENCLATURE"
+        resulting_dirs = []
+        for d in self.movies_dirs:
+            q = d.replace("\\", "/")
+            q = q + "*/"
 
-    def fetch_subsegmentation(self):
+            directories = glob.glob(q)
+            for ds in directories:
+                if "nomenclature" in ds or "NeueNomenklatur" in ds or "SCR_neu" in ds:
+                    if "SCR_neu" in ds:
+                        print ds
+                    resulting_dirs.append(ds)
+
+        shots = []
+        for l in resulting_dirs:
+            shots.extend(glob.glob(l + "*"))
+
+        to_copy = []
+        root_p = "\\\\130.60.131.134\\fiwi_datenbank\\SCR\\"
+        for s in shots:
+            try:
+                source_path = s
+                file_name = s.replace("\\", "/").split("/").pop().split(".")[0]
+                fm_ID = file_name.split("_")
+                fm_ID = fm_ID[2] + "_" + fm_ID[3] + "_" + fm_ID[4] + "/"
+                target_path = (root_p + fm_ID + file_name).replace("\\", "/") + ".jpg"
+                target_dir = (root_p + fm_ID).replace("\\", "/")
+                if not os.path.isfile(target_path):
+                    to_copy.append([target_path, target_dir, source_path])
+                    print target_path
+            except:
+                print "ERROR: \t", s
+                continue
+
+        checked = []
+        print len(to_copy)
+        threads = []
+        for i, s in enumerate(to_copy):
+            if s[1] not in checked:
+                checked.append(s[1])
+                if not os.path.isdir(s[1]):
+                    os.mkdir(s[1])
+
+            runner = Runner(s[2], s[0])
+            runner.start()
+            threads.append(runner)
+
+            if len(threads) % 10 == 0:
+                print i, " / ", len(to_copy)
+                for t in threads:
+                    t.join()
+
+    def replace_wrong_ids(self, path):
+        dirs = glob.glob(path + "*/")
+        to_do = []
+        for d in dirs:
+            name = d.replace(path, "").replace("\\", "").split("_")
+            a = int(name[1])
+            b = int(name[2])
+            if a != 1 or b != 1:
+                old_name = str(name[0]) + "_1_1"
+                new_name = name[0] + "_" + name[1] + "_" + name[2]
+                # if int(name[0]) not in [1062,13,167,183]:
+                to_do.append([d, new_name, old_name])
+
+        print len(d)
+
+        for d in to_do:
+            print d
+            # imgs = glob.glob(d[0] + "*")
+            # for i in imgs:
+            #     if os.path.isfile(i):
+            #         try:
+            #             old = i
+            #             new = i.replace(d[2], d[1])
+            #             os.rename(old, new)
+            #         except Exception as e:
+            #             print e.message, " in ", i
+            #             continue
+
+
+
+
+
+    def fetch_subsegmentation(self, movies = None):
         base_path = "\\\\130.60.131.134\\studi\\Filme\\FIWI\\SCR\\".replace("\\", "/")
 
-        with open("results/fp2_movies.pickle", "rb") as f:
-            self.movie_objs = pickle.load(f)
+        if movies is None:
+            with open("results/fp2_movies.pickle", "rb") as f:
+                self.movie_objs = pickle.load(f)
+        else:
+            self.movie_objs = movies
 
         for movie in self.movie_objs:
             movie_folder = str(movie.filemaker_ID[0]) + "_" + str(movie.filemaker_ID[1]) + "_" + str(movie.filemaker_ID[2])
@@ -481,6 +570,72 @@ class FiwiFetcher():
         for m in movies_undone:
             print m.filemaker_ID, m.movie_name
 
+    def fetch_shots_moviedirs(self, input_movies=None, test_dir=False, nomenclature=None):
+        movies_undone = []
+        movies_done = []
+
+        if input_movies is not None:
+            self.movie_objs = input_movies
+
+        if len(self.movie_objs) == 0:
+            return [False, "No Movies Found"]
+
+        for i, movie in enumerate(self.movie_objs):
+            base_path = ""
+
+            shots = []
+
+            shots_folder = None
+            folders = glob.glob(movie.folder_path + "*/")
+            for s in folders:
+                print s
+                if "SCR" in s or "Stills" in s:
+                    shots_folder = s
+                    break
+
+            if shots_folder is None:
+                return [False, "No Shots Folder Found"]
+
+            result = []
+            shots_paths = glob.glob(shots_folder + "/*")
+            shots_names = []
+
+            for s in shots_paths:
+                s = s.replace("\\", "/").replace(shots_folder.replace("\\", "/"), "")
+                result.append(s)
+
+            shots_names = result
+
+            idx_segm_id = 0
+            idx_shot_id = 1
+
+            result = []
+            for i, p in enumerate(shots_names):
+                path = shots_paths[i]
+
+                if "_SCR_" in p:
+                    p = p.split("_SCR_")[1]
+                elif "_Stills_" in p:
+                    p = p.split("_Stills_")
+                p = p.split(".")[0].split("_")
+
+                if len(p) >= 2:
+                    segm_id = p[idx_segm_id]
+                    shot_id = p[idx_shot_id]
+                    print segm_id,shot_id, path
+
+
+
+                    shot = Shot(segm_id, filemaker_ID=movie.filemaker_ID, segment_shot_id=shot_id, hr=-1,
+                                min=-1, sec=-1, ms=-1, path=path)
+                    result.append(shot)
+
+            movie.shots = result
+
+        self.movie_objs = input_movies
+        return [True, result]
+
+
     def fetch_exported(self, paths):
         movies = []
         for p in paths:
@@ -491,12 +646,12 @@ class FiwiFetcher():
 
         return movies
 
-    def copy_movies(self, movie_path, index_range=None, rm_dir = False):
+    def copy_movies(self, movie_path = None, index_range=None, rm_dir = False):
         debug = False
 
-
-        with open(movie_path, "rb") as f:
-            self.movie_objs = pickle.load(f)
+        if movie_path:
+            with open(movie_path, "rb") as f:
+                self.movie_objs = pickle.load(f)
 
         root_dir = "//130.60.131.134/fiwi_datenbank/"
         shots_dir = root_dir + "SCR/"
@@ -745,9 +900,14 @@ class FiwiFetcher():
     def find_movies_by_id(self, id_list):
         result = []
         for idx in id_list:
+            found = False
             for m in self.movie_objs:
                 if idx == m.filemaker_ID:
                     result.append(m)
+                    found = True
+                    break
+            if not found:
+                print idx, " not Found"
         return result
 
     def movie_list(self, path):
@@ -862,16 +1022,92 @@ class FiwiFetcher():
         with open("results/correction.pickle", "wb") as f:
             pickle.dump(final, f)
 
+    def lacucaracha(self, dir):
+        directory = "\\\\130.60.131.134\\studi\\Filme\mittlere_Filme\\48_La_Cucaracha_1934\\48_1_1_SCR_LaCucaracha_1934_DVD\\"
+        files = glob.glob(directory + "/*")
+        movie_path, segmentations = ELANProjectImporter().elan_project_importer("\\\\130.60.131.134\\studi\\Filme\mittlere_Filme\\48_La_Cucaracha_1934\\ELAN_Projektdatei\\48_1_1_LaCucaracha_1934_DVD_ELAN.eaf")
+
+        t_dir = "\\\\130.60.131.134\\fiwi_datenbank\\SCR\\48_1_1\\"
+        result = []
+        last_id = 0
+        sgm_counter = 1
+        for f in files:
+            path = f
+            name = path.split("\\").pop().replace(".jpg", "").replace("48_1_1_LaCucaracha_1934_DVD_SCR_","")
+            time = name.split("_")
+            hr = int(time[0])
+            min = int(time[1])
+            sec = int(time[2])
+
+            ms = ((hr * 60 * 60) + (min * 60) + sec) * 1000
+
+            found = False
+
+
+            for i, s in enumerate(segmentations[0][1]):
+                    if int(s[1]) <= ms <= int(s[2]):
+                        found = True
+                        s_id = i + 1
+                        if s_id != last_id:
+                            last_id = s_id
+                            sgm_counter = 1
+                        else:
+                            sgm_counter += 1
+
+                        segm_shot_id = sgm_counter
+
+            target_name = str(s_id) + "_" + str(segm_shot_id) + "_" + "48_1_1"
+            print target_name
+            new_path = path.split("48_1_1_LaCucaracha_1934_DVD_SCR_")
+            new_path.pop()
+            new_path = t_dir + target_name + ".jpg"
+            result.append([path, new_path])
+
+        threads = []
+        for s in result:
+            runner = Runner(s[0], s[1])
+            runner.start()
+            threads.append(runner)
+
+
+            if len(threads) % 10 == 0:
+                for t in threads:
+                    t.join()
+
+
+
+
+
+
 # region SCRIPT
 if __name__ == '__main__':
     root_directory_1 = os.path.abspath("\\\\130.60.131.134\\studi\\Filme\\frueher_Film\\")
     root_directory_2 = os.path.abspath("\\\\130.60.131.134\\studi\\Filme\\mittlere_Filme\\")
     root_directory_3 = os.path.abspath("\\\\130.60.131.134\\studi\\Filme\\spaete_Filme\\")
     source_dir = [root_directory_1, root_directory_2, root_directory_3]
-
+    # id_list = [[272,1,1],[3460,1,1],[3558,1,1],[3557,1,1],[3561,1,1],[3562,1,1],[3564,1,1],[3589,1,1]]
+    # id_list = [[3460, 1, 1]]
     fetcher = FiwiFetcher(source_dir)
-    fetcher.fetch()
-    fetcher.fetch_movies()
+    # fetcher.load_movie_object("results/all_movies.pickle")
+    # fetcher.fetch_databse_movies()
+    # fetcher.diff_list2movies(fetcher.database_movies)
+    fetcher.replace_wrong_ids("\\\\130.60.131.134\\fiwi_datenbank\\SCR\\")
+
+
+    # result = fetcher.find_movies_by_id(id_list)
+    # fetcher.fetch_shots_moviedirs(result)
+    # fetcher.fetch_shots(input_movies=result, output_done="results/correction2_done.pickle",
+    #                     output_undone="results/correction2_undone.pickle")
+    # fetcher.copy_movies()
+
+    # fetcher.fetch()
+
+    # fetcher.fetch_movies()
+
+    #fetcher.load_movie_list()
+    #fetcher.fetch_nomenclature_shots()
+
+    # fetcher.lacucaracha(None)
 #     # difference = fetcher.diff_export2database()
 #     # fetcher.load_movie_object("results/all_movies.pickle")
 #     # result = fetcher.find_movies_by_id(difference)
@@ -897,14 +1133,18 @@ if __name__ == '__main__':
 # #region PARSING FIRST
 #     # fetcher = FiwiFetcher(source_dir)
 #     #fetcher.load_movie_list()
-#     #fetcher.fetch_movies()
-#     # fetcher.fetch_subsegmentation()
-#
-#     # fetcher.fetch_shots(input_path="results/movie_sets/fp2_movies_06_InputNeu.pickle",
-#     #                     output_done="results/fp2_movies_07_done.pickle",
-#     #                     output_undone="results/fp2_movies_07_undone.pickle",
-#     #                     base_folder="\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank neu Export Einzelbilder\\FIWI\\SCR\\")
-#     # fetcher.copy_movies("results/fp2_movies_07_done.pickle")
+
+    #fetcher.load_movie_list()
+    #movies = fetcher.fetch_movies()
+    #fetcher.fetch_subsegmentation(movies)
+
+    #fetcher.fetch_shots(input_movies=fetcher.movie_objs,
+     #                     output_done="results/fp2_movies_07_done.pickle",
+      #                    output_undone="results/fp2_movies_07_undone.pickle",
+       #                   base_folder="\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank 01112017 Export Einzelbilder\\FIWI\\SCR\\")
+    #fetcher.load_movie_object(input_path="results/fp2_movies_07_done.pickle")
+    #fetcher.copy_movies(movie_path="results/fp2_movies_07_done.pickle")
+    #  fetcher.copy_movies("results/fp2_movies_07_done.pickle")
 #
 #     # fetcher.diff_check(input_path="results/fp2_movies_05_undone.pickle")
 #     # fetcher.remove_duplicates()

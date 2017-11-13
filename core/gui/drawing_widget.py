@@ -121,17 +121,34 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.initUI()
         self.project = project
         self.current_time = 0
-        self.show()
+
         self.selected = []
         self.current_key_tuple = None
         self.widgets = []
         self.is_freehand_drawing = False
         self.multi_selection = False
 
+        self.opencv_image = QLabel(self)
+        self.videoCap = None
+        self.opencv_image_visible = False
+
+        self.show()
+
+        self.main_window.onTimeStep.connect(self.on_timestep_update)
+        self.main_window.player.started.connect(self.hide_opencv_image)
+        # self.main_window.player.stopped.connect(self.show_opencv_image)
+
     def on_loaded(self, project):
         self.cleanup()
         self.project = project
+        try:
+            if self.videoCap:
+                self.videoCap.release()
+                self.videoCap = None
 
+            self.videoCap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
+        except Exception as e:
+            print e.message, "OpenCV Error: ", self.project.movie_descriptor.movie_path
         if len(self.project.get_annotation_layers()) > 0:
             for l in self.project.get_annotation_layers():
                 for a in l.annotations:
@@ -218,7 +235,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def create_rectangle(self, color, line):
         if self.project.current_annotation_layer is not None:
-            rectangle = Annotation(AnnotationType.Rectangle, (150,150), color=color, line_w=line)
+            rectangle = Annotation(AnnotationType.Rectangle, (150,150), color=color, line_w=line, name="New Rectangle")
             self.project.current_annotation_layer.add_annotation(rectangle)
             rectangle.set_project(self.project)
             # self.main_window.annotation_viewer.update_list()
@@ -227,7 +244,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def create_ellipse(self, color, line):
         if self.project.current_annotation_layer is not None:
-            ellipse = Annotation(AnnotationType.Ellipse, (150, 150), color=color, line_w=line)
+            ellipse = Annotation(AnnotationType.Ellipse, (150, 150), color=color, line_w=line, name="New Ellipse")
             ellipse.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(ellipse)
             # self.main_window.annotation_viewer.update_list()
@@ -236,7 +253,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def create_text(self, color, line, font_size):
         if self.project.current_annotation_layer is not None:
-            a_text = Annotation(AnnotationType.Text, (200, 200), color=color, line_w=line, text="^This is some sample text")
+            a_text = Annotation(AnnotationType.Text, (200, 200), color=color, line_w=line, text="^This is some sample text", name="New Text")
             a_text.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_text)
             # self.main_window.annotation_viewer.update_list()
@@ -253,7 +270,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 return
 
             image_size = (img.shape[1], img.shape[0])
-            a_image = Annotation(AnnotationType.Image, image_size, resource_path=image_path)
+            a_image = Annotation(AnnotationType.Image, image_size, resource_path=image_path, name="New Image")
             a_image.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_image)
             self.update_annotation_widgets()
@@ -261,7 +278,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def create_freehand(self, color, line):
         if self.project.current_annotation_layer is not None:
-            a_hand = Annotation(AnnotationType.FreeHand, (200, 200), color=color, line_w=line)
+            a_hand = Annotation(AnnotationType.FreeHand, (200, 200), color=color, line_w=line, name= "New FreeHand")
             a_hand.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_hand)
             # self.main_window.annotation_viewer.update_list()
@@ -427,6 +444,18 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.drawRect(QtCore.QRect(self.rect().x(), self.rect().y(), self.rect().width()-1, self.rect().height()-1))
             qp.end()
 
+    def hide_opencv_image(self):
+        if self.opencv_image_visible == True:
+            print "Hidden"
+            self.opencv_image_visible = False
+            self.opencv_image.hide()
+
+    def show_opencv_image(self):
+        if self.opencv_image_visible == False:
+            print "Shown"
+            self.opencv_image_visible = True
+            self.update_opencv_image(self.main_window.player.get_media_time())
+            self.opencv_image.show()
 
     def synchronize_transforms(self):
         if self.main_window.centralWidget() is self.main_window.screenshots_manager:
@@ -469,10 +498,17 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
         self.move(location)
         self.setFixedSize(x,y)
+        self.opencv_image.setFixedSize(x,y)
+        if self.opencv_image_visible and self.videoCap:
+            self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
+
+        # if self.opencv_image_visible and self.videoCap:
+        #     self.update_opencv_image(self.main_window.player.get_media_time())
         # self.raise_()
         for n in self.project.get_annotation_layers():
             for m in n.annotations:
                 m.widget.scale = scale
+                m.widget.interpolate_location()
                 m.widget.update()
 
     def drawLines(self, qp):
@@ -521,6 +557,20 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
     def on_timestep_update(self, time):
         self.current_time = time
         self.update()
+
+        if self.opencv_image_visible and self.videoCap:
+            self.update_opencv_image(time)
+
+    def update_opencv_image(self, time):
+        try:
+            fps = self.main_window.player.fps
+            idx = int(float(time) / (1000.0 / fps))
+            self.videoCap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+            ret, frame = self.videoCap.read()
+            qimage, qpixmap = numpy_to_qt_image(frame)
+            self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
+        except:
+            pass
 
 
 class DrawingBase(QtWidgets.QWidget):
@@ -723,6 +773,11 @@ class DrawingBase(QtWidgets.QWidget):
             qp.end()
 
     def interpolate_location(self):
+        if self.overlay.current_time != self.time_last_updated:
+                self.time_last_updated = self.overlay.current_time
+        else:
+            return
+
         if self.annotation_object.has_key:
             time = self.overlay.current_time
             key = self.annotation_object.keys
@@ -947,10 +1002,9 @@ class DrawingBase(QtWidgets.QWidget):
 
     def update(self, *__args):
         #TODO Currently disabled for MACOSX
-        if not self.overlay.main_window.is_darwin:
-            if self.overlay.current_time != self.time_last_updated:
-                self.interpolate_location()
-                self.time_last_updated = self.overlay.current_time
+        # if self.overlay.current_time != self.time_last_updated:
+        #     self.interpolate_location()
+        #     self.time_last_updated = self.overlay.current_time
         # Scaling the Widgets according to the current size of the movie_player
         # This has to be done here, because if the location of the widget is outside the current renderframe )
         # For instance after reloading the project with a smaller window, it won't be updated
@@ -1087,7 +1141,8 @@ class DrawingFreeHand(DrawingBase):
                         point = p / self.scale
                         result.append([point.x(), point.y()])
 
-                self.annotation_object.free_hand_paths.append([result, color, width ])
+                # self.annotation_object.free_hand_paths.append([result, color, width])
+                self.annotation_object.add_path(result, color, width)
                 self.new_path = None
 
                 # Abort Drawing
@@ -1229,6 +1284,7 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
 
     def focusOutEvent(self, *args, **kwargs):
         super(DrawingEditorWidget, self).focusOutEvent(*args, **kwargs)
+
 
 #OLD CODE
 # class AnnotationToolbar(EDockWidget):

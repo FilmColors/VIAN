@@ -1,6 +1,7 @@
 from core.data.computation import *
 from core.data.containers import *
 from core.data.interfaces import IConcurrentJob
+from core.gui.main_window import *
 from collections import namedtuple
 from PyQt5 import QtGui
 from PyQt5.QtCore import QRect, Qt
@@ -65,12 +66,14 @@ def store_project_concurrent(args, sign_progress):
         path=project.path,
         name=project.name,
         annotation_layers=a_layer,
+        notes=project.notes,
         current_annotation_layer=None,
         main_segmentation_index=project.main_segmentation_index,
         screenshots=screenshots,
         segmentation=segmentations,
         analyzes=analyzes,
-        movie_descriptor=project.movie_descriptor.serialize()
+        movie_descriptor=project.movie_descriptor.serialize(),
+        version=project.main_window.version
 
     )
     sign_progress(0.6)
@@ -93,8 +96,6 @@ def store_project_concurrent(args, sign_progress):
             json.dump(data, f)
     except Exception as e:
         print e.message
-
-
 
     sign_progress(1.0)
 
@@ -133,8 +134,6 @@ class LoadScreenshotsJob(IConcurrentJob):
             project.screenshots[i].img_movie = img.astype(np.uint8)
             project.screenshots[i].img_blend = annotations[i]
             project.dispatch_changed()
-
-
 
 
 class CreateScreenshotJob(IConcurrentJob):
@@ -177,6 +176,7 @@ class CreateScreenshotJob(IConcurrentJob):
                     shot.update_scene_id(project.get_main_segmentation())
         except RuntimeError as e:
             raise e
+
 
 class ImportScreenshotsJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):

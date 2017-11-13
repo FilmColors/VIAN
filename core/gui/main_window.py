@@ -32,7 +32,7 @@ from extensions.colormetrics.hilbert_colors import HilbertHistogramProc
 from extensions.extension_list import ExtensionList
 from player_controls import PlayerControls
 from player_vlc import Player_VLC
-from shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar
+from shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from status_bar import StatusBar, OutputLine, StatusProgressBar
 
 __author__ = "Gaudenz Halter"
@@ -46,12 +46,15 @@ __status__ = "Production"
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    onTimeStep = pyqtSignal(long)
+
     def __init__(self,vlc_instance, vlc_player):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
         loading_screen = LoadingScreen()
         self.has_open_project = False
+        self.version = __version__
 
         self.extension_list = ExtensionList(self)
         self.is_darwin = False
@@ -105,6 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.inspector = None
         self.history_view = None
         self.analyses_widget = None
+        self.screenshots_manager_dock = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -144,6 +148,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.create_screenshots_toolbar()
         self.create_outliner()
+        self.create_screenshot_manager_dock_widget()
         self.create_inspector()
 
         self.create_timeline()
@@ -152,14 +157,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_history_view()
         self.create_concurrent_task_viewer()
 
+
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
 
         # self.tabifyDockWidget(self.annotation_toolbar, self.screenshot_toolbar)
-        self.tabifyDockWidget(self.inspector, self.history_view
-                              )
-        self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer
-                              )
+        self.tabifyDockWidget(self.inspector, self.history_view)
 
+        self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
+        # self.tabifyDockWidget(self.inspector, self.screenshots_manager_dock)
         self.annotation_toolbar.raise_()
         self.inspector.raise_()
         # self.annotation_tb2 = AnnotationToolbar2(self,self.drawing_overlay)
@@ -197,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionDelete.triggered.connect(self.on_delete)
 
         # Tab Windows
-        self.actionScreenshot_Manager.triggered.connect(self.create_screenshot_manager)
+        self.actionScreenshot_Manager.triggered.connect(self.create_screenshot_manager_dock_widget)
         self.actionPreferences.triggered.connect(self.open_preferences)
         self.actionAnnotation_Toolbox.triggered.connect(self.create_annotation_toolbar)
         self.actionScreenshot_Toolbox.triggered.connect(self.create_screenshots_toolbar)
@@ -262,7 +267,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.QueuedConnection)
         self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
         self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
-        self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.QueuedConnection)
+        self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
 
         self.dispatch_on_changed()
 
@@ -370,7 +375,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_inspector(self):
         if self.inspector is None:
             self.inspector = Inspector(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.inspector)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
         else:
             self.inspector.show()
             self.inspector.raise_()
@@ -428,6 +433,15 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.timeline.activateWindow()
 
+    def create_screenshot_manager_dock_widget(self):
+        if self.screenshots_manager_dock is None:
+            self.screenshots_manager_dock = ScreenshotsManagerDockWidget(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Horizontal)
+            # self.on_movie_updated()
+            self.screenshots_manager_dock.set_manager(self.screenshots_manager)
+        else:
+            self.screenshots_manager_dock.show()
+            self.screenshots_manager_dock.activateWindow()
     #endregion
 
     #region QEvent Overrides
@@ -751,6 +765,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_controls.show()
             self.annotation_toolbar.raise_()
             self.inspector.show()
+            self.screenshots_manager_dock.set_manager(self.screenshots_manager)
+            self.screenshots_manager_dock.show()
             # self.concurrent_task_viewer.show()
             # self.history_view.show()
 
@@ -770,6 +786,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner.hide()
             self.history_view.show()
             self.screenshots_manager.center_images()
+            self.screenshots_manager_dock.hide()
 
         elif perspective == Perspective.Analyses.name:
             self.current_perspective = Perspective.Analyses
@@ -927,7 +944,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for o in self.i_project_notify_reciever:
             o.on_loaded(self.project)
-        self.setWindowTitle("Mara Project:" + str(self.project.path))
+        self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
 
     def dispatch_on_changed(self, receiver = None, item = None):
@@ -950,7 +967,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 o.on_selected(sender, selected)
 
     def dispatch_on_timestep_update(self, time):
-        self.timeline.timeline.on_timestep_update(time)
+
+        # self.timeline.timeline.on_timestep_update(time)
         if time == -1:
             for l in self.project.annotation_layers:
                 l.is_visible = False
@@ -974,7 +992,10 @@ class MainWindow(QtWidgets.QMainWindow):
                                 if a.widget is not None:
                                     a.widget.hide()
                                     a.widget.is_active = False
-            self.drawing_overlay.on_timestep_update(time)
+
+
+        self.onTimeStep.emit(time)
+            # self.drawing_overlay.on_timestep_update(time)
 
 
     #endregion

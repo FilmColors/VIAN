@@ -49,7 +49,7 @@ class UserSettings():
         self.DIR_USER = "user/"
         self.store_path = self.DIR_BASE + self.DIR_USER + path
         self.DIR_SCREENSHOTS = "shots/"
-        self.DIR_PROJECT = self.DIR_USERHOME + "documents/mara/"
+        self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
 
         if not os.path.isdir(self.DIR_PROJECT):

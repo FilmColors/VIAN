@@ -36,6 +36,14 @@ class ScreenshotsToolbar(EToolBar):
     def on_toggle_annotations(self):
         self.manager.toggle_annotations()
 
+class ScreenshotsManagerDockWidget(EDockWidget):
+    def __init__(self, main_window):
+        super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
+        self.setWindowTitle("Screenshot Manager")
+
+    def set_manager(self, screenshot_manager):
+        self.setWidget(screenshot_manager)
+
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
@@ -93,7 +101,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def add_images(self, screenshots, n_per_row = 4):
         font = QFont("Consolas")
-        font.setPixelSize(120)
+        font.setPointSize(160)
 
         border_width = self.border_width
         x = border_width
@@ -447,7 +455,6 @@ class ScreenshotsManagerScene(QGraphicsScene):
     def __init__(self, graphicsViewer):
         super(ScreenshotsManagerScene, self).__init__()
         self.graphicsViewer = graphicsViewer
-
 
 
 class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):

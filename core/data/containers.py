@@ -6,7 +6,7 @@ from random import randint
 import shelve
 from computation import blend_transparent
 import numpy as np
-from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem
+from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 
@@ -40,7 +40,7 @@ class ElanExtensionProject(IHasName):
         self.analysis = []
 
         self.folder = path.split("/")[len(path.split("/")) - 1]
-
+        self.notes = ""
 
         self.main_window = main_window
         self.selected = []
@@ -149,6 +149,7 @@ class ElanExtensionProject(IHasName):
         self.dispatch_changed()
 
     def get_main_segmentation(self):
+        print len(self.segmentation)
         if len(self.segmentation) > 0:
             return self.segmentation[self.main_segmentation_index]
             # return self.segmentation[0]
@@ -172,21 +173,26 @@ class ElanExtensionProject(IHasName):
         self.dispatch_changed()
 
     def sort_screenshots(self):
-        self.screenshots.sort(key=lambda x: x.movie_timestamp, reverse=False)
+        if self.get_main_segmentation():
+            self.get_main_segmentation().update_segment_ids()
+            self.screenshots.sort(key=lambda x: x.movie_timestamp, reverse=False)
 
-        shot_id_global = 0
-        shot_id_segm = 0
-        current_segm = 0
-        for s in self.screenshots:
-            while current_segm < s.scene_id:
-                current_segm += 1
-                shot_id_segm = 0
+            for s in self.screenshots:
+                s.update_scene_id(self.get_main_segmentation())
 
-            s.shot_id_global = shot_id_global
-            s.shot_id_segm = shot_id_segm
+            shot_id_global = 1
+            shot_id_segm = 1
+            current_segm = 1
+            for s in self.screenshots:
+                while current_segm < s.scene_id:
+                    current_segm += 1
+                    shot_id_segm = 1
 
-            shot_id_segm += 1
-            shot_id_global += 1
+                s.shot_id_global = shot_id_global
+                s.shot_id_segm = shot_id_segm
+
+                shot_id_segm += 1
+                shot_id_global += 1
 
     def remove_screenshot(self, screenshot):
         self.screenshots.remove(screenshot)
@@ -312,6 +318,7 @@ class ElanExtensionProject(IHasName):
         data = dict(
             path = self.path,
             name = self.name,
+            notes=self.notes,
             annotation_layers = a_layer,
             current_annotation_layer = None,
             main_segmentation_index = self.main_segmentation_index,
@@ -319,7 +326,6 @@ class ElanExtensionProject(IHasName):
             segmentation = segmentations,
             analyzes = analyzes,
             movie_descriptor = self.movie_descriptor.serialize()
-
         )
 
         if path is None:
@@ -354,6 +360,13 @@ class ElanExtensionProject(IHasName):
         self.path = my_dict['path']
         self.name = my_dict['name']
         self.main_segmentation_index = my_dict['main_segmentation_index']
+        self.notes = my_dict['notes']
+
+        try:
+            version = my_dict['locked']
+        except:
+            pass
+
         splitted = path.split("/")[0:len(path.split("/")) - 1]
         self.folder = ""
         for f in splitted:
@@ -388,6 +401,8 @@ class ElanExtensionProject(IHasName):
         for d in my_dict['analyzes']:
             new = Analysis().deserialize(d)
             self.add_analysis(new)
+
+        self.sort_screenshots()
         self.undo_manager.clear()
 
     def cleanup(self):
@@ -440,10 +455,10 @@ class ElanExtensionProject(IHasName):
         return None
 
     def get_notes(self):
-        return "NO Notes Currently possible"
+        return self.notes
 
     def set_notes(self, notes):
-        pass
+        self.notes = notes
 
     def dispatch_changed(self, receiver = None, item = None):
         self.main_window.dispatch_on_changed(receiver, item = item)
@@ -455,9 +470,10 @@ class ElanExtensionProject(IHasName):
         self.main_window.dispatch_on_selected(sender,self.selected)
 
 
-class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem):
+class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable):
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
+        ILockable.__init__(self)
         self.name = name
         if segments is None:
             segments = []
@@ -521,7 +537,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem):
     def update_segment_ids(self):
         self.segments = sorted(self.segments, key=lambda x: x.start)
         for i, s in enumerate(self.segments):
-            s.ID = i
+            s.ID = i + 1
 
     def get_segment(self, time):
         for s in self.segments:
@@ -558,7 +574,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem):
             name = self.name,
             unique_id = self.unique_id,
             segments = s_segments,
-            notes = self.notes
+            notes = self.notes,
+            locked = self.locked
         )
 
         return result
@@ -573,10 +590,25 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem):
             new.deserialize(s)
             new.segmentation = self
             self.segments.append(new)
+
+        try:
+            self.locked = serialization['locked']
+        except:
+            self.locked = False
         return self
 
     def get_type(self):
         return SEGMENTATION
+
+    def lock(self):
+        ILockable.lock(self)
+        for s in self.segments:
+            s.lock()
+
+    def unlock(self):
+        ILockable.unlock(self)
+        for s in self.segments:
+            s.unlock()
 
     def set_timeline_visibility(self, visibility):
         self.timeline_visibility = visibility
@@ -593,9 +625,12 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem):
     def delete(self):
         self.project.remove_segmentation(self)
 
-class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem):
+
+class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
     def __init__(self, ID = None, start = None, end  = None, duration  = None, additional_identifiers = None, segmentation=None):
         IProjectContainer.__init__(self)
+        ILockable.__init__(self)
+
         self.ID = ID
         self.start = start
         self.end = end
@@ -656,7 +691,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
              end = self.end,
              duration = self.duration,
              additional_identifiers = self.additional_identifiers,
-            notes = self.notes
+            notes = self.notes,
+            locked = self.locked
         )
         return r
 
@@ -669,6 +705,11 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.duration = serialization["duration"]
         self.additional_identifiers = serialization["additional_identifiers"]
         self.notes = serialization['notes']
+
+        try:
+            self.locked = serialization['locked']
+        except:
+            self.locked = False
 
         return self
 
@@ -695,7 +736,7 @@ class AnnotationType(Enum):
     FreeHand = 5
 
 
-class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable):
+class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable):
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
                  name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = ""):
         IProjectContainer.__init__(self)
@@ -843,6 +884,24 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable):
     def get_color(self):
         return QtGui.QColor(self.color[0], self.color[1], self.color[1])
 
+    def add_path(self, path, color, width):
+        self.free_hand_paths.append([path, color, width])
+
+        self.project.undo_manager.to_undo((self.add_path, [path, color, width]),
+                                          (self.remove_path, [[path, color, width]]))
+        self.widget.update_paths()
+
+    def remove_path(self, path):
+        to_remove = None
+        for p in self.free_hand_paths:
+            if p[0] == path[0]:
+                to_remove = p
+                break
+        self.free_hand_paths.remove(to_remove)
+        self.project.undo_manager.to_undo((self.remove_path, [to_remove]),
+                                          (self.add_path, [[to_remove]]))
+        self.widget.update_paths()
+
     def serialize(self):
         result = dict(
             name = self.name,
@@ -860,7 +919,8 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable):
             keys = self.keys,
             resource_path = self.resource_path,
             free_hand_paths = self.free_hand_paths,
-            notes = self.notes
+            notes = self.notes,
+            locked = self.locked
 
         )
         return result
@@ -882,6 +942,12 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable):
         self.resource_path = serialization['resource_path']
         self.free_hand_paths = serialization['free_hand_paths']
         self.notes = serialization['notes']
+
+        try:
+            self.locked = serialization['locked']
+        except:
+            self.locked = False
+
 
         if len(self.keys)>0:
             self.has_key = True
@@ -908,9 +974,11 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable):
         self.annotation_layer.remove_annotation(self)
 
 
-class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem):
+class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
     def __init__(self, name = None, t_start = None, t_end = None):
         IProjectContainer.__init__(self)
+        ILockable.__init__(self)
+
         self.name = name
         self.t_start = t_start
         self.t_end = t_end
@@ -983,7 +1051,8 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             t_end = self.t_end,
             is_current_layer = self.is_current_layer,
             annotations = s_annotations,
-            notes = self.notes
+            notes = self.notes,
+            locked=self.locked
         )
         return result
 
@@ -995,6 +1064,11 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         self.t_end = serialization['t_end']
         self.is_current_layer = serialization['is_current_layer']
         self.notes = serialization['notes']
+
+        try:
+            self.locked = serialization['locked']
+        except:
+            self.locked = False
 
         for a in serialization['annotations']:
             new = Annotation()
@@ -1057,7 +1131,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.notes = notes
         self.project.undo_manager.to_undo((self.set_notes, [notes]),
                                           (self.set_notes, [self.notes]))
-        self.dispatch_on_changed(item=self)
+        # self.dispatch_on_changed(item=self)
 
     def set_annotation_visibility(self, visibility):
         self.annotation_is_visible = visibility
@@ -1137,6 +1211,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def delete(self):
         self.project.remove_screenshot(self)
 
+
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
     def __init__(self, project, movie_name = "No Movie Name", movie_path = "", movie_id = -0001, year = 1800, source = "", duration = 100):
         IProjectContainer.__init__(self)
@@ -1189,6 +1264,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
     def get_end(self):
         cap = cv2.VideoCapture(self.movie_path)
         return cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
 
 class Analysis(IProjectContainer,ITimeRange, IHasName, ISelectable):
     def __init__(self, name = None, t_start = None, t_end = None, data = None, procedure_id = None, target_id = None):
@@ -1255,3 +1331,4 @@ class Analysis(IProjectContainer,ITimeRange, IHasName, ISelectable):
 
     def delete(self):
         self.project.remove_analysis(self)
+
