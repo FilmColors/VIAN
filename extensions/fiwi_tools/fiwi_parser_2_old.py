@@ -318,11 +318,16 @@ class FiwiFetcher():
     def fetch_databse_movies(self):
         scr_folder = glob.glob(self.database_dir + "SCR/*")
         result = []
+        folders = []
         for s in scr_folder:
+            folders.append(s)
             s = s.replace("\\", "/")
             s = s.replace(self.database_dir + "SCR/","").split("_")
             result.append([int(s[0]), int(s[1]), int(s[2])])
+
         self.database_movies = result
+        return folders
+
 
     def fetch_nomenclature_shots(self):
         print "FETCHING NOMENCLATURE"
@@ -404,10 +409,6 @@ class FiwiFetcher():
             #         except Exception as e:
             #             print e.message, " in ", i
             #             continue
-
-
-
-
 
     def fetch_subsegmentation(self, movies = None):
         base_path = "\\\\130.60.131.134\\studi\\Filme\\FIWI\\SCR\\".replace("\\", "/")
@@ -638,13 +639,15 @@ class FiwiFetcher():
 
     def fetch_exported(self, paths):
         movies = []
+        foldersp = []
         for p in paths:
             folders = glob.glob(p + "/*")
             for f in folders:
+                foldersp.append(f)
                 f = f.replace(p, "").split("_")
                 movies.append([int(f[0]), int(f[1]), int(f[2])])
 
-        return movies
+        return movies, foldersp
 
     def copy_movies(self, movie_path = None, index_range=None, rm_dir = False):
         debug = False
@@ -883,6 +886,60 @@ class FiwiFetcher():
                 print e
 
         return to_convert
+    def diff_export2database_shots(self):
+        # folders = self.fetch_databse_movies()
+        # m, dirs = self.fetch_exported(["\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank alt Export Einzelbilder\\FIWI\\SCR\\",
+        #                 "\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank neu Export Einzelbilder\\FIWI\\SCR\\"
+        #                 "\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank 01112017 Export Einzelbilder\\FIWI\\SCR\\"])
+        # shots_database = []
+        # for i, f in enumerate(folders):
+        #     console.write("\r" + str(i) + "/" + str(len(dirs)))
+        #     shots_database.extend(glob.glob(f + "/*"))
+        #
+        #
+        # print ""
+        # print ""
+        # shots_export = []
+        # for i, f in enumerate(dirs):
+        #     console.write("\r" + str(i) + "/" + str(len(dirs)))
+        #     fiwi_id = f.replace("\\", "/").split("/").pop()
+        #     segms_dirs = glob.glob(f + "/*")
+        #     for segm in segms_dirs:
+        #         segm_id = segm.replace("\\", "/").split("/").pop()
+        #
+        #         for shot in glob.glob(segm + "/*"):
+        #             shot_id = shot.replace("\\", "/").split("/").pop()
+        #
+        #             shots_export.append(segm_id + "_" + shot_id + "_" + fiwi_id)
+        #
+        #
+        #
+        # with open("results/diff_check.pickle", "wb") as f:
+        #     pickle.dump([shots_export, shots_database], f)
+
+        with open("results/diff_check.pickle", "rb") as f:
+            loaded = pickle.load(f)
+        shots_export = loaded[0]
+        shots_database = loaded[1]
+
+        shot_database_clippped = []
+        for s in shots_database:
+            shot_database_clippped.append(s.replace("\\", "/").split("/").pop().split(".")[0])
+
+        print len(shot_database_clippped)
+        print len(shots_export)
+        missing = []
+        print shot_database_clippped[0:100]
+
+        for s in shots_export:
+            q = s.split("_")
+            name = str(int(q[0])) +"_"+ str(int(q[1])) +"_"+ str(int(q[2])) +"_"+ str(int(q[3]))+"_"+ str(int(q[4]))
+            if name in shot_database_clippped:
+                print s
+            else:
+                print "NOT"
+
+    # pickle.dump([shots_export, shots_database], f)
 
     def clear_database_dir(self, movie = Movie):
         root_dir = "//130.60.131.134/fiwi_datenbank/"
@@ -1091,7 +1148,8 @@ if __name__ == '__main__':
     # fetcher.load_movie_object("results/all_movies.pickle")
     # fetcher.fetch_databse_movies()
     # fetcher.diff_list2movies(fetcher.database_movies)
-    fetcher.replace_wrong_ids("\\\\130.60.131.134\\fiwi_datenbank\\SCR\\")
+    # fetcher.replace_wrong_ids("\\\\130.60.131.134\\fiwi_datenbank\\SCR\\")
+    fetcher.diff_export2database_shots()
 
 
     # result = fetcher.find_movies_by_id(id_list)
