@@ -39,7 +39,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Production"
@@ -919,6 +919,23 @@ class MainWindow(QtWidgets.QMainWindow):
         print "**********************"
     #endregion
 
+    def get_version_as_string(self):
+
+        result = "VIAN - Visual Movie Annotation\n"
+        result += "Version: ".ljust(15) + __version__ + "\n"
+        result += "\n\n"
+        result += "Author: ".ljust(15) + __author__ + "\n"
+        result += "Copyright: ".ljust(15) + __copyright__ + "\n"
+        result += "Credits: ".ljust(15) + str(__credits__[0]) + "\n"
+        for i in range(1, len(__credits__)):
+            result += "".ljust(15) + str(__credits__[i]) + "\n"
+        result += "License: ".ljust(15) + __license__ + "\n"
+        result += "Maintainer: ".ljust(15) + __maintainer__ + "\n"
+        result += "Email: ".ljust(15) + __email__ + "\n"
+        result += "Status: ".ljust(15) + __status__ + "\n"
+
+        return result
+
     #region IProjectChangedNotify
     def dispatch_on_loaded(self):
         # self.set_darwin_player_visibility(True)
@@ -926,6 +943,9 @@ class MainWindow(QtWidgets.QMainWindow):
         screenshot_annotation_dicts = []
 
         self.has_open_project = True
+
+        for o in self.i_project_notify_reciever:
+            o.on_loaded(self.project)
 
         for s in self.project.screenshots:
             screenshot_position.append(s.frame_pos)
@@ -941,8 +961,6 @@ class MainWindow(QtWidgets.QMainWindow):
         job = LoadScreenshotsJob([self.project.movie_descriptor.movie_path, screenshot_position, screenshot_annotation_dicts])
         self.run_job_concurrent(job)
 
-        for o in self.i_project_notify_reciever:
-            o.on_loaded(self.project)
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
 

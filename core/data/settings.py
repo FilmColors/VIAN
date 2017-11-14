@@ -34,6 +34,8 @@ class UserSettings():
         self.COPRUS_PORT = 5006
         self.COPRUS_PW = "CorpusPassword"
 
+        self.OPENCV_PER_FRAME = False
+
         self.SCREENSHOTS_EXPORT_NAMING = self.SCREENSHOTS_EXPORT_NAMING_DEFAULT
         self.SCREENSHOTS_STATIC_SAVE = False
         self.GRID_SIZE = 100

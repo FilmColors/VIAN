@@ -60,6 +60,7 @@ class OutputLine(QtWidgets.QWidget):
 
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
+        self.main_window = main_window
 
         self.text_line = QtWidgets.QLabel(self)
         self.layout.addWidget(self.text_line)
@@ -139,14 +140,13 @@ class MessageLogWindow(QMainWindow):
         self.view = QTextEdit(self)
         self.setWindowTitle("Message Log")
         self.setCentralWidget(self.view)
+        self.main_window = self.message_bar.main_window
         self.resize(600,400)
 
     def update_log(self):
         self.view.clear()
         self.messages = self.message_bar.message_log
-        header = "Visual Movie Annotation (VIMA)" \
-               "\n##############################" \
-                 "\n###########OutputLog##########\n\n\n"
+        header = self.main_window.get_version_as_string()
         # for msg in self.messages:
         #     text += "<font color=\"" + msg[1] + "\">"
         #     text += msg[0] + "\n"

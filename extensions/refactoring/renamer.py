@@ -33,6 +33,7 @@ class RenamerWindow(QMainWindow):
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Run.clicked.connect(self.rename)
 
+        self.lineEdit_Path.setEnabled(False)
         self.lineEdit_Old.textChanged.connect(self.update_string)
         self.lineEdit_New.textChanged.connect(self.update_string)
 
@@ -72,6 +73,7 @@ class RenamerWindow(QMainWindow):
                 for n in dirs:
                     os.rename(n[0], n[1])
         except Exception as e:
+            print e.message
             QMessageBox.warning(self, "Error", e.message)
 
 

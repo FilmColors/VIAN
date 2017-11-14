@@ -27,6 +27,8 @@ class DialogPreferences(EDialogWidget):
             index = cb.findText(self.settings.SCREENSHOTS_EXPORT_NAMING[i])
             cb.setCurrentIndex(index)
 
+        self.checkBox_OpenCV.stateChanged.connect(self.set_opencv_per_frame)
+
         self.checkBox_Autosave.stateChanged.connect(self.set_autosave)
         self.spinBox_AutosaveTime.valueChanged.connect(self.set_autosave_time)
 
@@ -60,6 +62,9 @@ class DialogPreferences(EDialogWidget):
     def set_grid_size(self):
         self.settings.GRID_SIZE = self.spinBox_GridSize.value()
 
+    def set_opencv_per_frame(self):
+        state = self.checkBox_OpenCV.isChecked()
+        self.settings.OPENCV_PER_FRAME = state
 
     def set_screenshot_export_naming(self):
 

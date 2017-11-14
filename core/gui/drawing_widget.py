@@ -445,17 +445,19 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.end()
 
     def hide_opencv_image(self):
-        if self.opencv_image_visible == True:
-            print "Hidden"
-            self.opencv_image_visible = False
-            self.opencv_image.hide()
+        if  self.settings.OPENCV_PER_FRAME:
+            if self.opencv_image_visible == True:
+                print "Hidden"
+                self.opencv_image_visible = False
+                self.opencv_image.hide()
 
     def show_opencv_image(self):
-        if self.opencv_image_visible == False:
-            print "Shown"
-            self.opencv_image_visible = True
-            self.update_opencv_image(self.main_window.player.get_media_time())
-            self.opencv_image.show()
+        if self.settings.OPENCV_PER_FRAME:
+            if self.opencv_image_visible == False:
+                print "Shown"
+                self.opencv_image_visible = True
+                self.update_opencv_image(self.main_window.player.get_media_time())
+                self.opencv_image.show()
 
     def synchronize_transforms(self):
         if self.main_window.centralWidget() is self.main_window.screenshots_manager:
@@ -499,7 +501,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.move(location)
         self.setFixedSize(x,y)
         self.opencv_image.setFixedSize(x,y)
-        if self.opencv_image_visible and self.videoCap:
+        if self.opencv_image_visible and self.videoCap and self.settings.OPENCV_PER_FRAME:
             self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
 
         # if self.opencv_image_visible and self.videoCap:
@@ -558,7 +560,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.current_time = time
         self.update()
 
-        if self.opencv_image_visible and self.videoCap:
+        if self.opencv_image_visible and self.videoCap and self.settings.OPENCV_PER_FRAME:
             self.update_opencv_image(time)
 
     def update_opencv_image(self, time):

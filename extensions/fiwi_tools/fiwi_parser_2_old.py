@@ -1145,11 +1145,11 @@ if __name__ == '__main__':
     # id_list = [[272,1,1],[3460,1,1],[3558,1,1],[3557,1,1],[3561,1,1],[3562,1,1],[3564,1,1],[3589,1,1]]
     # id_list = [[3460, 1, 1]]
     fetcher = FiwiFetcher(source_dir)
-    # fetcher.load_movie_object("results/all_movies.pickle")
+    fetcher.load_movie_object("results/all_movies.pickle")
     # fetcher.fetch_databse_movies()
     # fetcher.diff_list2movies(fetcher.database_movies)
     # fetcher.replace_wrong_ids("\\\\130.60.131.134\\fiwi_datenbank\\SCR\\")
-    fetcher.diff_export2database_shots()
+    # fetcher.diff_export2database_shots()
 
 
     # result = fetcher.find_movies_by_id(id_list)

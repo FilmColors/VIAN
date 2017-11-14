@@ -412,9 +412,13 @@ class ElanExtensionProject(IHasName):
             my_dict = json.load(f)
 
         self.path = my_dict['path']
+        self.path = path
         self.name = my_dict['name']
         self.main_segmentation_index = my_dict['main_segmentation_index']
-        self.notes = my_dict['notes']
+        try:
+            self.notes = my_dict['notes']
+        except:
+            self.notes = ""
 
         try:
             version = my_dict['locked']
@@ -463,13 +467,15 @@ class ElanExtensionProject(IHasName):
             for e in my_dict['screenshot_groups']:
                 new = ScreenshotGroup(self).deserialize(e)
                 self.add_screenshot_group(group=new)
+
             self.active_screenshot_group = self.screenshot_groups[0]
             self.screenshot_groups[0].is_current = True
+
         except Exception as e:
             self.screenshot_groups = old
             print e.message
             self.main_window.print_message("Screenshot Group import failed", "Red")
-
+        print "MOVIE PATH:", self.movie_descriptor.movie_path
         self.sort_screenshots()
         self.undo_manager.clear()
 

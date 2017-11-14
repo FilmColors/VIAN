@@ -913,7 +913,6 @@ class TimebarDrawing(QtWidgets.QWidget):
 
     def paintEvent(self, QPaintEvent):
         qp = QtGui.QPainter()
-        qp.begin(self)
         pen = QtGui.QPen()
         qp.begin(self)
         qp.setRenderHint(QtGui.QPainter.Antialiasing, True)

@@ -45,6 +45,9 @@ def store_project_concurrent(args, sign_progress):
     analyzes = []
     screenshot_groups = []
 
+    print "MOVIE PATH:", project.movie_descriptor.movie_path
+    print "FILE PATH:", path
+
     for a in project.annotation_layers:
         a_layer.append(a.serialize())
 

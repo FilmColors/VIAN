@@ -368,7 +368,18 @@ class FiwiFetcher():
 
             movie_folder = str(movie.filemaker_ID[0]) + "_" + str(movie.filemaker_ID[1]) + "_" + str(
                 movie.filemaker_ID[2])
+
+            print movie_folder, "PATH", base_path
+            to_test = base_path.split("/")[len(base_path.split("/")) - 2]
+            print to_test
+            if movie_folder in to_test:
+                movie_folder = ""
+
+            print movie_folder, "PATH", base_path
+
             segm_folders = glob.glob(base_path + movie_folder + "/*")
+
+            print "Testing:", base_path + movie_folder + "/*"
 
             if len(segm_folders) == 0:
                 base_path = base_path_2
@@ -1059,21 +1070,24 @@ class FIWIParserWindow(QMainWindow):
         #self.fetcher.copy_movies(root_directory=self.output_folder)
 
     def on_update(self):
-        if self.input_folder is not None and self.output_folder is not None:
-            if self.from_fm_export is False:
-                nomenclature = []
-                for s in self.input_nomenclature_selectors:
-                    nomenclature.append(s.currentText())
-                result = self.fetcher.fetch_shots_moviedirs(self.fetcher.movie_objs, nomenclature=nomenclature)
-                self.list_SCR.clear()
-                for r in result[1]:
-                    self.list_SCR.addItem(str([r.segment_id, r.segment_shot_id]).ljust(25) + str(r.time).ljust(15))
-            else:
-                nomenclature = []
-                for s in self.input_nomenclature_selectors:
-                    nomenclature.append(s.currentText())
-                for shot in self.fetcher.movie_objs[0].shots:
-                    self.list_SCR.addItem(str([shot.segment_id, shot.segment_shot_id]).ljust(25) + str(shot.time).ljust(15))
+        try:
+            if self.input_folder is not None and self.output_folder is not None:
+                if self.from_fm_export is False:
+                    nomenclature = []
+                    for s in self.input_nomenclature_selectors:
+                        nomenclature.append(s.currentText())
+                    result = self.fetcher.fetch_shots_moviedirs(self.fetcher.movie_objs, nomenclature=nomenclature)
+                    self.list_SCR.clear()
+                    for r in result[1]:
+                        self.list_SCR.addItem(str([r.segment_id, r.segment_shot_id]).ljust(25) + str(r.time).ljust(15))
+                else:
+                    nomenclature = []
+                    for s in self.input_nomenclature_selectors:
+                        nomenclature.append(s.currentText())
+                    for shot in self.fetcher.movie_objs[0].shots:
+                        self.list_SCR.addItem(str([shot.segment_id, shot.segment_shot_id]).ljust(25) + str(shot.time).ljust(15))
+        except Exception as e:
+            print e.message
 
 
         else:
@@ -1137,7 +1151,7 @@ class FIWIParserWindow(QMainWindow):
         self.fetcher.movies_dirs = [self.input_folder]
 
         result = self.fetcher.fetch_movies()
-        print self.fetcher.movie_objs[0].filemaker_ID
+
         if result is True:
             self.edit_ELAN.setStyleSheet("color: green;")
             self.edit_ELAN.setText(self.fetcher.movie_objs[0].elan_path)
@@ -1199,7 +1213,8 @@ class FIWIParserWindow(QMainWindow):
         except Exception as e:
             QMessageBox.warning(self, "Error", e.message)
             return
-
+        if self.fetcher.movie_objs[0] is None:
+            return
 
         if len(result) == 0:
             print len(self.fetcher.movie_objs)
@@ -1216,7 +1231,10 @@ class FIWIParserWindow(QMainWindow):
             self.edit_FMID.setStyleSheet("color: green;")
             self.edit_FMID.setText(str(result[0].filemaker_ID))
 
-            self.fetcher.fetch_shots(input_movies=result)
+            self.fetcher.fetch_shots(input_movies=result, base_folder=self.input_folder)
+            if self.fetcher.movie_objs[0].shots is None:
+                return
+
             for shot in self.fetcher.movie_objs[0].shots:
                 print shot.segment_id, shot.segment_shot_id
 
