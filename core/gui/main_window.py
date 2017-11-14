@@ -252,6 +252,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.time_update_interval = 100
         self.update_timer = QtCore.QTimer()
+        self.update_timer.setTimerType(Qt.PreciseTimer)
         self.update_timer.setInterval(self.time_update_interval)
         self.update_timer.timeout.connect(self.signal_timestep_update)
 
@@ -985,6 +986,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def dispatch_on_timestep_update(self, time):
 
         # self.timeline.timeline.on_timestep_update(time)
+        self.onTimeStep.emit(time)
+
         if time == -1:
             for l in self.project.annotation_layers:
                 l.is_visible = False
@@ -1010,7 +1013,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     a.widget.is_active = False
 
 
-        self.onTimeStep.emit(time)
+
             # self.drawing_overlay.on_timestep_update(time)
 
 

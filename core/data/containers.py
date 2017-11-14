@@ -1286,6 +1286,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def delete(self):
         self.project.remove_screenshot(self)
 
+
 class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     def __init__(self, project, name = "New Screenshot Group"):
         IProjectContainer.__init__(self)
@@ -1344,6 +1345,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
 
         return self
+
 
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
     def __init__(self, project, movie_name = "No Movie Name", movie_path = "", movie_id = -0001, year = 1800, source = "", duration = 100):

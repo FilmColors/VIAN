@@ -129,6 +129,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.multi_selection = False
 
         self.opencv_image = QLabel(self)
+        self.opencv_image.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.videoCap = None
         self.opencv_image_visible = False
 
