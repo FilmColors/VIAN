@@ -77,10 +77,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scrollArea.wheelEvent = self.func_tes
         self.main_window.onTimeStep.connect(self.on_timestep_update)
 
+
         # self.update_timer = QtCore.QTimer()
         # self.update_timer.setInterval(100)
         # self.update_timer.timeout.connect(self.update_time)
         # self.update_timer.start()
+
         self.show()
 
     def func_tes(self, WheelEvent):
@@ -90,10 +92,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         return self.parent().project()
 
     def scroll_h(self):
-        value= self.scrollArea.horizontalScrollBar().value()
+        value= int(self.scrollArea.horizontalScrollBar().value())
         self.frame_Controls.move(self.scrollArea.mapToParent(QtCore.QPoint(value, 0)))
-        self.relative_corner = QtCore.QPoint(value, 0)
+        self.relative_corner = QtCore.QPoint(value, 1)
         self.time_bar.move(self.relative_corner)
+
 
     def scroll_v(self):
         value = self.scrollArea.verticalScrollBar().value()
@@ -183,9 +186,18 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def update_time_bar(self):
         if self.time_bar is None:
             self.time_bar = TimebarDrawing(self.frame_Bars, self)
+            self.time_bar.show()
+
+        if not self.time_bar.isVisible():
+            print "Timebar Shown"
+            self.time_bar.show()
+
         self.time_bar.move(self.relative_corner.x(), 0)
+
+        # self.time_bar.move(0,0)
         # self.time_bar.resize(self.width() - self.controls_width, self.time_bar_height)
         self.time_bar.setFixedWidth(self.width() - self.controls_width)
+
         self.time_bar.update()
         # self.time_bar.show()
 
@@ -795,10 +807,8 @@ class TimebarPicture(QtWidgets.QWidget):
         self.is_hovered = False
         self.color = (123, 86, 32, 100)
         self.pic_height = height
-
         qimage, qpixmap = numpy_to_qt_image(screenshot.get_preview(scale=0.1))
         self.qimage = qimage
-
         self.size = (screenshot.img_movie.shape[0], screenshot.img_movie.shape[1])
         width = self.size[1] * self.pic_height / self.size[0]
         self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
@@ -867,13 +877,21 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.offset = self.mapToParent(QMouseEvent.pos())
             self.curr_pos = self.pos()
 
+        else:
+            print "Scrubber Right"
+            self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
+            print self.mapToParent(QMouseEvent.pos())
+
         # if QMouseEvent.buttons() & Qt.RightButton:
         #     self.timeline.mousePressEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
-        if self.was_playing:
-            self.player.play()
-            self.was_playing = False
+        if QMouseEvent.buttons() & Qt.LeftButton:
+            if self.was_playing:
+                self.player.play()
+                self.was_playing = False
+        else:
+            self.timeline.end_selector()
 
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
@@ -882,7 +900,7 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.player.set_media_time((self.curr_pos.x() + pos.x()) * self.timeline.scale)
 
         if QMouseEvent.buttons() & Qt.RightButton:
-            self.timeline.mouseMoveEvent(QMouseEvent)
+            QMouseEvent.ignore()
 
     def paintEvent(self, QPaintEvent):
         self.raise_()
@@ -910,13 +928,14 @@ class TimebarDrawing(QtWidgets.QWidget):
         self.timeline = timeline
         self.background_color = QtGui.QColor(50,50,50,230)
         self.scale_image = None
-        self.show()
+
         self.is_hovered = False
         self.was_playing = False
         self.a = 50
         self.b = 200
         self.c = 1000
         self.time_offset = 0
+        self.show()
 
     def paintEvent(self, QPaintEvent):
         qp = QtGui.QPainter()
@@ -926,6 +945,7 @@ class TimebarDrawing(QtWidgets.QWidget):
         qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
         pen.setColor(QtGui.QColor(255, 255, 255))
         qp.fillRect(self.rect(),self.background_color)
+
         t_start = float(self.pos().x()) * self.timeline.scale / 1000
         t_end = t_start + float(self.width() * self.timeline.scale / 1000)
         self.time_offset = 0

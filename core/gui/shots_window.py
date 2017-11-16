@@ -119,7 +119,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 image = screenshot.img_movie
 
             n_per_segment_counter += 1
-            qgraph, qpixmap = numpy_to_qt_image(image)
+            try:
+                qgraph, qpixmap = numpy_to_qt_image(image)
+            except Exception as e:
+                self.main_window.print_message("An Error Occured, Save and Restart. An Error occured in the Screenshot Manager, I suggest you restart the application" + e.message )
+                continue
 
             w = qpixmap.width()
             if w > width:

@@ -36,6 +36,11 @@ class DataType(object):
         # self.name.resize(self.width() * scale, self.height() / 2.0)
 
 
+class DT_Literal(DataType):
+    def __init__(self,parent = None,  color = QColor(82,139,230), default_value = None):
+        super(DT_Literal, self).__init__(parent, color = color, default_value=default_value)
+
+
 class DT_Numeric(DataType):
     def __init__(self,parent = None,  color = QColor(229,229,229), default_value = None):
         super(DT_Numeric, self).__init__(parent, color = color, default_value=default_value)
@@ -93,7 +98,11 @@ class DT_Vector3(DT_Vector):
     #     self.value = [boxes[0].value(), boxes[1].value(), boxes[2].value()]
 
 
-class DT_Image(DT_Numeric):
+class DT_ImageStack(DT_Numeric):
+    def __init__(self, parent = None,color=QColor(240, 77, 77), default_value = None):
+        super(DT_ImageStack, self).__init__(parent, color=color)
+
+class DT_Image(DT_ImageStack):
     def __init__(self, parent = None, default_value = None):
         super(DT_Image, self).__init__(parent, color=QColor(214, 77, 77), default_value=default_value)
 

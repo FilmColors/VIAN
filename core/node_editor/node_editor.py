@@ -703,7 +703,7 @@ class NodeEditorContextMenu(QMenu):
         self.action_run.triggered.connect(self.node_editor.run_script)
         self.action_save.triggered.connect(partial(self.node_editor.store_script, "script.vis"))
         self.action_load.triggered.connect(partial(self.node_editor.load_script, "script.vis"))
-        self.a_read_frame.triggered.connect(partial(self.node_editor.create_node, ImageReader(), self.node_pos ))
+        self.a_read_frame.triggered.connect(partial(self.node_editor.create_node, OperationFrameReader(), self.node_pos))
 
         self.a_scalar.triggered.connect(partial(self.node_editor.create_node, OperationScalar(), self.node_pos ))
         self.a_vector2.triggered.connect(partial(self.node_editor.create_node, OperationVector2(), self.node_pos ))

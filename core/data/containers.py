@@ -994,7 +994,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             resource_path = self.resource_path,
             free_hand_paths = self.free_hand_paths,
             notes = self.notes,
-            locked = self.locked
+
 
         )
         return result

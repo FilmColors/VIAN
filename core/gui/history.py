@@ -68,11 +68,14 @@ class HistoryWidget(QtWidgets.QWidget):
         self.update_history()
 
     def on_goTo(self):
-        if self.current_item[0] == "UNDO":
-            for i in range(self.current_item[1]):
-                self.undo_manager.undo()
-        else:
-            for i in range(self.current_item[1]):
-                self.undo_manager.redo()
+        try:
+            if self.current_item[0] == "UNDO":
+                for i in range(self.current_item[1]):
+                    self.undo_manager.undo()
+            else:
+                for i in range(self.current_item[1]):
+                    self.undo_manager.redo()
+        except:
+            return
 
 

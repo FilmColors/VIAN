@@ -32,7 +32,7 @@ class NodeEditor(QWidget):
 
         self.scale = 1.0
 
-        self.add_node(Node(self, self, ImageReader()))
+        self.add_node(Node(self, self, OperationFrameReader()))
         n2 = self.add_node(Node(self, self, OperationNormalize()))
         n2.move(500,500)
 
@@ -69,7 +69,9 @@ class NodeEditor(QWidget):
                 c.input_field.remove_connection(c)
                 c.output_field.remove_connection(c)
                 self.connections.remove(c)
-            self.nodes.remove(n)
+
+            if n in self.nodes:
+                self.nodes.remove(n)
             n.close()
 
 
@@ -858,6 +860,7 @@ class NodeEditorContextMenu(QMenu):
         self.input_menu = self.node_menu.addMenu("Input")
         self.a_read_frame = self.input_menu.addAction("Read Frames")
         self.a_movie_colormetrics = self.input_menu.addAction("Movie Colorimetric")
+        self.a_range_reader = self.input_menu.addAction("Range Reader")
 
         self.input_menu.addAction("TimeRange Colorimetric")
 
@@ -866,7 +869,7 @@ class NodeEditorContextMenu(QMenu):
         self.computation_menu = self.node_menu.addMenu("Computation")
         self.node_pos = node_pos
 
-        self.a_sum = self.computation_menu.addAction("Sum")
+        self.a_add = self.computation_menu.addAction("Addition")
         self.a_subtraction = self.computation_menu.addAction("Subtraction")
         self.a_multiply = self.computation_menu.addAction("Multiplication")
         self.a_division = self.computation_menu.addAction("Division")
@@ -875,6 +878,7 @@ class NodeEditorContextMenu(QMenu):
         self.a_resize = self.computation_menu.addAction("Resize")
         self.a_mean = self.computation_menu.addAction("Mean")
         self.a_normalization = self.computation_menu.addAction("Normalization")
+        self.a_color_histogram = self.computation_menu.addAction("Color Histogram")
 
         self.a_color2img = self.computation_menu.addAction("Color2Image")
 
@@ -902,19 +906,21 @@ class NodeEditorContextMenu(QMenu):
         self.action_run.triggered.connect(self.node_editor.run_script)
         self.action_save.triggered.connect(partial(self.node_editor.save_script, "script.vis"))
         self.action_load.triggered.connect(partial(self.node_editor.load_script, "script.vis"))
-        self.a_read_frame.triggered.connect(partial(self.node_editor.create_node, ImageReader(), self.node_pos ))
+        self.a_read_frame.triggered.connect(partial(self.node_editor.create_node, OperationFrameReader(), self.node_pos))
+        self.a_range_reader.triggered.connect(partial(self.node_editor.create_node, OperationRangeReader(), self.node_pos))
 
         self.a_scalar.triggered.connect(partial(self.node_editor.create_node, OperationScalar(), self.node_pos ))
         self.a_vector2.triggered.connect(partial(self.node_editor.create_node, OperationVector2(), self.node_pos ))
         # Action Binding
         # Computation
         self.a_color2img.triggered.connect(partial(self.node_editor.create_node, OperationColor2Image(), self.node_pos ))
-        self.a_sum.triggered.connect(partial(self.node_editor.create_node, OperationAdd(), self.node_pos ))
+        self.a_add.triggered.connect(partial(self.node_editor.create_node, OperationAdd(), self.node_pos ))
         self.a_subtraction.triggered.connect(partial(self.node_editor.create_node, OperationSubtract(), self.node_pos ))
         self.a_multiply.triggered.connect(partial(self.node_editor.create_node, OperationMultiply(), self.node_pos ))
         self.a_division.triggered.connect(partial(self.node_editor.create_node, OperationDivision(), self.node_pos ))
         self.a_mean.triggered.connect(partial(self.node_editor.create_node, OperationMean(), self.node_pos ))
         self.a_normalization.triggered.connect(partial(self.node_editor.create_node, OperationNormalize(), self.node_pos))
+        self.a_color_histogram.triggered.connect(partial(self.node_editor.create_node, OperationColorHistogram(), self.node_pos))
         # Visualization
         self.a_show_img.triggered.connect(partial(self.node_editor.create_node, OperationShowImage(), self.node_pos ))
         self.a_bar.triggered.connect(partial(self.node_editor.create_node, OperationBarPlot(), self.node_pos ))

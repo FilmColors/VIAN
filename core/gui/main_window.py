@@ -291,19 +291,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #     self.show()
 
     def test_function(self):
-        # scr = self.project.get_selected(type=SCREENSHOT)
-        # segment = self.project.get_main_segmentation().get_segment(scr[0].movie_timestamp)
-        # start = self.player.get_frame_pos_by_time(segment.get_start())
-        # end = self.player.get_frame_pos_by_time(segment.get_end())
-        # find_time_of_screenshot(self.project.movie_descriptor.movie_path, scr[0].img_movie,start, end)
-        urls = QFileDialog.getOpenFileUrls(self)[0]
-        shots_paths = []
-        for p in urls:
-            path = p.url().replace("file:", "")
-            shots_paths.append(path)
-
-        job = ImportScreenshotsJob([shots_paths, self.project.movie_descriptor.movie_path, 0])
-        self.run_job_concurrent(job)
+        print self.player.get_fps()
 
     #region WidgetCreation
 
@@ -604,6 +592,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         time = self.player.get_media_time()
         # frame, pos = self.get_frame(time)
+        
         frame_pos = self.player.get_frame_pos_by_time(time)
 
         # result = create_screenshot([self.drawing_overlay, frame, time, pos], None)

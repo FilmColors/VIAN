@@ -153,9 +153,13 @@ class CreateScreenshotJob(IConcurrentJob):
 
 
         # Create Screenshot Image
+        print frame_pos
         video_capture = cv2.VideoCapture(movie_path)
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
         ret, frame = video_capture.read()
+
+        if frame is None:
+            raise IOError("Couldn't Read Frame")
 
         if len(annotation_dicts) > 0:
             frame_annotated = render_annotations(frame, annotation_dicts)

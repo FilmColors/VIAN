@@ -59,9 +59,10 @@ class Operation(QObject):
 class OperationValue(Operation):
     def __init__(self, name, input, output):
         super(OperationValue, self).__init__( name, input, output)
+        self.value = 100
 
     def perform(self, args):
-        self.result = self.spin_box.value()
+        self.result = self.value
 
 
 class OperationScalar(OperationValue):
@@ -78,20 +79,58 @@ class OperationVector2(OperationValue):
 
 
 #region InputNodes
-class ImageReader(Operation):
+class OperationFrameReader(Operation):
     def __init__(self):
-        super(ImageReader, self).__init__("Read Frame Movie",[], [Slot("Frame", DT_Image, None)])
+        super(OperationFrameReader, self).__init__("Read Frame Movie", [Slot("Path", DT_Literal, "/Users/gaudenz/Desktop/test.mp4"), Slot("Frame Index", DT_Numeric, 3000)], [Slot("Frame", DT_Image, None)])
 
     def perform(self, args):
         try:
-            cap = cv2.VideoCapture("C:\\Users\\Gaudenz Halter\\Videos\\Hyper\\GameStar\\test.mp4")
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 1000)
+            cap = cv2.VideoCapture(args[0])
+            cap.set(cv2.CAP_PROP_POS_FRAMES, args[1])
             ret, frame = cap.read()
             self.result = frame
             if frame is None:
                 raise Exception("Frame returned None, couldn't read Movie")
         except Exception as e:
             self.handle_exception(e)
+
+
+class OperationRangeReader(Operation):
+    def __init__(self):
+        super(OperationRangeReader, self).__init__("Read Range Movie",
+                                                   [Slot("Path", DT_Literal, "/Users/gaudenz/Desktop/test.mp4"),
+                                                    Slot("Start Index", DT_Numeric, 0),
+                                                    Slot("End Index", DT_Numeric, 20)],
+                                                   [Slot("Frame", DT_ImageStack, None)])
+
+    def perform(self, args):
+        try:
+
+            start = args[1]
+            end = args[2]
+
+            cap = cv2.VideoCapture(args[0])
+
+            if start >= end:
+                end = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start)
+
+            frame_stack = []
+            for idx in range(start, end):
+                ret, frame = cap.read()
+                if frame  is None:
+                    raise IOError("OperationRangeReader: OpenCV couldn't read frame")
+                frame_stack.append(frame)
+
+            self.result = frame_stack
+
+            if frame_stack is None:
+                raise Exception("Frame returned None, couldn't read Movie")
+        except Exception as e:
+            self.handle_exception(e)
+
+
 #endregion
 
 
@@ -112,6 +151,10 @@ class OperationMean(Operation):
 
     def update_out_types(self, input_types):
         print input_types
+
+        if isinstance(input_types[0], DT_ImageStack):
+            self.output_types = [DT_Image]
+
         if isinstance(input_types[0], DT_Image):
             self.output_types = [DT_Vector3]
 
@@ -120,7 +163,7 @@ class OperationMean(Operation):
 
 class OperationAdd(Operation):
     def __init__(self):
-        super(OperationAdd, self).__init__("Sum", [Slot("a", DT_Numeric, 0), Slot("b", DT_Numeric, 0)], [Slot("Result", DT_Numeric, None)])
+        super(OperationAdd, self).__init__("Addition", [Slot("a", DT_Numeric, 0), Slot("b", DT_Numeric, 0)], [Slot("Result", DT_Numeric, None)])
 
     def perform(self, args):
         try:
@@ -130,7 +173,10 @@ class OperationAdd(Operation):
             self.handle_exception(e)
 
     def update_out_types(self, input_types):
-        if isinstance(input_types[0], DT_Image) or isinstance(input_types[1], DT_Image):
+        if isinstance(input_types[0], DT_ImageStack) or isinstance(input_types[1], DT_ImageStack):
+            self.output_types = [DT_Image]
+
+        elif isinstance(input_types[0], DT_Image) or isinstance(input_types[1], DT_Image):
             self.output_types = [DT_Image]
 
         elif isinstance(input_types[0], DT_Vector3) or isinstance(input_types[1], DT_Vector3):
@@ -244,6 +290,7 @@ class OperationNormalize(Operation):
 
         return self.output_types
 
+
 class OperationShowImage(Operation):
     def __init__(self):
         super(OperationShowImage, self).__init__("Show Image", [Slot("Image", DT_Image, None)], [], is_final_node= True)
@@ -270,9 +317,38 @@ class OperationColor2Image(Operation):
             self.handle_exception(e)
 
 
+class OperationColorHistogram(Operation):
+    def __init__(self):
+        super(OperationColorHistogram, self).__init__("Color Histogram", [Slot("Color", DT_ImageStack, None)], [Slot("Histogram", DT_Vector, None)])
+
+    def perform(self, args):
+        try:
+            n_bins = 16
+            range_min = 0
+            range_max = 255
+
+            imgs = np.array(args[0])
+
+            hists = []
+            if len(imgs.shape) == 3:
+                imgs = np.array([imgs])
+            print "OperationColorHistogram", imgs.shape
+            for idx in range(imgs.shape[0]):
+                img = imgs[idx]
+                data = np.resize(img, (img.shape[0] * img.shape[1], 3))
+                hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+                                    [n_bins, n_bins, n_bins],
+                                    [range_min, range_max, range_min, range_max,
+                                     range_min, range_max])
+                hists.append(hist)
+            self.result = hists
+        except Exception as e:
+            self.handle_exception(e)
+
+
 class OperationBarPlot(Operation):
     def __init__(self):
-        super(OperationBarPlot, self).__init__("Bar Plot", [DT_Vector], [], is_final_node= True)
+        super(OperationBarPlot, self).__init__("Bar Plot", [Slot("Values", DT_Vector, None)], [], is_final_node= True)
 
     def perform(self, args):
         try:
@@ -280,7 +356,7 @@ class OperationBarPlot(Operation):
                 y = np.array([args[0]])
             else:
                 y = args[0]
-
+            print y.shape
             plt.bar(range(y.shape[0]), y)
             plt.show()
 
