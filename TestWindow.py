@@ -5,7 +5,7 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
-from core.node_editor.node_editor import NodeEditor
+from core.node_editor.node_editor_2 import NodeEditor
 
 
 class TWindow(QtWidgets.QMainWindow):

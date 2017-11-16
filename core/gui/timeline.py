@@ -19,6 +19,10 @@ class TimelineContainer(EDockWidget):
         self.setWidget(self.timeline)
         self.setWindowTitle("Timeline")
 
+    def resizeEvent(self, *args, **kwargs):
+        super(TimelineContainer, self).resizeEvent(*args, **kwargs)
+        self.timeline.update_time_bar()
+
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def __init__(self, main_window, parent):
@@ -171,7 +175,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Controls.setFixedSize(self.controls_width, self.height())
         self.frame_Bars.setFixedSize(self.duration /self.scale, self.height())
         self.time_scrubber.setFixedHeight(self.height())
-        self.update_time_bar()
+
+        # This makes OSX go crazy
+        # self.update_time_bar()
         super(Timeline, self).paintEvent(QPaintEvent)
 
     def update_time_bar(self):
@@ -181,7 +187,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.time_bar.resize(self.width() - self.controls_width, self.time_bar_height)
         self.time_bar.setFixedWidth(self.width() - self.controls_width)
         self.time_bar.update()
-        self.time_bar.show()
+        # self.time_bar.show()
 
     def update_ui(self):
         # self.time_scrubber.move(self.curr_movie_time, 0)
@@ -302,6 +308,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def on_timestep_update(self, time):
         self.curr_movie_time = time
         self.time_scrubber.move(self.curr_movie_time / self.scale - 5, 0)
+        self.update_time_bar()
         self.update()
 
     def keyPressEvent(self, QKeyEvent):

@@ -2,10 +2,11 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
+import os
 from functools import partial
 from core.node_editor.operations import *
-
+from core.node_editor.datatypes import *
+import json
 NODETYPE_INPUT_NODE = 0
 NODETYPE_OUTPUT_NODE = 1
 
@@ -15,9 +16,9 @@ NODETYPE_OUTPUT_NODE = 1
 class NodeEditor(QWidget):
     def __init__(self, parent):
         super(NodeEditor, self).__init__(parent)
-
-
+        self.id_counter = 10000
         self.nodes = []
+        self.selected_nodes = []
         self.is_connecting = False
         self.setAttribute(Qt.WA_MouseTracking, True)
         self.lbl_compile_status = QLabel("Not Compiled", self)
@@ -26,21 +27,54 @@ class NodeEditor(QWidget):
         self.connections = []
         self.hovered_pin = None
 
-        self.create_node(OperationMean())
-        self.create_node(OperationShowImage())
-        self.create_node(ImageReader())
+        # self.create_node(OperationMean())
+        # self.create_node(OperationShowImage())
+        # self.create_node(ImageReader())
 
         self.is_compiled = False
         self.show()
 
-
-    def create_node(self, operation):
-        node = Node(self, operation)
+    def create_node(self, operation, pos = QPoint(50,50)):
+        node = Node(self, operation, self.id_counter)
+        operation.node = node
         self.nodes.append(node)
+        node.onSelection.connect(self.on_selection)
+        node.move(pos)
+
+        self.id_counter += 1
         node.show()
+        return node
+
+    def get_by_id(self, id):
+        for n in self.nodes:
+            if n.unique_id == id:
+                return n
+        for c in self.connections:
+            if c.unique_id == id:
+                return c
+
+    def on_selection(self, node):
+        if node is None:
+            self.selected_nodes = []
+        else:
+            self.selected_nodes = [node]
+        for n in self.nodes:
+            if n not in self.selected_nodes:
+                n.is_selected = False
+
+    def remove_nodes(self, nodes):
+        for n in nodes:
+            for p in n.pins:
+                p.break_connection()
+            try:
+                self.nodes.remove(n)
+                n.deleteLater()
+            except:
+                pass
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
+            self.on_selection(None)
             if self.is_connecting and self.hovered_pin:
                 self.current_connection.set_end_point(self.hovered_pin.mapTo(self, self.hovered_pin.connection_point))
                 self.current_connection = None
@@ -52,7 +86,7 @@ class NodeEditor(QWidget):
             if self.is_connecting:
                 self.abort_connection()
             else:
-                menu = NodeEditorContextMenu(self, self.mapToGlobal(QMouseEvent.pos()))
+                menu = NodeEditorContextMenu(self, self.mapToGlobal(QMouseEvent.pos()), QMouseEvent.pos())
 
     def mouseReleaseEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
@@ -70,7 +104,8 @@ class NodeEditor(QWidget):
 
     def on_pin_pressed(self, node_pin):
         if self.is_connecting:
-            if self.current_connection.start_pin.get_data_type() == node_pin.get_data_type() and self.current_connection.start_pin.pin_type != node_pin.pin_type:
+            if isinstance(self.current_connection.start_pin.get_data_type(), node_pin.get_data_type().__class__) \
+                    and self.current_connection.start_pin.pin_type != node_pin.pin_type:
                 if node_pin.connection == None:
                     self.finish_connection(node_pin)
             else:
@@ -80,7 +115,7 @@ class NodeEditor(QWidget):
 
     def on_begin_connection(self, start_node):
         if not self.is_connecting:
-            connection = Connection(start_node.get_data_type())
+            connection = Connection(start_node.get_data_type(), self.id_counter)
             connection.set_start_point(start_node.mapTo(self, start_node.connection_point))
             connection.set_start_pin(start_node)
 
@@ -88,10 +123,14 @@ class NodeEditor(QWidget):
             self.current_connection = connection
             self.is_connecting = True
             self.update()
+            self.id_counter += 1
 
     def finish_connection(self, end_node):
         self.current_connection.set_end_point(self.hovered_pin.mapTo(self, self.hovered_pin.connection_point))
         self.current_connection.set_end_pin(end_node)
+
+        self.current_connection.end_pin.node.on_connect()
+
         self.current_connection = None
         self.is_connecting = False
         self.update()
@@ -99,6 +138,7 @@ class NodeEditor(QWidget):
     def abort_connection(self):
         try:
             self.connections.remove(self.current_connection)
+            self.current_connection.start_pin.connection = None
             self.is_connecting = False
             self.current_connection = None
         except:
@@ -116,6 +156,7 @@ class NodeEditor(QWidget):
         if connection:
             connection.start_pin.connection = None
             if  connection.end_pin:
+                connection.end_pin.node.update_pins()
                 connection.end_pin.connection = None
             if connection in self.connections:
                 self.connections.remove(connection)
@@ -135,27 +176,74 @@ class NodeEditor(QWidget):
             self.lbl_compile_status.setText("NotCompiled")
             self.lbl_compile_status.setStyleSheet("QLabel{color : Red;}")
 
-        print "OK"
-
     def run_script(self):
         if self.is_compiled:
             for n in self.nodes:
-                if n.operation.is_final_node:
+                if n.operation.is_final_node and n.is_compiled:
                     n.perform()
+        else:
+            print "Not Compiled"
+
+    def store_script(self, file_path="script.vis"):
+        nodes = []
+        print file_path
+        for n in self.nodes:
+            nodes.append(n.serialize())
+
+        connections = []
+        for c in self.connections:
+            connections.append(c.serialize())
+
+        data = dict(nodes = nodes, connections=connections)
+
+        with open(file_path, "wb") as f:
+            json.dump(data, f)
+
+    def load_script(self, file_path="script.vis"):
+        with open(file_path, "rb") as f:
+            data = json.load(f)
+
+        nodes = data['nodes']
+        connections = data['connections']
+        for n in nodes:
+            node = self.create_node(Operation("Loaded", [], []), QPoint(0,0))
+            node.deserialize(n)
+
+        print self.nodes
+
+        for c in connections:
+            print c
+            dt = eval(c['data_type'])()
+            conn = Connection(dt, c['unique_id'])
+            start_node = self.get_by_id(c['start_node'])
+            end_node = self.get_by_id(c['end_node'])
+
+            if end_node and start_node:
+                for p in start_node.pins:
+                    if p.pin_id == c['start_pin']:
+                        conn.set_start_pin(p)
+                        break
+                for p in end_node.pins:
+                    if p.pin_id == c['end_pin']:
+                        conn.set_end_pin(p)
+                        break
+
+                self.connections.append(conn)
+        self.update()
 
     def clear_compilation(self):
         self.is_compiled = False
         for n in self.nodes:
-            n.operation.result = None
+            n.operation.result = []
             n.is_compiled = False
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.compile()
 
-
     def resizeEvent(self, QResizeEvent):
         super(NodeEditor, self).resizeEvent(QResizeEvent)
         self.lbl_compile_status.move(self.width() - 100, self.height() - 20)
+
     def paintEvent(self, QPaintEvent):
 
         qp = QtGui.QPainter()
@@ -188,22 +276,30 @@ class NodeEditor(QWidget):
 
 
 class Node(QWidget):
-    def __init__(self, parent, operation, name = "Base Class Node"):
+    onSelection = pyqtSignal(object)
+
+    def __init__(self, parent, operation, unique_id, name = "Base Class Node"):
         super(Node, self).__init__(parent)
         self.curr_loc = self.pos
+        self.unique_id = unique_id
         self.node_editor = parent
         self.name = operation.name
         self.lbl_Title = QLabel(operation.name, self)
-        self.lbl_Title.move(5,5)
+        self.lbl_Title.setAlignment(Qt.AlignHCenter|Qt.AlignVCenter)
+
         self.setAttribute(Qt.WA_MouseTracking, True)
         self.operation = operation
         # self.setLayout(QVBoxLayout(self))
         # self.layout().addWidget(self.lbl_Title)
         self.resize(200,150)
+        self.lbl_Title.move(1, 1)
+        self.lbl_Title.resize(198,18)
         self.color = QColor(150,150,150)
         self.offset = QPoint(0,0)
+        self.compile_rect = QRect(1, self.height() - 5, self.width() - 1, self.height() - 1)
         self.is_dragging = False
         self.is_hovered = False
+        self.is_selected = False
 
 
         self.is_compiled = False
@@ -213,10 +309,9 @@ class Node(QWidget):
 
         self.create_pins()
 
-        # self.add_pin(NODETYPE_INPUT_NODE, DT_IMAGE, "Input Image")
-        # self.add_pin(NODETYPE_INPUT_NODE, DT_COLOR, "Input Color")
-        # self.add_pin(NODETYPE_OUTPUT_NODE, DT_IMAGE, "Output Image")
-        # self.add_pin(NODETYPE_OUTPUT_NODE, DT_COLOR, "Output Color")
+        if isinstance(self.operation, OperationValue):
+            self.widget = self.operation.get_input_widget(self)
+            self.widget.move(5, self.height() - 100)
 
     def create_pins(self):
         for i in self.operation.input_types:
@@ -224,21 +319,45 @@ class Node(QWidget):
         for o in self.operation.output_types:
             self.add_pin(NODETYPE_OUTPUT_NODE, o)
 
+    def on_connect(self):
+        inputs = []
+        for p in self.pins:
+            if isinstance(p, InputNodePin):
+                if p.connection:
+                    p.data_type = p.connection.data_type
+                inputs.append(p.data_type)
+        outputs = self.operation.update_out_types(inputs)
+        self.update_pins(outputs)
+
+    def update_pins(self, data_type = None):
+        if data_type:
+            counter = 0
+            for p in self.pins:
+                if isinstance(p, OutputNodePin):
+                    p.data_type = data_type[counter]
+                    p.color = p.data_type.color
+                    counter += 1
+        else:
+            for p in self.pins:
+                if isinstance(p, OutputNodePin):
+                    p.reset_datatype()
+
     def compile(self):
         result = True
+        self.operation.result = []
         for p in self.pins:
             if p.pin_type == "input":
-                print "compile", p.connection
                 if p.connection is not None:
                     result = p.connection.start_pin.node.compile()
                 else:
                     result = False
 
         self.is_compiled = result
+
         return result
 
     def perform(self):
-        if not self.operation:
+        if len(self.operation.result) == 0:
             args = []
             for p in self.pins:
                 if p.pin_type == "input":
@@ -246,11 +365,18 @@ class Node(QWidget):
             self.operation.perform(args)
         return self.operation.result
 
+    def get_other_pins(self, exclude, type):
+        result = []
+        for p in self.pins:
+            if isinstance(p, type) and p is not exclude:
+                result.append(p.data_type)
+        return result
+
     def add_pin(self, type, data_type, name = "A Pin"):
         if type == NODETYPE_INPUT_NODE:
-            pin = InputNodePin(self, data_type, name)
+            pin = InputNodePin(self, data_type,self.counter, name)
         else:
-            pin = OutputNodePin(self, data_type, name)
+            pin = OutputNodePin(self, data_type,self.counter, name)
 
         pin.onDragConnection.connect(self.node_editor.on_pin_pressed)
         pin.onEnter.connect(self.node_editor.on_hover_pin)
@@ -262,11 +388,37 @@ class Node(QWidget):
         pin.show()
         self.counter += 1
 
+    def serialize(self):
+        data = dict(
+            unique_id = self.unique_id,
+            position = (self.pos().x(), self.pos().y()),
+            operation = self.operation.__class__.__name__
+        )
+        return data
+    def deserialize(self, serialization):
+        operation = serialization['operation']
+        self.operation = eval(operation)()
+        self.unique_id = serialization['unique_id']
+        self.move(QPoint(serialization['position'][0], serialization['position'][1]))
+        self.lbl_Title.setText(self.operation.name)
+
+        self.create_pins()
+        if isinstance(self.operation, OperationValue):
+            self.widget = self.operation.get_input_widget(self)
+            self.widget.move(5, self.height() - 100)
+            self.widget.show()
+
+        return self
+
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
                 self.curr_loc = self.pos()
                 self.offset = QMouseEvent.pos()
                 self.is_dragging = True
+                self.onSelection.emit(self)
+                self.is_selected = True
+        # else:
+        #     super(Node, self).mousePressEvent(QMouseEvent)
 
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
@@ -275,6 +427,7 @@ class Node(QWidget):
                 target = self.mapToParent(pos)
                 self.move(target)
         else:
+
             QMouseEvent.ignore()
 
     def mouseReleaseEvent(self, QMouseEvent):
@@ -287,13 +440,28 @@ class Node(QWidget):
         qp.begin(self)
         qp.setRenderHint(QtGui.QPainter.Antialiasing)
         qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+
+        qp.fillRect(self.rect(), QColor(67,67,67,150))
+
         if self.is_hovered:
             pen.setColor(QColor(200,200,200))
         else:
             pen.setColor( self.color)
-        pen.setWidth(2)
+
+        if self.is_selected:
+            pen.setWidth(8)
+            pen.setColor(QColor(255,160,47))
+        else:
+            pen.setWidth(2)
         qp.setPen(pen)
         qp.drawRect(self.rect())
+
+        if self.is_compiled:
+            qp.fillRect(self.compile_rect, QColor(50,100,30))
+        else:
+            qp.fillRect(self.compile_rect, QColor(100,50,30))
+        qp.setPen(pen)
+
         qp.end()
 
     def enterEvent(self, QEvent):
@@ -321,9 +489,10 @@ class NodePin(QWidget):
     onLeave = pyqtSignal(object)
     onMoved = pyqtSignal(object)
 
-    def __init__(self, parent, node, data_type = DT_IMAGE, name = "A Pin"):
+    def __init__(self, parent, node, data_type,pin_id, name = "A Pin"):
         super(NodePin, self).__init__(parent)
         self.setAttribute(Qt.WA_MouseTracking, True)
+        self.pin_id = pin_id
         self.node = node
         self.is_hovered = False
         self.pin_height = 20
@@ -336,8 +505,9 @@ class NodePin(QWidget):
         self.connection_point = QPoint(10,10)
         self.connection = None
 
+        self.default_data_type = data_type
         self.data_type = data_type
-        self.color = data_type[1]
+        self.color = data_type.color
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
@@ -383,23 +553,29 @@ class NodePin(QWidget):
         if self.connection is not None:
             self.node.node_editor.remove_connection(self.connection)
 
+    def reset_datatype(self):
+        self.data_type = self.default_data_type
+        self.color = self.data_type.color
+
 
 class InputNodePin(NodePin):
-    def __init__(self, parent, data_type, name = "Output Pin"):
-        super(InputNodePin, self).__init__(parent, parent, data_type, name)
+    def __init__(self, parent, data_type, pin_id, name = "Output Pin"):
+        super(InputNodePin, self).__init__(parent, parent, data_type, pin_id, name)
         self.pin_rect = QRect(5,5,10,10)
         self.connection_point = QPoint(10, 10)
         self.pin_type = "input"
         self.label.hide()
+        self.setToolTip("This is an Input Node")
 
 
-        self.default = QLineEdit(self)
-        self.default.move(QPoint(20,0))
+        # if data_type.has_widget:
+        #     self.default = data_type.widget(self)
+        #     self.default.move(QPoint(20,0))
 
 
 class OutputNodePin(NodePin):
-    def __init__(self, parent, data_type, name = "Output Pin"):
-        super(OutputNodePin, self).__init__(parent, parent, data_type, name)
+    def __init__(self, parent, data_type, pin_id, name = "Output Pin"):
+        super(OutputNodePin, self).__init__(parent, parent, data_type, pin_id, name)
         self.pin_rect = QRect(85, 5, 10, 10)
         self.connection_point = QPoint(90, 10)
         self.label.move(5, 5)
@@ -414,9 +590,9 @@ class OutputNodePin(NodePin):
 
 
 class Connection(QObject):
-    def __init__(self, data_type):
+    def __init__(self, data_type, unique_id):
         super(Connection, self).__init__()
-
+        self.unique_id = unique_id
         self.start_point = QPoint(0,0)
         self.end_point = QPoint(0,0)
         self.color = QColor(203,212,194)
@@ -425,7 +601,7 @@ class Connection(QObject):
         self.end_pin = None
 
         self.data_type = data_type
-        self.color = data_type[1]
+        self.color = data_type.color
 
     def set_start_point(self, qpoint):
         self.start_point = qpoint
@@ -442,6 +618,7 @@ class Connection(QObject):
     def set_end_pin(self, pin):
         self.end_pin = pin
         self.end_pin.connection = self
+        self.end_point = pin.get_connection_location()
         self.end_pin.onMoved.connect(self.update_end)
 
         if pin.pin_type == "output":
@@ -451,6 +628,7 @@ class Connection(QObject):
     def set_start_pin(self, pin):
         self.start_pin = pin
         self.start_pin.connection = self
+        self.start_point = pin.get_connection_location()
         self.start_pin.onMoved.connect(self.update_start)
 
     def swap_pins(self):
@@ -461,26 +639,51 @@ class Connection(QObject):
         self.set_start_pin(self.end_pin)
         self.set_end_pin(temp)
 
+    def serialize(self):
+        data = dict(
+            start_node = self.start_pin.node.unique_id,
+            end_node=self.end_pin.node.unique_id,
+            start_pin = self.start_pin.pin_id,
+            end_pin=self.end_pin.pin_id,
+            data_type=self.data_type.__class__.__name__,
+            unique_id = self.unique_id
+        )
+        return data
+
 
 class NodeEditorContextMenu(QMenu):
-    def __init__(self, node_editor, pos):
+    def __init__(self, node_editor, pos, node_pos):
         super(NodeEditorContextMenu, self).__init__(node_editor)
         self.node_editor = node_editor
         self.node_menu = self.addMenu("New Node")
         self.input_menu = self.node_menu.addMenu("Input")
-        self.input_menu.addAction("Read Frames")
-        self.input_menu.addAction("Movie Colorimetric")
+        self.a_read_frame = self.input_menu.addAction("Read Frames")
+        self.a_movie_colormetrics = self.input_menu.addAction("Movie Colorimetric")
+
         self.input_menu.addAction("TimeRange Colorimetric")
 
+        self.a_scalar = self.input_menu.addAction("Scalar")
+        self.a_vector2 = self.input_menu.addAction("Vector2D")
         self.computation_menu = self.node_menu.addMenu("Computation")
-        self.computation_menu.addAction("Mean")
-        self.computation_menu.addAction("Sum")
-        self.computation_menu.addAction("Resize")
+        self.node_pos = node_pos
+
+        self.a_sum = self.computation_menu.addAction("Sum")
+        self.a_subtraction = self.computation_menu.addAction("Subtraction")
+        self.a_multiply = self.computation_menu.addAction("Multiplication")
+        self.a_division = self.computation_menu.addAction("Division")
+        self.computation_menu.addSeparator()
+
+        self.a_resize = self.computation_menu.addAction("Resize")
+        self.a_mean = self.computation_menu.addAction("Mean")
+        self.a_normalization = self.computation_menu.addAction("Normalization")
+
+        self.a_color2img = self.computation_menu.addAction("Color2Image")
+
 
         self.vis_menu = self.node_menu.addMenu("Visualization")
         self.a_show_img = self.vis_menu.addAction("Show Image")
-        self.a_show_img.triggered.connect(partial(self.node_editor.create_node, OperationShowImage()))
-        self.vis_menu.addAction("Bar Plot")
+
+        self.a_bar = self.vis_menu.addAction("Bar Plot")
         self.vis_menu.addAction("Color Histogram")
         self.vis_menu.addAction("Image Cluster")
 
@@ -490,8 +693,34 @@ class NodeEditorContextMenu(QMenu):
         self.action_compile = self.addAction("Compile")
         self.action_run = self.addAction("Run")
         self.node_editor = node_editor
+        self.action_save = self.addAction("Save Script")
+        self.action_load = self.addAction("Load Script")
+
+        if len(node_editor.selected_nodes) > 0:
+            self.a_delete = self.addAction("Delete Nodes")
+            self.a_delete.triggered.connect(partial(self.node_editor.remove_nodes, self.node_editor.selected_nodes))
         self.action_compile.triggered.connect(self.node_editor.compile)
         self.action_run.triggered.connect(self.node_editor.run_script)
+        self.action_save.triggered.connect(partial(self.node_editor.store_script, "script.vis"))
+        self.action_load.triggered.connect(partial(self.node_editor.load_script, "script.vis"))
+        self.a_read_frame.triggered.connect(partial(self.node_editor.create_node, ImageReader(), self.node_pos ))
+
+        self.a_scalar.triggered.connect(partial(self.node_editor.create_node, OperationScalar(), self.node_pos ))
+        self.a_vector2.triggered.connect(partial(self.node_editor.create_node, OperationVector2(), self.node_pos ))
+        # Action Binding
+        # Computation
+        self.a_color2img.triggered.connect(partial(self.node_editor.create_node, OperationColor2Image(), self.node_pos ))
+        self.a_sum.triggered.connect(partial(self.node_editor.create_node, OperationAdd(), self.node_pos ))
+        self.a_subtraction.triggered.connect(partial(self.node_editor.create_node, OperationSubtract(), self.node_pos ))
+        self.a_multiply.triggered.connect(partial(self.node_editor.create_node, OperationMultiply(), self.node_pos ))
+        self.a_division.triggered.connect(partial(self.node_editor.create_node, OperationDivision(), self.node_pos ))
+        self.a_mean.triggered.connect(partial(self.node_editor.create_node, OperationMean(), self.node_pos ))
+        self.a_normalization.triggered.connect(partial(self.node_editor.create_node, OperationNormalize(), self.node_pos))
+        # Visualization
+        self.a_show_img.triggered.connect(partial(self.node_editor.create_node, OperationShowImage(), self.node_pos ))
+        self.a_bar.triggered.connect(partial(self.node_editor.create_node, OperationBarPlot(), self.node_pos ))
+
+
 
         self.popup(pos)
 
@@ -502,7 +731,6 @@ class PinContextMenu(QMenu):
         self.action_break = self.addAction("Break Connection")
         self.node_editor = node_editor
         self.pin = pin
-
 
         self.action_break.triggered.connect(self.pin.break_connection)
 
