@@ -189,11 +189,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.time_bar.show()
 
         if not self.time_bar.isVisible():
-            print "Timebar Shown"
             self.time_bar.show()
 
         self.time_bar.move(self.relative_corner.x(), self.time_bar.y())
         self.time_bar.setFixedWidth(self.width() - self.controls_width)
+
 
         self.time_bar.update()
         # self.time_bar.show()
@@ -206,7 +206,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # # self.time_bar.setFixedSize(self.duration / self.scale + self.controls_width, self.time_bar_height)
         # self.time_bar.setFixedSize(self.width() - self.controls_width, self.time_bar_height)
         # self.time_bar.raise_()
-        self.update_time_bar()
+
 
         h = self.scrubber_min_h
         if self.scrubber_min_h < self.frame_Bars.height():
@@ -233,6 +233,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width, loc_y + self.bar_height)
         self.frame_Controls.setFixedSize(self.controls_width, self.frame_Bars.height())
+
+
+
 
     def on_loaded(self, project):
         self.clear()
@@ -875,9 +878,9 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.curr_pos = self.pos()
 
         else:
-            print "Scrubber Right"
+
             self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
-            print self.mapToParent(QMouseEvent.pos())
+
 
         # if QMouseEvent.buttons() & Qt.RightButton:
         #     self.timeline.mousePressEvent(QMouseEvent)

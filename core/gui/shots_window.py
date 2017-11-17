@@ -64,7 +64,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.annotation_visible = True
 
         self.font = QFont("Consolas")
-        self.font.setPixelSize(20)
+        self.font_size = 48
+        self.font_size_segments = 120
+        self.font.setPointSize(self.font_size)
         self.color = QColor(255,255,255)
 
         self.key_event_handler = key_event_handler
@@ -85,9 +87,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.segmentation_captions = []
         self.lines = []
         self.border = None
-        self.x_offset = 300
-        self.y_offset = 300
-        self.border_width = 4000
+        self.x_offset = 100
+        self.y_offset = 200
+        self.border_width = 1500
+        self.bottom_height = 1000
 
         self.n_per_row = 10
 
@@ -107,11 +110,14 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def add_images(self, screenshots, n_per_row = 4):
         n_per_row = self.n_per_row
         font = QFont("Consolas")
-        font.setPointSize(160)
 
         border_width = self.border_width
         x = border_width
         y = border_width
+
+        if len(screenshots)> 0:
+            self.x_offset = screenshots[0].img_movie.shape[1] / 3
+
 
         width = 0
         height = 0
@@ -119,6 +125,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         n_per_segment_counter = 0
         #TODO image might be NONE
         for i, screenshot in enumerate(screenshots):
+            # font.setPointSize(np.clip(self.font_size * self.transform().m11(), 5, None))
+            font.setPointSize(self.font_size)
+
             if screenshot.annotation_is_visible and screenshot.img_blend is not None:
                 image = screenshot.img_blend
             else:
@@ -141,7 +150,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             caption = self.create_caption_text(screenshot)
             item_caption.setPlainText(caption)
             item_caption.setDefaultTextColor(self.color)
-            item_caption.setFont(self.font)
+            item_caption.setFont(font)
 
             self.scene.addItem(item_caption)
             self.captions.append(item_caption)
@@ -158,15 +167,18 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.images.append(item_image)
             self.scene.addItem(item_image)
 
+            # font.setPointSize(np.clip(self.font_size_segments * self.transform().m11(), 5, None))
+            font.setPointSize(self.font_size_segments)
+
             if i == len(screenshots) - 1:
                 segm_caption = self.scene.addText("Scene ID: " + str(screenshot.scene_id), font)
                 segm_caption.setDefaultTextColor(QColor(255, 255, 255))
-                segm_caption.setPos(QtCore.QPointF(border_width/2, y))
+                segm_caption.setPos(QtCore.QPointF(border_width / 3, y))
                 self.segmentation_captions.append(segm_caption)
 
                 segm_counter = self.scene.addText(" n-Shots: " + str(n_per_segment_counter), font)
                 segm_counter.setDefaultTextColor(QColor(255, 255, 255))
-                segm_counter.setPos(QtCore.QPointF(border_width / 2, y + 200))
+                segm_counter.setPos(QtCore.QPointF(border_width / 3, y + 200))
                 self.segmentation_captions.append(segm_counter)
                 n_per_segment_counter = 0
 
@@ -176,12 +188,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if screenshot.scene_id != screenshots[i+1].scene_id:
                 segm_caption = self.scene.addText("Scene ID: " + str(screenshot.scene_id), font)
                 segm_caption.setDefaultTextColor(QColor(255, 255, 255))
-                segm_caption.setPos(QtCore.QPointF(border_width/2, y))
+                segm_caption.setPos(QtCore.QPointF(border_width/3, y))
                 self.segmentation_captions.append(segm_caption)
 
                 segm_counter = self.scene.addText(" n-Shots: " + str(n_per_segment_counter), font)
                 segm_counter.setDefaultTextColor(QColor(255, 255, 255))
-                segm_counter.setPos(QtCore.QPointF(border_width / 2, y + 200))
+                segm_counter.setPos(QtCore.QPointF(border_width / 3, y + 200))
                 self.segmentation_captions.append(segm_counter)
                 n_per_segment_counter = 0
 
@@ -215,9 +227,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         pen.setColor(QtGui.QColor(10, 10, 10))
         pen.setWidth(5)
 
-        rect = self.scene.addRect(QtCore.QRectF(0, 0, n_per_row * (self.x_offset + width) + 2*border_width, y + self.y_offset + 2* border_width), pen)
+        rect = self.scene.addRect(QtCore.QRectF(0, 0, n_per_row * (self.x_offset + width) + 2*border_width, y + self.y_offset + 2* self.bottom_height), pen)
         self.border = rect
-        self.scene.setSceneRect(QtCore.QRectF(0, 0, n_per_row * (self.x_offset + width) + 2*border_width, y + self.y_offset + 2* border_width))
+        self.scene.setSceneRect(QtCore.QRectF(0, 0, n_per_row * (self.x_offset + width) + 2*border_width, y + self.y_offset + 2* self.bottom_height))
 
     def add_image(self, screenshot):
 
@@ -272,7 +284,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 items.append(i.screenshot_obj)
             self.main_window.project.set_selected(self, items)
 
-
     def selected_image(self):
         return self.selected_images
 
@@ -295,6 +306,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.center_images()
             self.curr_scale = 1.0
 
+        self.update_caption()
     def center_images(self):
         self.fitInView(self.sceneRect(), QtCore.Qt.KeepAspectRatio)
 
@@ -313,23 +325,18 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
                 old_pos = self.mapToScene(event.pos())
                 if self.main_window.is_darwin:
-                    h_factor = 1.02
-                    l_factor = 0.98
+                    h_factor = 1.1
+                    l_factor = 0.9
                 else:
                     h_factor = 1.1
                     l_factor = 0.9
 
                 if event.angleDelta().y() > 0.0:
-
                     self.scale(h_factor,h_factor)
                     self.curr_scale *= h_factor
-                    pixel_size = np.clip(int(self.font.pixelSize() - 1), 8, 64)
-                    self.font.setPixelSize(pixel_size)
                     self.update_caption()
 
                 else:
-                    pixel_size = np.clip(int(self.font.pixelSize() + 1), 8, 64)
-                    self.font.setPixelSize(pixel_size)
                     self.curr_scale *= l_factor
                     self.scale(l_factor, l_factor)
                     self.update_caption()
@@ -367,6 +374,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.select_image(sel, dispatch=False)
 
     def update_caption(self):
+        return
+        point_size = np.clip(self.font_size * self.transform().m11(),5,None)
+        self.font.setPointSize(point_size)
+
         s = self.main_window.project.get_active_screenshots()
         for i, c in enumerate(self.captions):
 
@@ -379,7 +390,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             s_id = ""
         else:
             s_id = screenshot.scene_id
-        caption = str(screenshot.title) + "\t" + str(s_id) + "\t" + str(screenshot.movie_timestamp)
+        # caption = str(screenshot.title) + "\t" + str(s_id) + "\t" + str(screenshot.movie_timestamp)
+        caption = str(s_id) + "\t" + str(screenshot.shot_id_segm)
         return caption
 
     def paintEvent(self, QPaintEvent):
@@ -387,7 +399,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         #Removing all Selection Frames
         self.clear_selection()
-
         # Painting the Selection Frames
         if len(self.selected_images) > 0:
             for i in self.selected_images:

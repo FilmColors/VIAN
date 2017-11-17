@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>704</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -89,6 +89,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
+    <addaction name="actionWelcome"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
@@ -381,6 +382,11 @@
    </property>
    <property name="shortcut">
     <string>-</string>
+   </property>
+  </action>
+  <action name="actionWelcome">
+   <property name="text">
+    <string>Welcome</string>
    </property>
   </action>
  </widget>

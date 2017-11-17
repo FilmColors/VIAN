@@ -30,7 +30,6 @@ class DialogScreenshotExporter(EDialogWidget):
 
         for i, cb in enumerate(self.naming_cbs):
             for s in ScreenshotNamingConventionOptions:
-                print s
                 cb.addItem(s.name)
 
 

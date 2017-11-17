@@ -34,6 +34,8 @@ class UserSettings():
         self.COPRUS_PORT = 5006
         self.COPRUS_PW = "CorpusPassword"
 
+        self.SHOW_WELCOME = True
+
         self.OPENCV_PER_FRAME = False
 
         self.SCREENSHOTS_EXPORT_NAMING = self.SCREENSHOTS_EXPORT_NAMING_DEFAULT
@@ -79,10 +81,14 @@ class UserSettings():
             json.dump(dict, f)
 
     def load(self):
-        with open(self.store_path) as f:
-            dict = json.load(f)
-            for attr, value in dict.iteritems():
-                setattr(self,attr, value)
+        try:
+            with open(self.store_path) as f:
+                dict = json.load(f)
+                for attr, value in dict.iteritems():
+                    if not attr == "PALETTES" and not attr=="MAIN_FONT":
+                        setattr(self, attr, value)
+        except IOError as e:
+            print "No Settings found", e.message
 
     def load_last(self):
         files = glob.glob(os.path.abspath(self.DIR_USER + "settings.json"))

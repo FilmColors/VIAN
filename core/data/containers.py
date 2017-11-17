@@ -153,6 +153,7 @@ class ElanExtensionProject(IHasName):
             #     s.update_scene_id(self.segmentation[0])
             for s in self.screenshots:
                 s.update_scene_id(self.segmentation[index])
+                s.update_scene_id(self.segmentation[index])
 
 
         self.dispatch_changed()
@@ -220,7 +221,7 @@ class ElanExtensionProject(IHasName):
         if screenshot in self.screenshots:
             for grp in self.screenshot_groups:
                 grp.remove_screenshots(screenshot)
-                print grp.get_name()
+
 
             self.screenshots.remove(screenshot)
             self.sort_screenshots()
@@ -601,6 +602,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                     break
 
         self.update_segment_ids()
+        self.project.sort_screenshots()
 
 
         self.project.undo_manager.to_undo((self.add_segment, [segment]), (self.remove_segment, [segment]))
@@ -608,6 +610,9 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
     def remove_segment(self, segment):
         self.segments.remove(segment)
+
+        self.update_segment_ids()
+        self.project.sort_screenshots()
         self.project.undo_manager.to_undo((self.remove_segment, [segment]), (self.add_segment, [segment]))
         self.dispatch_on_changed()
 

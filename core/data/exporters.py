@@ -62,14 +62,13 @@ class SegmentationExporter(IConcurrentJob):
 
 def build_file_name(naming, screenshot, movie_descriptor):
     file_name = "/"
+    print screenshot.scene_id
 
     for i, name in enumerate(naming):
         if name is not ScreenshotNamingConventionOptions.empty.name:
             value = get_enum_value(ScreenshotNamingConventionOptions, name)
             object_type = value[0]
             object_attr = value[1]
-
-
 
             if object_type == "Screenshot":
                 if object_attr == "screenshot_group":

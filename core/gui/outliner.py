@@ -423,20 +423,19 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
     def update_item(self):
         super(SegmentationOutlinerItem, self).update_item()
         self.setText(0, self.segmentation.get_name())
-        print self.segmentation.project.main_segmentation_index, self.segmentation.timeline_visibility
         self.setIcon(0, QIcon())
 
         if self.segmentation.project.segmentation[self.segmentation.project.main_segmentation_index] is self.segmentation:
             self.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
-            print "Is Main Segmentation"
+
 
         elif self.segmentation.timeline_visibility is False:
             self.setIcon(1 ,QtGui.QIcon("qt_ui/icons/icon_hidden.png"))
-            print "HIDDEN",
+
 
         else:
             self.setIcon(0, QIcon())
-            print "NOTHING"
+
 
 
 

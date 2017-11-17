@@ -16,6 +16,7 @@ from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDial
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
+from core.gui.Dialogs.welcome_dialog import WelcomeDialog
 from core.gui.Dialogs.progressbar_popup import DialogProgress
 from core.gui.analyses_widget import AnalysesWidget
 from core.gui.concurrent_tasks import ConcurrentTaskDock
@@ -71,6 +72,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuWindows.addMenu(self.extension_list.get_plugin_menu(self.menuWindows))
 
         self.settings = UserSettings()
+        self.settings.load()
 
         self.master_file = MasterFile(self.settings)
         self.master_file.load()
@@ -225,6 +227,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionAdd_Segment.triggered.connect(self.on_new_segment)
 
         self.actionAbout.triggered.connect(self.on_about)
+        self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
 
@@ -286,7 +289,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.switch_perspective(Perspective.Annotation.name)
 
         # self.load_project("projects/ratatouille/Ratatouille.eext")
-        self.show()
+
+
+
+        self.showMaximized()
+        if self.settings.SHOW_WELCOME:
+           self.show_welcome()
+
+
 
         # if self.is_darwin:
         #     self.annotation_toolbar.raise_()
@@ -297,6 +307,10 @@ class MainWindow(QtWidgets.QMainWindow):
         print self.player.get_fps()
 
     #region WidgetCreation
+
+    def show_welcome(self):
+        welcome_dialog = WelcomeDialog(self, self)
+        welcome_dialog.raise_()
 
     def start_update_timer(self):
         self.time = self.player.get_media_time()
