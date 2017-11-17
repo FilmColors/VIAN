@@ -1,2 +1,3 @@
 cd "${0%/*}"
-conda env create -f mara/env_osx.yml
+ls
+conda env create -f VIAN/install/env/env_osx.yml

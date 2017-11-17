@@ -1,4 +1,4 @@
-name: mara_osx
+name: vian_osx
 channels:
 - menpo
 - conda-forge

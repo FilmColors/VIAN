@@ -1,4 +1,4 @@
-source activate mara_osx
+source activate vian_osx
 cd "${0%/*}"
-cd mara
+cd VIAN
 python main.py
