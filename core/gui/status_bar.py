@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit
+from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit, QSpacerItem
 from PyQt5.QtGui import QColor
 class StatusBar(QtWidgets.QWidget):
     def __init__(self,main_window,server):
@@ -10,19 +10,30 @@ class StatusBar(QtWidgets.QWidget):
         self.server = server
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
+
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred,QtWidgets.QSizePolicy.Preferred)
+
+        self.label_selection = QtWidgets.QLabel(self)
+        self.label_selection.setText("Selection: ")
+        self.label_selection_length = QtWidgets.QLabel("0 Items", self)
+        self.layout.addWidget(self.label_selection)
+        self.layout.addWidget(self.label_selection_length)
+        self.layout.addItem(QSpacerItem(20,20))
 
         self.label_server = QtWidgets.QLabel(self)
         self.label_server.setText("ELAN: ")
         self.lbl_connection_status = QtWidgets.QLabel(self)
         self.layout.addWidget(self.label_server)
         self.layout.addWidget(self.lbl_connection_status)
+        self.layout.addItem(QSpacerItem(20, 20))
 
         self.label_corpus = QtWidgets.QLabel(self)
         self.label_corpus.setText("Corpus: ")
         self.lbl_corpus_status = QtWidgets.QLabel(self)
         self.layout.addWidget(self.label_corpus)
         self.layout.addWidget(self.lbl_corpus_status)
+        self.layout.addItem(QSpacerItem(20, 20))
+
 
 
         self.update_timer = QtCore.QTimer(self)
@@ -54,6 +65,8 @@ class StatusBar(QtWidgets.QWidget):
             self.lbl_corpus_status.setText("Offline")
             self.lbl_corpus_status.setStyleSheet("QLabel {color : red; }")
 
+    def set_selection(self, selection):
+        self.label_selection_length.setText(str(len(selection)) + " Items")
 class OutputLine(QtWidgets.QWidget):
     def __init__(self,main_window):
         super(OutputLine, self).__init__(main_window)
@@ -132,6 +145,7 @@ class StatusProgressBar(QtWidgets.QWidget):
     def on_finished(self):
         self.progress_bar.setValue(0)
         self.hide()
+
 
 class MessageLogWindow(QMainWindow):
     def __init__(self, parent):

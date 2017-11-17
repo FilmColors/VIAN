@@ -2,6 +2,8 @@ from PyQt5.Qt import QApplication
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QScreen, QColor, QPainter, QPen
 from PyQt5.QtWidgets import *
+from PyQt5 import uic
+import os
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -13,6 +15,10 @@ class EDockWidget(QDockWidget):
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
         self.limit_size = limit_size
 
+        #NEWCODE
+        self.inner = QMainWindow(None)
+        self.init = True
+        self.setWidget(self.inner)
 
         if QScreen.physicalDotsPerInch(QApplication.screens()[0]) > 300:
             self.max_width = 800
@@ -37,6 +43,13 @@ class EDockWidget(QDockWidget):
                 self.main_window.update_player_size()
                 self.main_window.update_overlay()
 
+    def setWidget(self, QWidget):
+        # NEWCODE
+        if self.init:
+            super(EDockWidget, self).setWidget(QWidget)
+            self.init = False
+        else:
+            self.inner.setCentralWidget(QWidget)
 
     def dockLocationChanged(self, Qt_DockWidgetArea):
         super(EDockWidget, self).dockLocationChanged(Qt_DockWidgetArea)

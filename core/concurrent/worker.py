@@ -58,3 +58,31 @@ class Worker(QRunnable):
     def on_progress(self, float_value):
         self.signals.sign_progress.emit((self.task_id, float_value))
 
+class ProjectModifierSignals(QObject):
+    sign_progress = pyqtSignal(int)
+
+class ProjectModifier(QRunnable):
+    def __init__(self, function, worker_result, main_window, project, progress_popup = None):
+        super(ProjectModifier, self).__init__()
+        self.project = project
+        self.main_window = main_window
+        self.function = function
+        self.worker_result = worker_result
+
+        self.signals = ProjectModifierSignals()
+
+        if progress_popup:
+            self.signals.sign_progress.connect(progress_popup.on_progress, Qt.AutoConnection)
+
+    @pyqtSlot()
+    def run(self):
+        try:
+           self.function(self.project, self.worker_result, self.on_progress)
+
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            print exctype, value, traceback.format_exc()
+
+    def on_progress(self, int_value):
+        self.signals.sign_progress.emit(int_value)

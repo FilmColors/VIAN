@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QFileDialog, qApp, QLabel, QMessageBox
 
 # from annotation_viewer import AnnotationViewer
-from core.concurrent.worker import Worker
+from core.concurrent.worker import Worker, ProjectModifier
 from core.concurrent.worker_functions import *
 from core.data.exporters import SegmentationExporter
 from core.data.importers import ELANProjectImporter
@@ -16,6 +16,7 @@ from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDial
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
+from core.gui.Dialogs.progressbar_popup import DialogProgress
 from core.gui.analyses_widget import AnalysesWidget
 from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.history import HistoryView
@@ -87,6 +88,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Central Widgets
         self.video_player = None
         self.screenshots_manager = None
+
+        self.allow_dispatch_on_change = True
 
         self.thread_pool = QThreadPool()
 
@@ -663,7 +666,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_job_concurrent_result(self, result):
         res = result[0]
         job = result[1]
+        self.allow_dispatch_on_change = False
+
+        # progress = None
+        # if job.show_modify_progress:
+        #     progress = DialogProgress(self, "Modifying Project")
+        #
+        # worker = ProjectModifier(job.modify_project, res, self, self.project, progress)
+        # self.thread_pool.start(worker)
         job.modify_project(project=self.project,result=res)
+
+        self.allow_dispatch_on_change = True
+        self.dispatch_on_changed()
+        # progress.deleteLater()
 
     def on_key_annotation(self):
         selected = self.project.get_selected([ANNOTATION])
@@ -955,6 +970,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_timestep_update(-1)
 
     def dispatch_on_changed(self, receiver = None, item = None):
+        if not self.allow_dispatch_on_change:
+            return
+
         if receiver is not None:
             for r in receiver:
                 r.on_changed(self.project, item)
@@ -969,6 +987,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.outliner.on_changed(self.project)
 
     def dispatch_on_selected(self, sender, selected):
+        self.elan_status.set_selection(selected)
         for o in self.i_project_notify_reciever:
                 o.on_selected(sender, selected)
 

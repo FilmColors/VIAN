@@ -133,15 +133,18 @@ class LoadScreenshotsJob(IConcurrentJob):
 
         return [screenshots, annotations]
 
-    def modify_project(self, project, result):
+    def modify_project(self, project, result, sign_progress = None):
         images = result[0]
         annotations = result[1]
         for i, img in enumerate(images):
+            # sign_progress(int(float(i) / len(images) * 100))
             if img is None:
                 break
             project.screenshots[i].img_movie = img.astype(np.uint8)
             project.screenshots[i].img_blend = annotations[i]
             project.dispatch_changed()
+
+        # sign_progress(100)
 
 
 class CreateScreenshotJob(IConcurrentJob):
@@ -172,7 +175,7 @@ class CreateScreenshotJob(IConcurrentJob):
 
         return [frame, frame_annotated, frame_pos, time, annotation_ids]
 
-    def modify_project(self, project, result):
+    def modify_project(self, project, result, sign_progress = None):
         frame = result[0]
         frame_annotated = result[1]
         frame_pos = result[2]

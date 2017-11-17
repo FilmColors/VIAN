@@ -75,11 +75,9 @@ class ILockable():
 
     def lock(self):
         self.locked = True
-        self.dispatch_on_changed()
 
     def unlock(self):
         self.locked = False
-        self.dispatch_on_changed()
 
     def is_locked(self):
         return self.locked
@@ -148,7 +146,8 @@ class IAnalysisJob():
 
 
 class IConcurrentJob():
-    def __init__(self, args):
+    def __init__(self, args, show_modify_progress= False):
+        self.show_modify_progress = show_modify_progress
         self.args = args
         self.task_id = randint(10000000, 99999999)
 
@@ -158,6 +157,6 @@ class IConcurrentJob():
     def run_concurrent(self, args, sign_progress):
         print "run_concurrent not implemented by", self
 
-    def modify_project(self, project, result):
+    def modify_project(self, project, result, sign_progress = None):
         print "modify_project not implemented by", self
 

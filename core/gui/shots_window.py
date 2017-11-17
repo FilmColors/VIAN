@@ -5,7 +5,7 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QDockWidget, QGraphicsTextItem, QAction
+from PyQt5.QtWidgets import *
 
 from core.data.computation import *
 from core.data.containers import Screenshot
@@ -18,13 +18,11 @@ from core.gui.ewidgetbase import EDockWidget, EToolBar
 class ScreenshotsToolbar(EToolBar):
     def __init__(self, main_window, screenshot_manager):
         super(ScreenshotsToolbar, self).__init__(main_window, "Screenshots Toolbar")
-        # path = os.path.abspath("qt_ui/ScreenshotsToolbar.ui")
-        # uic.loadUi(path, self)
         self.setWindowTitle("Screenshots")
 
         self.manager = screenshot_manager
-        self.action_export = self.addAction("Export")
-        self.toggle_annotation = self.addAction("Toggle Annotations")
+        self.action_export = self.addAction(create_icon("qt_ui/icons/icon_export_screenshot.png"), "")
+        self.toggle_annotation = self.addAction(create_icon("qt_ui/icons/icon_toggle_annotations.png"), "")
         self.action_export.triggered.connect(self.on_export)
         self.toggle_annotation.triggered.connect(self.on_toggle_annotations)
         self.show()
@@ -36,10 +34,15 @@ class ScreenshotsToolbar(EToolBar):
     def on_toggle_annotations(self):
         self.manager.toggle_annotations()
 
+
+
 class ScreenshotsManagerDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Screenshot Manager")
+
+        # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
+
 
     def set_manager(self, screenshot_manager):
         self.setWidget(screenshot_manager)
@@ -86,6 +89,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.y_offset = 300
         self.border_width = 4000
 
+        self.n_per_row = 10
+
         self.n_images = 0
 
         self.rubberBandChanged.connect(self.rubber_band_selection)
@@ -100,6 +105,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.update_manager(center = False)
 
     def add_images(self, screenshots, n_per_row = 4):
+        n_per_row = self.n_per_row
         font = QFont("Consolas")
         font.setPointSize(160)
 

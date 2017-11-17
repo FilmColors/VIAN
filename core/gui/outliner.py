@@ -3,7 +3,7 @@ from random import randint
 from PyQt5 import QtCore, uic, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit, QMainWindow
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon
 
 from core.data.computation import ms_to_string
 from core.data.interfaces import IProjectChangeNotify
@@ -361,6 +361,7 @@ class AbstractOutlinerItem(QTreeWidgetItem):
 
 
 
+
     def get_children(self, list):
         if self.childCount() > 0:
             for i in range(self.childCount()):
@@ -422,6 +423,21 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
     def update_item(self):
         super(SegmentationOutlinerItem, self).update_item()
         self.setText(0, self.segmentation.get_name())
+        print self.segmentation.project.main_segmentation_index, self.segmentation.timeline_visibility
+        self.setIcon(0, QIcon())
+
+        if self.segmentation.project.segmentation[self.segmentation.project.main_segmentation_index] is self.segmentation:
+            self.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
+            print "Is Main Segmentation"
+
+        elif self.segmentation.timeline_visibility is False:
+            self.setIcon(1 ,QtGui.QIcon("qt_ui/icons/icon_hidden.png"))
+            print "HIDDEN",
+
+        else:
+            self.setIcon(0, QIcon())
+            print "NOTHING"
+
 
 
 class SegmentOutlinerItem(AbstractOutlinerItem):
@@ -471,8 +487,12 @@ class AnnotationLayerOutlinerItem(AbstractOutlinerItem):
         self.setText(0,  self.annotation_layer.get_name())
         self.setText(1, ms_to_string(self.annotation_layer.get_start()))
         self.setText(2, ms_to_string(self.annotation_layer.get_end()))
+
         if self.annotation_layer.timeline_visibility is False:
-            self.setIcon(0 ,QtGui.QIcon("qt_ui/icons/icon_hidden.png"))
+            self.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_hidden.png"))
+        else:
+            self.setIcon(0, QIcon())
+
 
 
 class AnnotationOutlinerItem(AbstractOutlinerItem):
@@ -503,6 +523,7 @@ class ScreenshotRootOutlinerItem(AbstractOutlinerItem):
         super(ScreenshotRootOutlinerItem, self).__init__(parent, index)
         self.setText(0, "Screenshots")
 
+
 class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
     def __init__(self, parent, index, screenshot_group):
         super(ScreenshotGroupOutlinerItem, self).__init__(parent, index)
@@ -519,6 +540,7 @@ class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
 
     def get_name(self):
         return self.item.get_name()
+
 
 class ScreenshotOutlinerItem(AbstractOutlinerItem):
     def __init__(self, parent, index, screenshot):

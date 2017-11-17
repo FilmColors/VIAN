@@ -42,7 +42,6 @@ class SegmentationFetcher():
             print e.message
             return None
 
-
 class ScreenshotFetcher():
     def __init__(self, root_path):
         self.root_path = root_path.replace("\\", "/")

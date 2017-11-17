@@ -88,7 +88,7 @@ class AnalysesContent(QWidget, IProjectChangeNotify):
             self.listWidget_Sources.addItem(SourceItemWidget(self.listWidget_Sources, t))
 
     def project(self):
-        return self.parent().project()
+        return self.parent().parent().project()
 
 
 class AnalysesItemWidget(QListWidgetItem):

@@ -89,7 +89,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         dummy = None
 
     def project(self):
-        return self.parent().project()
+        return self.parent().parent().project()
 
     def scroll_h(self):
         value= int(self.scrollArea.horizontalScrollBar().value())
@@ -192,10 +192,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             print "Timebar Shown"
             self.time_bar.show()
 
-        self.time_bar.move(self.relative_corner.x(), 0)
-
-        # self.time_bar.move(0,0)
-        # self.time_bar.resize(self.width() - self.controls_width, self.time_bar_height)
+        self.time_bar.move(self.relative_corner.x(), self.time_bar.y())
         self.time_bar.setFixedWidth(self.width() - self.controls_width)
 
         self.time_bar.update()
@@ -205,11 +202,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.time_scrubber.move(self.curr_movie_time, 0)
         value = self.scrollArea.verticalScrollBar().value()
 
-        self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
-        # self.time_bar.setFixedSize(self.duration / self.scale + self.controls_width, self.time_bar_height)
-        self.time_bar.setFixedSize(self.width() - self.controls_width, self.time_bar_height)
-        self.time_bar.raise_()
-
+        # self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
+        # # self.time_bar.setFixedSize(self.duration / self.scale + self.controls_width, self.time_bar_height)
+        # self.time_bar.setFixedSize(self.width() - self.controls_width, self.time_bar_height)
+        # self.time_bar.raise_()
+        self.update_time_bar()
 
         h = self.scrubber_min_h
         if self.scrubber_min_h < self.frame_Bars.height():
@@ -268,7 +265,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for grp in project.screenshot_groups:
             self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
-        self.update_time_bar()
+        # self.update_time_bar()
         self.update_ui()
 
     def on_selected(self, sender, selected):

@@ -137,6 +137,7 @@ class ElanExtensionProject(IHasName):
 
     def set_main_segmentation(self, segm):
         if len(self.segmentation) > 1:
+            self.segmentation[self.main_segmentation_index].is_main_segmentation = False
             self.undo_manager.to_undo((self.set_main_segmentation, [self.get_main_segmentation()]),
                                       (self.set_main_segmentation, [segm]))
 
@@ -146,6 +147,7 @@ class ElanExtensionProject(IHasName):
             # self.segmentation.extend(t)
             index = self.segmentation.index(segm)
             self.main_segmentation_index = index
+            self.segmentation[index].is_main_segmentation = True
 
             # for s in self.screenshots:
             #     s.update_scene_id(self.segmentation[0])
@@ -554,6 +556,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.segments = segments
         self.timeline_visibility = True
         self.notes = ""
+        self.is_main_segmentation = False
         for s in self.segments:
             s.segmentation = self
 
@@ -678,11 +681,13 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         ILockable.lock(self)
         for s in self.segments:
             s.lock()
+        self.dispatch_on_changed(item=self)
 
     def unlock(self):
         ILockable.unlock(self)
         for s in self.segments:
             s.unlock()
+        self.dispatch_on_changed(item=self)
 
     def set_timeline_visibility(self, visibility):
         self.timeline_visibility = visibility
@@ -1155,6 +1160,14 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 
     def get_type(self):
         return ANNOTATION_LAYER
+
+    def lock(self):
+        ILockable.lock(self)
+        self.dispatch_on_changed(item=self)
+
+    def unlock(self):
+        ILockable.unlock(self)
+        self.dispatch_on_changed(item=self)
 
     def set_timeline_visibility(self, visibility):
         self.timeline_visibility = visibility
