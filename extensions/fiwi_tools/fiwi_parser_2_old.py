@@ -26,7 +26,8 @@ from segmentation_fetcher import SegmentationFetcher
 #     def get_window(self):
 #         wnd = FIWIParserWindow(self.main_window)
 #         wnd.show()
-
+import re
+movie_formats = [".mov", ".mp4", ".mkv", ".m4v"]
 
 class FIWIParserWindow(QMainWindow):
     def __init__(self, parent):
@@ -131,6 +132,9 @@ class Movie():
 
 
 
+    def get_movie_path(self):
+        files = glob.glob(self.folder_path + "*")
+        print files
 
     def print_movie(self):
         print self.filemaker_ID
@@ -327,7 +331,6 @@ class FiwiFetcher():
 
         self.database_movies = result
         return folders
-
 
     def fetch_nomenclature_shots(self):
         print "FETCHING NOMENCLATURE"
@@ -886,6 +889,7 @@ class FiwiFetcher():
                 print e
 
         return to_convert
+
     def diff_export2database_shots(self):
         # folders = self.fetch_databse_movies()
         # m, dirs = self.fetch_exported(["\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank alt Export Einzelbilder\\FIWI\\SCR\\",
@@ -939,6 +943,56 @@ class FiwiFetcher():
             else:
                 print "NOT"
 
+    def fiwi_database_integrity(self, path="\\\\130.60.131.134\\fiwi_datenbank\\"):
+        self.load_movie_object("results/all_movies.pickle")
+
+        SCR_Folder = path + "SCR\\"
+        SEGM_Folder = path + "SEGM\\"
+        MOV_Folder = path + "MOV\\"
+
+        scr_movies_in = glob.glob(SCR_Folder + "*")
+        segm_movies_in = glob.glob(SEGM_Folder + "*")
+        mov_movies_in = glob.glob(MOV_Folder + "*")
+
+        scr_movies = []
+        segm_movies = []
+        mov_movies = []
+        for m in scr_movies_in:
+            scr_movies.append(m.replace(SCR_Folder, ""))
+
+        for m in segm_movies_in:
+            segm_movies.append(m.replace(SEGM_Folder, "").replace("_SEGM.txt", ""))
+            # print m.replace(SEGM_Folder, "").replace("_SEGM.txt", "")
+        for m in mov_movies_in:
+            mov_movies.append(m.replace(MOV_Folder, "").split(".")[0].replace("_MOV", ""))
+
+        # Missing in Segmentations
+        print "####Missing Segmentations in /SEGM/####"
+        for m in scr_movies:
+            if not m in segm_movies:
+                movie_object =  self.find_movies_by_id([m])
+                self.copy_segmentation(movie_object[0], SEGM_Folder + m + "_SEGM.txt")
+
+        print "\n####MISSING IN Studi/Filme/####"
+        for m in scr_movies:
+            if len(self.find_movies_by_id([m])) == 0:
+                print m
+        print "\n####MISSING Movies in /MOV/####"
+        for i, m in enumerate(scr_movies):
+            if m not in mov_movies:
+                if len(self.find_movies_by_id([m])) > 0:
+                    movie_object = self.find_movies_by_id([m])[0]
+                    if movie_object:
+                        movie_file = movie_object.get_movie_path()
+                        if movie_file:
+                            ext = movie_file.split(".").pop()
+                            print MOV_Folder + m + "_MOV." + ext
+                            shutil.copy2(movie_file, MOV_Folder + m + "_MOV." + ext)
+                            if i == 2:
+                                return
+
+
+
     # pickle.dump([shots_export, shots_database], f)
 
     def clear_database_dir(self, movie = Movie):
@@ -957,6 +1011,9 @@ class FiwiFetcher():
     def find_movies_by_id(self, id_list):
         result = []
         for idx in id_list:
+            if isinstance(idx, str):
+                idx = idx.split("_")
+                idx = [int(idx[0]),int(idx[1]),int(idx[2])]
             found = False
             for m in self.movie_objs:
                 if idx == m.filemaker_ID:
@@ -973,18 +1030,32 @@ class FiwiFetcher():
         for m in self.movie_objs:
             print m.filemaker_ID
 
+    def copy_movie(self, movie, path):
+        shutil.copy2(movie.movie_path, path)
+
     def store_segmentation(self, path, segmentation):
+
         try:
             with open(path, "wb") as segmentation_file:
                 if len(segmentation[1]) > 0:
                     segmentation_file.write("Sequence_No\tStart\tEnd\n")
+                    print "N-Segmentations:", len(segmentation[1])
+
                     for s in segmentation[1]:
-                        segmentation_file.write(str(s[0]) + "\t" + str(s[1]) + "\t" + str(s[2]) + "\n")
+                        a = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[0])))
+                        b = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[1])))
+                        c = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[2])))
+
+                        segmentation_file.write(a+ "\t" + b + "\t" + c + "\n")
 
                 else:
                     segmentation_file.write("None")
         except Exception as e:
-            print "Segmentation Export Failed", e.message
+            print "Segmentation Export Failed.", e.message
+
+    def copy_segmentation(self, movie, path):
+        movie_path, segmentations = ELANProjectImporter().elan_project_importer(movie.elan_path)
+        self.store_segmentation(path, segmentations[0])
 
     def store_shot(self, shot, shot_path):
         path = shot.path
@@ -1145,11 +1216,14 @@ if __name__ == '__main__':
     # id_list = [[272,1,1],[3460,1,1],[3558,1,1],[3557,1,1],[3561,1,1],[3562,1,1],[3564,1,1],[3589,1,1]]
     # id_list = [[3460, 1, 1]]
     fetcher = FiwiFetcher(source_dir)
-    fetcher.load_movie_object("results/all_movies.pickle")
+    fetcher.fiwi_database_integrity()
+    # fetcher.load_movie_object("results/all_movies.pickle")
     # fetcher.fetch_databse_movies()
     # fetcher.diff_list2movies(fetcher.database_movies)
     # fetcher.replace_wrong_ids("\\\\130.60.131.134\\fiwi_datenbank\\SCR\\")
     # fetcher.diff_export2database_shots()
+
+
 
 
     # result = fetcher.find_movies_by_id(id_list)

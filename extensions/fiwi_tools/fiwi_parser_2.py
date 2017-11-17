@@ -21,6 +21,7 @@ from core.gui.main_window import MainWindow
 
 nomenclature_items = [ "FilemakerID", "None", "SGM_ID","SGM_ID_With_Sub-Segmentation", "SHOT_ID", "HR", "MIN", "SEC", "MS", "SOURCE"]
 
+movie_formats = [".mov", ".mp4", ".mkv", ".m4v"]
 
 #region Fetcher
 class Shot():
@@ -82,6 +83,16 @@ class Movie():
 
         print self.folder_path
         print self.relative_path
+
+    def get_movie_path(self):
+        files = glob.glob(self.folder_path + "*")
+        movie_file = None
+        for f in movie_formats:
+            for fl in files:
+                if f in fl:
+                    movie_file = fl
+                    break
+        return movie_file
 
     def get_elan_path(self):
         if len(self.elan_path) > 0:
@@ -528,6 +539,56 @@ class FiwiFetcher():
                 return [True, result]
 
 
+    def fiwi_database_integrity(self, path="\\\\130.60.131.134\\fiwi_datenbank\\"):
+        # self.load_movie_object("results/all_movies.pickle")
+
+        SCR_Folder = path + "SCR\\"
+        SEGM_Folder = path + "SEGM\\"
+        MOV_Folder = path + "MOV\\"
+
+        scr_movies_in = glob.glob(SCR_Folder + "*")
+        segm_movies_in = glob.glob(SEGM_Folder + "*")
+        mov_movies_in = glob.glob(MOV_Folder + "*")
+
+        scr_movies = []
+        segm_movies = []
+        mov_movies = []
+        for m in scr_movies_in:
+            scr_movies.append(m.replace(SCR_Folder, ""))
+
+        for m in segm_movies_in:
+            segm_movies.append(m.replace(SEGM_Folder, "").replace("_SEGM.txt", ""))
+            # print m.replace(SEGM_Folder, "").replace("_SEGM.txt", "")
+        for m in mov_movies_in:
+            mov_movies.append(m.replace(MOV_Folder, "").split(".")[0].replace("_MOV", ""))
+
+        # Missing in Segmentations
+        print "####Missing Segmentations in /SEGM/####"
+        for m in scr_movies:
+            if not m in segm_movies:
+                movie_object =  self.find_movies_by_id([m])
+                self.copy_segmentation(movie_object[0], SEGM_Folder + m + "_SEGM.txt")
+
+        print "\n####MISSING IN Studi/Filme/####"
+        for m in scr_movies:
+            if len(self.find_movies_by_id([m])) == 0:
+                print m
+        print "\n####MISSING Movies in /MOV/####"
+        for i, m in enumerate(scr_movies):
+            if m not in mov_movies:
+                print self.find_movies_by_id([m])
+                if len(self.find_movies_by_id([m])) > 0:
+                    movie_object = self.find_movies_by_id([m])[0]
+                    if movie_object:
+                        movie_file = movie_object.get_movie_path()
+                        if movie_file:
+                            ext = movie_file.split(".").pop()
+                            print MOV_Folder + m + "_MOV." + ext
+                            shutil.copy2(movie_file, MOV_Folder + m + "_MOV." + ext)
+                            if i == 2:
+                                print "FINISHED"
+                                return
+
 
 
     def fetch_exported(self, paths):
@@ -800,9 +861,17 @@ class FiwiFetcher():
     def find_movies_by_id(self, id_list):
         result = []
         for idx in id_list:
+            if isinstance(idx, str):
+                idx = idx.split("_")
+                idx = [int(idx[0]),int(idx[1]),int(idx[2])]
+            found = False
             for m in self.movie_objs:
                 if idx == m.filemaker_ID:
                     result.append(m)
+                    found = True
+                    break
+            if not found:
+                print idx, " not Found"
         return result
 
     def movie_list(self, path):
@@ -811,18 +880,29 @@ class FiwiFetcher():
         for m in self.movie_objs:
             print m.filemaker_ID
 
+    def copy_segmentation(self, movie, path):
+        movie_path, segmentations = ELANProjectImporter().elan_project_importer(movie.elan_path)
+        self.store_segmentation(path, segmentations[0])
+
     def store_segmentation(self, path, segmentation):
+
         try:
             with open(path, "wb") as segmentation_file:
                 if len(segmentation[1]) > 0:
                     segmentation_file.write("Sequence_No\tStart\tEnd\n")
+                    print "N-Segmentations:", len(segmentation[1])
+
                     for s in segmentation[1]:
-                        segmentation_file.write(str(s[0]) + "\t" + str(s[1]) + "\t" + str(s[2]) + "\n")
+                        a = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[0])))
+                        b = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[1])))
+                        c = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[2])))
+
+                        segmentation_file.write(a+ "\t" + b + "\t" + c + "\n")
 
                 else:
                     segmentation_file.write("None")
         except Exception as e:
-            print "Segmentation Export Failed", e.message
+            print "Segmentation Export Failed.", e.message
 
     def store_shot(self, shot, shot_path):
         path = shot.path
@@ -1042,6 +1122,7 @@ class FIWIParserWindow(QMainWindow):
         self.btn_Run.clicked.connect(self.on_run)
         self.btn_UpdateMovieList.clicked.connect(self.on_update_movie_list)
 
+        self.actionCopy_Movies_to_Database.triggered.connect(self.copy_movies2database)
         self.rB_FromFMExport.toggled.connect(self.on_input_type_changed)
         self.rB_FromMovieFolder.toggled.connect(self.on_input_type_changed)
 
@@ -1060,6 +1141,13 @@ class FIWIParserWindow(QMainWindow):
             self.lineEdit_MovieBase.setEnabled(False)
             self.btn_UpdateMovieList.setEnabled(False)
 
+    def copy_movies2database(self):
+        try:
+            if self.output_folder is not None:
+                self.fetcher.load_movie_object(os.path.abspath("extensions/fiwi_tools/results/all_movies.pickle"))
+                self.fetcher.fiwi_database_integrity()
+        except:
+            print "Error"
 
     def on_run(self):
         if self.fetcher.movie_objs is not None and self.output_folder is not None:
@@ -1241,6 +1329,7 @@ class FIWIParserWindow(QMainWindow):
 
         # self.fetcher.fetch_shots(input_movies=result, output_done="results/correction2_done.pickle", output_undone="results/correction2_undone.pickle")
         # self.fetcher.copy_movies("results/correction2_done.pickle", rm_dir=Tru
+
 
 
 class CopyConcurrentJob(IConcurrentJob):

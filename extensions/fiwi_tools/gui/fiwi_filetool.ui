@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>505</width>
+    <width>585</width>
     <height>657</height>
    </rect>
   </property>
@@ -377,8 +377,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>432</width>
-         <height>210</height>
+         <width>512</width>
+         <height>209</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
@@ -401,6 +401,34 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>585</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuOperations">
+    <property name="title">
+     <string>Operations</string>
+    </property>
+    <addaction name="actionCopy_Movies_to_Database"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuOperations"/>
+  </widget>
+  <action name="actionCopy_Movies_to_Database">
+   <property name="text">
+    <string>Copy Movies to Database</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
