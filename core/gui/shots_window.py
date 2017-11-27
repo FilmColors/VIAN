@@ -332,12 +332,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     h_factor = 1.1
                     l_factor = 0.9
 
-                if event.angleDelta().y() > 0.0:
+                if event.angleDelta().y() > 0.0 and self.curr_scale < 100:
                     self.scale(h_factor,h_factor)
                     self.curr_scale *= h_factor
                     self.update_caption()
 
-                else:
+                elif event.angleDelta().y() < 0.0 and self.curr_scale > 0.2:
                     self.curr_scale *= l_factor
                     self.scale(l_factor, l_factor)
                     self.update_caption()

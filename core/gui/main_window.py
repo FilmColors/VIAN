@@ -235,7 +235,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionScreenshot.triggered.connect(self.on_screenshot)
         self.actionAdd_Key.triggered.connect(self.on_key_annotation)
-        # self.actionAdd_Segment.triggered.connect(self.on_new_segment)
+        self.actionAdd_Segment.triggered.connect(self.on_new_segment)
 
         self.actionAbout.triggered.connect(self.on_about)
         self.actionWelcome.triggered.connect(self.show_welcome)
@@ -606,7 +606,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.on_save_project(True)
 
     def on_exit(self):
-        self.on_save_project(True)
+        self.on_save_project(False)
         QCoreApplication.quit()
 
     def on_undo(self):
@@ -624,6 +624,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_overlay(self):
         if self.drawing_overlay is not None and self.drawing_overlay.isVisible():
             self.drawing_overlay.update()
+
+    def on_new_segment(self):
+        self.timeline.timeline.create_segment(None)
 
     def on_screenshot(self):
         # imgs = self.drawing_overlay.render_annotation()

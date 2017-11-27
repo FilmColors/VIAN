@@ -441,7 +441,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             return a - (a % (float(self.settings.GRID_SIZE) / self.scale))
 
     def create_segment(self, lst):
-        self.selected.create_segment(lst[0], lst[1])
+        if not lst:
+            lst = [self.curr_movie_time - 1, self.curr_movie_time]
+
+        if self.selected is not None:
+            print self.selected
+            if self.selected.get_type() == SEGMENTATION:
+                self.selected.create_segment(lst[0], lst[1])
 
     def create_layer(self, lst):
         self.project().create_annotation_layer("New Layer", lst[0], lst[1])

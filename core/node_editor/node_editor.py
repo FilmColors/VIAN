@@ -493,7 +493,7 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             self.is_dragging = False
 
     def wheelEvent(self, QWheelEvent):
-        
+
         old = QWheelEvent.pos() * self.scale - self.relative_corner * self.scale
         offset_old = QPoint((self.size() / 2).width(), (self.size() / 2).height()) * self.scale
         old_c = self.relative_corner

@@ -118,12 +118,24 @@ class AttributesMovieDescriptor(QWidget):
         self.lineEdit_MovieYear.setText(str(self.descriptor.year))
         self.lbl_Duration.setText(ms_to_string(self.descriptor.duration))
 
+        self.lineEdit_MovieYear.editingFinished.connect(self.on_movie_year_changed)
+        self.lineEdit_MovieID.editingFinished.connect(self.on_movie_id_changed)
+
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
 
         self.comboBox_Source.setCurrentText(self.descriptor.source)
         self.comboBox_Source.currentTextChanged.connect(self.on_source_changed)
         self.show()
+
+    def on_movie_id_changed(self):
+        self.descriptor.movie_id = self.lineEdit_MovieID.text()
+
+    def on_movie_year_changed(self):
+        try:
+            self.descriptor.year = int(self.lineEdit_MovieYear.text())
+        except:
+            pass
 
     def on_source_changed(self):
         current_text = self.comboBox_Source.currentText()
