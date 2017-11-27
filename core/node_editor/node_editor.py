@@ -184,7 +184,7 @@ class NodeEditor(QWidget, IProjectChangeNotify):
     def on_node_has_moved(self, moveEvent):
         for n in self.selected_nodes:
             if n is not moveEvent[0]:
-                n.node_object.set_position(n.pos() / self.scale + moveEvent[1])
+                n.node_object.set_position(n.pos() / self.scale + moveEvent[1] - (self.relative_corner / self.scale))
                 n.move(n.pos() + moveEvent[1])
 
     def get_unique_id(self):
@@ -460,6 +460,8 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             # target = self.mapToParent(pos)
 
         elif self.is_dragging:
+            # Dragging the GRID
+
             pos = (QMouseEvent.pos() - self.offset)
             if (self.relative_corner + pos).x() > 0:
                 pos = QPoint(0, pos.y())
@@ -471,6 +473,7 @@ class NodeEditor(QWidget, IProjectChangeNotify):
 
             for n in self.nodes:
                 n.move(n.pos() + pos)
+
 
             self.update()
 
@@ -490,12 +493,36 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             self.is_dragging = False
 
     def wheelEvent(self, QWheelEvent):
+        
+        old = QWheelEvent.pos() * self.scale - self.relative_corner * self.scale
+        offset_old = QPoint((self.size() / 2).width(), (self.size() / 2).height()) * self.scale
+        old_c = self.relative_corner
+
         if QWheelEvent.angleDelta().y() > 0:
             self.scale += 0.1
         else:
             if self.scale >= 0.2:
                 self.scale -= 0.1
 
+        center_point = QWheelEvent.pos() * self.scale - self.relative_corner * self.scale
+        offset_new = QPoint((self.size() / 2).width(), (self.size() / 2).height()) * self.scale
+
+        # center_point += offset_new
+        # old += offset_old
+
+        if QWheelEvent.angleDelta().y() > 0:
+            center_point += offset_new
+            old += offset_old
+        else:
+            center_point -= offset_new
+            old -= offset_old
+
+        print  QWheelEvent.pos(),  QWheelEvent.pos() * self.scale
+
+        new = old_c - ((center_point-old)/ self.scale)
+
+
+        self.relative_corner = QPoint(np.clip(new.x(), None, 0), np.clip(new.y(), None, 0))
         self.onScale.emit(self.scale)
         self.update()
 
@@ -829,10 +856,12 @@ class Node(QWidget, IHasName):
         for f in fields:
             conns.extend(f.connections)
         return conns
+
+
     #region Events
     def scale(self, scale):
         self.resize(self.node_object.get_size().width() * scale, self.node_object.get_size().height() * scale)
-        self.move(self.node_object.get_position() * scale)
+        self.move(self.node_object.get_position() * scale + self.node_editor.relative_corner)
 
         font = self.lbl_title.font()
         font.setPointSize(self.font_size * scale)
@@ -864,7 +893,7 @@ class Node(QWidget, IHasName):
                 delta = target - self.pos()
                 self.move(target)
                 self.node_editor.update()
-                self.node_pos = target / self.node_editor.scale
+                self.node_pos = target / self.node_editor.scale - self.node_editor.relative_corner / self.node_editor.scale
                 self.hasMoved.emit([self, delta])
 
                 self.node_object.set_position(self.node_pos)
@@ -874,6 +903,7 @@ class Node(QWidget, IHasName):
 
     def mouseReleaseEvent(self, QMouseEvent):
         self.is_dragging = False
+        super(Node, self).mouseReleaseEvent(QMouseEvent)
 
     def moveEvent(self, QMoveEvent):
         super(Node, self).moveEvent(QMoveEvent)

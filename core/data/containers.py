@@ -312,6 +312,8 @@ class ElanExtensionProject(IHasName):
         for s in selected:
             if s.get_type() == ANNOTATION_LAYER:
                 l = s
+            if s.get_type() == NODE_SCRIPT:
+                self.set_current_script(s)
 
         if l is not None:
             self.current_annotation_layer = l
@@ -389,9 +391,11 @@ class ElanExtensionProject(IHasName):
             self.node_scripts.remove(script)
         self.dispatch_changed()
 
-    def set_current_script(self, script):
+    def set_current_script(self, script, dispatch = True):
         self.current_script = script
-        self.dispatch_changed()
+
+        if dispatch:
+            self.dispatch_changed()
     #endregion
 
 

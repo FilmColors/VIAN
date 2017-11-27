@@ -258,7 +258,6 @@ class OutlinerTreeWidget(QTreeWidget):
             selected_items = self.selectedItems()
             self.select(selected_items, True)
 
-
     def select(self, selected_items, dispatch = True):
         selected_objs = []
 
@@ -271,8 +270,6 @@ class OutlinerTreeWidget(QTreeWidget):
 
         if dispatch:
             self.project.set_selected(self.outliner, selected_objs)
-
-
 
 
     def mousePressEvent(self, QMouseEvent):
