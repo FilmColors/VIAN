@@ -10,10 +10,12 @@ from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelec
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 
-from core.node_editor.node_editor import *
+
+# from core.node_editor.node_editor import *
 from enum import Enum
 # from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtCore import QPoint, QRect, QSize
 
 PROJECT = -1
 SEGMENTATION = 0
@@ -329,9 +331,10 @@ class ElanExtensionProject(IHasName):
         return self.movie_descriptor
 
     #region Annotations
-    def create_annotation_layer(self,name, t_start, t_stop):
+    def create_annotation_layer(self, name, t_start, t_stop):
         layer = AnnotationLayer(name, t_start, t_stop)
         self.add_annotation_layer(layer)
+        return layer
 
     def add_annotation_layer(self, layer):
         layer.set_project(self)
@@ -1185,6 +1188,13 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         self.t_start = start
         self.t_end = end
         self.dispatch_on_changed(item=self)
+
+    def create_annotation(self, type = AnnotationType.Rectangle, position = (150,150), size=(100,100), color = (255,255,255), line_width = 5, name = "New Annotation") :
+        annotation = Annotation(type, size = size, color=color, line_w=line_width, name=name,
+                                orig_position=position)
+        self.add_annotation(annotation)
+        annotation.set_project(self.project)
+        return annotation
 
     def add_annotation(self, annotation):
         self.annotations.append(annotation)

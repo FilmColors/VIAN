@@ -1325,6 +1325,10 @@ class NodeEditorContextMenu(QMenu):
         self.project_menu = self.node_menu.addMenu("Project")
         self.a_create_segment = self.project_menu.addAction("Create Segment")
         self.a_add_segmentation = self.project_menu.addAction("Add Segmentation")
+        self.a_create_annotation = self.project_menu.addAction("Create Annotation")
+        self.a_add_annotation_layer = self.project_menu.addAction("Add Annotation Layer")
+
+
 
         if len(node_editor.selected_nodes) > 0:
             self.a_delete = self.addAction("Delete Nodes")
@@ -1367,6 +1371,9 @@ class NodeEditorContextMenu(QMenu):
         self.a_create_segment.triggered.connect(partial(self.node_editor.create_node, OperationCreateSegment(), self.node_pos))
         self.a_add_segmentation.triggered.connect(
             partial(self.node_editor.create_node, OperationAddSegmentation(), self.node_pos))
+
+        self.a_create_annotation.triggered.connect(partial(self.node_editor.create_node, OperationCreateAnnotation(), self.node_pos))
+        self.a_add_annotation_layer.triggered.connect(partial(self.node_editor.create_node, OperationAddAnnotationLayer(), self.node_pos))
         self.popup(pos)
 
     def on_remove(self):

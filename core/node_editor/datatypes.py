@@ -132,6 +132,13 @@ class DT_Segment(DataType):
     def set_segment_end(self, end_ms):
         self.value[2] = end_ms
 
+class DT_Annotation(DataType):
+    def __init__(self,parent = None,  color = QColor(225, 82, 230), default_value = None):
+        super(DT_Annotation, self).__init__(parent, color = color, default_value=default_value)
+
+        self.value = ["New Annotation", (0, 0), (100, 100)]
+
+
 
 
 #endregion

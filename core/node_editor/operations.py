@@ -7,6 +7,7 @@ from core.data.computation import numpy_to_qt_image
 from random import randint
 from core.node_editor.datatypes import *
 from core.node_editor.script_results import *
+from core.data.containers import AnnotationType
 
 from bokeh.plotting import figure
 from bokeh.layouts import layout
@@ -88,6 +89,7 @@ class Operation(QObject):
 
     def reset_result(self):
         self.result = []
+
 
 class ProjectOperation(Operation):
     on_modify_project = pyqtSignal(list)
@@ -595,6 +597,64 @@ class OperationCreateSegment(Operation):
 
         except Exception as e:
             self.handle_exception(e)
+
+
+class OperationAddAnnotationLayer(ProjectOperation):
+    def __init__(self):
+        super(OperationAddAnnotationLayer, self).__init__(
+            "Add Annotation Layer",
+            [Slot("Name", DT_Literal, "New Segmentation"),
+             Slot("Start", DT_Numeric, 0),
+             Slot("End", DT_Numeric, 1000),
+             Slot("Annotations", DT_Annotation, None)],
+            [],
+            is_final_node=True)
+        self.value = 100
+
+    def perform_modify(self, args, progress_signal, project, modify_signal):
+        super(OperationAddAnnotationLayer, self).perform_modify(args, progress_signal, project, modify_signal)
+        self.on_modify_project.emit([self.modify_project, args])
+
+    def modify_project(self, project, args):
+        name = args[0]
+        start = args[1]
+        end = args[2]
+        layer = project.create_annotation_layer(name, start, end)
+
+        print isinstance(args[3][0], list)
+
+        if not isinstance(args[3][0], list):
+            annotations = [args[3]]
+        else:
+            annotations = args[3]
+
+        for a in annotations:
+            name = a[0]
+            pos = a[1]
+            size = a[2]
+            annotation = layer.create_annotation(type = AnnotationType.Rectangle, position = pos, size=size, color = (255,255,255), line_width = 5, name = name)
+            layer.add_annotation(annotation)
+
+
+
+
+
+
+class OperationCreateAnnotation(Operation):
+    def __init__(self):
+        super(OperationCreateAnnotation, self).__init__("Create Annotation",
+                                                     [Slot("Name", DT_Literal, "New Segmentation"),
+                                                      Slot("Position", DT_Vector2, (0,0)),
+                                                      Slot("Size", DT_Vector2, (50, 50))],
+                                                     [Slot("Segment", DT_Annotation, None)])
+
+    def perform(self, args, progress_signal, project):
+        try:
+            self.result = [[args[0], args[1], args[2]]]
+
+        except Exception as e:
+            self.handle_exception(e)
+
 
 #endregion
 

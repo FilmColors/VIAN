@@ -401,6 +401,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             hand = DrawingFreeHand(self.centralWidget(), annotation)
             hand.move(annotation.get_position())
             annotation.widget = hand
+            return
+
 
     def abort_freehand_drawing(self):
         for s in self.selected:
