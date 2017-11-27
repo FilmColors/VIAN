@@ -1,6 +1,26 @@
 from enum import Enum
 
 
+PROJECT = -1
+SEGMENTATION = 0
+SEGMENT = 1
+ANNOTATION = 2
+ANNOTATION_LAYER = 3
+SCREENSHOT = 4
+MOVIE_DESCRIPTOR = 5
+ANALYSIS = 6
+SCREENSHOT_GROUP = 7
+NODE = 8
+NODE_SCRIPT = 9
+
+
+class AnnotationType(Enum):
+    Rectangle = 0
+    Ellipse = 1
+    Line = 2
+    Text = 3
+    Image = 4
+    FreeHand = 5
 
 
 class ScreenshotNamingConventionOptions(Enum):
@@ -25,10 +45,12 @@ def get_enum_value(enum, name):
     for s in enum:
         if name == s.name:
             return s.value
+
 def get_enum(enum, name):
     for s in enum:
         if name == s.name:
             return s
+
 
 class MovieSource(Enum):
     VHS = 0,

@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLa
 from PyQt5.QtGui import QIcon, QFont
 
 from core.data.computation import *
-from core.data.containers import AnnotationLayer, Annotation, AnnotationType, ANNOTATION
+from core.data.containers import AnnotationLayer, Annotation
+from core.data.enums import *
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
 from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu

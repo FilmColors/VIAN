@@ -3,58 +3,61 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QMainWindow, QMenu, QFileDialog
-from core.data import containers as con
+from core.data.enums import *
 from core.data.computation import parse_file_path
 
 
-def open_context_menu(main_window, pos, containers, project, screenshot_root = False):
+def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):
 
 
-    if len(containers) == 0 and screenshot_root == False:
+    if len(containers) == 0 and (screenshot_root == False and scripts_root == False):
         return None
 
     elif len(containers) == 0 and screenshot_root == True:
         cm = ScreenshotRootContexMenu(main_window, pos, project)
 
+    elif len(containers) == 0 and scripts_root == True:
+        cm = ScriptsRootContexMenu(main_window, pos, project)
+
     else:
         container_type = containers[0].get_type()
 
-        if container_type == con.MOVIE_DESCRIPTOR:
+        if container_type == MOVIE_DESCRIPTOR:
             movie_descriptor = containers
             cm = MovieDescriptorContextMenu(main_window, pos, movie_descriptor)
             return cm
 
-        if container_type == con.SEGMENTATION:
+        if container_type == SEGMENTATION:
             segmentations = containers
             cm = SegmentationContextMenu(main_window, pos, segmentations)
             return cm
 
-        if container_type == con.SEGMENT:
+        if container_type == SEGMENT:
             segments = containers
             cm = SegmentContexMenu(main_window, pos, segments)
             return cm
 
-        if container_type == con.ANNOTATION_LAYER:
+        if container_type == ANNOTATION_LAYER:
             layers = containers
             cm = LayerContextMenu(main_window, pos, layers)
             return cm
 
-        if container_type == con.ANNOTATION:
+        if container_type == ANNOTATION:
             annotation = containers
             cm = AnnotationContextMenu(main_window, pos, annotation)
             return
 
-        if container_type == con.SCREENSHOT:
+        if container_type == SCREENSHOT:
             screenshots = containers
             cm = ScreenshotContextMenu(main_window, pos, screenshots)
             return cm
 
-        if container_type == con.SCREENSHOT_GROUP:
+        if container_type == SCREENSHOT_GROUP:
             screenshots_grp = containers
             cm = ScreenshotGroupContexMenu(main_window, pos, screenshots_grp, project)
             return cm
 
-        if container_type == con.NODE_SCRIPT:
+        if container_type == NODE_SCRIPT:
             scripts = containers
             cm = NodeScriptContextMenu(main_window, pos, scripts, project)
             return cm
@@ -432,3 +435,15 @@ class NodeScriptRootContextMenu(ContextMenu):
     def on_new_script(self):
         self.project.create_script()
 
+class ScriptsRootContexMenu(ContextMenu):
+    def __init__(self, parent, pos, project):
+        super(ScriptsRootContexMenu, self).__init__(parent, pos)
+        self.project = project
+
+        self.action_new_script = self.addAction("New Script")
+        self.action_new_script.triggered.connect(self.on_new_script)
+
+        self.popup(pos)
+
+    def on_new_script(self):
+        self.project.create_script()

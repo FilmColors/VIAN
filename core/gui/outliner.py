@@ -200,8 +200,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             self.tree.selection_dispatch = True
 
 
-
-
     def keyPressEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Shift:
             self.tree.setSelectionMode(self.tree.MultiSelection)
@@ -303,6 +301,11 @@ class OutlinerTreeWidget(QTreeWidget):
         if isinstance(self.selectedItems()[0], ScreenshotRootOutlinerItem):
             context_menu = open_context_menu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()), [],
                                            self.project, screenshot_root=True)
+
+        elif isinstance(self.selectedItems()[0], NodeScriptsRootItem):
+            context_menu = open_context_menu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()), [],
+                                           self.project, scripts_root=True)
+            print "ROOT"
         else:
             containers = []
             for item in self.selectedItems():

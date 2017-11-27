@@ -7,7 +7,7 @@ from core.data.computation import numpy_to_qt_image
 from random import randint
 from core.node_editor.datatypes import *
 from core.node_editor.script_results import *
-from core.data.containers import AnnotationType
+from core.data.enums import *
 
 from bokeh.plotting import figure
 from bokeh.layouts import layout

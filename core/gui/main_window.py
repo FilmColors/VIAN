@@ -12,6 +12,7 @@ from core.data.exporters import SegmentationExporter
 from core.data.importers import ELANProjectImporter
 from core.data.masterfile import MasterFile
 from core.data.settings import UserSettings
+from core.data.enums import *
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog

@@ -10,24 +10,26 @@ from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelec
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 
+from core.data.enums import *
 
-# from core.node_editor.node_editor import *
+from core.node_editor.node_editor import *
+
 from enum import Enum
 # from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import QPoint, QRect, QSize
-
-PROJECT = -1
-SEGMENTATION = 0
-SEGMENT = 1
-ANNOTATION = 2
-ANNOTATION_LAYER = 3
-SCREENSHOT = 4
-MOVIE_DESCRIPTOR = 5
-ANALYSIS = 6
-SCREENSHOT_GROUP = 7
-NODE = 8
-NODE_SCRIPT = 9
+#
+# PROJECT = -1
+# SEGMENTATION = 0
+# SEGMENT = 1
+# ANNOTATION = 2
+# ANNOTATION_LAYER = 3
+# SCREENSHOT = 4
+# MOVIE_DESCRIPTOR = 5
+# ANALYSIS = 6
+# SCREENSHOT_GROUP = 7
+# NODE = 8
+# NODE_SCRIPT = 9
 
 
 class ElanExtensionProject(IHasName):
@@ -895,14 +897,14 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 #endregion
 
 #region Annotation
-class AnnotationType(Enum):
-    Rectangle = 0
-    Ellipse = 1
-    Line = 2
-    Text = 3
-    Image = 4
-    FreeHand = 5
-
+# class AnnotationType(Enum):
+#     Rectangle = 0
+#     Ellipse = 1
+#     Line = 2
+#     Text = 3
+#     Image = 4
+#     FreeHand = 5
+#
 
 class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable):
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
