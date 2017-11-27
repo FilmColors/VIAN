@@ -312,12 +312,6 @@ class MainWindow(QtWidgets.QMainWindow):
            self.show_welcome()
 
 
-
-        # if self.is_darwin:
-        #     self.annotation_toolbar.raise_()
-        #     self.hide()
-        #     self.show()
-
     def test_function(self):
         print self.player.get_fps()
 
@@ -901,15 +895,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.start_worker(worker, analysis.get_name())
 
     def on_save_custom_perspective(self):
-        setting = QSettings("Custom perspective", "VIAN")
+        setting = QSettings("UniversityOfZurich", "VIAN")
         setting.setValue("geometry", self.saveGeometry())
         setting.setValue("windowState", self.saveState())
 
     def on_load_custom_perspective(self):
-        setting = QSettings("Custom perspective", "VIAN")
+        setting = QSettings("UniversityOfZurich", "VIAN")
         self.restoreGeometry(setting.value("geometry"))
         self.restoreState(setting.value("windowState"))
-
 
     def start_worker(self, worker, name = "New Task"):
         self.concurrent_task_viewer.add_task(worker.task_id, name)

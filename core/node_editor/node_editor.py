@@ -32,18 +32,22 @@ class ScriptExecutor(QRunnable):
 
     @pyqtSlot()
     def run(self):
-        # try:
-        for n in self.nodes:
-            if n.operation.is_final_node and n.is_compiled:
-                n.perform(self.project)
+        try:
+            for n in self.nodes:
+                if n.operation.is_final_node and n.is_compiled:
+                    n.perform(self.project)
 
-        for n in self.nodes:
-            n.is_running = False
+            for n in self.nodes:
+                n.is_running = False
 
-        res = True
-        # except Exception as e:
-        #     print e.message
-        #     res = False
+            res = True
+        except Exception as e:
+            print ""
+            print "Script Executor Failed"
+            print e.message
+            print ""
+
+            res = False
 
 
         # finally:
@@ -517,7 +521,7 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             center_point -= offset_new
             old -= offset_old
 
-        print  QWheelEvent.pos(),  QWheelEvent.pos() * self.scale
+
 
         new = old_c - ((center_point-old)/ self.scale)
 

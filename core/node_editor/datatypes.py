@@ -147,12 +147,11 @@ class DT_Annotation(DataType):
 def cast_numeric_output_type_highest(input_slots):
     input_types = [s.data_type() for s in input_slots]
 
-
-    if isinstance(input_types[0], DT_ImageStack) or isinstance(input_types[1], DT_ImageStack):
-        output_types = [DT_ImageStack]
-
-    elif isinstance(input_types[0], DT_Image) or isinstance(input_types[1], DT_Image):
+    if isinstance(input_types[0], DT_Image) or isinstance(input_types[1], DT_Image):
         output_types = [DT_Image]
+
+    elif isinstance(input_types[0], DT_ImageStack) or isinstance(input_types[1], DT_ImageStack):
+        output_types = [DT_ImageStack]
 
     elif isinstance(input_types[0], DT_Vector3) or isinstance(input_types[1], DT_Vector3):
         output_types = [DT_Vector3]

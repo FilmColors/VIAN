@@ -235,7 +235,7 @@ class OperationMean(Operation):
     def __init__(self):
         super(OperationMean, self).__init__("Mean", [
             Slot("Data", DT_Numeric, None),
-            Slot("Axis", DT_Vector, [0,1])],
+            Slot("Axis", DT_Vector, [0, 1])],
                                             [Slot("Mean", DT_Numeric, None)])
 
     def perform(self, args, progress_signal, project):

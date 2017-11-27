@@ -225,28 +225,29 @@ class AttributesNode(QWidget):
 
         for i, f in enumerate(self.descriptor.node_widget.fields):
             if isinstance(f, InputField):
-                if f.data_type_slot.default_value is not None:
-                    slot = f.data_type_slot.data_type
-                    item = None
+                if f.connection is None:
+                    if f.data_type_slot.default_value is not None:
+                        slot = f.data_type_slot.default_data_type
+                        item = None
 
-                    if slot == DT_Numeric:
-                        item = DefaultValueNumeric(self, f)
+                        if slot == DT_Numeric:
+                            item = DefaultValueNumeric(self, f)
 
-                    elif slot == DT_Vector:
-                        item = DefaultValueVector(self, f)
+                        elif slot == DT_Vector:
+                            item = DefaultValueVector(self, f)
 
-                    elif slot == DT_Vector2:
-                        item = DefaultValueVector2(self, f)
+                        elif slot == DT_Vector2:
+                            item = DefaultValueVector2(self, f)
 
-                    elif slot == DT_Vector3:
-                        item = DefaultValueVector3(self, f)
+                        elif slot == DT_Vector3:
+                            item = DefaultValueVector3(self, f)
 
-                    elif slot == DT_Literal:
-                        item = DefaultLiteral(self, f)
+                        elif slot == DT_Literal:
+                            item = DefaultLiteral(self, f)
 
-                    if item is not None:
-                        item.setStyleSheet("QWidget{margin: 1px; padding: 1px;}")
-                        self.layout().addWidget(item)
+                        if item is not None:
+                            item.setStyleSheet("QWidget{margin: 1px; padding: 1px;}")
+                            self.layout().addWidget(item)
 
         self.layout().addWidget(QLabel("Cache Size:" + str(round(float(self.descriptor.node_widget.cache_size) / 1000000, 2)) + " MB", self))
 

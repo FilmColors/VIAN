@@ -21,13 +21,20 @@ class NodeEditorResults(EDockWidget):
         # self.tab_results = QTabWidget(self)
 
     def visualize(self, operation):
-        if operation.result_visualization_type == VIS_TYPE_IMAGE:
-            self.create_image_result(operation.result[0])
-        elif operation.result_visualization_type == VIS_TYPE_WEB:
-            self.create_web_result(operation.result[0])
+        try:
+            if operation.result_visualization_type == VIS_TYPE_IMAGE:
+                self.create_image_result(operation.result[0])
+            elif operation.result_visualization_type == VIS_TYPE_WEB:
+                self.create_web_result(operation.result[0])
 
-        else:
-            return
+            else:
+                return
+        except Exception as e:
+            print ""
+            print "ERROR"
+            print "Visualization failed:"
+            print e
+            print ""
 
     def add_result_widget(self, widget):
         self.result_widgets.append(widget)
