@@ -47,8 +47,6 @@ class NewProjectDialog(EDialogWidget):
         self.lineEdit_MoviePath.setText(movie_path)
         self.project.movie_descriptor.movie_path = movie_path
 
-
-
         self.lineEdit_ProjectName.setText(self.project_name)
         self.set_project_path()
 
@@ -118,8 +116,13 @@ class NewProjectDialog(EDialogWidget):
         self.close()
 
     def on_ok(self):
-        if not os.path.isdir(self.project.path):
-            os.mkdir(self.project.path)
+        try:
+            if not os.path.isdir(self.project.path):
+                os.mkdir(self.project.path)
+        except OSError as e:
+            print e
+            print "Forced silencing as Hotfix, if this statement is necessary is currently unclear anyway"
+            #TODO
 
         self.project.path = self.project_dir + self.project_name
         self.main_window.new_project(self.project)

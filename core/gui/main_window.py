@@ -3,7 +3,7 @@ from functools import partial
 # from PyQt4 import QtCore, QtGui, uic
 from PyQt5 import uic
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QFileDialog, qApp, QLabel, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, qApp, QLabel, QMessageBox, QWidget
 
 # from annotation_viewer import AnnotationViewer
 from core.concurrent.worker import Worker, ProjectModifier
@@ -26,6 +26,8 @@ from core.gui.keyeventhandler import EKeyEventHandler
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.timeline import TimelineContainer
+from core.node_editor.node_editor import NodeEditorDock
+from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
 from core.remote.corpus.corpus import *
 from core.remote.elan.server.server import QTServer
@@ -114,6 +116,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.history_view = None
         self.analyses_widget = None
         self.screenshots_manager_dock = None
+        self.node_editor_dock = None
+        self.node_editor_results = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -151,6 +155,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.create_screenshot_editor()
         self.create_screenshot_manager()
 
+        self.create_node_editor_results()
+        self.create_node_editor()
         self.create_screenshots_toolbar()
         self.create_outliner()
         self.create_screenshot_manager_dock_widget()
@@ -162,7 +168,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_history_view()
         self.create_concurrent_task_viewer()
 
-        self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
+
+
+
+        self.splitDockWidget(self.outliner, self.perspective_manager, Qt.Vertical)
+        self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
         # self.tabifyDockWidget(self.annotation_toolbar, self.screenshot_toolbar)
         self.tabifyDockWidget(self.inspector, self.history_view)
@@ -241,7 +251,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                  self.outliner,
                                  self.timeline.timeline,
                                  self.inspector,
-                                 self.history_view]
+                                 self.history_view,
+                                 self.node_editor_dock.node_editor]
 
 
         # self.actionElanConnection.triggered.connect(self.create_widget_elan_status)
@@ -447,6 +458,22 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.screenshots_manager_dock.show()
             self.screenshots_manager_dock.activateWindow()
+
+    def create_node_editor(self):
+        if self.node_editor_dock is None:
+            self.node_editor_dock = NodeEditorDock(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.node_editor_dock, QtCore.Qt.Horizontal)
+        else:
+            self.node_editor_dock.show()
+            self.node_editor_dock.activateWindow()
+
+    def create_node_editor_results(self):
+        if self.node_editor_results is None:
+            self.node_editor_results = NodeEditorResults(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.node_editor_results, QtCore.Qt.Vertical)
+        else:
+            self.node_editor_results.show()
+            self.node_editor_results.activateWindow()
     #endregion
 
     #region QEvent Overrides
@@ -611,7 +638,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # frame, pos = self.get_frame(time)
         
         frame_pos = self.player.get_frame_pos_by_time(time)
-
         # result = create_screenshot([self.drawing_overlay, frame, time, pos], None)
         # self.on_screenshot_finished(result)
 
@@ -754,7 +780,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         central = self.player
 
-
         self.centralWidget().setParent(None)
         if perspective == Perspective.VideoPlayer.name:
             self.current_perspective = Perspective.VideoPlayer
@@ -770,6 +795,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.inspector.hide()
             self.history_view.hide()
             self.concurrent_task_viewer.hide()
+            self.node_editor_dock.hide()
+            self.node_editor_results.hide()
+            self.screenshots_manager_dock.hide()
 
         elif perspective == Perspective.Annotation.name:
             self.current_perspective = Perspective.Annotation
@@ -785,6 +813,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.inspector.show()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
             self.screenshots_manager_dock.show()
+            self.node_editor_dock.hide()
             # self.concurrent_task_viewer.show()
             # self.history_view.show()
 
@@ -805,6 +834,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.history_view.show()
             self.screenshots_manager.center_images()
             self.screenshots_manager_dock.hide()
+            self.node_editor_dock.hide()
+            self.node_editor_results.hide()
 
         elif perspective == Perspective.Analyses.name:
             self.current_perspective = Perspective.Analyses
@@ -812,7 +843,9 @@ class MainWindow(QtWidgets.QMainWindow):
             # if self.is_darwin:
             #     self.player_container.hide()
 
-            central = self.analyses_widget
+            # central = self.analyses_widget
+            central = QWidget(self)
+            central.setFixedWidth(0)
 
             self.drawing_overlay.hide()
             self.outliner.show()
@@ -821,8 +854,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.hide()
             self.player_controls.hide()
             self.screenshot_toolbar.raise_()
-            self.history_view.show()
-
+            self.history_view.hide()
+            self.node_editor_dock.show()
+            self.screenshots_manager_dock.hide()
+            self.node_editor_results.show()
 
 
         self.setCentralWidget(central)

@@ -44,9 +44,7 @@ def store_project_concurrent(args, sign_progress):
     segmentations = []
     analyzes = []
     screenshot_groups = []
-
-    print "MOVIE PATH:", project.movie_descriptor.movie_path
-    print "FILE PATH:", path
+    scripts = []
 
     for a in project.annotation_layers:
         a_layer.append(a.serialize())
@@ -69,6 +67,9 @@ def store_project_concurrent(args, sign_progress):
     for e in project.screenshot_groups:
         screenshot_groups.append(e.serialize())
 
+    for f in project.node_scripts:
+        scripts.append(f.serialize())
+
     data = dict(
         path=project.path,
         name=project.name,
@@ -81,7 +82,8 @@ def store_project_concurrent(args, sign_progress):
         analyzes=analyzes,
         movie_descriptor=project.movie_descriptor.serialize(),
         version=project.main_window.version,
-        screenshot_groups=screenshot_groups
+        screenshot_groups=screenshot_groups,
+        scripts = scripts
 
     )
     sign_progress(0.6)
@@ -156,7 +158,6 @@ class CreateScreenshotJob(IConcurrentJob):
 
 
         # Create Screenshot Image
-        print frame_pos
         video_capture = cv2.VideoCapture(movie_path)
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
         ret, frame = video_capture.read()

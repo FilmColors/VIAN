@@ -54,6 +54,10 @@ def open_context_menu(main_window, pos, containers, project, screenshot_root = F
             cm = ScreenshotGroupContexMenu(main_window, pos, screenshots_grp, project)
             return cm
 
+        if container_type == con.NODE_SCRIPT:
+            scripts = containers
+            cm = NodeScriptContextMenu(main_window, pos, scripts, project)
+            return cm
         else:
             cm = ContextMenu(main_window, pos)
             return cm
@@ -353,6 +357,7 @@ class MovieDescriptorContextMenu(ContextMenu):
         self.main_window.player.open_movie(path)
         self.main_window.dispatch_on_changed()
 
+
 class ScreenshotGroupContexMenu(ContextMenu):
     def __init__(self, parent, pos, screenshot_group, project):
         super(ScreenshotGroupContexMenu, self).__init__(parent, pos)
@@ -373,6 +378,7 @@ class ScreenshotGroupContexMenu(ContextMenu):
     def on_set_active(self):
         self.project.set_current_screenshot_group(self.screenshot_group)
 
+
 class ScreenshotRootContexMenu(ContextMenu):
     def __init__(self, parent, pos, project):
         super(ScreenshotRootContexMenu, self).__init__(parent, pos)
@@ -384,3 +390,45 @@ class ScreenshotRootContexMenu(ContextMenu):
 
     def on_new_screenshot_group(self):
         self.project.add_screenshot_group()
+
+
+class NodeScriptContextMenu(ContextMenu):
+    def __init__(self, parent, pos, scripts, project):
+        super(NodeScriptContextMenu, self).__init__(parent, pos)
+        self.project = project
+        self.scripts = scripts
+
+        self.action_new_script = self.addAction("New Script")
+        self.action_new_script.triggered.connect(self.on_new_script)
+
+        self.action_remove_script = self.addAction("Remove Script")
+        self.action_remove_script.triggered.connect(self.on_remove_script)
+
+        self.action_open_script = self.addAction("Open Script")
+        self.action_open_script.triggered.connect(self.on_open_script)
+        self.popup(pos)
+
+    def on_new_script(self):
+        self.project.create_script()
+
+    def on_remove_script(self):
+        for script in self.scripts:
+            self.project.remove_script(script)
+
+    def on_open_script(self):
+        self.project.set_current_script(self.scripts[0])
+
+
+class NodeScriptRootContextMenu(ContextMenu):
+    def __init__(self, parent, pos, project):
+        super(NodeScriptRootContextMenu, self).__init__(parent, pos)
+        self.project = project
+
+        self.action_new_script = self.addAction("New Script")
+        self.action_new_script.triggered.connect(self.on_new_script)
+
+        self.popup(pos)
+
+    def on_new_script(self):
+        self.project.create_script()
+

@@ -1,0 +1,16 @@
+\begin{thebibliography}{GSSP10}
+
+\bibitem[GSSP10]{GSSP:10}
+Prashant Goswami, Philipp Schlegel, Barbara Solenthaler, and Renato Pajarola.
+\newblock Interactive {SPH} simulation and rendering on the {GPU}.
+\newblock In {\em Proceedings ACM SIGGRAPH/Eurographics Symposium on Computer
+  Animation}, pages 55--64, 2010.
+
+\bibitem[Paj07]{Pajarola:07}
+Renato Pajarola.
+\newblock Efficient data structures.
+\newblock In Markus~H. Gross and Hanspeter Pfister, editors, {\em Point-Based
+  Graphics}, Series in Computer Graphics, pages 148--165. Morgan Kaufmann
+  Publishers, 2007.
+
+\end{thebibliography}

@@ -94,6 +94,14 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             analysis_item = AnalyzesOutlinerItem(self.analyzes_group, i, a)
             self.item_list.append(analysis_item)
 
+        self.node_scripts_group = NodeScriptsRootItem(self.project_item, 4)
+        for i, s in enumerate(self.main_window.project.node_scripts):
+            script_item = NodeScriptsItem(self.node_scripts_group, i, s)
+            self.item_list.append(script_item)
+            for j, n in enumerate(s.nodes):
+                node_item = NodeScriptsNodeItem(script_item, j, n)
+                self.item_list.append(node_item)
+
         if not first_time:
             self.project_item.setExpanded(exp_p_item)
             for i in range(self.project_item.childCount()):
@@ -428,10 +436,8 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
         if self.segmentation.project.segmentation[self.segmentation.project.main_segmentation_index] is self.segmentation:
             self.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
 
-
         elif self.segmentation.timeline_visibility is False:
             self.setIcon(1 ,QtGui.QIcon("qt_ui/icons/icon_hidden.png"))
-
 
         else:
             self.setIcon(0, QIcon())
@@ -635,7 +641,58 @@ class AnalyzesOutlinerItem(AbstractOutlinerItem):
         self.setText(0, self.item.name)
 
 
+class NodeScriptsRootItem(AbstractOutlinerItem):
+    def __init__(self, parent, index):
+        super(NodeScriptsRootItem, self).__init__(parent, index)
+        self.update_item()
 
+    def set_name(self, name):
+        "Not implemented"
+
+    def update_item(self):
+        self.setText(0, "Node Scripts")
+
+
+class NodeScriptsItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, script):
+        super(NodeScriptsItem, self).__init__(parent, index)
+        self.has_item = True
+        self.is_editable = True
+        self.item = script
+        self.update_item()
+
+    def get_container(self):
+        return self.item
+
+    def set_name(self, name):
+        self.item.set_name(name)
+
+    def get_name(self):
+        return self.item.get_name()
+
+    def update_item(self):
+        self.setText(0, self.item.get_name())
+
+
+class NodeScriptsNodeItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, script):
+        super(NodeScriptsNodeItem, self).__init__(parent, index)
+        self.has_item = True
+        self.is_editable = True
+        self.item = script
+        self.update_item()
+
+    def get_container(self):
+        return self.item
+
+    def set_name(self, name):
+        self.item.set_name(name)
+
+    def get_name(self):
+        return self.item.get_name()
+
+    def update_item(self):
+        self.setText(0, self.item.get_name())
 
 pageend = None
 #endregion

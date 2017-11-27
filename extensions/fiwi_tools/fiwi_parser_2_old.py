@@ -368,7 +368,7 @@ class FiwiFetcher():
                 continue
 
         checked = []
-        print len(to_copy)
+
         threads = []
         for i, s in enumerate(to_copy):
             if s[1] not in checked:
@@ -398,7 +398,6 @@ class FiwiFetcher():
                 # if int(name[0]) not in [1062,13,167,183]:
                 to_do.append([d, new_name, old_name])
 
-        print len(d)
 
         for d in to_do:
             print d
@@ -943,7 +942,7 @@ class FiwiFetcher():
             else:
                 print "NOT"
 
-    def fiwi_database_integrity(self, path="\\\\130.60.131.134\\fiwi_datenbank\\"):
+    def fiwi_database_integrity(self, path="/Volumes/Drobo_5D_fiwi/Filmcolors_server/fiwi_datenbank/"):
         self.load_movie_object("results/all_movies.pickle")
 
         SCR_Folder = path + "SCR\\"
@@ -957,12 +956,16 @@ class FiwiFetcher():
         scr_movies = []
         segm_movies = []
         mov_movies = []
+        for m in self.movie_objs:
+            print m.filemaker_ID
+
         for m in scr_movies_in:
             scr_movies.append(m.replace(SCR_Folder, ""))
 
         for m in segm_movies_in:
             segm_movies.append(m.replace(SEGM_Folder, "").replace("_SEGM.txt", ""))
             # print m.replace(SEGM_Folder, "").replace("_SEGM.txt", "")
+
         for m in mov_movies_in:
             mov_movies.append(m.replace(MOV_Folder, "").split(".")[0].replace("_MOV", ""))
 
@@ -979,6 +982,7 @@ class FiwiFetcher():
                 print m
         print "\n####MISSING Movies in /MOV/####"
         for i, m in enumerate(scr_movies):
+            console.write(str(i) + "/" + str(len(scr_movies)))
             if m not in mov_movies:
                 if len(self.find_movies_by_id([m])) > 0:
                     movie_object = self.find_movies_by_id([m])[0]
@@ -986,10 +990,8 @@ class FiwiFetcher():
                         movie_file = movie_object.get_movie_path()
                         if movie_file:
                             ext = movie_file.split(".").pop()
-                            print MOV_Folder + m + "_MOV." + ext
                             shutil.copy2(movie_file, MOV_Folder + m + "_MOV." + ext)
-                            if i == 2:
-                                return
+
 
 
 

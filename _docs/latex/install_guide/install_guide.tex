@@ -1,0 +1,139 @@
+\documentclass[11pt, a4paper,oneside,chapterprefix=false]{scrbook}
+
+\usepackage{a4wide}
+\usepackage{times}
+\usepackage{helvet}   % sets sans serif font
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\usepackage{graphicx}
+\usepackage{subfigure}  
+\usepackage{fancybox} % for shadowed or double bordered boxes
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+
+\DeclareGraphicsExtensions{.pdf, .jpg}
+
+%% macros
+\input{include/math}
+\input{include/codelisting_layout}
+
+\usepackage{color}
+\usepackage{hyperref}
+\definecolor{RED}{rgb}{1,0,0}
+\definecolor{GREEN}{rgb}{0,0.7,0}
+\definecolor{BLUE}{rgb}{0,0,1}
+\definecolor{Orange}{rgb}{0.7,0.7,0.7}
+\newcommand{\FIXME}[1]{{\color{RED}{\textbf{FIX}: #1}}}
+
+\addtolength{\textheight}{2.0cm}
+\addtolength{\voffset}{-1cm}
+\addtolength{\textwidth}{1.8cm}
+\addtolength{\hoffset}{-.9cm}
+
+\widowpenalty=10000
+\clubpenalty=10000
+
+%\author{Hans Muster}
+%\title{Blockwise Hierarchical Data Decompositions}
+%\date{Fall Semester 2011}
+
+\begin{document}
+
+\frontmatter
+%\maketitle %automatic version
+% --- selfmade version ----
+\begin{titlepage}
+	\setlength{\parindent}{0cm}
+	\addtolength{\textheight}{1.0cm}
+
+	\vspace{0.5cm}
+	\Huge
+	{\textbf \textsf{VIAN\\ \huge Installation Guide}}
+
+	\vfill \vfill \vfill
+	\includegraphics*[width=1.0\textwidth]{figures/VIAN.png}
+
+	\vfill
+	\large
+	Author:\\
+	Gaudenz Halter\\
+	
+
+	\vfill \vfill \vfill
+	\begin{minipage}[b]{0.5\textwidth}
+	ERC Advanced Grant FilmColors\\
+	Department of Film Studies \\
+	University of Z{\"u}rich
+	\end{minipage}
+	%
+	\begin{minipage}[b]{0.5\textwidth} \raggedleft
+	Visualization and MultiMedia Lab \\
+	Department of Informatics \\
+	University of Z{\"u}rich
+	\end{minipage}
+
+	\vfill
+	\hrule
+	\vspace{0.5cm}
+	\includegraphics*[width=0.3\textwidth]{figures/uzh_logo} \hfill
+	\includegraphics*[width=0.3\textwidth]{figures/vmml_logo}
+\end{titlepage}
+%%
+
+
+%=====================================================================
+\chapter{Installation} \label{chp:introduction}
+%=====================================================================
+
+\section{System Requirements}
+\begin{center}
+	\begin{tabular}{|c|c|c|}
+		\hline 
+		OS & OSX & Windows 64bit \\ 
+		\hline 
+		RAM & 4096 MB & 4096 MB \\ 
+		\hline 
+		HDD/SSD & ~1.5 GB & \~1.5 GB \\ 
+		\hline 
+	\end{tabular} 
+\end{center}
+
+Since VIAN is cross-platform, it will also run on Linux systems, but OpenCV, ffmpeg has to be compiled by the user. That is, why it is currently not listed in supported OS. This will most probably change in the future.
+
+
+\section{Preliminary Steps}
+Before VIAN can be installed, make sure that both, textbf{VLC} and textbf{Anaconda} are installed on your machine:\\
+
+
+\begin{mdframed}[backgroundcolor=Orange] 
+	\textbf{For members of the FIWI:}\\ Get VIAN from the server:\\ ".../team/Software/VIAN/". Copy the complete folder which corresponds to your OS onto your computer.\\
+	Both, anaconda and vlc installers are located in the directory, run them. Once completed, you may remove the anaconda-blablalb.dmg, resp. vlc-blablabla.dmg and proceed with "Installing VIAN".
+
+\end{mdframed}
+ 
+\begin{itemize}
+	\item If you haven't installed \textbf{Anaconda} yet, download and install anaconda for python 2.7.\\
+	\url{https://www.anaconda.com/download/}
+	\item Install or update the \textit{latest} \textbf{VLC}. On Windows: Make sure you have a 64bit Version.
+	\url{https://www.videolan.org/vlc/index.de.html}
+\end{itemize}
+
+\section{Installing VIAN}
+
+\begin{itemize}
+	\item To install VIAN, run the Script which is located in the root directory of VIAN. 
+	\subitem On OSX: "OSX\_Install"
+	\subitem On Win64: "Win64\_Install.bat"
+	\item A Console/Terminal Window will appear and install all necessary files used by VIAN on your Computer. 
+	\item Depending on your internet-connection, this might take a while.
+\end{itemize}
+
+\section{Running VIAN}
+\begin{itemize}
+	\item  In order to run VIAN, just use the other file located in the VIAN directory:
+	\subitem On OSX: "OSX\_Run"
+	\subitem On Win64: "Win64\_Run.bat"
+	\item Make sure to \textbf{NOT} close the Console/Terminal window while the program is running.
+\end{itemize}
+\end{document}

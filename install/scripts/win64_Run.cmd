@@ -1,3 +1,3 @@
-activate mara_win
+activate vian_win
 cd "${0%/*}"
-python mara/main.py
+python VIAN/main.py

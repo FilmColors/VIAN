@@ -54,6 +54,7 @@ def set_style_sheet(app, path):
     style_sheet = style_sheet.read()
     app.setStyleSheet(style_sheet)
 
+
 def set_attributes(app):
     app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     if sys.platform == "darwin":
@@ -74,7 +75,7 @@ if __name__ == '__main__':
             vlc_instance = vlc.Instance(vlc_argmuents)
             vlc_media_player = vlc_instance.media_player_new()
             settings = UserSettings()
-            settings.load_last()
+            settings.load()
 
 
             app = QApplication(sys.argv)
@@ -120,7 +121,7 @@ if __name__ == '__main__':
         vlc_instance = vlc.Instance(vlc_argmuents)
         vlc_media_player = vlc_instance.media_player_new()
         settings = UserSettings()
-        settings.load_last()
+        settings.load()
 
         app = QApplication(sys.argv)
         set_attributes(app)

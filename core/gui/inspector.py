@@ -85,6 +85,10 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.lbl_Type.setText("Analysis")
             widgets = [AttributesAnalysis(self, target_item)]
 
+        if s_type == NODE:
+            self.lbl_Type.setText("Node")
+            widgets = [AttributesNode(self, target_item)]
+
         for w in widgets:
             self.add_attribute_widget(w)
 
@@ -190,3 +194,173 @@ class AttributesAnalysis(QWidget):
         self.layout().addWidget(self.vis)
         self.show()
 
+
+class AttributesNode(QWidget):
+    def __init__(self, parent, descriptor):
+        super(AttributesNode, self).__init__(parent)
+        self.descriptor = descriptor
+
+        self.setLayout(QVBoxLayout(self))
+        self.default_values = []
+
+        self.layout().addWidget(QLabel("Default Parameters", self))
+        if descriptor.node_widget is None:
+            info = QLabel("Set this script as current script to modify the default parameters", self)
+            info.setWordWrap(True)
+            self.layout().addWidget(info)
+            return
+
+        for i, f in enumerate(self.descriptor.node_widget.fields):
+            if isinstance(f, InputField):
+                if f.data_type_slot.default_value is not None:
+                    slot = f.data_type_slot.data_type
+                    item = None
+
+                    if slot == DT_Numeric:
+                        item = DefaultValueNumeric(self, f)
+
+                    elif slot == DT_Vector:
+                        item = DefaultValueVector(self, f)
+
+                    elif slot == DT_Vector2:
+                        item = DefaultValueVector2(self, f)
+
+                    elif slot == DT_Vector3:
+                        item = DefaultValueVector3(self, f)
+
+                    elif slot == DT_Literal:
+                        item = DefaultLiteral(self, f)
+
+                    if item is not None:
+                        item.setStyleSheet("QWidget{margin: 1px; padding: 1px;}")
+                        self.layout().addWidget(item)
+
+        self.layout().addWidget(QLabel("Cache Size:" + str(round(float(self.descriptor.node_widget.cache_size) / 1000000, 2)) + " MB", self))
+
+        self.show()
+
+
+class AttributesNodeDefaultValues(QWidget):
+    def __init__(self, parent, field):
+        super(AttributesNodeDefaultValues, self).__init__(parent)
+        self.field = field
+        self.slot = field.data_type_slot
+        self.setLayout(QHBoxLayout(self))
+        self.layout().addWidget(QLabel(field.data_type_slot.name.rjust(15)))
+
+    def get_value(self):
+        pass
+
+    def on_value_changed(self):
+        self.field.node.update_output_types()
+
+
+class DefaultValueNumeric(AttributesNodeDefaultValues):
+    def __init__(self, parent, field):
+        super(DefaultValueNumeric, self).__init__(parent, field)
+        self.sp = QSpinBox(self)
+        self.sp.setRange(0, 9999999)
+        self.sp.setValue(self.slot.default_value)
+        self.layout().addWidget(self.sp)
+
+        self.sp.valueChanged.connect(self.on_value_changed)
+
+    def on_value_changed(self):
+        self.slot.default_value = self.sp.value()
+        super(DefaultValueNumeric, self).on_value_changed()
+
+
+class DefaultValueVector(AttributesNodeDefaultValues):
+    def __init__(self, parent, field):
+        super(DefaultValueVector, self).__init__(parent, field)
+        self.lineEdit = QLineEdit(self)
+        self.layout().addWidget(self.lineEdit)
+
+        text = ""
+        # if not isinstance(self.slot.default_value, list):
+        #     self.slot.default_value = [self.slot.default_value]
+        #     print "Silenced Default Value Vector error in Inspector line 279"
+
+        for v in self.slot.default_value:
+            text += str(v) + ","
+        self.lineEdit.setText(text)
+
+        self.lineEdit.textChanged.connect(self.on_value_changed)
+        validator = QRegExpValidator()
+        regex = QRegExp("^[0-9]+[.]?[0-9]*(,[0-9]+[.]?[0-9]*)*$")
+        validator.setRegExp(regex)
+        self.lineEdit.setValidator(validator)
+
+
+    def on_value_changed(self):
+        text = self.lineEdit.text() + ","
+        numbers = text.replace(" ", "").split(",")
+        result = []
+        try:
+            for n in numbers:
+                if n != "":
+                    result.append(float(n))
+            self.slot.default_value = np.array(result)
+            super(DefaultValueVector, self).on_value_changed()
+        except:
+            print "error", n
+
+
+class DefaultValueVector2(AttributesNodeDefaultValues):
+    def __init__(self, parent, field):
+        super(DefaultValueVector2, self).__init__(parent, field)
+        self.sp1 = QSpinBox(self)
+        self.sp1.setRange(0, 9999999)
+        self.sp1.setValue(self.slot.default_value[0])
+        self.layout().addWidget(self.sp1)
+        self.sp2 = QSpinBox(self)
+        self.sp2.setRange(0, 9999999)
+        self.sp2.setValue(self.slot.default_value[1])
+        self.layout().addWidget(self.sp2)
+
+        self.sp1.valueChanged.connect(self.on_value_changed)
+        self.sp2.valueChanged.connect(self.on_value_changed)
+
+
+    def on_value_changed(self):
+        self.slot.default_value = np.array([self.sp1.value(), self.sp2.value()])
+        super(DefaultValueVector2, self).on_value_changed()
+
+
+class DefaultValueVector3(AttributesNodeDefaultValues):
+    def __init__(self, parent, field):
+        super(DefaultValueVector3, self).__init__(parent, field)
+        self.sp1 = QSpinBox(self)
+        self.sp1.setRange(0, 9999999)
+        self.sp1.setValue(self.slot.default_value[0])
+        self.layout().addWidget(self.sp1)
+        self.sp2 = QSpinBox(self)
+        self.sp2.setRange(0, 9999999)
+        self.sp2.setValue(self.slot.default_value[1])
+        self.layout().addWidget(self.sp2)
+        self.sp3 = QSpinBox(self)
+        self.sp3.setRange(0, 9999999)
+        self.sp3.setValue(self.slot.default_value[2])
+        self.layout().addWidget(self.sp3)
+
+        self.sp1.valueChanged.connect(self.on_value_changed)
+        self.sp2.valueChanged.connect(self.on_value_changed)
+        self.sp3.valueChanged.connect(self.on_value_changed)
+
+    def on_value_changed(self):
+        self.slot.default_value = np.array([self.sp1.value(), self.sp2.value(), self.sp3.value()])
+        super(DefaultValueVector3, self).on_value_changed()
+
+
+class DefaultLiteral(AttributesNodeDefaultValues):
+    def __init__(self, parent, field):
+        super(DefaultLiteral, self).__init__(parent, field)
+        self.lineEdit = QLineEdit(self)
+        self.lineEdit.setText(self.slot.default_value)
+        self.layout().addWidget(self.lineEdit)
+
+        self.lineEdit.textChanged.connect(self.on_value_changed)
+
+    def on_value_changed(self):
+        self.slot.default_value = self.lineEdit.text()
+        super(DefaultLiteral, self).on_value_changed()

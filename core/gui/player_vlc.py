@@ -6,6 +6,7 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
 
+from core.gui.ewidgetbase import EDockWidget
 from core.data.computation import parse_file_path
 from core.data.interfaces import IProjectChangeNotify
 from core.vlc import vlc
@@ -34,7 +35,7 @@ class MacPlayerContainer(QtWidgets.QMainWindow):
         self.resize(target.size())
         self.player.videoframe.resize(target.size())
 
-
+# QtWidgets.QFrame
 class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
@@ -46,7 +47,7 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
     timeChanged = pyqtSignal(long)
 
     def __init__(self, main_window):
-        super(VideoPlayer, self).__init__()
+        super(VideoPlayer, self).__init__(main_window)
         self.main_window = main_window
         self.media_descriptor = None
         # These Variables are initialized to be sure they exist in Classes inheriting from VideoPlayer
@@ -63,6 +64,11 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
         self.playing = False
         self.volume = 0
         self.mute = False
+
+        self.use_user_fps = False
+        self.user_fps = 29.9999999
+
+
         self.videoframe = QFrame(self)
 
     # *** EXTENSION METHODS *** #
@@ -193,7 +199,6 @@ class Player_VLC(VideoPlayer):
         self.media = None
         self.init_ui()
 
-
         self.pause_timer = QtCore.QTimer()
         self.pause_timer.setInterval(1000)
         self.pause_timer.setSingleShot(True)
@@ -271,13 +276,14 @@ class Player_VLC(VideoPlayer):
         if fps != 0:
             self.fps = fps
 
+        self.user_fps = self.fps
+
     def get_subtitles(self):
         subs = self.media_player.video_get_spu_description()
         return subs
 
     def set_subtitle(self, index):
         self.media_player.video_set_spu(index)
-
 
     # *** ELAN INTERFACE METHODS *** #
 
@@ -323,7 +329,6 @@ class Player_VLC(VideoPlayer):
 
         if self.main_window.is_darwin:
             self.mac_frame.update()
-
 
     def play_pause(self):
         if not self.is_playing():
@@ -444,7 +449,10 @@ class Player_VLC(VideoPlayer):
         print NotImplementedError("Method <set_miliseconds_per_sample> not implemented")
 
     def get_fps(self):
-        return self.media_player.get_fps()
+        if self.use_user_fps:
+            return self.user_fps
+        else:
+            return self.media_player.get_fps()
 
     def on_loaded(self, project):
         path = project.movie_descriptor.movie_path
@@ -462,7 +470,7 @@ class Player_VLC(VideoPlayer):
 
     def get_frame_pos_by_time(self, time):
         fps = self.get_fps()
-        pos = float(time) / 1000 * fps
+        pos = round(round(float(time) / 1000, 0) * fps, 0)
         return int(pos)
 
     def on_selected(self,sender, selected):

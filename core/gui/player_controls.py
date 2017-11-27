@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 from PyQt5 import QtCore, uic
+from PyQt5.QtWidgets import QComboBox, QSpinBox
 
 from core.data.computation import ms_to_string
 from core.gui.ewidgetbase import EDockWidget
@@ -29,6 +30,9 @@ class PlayerControls(EDockWidget):
 
         self.comboBox_Subs.currentIndexChanged.connect(self.on_subs_changed)
 
+        self.sp_fps.valueChanged.connect(self.on_fps_changed)
+        self.cB_fps_Mode.currentIndexChanged.connect(self.on_fps_changed)
+
 
         # Slider Update Timer
 
@@ -45,6 +49,9 @@ class PlayerControls(EDockWidget):
         self.initial_values_timer.setSingleShot(True)
         self.initial_values_timer.setInterval(1000)
         self.initial_values_timer.timeout.connect(self.update_movie)
+
+
+
         self.on_hide_slider()
 
         self.main_window.player.movieOpened.connect(self.initial_values_timer.start)
@@ -83,6 +90,15 @@ class PlayerControls(EDockWidget):
         else:
             self.btn_play.setText("Pause ")
         self.main_window.player.set_subtitle(1)
+
+    def on_fps_changed(self):
+        # self.cB_fps_Mode = QComboBox()
+        if self.cB_fps_Mode.currentIndex() == 0:
+            self.main_window.player.use_user_fps = False
+        else:
+            self.main_window.player.use_user_fps = True
+            self.main_window.player.user_fps = self.sp_fps.value()
+
 
     def update_ui(self):
         self.lbl_Rate.setText(str(round(self.main_window.player.get_rate(),1)))

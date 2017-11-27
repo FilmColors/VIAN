@@ -1,5 +1,6 @@
 from random import randint
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import QObject
 class IProjectChangeNotify():
     def __init__(self, dummy = None):
         dummy = dummy
@@ -23,6 +24,7 @@ class IProjectContainer:
         self.outliner_expanded = False
         self.outliner_highlighted = False
         self.unique_id = -1
+        self.notes = ""
 
     def get_id(self):
         return self.unique_id
@@ -69,6 +71,7 @@ class ITimeRange():
     def move(self, start, end):
         print "ITimelineItem: Not Implemented", self
 
+
 class ILockable():
     def __init__(self):
         self.locked = False
@@ -81,6 +84,7 @@ class ILockable():
 
     def is_locked(self):
         return self.locked
+
 
 class ITimelineItem:
     def set_timeline_visibility(self, visibility):

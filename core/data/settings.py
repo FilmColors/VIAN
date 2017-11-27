@@ -29,7 +29,7 @@ class UserSettings():
             naming.Movie_Source.name,
 
         ]
-        self.USER_NAME = "Gaudenz Halter"
+        self.USER_NAME = "User Name"
         self.CORPUS_IP = "127.0.0.1"
         self.COPRUS_PORT = 5006
         self.COPRUS_PW = "CorpusPassword"
@@ -51,9 +51,9 @@ class UserSettings():
         self.DIR_BASE = (os.path.abspath(".") + "/").replace("\\", "/")
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_USER = "user/"
-        self.store_path = self.DIR_BASE + self.DIR_USER + path
         self.DIR_SCREENSHOTS = "shots/"
         self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
+        self.store_path = self.DIR_PROJECT + path
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
 
         if not os.path.isdir(self.DIR_PROJECT):
@@ -76,22 +76,27 @@ class UserSettings():
 
     def store(self):
         dict = vars(self)
+        try:
+            with open(self.store_path, 'w') as f:
+                json.dump(dict, f)
+            print "Stored Settings to: ", self.store_path
+        except Exception as e:
+            print e.message
 
-        with open(self.store_path, 'w') as f:
-            json.dump(dict, f)
 
     def load(self):
         try:
-            with open(self.store_path) as f:
+            with open(self.store_path ,"r") as f:
                 dict = json.load(f)
                 for attr, value in dict.iteritems():
                     if not attr == "PALETTES" and not attr=="MAIN_FONT":
                         setattr(self, attr, value)
+                print "Loaded Settings from: ", self.store_path
         except IOError as e:
             print "No Settings found", e.message
 
     def load_last(self):
-        files = glob.glob(os.path.abspath(self.DIR_USER + "settings.json"))
+        files = glob.glob(self.DIR_PROJECT)
         if len(files) > 0:
             files.sort(key=os.path.getmtime, reverse=True)
             self.store_path = files[0]

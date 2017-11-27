@@ -266,7 +266,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             image_path = unicode(image_path)
 
             img = cv2.imread(image_path)
-            print "IMAGE Returned", img
             if img is None:
                 return
 
@@ -448,14 +447,12 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
     def hide_opencv_image(self):
         if  self.settings.OPENCV_PER_FRAME:
             if self.opencv_image_visible == True:
-                print "Hidden"
                 self.opencv_image_visible = False
                 self.opencv_image.hide()
 
     def show_opencv_image(self):
         if self.settings.OPENCV_PER_FRAME:
             if self.opencv_image_visible == False:
-                print "Shown"
                 self.opencv_image_visible = True
                 self.update_opencv_image(self.main_window.player.get_media_time())
                 self.opencv_image.show()
@@ -502,7 +499,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.move(location)
         self.setFixedSize(x,y)
         self.opencv_image.setFixedSize(x,y)
-        if self.opencv_image_visible and self.videoCap and self.settings.OPENCV_PER_FRAME:
+        if self.opencv_image_visible and self.videoCap is not None and self.settings.OPENCV_PER_FRAME and self.opencv_image.pixmap():
             self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
 
         # if self.opencv_image_visible and self.videoCap:
@@ -566,13 +563,14 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def update_opencv_image(self, time):
         try:
-            fps = self.main_window.player.fps
-            idx = int(float(time) / (1000.0 / fps))
+            idx = self.main_window.player.get_frame_pos_by_time(time)
+            # idx = int(float(time) / (1000.0 / fps))
             self.videoCap.set(cv2.CAP_PROP_POS_FRAMES, idx)
             ret, frame = self.videoCap.read()
             qimage, qpixmap = numpy_to_qt_image(frame)
             self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
-        except:
+        except Exception as e:
+            print e.message
             pass
 
 

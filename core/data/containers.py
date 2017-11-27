@@ -10,6 +10,7 @@ from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelec
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 
+from core.node_editor.node_editor import *
 from enum import Enum
 # from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -23,11 +24,14 @@ SCREENSHOT = 4
 MOVIE_DESCRIPTOR = 5
 ANALYSIS = 6
 SCREENSHOT_GROUP = 7
+NODE = 8
+NODE_SCRIPT = 9
 
 
 class ElanExtensionProject(IHasName):
     def __init__(self, main_window, path = "", name = ""):
         self.undo_manager = UndoRedoManager()
+        self.main_window = main_window
 
         self.path = path
         self.name = name
@@ -41,6 +45,12 @@ class ElanExtensionProject(IHasName):
         self.movie_descriptor = MovieDescriptor(project=self)
         self.analysis = []
         self.screenshot_groups = []
+
+        self.current_script = None
+        self.node_scripts = []
+        self.create_script(dispatch=False)
+
+
         self.add_screenshot_group("All Shots", initial=True)
         self.active_screenshot_group = self.screenshot_groups[0]
         self.active_screenshot_group.is_current = True
@@ -48,7 +58,7 @@ class ElanExtensionProject(IHasName):
         self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
-        self.main_window = main_window
+
         self.selected = []
 
 
@@ -100,10 +110,12 @@ class ElanExtensionProject(IHasName):
     def get_type(self):
         return PROJECT
 
+    #region Segmentation
     def create_segmentation(self, name = None):
         s = Segmentation(name)
 
         self.add_segmentation(s)
+        return s
 
     def add_segmentation(self, segmentation):
         self.segmentation.append(segmentation)
@@ -174,6 +186,10 @@ class ElanExtensionProject(IHasName):
     def get_segmentations(self):
         return self.segmentation
 
+    # endregion
+
+    # region Screenshots
+
     def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)
         screenshot.set_project(self)
@@ -230,9 +246,35 @@ class ElanExtensionProject(IHasName):
         else:
             print "Not Found"
 
+    def get_screenshots(self):
+        return self.screenshots
 
+    def add_screenshot_group(self, name="New Screenshot Group", initial=False, group=None):
+        if not group:
+            grp = ScreenshotGroup(self, name)
+        else:
+            grp = group
 
+        self.screenshot_groups.append(grp)
+        if not initial:
+            self.dispatch_changed()
 
+    def remove_screenshot_group(self, grp):
+        if grp is not self.screenshot_groups[0]:
+            self.screenshot_groups.remove(grp)
+            self.dispatch_changed()
+
+    def set_current_screenshot_group(self, grp):
+        self.active_screenshot_group.is_current = False
+        self.active_screenshot_group = grp
+        grp.is_current = True
+        self.dispatch_changed()
+
+    def get_active_screenshots(self):
+        return self.active_screenshot_group.screenshots
+    #endregion
+
+    #region Analysis
     def add_analysis(self, analyze):
         analyze.set_project(self)
         self.analysis.append(analyze)
@@ -250,6 +292,8 @@ class ElanExtensionProject(IHasName):
             if a.target_id == item.unique_id:
                 result.append(item)
         return item
+    #endregion
+
 
     # Getters for easier changes later in the project
     def set_selected(self,sender, selected = []):
@@ -284,33 +328,7 @@ class ElanExtensionProject(IHasName):
     def get_movie(self):
         return self.movie_descriptor
 
-    def get_screenshots(self):
-        return self.screenshots
-
-    def add_screenshot_group(self, name = "New Screenshot Group", initial = False, group = None):
-        if not group:
-            grp = ScreenshotGroup(self, name)
-        else:
-            grp = group
-
-        self.screenshot_groups.append(grp)
-        if not initial:
-            self.dispatch_changed()
-
-    def remove_screenshot_group(self, grp):
-        if grp is not self.screenshot_groups[0]:
-            self.screenshot_groups.remove(grp)
-            self.dispatch_changed()
-
-    def set_current_screenshot_group(self, grp):
-        self.active_screenshot_group.is_current = False
-        self.active_screenshot_group = grp
-        grp.is_current = True
-        self.dispatch_changed()
-
-    def get_active_screenshots(self):
-        return self.active_screenshot_group.screenshots
-
+    #region Annotations
     def create_annotation_layer(self,name, t_start, t_stop):
         layer = AnnotationLayer(name, t_start, t_stop)
         self.add_annotation_layer(layer)
@@ -346,15 +364,47 @@ class ElanExtensionProject(IHasName):
 
     def get_annotation_layers(self):
         return self.annotation_layers
+    #endregion
+
+    #region NodeScripts
+    def create_script(self, dispatch = True):
+        script = NodeScript("New Script")
+        self.add_script(script)
+
+        if dispatch:
+            self.dispatch_changed()
+
+    def add_script(self, script):
+        script.set_project(self)
+        self.node_scripts.append(script)
+        self.current_script = script
+
+    def remove_script(self, script):
+        if script in self.node_scripts:
+            self.node_scripts.remove(script)
+        self.dispatch_changed()
+
+    def set_current_script(self, script):
+        self.current_script = script
+        self.dispatch_changed()
+    #endregion
+
 
     def store_project(self, settings, global_settings, path = None):
-
+        """
+        DEPRECATED
+        :param settings: 
+        :param global_settings: 
+        :param path: 
+        :return: 
+        """
         a_layer = []
         screenshots = []
         screenshots_img = []
         screenshots_ann = []
         segmentations = []
         analyzes = []
+        scripts = []
 
         for a in self.annotation_layers:
             a_layer.append(a.serialize())
@@ -365,12 +415,15 @@ class ElanExtensionProject(IHasName):
             screenshots_img.append(img[0])
             screenshots_ann.append(img[1])
 
-
         for c in self.segmentation:
             segmentations.append(c.serialize())
 
         for d in self.analysis:
             analyzes.append(d.serialize())
+
+        for e in self.node_scripts:
+            scripts.append(e.serialize())
+
 
         data = dict(
             path = self.path,
@@ -382,7 +435,8 @@ class ElanExtensionProject(IHasName):
             screenshots = screenshots,
             segmentation = segmentations,
             analyzes = analyzes,
-            movie_descriptor = self.movie_descriptor.serialize()
+            movie_descriptor = self.movie_descriptor.serialize(),
+            scripts = scripts
         )
 
         if path is None:
@@ -474,14 +528,26 @@ class ElanExtensionProject(IHasName):
             self.active_screenshot_group = self.screenshot_groups[0]
             self.screenshot_groups[0].is_current = True
 
+            old_script = self.node_scripts[0]
+            self.node_scripts = []
+
+            for f in my_dict['scripts']:
+                new = NodeScript().deserialize(f)
+                self.add_script(new)
+
+            if len(self.node_scripts) == 0:
+                self.add_script(old_script)
+                self.current_script = old_script
+
         except Exception as e:
             self.screenshot_groups = old
             print e.message
             self.main_window.print_message("Screenshot Group import failed", "Red")
-        print "MOVIE PATH:", self.movie_descriptor.movie_path
+
         self.sort_screenshots()
         self.undo_manager.clear()
 
+    # region Setters/Getters
     def cleanup(self):
         for l in self.annotation_layers:
             for w in l.annotations:
@@ -511,6 +577,12 @@ class ElanExtensionProject(IHasName):
         self.id_list.append((item_id, container_object))
         self.id_list = sorted(self.id_list, key=lambda x: x[0])
 
+    def remove_from_id_list(self, container_object):
+        for d in self.id_list:
+            if d[1] == container_object:
+                self.id_list.remove(d)
+                break
+
     def get_by_id(self, item_id):
         """
         Binary Search
@@ -536,7 +608,9 @@ class ElanExtensionProject(IHasName):
 
     def set_notes(self, notes):
         self.notes = notes
+    #endregion
 
+    #region Dispatchers
     def dispatch_changed(self, receiver = None, item = None):
         self.main_window.dispatch_on_changed(receiver, item = item)
 
@@ -544,9 +618,13 @@ class ElanExtensionProject(IHasName):
         self.main_window.dispatch_on_loaded()
 
     def dispatch_selected(self, sender):
+
         self.main_window.dispatch_on_selected(sender,self.selected)
+    #endregion
 
+    pass
 
+#region Segmentaion
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable):
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
@@ -811,6 +889,9 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.segmentation.remove_segment(self)
 
 
+#endregion
+
+#region Annotation
 class AnnotationType(Enum):
     Rectangle = 0
     Ellipse = 1
@@ -1185,7 +1266,9 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         IProjectContainer.set_project(self, project)
         for a in self.annotations:
             a.set_project(project)
+#endregion
 
+#region Screenshots
 
 class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem):
     def __init__(self, title = "", image = None,
@@ -1364,9 +1447,238 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
         return self
 
+#endregion
 
+#region NodeScripts
+
+class NodeScript(IProjectContainer, IHasName, ISelectable):
+    def __init__(self, name = ""):
+        IProjectContainer.__init__(self)
+        self.name = name
+        self.notes = ""
+        self.nodes = []
+        self.connections = []
+
+    def create_node(self, operation, pos, unique_id = -1):
+        new = NodeDescriptor(operation, pos, unique_id)
+        new.set_project(self.project)
+        self.add_node(new)
+        return new
+
+    def add_node(self, node):
+        self.nodes.append(node)
+        self.dispatch_on_changed()
+
+    def remove_node(self, node, dispatch = True):
+        if node in self.nodes:
+            self.nodes.remove(node)
+            self.project.remove_from_id_list(node)
+
+            if dispatch:
+                self.dispatch_on_changed()
+            print "Removed"
+        else:
+            print "Not Found"
+
+    def create_connection(self, connection, unique_id = -1):
+        new = ConnectionDescriptor(connection.input_field, connection.output_field,
+                                   connection.input_field.field_id, connection.output_field.field_id)
+
+        new.unique_id = unique_id
+        new.set_project(self.project)
+        self.connections.append(new)
+        return new
+
+    def add_connection(self, connection):
+        self.connections.append(connection)
+
+    def remove_connection(self, connection):
+        if connection in self.connections:
+            self.connections.remove(connection)
+            self.project.remove_from_id_list(connection)
+
+    def clear(self):
+        for c in self.connections:
+            self.connections.remove(c)
+        for n in self.nodes:
+            self.nodes.remove(n)
+
+    #region IProjectContainer
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+        self.project.dispatch_changed(item=self)
+
+    def get_type(self):
+        return NODE_SCRIPT
+
+    def serialize(self):
+        nodes = []
+        connections = []
+
+        for n in self.nodes:
+            nodes.append(n.serialize())
+
+        for c in self.connections:
+            connections.append(c.serialize())
+
+        data = dict(
+            name = self.name,
+            unique_id = self.unique_id,
+            nodes=nodes,
+            connections=connections,
+            notes = self.notes
+        )
+
+        return data
+
+    def deserialize(self, serialization):
+        nodes = serialization['nodes']
+        connections = serialization['connections']
+
+        # node_editor = self.project.main_window.node_editor_dock.node_editor
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.notes = serialization['notes']
+
+        for n in nodes:
+            node = NodeDescriptor().deserialize(n)
+            node.set_project(self.project)
+            self.add_node(node)
+            # pos = QPoint(n['pos'][0] * node_editor.scale, n['pos'][1] * node_editor.scale)
+            # node.scale(node_editor.scale)
+            # node.node_pos = pos
+
+            # node.move(pos)
+
+        for c in connections:
+            conn = ConnectionDescriptor().deserialize(c)
+            conn.set_project(self.project)
+            self.add_connection(conn)
+
+        return self
+
+
+class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
+    def __init__(self, operation = None, pos = (0, 0), unique_id = -1):
+        IProjectContainer.__init__(self)
+        self.unique_id = unique_id
+        self.node_size = (200,200)
+        if isinstance(pos, tuple):
+            self.node_pos = pos
+        else:
+            self.node_pos = (pos.x(), pos.y())
+        self.operation = operation
+
+        if operation is not None:
+            self.name = operation.name
+
+        self.node_widget = None
+
+    def set_position(self, qpoint):
+        self.node_pos = (qpoint.x(), qpoint.y())
+
+    def set_size(self, qsize):
+        self.node_size = (qsize.width(), qsize.height())
+
+    def get_position(self):
+        return QPoint(self.node_pos[0], self.node_pos[1])
+
+    def get_size(self):
+        return QSize(self.node_size[0], self.node_size[1])
+
+    #region IProjectContainer
+    def get_type(self):
+        return NODE
+
+    def get_name(self):
+        return self.operation.name
+
+    def get_notes(self):
+        return self.notes
+
+    def set_notes(self, notes):
+        self.notes = notes
+
+    #endregion
+    def serialize(self):
+        default_values = []
+        for s in self.operation.input_slots:
+            value = s.default_value
+            if value is None:
+                value = -1
+            if isinstance(value, np.ndarray):
+                value = value.tolist()
+            default_values.append(value)
+
+
+        data = dict(
+            name=self.name,
+            unique_id=self.unique_id,
+            node_pos = self.node_pos,
+            node_size = self.node_size,
+            default_values = default_values,
+            operation = self.operation.__class__.__name__,
+            notes=self.notes
+        )
+
+        return data
+
+    def deserialize(self, serialization):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.node_pos = serialization['node_pos']
+        self.node_size = serialization['node_size']
+        self.notes = serialization['notes']
+
+        self.operation = eval(serialization['operation'])()
+        default_values = serialization['default_values']
+
+        for i, s in enumerate(self.operation.input_slots):
+            if default_values[i] == -1:
+                s.default_value = None
+            else:
+                s.default_value = default_values[i]
+
+        return self
+
+
+class ConnectionDescriptor(IProjectContainer):
+    def __init__(self, input_pin=None, output_pin=None, input_pin_id=None, output_pin_id=None):
+        IProjectContainer.__init__(self)
+        if input_pin is not None:
+            self.input_node = input_pin.node.node_object.unique_id
+        if output_pin is not None:
+            self.output_node = output_pin.node.node_object.unique_id
+        self.input_pin_id = input_pin_id
+        self.output_pin_id = output_pin_id
+
+    def serialize(self):
+        data = dict(
+            input_node = self.input_node,
+            output_node=self.output_node,
+            input_pin_id=self.input_pin_id,
+            output_pin_id=self.output_pin_id
+        )
+        return data
+
+    def deserialize(self, serialization):
+        self.input_node = serialization['input_node']
+        self.output_node = serialization['output_node']
+        self.input_pin_id = serialization['input_pin_id']
+        self.output_pin_id = serialization['output_pin_id']
+
+        return self
+
+
+#endregion
+
+#region Analysis/MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
-    def __init__(self, project, movie_name = "No Movie Name", movie_path = "", movie_id = -0001, year = 1800, source = "", duration = 100):
+    def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0001, year=1800, source="",
+                 duration=100):
         IProjectContainer.__init__(self)
         self.set_project(project)
         self.movie_name = movie_name
@@ -1381,11 +1693,11 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
         data = dict(
             movie_name=self.movie_name,
             unique_id=self.unique_id,
-            movie_path = self.movie_path,
-            movie_id = self.movie_id,
-            year = self.year,
-            source = self.source,
-            duration = self.duration,
+            movie_path=self.movie_path,
+            movie_id=self.movie_id,
+            year=self.year,
+            source=self.source,
+            duration=self.duration,
             notes=self.notes,
         )
         return data
@@ -1395,8 +1707,8 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
         self.dispatch_on_changed(item=self)
 
     def deserialize(self, serialization):
-        for key,value in serialization.items():
-            setattr(self,key, value)
+        for key, value in serialization.items():
+            setattr(self, key, value)
         return self
 
     def get_type(self):
@@ -1419,8 +1731,8 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
         return cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
 
-class Analysis(IProjectContainer,ITimeRange, IHasName, ISelectable):
-    def __init__(self, name = None, t_start = None, t_end = None, data = None, procedure_id = None, target_id = None):
+class Analysis(IProjectContainer, ITimeRange, IHasName, ISelectable):
+    def __init__(self, name=None, t_start=None, t_end=None, data=None, procedure_id=None, target_id=None):
         IProjectContainer.__init__(self)
         self.name = name
         self.data = data
@@ -1460,10 +1772,10 @@ class Analysis(IProjectContainer,ITimeRange, IHasName, ISelectable):
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
-            data = data_json,
-            procedure_id = self.procedure_id,
-            target_id = self.target_id,
-            notes = self.notes
+            data=data_json,
+            procedure_id=self.procedure_id,
+            target_id=self.target_id,
+            notes=self.notes
         )
 
         return data
@@ -1485,3 +1797,5 @@ class Analysis(IProjectContainer,ITimeRange, IHasName, ISelectable):
     def delete(self):
         self.project.remove_analysis(self)
 
+#endregion
+pass

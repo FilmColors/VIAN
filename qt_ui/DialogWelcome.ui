@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>847</width>
-    <height>864</height>
+    <width>779</width>
+    <height>535</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,18 +16,36 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QWidget" name="widget" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:36pt; font-weight:600;&quot;&gt;Welcome to VIAN 0.1.1 !&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:24pt; font-weight:600;&quot;&gt;Important Notes:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Be aware, that this is still a beta version, therefore, &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#ff0000;&quot;&gt;issues&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt; may (and will) occur. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;To ensure that your experience of VIAN is adequate, please note the following:&lt;br/&gt;&lt;br/&gt;-&amp;gt; While most basic functionalities are implemented, some are not yet finished. Especially the Analysis is not yet ready to use, please &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#ff0000;&quot;&gt;do not use&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt; them, yet. But &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#008000;&quot;&gt;look forward&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt; to the mighty tools later implemented.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;-&amp;gt; Of course, &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#14990a;&quot;&gt;taking screenshots is fun&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;! But be aware, that the VIAN keeps all taken screenshots in Memory while the project is open. Depending on the resolution of a movie, and your computers specifications, your computer may suffer from its heavy duty and even abandon you. Thus, &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#ff0000;&quot;&gt;use the autosave, and save on a regular basis. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;-&amp;gt; On &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#ff0000;&quot;&gt;OSX&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;, you might experience situations, where the User Interface doesn't seem to respond as expected, or not at all. In such cases, shortly focus another application, like the Finder, and switch back to VIAN. It is best practise to do so, when the application has been started. Therefore, &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#ff0000;&quot;&gt;once the application has started, shortly click on another Application (like Finder, Firefox, etc.) and switch back. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;-&amp;gt; &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#ff0000;&quot;&gt;MovieFormats&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;: Be aware, that while most movie-formats may be opened by VIAN, it may refuse to take screenshots of them. This is especially true on OSX in combination with .mkv. (Sorry for that) &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;-&amp;gt; Finally, this software &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#408000;&quot;&gt;needs your Feedback&lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt; to overcome its issues! Please let me know when your software crashed, you find something is behaving odd or you have a genius idea to improve this application! &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;-&amp;gt; You can message me on slack, email or write issues on Github. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;gaudenz.halter@uzh.ch&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Gaudi19/VIAN&quot;&gt;&lt;span style=&quot; font-size:14pt; text-decoration: underline; color:#408000;&quot;&gt;Github&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <layout class="QVBoxLayout" name="verticalLayout_2"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>742</width>
+        <height>750</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt; font-weight:600;&quot;&gt;Welcome to VIAN 0.1.1 !&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Important Notes:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Be aware, that this is still a beta version, therefore, &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#ff0000;&quot;&gt;issues&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt; may (and will) occur. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;To ensure that your experience of VIAN is adequate, please note the following:&lt;br/&gt;&lt;br/&gt;-&amp;gt; While most basic functionalities are implemented, some are not yet finished. Especially the Analysis is not yet ready to use, please &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#ff0000;&quot;&gt;do not use&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt; them, yet. But &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#008000;&quot;&gt;look forward&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt; to the mighty tools later implemented.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;-&amp;gt; Of course, &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#14990a;&quot;&gt;taking screenshots is fun&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;! But be aware, that the VIAN keeps all taken screenshots in Memory while the project is open. Depending on the resolution of a movie, and your computers specifications, your computer may suffer from its heavy duty and even abandon you. Thus, &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#ff0000;&quot;&gt;use the autosave, and save on a regular basis. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;-&amp;gt; On &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#ff0000;&quot;&gt;OSX&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;, you might experience situations, where the User Interface doesn't seem to respond as expected, or not at all. In such cases, shortly focus another application, like the Finder, and switch back to VIAN. It is best practise to do so, when the application has been started. Therefore, &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#ff0000;&quot;&gt;once the application has started, shortly click on another Application (like Finder, Firefox, etc.) and switch back. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;-&amp;gt; &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#ff0000;&quot;&gt;MovieFormats&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;: Be aware, that while most movie-formats may be opened by VIAN, it may refuse to take screenshots of them. This is especially true on OSX in combination with .mkv. (Sorry for that) &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;-&amp;gt; Finally, this software &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600; color:#408000;&quot;&gt;needs your Feedback&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt; to overcome its issues! Please let me know when your software crashed, you find something is behaving odd or you have a genius idea to improve this application! &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;-&amp;gt; You can message me on slack, email or write issues on Github. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;gaudenz.halter@uzh.ch&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/Gaudi19/VIAN&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#408000;&quot;&gt;Github&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>

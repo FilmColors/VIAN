@@ -307,6 +307,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.curr_scale = 1.0
 
         self.update_caption()
+
     def center_images(self):
         self.fitInView(self.sceneRect(), QtCore.Qt.KeepAspectRatio)
 

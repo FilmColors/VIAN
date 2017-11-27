@@ -1,45 +1,58 @@
 name: vian_win
 channels:
 - anaconda
+- conda-forge
 - menpo
 - anaconda-fusion
 - defaults
 dependencies:
-- icu=57.1=vc9_0
-- jpeg=9b=vc9_0
-- libpng=1.6.30=vc9_1
-- openssl=1.0.2l=vc9_0
-- pyqt=5.6.0=py27_2
-- qt=5.6.2=vc9_6
-- sip=4.18=py27_0
-- zlib=1.2.11=vc9_0
-- mkl=2017.0.3=0
-- numpy=1.13.1=py27_0
+- backports=1.0=py27h6492d98_1
+- backports_abc=0.5=py27h0ec6b72_0
+- bokeh=0.12.10=py27h5ac3b79_0
+- ca-certificates=2017.08.26=h94faf87_0
+- futures=3.1.1=py27h71313b4_0
+- icc_rt=2017.0.4=h97af966_0
+- icu=58.2=vc9h3e79e4e_0
+- intel-openmp=2018.0.0=hcd89f80_7
+- jinja2=2.9.6=py27hb525989_1
+- jpeg=9b=vc9hb90d6ad_1
+- markupsafe=1.0=py27h9d4480d_1
+- mkl=2018.0.0=h36b65af_4
+- numpy=1.13.3=py27h9ac254c_0
+- openssl=1.0.2l=vc9hb274bc6_5
+- pyqt=5.6.0=py27h224ed30_5
+- python-dateutil=2.6.1=py27hbdcc174_1
+- pyyaml=3.12=py27_0
+- singledispatch=3.4.0.3=py27h3f9d112_0
+- sip=4.18.1=py27h5ec1c1a_2
+- six=1.11.0=py27ha5e1701_1
+- sqlite=3.20.1=vc9h5ec81ce_1
+- ssl_match_hostname=3.5.0.1=py27hea8a0f4_2
+- tornado=4.5.2=py27hbdd278e_0
+- zlib=1.2.11=vc9ha80f4e8_1
+- backports.functools_lru_cache=1.4=py27_1
+- cycler=0.10.0=py27_0
+- freetype=2.7=vc9_2
+- functools32=3.2.3.2=py27_1
+- libpng=1.6.28=vc9_2
+- matplotlib=2.1.0=py27_1
+- pyparsing=2.2.0=py27_0
+- pytz=2017.3=py_2
+- qt=5.6.2=vc9_1
+- certifi=2016.2.28=py27_0
+- enum34=1.1.6=py27_0
 - pip=9.0.1=py27_1
+- pyodbc=4.0.17=py27_0
 - python=2.7.13=1
-- setuptools=27.2.0=py27_1
+- setuptools=36.4.0=py27_1
+- vc=9=0
 - vs2008_runtime=9.00.30729.5054=0
 - wheel=0.29.0=py27_0
-- enum=0.4.4=py27_0
+- wincertstore=0.2=py27_0
 - opencv3=3.1.0=py27_0
 - pip:
   - backports-abc==0.5
-  - bkcharts==0.2
-  - bokeh==0.12.7
-  - certifi==2017.7.27.1
-  - cycler==0.10.0
-  - enum34==1.1.6
-  - functools32==3.2.3.post2
-  - futures==3.1.1
-  - jinja2==2.9.6
-  - markupsafe==1.0
-  - matplotlib==2.0.2
-  - pyparsing==2.2.0
-  - python-dateutil==2.6.1
-  - pytz==2017.2
-  - pyyaml==3.12
-  - singledispatch==3.4.0.3
-  - six==1.10.0
-  - tornado==4.5.2
-prefix: C:\dev\anaconda\envs\mara_win
+  - backports.functools-lru-cache==1.4
+  - backports.ssl-match-hostname==3.5.0.1
+prefix: C:\dev\anaconda\envs\vian_win
 
