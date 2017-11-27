@@ -440,12 +440,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         else:
             return a - (a % (float(self.settings.GRID_SIZE) / self.scale))
 
-    def create_segment(self, lst):
+    def create_segment(self, lst = None):
+        # If Nothing is handed in, we're performing a fast-segmentation
+        # which means, that the segment is created from the last segments end to the current movie-time
         if not lst:
             lst = [self.curr_movie_time - 1, self.curr_movie_time]
-
         if self.selected is not None:
-            print self.selected
             if self.selected.get_type() == SEGMENTATION:
                 self.selected.create_segment(lst[0], lst[1])
 

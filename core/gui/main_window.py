@@ -242,6 +242,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
 
+        self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
+        self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
+
 
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
@@ -897,6 +900,16 @@ class MainWindow(QtWidgets.QMainWindow):
         worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished="Hilbert Histogram Calculated", target_id=target_id)
         self.start_worker(worker, analysis.get_name())
 
+    def on_save_custom_perspective(self):
+        setting = QSettings("Custom perspective", "VIAN")
+        setting.setValue("geometry", self.saveGeometry())
+        setting.setValue("windowState", self.saveState())
+
+    def on_load_custom_perspective(self):
+        setting = QSettings("Custom perspective", "VIAN")
+        self.restoreGeometry(setting.value("geometry"))
+        self.restoreState(setting.value("windowState"))
+
 
     def start_worker(self, worker, name = "New Task"):
         self.concurrent_task_viewer.add_task(worker.task_id, name)
@@ -916,7 +929,6 @@ class MainWindow(QtWidgets.QMainWindow):
         about += "Version:".ljust(12) + __version__ + "\n"
         about += "Credits:".ljust(12) + str(__credits__) + "\n"
         QMessageBox.about(self, "About", about)
-
 
     def increase_playrate(self):
         self.player.set_rate(self.player.get_rate() + 0.1)

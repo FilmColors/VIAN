@@ -112,6 +112,9 @@
      <addaction name="actionAnnotationPersp"/>
      <addaction name="actionScreenshotsPersp"/>
      <addaction name="actionAnalysisPerspective"/>
+     <addaction name="separator"/>
+     <addaction name="actionSave_Perspective"/>
+     <addaction name="actionLoad_Perspective"/>
     </widget>
     <addaction name="menuToolboxes"/>
     <addaction name="actionPlayerControls"/>
@@ -387,6 +390,16 @@
   <action name="actionWelcome">
    <property name="text">
     <string>Welcome</string>
+   </property>
+  </action>
+  <action name="actionSave_Perspective">
+   <property name="text">
+    <string>Save Perspective</string>
+   </property>
+  </action>
+  <action name="actionLoad_Perspective">
+   <property name="text">
+    <string>Load Perspective</string>
    </property>
   </action>
  </widget>
