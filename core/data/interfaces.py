@@ -175,5 +175,6 @@ class IConcurrentJob():
         print "run_concurrent not implemented by", self
 
     def modify_project(self, project, result, sign_progress = None):
-        print "modify_project not implemented by", self
+        pass
+        # print "modify_project not implemented by", self
 

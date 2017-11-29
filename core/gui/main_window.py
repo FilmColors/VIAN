@@ -93,7 +93,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vlc_player = vlc_player
 
         self.updater = VianUpdater(self, self.version)
-        self.updater.update()
 
         self.key_event_handler = EKeyEventHandler(self)
 
@@ -260,6 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
 
 
+        self.actionUpdate.triggered.connect(self.update_vian)
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -540,6 +540,16 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+    def update_vian(self):
+        result = self.updater.get_server_version()
+        if result:
+            answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\n\nDo you want to Update now?")
+            if answer == QMessageBox.Yes:
+                self.updater.update()
+            else:
+                self.print_message("Update Aborted", "Orange")
+
+
     def open_preferences(self):
         dialog = DialogPreferences(self)
         dialog.show()

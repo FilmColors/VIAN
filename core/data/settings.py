@@ -56,6 +56,8 @@ class UserSettings():
         self.store_path = self.DIR_PROJECT + path
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
 
+        self.UPDATE_SOURCE = "\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
+
         if not os.path.isdir(self.DIR_PROJECT):
             os.mkdir(self.DIR_PROJECT)
         # Annotation Viewer
