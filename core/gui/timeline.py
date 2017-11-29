@@ -18,6 +18,7 @@ class TimelineContainer(EDockWidget):
         self.timeline = Timeline(main_window, self)
         self.setWidget(self.timeline)
         self.setWindowTitle("Timeline")
+        self.resize(self.width(), 400)
 
     def resizeEvent(self, *args, **kwargs):
         super(TimelineContainer, self).resizeEvent(*args, **kwargs)
@@ -76,6 +77,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.scrollArea.wheelEvent = self.func_tes
         self.main_window.onTimeStep.connect(self.on_timestep_update)
+
+
 
 
         # self.update_timer = QtCore.QTimer()

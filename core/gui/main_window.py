@@ -184,10 +184,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 
-
-
-
-        self.splitDockWidget(self.outliner, self.perspective_manager, Qt.Vertical)
+        self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
         # self.tabifyDockWidget(self.annotation_toolbar, self.screenshot_toolbar)
@@ -240,12 +237,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionPlayerControls.triggered.connect(self.create_widget_player_controls)
         self.actionPerspectivesToggle.triggered.connect(self.create_perspectives_manager)
         self.actionOutliner.triggered.connect(self.create_outliner)
-
+        self.actionVocabularyManager.triggered.connect(self.create_vocabulary_manager)
+        self.actionInspector.triggered.connect(self.create_inspector)
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
         self.actionScreenshotsPersp.triggered.connect(partial(self.switch_perspective, Perspective.ScreenshotsManager.name))
         self.actionAnalysisPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses.name))
-
+        self.actionHistory.triggered.connect(self.create_history_view)
+        self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
         self.actionAdd_Annotation_Layer.triggered.connect(self.on_new_annotation_layer)
         self.actionAdd_Segmentation.triggered.connect(self.on_new_segmentation)
 
@@ -855,6 +854,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.node_editor_dock.hide()
             self.node_editor_results.hide()
             self.screenshots_manager_dock.hide()
+            self.vocabulary_manager.hide()
 
         elif perspective == Perspective.Annotation.name:
             self.current_perspective = Perspective.Annotation
@@ -865,12 +865,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_toolbar.show()
             self.screenshot_toolbar.show()
             self.timeline.show()
+            self.history_view.hide()
             self.player_controls.show()
             self.annotation_toolbar.raise_()
             self.inspector.show()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
             self.screenshots_manager_dock.show()
             self.node_editor_dock.hide()
+            self.vocabulary_manager.hide()
+            self.node_editor_results.hide()
             # self.concurrent_task_viewer.show()
             # self.history_view.show()
 
@@ -888,11 +891,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_controls.hide()
             self.screenshot_toolbar.raise_()
             self.outliner.hide()
-            self.history_view.show()
+            self.history_view.hide()
             self.screenshots_manager.center_images()
             self.screenshots_manager_dock.hide()
             self.node_editor_dock.hide()
             self.node_editor_results.hide()
+            self.vocabulary_manager.hide()
 
         elif perspective == Perspective.Analyses.name:
             self.current_perspective = Perspective.Analyses
@@ -915,6 +919,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.node_editor_dock.show()
             self.screenshots_manager_dock.hide()
             self.node_editor_results.show()
+            self.vocabulary_manager.hide()
 
 
         self.setCentralWidget(central)

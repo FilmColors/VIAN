@@ -56,11 +56,11 @@
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
+    <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="menuImport"/>
     <addaction name="menuExport"/>
     <addaction name="separator"/>
-    <addaction name="actionClose_Project"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuAnalyze">
@@ -121,6 +121,7 @@
     <addaction name="menuToolboxes"/>
     <addaction name="actionPlayerControls"/>
     <addaction name="separator"/>
+    <addaction name="actionInspector"/>
     <addaction name="actionOutliner"/>
     <addaction name="separator"/>
     <addaction name="actionScreenshot_Manager"/>
@@ -128,8 +129,9 @@
     <addaction name="separator"/>
     <addaction name="menuPerspectives"/>
     <addaction name="separator"/>
-    <addaction name="actionPreferences"/>
+    <addaction name="actionTaksMonitor"/>
     <addaction name="actionHistory"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -412,6 +414,21 @@
   <action name="actionClose_Project">
    <property name="text">
     <string>Close Project</string>
+   </property>
+  </action>
+  <action name="actionInspector">
+   <property name="text">
+    <string>Inspector</string>
+   </property>
+  </action>
+  <action name="actionGeneral">
+   <property name="text">
+    <string>General</string>
+   </property>
+  </action>
+  <action name="actionTaksMonitor">
+   <property name="text">
+    <string>Task Monitor</string>
    </property>
   </action>
  </widget>
