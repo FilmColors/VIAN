@@ -167,6 +167,7 @@ class IConcurrentJob():
         self.show_modify_progress = show_modify_progress
         self.args = args
         self.task_id = randint(10000000, 99999999)
+        self.aborted = False
 
     def prepare(self):
         self.args = self.args
@@ -178,3 +179,5 @@ class IConcurrentJob():
         pass
         # print "modify_project not implemented by", self
 
+    def abort(self):
+        self.aborted = True

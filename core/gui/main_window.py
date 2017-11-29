@@ -55,6 +55,7 @@ __status__ = "Production"
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(long)
+    abortAllConcurrentThreads = pyqtSignal()
 
     def __init__(self,vlc_instance, vlc_player):
         super(MainWindow, self).__init__()
@@ -185,6 +186,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 
+
         self.splitDockWidget(self.outliner, self.perspective_manager, Qt.Vertical)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
@@ -223,6 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.action_importELAN_Project.triggered.connect(self.import_elan_project)
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
+        self.actionClose_Project.triggered.connect(self.close_project)
         self.actionExit.triggered.connect(self.on_exit)
 
         self.actionUndo.triggered.connect(self.on_undo)
@@ -586,12 +589,23 @@ class MainWindow(QtWidgets.QMainWindow):
         path = path[0]
         self.load_project(path)
 
+    def close_project(self):
+        self.project.cleanup()
+        self.project = ElanExtensionProject(self, name="No Project")
+        self.player.stop()
+        #self.project_streamer.release_project()
+        self.abortAllConcurrentThreads.emit()
+
+        #self.project_streamer.set_project(self.project)
+        self.dispatch_on_changed()
+
     def load_project(self, path):
+
         if path == "" or path is None:
             self.print_message("Not Loaded, Path was Empty")
             return
 
-        self.project.cleanup()
+        self.close_project()
 
         new = ElanExtensionProject(self)
         print "Loading Project Path", path
@@ -599,7 +613,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.project = new
 
-        self.project_streamer.set_project(new)
+        #self.project_streamer.set_project(new)
         self.dispatch_on_loaded()
 
     def on_save_project(self, open_dialog=False):
@@ -738,6 +752,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def run_job_concurrent(self, job):
         job.prepare()
         worker = Worker(job.run_concurrent, self, self.on_job_concurrent_result, job.args, msg_finished="Screenshots Loaded", concurrent_job=job)
+        self.abortAllConcurrentThreads.connect(job.abort)
         self.start_worker(worker, "Job")
 
     def on_job_concurrent_result(self, result):
@@ -751,7 +766,8 @@ class MainWindow(QtWidgets.QMainWindow):
         #
         # worker = ProjectModifier(job.modify_project, res, self, self.project, progress)
         # self.thread_pool.start(worker)
-        job.modify_project(project=self.project,result=res)
+        if not job.aborted:
+            job.modify_project(project=self.project,result=res)
 
         self.allow_dispatch_on_change = True
         self.dispatch_on_changed()

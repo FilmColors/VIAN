@@ -127,6 +127,9 @@ class LoadScreenshotsJob(IConcurrentJob):
         screenshots = []
         annotations = []
         for i,frame_pos in enumerate(locations):
+            if self.aborted:
+                break
+
             sign_progress(float(i)/len(locations))
 
             video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)

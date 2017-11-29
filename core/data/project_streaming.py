@@ -28,7 +28,10 @@ class ProjectStreamer():
         self.stream_path = ""
 
         # Removing the temporary File
-        os.remove(self.stream_path)
+        try:
+            os.remove(self.stream_path)
+        except:
+            self.main_window.print_message("No Streaming File Found", "Orange")
 
     def to_stream(self, unique_id, object):
         job = ProjectToStreamJob([self.stream, unique_id, object])
