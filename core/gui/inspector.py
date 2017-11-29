@@ -19,6 +19,14 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.current_att_widgets = []
         self.lineEdit_Name.editingFinished.connect(self.set_name)
         self.textEdit_Notes.textChanged.connect(self.set_notes)
+
+        self.lineEdit_Vocabulary.returnPressed.connect(self.add_voc_word)
+        self.completer = QCompleter()
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+
+        # self.lineEdit_Vocabulary.keyPressEvent.connect(self.vocabulary_key_press)
+        self.lineEdit_Vocabulary.setCompleter(self.completer)
+
         self.item = None
         self.allow_change = False
 
@@ -35,6 +43,25 @@ class Inspector(EDockWidget, IProjectChangeNotify):
     def set_notes(self):
         if self.item is not None and self.allow_change:
             self.item.set_notes(self.textEdit_Notes.toPlainText())
+
+    def vocabulary_key_press(self, QKeyEvent):
+        if QKeyEvent.key() == Qt.Key_Tab:
+            self.lineEdit_Vocabulary.setText(self.completer.currentCompletion())
+
+    def set_voc_words(self):
+        if self.item is not None:
+            text = ""
+            for word in self.item.voc_list:
+                text += word.name + ", "
+            self.textEdit_VocList.setPlainText(text)
+
+    def add_voc_word(self):
+        if self.lineEdit_Vocabulary.text() != "" and self.item is not None:
+            new_word = self.project().get_word_object_from_name(self.lineEdit_Vocabulary.text())
+            if new_word is not None:
+                self.item.add_word(new_word)
+        self.set_voc_words()
+        self.lineEdit_Vocabulary.setText("")
 
     def on_changed(self, project, item):
         if item:
@@ -53,8 +80,9 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.lbl_Type.setText(str(target_item.get_type()))
         self.item = target_item
 
-
+        self.completer.setModel(self.project().get_auto_completer_model())
         self.textEdit_Notes.setPlainText(self.item.get_notes())
+        self.set_voc_words()
 
         widgets = []
         s_type = selected[len(selected) - 1].get_type()
@@ -94,9 +122,9 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.add_attribute_widget(w)
 
         self.allow_change = True
+
     def on_loaded(self, project):
         self.cleanup()
-
 
     def cleanup(self):
         for w in self.current_att_widgets:

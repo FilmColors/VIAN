@@ -13,6 +13,7 @@ from core.data.importers import ELANProjectImporter
 from core.data.masterfile import MasterFile
 from core.data.settings import UserSettings
 from core.data.enums import *
+from core.data.project_streaming import ProjectStreamer
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
@@ -39,6 +40,8 @@ from player_controls import PlayerControls
 from player_vlc import Player_VLC
 from shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from status_bar import StatusBar, OutputLine, StatusProgressBar
+from core.gui.vocabulary import VocabularyManager
+from core.data.vian_updater import VianUpdater
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
@@ -85,8 +88,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_client.send_connect(self.settings.USER_NAME)
         self.corpus_client.start()
 
+
         self.vlc_instance = vlc_instance
         self.vlc_player = vlc_player
+
+        self.updater = VianUpdater(self, self.version)
+        self.updater.update()
 
         self.key_event_handler = EKeyEventHandler(self)
 
@@ -97,6 +104,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.allow_dispatch_on_change = True
 
         self.thread_pool = QThreadPool()
+
+        self.project_streamer = ProjectStreamer(self)
+
 
         # DockWidgets
         self.player_controls = None
@@ -119,6 +129,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.screenshots_manager_dock = None
         self.node_editor_dock = None
         self.node_editor_results = None
+        self.vocabulary_manager = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -168,6 +179,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_perspectives_manager()
         self.create_history_view()
         self.create_concurrent_task_viewer()
+
+        self.create_vocabulary_manager()
+
 
 
 
@@ -256,7 +270,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                  self.timeline.timeline,
                                  self.inspector,
                                  self.history_view,
-                                 self.node_editor_dock.node_editor]
+                                 self.node_editor_dock.node_editor,
+                                 self.vocabulary_manager]
 
 
         # self.actionElanConnection.triggered.connect(self.create_widget_elan_status)
@@ -313,7 +328,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def test_function(self):
-        print self.player.get_fps()
+        self.scale_screenshots(0.1)
 
     #region WidgetCreation
 
@@ -472,6 +487,14 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.node_editor_results.show()
             self.node_editor_results.activateWindow()
+
+    def create_vocabulary_manager(self):
+        if self.vocabulary_manager is None:
+            self.vocabulary_manager = VocabularyManager(self)
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_manager, QtCore.Qt.Vertical)
+        else:
+            self.vocabulary_manager.show()
+            self.vocabulary_manager.activateWindow()
     #endregion
 
     #region QEvent Overrides
@@ -563,7 +586,10 @@ class MainWindow(QtWidgets.QMainWindow):
         new = ElanExtensionProject(self)
         print "Loading Project Path", path
         new.load_project(self.settings ,path)
+
         self.project = new
+
+        self.project_streamer.set_project(new)
         self.dispatch_on_loaded()
 
     def on_save_project(self, open_dialog=False):
@@ -720,6 +746,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.allow_dispatch_on_change = True
         self.dispatch_on_changed()
         # progress.deleteLater()
+
+    def scale_screenshots(self, scale = 0.1):
+        job = ScreenshotStreamingJob([self.project.screenshots, scale])
+        self.run_job_concurrent(job)
 
     def on_key_annotation(self):
         selected = self.project.get_selected([ANNOTATION])
@@ -1026,6 +1056,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
+        print "LOADED"
 
     def dispatch_on_changed(self, receiver = None, item = None):
         if not self.allow_dispatch_on_change:

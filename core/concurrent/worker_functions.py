@@ -46,6 +46,11 @@ def store_project_concurrent(args, sign_progress):
     screenshot_groups = []
     scripts = []
 
+    vocabularies = []
+
+    for v in project.vocabularies:
+        vocabularies.append(v.serialize())
+
     for a in project.annotation_layers:
         a_layer.append(a.serialize())
 
@@ -83,7 +88,8 @@ def store_project_concurrent(args, sign_progress):
         movie_descriptor=project.movie_descriptor.serialize(),
         version=project.main_window.version,
         screenshot_groups=screenshot_groups,
-        scripts = scripts
+        scripts = scripts,
+        vocabularies=vocabularies
 
     )
     sign_progress(0.6)
@@ -138,12 +144,17 @@ class LoadScreenshotsJob(IConcurrentJob):
     def modify_project(self, project, result, sign_progress = None):
         images = result[0]
         annotations = result[1]
+
         for i, img in enumerate(images):
             # sign_progress(int(float(i) / len(images) * 100))
             if img is None:
                 break
+
             project.screenshots[i].img_movie = img.astype(np.uint8)
             project.screenshots[i].img_blend = annotations[i]
+
+            # project.screenshots[i].to_stream(project)
+
             project.dispatch_changed()
 
         # sign_progress(100)
@@ -366,3 +377,14 @@ def render_annotations(frame, annotation_dicts):
     return img_numpy
 
 
+class ScreenshotStreamingJob(IConcurrentJob):
+    def run_concurrent(self, args, sign_progress):
+        screenshots = args[0]
+        scale = args[1]
+
+        for s in screenshots:
+            s.resize(scale)
+
+
+    def modify_project(self, project, result, sign_progress = None):
+       pass

@@ -35,7 +35,6 @@ class ScreenshotsToolbar(EToolBar):
         self.manager.toggle_annotations()
 
 
-
 class ScreenshotsManagerDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
@@ -431,11 +430,17 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def export_screenshots(self, dir, visibility = None, image_type = None, quality = None, naming = None):
         screenshots = []
         if len(self.selected_images) == 0:
-            self.main_window.print_message("No Screenshots selected", "red")
-            return
+            for item in self.images:
+                screenshots.append(item.screenshot_obj)
+            self.main_window.print_message("No Screenshots selected, exporting all Screenshots", "red")
+        else:
+            for item in self.selected_images:
+                screenshots.append(item.screenshot_obj)
 
-        for item in self.images:
-            screenshots.append(item.screenshot_obj)
+
+        # TODO
+        # for item in self.images:
+        #     screenshots.append(item.screenshot_obj)
 
         exporter = ScreenshotsExporter(self.main_window.settings, self.main_window.project, naming)
         if not os.path.isdir(dir):

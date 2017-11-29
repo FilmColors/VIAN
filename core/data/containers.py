@@ -9,7 +9,8 @@ import numpy as np
 from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
-
+from core.gui.vocabulary import VocabularyItem
+from core.data.project_streaming import ProjectStreamer
 from core.data.enums import *
 
 from core.node_editor.node_editor import *
@@ -32,10 +33,13 @@ from PyQt5.QtCore import QPoint, QRect, QSize
 # NODE_SCRIPT = 9
 
 
-class ElanExtensionProject(IHasName):
+class ElanExtensionProject(IHasName, IHasVocabulary):
     def __init__(self, main_window, path = "", name = ""):
+        IHasVocabulary.__init__(self)
         self.undo_manager = UndoRedoManager()
         self.main_window = main_window
+        self.streamer = main_window.project_streamer
+        self.inhibit_dispatch = True
 
         self.path = path
         self.name = name
@@ -49,6 +53,7 @@ class ElanExtensionProject(IHasName):
         self.movie_descriptor = MovieDescriptor(project=self)
         self.analysis = []
         self.screenshot_groups = []
+        self.vocabularies = []
 
         self.current_script = None
         self.node_scripts = []
@@ -63,8 +68,10 @@ class ElanExtensionProject(IHasName):
         self.notes = ""
 
 
-        self.selected = []
 
+        self.add_vocabulary(get_default_vocabulary())
+        self.inhibit_dispatch = False
+        self.selected = []
 
     def highlight_types(self, types):
 
@@ -205,6 +212,9 @@ class ElanExtensionProject(IHasName):
 
         self.sort_screenshots()
         self.undo_manager.to_undo((self.add_screenshot, [screenshot]),(self.remove_screenshot, [screenshot]))
+
+
+        # screenshot.to_stream(self)
         self.dispatch_changed()
 
     def sort_screenshots(self):
@@ -414,6 +424,10 @@ class ElanExtensionProject(IHasName):
         segmentations = []
         analyzes = []
         scripts = []
+        vocabularies = []
+
+        for v in self.vocabularies:
+            vocabularies.append(v.serialize())
 
         for a in self.annotation_layers:
             a_layer.append(a.serialize())
@@ -445,7 +459,8 @@ class ElanExtensionProject(IHasName):
             segmentation = segmentations,
             analyzes = analyzes,
             movie_descriptor = self.movie_descriptor.serialize(),
-            scripts = scripts
+            scripts = scripts,
+            vocabularies=vocabularies
         )
 
         if path is None:
@@ -481,6 +496,7 @@ class ElanExtensionProject(IHasName):
         self.path = path
         self.name = my_dict['name']
         self.main_segmentation_index = my_dict['main_segmentation_index']
+
         try:
             self.notes = my_dict['notes']
         except:
@@ -491,6 +507,7 @@ class ElanExtensionProject(IHasName):
         except:
             pass
 
+
         splitted = path.split("/")[0:len(path.split("/")) - 1]
         self.folder = ""
         for f in splitted:
@@ -499,8 +516,20 @@ class ElanExtensionProject(IHasName):
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
 
+        # Attempt to load the Vocabularies, this might fail if the save is from VIAN 0.1.1
+        try:
+            self.vocabularies = []
+            for v in my_dict['vocabularies']:
+                voc = Vocabulary("voc").deserialize(v, self)
+                self.add_vocabulary(voc)
+
+        except Exception as e:
+            self.main_window.print_message("Loading Vocabularies failed", "Red")
+            self.main_window.print_message(e.message, "Red")
+
+
         for a in my_dict['annotation_layers']:
-            new = AnnotationLayer().deserialize(a)
+            new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
 
         # THIS IS OLD CODE AND SHOULD BE REMOVED
@@ -515,11 +544,11 @@ class ElanExtensionProject(IHasName):
         #
         # else:
         for i, b in enumerate(my_dict['screenshots']):
-            new = Screenshot().deserialize(serialization=b)
+            new = Screenshot().deserialize(b, self)
             self.add_screenshot(new)
 
         for c in my_dict['segmentation']:
-            new = Segmentation().deserialize(c)
+            new = Segmentation().deserialize(c, self)
             self.add_segmentation(new)
 
         for d in my_dict['analyzes']:
@@ -531,30 +560,69 @@ class ElanExtensionProject(IHasName):
             self.screenshot_groups = []
 
             for e in my_dict['screenshot_groups']:
-                new = ScreenshotGroup(self).deserialize(e)
+                new = ScreenshotGroup(self).deserialize(e, self)
                 self.add_screenshot_group(group=new)
 
             self.active_screenshot_group = self.screenshot_groups[0]
             self.screenshot_groups[0].is_current = True
 
+        except Exception as e:
+            self.screenshot_groups = old
+            print e.message
+            self.main_window.print_message("Loading Screenshot Group failed.", "Red")
+
+        try:
             old_script = self.node_scripts[0]
             self.node_scripts = []
 
             for f in my_dict['scripts']:
-                new = NodeScript().deserialize(f)
+                new = NodeScript().deserialize(f, self)
                 self.add_script(new)
 
             if len(self.node_scripts) == 0:
                 self.add_script(old_script)
                 self.current_script = old_script
-
         except Exception as e:
-            self.screenshot_groups = old
-            print e.message
-            self.main_window.print_message("Screenshot Group import failed", "Red")
+            self.main_window.print_message("Loading Node Scripts failed", "Red")
+            self.main_window.print_message(e.message, "Red")
+
 
         self.sort_screenshots()
         self.undo_manager.clear()
+
+    #region Vocabularies
+    def create_vocabulary(self, name="New Vocabulary"):
+        voc = Vocabulary(name)
+        self.add_vocabulary(voc)
+
+    def add_vocabulary(self, voc):
+        voc.set_project(self)
+        self.vocabularies.append(voc)
+        self.dispatch_changed()
+
+    def remove_vocabulary(self, voc):
+        if voc in self.vocabularies:
+            self.vocabularies.remove(voc)
+        self.dispatch_changed()
+
+    def get_auto_completer_model(self):
+        """
+        :return: Returns a model of words for the QCompleter, non-tree-like!
+        """
+        model = QStandardItemModel()
+        words = []
+        for v in self.vocabularies:
+            words.extend(v.get_vocabulary_as_list())
+        for w in words:
+            model.appendRow(QStandardItem(w.name))
+        return model
+
+    def get_word_object_from_name(self, name):
+        for v in self.vocabularies:
+            for w in v.words_plain:
+                if w.name == name:
+                    return w
+    #endregion
 
     # region Setters/Getters
     def cleanup(self):
@@ -621,14 +689,16 @@ class ElanExtensionProject(IHasName):
 
     #region Dispatchers
     def dispatch_changed(self, receiver = None, item = None):
-        self.main_window.dispatch_on_changed(receiver, item = item)
+        if self.inhibit_dispatch == False:
+            self.main_window.dispatch_on_changed(receiver, item = item)
 
     def dispatch_loaded(self):
-        self.main_window.dispatch_on_loaded()
+        if self.inhibit_dispatch == False:
+            self.main_window.dispatch_on_loaded()
 
     def dispatch_selected(self, sender):
-
-        self.main_window.dispatch_on_selected(sender,self.selected)
+        if self.inhibit_dispatch == False:
+            self.main_window.dispatch_on_selected(sender,self.selected)
     #endregion
 
     pass
@@ -739,31 +809,45 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         for s in self.segments:
             s_segments.append(s.serialize())
 
+        words = []
+        for w in self.voc_list:
+            words.append(w.unique_id)
+
         result = dict(
             name = self.name,
             unique_id = self.unique_id,
             segments = s_segments,
             notes = self.notes,
-            locked = self.locked
+            locked = self.locked,
+            words = words
         )
 
         return result
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         self.name = serialization["name"]
         self.segments = []
         self.unique_id = serialization['unique_id']
         self.notes = serialization['notes']
         for s in serialization["segments"]:
             new = Segment()
-            new.deserialize(s)
+            new.deserialize(s, self)
             new.segmentation = self
             self.segments.append(new)
 
         try:
             self.locked = serialization['locked']
+
         except:
             self.locked = False
+
+        try:
+            for w in serialization["words"]:
+                self.add_word(self.project.get_by_id(w))
+        except Exception as e:
+            pass
+
         return self
 
     def get_type(self):
@@ -855,6 +939,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def serialize(self):
+        words = []
+        for w in self.voc_list:
+            words.append(w.unique_id)
+
         r = dict(
              scene_id = self.ID,
              unique_id = self.unique_id,
@@ -863,12 +951,13 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
              duration = self.duration,
              additional_identifiers = self.additional_identifiers,
             notes = self.notes,
-            locked = self.locked
+            locked = self.locked,
+            words = words
         )
         return r
 
-
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         self.ID = serialization["scene_id"]
         self.unique_id = serialization['unique_id']
         self.start = serialization["start"]
@@ -881,6 +970,12 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             self.locked = serialization['locked']
         except:
             self.locked = False
+
+        try:
+            for w in serialization["words"]:
+                self.add_word(self.project.get_by_id(w))
+        except:
+            pass
 
         return self
 
@@ -1077,6 +1172,15 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.widget.update_paths()
 
     def serialize(self):
+        words = []
+
+
+        for w in self.voc_list:
+            if w is not None:
+                words.append(w.unique_id)
+            else:
+                self.voc_list.remove(w)
+
         result = dict(
             name = self.name,
             unique_id=self.unique_id,
@@ -1094,12 +1198,14 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             resource_path = self.resource_path,
             free_hand_paths = self.free_hand_paths,
             notes = self.notes,
+            words=words
 
 
         )
         return result
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.a_type = AnnotationType(serialization['a_type'])
@@ -1122,6 +1228,11 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         except:
             self.locked = False
 
+        try:
+            for w in serialization["words"]:
+                self.add_word(self.project.get_by_id(w))
+        except:
+            pass
 
         if len(self.keys)>0:
             self.has_key = True
@@ -1225,6 +1336,10 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         for a in self.annotations:
             s_annotations.append(a.serialize())
 
+        words = []
+        for w in self.voc_list:
+            words.append(w.unique_id)
+
         result = dict(
             name = self.name,
             unique_id=self.unique_id,
@@ -1233,12 +1348,13 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             is_current_layer = self.is_current_layer,
             annotations = s_annotations,
             notes = self.notes,
-            locked=self.locked
+            locked=self.locked,
+            words=words
         )
         return result
 
-    def deserialize(self, serialization):
-
+    def deserialize(self, serialization, project):
+        self.project = project
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.t_start = serialization['t_start']
@@ -1253,10 +1369,15 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 
         for a in serialization['annotations']:
             new = Annotation()
-            new.deserialize(a)
+            new.deserialize(a, self.project)
             new.annotation_layer = self
             self.annotations.append(new)
 
+        try:
+            for w in serialization["words"]:
+                self.add_word(self.project.get_by_id(w))
+        except:
+            pass
 
         return self
 
@@ -1306,6 +1427,25 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.annotation_is_visible = False
         self.timeline_visibility = True
 
+
+    def to_stream(self, project = None):
+        obj = dict(
+            img_movie = self.img_movie,
+            img_blend=self.img_blend,
+        )
+
+        if project is None:
+            project = self.project
+        project.streamer.to_stream(self.unique_id, obj)
+
+    def from_stream(self, project = None):
+        if project is None:
+            project = self.project
+        obj = project.streamer.from_stream(self.unique_id)
+        self.img_movie = obj['img_movie']
+        self.img_blend = obj['img_blend']
+
+
     def set_title(self, title):
         self.title = title
         self.dispatch_on_changed(item=self)
@@ -1337,6 +1477,16 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def get_name(self):
         return self.title
 
+    def resize(self, scale = 1.0):
+        streamed = self.project.streamer.from_stream(self.unique_id)
+        self.img_movie =  cv2.resize(streamed['img_movie'], None, None, scale, scale, cv2.INTER_CUBIC)
+
+        try:
+            self.img_blend =  cv2.resize(streamed['img_blend'], None, None, scale, scale, cv2.INTER_CUBIC)
+        except:
+            self.img_blend = np.zeros_like(self.img_movie)
+
+
     def get_preview(self, scale = 0.2):
         return cv2.resize(self.img_movie, None,None, scale, scale, cv2.INTER_CUBIC)
 
@@ -1353,6 +1503,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def serialize(self):
 
+        words = []
+        for w in self.voc_list:
+            words.append(w.unique_id)
+
         result = dict(
             title = self.title,
             unique_id=self.unique_id,
@@ -1364,6 +1518,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             movie_timestamp = self.movie_timestamp,
             creation_timestamp = self.creation_timestamp,
             notes = self.notes,
+            words=words
         )
 
 
@@ -1371,7 +1526,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         return result, images
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         self.title = serialization['title']
         self.unique_id = serialization['unique_id']
         self.scene_id = serialization['scene_id']
@@ -1387,6 +1543,12 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         #
         self.img_movie = np.zeros(shape=(30,50,3), dtype=np.uint8)
         self.img_blend = None
+
+        try:
+            for w in serialization["words"]:
+                self.add_word(self.project.get_by_id(w))
+        except:
+            pass
 
         return self
 
@@ -1446,13 +1608,20 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         for s in self.screenshots:
             shot_ids.append(s.get_id())
 
+        words = []
+        for w in self.voc_list:
+            words.append(w.unique_id)
+
+
         data = dict(
             name=self.name,
-            shots = shot_ids
+            shots = shot_ids,
+            words=words
         )
         return data
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         self.name = serialization['name']
 
         for s in serialization['shots']:
@@ -1460,6 +1629,11 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
             shot.screenshot_group = self.name
             self.screenshots.append(shot)
 
+        try:
+            for w in serialization["words"]:
+                self.add_word(self.project.get_by_id(w))
+        except:
+            pass
 
         return self
 
@@ -1550,7 +1724,8 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
 
         return data
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         nodes = serialization['nodes']
         connections = serialization['connections']
 
@@ -1560,7 +1735,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
         self.notes = serialization['notes']
 
         for n in nodes:
-            node = NodeDescriptor().deserialize(n)
+            node = NodeDescriptor().deserialize(n, self.project)
             node.set_project(self.project)
             self.add_node(node)
             # pos = QPoint(n['pos'][0] * node_editor.scale, n['pos'][1] * node_editor.scale)
@@ -1570,7 +1745,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
             # node.move(pos)
 
         for c in connections:
-            conn = ConnectionDescriptor().deserialize(c)
+            conn = ConnectionDescriptor().deserialize(c, self.project)
             conn.set_project(self.project)
             self.add_connection(conn)
 
@@ -1642,7 +1817,8 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
 
         return data
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.node_pos = serialization['node_pos']
@@ -1680,7 +1856,8 @@ class ConnectionDescriptor(IProjectContainer):
         )
         return data
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, project):
+        self.project = project
         self.input_node = serialization['input_node']
         self.output_node = serialization['output_node']
         self.input_pin_id = serialization['input_pin_id']
@@ -1814,4 +1991,162 @@ class Analysis(IProjectContainer, ITimeRange, IHasName, ISelectable):
         self.project.remove_analysis(self)
 
 #endregion
+
+#region Vocabulary
+class Vocabulary(IProjectContainer, IHasName):
+    def __init__(self, name):
+        IProjectContainer.__init__(self)
+        self.name = name
+        self.words = []
+        self.words_plain = []
+        self.was_expanded = False
+
+
+    def create_word(self, name, parent_word = None, unique_id = -1):
+        word = VocabularyWord(name, vocabulary=self)
+        word.unique_id = unique_id
+        self.add_word(word, parent_word)
+        return word
+
+    def add_word(self, word, parent_word = None):
+        if parent_word is None:
+            word.parent = self
+            self.words.append(word)
+            self.words_plain.append(word)
+            word.set_project(self.project)
+        else:
+            parent = self.get_word_by_name(parent_word)
+            if parent is not None:
+                word.parent=parent
+                parent.add_children(word)
+                self.words_plain.append(word)
+                word.set_project(self.project)
+
+        self.dispatch_on_changed(item=self)
+
+    def remove_word(self, word):
+        children = []
+        word.get_children_plain(children)
+        for w in children:
+            self.words_plain.remove(w)
+        if word in self.words:
+            self.words.remove(word)
+        else:
+            if word in word.parent.children:
+                word.parent.children.remove(word)
+
+        if word in self.words_plain:
+            self.words_plain.remove(word)
+
+        self.dispatch_on_changed()
+
+    def get_word_by_name(self, name):
+        for w in self.words_plain:
+            if w.name == name:
+                return w
+        return None
+
+    def get_vocabulary_item_model(self):
+        root = VocabularyItem(self.name, self)
+        for w in self.words:
+            w.get_children(root)
+        return root
+
+    def get_vocabulary_as_list(self):
+        result = []
+        for w in self.words:
+            w.get_children_plain(result)
+        return result
+
+    def serialize(self):
+        words = []
+        for w in self.words:
+            w.get_children_plain(words)
+
+        words_data = []
+        for w in words:
+            data = dict(
+                name = w.name,
+                unique_id = w.unique_id,
+                parent = w.parent.unique_id,
+                children = [a.unique_id for a in w.children]
+            )
+            words_data.append(data)
+
+        voc_data = dict(
+            name = self.name,
+            unique_id = self.unique_id,
+            words = words_data
+        )
+
+        return voc_data
+
+    def deserialize(self, serialization, project):
+        self.project = project
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+
+        for w in serialization['words']:
+            parent = self.project.get_by_id(w['unique_id'])
+
+            # If this is a root node in the Vocabulary
+            if isinstance(parent, Vocabulary):
+                self.create_word(w['name'], unique_id=w['unique_id'])
+
+            else:
+                self.create_word(w['name'], parent, unique_id=w['unique_id'])
+
+        return self
+
+    def get_type(self):
+        return VOCABULARY
+
+
+class VocabularyWord(IProjectContainer, IHasName):
+    def __init__(self, name, vocabulary, parent = None, is_checkable = False):
+        IProjectContainer.__init__(self)
+        self.name = name
+        self.vocabulary = vocabulary
+        self.is_checkable = is_checkable
+        self.was_expanded = False
+        self.parent = parent
+        self.children = []
+
+    def add_children(self, children):
+        print self.name, [c.name for c in self.children]
+        if isinstance(children, list):
+            for c in children:
+                self.children.append(c)
+                c.parent = self
+        else:
+            self.children.append(children)
+
+    def get_children(self, parent_item):
+
+        item = VocabularyItem(self.name, self)
+        parent_item.appendRow(item)
+        if len(self.children) > 0:
+            for c in self.children:
+                c.get_children(item)
+
+    def get_children_plain(self, list):
+        list.append(self)
+        if len(self.children) > 0:
+            for c in self.children:
+                c.get_children_plain(list)
+
+    def get_type(self):
+        return VOCABULARY_WORD
+
+def get_default_vocabulary():
+    voc = Vocabulary("Scene Locations")
+    voc.create_word("House")
+    voc.create_word("Kitchen", "House")
+    voc.create_word("Bedroom", "House")
+    voc.create_word("Toilet", "House")
+
+
+    return voc
+#endregion
+
 pass

@@ -404,7 +404,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             annotation.widget = hand
             return
 
-
     def abort_freehand_drawing(self):
         for s in self.selected:
             if s.get_type() == ANNOTATION:
@@ -448,13 +447,14 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.end()
 
     def hide_opencv_image(self):
-        if  self.settings.OPENCV_PER_FRAME:
+        if self.settings.OPENCV_PER_FRAME:
             if self.opencv_image_visible == True:
                 self.opencv_image_visible = False
                 self.opencv_image.hide()
 
     def show_opencv_image(self):
         if self.settings.OPENCV_PER_FRAME:
+            print "SHOWN"
             if self.opencv_image_visible == False:
                 self.opencv_image_visible = True
                 self.update_opencv_image(self.main_window.player.get_media_time())
@@ -561,7 +561,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.current_time = time
         self.update()
 
-        if self.opencv_image_visible and self.videoCap and self.settings.OPENCV_PER_FRAME:
+        if self.settings.OPENCV_PER_FRAME and self.opencv_image_visible and self.videoCap:
             self.update_opencv_image(time)
 
     def update_opencv_image(self, time):

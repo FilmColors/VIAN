@@ -18,8 +18,21 @@ class IProjectChangeNotify():
         print "IProjectChangeNotify: Not Implemented by ",self
 
 
-class IProjectContainer:
+class IHasVocabulary():
     def __init__(self):
+        self.voc_list = []
+
+    def add_word(self, word):
+        self.voc_list.append(word)
+
+    def remove_word(self, word):
+        if word in self.voc_list:
+            self.voc_list.remove(word)
+
+
+class IProjectContainer(IHasVocabulary):
+    def __init__(self):
+        IHasVocabulary.__init__(self)
         self.project = None
         self.outliner_expanded = False
         self.outliner_highlighted = False

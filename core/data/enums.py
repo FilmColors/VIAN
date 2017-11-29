@@ -12,7 +12,8 @@ ANALYSIS = 6
 SCREENSHOT_GROUP = 7
 NODE = 8
 NODE_SCRIPT = 9
-
+VOCABULARY = 10
+VOCABULARY_WORD = 11
 
 class AnnotationType(Enum):
     Rectangle = 0
