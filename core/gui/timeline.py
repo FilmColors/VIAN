@@ -94,13 +94,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def scroll_h(self):
         value= int(self.scrollArea.horizontalScrollBar().value())
         self.frame_Controls.move(self.scrollArea.mapToParent(QtCore.QPoint(value, 0)))
-        self.relative_corner = QtCore.QPoint(value, 1)
+        self.relative_corner = QtCore.QPoint(value, self.relative_corner.y())
         self.time_bar.move(self.relative_corner)
 
 
     def scroll_v(self):
         value = self.scrollArea.verticalScrollBar().value()
-        self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
+        # self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
+        self.relative_corner = QtCore.QPoint(self.relative_corner.x(), value)
+        self.time_bar.move(self.relative_corner)
         self.time_bar.raise_()
         self.time_scrubber.raise_()
 
@@ -193,7 +195,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.time_bar.move(self.relative_corner.x(), self.time_bar.y())
         self.time_bar.setFixedWidth(self.width() - self.controls_width)
-
+        self.time_bar.setFixedHeight(self.time_bar_height)
 
         self.time_bar.update()
         # self.time_bar.show()
@@ -207,6 +209,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.time_bar.setFixedSize(self.width() - self.controls_width, self.time_bar_height)
         # self.time_bar.raise_()
 
+        self.relative_corner = QtCore.QPoint(value, self.relative_corner.y())
 
         h = self.scrubber_min_h
         if self.scrubber_min_h < self.frame_Bars.height():
