@@ -619,6 +619,8 @@ class TimebarSlice(QtWidgets.QWidget):
         self.offset = QtCore.QPoint(0,0)
 
 
+
+
         self.color = (232, 174, 12, 100)
         if item.get_type() == ANNOTATION_LAYER:
             self.color = (232,55,40,100)
@@ -626,10 +628,14 @@ class TimebarSlice(QtWidgets.QWidget):
             self.color = (202, 54, 109, 100)
 
         if item.get_type() == SEGMENT:
-            self.text = "ID:" + str(item.ID) +"  Name:"+item.get_name()
+            self.text = "ID:" + str(item.ID).ljust(5) +"\n Body:"+item.get_annotation_body()
+            self.setToolTip("<FONT>" + self.text + "</FONT>")
         else:
             self.text = str(item.get_name())
         self.text_size = 10
+
+
+
         self.is_hovered = False
         self.is_selected = False
 

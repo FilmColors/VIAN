@@ -89,7 +89,6 @@ class EDialogWidget(QDialog):
                 self.main_window.set_overlay_visibility(True)
         super(EDialogWidget, self).closeEvent(QCloseEvent)
 
-
 class EVisualizationDialog(EDialogWidget):
     def __init__(self, parent, visualization_widget):
         super(EVisualizationDialog, self).__init__(parent)

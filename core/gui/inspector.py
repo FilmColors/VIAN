@@ -100,7 +100,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
 
         if s_type == SEGMENT:
             self.lbl_Type.setText("Segment")
-            widgets = [AttributesITimeRange(self, target_item)]
+            widgets = [AttributesSegment(self, target_item), AttributesITimeRange(self, target_item)]
 
         if s_type == ANNOTATION:
             self.lbl_Type.setText("Annotation")
@@ -222,6 +222,30 @@ class AttributesSegmentation(QWidget):
         self.table_segments.resizeColumnsToContents()
         self.table_segments.resizeRowsToContents()
         self.show()
+
+#textEdit_AnnotationBody
+
+class AttributesSegment(QWidget):
+    def __init__(self, parent, descriptor):
+        super(AttributesSegment, self).__init__(parent)
+        path = os.path.abspath("qt_ui/AttributesSegment.ui")
+        uic.loadUi(path, self)
+        self.descriptor = descriptor
+        self.textEdit_AnnotationBody.setPlainText(self.descriptor.annotation_body)
+
+        self.textEdit_AnnotationBody.installEventFilter(self)
+
+
+    def on_body_changed(self):
+        text = self.textEdit_AnnotationBody.toPlainText()
+        self.descriptor.set_annotation_body(text)
+
+
+    def eventFilter(self, QObject, QEvent):
+        if QEvent.type() == QtCore.QEvent.FocusOut:
+            self.on_body_changed()
+
+        return super(AttributesSegment, self).eventFilter(QObject, QEvent)
 
 
 class AttributesAnalysis(QWidget):

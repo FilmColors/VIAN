@@ -946,6 +946,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         if additional_identifiers is None:
             additional_identifiers = []
         self.additional_identifiers = additional_identifiers
+        self.annotation_body = ""
         self.timeline_visibility = True
         self.segmentation = segmentation
         self.notes = ""
@@ -987,6 +988,13 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.additional_identifiers[0] = name
         self.dispatch_on_changed(item=self)
 
+    def set_annotation_body(self, annotation):
+        self.project.undo_manager.to_undo((self.set_annotation_body, [annotation]), (self.set_annotation_body, [self.annotation_body]))
+        self.annotation_body = annotation
+        self.dispatch_on_changed(item=self)
+
+    def get_annotation_body(self):
+        return self.annotation_body
     def set_additional_identifiers(self, additional):
         self.additional_identifiers = additional
         self.dispatch_on_changed(item=self)
@@ -1003,6 +1011,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
              end = self.end,
              duration = self.duration,
              additional_identifiers = self.additional_identifiers,
+            annotation_body = self.annotation_body,
             notes = self.notes,
             locked = self.locked,
             words = words
@@ -1024,6 +1033,11 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         except:
             self.locked = False
 
+        try:
+            self.annotation_body = serialization['annotation_body']
+        except:
+            self.annotation_body = ""
+        
         try:
             for w in serialization["words"]:
                 word = self.project.get_by_id(w)
