@@ -86,3 +86,44 @@ class ProjectModifier(QRunnable):
 
     def on_progress(self, int_value):
         self.signals.sign_progress.emit(int_value)
+
+
+class CurrentSegmentEvaluaterSignals(QObject):
+    segmentChanged = pyqtSignal(int)
+
+class CurrentSegmentEvaluater(QRunnable):
+    def __init__(self):
+        super(CurrentSegmentEvaluater, self).__init__()
+        self.running = False
+        self.aborted = False
+        self.current_segment = -1
+        self.time = -1
+        self.segments = None
+        self.signals = CurrentSegmentEvaluaterSignals()
+
+
+    @pyqtSlot()
+    def run(self):
+        while not self.aborted:
+            if self.running and self.segments is not None:
+                for i, s in enumerate(self.segments):
+                    if s[0] <= self.time < s[1]:
+                        if i != self.current_segment:
+                            self.current_segment = i
+                            self.signals.segmentChanged.emit(self.current_segment)
+
+    @pyqtSlot()
+    def pause(self):
+        self.running = False
+
+    @pyqtSlot()
+    def play(self):
+        self.running = True
+
+    @pyqtSlot(long)
+    def set_time(self, time):
+        self.time = time
+
+    @pyqtSlot(list)
+    def set_segments(self, segments):
+        self.segments = segments

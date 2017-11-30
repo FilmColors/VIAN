@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit, QSpacerItem
+from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit, QSpacerItem, QSizePolicy
 from PyQt5.QtGui import QColor
 class StatusBar(QtWidgets.QWidget):
     def __init__(self,main_window,server):
@@ -11,7 +11,7 @@ class StatusBar(QtWidgets.QWidget):
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred,QtWidgets.QSizePolicy.Preferred)
+        # self.setSizePolicy(QtWidgets.QSizePolicy.Preferred,QtWidgets.QSizePolicy.Preferred)
 
         self.label_selection = QtWidgets.QLabel(self)
         self.label_selection.setText("Selection: ")
@@ -67,6 +67,7 @@ class StatusBar(QtWidgets.QWidget):
 
     def set_selection(self, selection):
         self.label_selection_length.setText(str(len(selection)) + " Items")
+
 class OutputLine(QtWidgets.QWidget):
     def __init__(self,main_window):
         super(OutputLine, self).__init__(main_window)
@@ -82,7 +83,8 @@ class OutputLine(QtWidgets.QWidget):
         self.text_time = QtCore.QTimer(self)
         self.text_time.setInterval(2000)
         self.text_time.timeout.connect(self.on_timeout)
-        self.setMinimumWidth(300)
+        # self.setMinimumWidth(50)
+
         # self.setFixedWidth(400)
         self.text_line.setMargin(0)
         self.message_queue = []
@@ -124,6 +126,23 @@ class OutputLine(QtWidgets.QWidget):
         else:
             self.text_line.setText("")
 
+class StatusVideoSource(QtWidgets.QWidget):
+    def __init__(self,main_window):
+        super(StatusVideoSource, self).__init__(main_window)
+        self.layout = QtWidgets.QHBoxLayout()
+        self.setLayout(self.layout)
+        self.layout.addWidget(QtWidgets.QLabel("Video Source: "))
+        self.lbl_source = QtWidgets.QLabel("VLC")
+        self.lbl_source.setFixedWidth(100)
+        self.layout.addWidget(self.lbl_source)
+
+    def on_source_changed(self, source):
+        if source == "VLC":
+            self.lbl_source.setText("VLC")
+            self.lbl_source.setStyleSheet("QLabel{color:Orange;}")
+        else:
+            self.lbl_source.setText("OpenCV")
+            self.lbl_source.setStyleSheet("QLabel{color:Green;}")
 
 class StatusProgressBar(QtWidgets.QWidget):
     def __init__(self,main_window):

@@ -3,7 +3,7 @@ import os
 import cv2
 import numpy as np
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLayout, QLabel
 from PyQt5.QtGui import QIcon, QFont
 
@@ -110,6 +110,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
     Implements IProjectChangeNotify
     """
 
+    onSourceChanged = pyqtSignal(str)
 
     def __init__(self, main_window, videoframe, project):
         super(DrawingOverlay, self).__init__(main_window)
@@ -133,6 +134,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.opencv_image.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.videoCap = None
         self.opencv_image_visible = False
+
+
 
         self.show()
 
@@ -451,14 +454,15 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             if self.opencv_image_visible == True:
                 self.opencv_image_visible = False
                 self.opencv_image.hide()
+                self.onSourceChanged.emit("VLC")
 
     def show_opencv_image(self):
         if self.settings.OPENCV_PER_FRAME:
-            print "SHOWN"
             if self.opencv_image_visible == False:
                 self.opencv_image_visible = True
                 self.update_opencv_image(self.main_window.player.get_media_time())
                 self.opencv_image.show()
+                self.onSourceChanged.emit("OPENCV")
 
     def synchronize_transforms(self):
         if self.main_window.centralWidget() is self.main_window.screenshots_manager:
@@ -559,10 +563,13 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def on_timestep_update(self, time):
         self.current_time = time
+
+
+        if self.settings.OPENCV_PER_FRAME and self.opencv_image_visible and self.videoCap is not None:
+            self.update_opencv_image(time)
+
         self.update()
 
-        if self.settings.OPENCV_PER_FRAME and self.opencv_image_visible and self.videoCap:
-            self.update_opencv_image(time)
 
     def update_opencv_image(self, time):
         try:
@@ -572,6 +579,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             ret, frame = self.videoCap.read()
             qimage, qpixmap = numpy_to_qt_image(frame)
             self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
+            self.opencv_image.lower()
+
         except Exception as e:
             print e.message
             pass

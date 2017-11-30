@@ -618,9 +618,6 @@ class TimebarSlice(QtWidgets.QWidget):
         self.border_width = 10
         self.offset = QtCore.QPoint(0,0)
 
-
-
-
         self.color = (232, 174, 12, 100)
         if item.get_type() == ANNOTATION_LAYER:
             self.color = (232,55,40,100)

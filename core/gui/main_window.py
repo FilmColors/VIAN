@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QFileDialog, qApp, QLabel, QMessageBox, QWidget
 
 # from annotation_viewer import AnnotationViewer
-from core.concurrent.worker import Worker, ProjectModifier
+from core.concurrent.worker import Worker, CurrentSegmentEvaluater
 from core.concurrent.worker_functions import *
 from core.data.exporters import SegmentationExporter
 from core.data.importers import ELANProjectImporter
@@ -40,7 +40,7 @@ from extensions.extension_list import ExtensionList
 from player_controls import PlayerControls
 from player_vlc import Player_VLC
 from shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
-from status_bar import StatusBar, OutputLine, StatusProgressBar
+from status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.vocabulary import VocabularyManager
 from core.data.vian_updater import VianUpdater
 
@@ -56,6 +56,7 @@ __status__ = "Production"
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(long)
+    currentSegmentChanged = pyqtSignal(int)
     abortAllConcurrentThreads = pyqtSignal()
 
     def __init__(self,vlc_instance, vlc_player):
@@ -112,6 +113,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # DockWidgets
         self.player_controls = None
         self.elan_status = None
+        self.source_status = None
         # self.shots_window = None
         self.phonon_player = None
         self.annotation_toolbar = None
@@ -157,7 +159,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # if self.is_darwin:  # for MacOS
         #     self.player_placeholder = QWidget(self)
         #     self.player_container = MacPlayerContainer(self, self.player)
-
 
         self.create_widget_elan_status()
         self.create_widget_video_player()
@@ -309,6 +310,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
         self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
 
+        self.drawing_overlay.onSourceChanged.connect(self.source_status.on_source_changed)
         self.dispatch_on_changed()
 
         self.screenshot_blocked = False
@@ -324,7 +326,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.load_project("projects/ratatouille/Ratatouille.eext")
 
-
+        # SEGMENT EVALUATOR
+        # self.current_segment_evaluator = CurrentSegmentEvaluater()
+        # self.player.started.connect(self.current_segment_evaluator.play)
+        # self.player.stopped.connect(self.current_segment_evaluator.pause)
+        # self.onTimeStep.connect(self.current_segment_evaluator.set_time)
+        # self.current_segment_evaluator.signals.segmentChanged.connect(self.currentSegmentChanged.emit)
+        # self.thread_pool.start(self.current_segment_evaluator)
 
         self.showMaximized()
         if self.settings.SHOW_WELCOME:
@@ -333,6 +341,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.USER_NAME == "" and self.settings.UPDATE_SOURCE == "":
             self.show_first_start()
 
+    def print_time(self, segment):
+        print segment
 
     def test_function(self):
         self.scale_screenshots(0.1)
@@ -368,12 +378,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_widget_elan_status(self):
         if self.elan_status is None:
+            self.source_status = StatusVideoSource(self)
             self.elan_status = StatusBar(self, self.server)
             self.output_line = OutputLine(self)
             self.progress_bar = StatusProgressBar(self)
 
+            self.statusBar().addWidget(self.source_status)
             self.statusBar().addPermanentWidget(self.progress_bar)
-            self.statusBar().addPermanentWidget(self.output_line)
+            self.statusBar().addWidget(self.output_line)
+
             self.statusBar().addPermanentWidget(self.elan_status)
             self.statusBar().setFixedHeight(45)
 
@@ -602,14 +615,16 @@ class MainWindow(QtWidgets.QMainWindow):
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
         self.set_overlay_visibility(True)
         path = path[0]
+        self.close_project()
         self.load_project(path)
 
     def close_project(self):
+        self.abortAllConcurrentThreads.emit()
         self.project.cleanup()
         self.project = ElanExtensionProject(self, name="No Project")
         self.player.stop()
         #self.project_streamer.release_project()
-        self.abortAllConcurrentThreads.emit()
+
 
         #self.project_streamer.set_project(self.project)
         self.dispatch_on_changed()
@@ -620,7 +635,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message("Not Loaded, Path was Empty")
             return
 
-        self.close_project()
+
 
         new = ElanExtensionProject(self)
         print "Loading Project Path", path
@@ -1106,6 +1121,15 @@ class MainWindow(QtWidgets.QMainWindow):
         print "LOADED"
 
     def dispatch_on_changed(self, receiver = None, item = None):
+
+        # SEGMENT EVALUATOR
+        # if self.project.get_main_segmentation() is not None:
+        #     segm = []
+        #     for s in self.project.get_main_segmentation().segments:
+        #         segm.append([s.get_start(), s.get_end()])
+        #     self.current_segment_evaluator.set_segments(segm)
+
+
         if not self.allow_dispatch_on_change:
             return
 
@@ -1163,6 +1187,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #endregion
 
+
 class LoadingScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(LoadingScreen, self).__init__(None)
@@ -1173,6 +1198,7 @@ class LoadingScreen(QtWidgets.QMainWindow):
         self.setCentralWidget(self.lbl)
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.show()
+
 
 class IconContainer():
     def __init__(self):

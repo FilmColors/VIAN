@@ -341,6 +341,7 @@ class Player_VLC(VideoPlayer):
         self.media_player.play()
         self.playing = True
         self.started.emit()
+        self.fps = self.media_player.get_fps()
 
     def pause(self):
         self.media_player.set_pause(-1)
@@ -452,7 +453,7 @@ class Player_VLC(VideoPlayer):
         if self.use_user_fps:
             return self.user_fps
         else:
-            return self.media_player.get_fps()
+            return self.fps
 
     def on_loaded(self, project):
         path = project.movie_descriptor.movie_path
@@ -470,7 +471,8 @@ class Player_VLC(VideoPlayer):
 
     def get_frame_pos_by_time(self, time):
         fps = self.get_fps()
-        pos = round(round(float(time) / 1000, 0) * fps, 0)
+        # pos = round(round(float(time) / 1000, 0) * fps, 0)
+        pos = round(float(time) * fps / 1000, 0)
         return int(pos)
 
     def on_selected(self,sender, selected):

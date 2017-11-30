@@ -91,11 +91,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.border_width = 1500
         self.bottom_height = 1000
 
+
         self.n_per_row = 10
 
         self.n_images = 0
 
         self.rubberBandChanged.connect(self.rubber_band_selection)
+
+        # SEGMENT EVALUATOR
+        # self.main_window.currentSegmentChanged.connect(self.frame_segment)
 
     def toggle_annotations(self):
         if len(self.selected_images) == 0:
@@ -302,6 +306,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         return self.selected_images
 
     def update_manager(self, center = True):
+        print "Updating Manager"
         self.clear_caption()
         self.clear_selection()
         self.clear_images()
@@ -486,6 +491,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             for f in self.images:
                 self.scene.removeItem(f)
             self.images = []
+            self.segment_rects = []
 
     def clear_lines(self):
         if self.border is not None:
@@ -500,6 +506,22 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         rect = image.sceneBoundingRect()
         self.fitInView(rect, Qt.KeepAspectRatio)
         self.curr_scale = self.sceneRect().width() / rect.width()
+
+    # SEGMENT EVALUATOR
+    # def frame_segment(self, segment_index):
+    #     pos = QtCore.QPoint(0,0)
+    #     scrs = self.get_project().get_screenshots_of_segment(segment_index)
+    #     for i in self.images:
+    #         if i.screenshot_obj in scrs:
+    #             pos = i.sceneBoundingRect()
+    #             self.fitInView(rect, Qt.KeepAspectRatio)
+    #             break
+
+    def get_project(self):
+        return self.main_window.project
+
+
+
 
     def mouseDoubleClickEvent(self, *args, **kwargs):
         if len(self.selected_images) > 0:

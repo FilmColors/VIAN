@@ -278,6 +278,20 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.screenshot_groups.remove(grp)
             self.dispatch_changed()
 
+    def get_screenshots_of_segment(self, main_segm_id):
+        segmentation = self.get_main_segmentation()
+        result = []
+        if segmentation is not None:
+            start = segmentation.segments[main_segm_id].get_start()
+            end = segmentation.segments[main_segm_id].get_end()
+
+            for s in self.screenshots:
+                if start <= s.movie_timestamp < end:
+                    result.append(s)
+
+        return result
+
+
     def set_current_screenshot_group(self, grp):
         self.active_screenshot_group.is_current = False
         self.active_screenshot_group = grp
@@ -959,12 +973,14 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.project.undo_manager.to_undo((self.set_start, [start]), (self.set_start, [self.start]))
         self.start = start
         self.segmentation.update_segment_ids()
+        self.project.sort_screenshots()
         self.dispatch_on_changed(item=self)
 
     def set_end(self, end):
         self.project.undo_manager.to_undo((self.set_end, [end]), (self.set_end, [self.end]))
         self.end = end
         self.segmentation.update_segment_ids()
+        self.project.sort_screenshots()
         self.dispatch_on_changed(item=self)
 
     def get_start(self):
@@ -978,6 +994,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.start = start
         self.end = end
         self.segmentation.update_segment_ids()
+        self.project.sort_screenshots()
         self.dispatch_on_changed(item=self)
 
     def get_name(self):
@@ -1037,7 +1054,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             self.annotation_body = serialization['annotation_body']
         except:
             self.annotation_body = ""
-        
+
         try:
             for w in serialization["words"]:
                 word = self.project.get_by_id(w)
