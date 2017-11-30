@@ -590,6 +590,56 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.sort_screenshots()
         self.undo_manager.clear()
 
+    def get_template(self, segm, voc, ann, scripts):
+        segmentations = []
+        vocabularies = []
+        layers = []
+        node_scripts = []
+        if segm:
+            for s in self.segmentation:
+                segmentations.append(s.get_name())
+        if voc:
+            for v in self.vocabularies:
+                vocabularies.append(v.serialize())
+        if ann:
+            for l in self.annotation_layers:
+                layers.append([l.get_name(), l.get_start(), l.get_end()])
+        if scripts:
+            for n in self.node_scripts:
+                node_scripts.append(n.serialize())
+
+        template = dict(
+            segmentations = segmentations,
+            vocabularies = vocabularies,
+            layers = layers,
+            node_scripts=node_scripts
+        )
+        return template
+
+    def apply_template(self, template_path):
+
+        try:
+            with open(template_path, "rb") as f:
+                template = json.load(f)
+        except:
+            print "Importing Template Failed"
+            return
+
+        for s in template['segmentations']:
+            self.create_segmentation(s)
+
+        for v in template['vocabularies']:
+            voc = Vocabulary("voc").deserialize(v, self)
+            self.add_vocabulary(voc)
+
+        for l in template['layers']:
+            self.create_annotation_layer(l[0], long(l[1]), long(l[2]))
+
+        for n in template['node_scripts']:
+            new = NodeScript().deserialize(n, self)
+            self.add_script(new)
+
+
     #region Vocabularies
     def create_vocabulary(self, name="New Vocabulary"):
         voc = Vocabulary(name)
@@ -844,7 +894,10 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
         try:
             for w in serialization["words"]:
-                self.add_word(self.project.get_by_id(w))
+                word = self.project.get_by_id(w)
+                if word is not None:
+                    self.add_word(self.project.get_by_id(w))
+
         except Exception as e:
             pass
 
@@ -973,8 +1026,11 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
         try:
             for w in serialization["words"]:
-                self.add_word(self.project.get_by_id(w))
-        except:
+                word = self.project.get_by_id(w)
+                if word is not None:
+                    self.add_word(self.project.get_by_id(w))
+
+        except Exception as e:
             pass
 
         return self
@@ -1230,8 +1286,11 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 
         try:
             for w in serialization["words"]:
-                self.add_word(self.project.get_by_id(w))
-        except:
+                word = self.project.get_by_id(w)
+                if word is not None:
+                    self.add_word(self.project.get_by_id(w))
+
+        except Exception as e:
             pass
 
         if len(self.keys)>0:
@@ -1375,8 +1434,11 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 
         try:
             for w in serialization["words"]:
-                self.add_word(self.project.get_by_id(w))
-        except:
+                word = self.project.get_by_id(w)
+                if word is not None:
+                    self.add_word(self.project.get_by_id(w))
+
+        except Exception as e:
             pass
 
         return self
@@ -1445,7 +1507,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.img_movie = obj['img_movie']
         self.img_blend = obj['img_blend']
 
-
     def set_title(self, title):
         self.title = title
         self.dispatch_on_changed(item=self)
@@ -1485,7 +1546,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             self.img_blend =  cv2.resize(streamed['img_blend'], None, None, scale, scale, cv2.INTER_CUBIC)
         except:
             self.img_blend = np.zeros_like(self.img_movie)
-
 
     def get_preview(self, scale = 0.2):
         return cv2.resize(self.img_movie, None,None, scale, scale, cv2.INTER_CUBIC)
@@ -1546,8 +1606,11 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         try:
             for w in serialization["words"]:
-                self.add_word(self.project.get_by_id(w))
-        except:
+                word = self.project.get_by_id(w)
+                if word is not None:
+                    self.add_word(self.project.get_by_id(w))
+
+        except Exception as e:
             pass
 
         return self
@@ -1574,8 +1637,6 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         self.screenshots = []
         self.notes = ""
         self.is_current = False
-
-
 
     def get_name(self):
         return self.name
@@ -1631,8 +1692,11 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
         try:
             for w in serialization["words"]:
-                self.add_word(self.project.get_by_id(w))
-        except:
+                word = self.project.get_by_id(w)
+                if word is not None:
+                    self.add_word(self.project.get_by_id(w))
+
+        except Exception as e:
             pass
 
         return self
@@ -2027,8 +2091,15 @@ class Vocabulary(IProjectContainer, IHasName):
     def remove_word(self, word):
         children = []
         word.get_children_plain(children)
+
+        for itm in word.connected_items:
+            itm.remove_word(word)
+
         for w in children:
             self.words_plain.remove(w)
+            for itm in w.connected_items:
+                itm.remove_word(w)
+
         if word in self.words:
             self.words.remove(word)
         else:
@@ -2111,6 +2182,14 @@ class VocabularyWord(IProjectContainer, IHasName):
         self.was_expanded = False
         self.parent = parent
         self.children = []
+        self.connected_items = []
+
+    def add_connected_item(self, item):
+        self.connected_items.append(item)
+
+    def remove_connected_item(self, item):
+        if item in self.connected_items:
+            self.connected_items.remove(item)
 
     def add_children(self, children):
         print self.name, [c.name for c in self.children]

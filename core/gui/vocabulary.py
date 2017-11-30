@@ -88,6 +88,9 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         if item is None:
             self.recreate_tree()
 
+    def on_selected(self, sender, selected):
+        pass
+
 
 class VocabularyTreeView(QTreeView):
     def __init__(self, parent):

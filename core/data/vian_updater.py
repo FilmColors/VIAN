@@ -24,32 +24,6 @@ class VianUpdater(IConcurrentJob):
         if do_update:
             job = VianUpdaterJob([self.app_root, self.source_dir])
             self.main_window.run_job_concurrent(job)
-        # try:
-        #     self.box = QMessageBox(self.main_window)
-        #     self.box.setWindowTitle("Updating VIAN...")
-        #     self.box.setText("Updating\n\nPlease Wait")
-        #     self.box.show()
-        #     print "UPDATING"
-        #     print self.source_dir
-        #     print self.temp_dir
-        #
-        #     do_update = self.get_server_version()
-        #
-        #     if do_update:
-        #         self.box.setText("Updating: Copying Files\n\nPlease Wait")
-        #         self.fetch_folder()
-        #         self.box.setText("Updating: Replacing Old Files\n\nPlease Wait")
-        #         self.replace_files()
-        #         self.box.close()
-        #         QMessageBox.information(self.main_window, "Update Finished", "Update Finished\n\n Please restart VIAN")
-        # except Exception as e:
-        #     print e.message
-        #
-        # finally:
-        #     try:
-        #         shutil.rmtree(self.app_root + "/update/")
-        #     except:
-        #         pass
 
     def get_server_version(self):
         version = None
@@ -113,7 +87,6 @@ class VianUpdaterJob(IConcurrentJob):
         sign_progress(0.5)
         root_src_dir = (self.temp_dir + "VIAN/").replace("\\", "/")
         root_dst_dir = (self.app_root + "/VIAN/").replace("\\", "/")
-
 
         total = sum([len(files) for r, d, files in os.walk(root_src_dir)])
         counter = 1.0

@@ -51,6 +51,7 @@
       <string>Export</string>
      </property>
      <addaction name="action_ExportSegmentation"/>
+     <addaction name="actionExportTemplate"/>
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionLoad"/>
@@ -429,6 +430,11 @@
   <action name="actionTaksMonitor">
    <property name="text">
     <string>Task Monitor</string>
+   </property>
+  </action>
+  <action name="actionExportTemplate">
+   <property name="text">
+    <string>Project Template</string>
    </property>
   </action>
  </widget>

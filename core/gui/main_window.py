@@ -28,6 +28,7 @@ from core.gui.keyeventhandler import EKeyEventHandler
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.timeline import TimelineContainer
+from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
@@ -222,6 +223,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.action_importELAN_Project.triggered.connect(self.import_elan_project)
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
+        self.actionExportTemplate.triggered.connect(self.export_template)
         self.actionClose_Project.triggered.connect(self.close_project)
         self.actionExit.triggered.connect(self.on_exit)
 
@@ -328,15 +330,26 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.SHOW_WELCOME:
            self.show_welcome()
 
+        if self.settings.USER_NAME == "" and self.settings.UPDATE_SOURCE == "":
+            self.show_first_start()
+
 
     def test_function(self):
         self.scale_screenshots(0.1)
 
     #region WidgetCreation
 
+    def export_template(self):
+        dialog = ExportTemplateDialog(self)
+        dialog.show()
+
     def show_welcome(self):
         welcome_dialog = WelcomeDialog(self, self)
         welcome_dialog.raise_()
+
+    def show_first_start(self):
+        dialog = DialogFirstStart(self)
+        dialog.raise_()
 
     def start_update_timer(self):
         self.time = self.player.get_media_time()
@@ -574,8 +587,11 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = NewProjectDialog(self, self.settings, movie_path)
         dialog.show()
 
-    def new_project(self, project):
+    def new_project(self, project, template_path = None):
         self.project = project
+        if template_path is not None:
+            self.project.apply_template(template_path)
+
         self.player.open_movie(project.movie_descriptor.movie_path)
         self.master_file.add_project(project)
         self.project.store_project(self.settings, self.master_file)
@@ -1164,9 +1180,61 @@ class IconContainer():
         self.movie_icon = QIcon(QPixmap(path + "icon_movie.png"))
 
 
+class DialogFirstStart(QtWidgets.QDialog):
+    def __init__(self, main_window):
+        super(DialogFirstStart, self).__init__(main_window)
+        path = os.path.abspath("qt_ui/DialogFirstStart.ui")
+        uic.loadUi(path, self)
+
+        self.main_window = main_window
+        self.settings = main_window.settings
+        self.may_proceed = False
+
+        self.btn_BrowseSource.clicked.connect(self.btn_browse_vian_source)
+        self.btn_OK.clicked.connect(self.on_ok)
+        self.lineEdit_UpdateDir.textChanged.connect(self.update_directory_changed)
+        self.lineEdit_UserName.editingFinished.connect(self.on_name_changed)
+
+        self.show()
 
 
+    def on_name_changed(self):
+        name = self.lineEdit_UserName.text()
+        self.settings.USER_NAME = name
+        self.check_if_finished()
 
+    def btn_browse_vian_source(self):
+        source = QFileDialog.getExistingDirectory()
+        self.lineEdit_UpdateDir.setText(source)
+
+    def update_directory_changed(self):
+        self.settings.UPDATE_SOURCE = self.lineEdit_UpdateDir.text()
+        try:
+            result = False
+            with open(self.settings.UPDATE_SOURCE + "/VIAN/__version__.txt", "rb") as f:
+                for l in f:
+                    if "__version__" in l:
+                        result = True
+                        break
+        except Exception as e:
+            result = False
+            print e
+
+        if not result:
+            QMessageBox.warning( self.main_window, "Couldn't open Update Path", "Couldn't Open Update Path.\n\nMake sure the path points to: \n <Some_Adress>/team/Software/VIAN/<Your_OS>")
+
+        self.check_if_finished()
+
+    def check_if_finished(self):
+        print self.settings.USER_NAME, self.settings.UPDATE_SOURCE
+        if self.settings.USER_NAME != "" and self.settings.UPDATE_SOURCE != "":
+            self.may_proceed = True
+
+    def on_ok(self):
+        if self.may_proceed:
+            self.close()
+        else:
+            QMessageBox.warning(self.main_window, "Please Fill out the Form", "Some information seems to be missing, please fill out the Form.")
 
 
 

@@ -273,11 +273,26 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         print ""
 
     def select_image(self, images, dispatch = True):
+        self.clear_selection()
         self.selected_images = images
 
-        self.update()
-        items = []
+        # Drawing the New Selection Frames
+        if len(self.selected_images) > 0:
+            for i in self.selected_images:
 
+                pen = QtGui.QPen()
+                pen.setColor(QtGui.QColor(255, 160, 74))
+                pen.setWidth(15 * 1/self.curr_scale)
+                item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(i.selection_rect))
+                item.setPen(pen)
+                # rect = QtCore.QRectF(i.selection_rect)
+                self.selection_frames.append(item)
+                self.scene.addItem(item)
+
+
+        self.update()
+
+        items = []
         if dispatch:
             for i in images:
                 items.append(i.screenshot_obj)
@@ -397,20 +412,20 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def paintEvent(self, QPaintEvent):
         super(ScreenshotsManagerWidget, self).paintEvent(QPaintEvent)
 
-        #Removing all Selection Frames
-        self.clear_selection()
-        # Painting the Selection Frames
-        if len(self.selected_images) > 0:
-            for i in self.selected_images:
-
-                pen = QtGui.QPen()
-                pen.setColor(QtGui.QColor(255, 160, 74))
-                pen.setWidth(15 * 1/self.curr_scale)
-                item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(i.selection_rect))
-                item.setPen(pen)
-                # rect = QtCore.QRectF(i.selection_rect)
-                self.selection_frames.append(item)
-                self.scene.addItem(item)
+        # #Removing all Selection Frames
+        # self.clear_selection()
+        # # Painting the Selection Frames
+        # if len(self.selected_images) > 0:
+        #     for i in self.selected_images:
+        #
+        #         pen = QtGui.QPen()
+        #         pen.setColor(QtGui.QColor(255, 160, 74))
+        #         pen.setWidth(15 * 1/self.curr_scale)
+        #         item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(i.selection_rect))
+        #         item.setPen(pen)
+        #         # rect = QtCore.QRectF(i.selection_rect)
+        #         self.selection_frames.append(item)
+        #         self.scene.addItem(item)
 
     def rubber_band_selection(self, QRect, Union, QPointF=None, QPoint=None):
         self.rubberband_rect = self.mapToScene(QRect).boundingRect()
@@ -427,8 +442,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.rubberband_rect = QtCore.QRectF(0.0, 0.0, 0.0, 0.0)
             super(ScreenshotsManagerWidget, self).mouseReleaseEvent(QMouseEvent)
 
-    def export_screenshots(self, dir, visibility = None, image_type = None, quality = None, naming = None):
+    def export_screenshots(self, path, visibility = None, image_type = None, quality = None, naming = None):
         screenshots = []
+
+        # If there are selected Screenshots, only export those,
+        # Else export all
         if len(self.selected_images) == 0:
             for item in self.images:
                 screenshots.append(item.screenshot_obj)
@@ -437,16 +455,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             for item in self.selected_images:
                 screenshots.append(item.screenshot_obj)
 
+        try:
+            if not os.path.isdir(path):
+                os.mkdir(path)
 
-        # TODO
-        # for item in self.images:
-        #     screenshots.append(item.screenshot_obj)
-
-        exporter = ScreenshotsExporter(self.main_window.settings, self.main_window.project, naming)
-        if not os.path.isdir(dir):
-            os.mkdir(dir)
-
-        exporter.export(screenshots, dir, visibility, image_type, quality)
+            exporter = ScreenshotsExporter(self.main_window.settings, self.main_window.project, naming)
+            exporter.export(screenshots, path, visibility, image_type, quality)
+        except OSError as e:
+            QMessageBox.warning(self.main_window, "Failed to Create Directory", "Please choose a valid path\n\n" + path)
+            self.main_window.print_message("Failed to Create Directory: " + path, "Red")
 
     def clear_selection(self):
         if len(self.selection_frames) > 0:

@@ -42,14 +42,19 @@ class DialogPreferences(EDialogWidget):
 
 
         self.lineEdit_ProjectsFolder.setText(self.settings.DIR_PROJECT)
+        self.lineEdit_UpdateSource.setText(self.settings.UPDATE_SOURCE)
         self.checkBox_Autosave.setCheckState(self.settings.AUTOSAVE)
         self.spinBox_AutosaveTime.setValue(self.settings.AUTOSAVE_TIME)
 
 
+
         self.spinBox_GridSize.setValue(self.settings.GRID_SIZE)
+
+        self.lineEdit_UserName.setText(self.settings.USER_NAME)
         self.lineEdit_CorpusIP.setText(self.settings.CORPUS_IP)
         self.lineEdit_CorpusPort.setText(str(self.settings.COPRUS_PORT))
         self.lineEdit_CorpusPW.setText(self.settings.COPRUS_PW)
+
 
     def set_autosave(self):
         state = self.checkBox_Autosave.isChecked()
@@ -77,6 +82,14 @@ class DialogPreferences(EDialogWidget):
 
         naming = [n1, n2, n3, n4, n5, n6]
         self.settings.SCREENSHOTS_EXPORT_NAMING = naming
+
+    def apply_settings(self):
+        self.settings.USER_NAME = self.lineEdit_UserName.text()
+        self.settings.CORPUS_IP = self.lineEdit_CorpusIP.text()
+        self.settings.COPRUS_PORT = self.lineEdit_CorpusPort.text()
+        self.settings.COPRUS_PW = self.lineEdit_CorpusPW.text()
+
+        self.settings.UPDATE_SOURCE = self.lineEdit_UpdateSource.text()
 
     def on_ok(self):
         self.settings.store()

@@ -5,6 +5,7 @@ from core.data.containers import ElanExtensionProject
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.enums import MovieSource
 import os
+import glob
 
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path):
@@ -12,6 +13,7 @@ class NewProjectDialog(EDialogWidget):
         path = os.path.abspath("qt_ui/DialogNewProject.ui")
         uic.loadUi(path, self)
         self.settings = settings
+        self.templates = []
 
         self.project_name = "project_name"
         if movie_path is "":
@@ -29,6 +31,8 @@ class NewProjectDialog(EDialogWidget):
 
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
+
+        self.find_templates()
 
         self.lineEdit_ProjectName.textChanged.connect(self.on_proj_name_changed)
         self.lineEdit_ProjectPath.editingFinished.connect(self.on_proj_path_changed)
@@ -51,6 +55,14 @@ class NewProjectDialog(EDialogWidget):
         self.set_project_path()
 
         self.show()
+
+    def find_templates(self):
+        templates = glob.glob(self.settings.DIR_TEMPLATES + "*")
+        self.templates.append(None)
+        self.comboBox_Template.addItem("No Template")
+        for t in templates:
+            self.templates.append(t)
+            self.comboBox_Template.addItem(t.replace("\\" , "/").split("/").pop().replace(".viant", ""))
 
     def set_project_path(self):
         self.project.path = self.project_dir
@@ -124,6 +136,7 @@ class NewProjectDialog(EDialogWidget):
             print "Forced silencing as Hotfix, if this statement is necessary is currently unclear anyway"
             #TODO
 
+        template = self.templates[self.comboBox_Template.currentIndex()]
         self.project.path = self.project_dir + self.project_name
-        self.main_window.new_project(self.project)
+        self.main_window.new_project(self.project, template)
         self.close()

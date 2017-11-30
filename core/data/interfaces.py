@@ -24,10 +24,12 @@ class IHasVocabulary():
 
     def add_word(self, word):
         self.voc_list.append(word)
+        word.add_connected_item(self)
 
     def remove_word(self, word):
         if word in self.voc_list:
             self.voc_list.remove(word)
+        word.remove_connected_item(self)
 
 
 class IProjectContainer(IHasVocabulary):

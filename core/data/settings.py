@@ -29,7 +29,7 @@ class UserSettings():
             naming.Movie_Source.name,
 
         ]
-        self.USER_NAME = "User Name"
+        self.USER_NAME = ""#"User Name"
         self.CORPUS_IP = "127.0.0.1"
         self.COPRUS_PORT = 5006
         self.COPRUS_PW = "CorpusPassword"
@@ -55,11 +55,17 @@ class UserSettings():
         self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
         self.store_path = self.DIR_PROJECT + path
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
+        self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
 
-        self.UPDATE_SOURCE = "\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
+        self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
         if not os.path.isdir(self.DIR_PROJECT):
             os.mkdir(self.DIR_PROJECT)
+
+        if not os.path.isdir(self.DIR_TEMPLATES):
+            os.mkdir(self.DIR_TEMPLATES)
+
+
         # Annotation Viewer
         self.AUTO_COLLAPSE = True
 
