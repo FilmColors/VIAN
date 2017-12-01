@@ -800,7 +800,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 start = last.end
 
         if ID is None:
-            ID = len(self.segments)
+            ID = len(self.segments) + 1
 
         new_seg = Segment(ID = ID, start = start, end = stop, additional_identifiers=[str(ID)], segmentation = self)
         new_seg.set_project(self.project)

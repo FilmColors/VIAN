@@ -16,10 +16,15 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, "E:\\\\Programming\\Git\\visual-movie-annotator\\_docs\\source\\documentation\\")
+sys.path.insert(0, "E:\\\\Programming\\Git\\visual-movie-annotator\\_docs\\source\\")
 
+
+# sys.path.insert(0, os.path.abspath('.'))
+import guzzle_sphinx_theme
+import sphinx_rtd_theme
 
 # -- General configuration ------------------------------------------------
 
@@ -53,7 +58,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'VIAM'
+project = u'VIAN'
 copyright = u'2017, Gaudenz Halter'
 author = u'Gaudenz Halter'
 
@@ -90,7 +95,11 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+# html_theme_path = guzzle_sphinx_theme.html_theme_path()
+# html_theme = 'guzzle_sphinx_theme'
+
+html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -107,7 +116,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'VIAMdoc'
+htmlhelp_basename = 'VIANdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------

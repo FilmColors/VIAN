@@ -274,6 +274,7 @@ class OutlinerTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() == Qt.RightButton:
+            super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
             self.open_context_menu(QMouseEvent)
         else:
             super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
@@ -293,6 +294,9 @@ class OutlinerTreeWidget(QTreeWidget):
             self.context_menu.close()
 
         if self.currentItem() is None:
+            return
+
+        if len(self.selectedIndexes()) == 0:
             return
 
         if isinstance(self.selectedItems()[0], ScreenshotRootOutlinerItem):
@@ -409,6 +413,7 @@ class SegmentationOutlinerRootItem(AbstractOutlinerItem):
     def update_item(self):
         super(SegmentationOutlinerRootItem, self).update_item()
         self.setText(0, "Segmentations")
+        self.setForeground(0, QtGui.QColor(0,113,122))
 
 
 class SegmentationOutlinerItem(AbstractOutlinerItem):
@@ -443,8 +448,6 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
             self.setIcon(0, QIcon())
 
 
-
-
 class SegmentOutlinerItem(AbstractOutlinerItem):
     def __init__(self, parent, index, segment):
         super(SegmentOutlinerItem, self).__init__(parent, index)
@@ -467,6 +470,7 @@ class AnnotationLayerOutlinerRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(AnnotationLayerOutlinerRootItem, self).__init__(parent, index)
         self.setText(0, "Annotation Layers")
+        self.setForeground(0, QtGui.QColor(133,42,42))
 
 
 class AnnotationLayerOutlinerItem(AbstractOutlinerItem):
@@ -527,6 +531,7 @@ class ScreenshotRootOutlinerItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(ScreenshotRootOutlinerItem, self).__init__(parent, index)
         self.setText(0, "Screenshots")
+        self.setForeground(0, QtGui.QColor(116,73,146))
 
 
 class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
@@ -610,6 +615,7 @@ class MovieDescriptorOutlinerItem(AbstractOutlinerItem):
     def update_item(self):
         super(MovieDescriptorOutlinerItem, self).update_item()
         self.setText(0, self.movie_descriptor.movie_name)
+        self.setForeground(0, QtGui.QColor(182,128,10))
 
 
 class AnalyzesOutlinerRootItem(AbstractOutlinerItem):
@@ -622,6 +628,7 @@ class AnalyzesOutlinerRootItem(AbstractOutlinerItem):
 
     def update_item(self):
         self.setText(0, "Analyzes")
+        self.setForeground(0, QtGui.QColor(7,133,47))
 
 
 class AnalyzesOutlinerItem(AbstractOutlinerItem):
@@ -652,6 +659,7 @@ class NodeScriptsRootItem(AbstractOutlinerItem):
     def update_item(self):
         self.setText(0, "Node Scripts")
 
+        self.setForeground(0, QtGui.QColor(81,109,90))
 
 class NodeScriptsItem(AbstractOutlinerItem):
     def __init__(self, parent, index, script):

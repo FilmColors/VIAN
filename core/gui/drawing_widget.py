@@ -422,6 +422,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             super(DrawingOverlay, self).update()
             # self.raise_()
             self.synchronize_transforms()
+        if not self.settings.OPENCV_PER_FRAME and self.opencv_image.isVisible():
+            self.hide_opencv_image()
 
     def set_input_transparent(self, transparent):
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents,transparent)
@@ -450,11 +452,10 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.end()
 
     def hide_opencv_image(self):
-        if self.settings.OPENCV_PER_FRAME:
-            if self.opencv_image_visible == True:
-                self.opencv_image_visible = False
-                self.opencv_image.hide()
-                self.onSourceChanged.emit("VLC")
+        if self.opencv_image_visible == True:
+            self.opencv_image_visible = False
+            self.opencv_image.hide()
+            self.onSourceChanged.emit("VLC")
 
     def show_opencv_image(self):
         if self.settings.OPENCV_PER_FRAME:

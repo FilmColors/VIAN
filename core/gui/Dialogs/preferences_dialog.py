@@ -27,14 +27,20 @@ class DialogPreferences(EDialogWidget):
             index = cb.findText(self.settings.SCREENSHOTS_EXPORT_NAMING[i])
             cb.setCurrentIndex(index)
 
+        # OPENCV
+        self.checkBox_OpenCV.setChecked(self.settings.OPENCV_PER_FRAME)
         self.checkBox_OpenCV.stateChanged.connect(self.set_opencv_per_frame)
 
+        # AUTOSAVE
+        print self.settings.AUTOSAVE
+        self.checkBox_Autosave.setChecked(self.settings.AUTOSAVE)
         self.checkBox_Autosave.stateChanged.connect(self.set_autosave)
         self.spinBox_AutosaveTime.valueChanged.connect(self.set_autosave_time)
 
         self.btn_Ok.clicked.connect(self.on_ok)
         self.btn_Cancel.clicked.connect(self.on_cancel)
 
+        # SCREENSHOT Nomenclature
         for cb in self.naming_cbs:
             cb.currentIndexChanged.connect(self.set_screenshot_export_naming)
 
@@ -43,7 +49,6 @@ class DialogPreferences(EDialogWidget):
 
         self.lineEdit_ProjectsFolder.setText(self.settings.DIR_PROJECT)
         self.lineEdit_UpdateSource.setText(self.settings.UPDATE_SOURCE)
-        self.checkBox_Autosave.setCheckState(self.settings.AUTOSAVE)
         self.spinBox_AutosaveTime.setValue(self.settings.AUTOSAVE_TIME)
 
 

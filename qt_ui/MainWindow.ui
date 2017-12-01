@@ -93,6 +93,7 @@
     <addaction name="actionAbout"/>
     <addaction name="actionWelcome"/>
     <addaction name="actionUpdate"/>
+    <addaction name="actionDocumentation"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
@@ -435,6 +436,11 @@
   <action name="actionExportTemplate">
    <property name="text">
     <string>Project Template</string>
+   </property>
+  </action>
+  <action name="actionDocumentation">
+   <property name="text">
+    <string>Documentation</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QFileDialog, qApp, QLabel, QMessageBox, QWidget
 
+import webbrowser
 # from annotation_viewer import AnnotationViewer
 from core.concurrent.worker import Worker, CurrentSegmentEvaluater
 from core.concurrent.worker_functions import *
@@ -48,10 +49,10 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
-__status__ = "Production"
+__status__ = "Developement, (BETA)"
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -262,6 +263,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
+        self.actionDocumentation.triggered.connect(self.open_documentation)
 
 
         self.actionUpdate.triggered.connect(self.update_vian)
@@ -1006,6 +1008,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_player_size(self):
         self.player.update()
     # endregion
+
+    def open_documentation(self):
+        webbrowser.open("file://" + os.path.abspath("_docs/build/html/index.html"))
 
     def on_about(self):
         about = ""
