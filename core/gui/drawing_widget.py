@@ -469,6 +469,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         if self.main_window.centralWidget() is self.main_window.screenshots_manager:
             return
 
+        old_size = self.size()
+
         s = self.main_window.player.movie_size
         aspect =self.main_window.player.get_aspect_ratio()
 
@@ -506,9 +508,11 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
         self.move(location)
         self.setFixedSize(x,y)
-        self.opencv_image.setFixedSize(x,y)
+
         if self.opencv_image_visible and self.videoCap is not None and self.settings.OPENCV_PER_FRAME and self.opencv_image.pixmap():
-            self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
+            self.opencv_image.setFixedSize(x, y)
+            if old_size.width() != x or old_size.height() != y:
+                self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
 
         # if self.opencv_image_visible and self.videoCap:
         #     self.update_opencv_image(self.main_window.player.get_media_time())

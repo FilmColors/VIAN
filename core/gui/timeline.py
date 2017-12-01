@@ -205,7 +205,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def update_ui(self):
         # self.time_scrubber.move(self.curr_movie_time, 0)
-        value = self.scrollArea.verticalScrollBar().value()
+        value = self.scrollArea.horizontalScrollBar().value()
 
         # self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
         # # self.time_bar.setFixedSize(self.duration / self.scale + self.controls_width, self.time_bar_height)
@@ -240,6 +240,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width, loc_y + self.bar_height)
         self.frame_Controls.setFixedSize(self.controls_width, self.frame_Bars.height())
 
+        self.time_bar.raise_()
 
 
 

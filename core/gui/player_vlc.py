@@ -341,7 +341,11 @@ class Player_VLC(VideoPlayer):
         self.media_player.play()
         self.playing = True
         self.started.emit()
-        self.fps = self.media_player.get_fps()
+
+        # We want to check for the fps, since VLC sometimes gets it wrong at the beginning.
+        fps = self.media_player.get_fps()
+        if fps > 0:
+            self.fps = fps
 
     def pause(self):
         self.media_player.set_pause(-1)
