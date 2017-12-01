@@ -5,13 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5f86adad-e443-47bd-a2df-ab0eb0627df8" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/drawing_widget.py" afterPath="$PROJECT_DIR$/core/gui/drawing_widget.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/player_vlc.py" afterPath="$PROJECT_DIR$/core/gui/player_vlc.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/timeline.py" afterPath="$PROJECT_DIR$/core/gui/timeline.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/install/scripts/OSX_Install" afterPath="$PROJECT_DIR$/install/scripts/OSX_Install" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/install/scripts/OSX_Run" afterPath="$PROJECT_DIR$/install/scripts/OSX_Run" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/install/scripts/win64_Install.cmd" afterPath="$PROJECT_DIR$/install/scripts/win64_Install.cmd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/__version__.txt" afterPath="$PROJECT_DIR$/__version__.txt" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -600,7 +594,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="settings.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/data/settings.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-1585">
@@ -608,6 +602,16 @@
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="__version__.txt" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/__version__.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="18">
+              <caret line="1" column="18" lean-forward="true" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -1196,7 +1200,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/core/gui/vocabulary.py" />
         <option value="$PROJECT_DIR$/core/gui/Dialogs/export_template_dialog.py" />
         <option value="$PROJECT_DIR$/core/gui/Dialogs/new_project_dialog.py" />
         <option value="$PROJECT_DIR$/core/gui/ewidgetbase.py" />
@@ -1247,6 +1250,7 @@
         <option value="$PROJECT_DIR$/core/gui/player_vlc.py" />
         <option value="$PROJECT_DIR$/core/gui/drawing_widget.py" />
         <option value="$PROJECT_DIR$/core/gui/timeline.py" />
+        <option value="$PROJECT_DIR$/__version__.txt" />
       </list>
     </option>
   </component>
@@ -1766,13 +1770,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://C:/dev/anaconda/envs/vian_win/Lib/genericpath.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="39" column="0" lean-forward="false" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/vlc/vlc.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -3232,6 +3229,14 @@
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__version__.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="1" column="18" lean-forward="true" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
+          <folding />
         </state>
       </provider>
     </entry>
