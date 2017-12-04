@@ -626,7 +626,7 @@ class TimebarSlice(QtWidgets.QWidget):
             self.color = (202, 54, 109, 100)
 
         if item.get_type() == SEGMENT:
-            self.text = "ID:" + str(item.ID).ljust(5) +"\n Body:"+item.get_annotation_body()
+            self.text = "Name:" + str(item.get_name()).ljust(5) +"\n Text:"+item.get_annotation_body()
             self.setToolTip("<FONT>" + self.text + "</FONT>")
         else:
             self.text = str(item.get_name())

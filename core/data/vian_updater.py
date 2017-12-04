@@ -8,32 +8,43 @@ import shutil
 from core.data.interfaces import IConcurrentJob
 from PyQt5.QtWidgets import QMessageBox
 
+import requests, zipfile, StringIO
+import os
+
+import urllib2
+
 class VianUpdater(IConcurrentJob):
     def __init__(self, main_window, current_version):
         v = current_version.split(".")
         self.main_window = main_window
-        self.current_version = [int(v[0]), int(v[2]), int(v[1])]
+        self.current_version = [int(v[0]), int(v[1]), int(v[2])]
         self.source_dir = main_window.settings.UPDATE_SOURCE
         self.temp_dir = ""
         self.app_root = os.path.abspath("../" + os.curdir)
+        self.url_source = "http://zauberklang.ch/vian_update.zip"
+        self.url_version = "http://zauberklang.ch/vian_version.txt"
         self.to_exclude = ["user"]
         self.box = None
 
     def update(self):
-        do_update = self.get_server_version()
-        if do_update:
-            job = VianUpdaterJob([self.app_root, self.source_dir])
-            self.main_window.run_job_concurrent(job)
+        try:
+            do_update = self.get_server_version()
+            if do_update:
+                job = VianUpdaterJob([self.app_root, self.source_dir, self.url_source])
+                self.main_window.run_job_concurrent(job)
+        except Exception as e:
+            self.main_window.print_message("Update Failed, see Console for more Information", "Red")
+            print e.message
 
     def get_server_version(self):
         version = None
-        with open(self.source_dir + "/VIAN/__version__.txt", "rb") as f:
-            for l in f:
-                if "__version__" in l:
-                    version = l.split(" ").pop()
-                    version = version.split(".")
-                    version = [int(version[0]), int(version[1]), int(version[2])]
+        for line in urllib2.urlopen(self.url_version):
+            if "__version__" in line:
+                version = line.replace("__version__: ", "")
+                version = version.split(".")
+                version = [int(version[0]), int(version[1]), int(version[2])]
 
+        print self.current_version
         if version == None:
             return False
 
@@ -44,13 +55,17 @@ class VianUpdater(IConcurrentJob):
         else:
             return False
 
+
     def fetch_folder(self):
         if os.path.exists(self.app_root + "/update/"):
             shutil.rmtree(self.app_root + "/update/")
 
         os.mkdir(self.app_root + "/update/")
         self.temp_dir = self.app_root + "/update/"
-        copytree(self.source_dir +"/VIAN", self.temp_dir + "/VIAN")
+
+        r = requests.get(self.url_source, stream=True)
+        z = zipfile.ZipFile(StringIO.StringIO(r.content))
+        z.extractall(self.temp_dir)
 
     def replace_files(self):
         to_remove = self.app_root + "/VIAN/"
@@ -75,6 +90,8 @@ class VianUpdaterJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         self.app_root = args[0]
         self.source_dir = args[1]
+        self.url_source = args[2]
+
 
         sign_progress(0.1)
         if os.path.exists(self.app_root + "/update/"):
@@ -82,14 +99,18 @@ class VianUpdaterJob(IConcurrentJob):
 
         os.mkdir(self.app_root + "/update/")
         self.temp_dir = self.app_root + "/update/"
-        copytree(self.source_dir + "/VIAN", self.temp_dir + "/VIAN")
+
+        r = requests.get(self.url_source, stream=True)
+        z = zipfile.ZipFile(StringIO.StringIO(r.content))
+        z.extractall(self.temp_dir)
 
         sign_progress(0.5)
-        root_src_dir = (self.temp_dir + "VIAN/").replace("\\", "/")
+        root_src_dir = (self.temp_dir).replace("\\", "/")
         root_dst_dir = (self.app_root + "/VIAN/").replace("\\", "/")
 
         total = sum([len(files) for r, d, files in os.walk(root_src_dir)])
         counter = 1.0
+
         for src_dir, dirs, files in os.walk(root_src_dir):
             counter += 1
             sign_progress(0.5 + (counter / total) / 2)
@@ -103,7 +124,7 @@ class VianUpdaterJob(IConcurrentJob):
                 dst_file = os.path.join(dst_dir, file_)
                 if os.path.exists(dst_file):
                     os.remove(dst_file)
-                    move(src_file, dst_dir)
+                move(src_file, dst_dir)
 
         shutil.rmtree(self.app_root + "/update/")
         return [True]

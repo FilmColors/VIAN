@@ -79,7 +79,9 @@ class DialogScreenshotExporter(EDialogWidget):
 
         naming = [n1, n2, n3, n4, n5, n6]
 
-        self.manager.export_screenshots(path, visibility, image_type, quality, naming)
+        smooth = self.checkBox_Antialiasing.isChecked()
+
+        self.manager.export_screenshots(path, visibility, image_type, quality, naming, smooth)
         self.close()
 
 

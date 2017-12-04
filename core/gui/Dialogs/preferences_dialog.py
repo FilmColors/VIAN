@@ -97,6 +97,7 @@ class DialogPreferences(EDialogWidget):
         self.settings.UPDATE_SOURCE = self.lineEdit_UpdateSource.text()
 
     def on_ok(self):
+        self.apply_settings()
         self.settings.store()
         self.close()
 

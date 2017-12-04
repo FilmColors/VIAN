@@ -38,7 +38,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         IHasVocabulary.__init__(self)
         self.undo_manager = UndoRedoManager()
         self.main_window = main_window
-        self.streamer = main_window.project_streamer
+        # self.streamer = main_window.project_streamer
         self.inhibit_dispatch = True
 
         self.path = path

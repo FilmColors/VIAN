@@ -7,6 +7,7 @@ from core.data.computation import ms_to_string, numpy_to_qt_image
 from core.data.enums import MovieSource
 from extensions.colormetrics.hilbert_colors import HilbertHistogramVis
 from core.node_editor.node_editor import *
+from core.data.tracking import BasicTrackingJob
 
 class Inspector(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
@@ -104,7 +105,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
 
         if s_type == ANNOTATION:
             self.lbl_Type.setText("Annotation")
-            widgets = [AttributesITimeRange(self, target_item)]
+            widgets = [AttributesITimeRange(self, target_item), AttributesAnnotation(self, target_item)]
 
         if s_type == ANNOTATION_LAYER:
             self.lbl_Type.setText("Annotation Layer")
@@ -222,6 +223,41 @@ class AttributesSegmentation(QWidget):
         self.table_segments.resizeColumnsToContents()
         self.table_segments.resizeRowsToContents()
         self.show()
+
+
+class AttributesAnnotation(QWidget):
+    def __init__(self, parent, descriptor):
+        super(AttributesAnnotation, self).__init__(parent)
+        path = os.path.abspath("qt_ui/AttributesAnnotation.ui")
+        uic.loadUi(path, self)
+        self.annotation = descriptor
+        self.main_window = parent.main_window
+
+        self.comboBox_Tracking.currentIndexChanged.connect(self.on_tracking_changed)
+        self.show()
+
+    def on_tracking_changed(self):
+        index =  self.comboBox_Tracking.currentIndex()
+        if index != 0:
+            bbox = (float(self.annotation.orig_position[0]),
+                    float(self.annotation.orig_position[1]),
+                    float(int(self.annotation.size[0])),
+                    float(int(self.annotation.size[1])))
+            print bbox
+            job = BasicTrackingJob([self.annotation.unique_id,
+                                    bbox,
+                                    self.main_window.project.movie_descriptor.movie_path,
+                                    self.annotation.annotation_layer.get_start(),
+                                    self.annotation.annotation_layer.get_end(),
+                                    self.main_window.player.get_fps(),
+                                    self.comboBox_Tracking.currentText()
+                                    ])
+
+            self.main_window.run_job_concurrent(job)
+
+
+
+
 
 #textEdit_AnnotationBody
 

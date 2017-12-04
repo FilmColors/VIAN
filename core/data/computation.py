@@ -137,6 +137,8 @@ def get_mouse_handle_by_location(pos, rect, border_size = 0.1, corner_size = 0.1
 def ms_to_frames(time, fps):
     return long(float(time) / 1000 * fps)
 
+def frame2ms(frame, fps):
+    return long(round(long(frame) * 1000.0 / fps,0))
 
 def mse(imageA, imageB):
     # the 'Mean Squared Error' between the two images is the

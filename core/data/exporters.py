@@ -9,7 +9,7 @@ class ScreenshotsExporter():
         self.project = project
         self.naming = naming
 
-    def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100):
+    def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100, smooth = False):
         for s in screenshots:
             if self.naming is None:
                 name = build_file_name(self.settings.SCREENSHOTS_EXPORT_NAMING, s, self.project.movie_descriptor)
@@ -26,6 +26,8 @@ class ScreenshotsExporter():
             else:
                 img = s.img_movie
 
+            if smooth:
+                img = cv2.GaussianBlur(img, (3, 3), 0)
             # Export depending on the image Type selected
 
             if image_type.value == ImageType.JPG.value:

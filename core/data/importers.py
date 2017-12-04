@@ -73,7 +73,8 @@ def get_elan_segmentation_identifiers(path):
         return False, e.message
 
 class ELANProjectImporter():
-    def __init__(self, remote_movie = False, import_screenshots = False, movie_formats = None):
+    def __init__(self, main_window, remote_movie = False, import_screenshots = False, movie_formats = None):
+        self.main_window = main_window
         self.remote_movie = remote_movie
         self.import_screenshots = import_screenshots
         if movie_formats is None:
@@ -114,15 +115,14 @@ class ELANProjectImporter():
                 pass
 
 
-
-
         project_path = directory + filename
-        project = ElanExtensionProject(None, project_path, filename)
+        project = ElanExtensionProject(self.main_window, project_path, filename)
         project.movie_descriptor.movie_path = movie_path
 
         for i in segmentations:
             segmentation_name = i[0]
             segmentation = Segmentation(segmentation_name)
+            project.add_segmentation(segmentation)
 
             for j in i[1]:
                 value = j[0]
@@ -130,8 +130,9 @@ class ELANProjectImporter():
                 t_stop = j[2]
                 segm = Segment(start = t_start, end = t_stop, additional_identifiers=[value])
 
-                segmentation.segments.append(segm)
-            project.segmentation.append(segmentation)
+                # segmentation.segments.append(segm)
+                segmentation.add_segment(segm)
+            # project.segmentation.append(segmentation)
 
         for s in project.segmentation:
             s.update_segment_ids()

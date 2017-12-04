@@ -836,17 +836,19 @@ class MainWindow(QtWidgets.QMainWindow):
             path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
             #path = path.replace("file:///", "")
             #path = path.replace("file:", "")
-            print path
+
             path = parse_file_path(path)
-            print path
-            importer = ELANProjectImporter(remote_movie=True, import_screenshots=True)
+
+            importer = ELANProjectImporter(self, remote_movie=True, import_screenshots=True)
             self.project = importer.import_project(path)
 
             self.project.main_window = self
             self.project.dispatch_loaded()
             self.print_message("Import Successfull", "Green")
-        except:
+        except Exception  as e:
             self.print_message("Import Failed", "Red")
+            self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
+            self.print_message(e.message, "Red")
 
     def export_segmentation(self):
         path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
