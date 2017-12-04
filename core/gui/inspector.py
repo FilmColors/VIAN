@@ -243,7 +243,7 @@ class AttributesAnnotation(QWidget):
                     float(self.annotation.orig_position[1]),
                     float(int(self.annotation.size[0])),
                     float(int(self.annotation.size[1])))
-            print bbox
+
             job = BasicTrackingJob([self.annotation.unique_id,
                                     bbox,
                                     self.main_window.project.movie_descriptor.movie_path,

@@ -52,6 +52,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.group_height = 15
         self.controls_width = 200
         self.time_bar_height = 50
+        self.timeline_tail = 100
         self.time_bar = None
         self.frame_Bars.setFixedSize(self.duration,500)
         self.frame_Bars.move(self.controls_width, 0)
@@ -179,9 +180,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update()
 
     def paintEvent(self, QPaintEvent):
+        #TODO are these statements really necessary??
         self.frame_outer.setFixedSize(self.frame_Bars.size())
         self.frame_Controls.setFixedSize(self.controls_width, self.height())
-        self.frame_Bars.setFixedSize(self.duration /self.scale, self.height())
+        self.frame_Bars.setFixedSize(self.duration /self.scale + self.controls_width + self.timeline_tail, self.height())
         self.time_scrubber.setFixedHeight(self.height())
 
         # This makes OSX go crazy
@@ -237,7 +239,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         if loc_y + self.bar_height < 400:
             loc_y = 400 - self.bar_height
 
-        self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width, loc_y + self.bar_height)
+        self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail, loc_y + self.bar_height)
         self.frame_Controls.setFixedSize(self.controls_width, self.frame_Bars.height())
 
         self.time_bar.raise_()
@@ -358,7 +360,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             center_point = (pos.x() - self.controls_width) * self.scale + self.scrollArea.horizontalScrollBar().value() * self.scale
             delta = (pos.x() - self.controls_width)
 
-            s_max = int(self.duration / self.width()) + self.controls_width
+            s_max = int(self.duration / self.width()) + self.controls_width + 400 # + 400 to make sure the whole timeline can be looked at once
             self.scale = np.clip(- angleDelta.y() * (0.0005 * self.scale) + self.scale, None, s_max)
             self.update_ui()
             self.update()
