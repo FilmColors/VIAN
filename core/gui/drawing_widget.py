@@ -132,6 +132,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
         self.opencv_image = QLabel(self)
         self.opencv_image.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.opencv_image.installEventFilter(self)
         self.videoCap = None
         self.opencv_image_visible = False
         self.current_opencv_frame_index = 0
@@ -547,6 +548,9 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         pen.setDashPattern([1, 4, 5, 4])
         qp.setPen(pen)
         qp.drawLine(20, 240, 250, 240)
+
+    def eventFilter(self, QObject, QEvent):
+        return super(DrawingOverlay, self).eventFilter(QObject, QEvent)
 
     def mousePressEvent(self, event):
         print("MousePress")

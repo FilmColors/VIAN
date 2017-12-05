@@ -578,6 +578,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updater.update()
             else:
                 self.print_message("Update Aborted", "Orange")
+        else:
+            QMessageBox.information(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version)
 
 
     def open_preferences(self):

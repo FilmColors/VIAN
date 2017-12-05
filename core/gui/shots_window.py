@@ -119,7 +119,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         y = border_width
 
         if len(screenshots)> 0:
-            self.x_offset = screenshots[0].img_movie.shape[1] / 3
+            self.x_offset = screenshots[0].img_movie.shape[1] / 5
+            self.y_offset = screenshots[0].img_movie.shape[0] / 5
 
 
         width = 0
@@ -360,8 +361,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     self.scale(l_factor, l_factor)
                     self.update_caption()
 
+                if len(self.images)>0:
+                    viewport_width = (self.mapToScene(self.width(), self.height()) - self.mapToScene(QtCore.QPoint(0,0)))
+                    self.n_per_row = np.clip(np.floor( viewport_width.x() / self.images[0].pixmap().width()), 1, None)
+                    print (self.n_per_row, viewport_width.x(), self.images[0].pixmap().width())
+
                 cursor_pos = self.mapToScene(event.pos()) - old_pos
                 self.translate(cursor_pos.x(), cursor_pos.y())
+
+
 
             else:
                 self.verticalScrollBar().setValue(self.verticalScrollBar().value() - (500 * (float(event.angleDelta().y()) / 360)))
