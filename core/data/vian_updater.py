@@ -39,7 +39,8 @@ class VianUpdater(IConcurrentJob):
     def get_server_version(self):
         version = None
         for line in urllib.request.urlopen(self.url_version):
-            if "__version__" in line:
+            if "__version__" in str(line):
+                line = line.decode()
                 version = line.replace("__version__: ", "")
                 version = version.split(".")
                 version = [int(version[0]), int(version[1]), int(version[2])]

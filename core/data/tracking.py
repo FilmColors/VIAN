@@ -20,7 +20,7 @@ class BasicTrackingJob(IConcurrentJob):
         print(start_frame, end_frame)
 
         keys = []
-        print(method)
+
         # TRACKING
         if method == 'BOOSTING':
             tracker = cv2.TrackerBoosting_create()
@@ -82,7 +82,6 @@ class BasicTrackingJob(IConcurrentJob):
         return [annotation_id, keys]
 
     def modify_project(self, project, result, sign_progress=None):
-        print("MODIFYING")
         annotation_id = result[0]
         keys = result[1]
 
