@@ -11,10 +11,10 @@ import os
 
 
 def ms_to_string(ms):
-    ms = long(ms)
-    seconds = (ms / 1000) % 60
-    minutes = (ms / (1000 * 60)) % 60
-    hours = (ms / (1000 * 60 * 60)) % 24
+    ms = int(ms)
+    seconds = (ms // 1000) % 60
+    minutes = (ms // (1000 * 60)) % 60
+    hours = (ms // (1000 * 60 * 60)) % 24
 
     return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
 
@@ -135,10 +135,10 @@ def get_mouse_handle_by_location(pos, rect, border_size = 0.1, corner_size = 0.1
 
 
 def ms_to_frames(time, fps):
-    return long(float(time) / 1000 * fps)
+    return int(float(time) / 1000 * fps)
 
 def frame2ms(frame, fps):
-    return long(round(long(frame) * 1000.0 / fps,0))
+    return int(round(int(frame) * 1000.0 / fps,0))
 
 def mse(imageA, imageB):
     # the 'Mean Squared Error' between the two images is the
@@ -199,9 +199,9 @@ def find_time_of_screenshot(movie, shot, start, end):
 
 def parse_file_path(path):
     if sys.platform =="darwin":
-        return unicode(path.replace("file://", ""))
+        return str(path.replace("file://", ""))
     else:
-        return unicode(path.replace("file://", ""))
+        return str(path.replace("file://", ""))
 
 def create_icon(path):
     icon = QIcon(path)

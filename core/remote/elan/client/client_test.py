@@ -23,7 +23,7 @@ class ClientControl(QtWidgets.QMainWindow):
         self.show()
 
     def send_pos(self,position):
-        self.client.send_position(long(float(position)/50000*self.duration))
+        self.client.send_position(int(float(position)/50000*self.duration))
 
 
 if __name__ == '__main__':

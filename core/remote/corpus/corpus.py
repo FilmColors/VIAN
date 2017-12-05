@@ -26,7 +26,7 @@ class ProjectData():
 
 
 class CorpusMovie():
-    def __init__(self, movie_name = "", movie_path = "", movie_id = -0001, year = 1800, source = "", duration = 100):
+    def __init__(self, movie_name = "", movie_path = "", movie_id = -0o001, year = 1800, source = "", duration = 100):
         self.movie_name = movie_name
         self.movie_path = movie_path
         self.movie_id = movie_id

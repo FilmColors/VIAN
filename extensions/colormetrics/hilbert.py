@@ -139,7 +139,7 @@ def create_hilbert_color_map(s, rgb_multiplier, colorspace):
 
 
 def create_hilbert_color_pattern(s = 16, multiplier = 16, color_space = cv2.COLOR_Lab2BGR, filename = "color_pattern", write_to_disc=False):
-    print "Creating Hilbert Color Gradients"
+    print("Creating Hilbert Color Gradients")
     grad_hilbert = []
     # OLD Code
     # hilbert_walk_index(np.ones(shape=(s, s, s)), grad_hilbert, s, multiplier)#, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
@@ -170,7 +170,7 @@ def create_hilbert_3d_to_2d_coordinates(n):
 
 def create_hilbert_conversion_tables(dir, n1=13, n2=256):
     if not os.path.exists(dir + str("hilbert_conversion.npz")):
-        print "Creating Hilbert Conversion Table"
+        print("Creating Hilbert Conversion Table")
         indices_hilbert_3d_list = []
         indices_hilbert_2d_list = []
 
@@ -182,15 +182,15 @@ def create_hilbert_conversion_tables(dir, n1=13, n2=256):
         for index, i in enumerate(indices_hilbert_3d_list):
             indices_hilbert_3d[i[0], i[1], i[2],] = index
 
-        print indices_hilbert_3d.shape
+        print(indices_hilbert_3d.shape)
 
         np.savez(dir + str("hilbert_conversion.npz"), hilbert_2d=indices_hilbert_2d_list, hilbert_3d=indices_hilbert_3d)
 
     else:
-        print "Hilbert Conversion Table loaded from File"
+        print("Hilbert Conversion Table loaded from File")
 
 
-    print "Done"
+    print("Done")
     loaded = np.load(dir + str("hilbert_conversion.npz"))
     return loaded['hilbert_2d'], loaded['hilbert_3d']
 

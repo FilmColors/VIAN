@@ -4,7 +4,7 @@ import cv2
 import os
 from random import randint
 import shelve
-from computation import blend_transparent
+from .computation import blend_transparent
 import numpy as np
 from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable
 from core.data.undo_redo_manager import UndoRedoManager
@@ -258,7 +258,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
             self.dispatch_changed()
         else:
-            print "Not Found"
+            print("Not Found")
 
     def get_screenshots(self):
         return self.screenshots
@@ -493,7 +493,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             with open(project_path, 'w') as f:
                 json.dump(data, f)
         except Exception:
-            print Exception
+            print(Exception)
 
     def load_project(self, settings, path):
 
@@ -539,7 +539,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
         except Exception as e:
             self.main_window.print_message("Loading Vocabularies failed", "Red")
-            self.main_window.print_message(e.message, "Red")
+            self.main_window.print_message(e, "Red")
 
 
         for a in my_dict['annotation_layers']:
@@ -582,7 +582,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
         except Exception as e:
             self.screenshot_groups = old
-            print e.message
+            print(e)
             self.main_window.print_message("Loading Screenshot Group failed.", "Red")
 
         try:
@@ -598,7 +598,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                 self.current_script = old_script
         except Exception as e:
             self.main_window.print_message("Loading Node Scripts failed", "Red")
-            self.main_window.print_message(e.message, "Red")
+            self.main_window.print_message(e, "Red")
 
 
         self.sort_screenshots()
@@ -636,7 +636,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             with open(template_path, "rb") as f:
                 template = json.load(f)
         except:
-            print "Importing Template Failed"
+            print("Importing Template Failed")
             return
 
         for s in template['segmentations']:
@@ -647,7 +647,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.add_vocabulary(voc)
 
         for l in template['layers']:
-            self.create_annotation_layer(l[0], long(l[1]), long(l[2]))
+            self.create_annotation_layer(l[0], int(l[1]), int(l[2]))
 
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
@@ -733,7 +733,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         first = 0
         last = len(self.id_list) - 1
         while first <= last:
-            mid_point = (first + last) / 2
+            mid_point = (first + last) // 2
             if self.id_list[mid_point][0] == item_id:
                 return self.id_list[mid_point][1]
             else:
@@ -1094,7 +1094,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
 class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable):
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
-                 name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = ""):
+                 name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static"):
         IProjectContainer.__init__(self)
         self.name = name
         self.a_type = a_type
@@ -1112,6 +1112,8 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.keys = []
         self.free_hand_paths = []
         self.notes = ""
+
+        self.tracking = tracking
 
         self.annotation_layer = None
 
@@ -1228,7 +1230,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         if self.a_type == AnnotationType.Text:
             return self.text
         else:
-            print "get_text() called on non-text annotation"
+            print("get_text() called on non-text annotation")
             return self.text
 
     def set_text(self, text):
@@ -1285,7 +1287,8 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             resource_path = self.resource_path,
             free_hand_paths = self.free_hand_paths,
             notes = self.notes,
-            words=words
+            words=words,
+            tracking = self.tracking
 
 
         )
@@ -1309,6 +1312,11 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.resource_path = serialization['resource_path']
         self.free_hand_paths = serialization['free_hand_paths']
         self.notes = serialization['notes']
+
+        try:
+            self.tracking = serialization['tracking']
+        except:
+            self.tracking = "Static"
 
         try:
             self.locked = serialization['locked']
@@ -1761,9 +1769,9 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
 
             if dispatch:
                 self.dispatch_on_changed()
-            print "Removed"
+            print("Removed")
         else:
-            print "Not Found"
+            print("Not Found")
 
     def create_connection(self, connection, unique_id = -1):
         new = ConnectionDescriptor(connection.input_field, connection.output_field,
@@ -1965,7 +1973,7 @@ class ConnectionDescriptor(IProjectContainer):
 
 #region Analysis/MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
-    def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0001, year=1800, source="",
+    def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
                  duration=100):
         IProjectContainer.__init__(self)
         self.set_project(project)
@@ -1995,7 +2003,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
         self.dispatch_on_changed(item=self)
 
     def deserialize(self, serialization):
-        for key, value in serialization.items():
+        for key, value in list(serialization.items()):
             setattr(self, key, value)
         return self
 
@@ -2223,7 +2231,7 @@ class VocabularyWord(IProjectContainer, IHasName):
             self.connected_items.remove(item)
 
     def add_children(self, children):
-        print self.name, [c.name for c in self.children]
+        print(self.name, [c.name for c in self.children])
         if isinstance(children, list):
             for c in children:
                 self.children.append(c)

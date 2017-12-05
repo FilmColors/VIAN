@@ -1,12 +1,12 @@
-import pyodbc
-
-
-def get_all_fields_by_name(cursor, name):
-    result = []
-    for row in cursor.execute("select \"" + name + "\" from " + tables[0]):
-        print row
-        result.append(row[0])
-    return result
+# import pyodbc
+#
+#
+# def get_all_fields_by_name(cursor, name):
+#     result = []
+#     for row in cursor.execute("select \"" + name + "\" from " + tables[0]):
+#         print(row)
+#         result.append(row[0])
+#     return result
 
 # connection_string = "DSN=test_fm;UID=Admin;PWD="
 # connection = pyodbc.connect(connection_string)

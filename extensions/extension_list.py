@@ -18,7 +18,7 @@ class ExtensionList:
 
 
     def load_all_modules_from_dir(self):
-        print "## Loading Plugins ##"
+        print("## Loading Plugins ##")
 
         files = []
 
@@ -45,8 +45,8 @@ class ExtensionList:
                         self.plugins.append(obj(self.main_window))
 
 
-        print "Loaded Analyses:", self.analyses
-        print "Loaded Plugins: ", self.plugins
+        print("Loaded Analyses:", self.analyses)
+        print("Loaded Plugins: ", self.plugins)
 
     def get_plugin_menu(self, parent):
         result = QMenu("Extensions", parent)
@@ -55,7 +55,7 @@ class ExtensionList:
         for p in self.plugins:
             action = result.addAction(p.plugin_name)
             action.triggered.connect(p.get_window)
-        print "## Done ##"
+        print("## Done ##")
         return result
 
 

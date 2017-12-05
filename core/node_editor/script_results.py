@@ -30,11 +30,11 @@ class NodeEditorResults(EDockWidget):
             else:
                 return
         except Exception as e:
-            print ""
-            print "ERROR"
-            print "Visualization failed:"
-            print e
-            print ""
+            print("")
+            print("ERROR")
+            print("Visualization failed:")
+            print(e)
+            print("")
 
     def add_result_widget(self, widget):
         self.result_widgets.append(widget)
@@ -67,7 +67,7 @@ class ImageResultWidget(ResultWidget):
             rect = self.pixm.sceneBoundingRect()
             self.view.fitInView(rect, Qt.KeepAspectRatio)
         except:
-            print "No Pixmap in Image Result Widget"
+            print("No Pixmap in Image Result Widget")
 
 
 

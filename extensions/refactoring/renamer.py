@@ -73,8 +73,8 @@ class RenamerWindow(QMainWindow):
                 for n in dirs:
                     os.rename(n[0], n[1])
         except Exception as e:
-            print e.message
-            QMessageBox.warning(self, "Error", e.message)
+            print(e)
+            QMessageBox.warning(self, "Error", e)
 
 
 

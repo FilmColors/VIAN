@@ -115,7 +115,7 @@ class OutputLine(QtWidgets.QWidget):
             color = curr_msg[1]
             msg = curr_msg [0]
 
-            self.text_line.setText(msg)
+            self.text_line.setText(str(msg))
             if color is not "":
                 self.setStyleSheet("QLabel{color : " + color + ";}")
 

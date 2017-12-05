@@ -16,7 +16,7 @@ from core.gui.Dialogs.file_dialogs import MultiDirFileDialog
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtWidgets
-from segmentation_fetcher import SegmentationFetcher
+from .segmentation_fetcher import SegmentationFetcher
 # class FiwiParserExtension(GAPlugin):
 #     def __init__(self, main_window):
 #         super(FiwiParserExtension, self).__init__(main_window)
@@ -51,10 +51,10 @@ class FIWIParserWindow(QMainWindow):
         file_dialog.show()
 
     def on_accepted(self, result):
-        print result
+        print(result)
 
     def on_browse_input_finished(self, result):
-        print result
+        print(result)
 
     def on_browse_output(self):
         pass
@@ -97,11 +97,11 @@ class Shot():
     def print_shot(self, no_print = False):
 
         if not no_print:
-            print self.filemaker_ID, self.movie_name, self.movie_year, self.source_type, self.shot_id, [self.segment_id, self.segment_shot_id,self.global_shot_id], self.time, self.path
+            print(self.filemaker_ID, self.movie_name, self.movie_year, self.source_type, self.shot_id, [self.segment_id, self.segment_shot_id,self.global_shot_id], self.time, self.path)
         else:
             return self.filemaker_ID, self.movie_name, self.movie_year, self.source_type, self.shot_id, [self.segment_id, self.segment_shot_id,self.global_shot_id], self.time, self.path
     def deserialize(self, serialization):
-        for a,v in serialization.items():
+        for a,v in list(serialization.items()):
             setattr(self,a,v)
         return self
 
@@ -134,16 +134,16 @@ class Movie():
 
     def get_movie_path(self):
         files = glob.glob(self.folder_path + "*")
-        print files
+        print(files)
 
     def print_movie(self):
-        print self.filemaker_ID
-        print self.movie_name
-        print self.elan_path
-        print self.segmentation_path
+        print(self.filemaker_ID)
+        print(self.movie_name)
+        print(self.elan_path)
+        print(self.segmentation_path)
 
-        print self.folder_path
-        print self.relative_path
+        print(self.folder_path)
+        print(self.relative_path)
 
     def get_elan_path(self):
         if len(self.elan_path) > 0:
@@ -177,8 +177,8 @@ class FiwiFetcher():
         for root in self.directories:
             movie_directories.extend(glob.glob(root + "/" + "*" + "/"))
 
-        print "######FETCHER######"
-        print "Total Directories Found:", len(movie_directories)
+        print("######FETCHER######")
+        print("Total Directories Found:", len(movie_directories))
 
         edited = []
         for m in movie_directories:
@@ -222,7 +222,7 @@ class FiwiFetcher():
         self.movies_dirs = movie_directories
 
 
-        print len(edited), len(movies_without_screenshots_folder)
+        print(len(edited), len(movies_without_screenshots_folder))
         with open("results/Movies_Without_SCR.txt", "w") as f:
             for l in movies_without_screenshots_folder:
                 f.write(l + "\n")
@@ -242,7 +242,7 @@ class FiwiFetcher():
 
         movie_directories = self.movies_dirs
         if movie_directories is None:
-            print "No Movies Loaded"
+            print("No Movies Loaded")
             return
 
         n_ok = 0
@@ -298,7 +298,7 @@ class FiwiFetcher():
                 movie_name = elan_name[3]
 
             if "392" in elan_path:
-                print filemaker_id, "THIS"
+                print(filemaker_id, "THIS")
 
             if "BlackHawkDown" in elan_path:
                 filemaker_id = [272, 1, 1]
@@ -308,7 +308,7 @@ class FiwiFetcher():
             filemaker_id = [int(filemaker_id[0]), int(filemaker_id[1]), int(filemaker_id[2])]
 
             if filemaker_id[0] == 8 or filemaker_id[0] == 167 or filemaker_id[0] == 172 or filemaker_id[0] == 845 or filemaker_id[0] == 860:
-                print filemaker_id, elan_path
+                print(filemaker_id, elan_path)
 
             # console.write(str(filemaker_id).ljust(20) + movie_name.ljust(30))
             movie = Movie(filemaker_id, movie_name, None, m, elan_path, segmentation_files)
@@ -333,7 +333,7 @@ class FiwiFetcher():
         return folders
 
     def fetch_nomenclature_shots(self):
-        print "FETCHING NOMENCLATURE"
+        print("FETCHING NOMENCLATURE")
         resulting_dirs = []
         for d in self.movies_dirs:
             q = d.replace("\\", "/")
@@ -343,7 +343,7 @@ class FiwiFetcher():
             for ds in directories:
                 if "nomenclature" in ds or "NeueNomenklatur" in ds or "SCR_neu" in ds:
                     if "SCR_neu" in ds:
-                        print ds
+                        print(ds)
                     resulting_dirs.append(ds)
 
         shots = []
@@ -362,9 +362,9 @@ class FiwiFetcher():
                 target_dir = (root_p + fm_ID).replace("\\", "/")
                 if not os.path.isfile(target_path):
                     to_copy.append([target_path, target_dir, source_path])
-                    print target_path
+                    print(target_path)
             except:
-                print "ERROR: \t", s
+                print("ERROR: \t", s)
                 continue
 
         checked = []
@@ -381,7 +381,7 @@ class FiwiFetcher():
             threads.append(runner)
 
             if len(threads) % 10 == 0:
-                print i, " / ", len(to_copy)
+                print(i, " / ", len(to_copy))
                 for t in threads:
                     t.join()
 
@@ -400,7 +400,7 @@ class FiwiFetcher():
 
 
         for d in to_do:
-            print d
+            print(d)
             # imgs = glob.glob(d[0] + "*")
             # for i in imgs:
             #     if os.path.isfile(i):
@@ -409,7 +409,7 @@ class FiwiFetcher():
             #             new = i.replace(d[2], d[1])
             #             os.rename(old, new)
             #         except Exception as e:
-            #             print e.message, " in ", i
+            #             print e, " in ", i
             #             continue
 
     def fetch_subsegmentation(self, movies = None):
@@ -426,7 +426,7 @@ class FiwiFetcher():
             segm_folders = glob.glob(base_path + movie_folder + "/*")
 
             if len(segm_folders) == 0:
-                print movie.filemaker_ID, movie.folder_path
+                print(movie.filemaker_ID, movie.folder_path)
 
             else:
                 try:
@@ -434,7 +434,7 @@ class FiwiFetcher():
                         segm_ID = int(s.replace("\\", "/").split("/").pop())
 
                 except:
-                    print s.replace("\\", "/").split("/").pop()
+                    print(s.replace("\\", "/").split("/").pop())
                     movie.has_sub_segmentation = True
                     continue
 
@@ -456,10 +456,10 @@ class FiwiFetcher():
 
         result.append(movies[len(movies)-1])
 
-        print "#####REMOVED#######"
+        print("#####REMOVED#######")
         for r in removed:
-            print r.filemaker_ID, r.movie_name
-        print len(movies), len(result)
+            print(r.filemaker_ID, r.movie_name)
+        print(len(movies), len(result))
 
         with open("results/fp2_movies_03_duplicates.pickle", "wb") as f:
             pickle.dump(result, f)
@@ -471,13 +471,13 @@ class FiwiFetcher():
         for m in self.movie_objs:
             if m.filemaker_ID[0] == 266:
                 m.filemaker_ID = [266, 1, 1]
-                print m.print_movie()
-                print m.filemaker_ID
+                print(m.print_movie())
+                print(m.filemaker_ID)
             if m.filemaker_ID[0] == 182:
                 m.filemaker_ID = [182,1,1]
-                print m.filemaker_ID
+                print(m.filemaker_ID)
             if m.filemaker_ID[0] == 392:
-                print m.filemaker_ID
+                print(m.filemaker_ID)
 
         new_movie = Movie([329,1,1], "BladeRunner",None,
                           "//130.60.131.134/studi/Filme/spaete_Filme/329_Blade_Runner_1982/",
@@ -525,11 +525,11 @@ class FiwiFetcher():
                 movie_folder = str(movie.filemaker_ID[0]) + "_" + str(movie.filemaker_ID[1]) + "_" + str(
                     movie.filemaker_ID[2])
                 segm_folders = glob.glob(base_path + movie_folder + "/*")
-                print segm_folders, base_path + movie_folder + "/*"
+                print(segm_folders, base_path + movie_folder + "/*")
 
 
             if len(segm_folders) == 0:
-                print "ERROR NO FILES FOUND", movie.filemaker_ID
+                print("ERROR NO FILES FOUND", movie.filemaker_ID)
                 movies_undone.append(movie)
 
             else:
@@ -554,7 +554,7 @@ class FiwiFetcher():
 
                 movie.shots = shots
                 if len(shots) == 0:
-                    print "NO Shots", movie
+                    print("NO Shots", movie)
                 movies_done.append(movie)
 
         with open(output_done, "wb") as f:
@@ -563,15 +563,15 @@ class FiwiFetcher():
         with open(output_undone, "wb") as f:
             pickle.dump(movies_undone, f)
 
-        print "################################"
-        print "#############SUCESS#############"
+        print("################################")
+        print("#############SUCESS#############")
         for m in movies_done:
-            print m.filemaker_ID, m.movie_name
-        print ""
-        print "################################"
-        print "#############Failed#############"
+            print(m.filemaker_ID, m.movie_name)
+        print("")
+        print("################################")
+        print("#############Failed#############")
         for m in movies_undone:
-            print m.filemaker_ID, m.movie_name
+            print(m.filemaker_ID, m.movie_name)
 
     def fetch_shots_moviedirs(self, input_movies=None, test_dir=False, nomenclature=None):
         movies_undone = []
@@ -591,7 +591,7 @@ class FiwiFetcher():
             shots_folder = None
             folders = glob.glob(movie.folder_path + "*/")
             for s in folders:
-                print s
+                print(s)
                 if "SCR" in s or "Stills" in s:
                     shots_folder = s
                     break
@@ -625,7 +625,7 @@ class FiwiFetcher():
                 if len(p) >= 2:
                     segm_id = p[idx_segm_id]
                     shot_id = p[idx_shot_id]
-                    print segm_id,shot_id, path
+                    print(segm_id,shot_id, path)
 
 
 
@@ -671,7 +671,7 @@ class FiwiFetcher():
             start = index_range[0]
             if index_range[1] > len(self.movie_objs):
                 stop = len(self.movie_objs)
-                print "Ajusted END: ", stop
+                print("Ajusted END: ", stop)
             else:
                 stop = index_range[1]
 
@@ -681,11 +681,11 @@ class FiwiFetcher():
                 try:
                     shutil.rmtree(shots_dir + movie.string_ID())
                 except Exception as e:
-                    print e.message
+                    print(e)
 
             t1 = time.time()
             try:
-                print "Copying:",str(i).ljust(5) ,str(movie.filemaker_ID).ljust(20), movie.movie_name.ljust(25), str(len(movie.shots)).ljust(25),
+                print("Copying:",str(i).ljust(5) ,str(movie.filemaker_ID).ljust(20), movie.movie_name.ljust(25), str(len(movie.shots)).ljust(25), end=' ')
 
                 movie_path, segmentations = ELANProjectImporter().elan_project_importer(movie.elan_path)
 
@@ -715,10 +715,10 @@ class FiwiFetcher():
                 result.append(movie)
 
                 t2 = time.time()
-                print ["Elapsed Time (s):", t2]
+                print(["Elapsed Time (s):", t2])
 
             except IOError as e:
-                print e.message
+                print(e)
                 errors.append(movie)
 
         with open("results/movie_sets/fp2_movies_06_copy_"+str(start)+"_" +str(stop)+".pickle", "wb") as f:
@@ -758,9 +758,9 @@ class FiwiFetcher():
                     m.filemaker_ID = [287, 1, 4]
                 movie_ids.append(m.filemaker_ID)
 
-            print "Missing in Movies"
+            print("Missing in Movies")
             to_change = []
-            print len(self.movie_objs)
+            print(len(self.movie_objs))
             for n in folder_names:
                 if n not in movie_ids:
                     similar = []
@@ -771,18 +771,18 @@ class FiwiFetcher():
                         if m.filemaker_ID == n:
                             self.movie_objs.remove(m)
 
-                    print str(n).ljust(20), similar
+                    print(str(n).ljust(20), similar)
 
 
-            print "Missing in Folders"
-            print len(self.movie_objs)
+            print("Missing in Folders")
+            print(len(self.movie_objs))
             for n in movie_ids:
                 if n not in folder_names:
                     for m in self.movie_objs:
                         if m.filemaker_ID == n:
                             self.movie_objs.remove(m)
-                    print n
-            print len(self.movie_objs)
+                    print(n)
+            print(len(self.movie_objs))
 
 
             with open("results/movie_sets/fp2_movies_06_InputNeu.pickle", "wb") as f:
@@ -790,7 +790,7 @@ class FiwiFetcher():
 
     def diff_check_02(self, base_folder = "\\\\130.60.131.134\\fiwi_datenbank\\SCR\\", source_dirs = None):
         if self.database_movies is None or self.movie_objs is None:
-            print "No Movies Loaded"
+            print("No Movies Loaded")
             return
 
         not_in_database = []
@@ -813,40 +813,40 @@ class FiwiFetcher():
         not_in_database = sorted(not_in_database, key=lambda x : x.filemaker_ID[0])
         synchronized = sorted(synchronized, key=lambda x: x.filemaker_ID[0])
         not_in_movie_dir = sorted(not_in_movie_dir, key=lambda x: x[0])
-        print "###############DIFF CHECK###############"
-        print "########SYNCHRONIZED:############"
-        print "n-Items:", len(synchronized)
+        print("###############DIFF CHECK###############")
+        print("########SYNCHRONIZED:############")
+        print("n-Items:", len(synchronized))
         for m in synchronized:
-            print m.filemaker_ID
+            print(m.filemaker_ID)
 
-        print "\n\n"
-        print "######Not in Database:###########"
-        print "n-Items:", len(not_in_database)
+        print("\n\n")
+        print("######Not in Database:###########")
+        print("n-Items:", len(not_in_database))
         for m in not_in_database:
             suspect = False
             for idx in not_in_movie_dir:
                 if m.filemaker_ID[0] == idx[0]:
-                    print m.filemaker_ID, "\t", idx, "(Suspect wrong Item ID)"
+                    print(m.filemaker_ID, "\t", idx, "(Suspect wrong Item ID)")
                     suspect = True
                     break
 
             if not suspect:
-                print m.filemaker_ID
+                print(m.filemaker_ID)
 
 
-        print "\n\n"
-        print "######Not in Movie DIR:###########"
-        print "n-Items:", len(not_in_movie_dir)
+        print("\n\n")
+        print("######Not in Movie DIR:###########")
+        print("n-Items:", len(not_in_movie_dir))
         for m in not_in_movie_dir:
             suspect = False
             for idx in not_in_database:
                 if idx.filemaker_ID[0] == m[0]:
-                    print idx.filemaker_ID, "\t", m, "(Suspect wrong Item ID)"
+                    print(idx.filemaker_ID, "\t", m, "(Suspect wrong Item ID)")
                     suspect = True
                     break
 
             if not suspect:
-                print m
+                print(m)
 
     def diff_list2movies(self, idx_list = None):
         if idx_list is None:
@@ -854,20 +854,20 @@ class FiwiFetcher():
                      "\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank neu Export Einzelbilder\\FIWI\\SCR\\"]
             idx_list = self.fetch_exported(paths)
 
-        print idx_list
+        print(idx_list)
         movie_objs_idx = []
         for m in self.movie_objs:
             movie_objs_idx.append(m.filemaker_ID)
-        print movie_objs_idx
-        print "MOVIES -> DATABASE (Missing in Database)"
+        print(movie_objs_idx)
+        print("MOVIES -> DATABASE (Missing in Database)")
         for e in movie_objs_idx:
             if e not in idx_list:
-                print e
+                print(e)
 
-        print "DATABASE -> MOVIES (Missing in Exported)"
+        print("DATABASE -> MOVIES (Missing in Exported)")
         for e in idx_list:
             if e not in movie_objs_idx:
-                print e
+                print(e)
 
     def diff_export2database(self):
         paths = ["\\\\130.60.131.134\\fiwi_datenbank\\SCR_SOURCE\\Masterdatenbank alt Export Einzelbilder\\FIWI\\SCR\\",
@@ -876,16 +876,16 @@ class FiwiFetcher():
         exported = self.fetch_exported(paths)
 
         to_convert = []
-        print "EXPORTED -> DATABASE (Missing in Database)"
+        print("EXPORTED -> DATABASE (Missing in Database)")
         for e in exported:
             if e not in self.database_movies:
-                print e
+                print(e)
                 to_convert.append(e)
 
-        print "DATABASE -> EXPORTED (Missing in Exported)"
+        print("DATABASE -> EXPORTED (Missing in Exported)")
         for e in self.database_movies:
             if e not in exported:
-                print e
+                print(e)
 
         return to_convert
 
@@ -929,18 +929,18 @@ class FiwiFetcher():
         for s in shots_database:
             shot_database_clippped.append(s.replace("\\", "/").split("/").pop().split(".")[0])
 
-        print len(shot_database_clippped)
-        print len(shots_export)
+        print(len(shot_database_clippped))
+        print(len(shots_export))
         missing = []
-        print shot_database_clippped[0:100]
+        print(shot_database_clippped[0:100])
 
         for s in shots_export:
             q = s.split("_")
             name = str(int(q[0])) +"_"+ str(int(q[1])) +"_"+ str(int(q[2])) +"_"+ str(int(q[3]))+"_"+ str(int(q[4]))
             if name in shot_database_clippped:
-                print s
+                print(s)
             else:
-                print "NOT"
+                print("NOT")
 
     def fiwi_database_integrity(self, path="/Volumes/Drobo_5D_fiwi/Filmcolors_server/fiwi_datenbank/"):
         self.load_movie_object("results/all_movies.pickle")
@@ -957,7 +957,7 @@ class FiwiFetcher():
         segm_movies = []
         mov_movies = []
         for m in self.movie_objs:
-            print m.filemaker_ID
+            print(m.filemaker_ID)
 
         for m in scr_movies_in:
             scr_movies.append(m.replace(SCR_Folder, ""))
@@ -970,17 +970,17 @@ class FiwiFetcher():
             mov_movies.append(m.replace(MOV_Folder, "").split(".")[0].replace("_MOV", ""))
 
         # Missing in Segmentations
-        print "####Missing Segmentations in /SEGM/####"
+        print("####Missing Segmentations in /SEGM/####")
         for m in scr_movies:
             if not m in segm_movies:
                 movie_object =  self.find_movies_by_id([m])
                 self.copy_segmentation(movie_object[0], SEGM_Folder + m + "_SEGM.txt")
 
-        print "\n####MISSING IN Studi/Filme/####"
+        print("\n####MISSING IN Studi/Filme/####")
         for m in scr_movies:
             if len(self.find_movies_by_id([m])) == 0:
-                print m
-        print "\n####MISSING Movies in /MOV/####"
+                print(m)
+        print("\n####MISSING Movies in /MOV/####")
         for i, m in enumerate(scr_movies):
             console.write(str(i) + "/" + str(len(scr_movies)))
             if m not in mov_movies:
@@ -1004,7 +1004,7 @@ class FiwiFetcher():
         try:
             shutil.rmtree(to_delete)
         except Exception as e:
-            print e
+            print(e)
 
     def load_movie_object(self, input_path):
         with open(input_path, "rb") as f:
@@ -1023,14 +1023,14 @@ class FiwiFetcher():
                     found = True
                     break
             if not found:
-                print idx, " not Found"
+                print(idx, " not Found")
         return result
 
     def movie_list(self, path):
         with open(path, "rb") as f:
             self.movie_objs = pickle.load(f)
         for m in self.movie_objs:
-            print m.filemaker_ID
+            print(m.filemaker_ID)
 
     def copy_movie(self, movie, path):
         shutil.copy2(movie.movie_path, path)
@@ -1041,19 +1041,19 @@ class FiwiFetcher():
             with open(path, "wb") as segmentation_file:
                 if len(segmentation[1]) > 0:
                     segmentation_file.write("Sequence_No\tStart\tEnd\n")
-                    print "N-Segmentations:", len(segmentation[1])
+                    print("N-Segmentations:", len(segmentation[1]))
 
                     for s in segmentation[1]:
-                        a = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[0])))
-                        b = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[1])))
-                        c = str(re.sub(r'[^\x00-\x7f]', r' ', unicode(s[2])))
+                        a = str(re.sub(r'[^\x00-\x7f]', r' ', str(s[0])))
+                        b = str(re.sub(r'[^\x00-\x7f]', r' ', str(s[1])))
+                        c = str(re.sub(r'[^\x00-\x7f]', r' ', str(s[2])))
 
                         segmentation_file.write(a+ "\t" + b + "\t" + c + "\n")
 
                 else:
                     segmentation_file.write("None")
         except Exception as e:
-            print "Segmentation Export Failed.", e.message
+            print("Segmentation Export Failed.", e)
 
     def copy_segmentation(self, movie, path):
         movie_path, segmentations = ELANProjectImporter().elan_project_importer(movie.elan_path)
@@ -1084,19 +1084,19 @@ class FiwiFetcher():
                 movies.append([int(f[0]), int(f[1]), int(f[2])])
 
         movies = sorted(movies, key=lambda x: x[0])
-        print movies
+        print(movies)
         with_multi_items = []
         for i, m in enumerate(movies):
             if i == len(movies) - 1:
                 break
             else:
                 if m[0] == movies[i + 1][0]:
-                    print m, movies[i + 1]
-                    print glob.glob("//130.60.131.134/fiwi_datenbank/SCR/" + str(m[0]) + "_" + str(m[1]) + "_" + str(m[2]))
+                    print(m, movies[i + 1])
+                    print(glob.glob("//130.60.131.134/fiwi_datenbank/SCR/" + str(m[0]) + "_" + str(m[1]) + "_" + str(m[2])))
                     with_multi_items.append(m)
                     with_multi_items.append(movies[i + 1])
 
-        print with_multi_items
+        print(with_multi_items)
         database_paths = glob.glob("//130.60.131.134/fiwi_datenbank/SCR/" + "*")
         database_files = []
         for p in database_paths:
@@ -1112,9 +1112,9 @@ class FiwiFetcher():
                         has_found = True
                         todo.append(obj)
                 if has_found is False:
-                    print "Not Found", m
+                    print("Not Found", m)
         for m in todo:
-            print m.filemaker_ID, m.movie_name
+            print(m.filemaker_ID, m.movie_name)
 
         to_rename = []
         final = []
@@ -1139,11 +1139,11 @@ class FiwiFetcher():
                 if m.filemaker_ID == n.filemaker_ID:
                     found = True
             if found is False:
-                print m.filemaker_ID, "Added"
+                print(m.filemaker_ID, "Added")
                 final.append(m)
 
         for m in final:
-            print m.filemaker_ID, m.elan_path
+            print(m.filemaker_ID, m.elan_path)
             # print "Current Path", glob.glob(
             #     "//130.60.131.134/fiwi_datenbank/SCR/" + str(m.filemaker_ID[0]) + "_" + str(m.filemaker_ID[1]) + "_" + str(
             #         m.filemaker_ID[1]))
@@ -1187,7 +1187,7 @@ class FiwiFetcher():
                         segm_shot_id = sgm_counter
 
             target_name = str(s_id) + "_" + str(segm_shot_id) + "_" + "48_1_1"
-            print target_name
+            print(target_name)
             new_path = path.split("48_1_1_LaCucaracha_1934_DVD_SCR_")
             new_path.pop()
             new_path = t_dir + target_name + ".jpg"

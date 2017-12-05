@@ -30,9 +30,9 @@ def import_elan_segmentation(path, name, id_identifier, prevent_overlapping = Fa
         for row in lines:
             if row[0] in id_identifier:
                 id_sequence = curr_id
-                start_time = long(row[2])
-                end_time = long(row[3])
-                duration = long(row[4])
+                start_time = int(row[2])
+                end_time = int(row[3])
+                duration = int(row[4])
                 identifier = str(row[5])
 
                 if prevent_overlapping:
@@ -69,8 +69,8 @@ def get_elan_segmentation_identifiers(path):
                     identifiers.append(row[0])
         return True, identifiers
     except Exception as e:
-        print e.message
-        return False, e.message
+        print(e)
+        return False, e
 
 class ELANProjectImporter():
     def __init__(self, main_window, remote_movie = False, import_screenshots = False, movie_formats = None):
@@ -98,7 +98,7 @@ class ELANProjectImporter():
             filemaker_id = ""
             for i in range(3):
                 filemaker_id += id_parts[i] + "_"
-            print "FILEMAKER ID:", filemaker_id
+            print("FILEMAKER ID:", filemaker_id)
 
             for f in files:
                 if filemaker_id in f and any(ext in f for ext in self.movie_formats):
@@ -137,9 +137,9 @@ class ELANProjectImporter():
         for s in project.segmentation:
             s.update_segment_ids()
 
-        print project.name
-        print project.path
-        print project.movie_descriptor.movie_path
+        print(project.name)
+        print(project.path)
+        print(project.movie_descriptor.movie_path)
 
         return project
 
@@ -165,7 +165,7 @@ class ELANProjectImporter():
         time_order_nodes = collection.getElementsByTagName("TIME_ORDER")[0]
         for to in time_order_nodes.getElementsByTagName("TIME_SLOT"):
             slot_id = to.getAttribute("TIME_SLOT_ID")
-            slot_time = long(to.getAttribute("TIME_VALUE"))
+            slot_time = int(to.getAttribute("TIME_VALUE"))
             time_slots.append([slot_id, slot_time])
 
         tiers = []

@@ -8,10 +8,10 @@ import shutil
 from core.data.interfaces import IConcurrentJob
 from PyQt5.QtWidgets import QMessageBox
 
-import requests, zipfile, StringIO
+import requests, zipfile, io
 import os
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 class VianUpdater(IConcurrentJob):
     def __init__(self, main_window, current_version):
@@ -34,17 +34,18 @@ class VianUpdater(IConcurrentJob):
                 self.main_window.run_job_concurrent(job)
         except Exception as e:
             self.main_window.print_message("Update Failed, see Console for more Information", "Red")
-            print e.message
+            print(e)
 
     def get_server_version(self):
         version = None
-        for line in urllib2.urlopen(self.url_version):
-            if "__version__" in line:
+        for line in urllib.request.urlopen(self.url_version):
+            if "__version__" in str(line):
+                line = line.decode()
                 version = line.replace("__version__: ", "")
                 version = version.split(".")
                 version = [int(version[0]), int(version[1]), int(version[2])]
 
-        print self.current_version
+        print(self.current_version)
         if version == None:
             return False
 
@@ -64,7 +65,7 @@ class VianUpdater(IConcurrentJob):
         self.temp_dir = self.app_root + "/update/"
 
         r = requests.get(self.url_source, stream=True)
-        z = zipfile.ZipFile(StringIO.StringIO(r.content))
+        z = zipfile.ZipFile(io.StringIO(r.content))
         z.extractall(self.temp_dir)
 
     def replace_files(self):
@@ -101,7 +102,7 @@ class VianUpdaterJob(IConcurrentJob):
         self.temp_dir = self.app_root + "/update/"
 
         r = requests.get(self.url_source, stream=True)
-        z = zipfile.ZipFile(StringIO.StringIO(r.content))
+        z = zipfile.ZipFile(io.StringIO(r.content))
         z.extractall(self.temp_dir)
 
         sign_progress(0.5)

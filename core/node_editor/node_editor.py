@@ -42,10 +42,10 @@ class ScriptExecutor(QRunnable):
 
             res = True
         except Exception as e:
-            print ""
-            print "Script Executor Failed"
-            print e.message
-            print ""
+            print("")
+            print("Script Executor Failed")
+            print(e)
+            print("")
 
             res = False
 
@@ -167,7 +167,7 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             #     if n.operation.is_final_node and n.is_compiled:
             #         n.perform()
         else:
-            print "Not Compiled"
+            print("Not Compiled")
 
     def on_script_execution_finished(self, success):
         if success:

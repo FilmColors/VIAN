@@ -32,7 +32,7 @@ class DialogPreferences(EDialogWidget):
         self.checkBox_OpenCV.stateChanged.connect(self.set_opencv_per_frame)
 
         # AUTOSAVE
-        print self.settings.AUTOSAVE
+        print(self.settings.AUTOSAVE)
         self.checkBox_Autosave.setChecked(self.settings.AUTOSAVE)
         self.checkBox_Autosave.stateChanged.connect(self.set_autosave)
         self.spinBox_AutosaveTime.valueChanged.connect(self.set_autosave_time)

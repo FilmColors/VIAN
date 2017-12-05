@@ -8,7 +8,7 @@ from PyQt5.QtGui import QFont, QIcon
 from core.data.computation import ms_to_string
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.context_menu import open_context_menu
-from ewidgetbase import EDockWidget
+from .ewidgetbase import EDockWidget
 
 
 class Outliner(EDockWidget, IProjectChangeNotify):
@@ -306,7 +306,7 @@ class OutlinerTreeWidget(QTreeWidget):
         elif isinstance(self.selectedItems()[0], NodeScriptsRootItem):
             context_menu = open_context_menu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()), [],
                                            self.project, scripts_root=True)
-            print "ROOT"
+            print("ROOT")
         else:
             containers = []
             for item in self.selectedItems():

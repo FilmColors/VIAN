@@ -366,9 +366,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.update()
 
             side_offset = center_point - delta * self.scale
-            self.time_scrubber.move(self.curr_movie_time / self.scale - 5, 0)
+            self.time_scrubber.move(self.curr_movie_time // self.scale - 5, 0)
 
-            self.scrollArea.horizontalScrollBar().setValue(side_offset / self.scale)
+            self.scrollArea.horizontalScrollBar().setValue(side_offset // self.scale)
 
 
     def mousePressEvent(self, QMouseEvent):
@@ -445,9 +445,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         if isinstance(a, QtCore.QPoint):
             px = a.x() - (a.x() % (float(self.settings.GRID_SIZE) / self.scale))
             py = a.y() - (a.y() % (float(self.settings.GRID_SIZE) / self.scale))
-            return QtCore.QPoint(px, py)
+            return QtCore.QPoint(int(px), int(py))
         else:
-            return a - (a % (float(self.settings.GRID_SIZE) / self.scale))
+            return int(a - (a % (float(self.settings.GRID_SIZE) / self.scale)))
 
     def create_segment(self, lst = None):
         # If Nothing is handed in, we're performing a fast-segmentation
@@ -563,7 +563,7 @@ class TimelineBar(QtWidgets.QFrame):
         tb_keys = []
         for i, k in enumerate(keys):
             tb_key = TimebarKey(self, annotation, i)
-            tb_key.move(k[0] / self.timeline.scale, y + 2.5)
+            tb_key.move(k[0] // self.timeline.scale, y + 2.5)
             tb_key.resize(10, 10)
             tb_keys.append(tb_key)
             tb_key.show()
@@ -571,18 +571,18 @@ class TimelineBar(QtWidgets.QFrame):
 
     def add_slice(self, item):
         slice = TimebarSlice(self, item, self.timeline)
-        slice.move(item.get_start() / self.timeline.scale, 0)
-        slice.resize((item.get_end() - item.get_start()) / self.timeline.scale, self.height())
+        slice.move(item.get_start() // self.timeline.scale, 0)
+        slice.resize((item.get_end() - item.get_start()) // self.timeline.scale, self.height())
         self.slices.append(slice)
 
     def rescale(self):
         for a in self.annotations:
             for k in a[1]:
-                k.move(a[0].keys[k.key_index][0] / self.timeline.scale, k.y())
+                k.move(a[0].keys[k.key_index][0] // self.timeline.scale, k.y())
 
         for s in self.slices:
-            s.move(s.item.get_start() / self.timeline.scale, 0)
-            s.resize((s.item.get_end() - s.item.get_start()) / self.timeline.scale, self.height())
+            s.move(s.item.get_start() // self.timeline.scale, 0)
+            s.resize((s.item.get_end() - s.item.get_start()) // self.timeline.scale, self.height())
 
     def paintEvent(self, QPaintEvent):
         super(TimelineBar, self).paintEvent(QPaintEvent)
@@ -667,7 +667,7 @@ class TimebarSlice(QtWidgets.QWidget):
 
         qp.drawRect(QtCore.QRect(0, 0, self.width(), self.height()))
         qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), col)
-        qp.drawText(5, (self.height() + self.text_size) /2, self.text)
+        qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
         qp.end()
 
     def mousePressEvent(self, QMouseEvent):
@@ -688,8 +688,8 @@ class TimebarSlice(QtWidgets.QWidget):
         if not self.locked:
             if np.abs(self.pos().x() * self.timeline.scale - self.item.get_start()) < self.timeline.settings.GRID_SIZE and \
                  np.abs(self.width() * self.timeline.scale - (self.item.get_end() - self.item.get_start())) < self.timeline.settings.GRID_SIZE:
-                self.move(self.item.get_start()/self.timeline.scale, 0)
-                self.resize((self.item.get_end() - self.item.get_start()) / self.timeline.scale, self.height())
+                self.move(self.item.get_start()//self.timeline.scale, 0)
+                self.resize((self.item.get_end() - self.item.get_start()) // self.timeline.scale, self.height())
                 return
 
             if self.mode == "center":
@@ -715,9 +715,9 @@ class TimebarSlice(QtWidgets.QWidget):
             if QMouseEvent.buttons() & Qt.LeftButton:
                 pos = self.mapToParent(QMouseEvent.pos())
                 target = pos - self.offset
-                tx = self.timeline.round_to_grid(target.x())
-                ty = self.timeline.round_to_grid(target.y())
-                target = QtCore.QPoint(tx, ty)
+                tx = int(self.timeline.round_to_grid(target.x()))
+                ty = int(self.timeline.round_to_grid(target.y()))
+                target = QtCore.QPoint(int(tx), int(ty))
 
                 if self.mode == "right":
                     x = np.clip(self.curr_size.width() + target.x(),self.curr_pos.x() - self.offset.x() + 5,None)
@@ -807,14 +807,14 @@ class ScreenshotBar(TimelineBar):
 
         for s in screenshots:
             pic = TimebarPicture(self, s, timeline)
-            pic.move(s.get_start()/timeline.scale, 0)
+            pic.move(s.get_start()//timeline.scale, 0)
             self.pictures.append(pic)
 
         self.show()
 
     def rescale(self):
         for s in self.pictures:
-            s.move(s.item.get_start()/self.timeline.scale, 0)
+            s.move(s.item.get_start()//self.timeline.scale, 0)
 
 
 class TimebarPicture(QtWidgets.QWidget):
@@ -828,7 +828,7 @@ class TimebarPicture(QtWidgets.QWidget):
         qimage, qpixmap = numpy_to_qt_image(screenshot.get_preview(scale=0.1))
         self.qimage = qimage
         self.size = (screenshot.img_movie.shape[0], screenshot.img_movie.shape[1])
-        width = self.size[1] * self.pic_height / self.size[0]
+        width = self.size[1] * self.pic_height // self.size[0]
         self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
         self.resize(width, self.pic_height)
         self.show()

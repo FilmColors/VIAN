@@ -82,7 +82,7 @@ class ProjectModifier(QRunnable):
         except:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
-            print exctype, value, traceback.format_exc()
+            print(exctype, value, traceback.format_exc())
 
     def on_progress(self, int_value):
         self.signals.sign_progress.emit(int_value)
@@ -120,7 +120,7 @@ class CurrentSegmentEvaluater(QRunnable):
     def play(self):
         self.running = True
 
-    @pyqtSlot(long)
+    @pyqtSlot(int)
     def set_time(self, time):
         self.time = time
 

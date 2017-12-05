@@ -56,7 +56,7 @@ class CorpusPreferences():
                 self.backup_Interval = data['backup_Interval']
                 self.corpus_password = data['corpus_password']
         except:
-            print "No Settings Found"
+            print("No Settings Found")
             self.store()
 
 
@@ -88,10 +88,10 @@ class CorpusServer(QThread):
     def listen(self):
         self.s.listen(5)
         conn, addr = self.s.accept()
-        print "MasterServer:\t New Connection"
+        print("MasterServer:\t New Connection")
 
         try:
-            print "MasterServer:\t New Connection"
+            print("MasterServer:\t New Connection")
             self.is_connected = True
             handler = QServerHandler(conn, self, self.connection_id_counter)
             handler.do_connect.connect(self.on_connect)
@@ -103,7 +103,7 @@ class CorpusServer(QThread):
             self.connection_id_counter += 1
             # self.handle_threads.append(handler)
         except IOError as e:
-            print e.message
+            print(e)
 
     def on_connect(self,info):
         self.do_connect.emit(info)
@@ -138,7 +138,7 @@ class QServerHandler(QThread):
                 if not data: break
                 ret = self.parse_msg(data)
                 ret = self.parse_answer(ret)
-                print ret
+                print(ret)
                 self.conn.send(ret)
             except IOError as e:
                 self.conn.close()
@@ -158,7 +158,7 @@ class QServerHandler(QThread):
                 self.do_connect.emit(args)
                 return str(self.ID) + ";" + str(True)
             else:
-                print "Wrong Password"
+                print("Wrong Password")
                 return str(self.ID) + ";" + str(False)
                 self.conn.close()
 
@@ -336,7 +336,7 @@ class PreferencesWindow(QDialog):
 
 def my_exception_hook(exctype, value, traceback):
     # Print the error and traceback
-    print(exctype, value, traceback)
+    print((exctype, value, traceback))
     # Call the normal Exception hook after
     sys._excepthook(exctype, value, traceback)
     sys.exit(1)

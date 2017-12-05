@@ -31,7 +31,7 @@ class MasterFile():
             if not os.path.isfile(p['path']):
                 non_existing.append(p)
         for p in non_existing:
-            print "Removed from Masterfile:", p['path']
+            print("Removed from Masterfile:", p['path'])
             self.projects.remove(p)
 
         self.store()
@@ -49,22 +49,22 @@ class MasterFile():
 
     def store(self):
         dict = vars(self)
-        print self.store_path
+        print(self.store_path)
 
         with open(self.store_path, 'w') as f:
             json.dump(dict, f)
 
     def load(self):
         if not os.path.isfile(self.store_path):
-            print "No Masterfile existing"
+            print("No Masterfile existing")
             self.store()
             return
         try:
             with open(self.store_path) as f:
                 dict = json.load(f)
-                for attr, value in dict.iteritems():
+                for attr, value in dict.items():
                     setattr(self, attr, value)
         except ValueError as e:
-            print e.message
+            print(e)
 
         self.check_existing()
