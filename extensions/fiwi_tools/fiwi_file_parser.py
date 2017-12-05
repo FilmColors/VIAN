@@ -33,11 +33,11 @@ class Shot():
     def print_shot(self, no_print = False):
 
         if not no_print:
-            print self.filemaker_ID, self.movie_name, self.movie_year, self.source_type, self.shot_id, [self.segment_id, self.segment_shot_id,self.global_shot_id], self.time, self.path
+            print(self.filemaker_ID, self.movie_name, self.movie_year, self.source_type, self.shot_id, [self.segment_id, self.segment_shot_id,self.global_shot_id], self.time, self.path)
         else:
             return self.filemaker_ID, self.movie_name, self.movie_year, self.source_type, self.shot_id, [self.segment_id, self.segment_shot_id,self.global_shot_id], self.time, self.path
     def deserialize(self, serialization):
-        for a,v in serialization.items():
+        for a,v in list(serialization.items()):
             setattr(self,a,v)
         return self
 
@@ -65,7 +65,7 @@ class Movie():
 
 
     def print_movie(self):
-        print self.filemaker_ID, self.movie_name, self.elan_path, self.segmentation_path, len(self.shots)
+        print(self.filemaker_ID, self.movie_name, self.elan_path, self.segmentation_path, len(self.shots))
 
     def get_elan_path(self):
         if len(self.elan_path) > 0:
@@ -85,8 +85,8 @@ class FiwiFetcher():
         for root in self.directories:
             movie_directories.extend(glob.glob(root + "/" + "*" + "/"))
 
-        print "######FETCHER######"
-        print "Total Directories Found:", len(movie_directories)
+        print("######FETCHER######")
+        print("Total Directories Found:", len(movie_directories))
 
         edited = []
         for m in movie_directories:
@@ -106,7 +106,7 @@ class FiwiFetcher():
 
                 else:
                     edited.append(m)
-                    print m
+                    print(m)
 
         movie_directories = edited
         edited = []
@@ -123,12 +123,12 @@ class FiwiFetcher():
                 if has_SCR:
                     edited.append(m)
                 else:
-                    print m
+                    print(m)
 
         movie_directories = edited
 
 
-        print len(edited), len(movies_without_screenshots_folder)
+        print(len(edited), len(movies_without_screenshots_folder))
         with open("results/Movies_Without_SCR.txt", "w") as f:
             for l in movies_without_screenshots_folder:
                 f.write(l + "\n")
@@ -146,7 +146,7 @@ class FiwiFetcher():
 
         shot_dirs = []
         shots = []
-        print "ERRORS:"
+        print("ERRORS:")
         for m in movie_directories:
             try:
                 files = glob.glob(m + "*\\")
@@ -158,19 +158,19 @@ class FiwiFetcher():
                             n += 1
 
                 if n == 0 or n > 1:
-                    print m, "\t" ,n
+                    print(m, "\t" ,n)
 
             except TypeError as e:
-                print e.message
-                print e.args
-                print m
+                print(e)
+                print(e.args)
+                print(m)
 
-        print "FETCHING SHOTS"
+        print("FETCHING SHOTS")
         for i, s in enumerate(shot_dirs):
             console.write("\r" + str(round(float(i)/len(shot_dirs)*100, 2)))
             shots.extend(glob.glob(s + "*"))
 
-        print "GENERATING RESULT"
+        print("GENERATING RESULT")
         with open("results/All_Shots.txt", "w") as f:
             for s in shots:
                 name = s.split("\\").pop()
@@ -227,7 +227,7 @@ class FiwiParser():
         custom_last_two = []
         seconds_scr = []
         no_scr_counter = []
-        print "CLEANUP"
+        print("CLEANUP")
         last = "-1"
         last_year_error = "-1"
 
@@ -472,26 +472,26 @@ class FiwiParser():
         #     print string
 
 
-        print "Missing SCR", len(no_scr_counter)
+        print("Missing SCR", len(no_scr_counter))
         for sqr in no_scr_counter:
-            print sqr
+            print(sqr)
 
         self.lines = [cleaned, self.lines[1]]
         lst = []
         lst_e = []
-        print "Length before Cleaning:", len(self.lines[0])
+        print("Length before Cleaning:", len(self.lines[0]))
 
         for l in to_remove:
             lst.append(l[1])
             lst_e.append(l[2])
 
         self.to_error_index(lst, lst_e)
-        print "Length after Cleaning:", len(self.lines[0])
+        print("Length after Cleaning:", len(self.lines[0]))
 
 
         # Parsing
         if not self.debug:
-            print "Parsing Seconds Symbols", len(seconds_scr[0])
+            print("Parsing Seconds Symbols", len(seconds_scr[0]))
             self.print_remaining()
             for i, l in enumerate(seconds_scr):
 
@@ -533,35 +533,35 @@ class FiwiParser():
 
         self.print_remaining()
 
-        print "Parsing Two Symbols", len(n2[0])
+        print("Parsing Two Symbols", len(n2[0]))
         self.print_remaining()
         for i, l in enumerate(n2[0]):
             res = self.parse_two_fields(l, n2[1][i])
             if res is not None:
                 self.to_results(res)
 
-        print "Parsing Three Symbols", len(n3[0])
+        print("Parsing Three Symbols", len(n3[0]))
         self.print_remaining()
         for i, l in enumerate(n3[0]):
             res = self.parse_three_fields(l, n3[1][i])
             if res is not None:
                 self.to_results(res)
 
-        print "Parsing Four Symbols", len(n4[0])
+        print("Parsing Four Symbols", len(n4[0]))
         self.print_remaining()
         for i, l in enumerate(n4[0]):
             res = self.parse_four_fields(l, n4[1][i])
             if res is not None:
                 self.to_results(res)
 
-        print "Parsing Five Symbols", len(n5[0])
+        print("Parsing Five Symbols", len(n5[0]))
         self.print_remaining()
         for i, l in enumerate(n5[0]):
             res = self.parse_five_fields(l, n5[1][i])
             if res is not None:
                 self.to_results(res)
 
-        print "Parsing Six Symbols", len(n6[0])
+        print("Parsing Six Symbols", len(n6[0]))
         self.print_remaining()
         for i, l in enumerate(n6[0]):
             res = self.parse_six_fields(l, n6[1][i])
@@ -570,7 +570,7 @@ class FiwiParser():
 
         self.print_remaining()
 
-        print "Parsing No SCR Symbol", len(n6[0])
+        print("Parsing No SCR Symbol", len(n6[0]))
         self.print_remaining()
         counter = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         for i, l in enumerate(n_not[0]):
@@ -601,7 +601,7 @@ class FiwiParser():
 
             if shot is not None:
                 self.to_results(shot)
-        print "RESULT: No SCR Symbol", counter
+        print("RESULT: No SCR Symbol", counter)
 
 
         self.print_remaining()
@@ -672,10 +672,10 @@ class FiwiParser():
 
     def print_containing(self, line, containing):
             if containing in line:
-                print line
+                print(line)
 
     def print_remaining(self):
-        print "REMAINING:", len(self.lines[0])
+        print("REMAINING:", len(self.lines[0]))
 
     def get_containing(self, lines, containing, inverse = False):
         result = []
@@ -692,13 +692,13 @@ class FiwiParser():
         return [result, indices]
 
     def get_result_ratio(self, input, lines):
-        print len(input[0]), "/", len(lines[0])
-        print float(len(input[0])) / len(lines[0]) * 100, "%"
+        print(len(input[0]), "/", len(lines[0]))
+        print(float(len(input[0])) / len(lines[0]) * 100, "%")
 
     def print_all(self, to_print):
         for i, l in enumerate(to_print[0]):
-            print l, to_print[1][i]
-        print "LENGTH: ", len(to_print)
+            print(l, to_print[1][i])
+        print("LENGTH: ", len(to_print))
 
     def get_all_with_n_after(self,lines, split_str, n):
         result = []
@@ -750,7 +750,7 @@ class FiwiParser():
 
             except ValueError as e:
                if i in self.error_indices:
-                   print "Already Removed"
+                   print("Already Removed")
                else :
                    raise e
 
@@ -763,9 +763,9 @@ class FiwiParser():
                 self.error_indices.append(index)
 
     def print_errors(self):
-        print "********ERRORS*********"
+        print("********ERRORS*********")
         for e in self.errors:
-            print e
+            print(e)
 
     def save_error_list(self):
 
@@ -898,7 +898,7 @@ class FiwiParser():
             else:
                 raise RuntimeError("Error in Timestamp")
         except Exception as e:
-            print e.message
+            print(e)
             self.to_error_index(index, "Parsing Failed")
             if not (isinstance(e, RuntimeError) or isinstance(e, ValueError)):
                 raise e
@@ -949,10 +949,10 @@ class FiwiParser():
             else:
                 raise RuntimeError("Error in Timestamp")
         except Exception as e:
-            print e.message
+            print(e)
             self.to_error_index(index, "Parsing Failed")
             if not (isinstance(e, RuntimeError) or isinstance(e, ValueError)):
-                print l
+                print(l)
                 raise e
 
     def parse_five_fields(self, line, index, do_split = True):
@@ -981,7 +981,7 @@ class FiwiParser():
             else:
                 raise RuntimeError("Error in Timestamp")
         except Exception as e:
-            print e.message
+            print(e)
             self.to_error_index(index, "Parsing Failed")
             if not (isinstance(e, RuntimeError) or isinstance(e, ValueError)):
                 raise e
@@ -1011,7 +1011,7 @@ class FiwiParser():
             else:
                 raise RuntimeError("Error in Timestamp")
         except Exception as e:
-            print e.message
+            print(e)
             if not (isinstance(e, RuntimeError) or isinstance(e, ValueError)):
                 raise e
             self.to_error_index(index, "Parsing Failed")
@@ -1044,7 +1044,7 @@ class FiwiCopy():
         self.movies = []
         self.shots.sort(key=lambda x: x.filemaker_ID[0], reverse=False)
 
-        print "Number of Shots", len(self.shots)
+        print("Number of Shots", len(self.shots))
 
 
     def create_movies(self):
@@ -1081,7 +1081,7 @@ class FiwiCopy():
 
                         else:
                             elan_path = []
-                            print "NO ELAN", movie_path
+                            print("NO ELAN", movie_path)
 
                     if len(segmentation_path) == 0:
                         segmentation_path = []
@@ -1098,7 +1098,7 @@ class FiwiCopy():
 
             last_movie_id = curr_movie_id
 
-        print "Unclear ELAN PATH"
+        print("Unclear ELAN PATH")
         for m in movies:
             if m.elan_path is None:
                 files = glob.glob(m.folder_path + "*")
@@ -1109,7 +1109,7 @@ class FiwiCopy():
                         has_elan = True
                 if has_elan is False:
                     m.print_movie()
-                    print m.folder_path
+                    print(m.folder_path)
 
 
 
@@ -1120,9 +1120,9 @@ class FiwiCopy():
             if m.needs_segmentation:
                 to_segment += 1
 
-        print "TOTAL MOVIES:", len(movies)
-        print "TOTAL SHOTS: ", total_SCR
-        print "MISSING SEGM:", to_segment
+        print("TOTAL MOVIES:", len(movies))
+        print("TOTAL SHOTS: ", total_SCR)
+        print("MISSING SEGM:", to_segment)
 
         self.movies = movies
 
@@ -1132,11 +1132,11 @@ class FiwiCopy():
         for m in self.movies:
 
             if m.needs_segmentation:
-                print m.movie_name, m.filemaker_ID
+                print(m.movie_name, m.filemaker_ID)
                 movie_path, segmentations = ELANProjectImporter().elan_project_importer(m.get_elan_path())
                 for s in m.shots:
                     if s.segment_id == -1:
-                        ms_pos = s.time[0] * long(60*60*1000) + s.time[1] * long(60 * 1000) + s.time[2] * 1000 + s.time[3]
+                        ms_pos = s.time[0] * int(60*60*1000) + s.time[1] * int(60 * 1000) + s.time[2] * 1000 + s.time[3]
 
                         segm_id = -1
                         last_ms = -1000
@@ -1151,10 +1151,10 @@ class FiwiCopy():
                         else:
                             errors.append(s)
                             m.shots.remove(s)
-                            print "ERROR", s.time, [ms_pos, last_ms], s.segment_id, s.segment_shot_id, s.path
+                            print("ERROR", s.time, [ms_pos, last_ms], s.segment_id, s.segment_shot_id, s.path)
 
 
-                m.shots.sort(key=lambda s:s.time[0] * long(60*60*1000) + s.time[1] * long(60 * 1000) + s.time[2] * 1000 + s.time[3])
+                m.shots.sort(key=lambda s:s.time[0] * int(60*60*1000) + s.time[1] * int(60 * 1000) + s.time[2] * 1000 + s.time[3])
                 curr_segm = 0
                 curr_shot_id = 0
                 for s in m.shots:

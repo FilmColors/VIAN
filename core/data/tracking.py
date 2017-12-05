@@ -17,12 +17,26 @@ class BasicTrackingJob(IConcurrentJob):
         end_frame = ms_to_frames(args[4], fps)
         method = args[6]
 
-        print start_frame, end_frame
+        print(start_frame, end_frame)
 
         keys = []
-
+        print(method)
         # TRACKING
-        tracker = cv2.Tracker_create(method)
+        if method == 'BOOSTING':
+            tracker = cv2.TrackerBoosting_create()
+        elif method == 'MIL':
+            tracker = cv2.TrackerMIL_create()
+        elif method == 'KCF':
+            tracker = cv2.TrackerKCF_create()
+        elif method == 'TLD':
+            tracker = cv2.TrackerTLD_create()
+        elif method == 'MEDIANFLOW':
+            tracker = cv2.TrackerMedianFlow_create()
+        elif method == 'GOTURN':
+            tracker = cv2.TrackerGOTURN_create()
+        else:
+            raise Exception("Tracking Method not identifiable. " + str(method))
+
         # Read video
         capture = cv2.VideoCapture(movie_path)
 
@@ -61,14 +75,14 @@ class BasicTrackingJob(IConcurrentJob):
                 p1 = (int(bbox[0]), int(bbox[1]))
                 p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
                 cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
-                cv2.imshow("Returned", frame)
+                # cv2.imshow("Returned", frame)
                 cv2.waitKey(30)
 
 
         return [annotation_id, keys]
 
     def modify_project(self, project, result, sign_progress=None):
-        print "MODIFYING"
+        print("MODIFYING")
         annotation_id = result[0]
         keys = result[1]
 

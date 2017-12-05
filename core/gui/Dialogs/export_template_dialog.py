@@ -31,7 +31,7 @@ class ExportTemplateDialog(EDialogWidget):
                 json.dump(template, f)
         except Exception as e:
             self.main_window.print_message("Template Export Failed:", "Red")
-            self.main_window.print_message(e.message, "Red")
+            self.main_window.print_message(e, "Red")
 
 
 

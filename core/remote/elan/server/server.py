@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 
 
-from tcp_commands import TCPCommands
+from .tcp_commands import TCPCommands
 
 
 class ServerInfo:
@@ -58,7 +58,7 @@ class Server(threading.Thread):
         self.s.listen(1)
 
         conn, addr = self.s.accept()
-        print 'Connection addres: ', addr
+        print('Connection addres: ', addr)
         self.is_connected = True
         while (self.active):
             try:
@@ -68,7 +68,7 @@ class Server(threading.Thread):
                 ret = self.parse_answer(ret)
                 conn.send(ret)
             except IOError as e:
-                print e.message
+                print(e)
 
         conn.close()
         self.is_connected = False
@@ -537,7 +537,7 @@ class QServerHandler(QtCore.QThread):
             if cmd == TCPCommands.CONNECT.value:
                 return True
         except IOError:
-            print "Command call Failed "
+            print("Command call Failed ")
 
     def parse_answer(self, answer):
         return str(answer) + "\n"
@@ -547,8 +547,8 @@ class QServerHandler(QtCore.QThread):
             val = float(string)
         except ValueError:
             val = default
-            print "ValueError, couldn't convert String to Float."
-            print "Input: ", string
+            print("ValueError, couldn't convert String to Float.")
+            print("Input: ", string)
         return val
 
     def to_bool(self, string):
@@ -598,9 +598,9 @@ class QTServer(QtCore.QThread):
             self.is_connected = True
             self.handle_thread = QServerHandler(self.player, conn, self)
             self.handle_thread.start()
-            print "Server:\t Connection Established"
+            print("Server:\t Connection Established")
         else:
-            print "Server:\t Connection Denied"
+            print("Server:\t Connection Denied")
 
 
         # self.is_connected = True
@@ -753,7 +753,7 @@ class QTServer(QtCore.QThread):
             if cmd == TCPCommands.CONNECT.value:
                 return True
         except IOError:
-            print "Command call Failed "
+            print("Command call Failed ")
 
     def parse_answer(self, answer):
         return str(answer) + "\n"
@@ -763,8 +763,8 @@ class QTServer(QtCore.QThread):
             val = float(string)
         except ValueError:
             val = default
-            print "ValueError, couldn't convert String to Float."
-            print "Input: ", string
+            print("ValueError, couldn't convert String to Float.")
+            print("Input: ", string)
         return val
 
     def to_bool(self, string):

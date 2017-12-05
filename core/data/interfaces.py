@@ -6,16 +6,16 @@ class IProjectChangeNotify():
         dummy = dummy
 
     def on_loaded(self, project):
-        print "IProjectChangeNotify: Not Implemented", self
+        print("IProjectChangeNotify: Not Implemented", self)
 
     def on_changed(self, project, item):
-        print "IProjectChangeNotify: Not Implemented", self
+        print("IProjectChangeNotify: Not Implemented", self)
 
     def get_project(self):
-        print "IProjectChangeNotify: Not Implemented", self
+        print("IProjectChangeNotify: Not Implemented", self)
 
     def on_selected(self, sender, selected):
-        print "IProjectChangeNotify: Not Implemented by ",self
+        print("IProjectChangeNotify: Not Implemented by ",self)
 
 
 class IHasVocabulary():
@@ -48,7 +48,7 @@ class IProjectContainer(IHasVocabulary):
         self.outliner_expanded = expanded
 
     def delete(self):
-        print "Not Implemented in ", self
+        print("Not Implemented in ", self)
 
     def set_project(self, project):
         if project is not None:
@@ -72,19 +72,19 @@ class IProjectContainer(IHasVocabulary):
 class ITimeRange():
 
     def get_start(self):
-        print "ITimelineItem: Not implemented" , self
+        print("ITimelineItem: Not implemented" , self)
 
     def get_end(self):
-        print "ITimelineItem: Not Implemented", self
+        print("ITimelineItem: Not Implemented", self)
 
     def set_start(self, start):
-        print "ITimelineItem: Not Implemented", self
+        print("ITimelineItem: Not Implemented", self)
 
     def set_end(self, end):
-        print "ITimelineItem: Not Implemented", self
+        print("ITimelineItem: Not Implemented", self)
 
     def move(self, start, end):
-        print "ITimelineItem: Not Implemented", self
+        print("ITimelineItem: Not Implemented", self)
 
 
 class ILockable():
@@ -103,10 +103,10 @@ class ILockable():
 
 class ITimelineItem:
     def set_timeline_visibility(self, visibility):
-        print "ITimelineItem: Not Implemented", self
+        print("ITimelineItem: Not Implemented", self)
 
     def get_timeline_visibility(self):
-        print "ITimelineItem: Not Implemented", self
+        print("ITimelineItem: Not Implemented", self)
 
 
 class IHasName():
@@ -114,10 +114,10 @@ class IHasName():
         dummy = dummy
 
     def get_name(self):
-        print "IHasName: Not Implemented by", self
+        print("IHasName: Not Implemented by", self)
 
     def set_name(self, name):
-        print "IHasName: Not Implemented by", self
+        print("IHasName: Not Implemented by", self)
 
 
 class ITimeStepDepending():
@@ -125,7 +125,7 @@ class ITimeStepDepending():
         dummy = dummy
 
     def on_timestep_update(self, time):
-        print "ITimeStepDepending: Not Implemented by", self
+        print("ITimeStepDepending: Not Implemented by", self)
 
 
 class ISelectable():
@@ -133,20 +133,20 @@ class ISelectable():
         dummy = dummy
 
     def get_type(self):
-        print "ISelectable: Not Implemented by", self
+        print("ISelectable: Not Implemented by", self)
 
 
 class IAnalysisJob():
     source_types = []
     def get_name(self):
-        print "get_name not implemented by", self
+        print("get_name not implemented by", self)
 
     def prepare(self, movie_path, targets):
-        print "prepare not implemented by", self
+        print("prepare not implemented by", self)
         return None
 
     def process(self, target_id, args, sign_progress):
-        print "get_name not implemented by", self
+        print("get_name not implemented by", self)
 
     def get_preferences(self):
         widget = QWidget()
@@ -158,7 +158,7 @@ class IAnalysisJob():
         return widget
 
     def get_visualization(self, parent, analysis):
-        print "get_name not implemented by", self
+        print("get_name not implemented by", self)
 
     def get_source_types(self):
         return self.source_types
@@ -175,7 +175,7 @@ class IConcurrentJob():
         self.args = self.args
 
     def run_concurrent(self, args, sign_progress):
-        print "run_concurrent not implemented by", self
+        print("run_concurrent not implemented by", self)
 
     def modify_project(self, project, result, sign_progress = None):
         pass

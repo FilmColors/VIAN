@@ -62,8 +62,8 @@ class EDockWidget(QDockWidget):
         try:
             return self.main_window.project
         except TypeError:
-            print self.__class__.__name__, ".main_window attributed of ", self, \
-                " doesn't seem to be from derived from class MainWindow"
+            print(self.__class__.__name__, ".main_window attributed of ", self, \
+                " doesn't seem to be from derived from class MainWindow")
 
 
 class EDialogWidget(QDialog):
@@ -117,7 +117,7 @@ class EAnalyseVisualization(QWidget):
         self.show()
 
     def plot(self):
-        print "plot() not implemented in:", self
+        print("plot() not implemented in:", self)
 
     def on_expand(self):
         if self.figure is not None:
@@ -164,7 +164,7 @@ class MatplotlibFigure(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
     def plot(self):
-        print "plot not  implemented in", self
+        print("plot not  implemented in", self)
 
 
 class EToolBar(QToolBar):

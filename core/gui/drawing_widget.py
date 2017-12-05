@@ -13,7 +13,7 @@ from core.data.enums import *
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
 from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu
-from ewidgetbase import EDockWidget, EToolBar
+from .ewidgetbase import EDockWidget, EToolBar
 
 class AnnotationToolbar(EToolBar):
     def __init__(self, main_window, drawing_widget):
@@ -134,6 +134,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.opencv_image.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.videoCap = None
         self.opencv_image_visible = False
+        self.current_opencv_frame_index = 0
 
 
 
@@ -153,7 +154,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
             self.videoCap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
         except Exception as e:
-            print e.message, "OpenCV Error: ", self.project.movie_descriptor.movie_path
+            print(e, "OpenCV Error: ", self.project.movie_descriptor.movie_path)
         if len(self.project.get_annotation_layers()) > 0:
             for l in self.project.get_annotation_layers():
                 for a in l.annotations:
@@ -267,7 +268,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def create_image(self, image_path):
         if self.project.current_annotation_layer is not None:
-            image_path = unicode(image_path)
+            image_path = str(image_path)
 
             img = cv2.imread(image_path)
             if img is None:
@@ -514,9 +515,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             if old_size.width() != x or old_size.height() != y:
                 self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
 
-        # if self.opencv_image_visible and self.videoCap:
-        #     self.update_opencv_image(self.main_window.player.get_media_time())
-        # self.raise_()
         for n in self.project.get_annotation_layers():
             for m in n.annotations:
                 m.widget.scale = scale
@@ -551,7 +549,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         qp.drawLine(20, 240, 250, 240)
 
     def mousePressEvent(self, event):
-        print "MousePress"
+        print("MousePress")
         self.project.set_selected(None, [])
         self.main_window.mousePressEvent(event)
         self.abort_freehand_drawing()
@@ -573,21 +571,27 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         if self.settings.OPENCV_PER_FRAME and self.opencv_image_visible and self.videoCap is not None:
             self.update_opencv_image(time)
 
-        self.update()
+        # self.update()
 
 
     def update_opencv_image(self, time):
         try:
             idx = self.main_window.player.get_frame_pos_by_time(time)
-            # idx = int(float(time) / (1000.0 / fps))
-            self.videoCap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-            ret, frame = self.videoCap.read()
-            qimage, qpixmap = numpy_to_qt_image(frame)
-            self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
-            self.opencv_image.lower()
+
+            # We don't want to update more than necessary,
+            # When the Timeline is highly zoomed it is possible to call more updates than there are frames
+            # Thus we want to test if there is really a new Frame position
+            if self.current_opencv_frame_index != idx:
+                self.current_opencv_frame_index = idx
+                # idx = int(float(time) / (1000.0 / fps))
+                self.videoCap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                ret, frame = self.videoCap.read()
+                qimage, qpixmap = numpy_to_qt_image(frame)
+                self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
+                self.opencv_image.lower()
 
         except Exception as e:
-            print e.message
+            print(e)
             pass
 
 
@@ -663,7 +667,7 @@ class DrawingBase(QtWidgets.QWidget):
             qp.end()
 
     def drawShape(self, qp, rect = None):
-        print "not Implemented"
+        print("not Implemented")
 
     def renderDrawing(self,qp, offset, size, scale = 1.0):
 

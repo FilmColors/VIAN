@@ -79,7 +79,7 @@ def plot_hilbert_color_histogram(title, x, y, color_patter,alpha_bars=1, alpha_f
 
 
 def plot_palette_hist(title, y, color, width = 1000, height = 500, hide_tools = True, background = "white"):
-    x = range(len(y))
+    x = list(range(len(y)))
     y_max = np.amax(y)
 
     p = figure(width=width, height=height, y_axis_type="log", y_range = [10**-2, y_max + 0.2], tools = [])

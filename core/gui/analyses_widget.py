@@ -9,7 +9,7 @@ from core.data.computation import ms_to_string
 from core.data.containers import *
 from core.data.interfaces import IProjectChangeNotify, IAnalysisJob
 
-from ewidgetbase import EDockWidget
+from .ewidgetbase import EDockWidget
 
 
 class AnalysesWidget(EDockWidget, IProjectChangeNotify):

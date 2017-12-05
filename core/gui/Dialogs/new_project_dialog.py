@@ -132,8 +132,8 @@ class NewProjectDialog(EDialogWidget):
             if not os.path.isdir(self.project.path):
                 os.mkdir(self.project.path)
         except OSError as e:
-            print e
-            print "Forced silencing as Hotfix, if this statement is necessary is currently unclear anyway"
+            print(e)
+            print("Forced silencing as Hotfix, if this statement is necessary is currently unclear anyway")
             #TODO
 
         template = self.templates[self.comboBox_Template.currentIndex()]

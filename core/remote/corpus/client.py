@@ -3,7 +3,7 @@ import socket
 from core.remote.corpus.corpus import CorpusMovie, ProjectData
 from core.data.containers import MovieDescriptor
 from random import randint
-from server import *
+from .server import *
 TCP_IP = '127.0.0.1'
 TCP_PORT = 5005
 BUFFER_SIZE = 1024
@@ -51,7 +51,7 @@ class CorpusClient(QThread):
             if ret[1] == "True":
                 self.ID = int(ret[0])
             else:
-                print "CORPUS Connection Failed"
+                print("CORPUS Connection Failed")
                 self.is_connected = False
                 self.is_active = False
 

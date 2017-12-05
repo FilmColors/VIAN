@@ -35,13 +35,13 @@ from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
 from core.remote.corpus.corpus import *
 from core.remote.elan.server.server import QTServer
-from drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
+from .drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
 from extensions.colormetrics.hilbert_colors import HilbertHistogramProc
 from extensions.extension_list import ExtensionList
-from player_controls import PlayerControls
-from player_vlc import Player_VLC
-from shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
-from status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
+from .player_controls import PlayerControls
+from .player_vlc import Player_VLC
+from .shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
+from .status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.vocabulary import VocabularyManager
 from core.data.vian_updater import VianUpdater
 
@@ -56,7 +56,7 @@ __status__ = "Developement, (BETA)"
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    onTimeStep = pyqtSignal(long)
+    onTimeStep = pyqtSignal(int)
     currentSegmentChanged = pyqtSignal(int)
     abortAllConcurrentThreads = pyqtSignal()
 
@@ -344,7 +344,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show_first_start()
 
     def print_time(self, segment):
-        print segment
+        print(segment)
 
     def test_function(self):
         self.scale_screenshots(0.1)
@@ -640,7 +640,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         new = ElanExtensionProject(self)
-        print "Loading Project Path", path
+        print("Loading Project Path", path)
         new.load_project(self.settings ,path)
 
         self.project = new
@@ -772,9 +772,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_bar.on_finished()
 
     def worker_error(self, error):
-        print "*********ERROR**IN**WORKER***********"
-        print error
-        print "*************************************"
+        print("*********ERROR**IN**WORKER***********")
+        print(error)
+        print("*************************************")
 
     def worker_progress(self, tpl):
         # self.progress_bar.set_progress(float)
@@ -845,10 +845,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.main_window = self
             self.project.dispatch_loaded()
             self.print_message("Import Successfull", "Green")
-        except Exception  as e:
+        except Exception as e:
             self.print_message("Import Failed", "Red")
             self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
-            self.print_message(e.message, "Red")
+            self.print_message(e, "Red")
 
     def export_segmentation(self):
         path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
@@ -1075,10 +1075,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.dispatch_on_timestep_update(t)
 
     def testfunction(self, a = None):
-        print "**********************"
-        print "Test function called"
-        print a
-        print "**********************"
+        print("**********************")
+        print("Test function called")
+        print(a)
+        print("**********************")
     #endregion
 
     def get_version_as_string(self):
@@ -1125,7 +1125,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
-        print "LOADED"
+        print("LOADED")
 
     def dispatch_on_changed(self, receiver = None, item = None):
 
@@ -1251,7 +1251,7 @@ class DialogFirstStart(QtWidgets.QDialog):
                         break
         except Exception as e:
             result = False
-            print e
+            print(e)
 
         if not result:
             QMessageBox.warning( self.main_window, "Couldn't open Update Path", "Couldn't Open Update Path.\n\nMake sure the path points to: \n <Some_Adress>/team/Software/VIAN/<Your_OS>")
@@ -1259,7 +1259,7 @@ class DialogFirstStart(QtWidgets.QDialog):
         self.check_if_finished()
 
     def check_if_finished(self):
-        print self.settings.USER_NAME, self.settings.UPDATE_SOURCE
+        print(self.settings.USER_NAME, self.settings.UPDATE_SOURCE)
         if self.settings.USER_NAME != "" and self.settings.UPDATE_SOURCE != "":
             self.may_proceed = True
 

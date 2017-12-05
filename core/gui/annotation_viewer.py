@@ -36,8 +36,8 @@ class NewLayerDialog(EDialogWidget):
 
     def on_ok(self):
         self.annotation_viewer.add_layer(self.text_Name.text(),
-                                         long(self.text_Start.text()),
-                                         long(self.text_End.text()))
+                                         int(self.text_Start.text()),
+                                         int(self.text_End.text()))
         self.close()
 
     def on_cancel(self):
@@ -73,8 +73,8 @@ class EditLayerDialog(QDialog):
 
     def on_ok(self):
         self.annotation.name = self.text_Name.text()
-        self.annotation.t_start = long(self.text_Start.text())
-        self.annotation.t_end = long(self.text_End.text())
+        self.annotation.t_start = int(self.text_Start.text())
+        self.annotation.t_end = int(self.text_End.text())
         self.annotation_viewer.update_list()
         self.close()
 

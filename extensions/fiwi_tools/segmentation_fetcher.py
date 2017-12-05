@@ -39,7 +39,7 @@ class SegmentationFetcher():
 
             return segments
         except IOError as e:
-            print e.message
+            print(e)
             return None
 
 class ScreenshotFetcher():
@@ -72,10 +72,10 @@ if __name__ == '__main__':
 
     fetcher = SegmentationFetcher("\\\\130.60.131.134\\fiwi_datenbank\\")
     result = fetcher.get_segmentation_by_id(fm_id)
-    print result
+    print(result)
 
     fetcher = ScreenshotFetcher("\\\\130.60.131.134\\fiwi_datenbank\\")
     result = fetcher.get_all_shots_of_movie(fm_id)
-    print result
+    print(result)
 
 

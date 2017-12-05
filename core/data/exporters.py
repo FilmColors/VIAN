@@ -37,7 +37,7 @@ class ScreenshotsExporter():
                 compression = np.clip(int(float(100 - quality) / 10),0,9)
                 cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
 
-            print file_name
+            print(file_name)
 
 class SegmentationExporter(IConcurrentJob):
     def __init__(self, file_path, export_ms = False, ):
@@ -64,7 +64,7 @@ class SegmentationExporter(IConcurrentJob):
 
 def build_file_name(naming, screenshot, movie_descriptor):
     file_name = "/"
-    print screenshot.scene_id
+    print(screenshot.scene_id)
 
     for i, name in enumerate(naming):
         if name is not ScreenshotNamingConventionOptions.empty.name:
@@ -79,7 +79,7 @@ def build_file_name(naming, screenshot, movie_descriptor):
 
             if object_type == "Movie":
                 file_name += str(getattr(movie_descriptor, object_attr))
-                print file_name
+                print(file_name)
 
             if i < len(naming) - 1:
                 if get_enum_value(ScreenshotNamingConventionOptions, naming[i + 1])[1] == 0:

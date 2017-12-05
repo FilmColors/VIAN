@@ -63,7 +63,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
                 item = VocabularyItem(word.name, word)
 
             else:
-                print "FAILED TO CREAE WORD"
+                print("FAILED TO CREAE WORD")
             # if isinstance(selected_item, Vocabulary):
             #     selected_item.add_word(VocabularyWord(name))
             # elif isinstance(selected_item, VocabularyWord):
@@ -116,7 +116,7 @@ class VocabularyTreeView(QTreeView):
         current_word = self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object
         new_name = self.model().itemFromIndex(self.selectedIndexes()[0]).text()
         current_word.name = new_name
-        print new_name
+        print(new_name)
 
     def edit(self, *args, **kwargs):
         self.is_editing = True

@@ -233,12 +233,18 @@ class AttributesAnnotation(QWidget):
         self.annotation = descriptor
         self.main_window = parent.main_window
 
+        self.comboBox_Tracking.setCurrentText(self.annotation.tracking)
         self.comboBox_Tracking.currentIndexChanged.connect(self.on_tracking_changed)
+
         self.show()
 
     def on_tracking_changed(self):
         index =  self.comboBox_Tracking.currentIndex()
         if index != 0:
+            # Removing all keys from the Annotation
+            self.annotation.remove_keys()
+
+
             bbox = (float(self.annotation.orig_position[0]),
                     float(self.annotation.orig_position[1]),
                     float(int(self.annotation.size[0])),
@@ -252,7 +258,7 @@ class AttributesAnnotation(QWidget):
                                     self.main_window.player.get_fps(),
                                     self.comboBox_Tracking.currentText()
                                     ])
-
+            self.annotation.tracking = self.comboBox_Tracking.currentText()
             self.main_window.run_job_concurrent(job)
 
 
@@ -405,7 +411,7 @@ class DefaultValueVector(AttributesNodeDefaultValues):
             self.slot.default_value = np.array(result)
             super(DefaultValueVector, self).on_value_changed()
         except:
-            print "error", n
+            print("error", n)
 
 
 class DefaultValueVector2(AttributesNodeDefaultValues):

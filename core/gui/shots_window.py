@@ -140,7 +140,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             try:
                 qgraph, qpixmap = numpy_to_qt_image(image)
             except Exception as e:
-                self.main_window.print_message("An Error Occured, Save and Restart. An Error occured in the Screenshot Manager, I suggest you restart the application" + e.message )
+                self.main_window.print_message("An Error Occured, Save and Restart. An Error occured in the Screenshot Manager, I suggest you restart the application" + e )
                 continue
 
             w = qpixmap.width()
@@ -274,7 +274,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.scene.addItem(item_image)
 
     def remove_image(self, image):
-        print ""
+        print("")
 
     def select_image(self, images, dispatch = True):
         self.clear_selection()
@@ -306,7 +306,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         return self.selected_images
 
     def update_manager(self, center = True):
-        print "Updating Manager"
         self.clear_caption()
         self.clear_selection()
         self.clear_images()

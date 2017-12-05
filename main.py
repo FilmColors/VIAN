@@ -43,7 +43,7 @@ class MainThread(Thread):
 
 def my_exception_hook(exctype, value, traceback):
     # Print the error and traceback
-    print(exctype, value, traceback)
+    print((exctype, value, traceback))
     # Call the normal Exception hook after
     sys._excepthook(exctype, value, traceback)
     sys.exit(1)
@@ -85,7 +85,7 @@ if __name__ == '__main__':
             main.run()
             sys.exit(app.exec_())
 
-        except Exception, e:
+        except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             time =datetime.now()
             path = settings.DIR_PROJECT + "error_log_" + str(time.year) + "_" + str(time.day) + "_" + str(time.hour) + ".txt"
@@ -98,7 +98,7 @@ if __name__ == '__main__':
                 log_file.write(time.ctime())
 
                 log_file.write("\nERROR MESSAGE: ")
-                log_file.writelines(str(e.message) + "\n")
+                log_file.writelines(str(e) + "\n")
                 tb = traceback.extract_tb(exc_traceback)
 
                 log_file.write("\nERROR STACK TRACE \n")
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
             with open(path, "r") as log_file:
                 for l in log_file:
-                    print l.replace("\n", "")
+                    print(l.replace("\n", ""))
     else:
         sys._excepthook = sys.excepthook
         sys.excepthook = my_exception_hook

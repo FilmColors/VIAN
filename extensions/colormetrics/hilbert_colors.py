@@ -5,8 +5,8 @@ from core.data.containers import Analysis
 from core.data.containers import *
 from core.data.interfaces import IAnalysisJob
 from core.gui.ewidgetbase import EMatplotLibVis
-from computation import calculate_histogram
-from hilbert import create_hilbert_color_pattern, hilbert_mapping_3d, HilbertMode
+from .computation import calculate_histogram
+from .hilbert import create_hilbert_color_pattern, hilbert_mapping_3d, HilbertMode
 
 
 __version__ = "1.0.0"
@@ -16,7 +16,7 @@ class HilbertHistogramVis(EMatplotLibVis):
         self.plot()
 
     def plot(self):
-        x = range(len(self.analyze.data[0]))
+        x = list(range(len(self.analyze.data[0])))
         y = self.analyze.data[0]
         colors = []
         for c in self.analyze.data[1]:
@@ -65,7 +65,7 @@ class HilbertHistogramProc(IAnalysisJob):
                 hist = calculate_histogram(frame, 8)
                 hist_stack[i] = hist
             else:
-                print "Not worked"
+                print("Not worked")
 
         result = np.sum(hist_stack, axis=0)
         result = np.divide(result, length * width * height)
@@ -92,5 +92,5 @@ class HilbertTSNEProc(IAnalysisJob):
         self.procedure_id = id
 
     def process(self, args, sign_progress):
-        print "Do Something"
+        print("Do Something")
 

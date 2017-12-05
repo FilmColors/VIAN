@@ -81,11 +81,11 @@ class Operation(QObject):
         return self.result
 
     def handle_exception(self, exception):
-        print ""
-        print "Exception in Node"
-        print self.__class__.__name__
-        print exception.message
-        print ""
+        print("")
+        print("Exception in Node")
+        print(self.__class__.__name__)
+        print(exception.message)
+        print("")
 
     def reset_result(self):
         self.result = []
@@ -185,7 +185,7 @@ class OperationRangeReader(Operation):
 
             frame_stack = []
             for idx in range(start, end):
-                self.onProgress.emit(float(idx - start + 1) / len(range(start, end)))
+                self.onProgress.emit(float(idx - start + 1) / len(list(range(start, end))))
                 ret, frame = cap.read()
                 if frame  is None:
                     raise IOError("OperationRangeReader: OpenCV couldn't read frame")
@@ -206,7 +206,7 @@ class OperationRange(Operation):
                                                    [Slot("Range", DT_Vector, None)], vis_type=VIS_TYPE_NONE)
 
     def perform(self, args, progress_signal, project):
-        self.result = [range(args[0], args[1], args[2])]
+        self.result = [list(range(args[0], args[1], args[2]))]
 
 
 
@@ -462,7 +462,7 @@ class OperationPrintToConsole(Operation):
     def perform(self, args, progress_signal, project):
 
         try:
-            print args[0]
+            print(args[0])
 
         except Exception as e:
             self.handle_exception(e)
@@ -479,7 +479,7 @@ class OperationShowImage(Operation):
             img = np.array(np.clip(args[0], 0, 255)).astype(np.uint8)
 
             qimage, qpixmap = numpy_to_qt_image(img)
-            cv2.imshow("ImShow Output", img)
+            # cv2.imshow("ImShow Output", img)
             cv2.waitKey()
             self.result = [qpixmap]
 
@@ -580,7 +580,7 @@ class OperationAddSegmentation(ProjectOperation):
             segms = args[1]
 
         for s in segms:
-            segmentation.create_segment(long(s[1]), long(s[2]), s[0])
+            segmentation.create_segment(int(s[1]), int(s[2]), s[0])
 
 
 class OperationCreateSegment(Operation):
@@ -621,7 +621,7 @@ class OperationAddAnnotationLayer(ProjectOperation):
         end = args[2]
         layer = project.create_annotation_layer(name, start, end)
 
-        print isinstance(args[3][0], list)
+        print(isinstance(args[3][0], list))
 
         if not isinstance(args[3][0], list):
             annotations = [args[3]]

@@ -71,7 +71,7 @@ class PlayerControls(EDockWidget):
     def on_position_change(self, position):
         if not self.is_connected:
             if self.is_clicked:
-                self.main_window.player.set_media_time(long(float(position) / 10000.0 * self.main_window.player.duration))
+                self.main_window.player.set_media_time(int(float(position) / 10000.0 * self.main_window.player.duration))
 
     def on_volume_change(self, Volume):
         if not self.is_connected:

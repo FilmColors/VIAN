@@ -87,21 +87,21 @@ class UserSettings():
         try:
             with open(self.store_path, 'w') as f:
                 json.dump(dict, f)
-            print "Stored Settings to: ", self.store_path
+            print("Stored Settings to: ", self.store_path)
         except Exception as e:
-            print e.message
+            print(e)
 
 
     def load(self):
         try:
             with open(self.store_path ,"r") as f:
                 dict = json.load(f)
-                for attr, value in dict.iteritems():
+                for attr, value in dict.items():
                     if not attr == "PALETTES" and not attr=="MAIN_FONT":
                         setattr(self, attr, value)
-                print "Loaded Settings from: ", self.store_path
+                print("Loaded Settings from: ", self.store_path)
         except IOError as e:
-            print "No Settings found", e.message
+            print("No Settings found", e)
 
     def load_last(self):
         files = glob.glob(self.DIR_PROJECT)
