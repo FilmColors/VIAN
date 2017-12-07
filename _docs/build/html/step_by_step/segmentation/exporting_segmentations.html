@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Creating Segments &mdash; VIAN 0.1.1 documentation</title>
+  <title>Exporting Segmentations &mdash; VIAN 0.1.1 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
         <link rel="search" title="Search" href="../../search.html"/>
     <link rel="top" title="VIAN 0.1.1 documentation" href="../../index.html"/>
         <link rel="up" title="Segmentation" href="segmentation.html"/>
-        <link rel="next" title="Changing the Main Segmentation" href="changing_main_segmentation.html"/>
-        <link rel="prev" title="Creating Segmentations" href="create_segmentation.html"/> 
+        <link rel="next" title="Annotations" href="../annotation/annotation.html"/>
+        <link rel="prev" title="Locking Segmentations" href="locking_segmentations.html"/> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
@@ -98,9 +98,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../project_management/project_management.html">Vian Projects</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="segmentation.html">Segmentation</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="create_segmentation.html">Creating Segmentations</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="create_segment.html">Creating Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="changing_main_segmentation.html">Changing the Main Segmentation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="locking_segmentations.html">Locking Segmentations</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Exporting Segmentations</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../annotation/annotation.html">Annotations</a></li>
@@ -160,13 +161,13 @@
         
           <li><a href="segmentation.html">Segmentation</a> &raquo;</li>
         
-      <li>Creating Segments</li>
+      <li>Exporting Segmentations</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/step_by_step/segmentation/create_segment.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/step_by_step/segmentation/exporting_segmentations.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -179,64 +180,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="creating-segments">
-<span id="create-segment"></span><h1>Creating Segments<a class="headerlink" href="#creating-segments" title="Permalink to this headline">¶</a></h1>
-<p>There are several ways to create Segments in VIAN, depending on your Use-Case you may choose one of the following:</p>
-<ol class="arabic simple">
-<li><strong>Time Slice Dragging</strong> allows you to define a start and an end-point of the new segment.</li>
-<li><strong>Fast Segmentation</strong> will automatically create a new Segment from the last segments end, to your current time location.</li>
-<li><strong>Interval Selection</strong> allows to define a start and an end-point with an infinite number of actions in between.</li>
+  <div class="section" id="exporting-segmentations">
+<span id="id1"></span><h1>Exporting Segmentations<a class="headerlink" href="#exporting-segmentations" title="Permalink to this headline">¶</a></h1>
+<p>To Export the Segmentations of the Project, do the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Go to <strong>File/Export/Segmentation</strong>.</li>
+<li>A new <strong>Segmentation Export Dialog</strong> appears.</li>
+<li><strong>Fill out</strong> the Form.</li>
+<li>Press <strong>Export</strong> to finalize.</li>
 </ol>
-<div class="section" id="time-slice-dragging">
-<h2>Time Slice Dragging<a class="headerlink" href="#time-slice-dragging" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>In the Timeline, <strong>click</strong> on the name of the Segmentation you want to add a Segment to.</li>
-<li>The Segmentation should now be highlighted with a steel-blue color.</li>
-<li>On the <em>Timeline-Scale</em>, <strong>Right-Press</strong> and drag (while holding the the Right Button down) from the segment start to the Segment end and <strong>Release</strong>.</li>
-<li>In the appearing Context Menu, choose <strong>New Segment</strong>.</li>
-</ol>
+</div></blockquote>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p><strong>Options</strong></p>
 <ol class="last arabic simple">
-<li><strong>Name</strong>, how the template should appear in the “New Project Dialog”</li>
-<li><strong>Include</strong>, which entities of your project should be exported.</li>
+<li><strong>General</strong><ul>
+<li><strong>Path</strong> The Path the Screenshots are exported to.</li>
+</ul>
+</li>
+<li><strong>Options</strong> Which Information for each exported Segmentation should be included.<ul>
+<li><strong>Annotation Text</strong> If the Annotation Text should be included.</li>
+<li><strong>Frame Index</strong> If the Segment locations should be included as Frame Indices</li>
+<li><strong>Time [Milliseconds]</strong> If the Segment locations should be included in Milliseconds</li>
+<li><strong>Time [HH:MM:SS] Type</strong> If the Segment locations should be included as Formated String</li>
+</ul>
+</li>
+<li><strong>Include</strong> Which Information about the Locations should be included.<ul>
+<li><strong>Segment Start</strong> If the Start-Point should be included</li>
+<li><strong>Segment End</strong> If the End-Point should be included</li>
+<li><strong>Segment Duration</strong> If the Duration should be included</li>
+</ul>
+</li>
+<li><strong>Segmentations</strong> Select all Segmentations you want to export.</li>
 </ol>
-</div>
-<div class="figure align-center" id="id1">
-<a class="reference internal image-reference" href="../../_images/create_segment_01.png"><img alt="map to buried treasure" src="../../_images/create_segment_01.png" style="width: 1537.6000000000001px; height: 814.4000000000001px;" /></a>
-<p class="caption"><span class="caption-text">The Export Template Dialog</span></p>
-</div>
-</div>
-<div class="section" id="fast-segmentation">
-<h2>Fast Segmentation<a class="headerlink" href="#fast-segmentation" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>In the Timeline, <strong>click</strong> on the name of the Segmentation you want to add a Segment to.</li>
-<li>The Segmentation should now be highlighted with a steel-blue color.</li>
-<li>On the <em>Timeline-Scale</em>, <strong>Right-Click</strong> onto the end Position of your new Segment.</li>
-<li>In the appearing Context Menu, choose <strong>New Segment</strong>.</li>
-</ol>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>Alternatively, one can create a new Segment using the Main Menu by triggering:</p>
-<p class="last"><strong>Tools/Add Segment</strong></p>
 </div>
 <div class="figure align-center">
-<a class="reference internal image-reference" href="../../_images/create_segment_02.png"><img alt="map to buried treasure" src="../../_images/create_segment_02.png" style="width: 1534.4px; height: 814.4000000000001px;" /></a>
-</div>
-</div>
-<div class="section" id="interval-selection">
-<h2>Interval Selection<a class="headerlink" href="#interval-selection" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>In the Timeline, <strong>click</strong> on the name of the Segmentation you want to add a Segment to.</li>
-<li>The Segmentation should now be highlighted with a steel-blue color.</li>
-<li>Navigate to the start point of your segment.</li>
-<li>Press <strong>Ctrl + Q</strong> to set a start-point. A new green line should appear.</li>
-<li>Navigate to the end-point of your Segment.</li>
-<li>Press <strong>Ctrl + W</strong> to finish up the new Segment</li>
-</ol>
-<div class="figure align-center">
-<a class="reference internal image-reference" href="../../_images/create_segment_03.png"><img alt="map to buried treasure" src="../../_images/create_segment_03.png" style="width: 1532.8000000000002px; height: 809.6px;" /></a>
+<a class="reference internal image-reference" href="../../_images/export_segmentations.png"><img alt="map to buried treasure" src="../../_images/export_segmentations.png" style="width: 307.20000000000005px; height: 305.6px;" /></a>
 </div>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
@@ -252,7 +232,6 @@
 <li><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
 </div>
-</div>
 
 
            </div>
@@ -264,10 +243,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="changing_main_segmentation.html" class="btn btn-neutral float-right" title="Changing the Main Segmentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../annotation/annotation.html" class="btn btn-neutral float-right" title="Annotations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="create_segmentation.html" class="btn btn-neutral" title="Creating Segmentations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="locking_segmentations.html" class="btn btn-neutral" title="Locking Segmentations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

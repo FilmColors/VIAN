@@ -23,7 +23,6 @@ sys.path.insert(0, "E:\\\\Programming\\Git\\visual-movie-annotator\\_docs\\sourc
 
 
 # sys.path.insert(0, os.path.abspath('.'))
-import guzzle_sphinx_theme
 import sphinx_rtd_theme
 
 # -- General configuration ------------------------------------------------

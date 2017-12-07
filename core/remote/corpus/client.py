@@ -13,7 +13,7 @@ class CorpusClient(QThread):
     def __init__(self, user_name):
         super(CorpusClient, self).__init__()
         self.ip = '127.0.0.1'
-        self.port = 5006
+        self.port = 6006
         self.buffer_size = 1024
         self.s = None
         self.ID = -1
@@ -24,6 +24,7 @@ class CorpusClient(QThread):
 
     def run(self):
         while(self.is_active):
+
             self.ping(self.user_name)
             self.sleep(1)
         # ping_timer = QTimer()
@@ -44,7 +45,7 @@ class CorpusClient(QThread):
         self.connect()
         if self.is_connected:
             msg = self.create_message(CORPUS_Connect, [user_name, self.password])
-            self.s.send(msg)
+            self.s.send(msg.encode())
             ret = self.s.recv(BUFFER_SIZE)
             ret = ret.replace("\n", "").split(";")
 

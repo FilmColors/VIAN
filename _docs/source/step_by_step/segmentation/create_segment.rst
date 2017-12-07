@@ -9,7 +9,7 @@ There are several ways to create Segments in VIAN, depending on your Use-Case yo
 
 1. **Time Slice Dragging** allows you to define a start and an end-point of the new segment.
 2. **Fast Segmentation** will automatically create a new Segment from the last segments end, to your current time location.
-
+3. **Interval Selection** allows to define a start and an end-point with an infinite number of actions in between.
 
 Time Slice Dragging
 *******************
@@ -45,8 +45,23 @@ Fast Segmentation
 
    **Tools/Add Segment**
 
-
 .. figure:: create_segment_02.png
+   :scale: 80 %
+   :align: center
+   :alt: map to buried treasure
+
+Interval Selection
+******************
+
+1. In the Timeline, **click** on the name of the Segmentation you want to add a Segment to.
+2. The Segmentation should now be highlighted with a steel-blue color.
+3. Navigate to the start point of your segment.
+4. Press **Ctrl + Q** to set a start-point. A new green line should appear.
+5. Navigate to the end-point of your Segment.
+6. Press **Ctrl + W** to finish up the new Segment
+
+
+.. figure:: create_segment_03.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure

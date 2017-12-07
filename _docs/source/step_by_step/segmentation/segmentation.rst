@@ -10,6 +10,7 @@ Segmentation
    create_segment
    changing_main_segmentation
    locking_segmentations
+   exporting_segmentations
 
 
 Segmentations are the key-entity in VIAN (and most other Annotation Applications anyway). Each Segmentation created in VIAN,

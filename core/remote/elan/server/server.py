@@ -43,8 +43,16 @@ class Server(threading.Thread):
 
 
     def run(self):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.bind((self.TCP_IP, self.TCP_PORT))
+        port_counter = self.TCP_PORT
+        not_bound = True
+        while(not_bound):
+            try:
+                self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.s.bind((self.TCP_IP, port_counter))
+                not_bound = False
+            except:
+                port_counter += 1
+
         while self.active:
             self.listen()
 
@@ -396,10 +404,10 @@ class QServerHandler(QtCore.QThread):
             try:
                 data = self.conn.recv(self.server.BUFFER_SIZE)
                 if not data: break
-                ret = self.parse_msg(data)
+                ret = self.parse_msg(data.decode())
                 ret = self.parse_answer(ret)
                 # print ret
-                self.conn.send(ret)
+                self.conn.send(ret.encode())
             except IOError as e:
                 self.conn.close()
                 self.is_connected = False
@@ -577,8 +585,17 @@ class QTServer(QtCore.QThread):
 
     def run(self):
         while(True):
-            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.s.bind((self.TCP_IP, self.TCP_PORT))
+            bound = False
+            port_counter = self.TCP_PORT
+            while not bound:
+                try:
+                    self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.s.bind((self.TCP_IP, port_counter))
+                    bound = True
+                    self.TCP_PORT = port_counter
+                except:
+                    port_counter += 1
+
             while self.active:
                 self.listen()
 

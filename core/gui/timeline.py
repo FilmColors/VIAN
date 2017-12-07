@@ -178,12 +178,16 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
 
     def on_interval_segment_start(self):
+        if self.interval_segmentation_marker is not None:
+            self.interval_segmentation_marker.deleteLater()
+
         if self.selected is not None and self.selected.get_type() == SEGMENTATION:
                 self.interval_segmentation_start = self.curr_movie_time
                 self.interval_segmentation_marker = TimelineTimemark(self.frame_Bars, QColor(30, 200, 30, 100))
                 self.interval_segmentation_marker.move(QPoint(self.interval_segmentation_start / self.scale, 0))
                 self.interval_segmentation_marker.setFixedHeight(self.height())
         else:
+
             self.main_window.print_message("No Segmentation Selected", "Orange")
 
     def on_interval_segment_end(self):
@@ -198,7 +202,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.interval_segmentation_marker.deleteLater()
             self.interval_segmentation_marker = None
         else:
-            self.main_window.print_message("No Segmentation Selected", "Orange")
+
+            self.main_window.print_message("Please set a Start Point First", "Orange")
 
     def add_annotation_layer(self, layer):
         control = TimelineControl(self.frame_Controls,self, layer)
@@ -321,7 +326,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,
                                      self.frame_Bars.height())
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
-        self.time_scrubber.setFixedHeight(self.height())
+        self.time_scrubber.setFixedHeight(self.frame_Bars.height())
 
         self.time_bar.raise_()
 
@@ -1021,8 +1026,8 @@ class TimelineScrubber(QtWidgets.QWidget):
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
             pos = self.mapToParent(QMouseEvent.pos()) - self.offset
-            self.move(self.curr_pos.x() + pos.x(), 0)
-            self.player.set_media_time((self.curr_pos.x() + pos.x()) * self.timeline.scale)
+            self.move(self.curr_pos.x() + pos.x() + 5, 0)
+            self.player.set_media_time((self.curr_pos.x() + pos.x() + 5) * self.timeline.scale)
 
         if QMouseEvent.buttons() & Qt.RightButton:
             QMouseEvent.ignore()
@@ -1244,6 +1249,7 @@ class TimebarDrawing(QtWidgets.QWidget):
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
             pos = self.mapToParent(QMouseEvent.pos()).x()
+            pos += 1 #offset correction
             self.timeline.time_scrubber.move(pos, 0)
             self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             if self.timeline.is_fast_selecting and self.timeline.selector is not None:
