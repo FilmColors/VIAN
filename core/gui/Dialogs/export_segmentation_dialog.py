@@ -29,7 +29,7 @@ class ExportSegmentationDialog(EDialogWidget):
 
 
     def on_browse(self):
-        path = QFileDialog.getSaveFileName(directory=self.main_window.project.path, filter=".txt")[0]
+        path = QFileDialog.getSaveFileName(directory=self.main_window.project.path, filter="*.txt")[0]
         if ".txt" not in path:
             path += ".txt"
         self.lineEdit_Path.setText(path)
@@ -64,5 +64,7 @@ class ExportSegmentationDialog(EDialogWidget):
         else:
             self.main_window.print_message("Segmentation Export Failed: " + path, "Red")
             self.main_window.print_message(str(exception), "Red")
+
+        self.close()
 
 

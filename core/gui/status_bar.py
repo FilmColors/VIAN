@@ -83,7 +83,7 @@ class OutputLine(QtWidgets.QWidget):
         self.text_time = QtCore.QTimer(self)
         self.text_time.setInterval(2000)
         self.text_time.timeout.connect(self.on_timeout)
-        # self.setMinimumWidth(50)
+        self.setMinimumWidth(100)
 
         # self.setFixedWidth(400)
         self.text_line.setMargin(0)

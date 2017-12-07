@@ -80,7 +80,10 @@
     <addaction name="separator"/>
     <addaction name="actionScreenshot"/>
     <addaction name="actionAdd_Key"/>
+    <addaction name="separator"/>
     <addaction name="actionAdd_Segment"/>
+    <addaction name="actionIntervalSegmentStart"/>
+    <addaction name="actionIntervalSegmentEnd"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_Annotation_Layer"/>
     <addaction name="actionAdd_Segmentation"/>
@@ -441,6 +444,22 @@
   <action name="actionDocumentation">
    <property name="text">
     <string>Documentation</string>
+   </property>
+  </action>
+  <action name="actionIntervalSegmentStart">
+   <property name="text">
+    <string>Start Interval Segment</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionIntervalSegmentEnd">
+   <property name="text">
+    <string>End Interval Segment</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>

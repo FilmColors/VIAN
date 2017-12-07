@@ -50,7 +50,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Developement, (BETA)"
@@ -341,7 +341,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.SHOW_WELCOME:
            self.show_welcome()
 
-        if self.settings.USER_NAME == "" and self.settings.UPDATE_SOURCE == "":
+        if self.settings.USER_NAME == "":
             self.show_first_start()
 
     def print_time(self, segment):
@@ -1232,11 +1232,6 @@ class DialogFirstStart(QtWidgets.QDialog):
     def on_name_changed(self):
         name = self.lineEdit_UserName.text()
         self.settings.USER_NAME = name
-        self.check_if_finished()
-
-    def btn_browse_vian_source(self):
-        source = QFileDialog.getExistingDirectory()
-        self.lineEdit_UpdateDir.setText(source)
 
     def update_directory_changed(self):
         self.settings.UPDATE_SOURCE = self.lineEdit_UpdateDir.text()
@@ -1257,11 +1252,11 @@ class DialogFirstStart(QtWidgets.QDialog):
         self.check_if_finished()
 
     def check_if_finished(self):
-        print(self.settings.USER_NAME, self.settings.UPDATE_SOURCE)
-        if self.settings.USER_NAME != "" and self.settings.UPDATE_SOURCE != "":
+        if self.settings.USER_NAME != "":
             self.may_proceed = True
 
     def on_ok(self):
+        self.check_if_finished()
         if self.may_proceed:
             self.close()
         else:
