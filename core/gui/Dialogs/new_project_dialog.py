@@ -9,7 +9,7 @@ import glob
 
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path):
-        super(NewProjectDialog, self).__init__(parent, parent)
+        super(NewProjectDialog, self).__init__(parent, parent, "_docs/build/html/step_by_step/project_management/create_project.html")
         path = os.path.abspath("qt_ui/DialogNewProject.ui")
         uic.loadUi(path, self)
         self.settings = settings
@@ -46,7 +46,7 @@ class NewProjectDialog(EDialogWidget):
 
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.btn_OK.clicked.connect(self.on_ok)
-
+        self.btn_Help.clicked.connect(self.on_help)
 
         self.lineEdit_MoviePath.setText(movie_path)
         self.project.movie_descriptor.movie_path = movie_path

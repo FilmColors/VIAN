@@ -6,7 +6,7 @@ from PyQt5 import uic
 import os
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
+import webbrowser
 
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True):
@@ -67,9 +67,10 @@ class EDockWidget(QDockWidget):
 
 
 class EDialogWidget(QDialog):
-    def __init__(self,  parent = None,  main_window = None,):
+    def __init__(self,  parent = None,  main_window = None, help_path = None):
         super(EDialogWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
+        self.help_path = help_path
 
         # self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Dialog)
         self.setWindowFlags(Qt.Dialog)
@@ -88,7 +89,9 @@ class EDialogWidget(QDialog):
                 self.main_window.set_overlay_visibility(True)
         super(EDialogWidget, self).closeEvent(QCloseEvent)
 
-
+    def on_help(self):
+        if self.help_path is not None:
+            webbrowser.open("file://" + os.path.abspath(self.help_path))
 
 class EVisualizationDialog(EDialogWidget):
     def __init__(self, parent, visualization_widget):

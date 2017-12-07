@@ -1221,9 +1221,7 @@ class DialogFirstStart(QtWidgets.QDialog):
         self.settings = main_window.settings
         self.may_proceed = False
 
-        self.btn_BrowseSource.clicked.connect(self.btn_browse_vian_source)
         self.btn_OK.clicked.connect(self.on_ok)
-        self.lineEdit_UpdateDir.textChanged.connect(self.update_directory_changed)
         self.lineEdit_UserName.editingFinished.connect(self.on_name_changed)
 
         self.show()
@@ -1233,30 +1231,13 @@ class DialogFirstStart(QtWidgets.QDialog):
         name = self.lineEdit_UserName.text()
         self.settings.USER_NAME = name
 
-    def update_directory_changed(self):
-        self.settings.UPDATE_SOURCE = self.lineEdit_UpdateDir.text()
-        try:
-            result = False
-            with open(self.settings.UPDATE_SOURCE + "/VIAN/__version__.txt", "rb") as f:
-                for l in f:
-                    if "__version__" in l:
-                        result = True
-                        break
-        except Exception as e:
-            result = False
-            print(e)
-
-        if not result:
-            QMessageBox.warning( self.main_window, "Couldn't open Update Path", "Couldn't Open Update Path.\n\nMake sure the path points to: \n <Some_Adress>/team/Software/VIAN/<Your_OS>")
-
-        self.check_if_finished()
-
     def check_if_finished(self):
         if self.settings.USER_NAME != "":
             self.may_proceed = True
 
     def on_ok(self):
         self.check_if_finished()
+        self.settings.store()
         if self.may_proceed:
             self.close()
         else:

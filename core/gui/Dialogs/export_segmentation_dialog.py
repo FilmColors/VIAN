@@ -8,7 +8,7 @@ import json
 
 class ExportSegmentationDialog(EDialogWidget):
     def __init__(self, main_window):
-        super(ExportSegmentationDialog, self).__init__(main_window, main_window)
+        super(ExportSegmentationDialog, self).__init__(main_window, main_window, "_docs/build/html/step_by_step/project_management/export_segmentation.html")
         path = os.path.abspath("qt_ui/DialogExportSegmentation.ui")
         uic.loadUi(path, self)
         self.settings = main_window.settings
@@ -25,6 +25,7 @@ class ExportSegmentationDialog(EDialogWidget):
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Export.clicked.connect(self.on_export)
         self.btn_Cancel.clicked.connect(self.close)
+        self.btn_Help.clicked.connect(self.on_help)
 
 
 

@@ -8,7 +8,7 @@ import cv2
 
 class DialogScreenshotExporter(EDialogWidget):
     def __init__(self, parent, manager):
-        super(DialogScreenshotExporter, self).__init__(parent, parent)
+        super(DialogScreenshotExporter, self).__init__(parent, parent, "_docs/build/html/step_by_step/screenshots/export_screenshots.html")
         path = os.path.abspath("qt_ui/DialogScreenshotExport.ui")
         uic.loadUi(path, self)
         self.manager = manager
@@ -50,6 +50,7 @@ class DialogScreenshotExporter(EDialogWidget):
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.btn_OK.clicked.connect(self.on_export)
+        self.btn_Help.clicked.connect(self.on_help)
 
     def on_override_visibility_changed(self):
         self.override_visibility = self.checkBox_OverrideV.isChecked()
