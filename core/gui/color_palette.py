@@ -40,7 +40,6 @@ class ColorSelector(QtWidgets.QWidget):
         self.layout().addWidget(self.color_selector_1)
         self.color_selector_2 = ColorSelectorLine(self, settings, current_index = 1)
         self.layout().addWidget(self.color_selector_2)
-
         self.color_selector_1.on_selection.connect(self.selection_dispatch)
         self.color_selector_2.on_selection.connect(self.selection_dispatch)
 

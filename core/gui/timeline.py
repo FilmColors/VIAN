@@ -7,22 +7,59 @@ from PyQt5.QtWidgets import QPushButton
 
 from core.data.computation import ms_to_string, numpy_to_qt_image
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
-from core.gui.ewidgetbase import EDockWidget
+from core.gui.ewidgetbase import EDockWidget, EToolBar
 from core.data.containers import *
 from core.gui.context_menu import open_context_menu
 
 
 class TimelineContainer(EDockWidget):
     def __init__(self, main_window):
-        super(TimelineContainer, self).__init__(main_window)
+        super(TimelineContainer, self).__init__(main_window, limit_size=False)
         self.timeline = Timeline(main_window, self)
         self.setWidget(self.timeline)
         self.setWindowTitle("Timeline")
         self.resize(self.width(), 400)
 
+
+        # self.toolbar = EToolBar(self)
+        # self.toolbar.setWindowTitle("Timeline Toolbar")
+        self.menu_create = self.inner.menuBar().addMenu("Create")
+        self.a_create_segmentation = self.menu_create.addAction("New Segmentation")
+        self.a_create_annotation_layer = self.menu_create.addAction("New Annotation Layer")
+        self.a_create_annotation_layer.triggered.connect(partial(self.timeline.create_layer, []))
+        self.a_create_segmentation.triggered.connect(self.timeline.create_segmentation)
+
+        self.menu_display = self.inner.menuBar().addMenu("Display")
+        self.a_show_id = self.menu_display.addAction("ID")
+        self.a_show_id.setCheckable(True)
+        self.a_show_id.setChecked(True)
+
+        self.a_show_name = self.menu_display.addAction("Name")
+        self.a_show_name.setCheckable(True)
+        self.a_show_name.setChecked(True)
+
+        self.a_show_text = self.menu_display.addAction("Text")
+        self.a_show_text.setCheckable(True)
+        self.a_show_text.setChecked(True)
+
+        self.a_show_id.triggered.connect(self.update_settings)
+        self.a_show_name.triggered.connect(self.update_settings)
+        self.a_show_text.triggered.connect(self.update_settings)
+
+        # self.inner.addToolBar(self.toolbar)
+
     def resizeEvent(self, *args, **kwargs):
         super(TimelineContainer, self).resizeEvent(*args, **kwargs)
         self.timeline.update_time_bar()
+
+    def update_settings(self):
+        self.timeline.show_id = self.a_show_id.isChecked()
+        self.timeline.show_name = self.a_show_name.isChecked()
+        self.timeline.show_text = self.a_show_text.isChecked()
+
+
+        self.timeline.on_timeline_settings_update()
+
 
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
@@ -75,6 +112,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scrollArea.verticalScrollBar().valueChanged.connect(self.scroll_v)
         self.scrollArea.installEventFilter(self)
 
+        # Settings
+        self.show_id = True
+        self.show_name = True
+        self.show_text = True
 
         self.update_time_bar()
         self.update_ui()
@@ -486,6 +527,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         else:
             return int(a - (a % (float(self.settings.GRID_SIZE) / self.scale)))
 
+    def on_timeline_settings_update(self):
+        for s in self.item_segments:
+            for bar in s[1]:
+                for slice in bar.slices:
+                    slice.update_text()
+
     def create_segment(self, lst = None):
         # If Nothing is handed in, we're performing a fast-segmentation
         # which means, that the segment is created from the last segments end to the current movie-time
@@ -496,6 +543,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.selected.create_segment(lst[0], lst[1])
 
     def create_layer(self, lst):
+        if len(lst) == 0:
+            lst = [self.curr_movie_time, self.duration]
         self.project().create_annotation_layer("New Layer", lst[0], lst[1])
 
     def create_segmentation(self):
@@ -657,6 +706,9 @@ class TimebarSlice(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.border_width = 10
         self.offset = QtCore.QPoint(0,0)
+        self.text = ""
+
+        self.update_text()
 
         self.color = (232, 174, 12, 100)
         if item.get_type() == ANNOTATION_LAYER:
@@ -664,11 +716,6 @@ class TimebarSlice(QtWidgets.QWidget):
         if item.get_type() == SEGMENT:
             self.color = (202, 54, 109, 100)
 
-        if item.get_type() == SEGMENT:
-            self.text = "Name:" + str(item.get_name()).ljust(5) +"\n Text:"+item.get_annotation_body()
-            self.setToolTip("<FONT>" + self.text + "</FONT>")
-        else:
-            self.text = str(item.get_name())
         self.text_size = 10
 
 
@@ -706,6 +753,22 @@ class TimebarSlice(QtWidgets.QWidget):
         qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), col)
         qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
         qp.end()
+
+    def update_text(self):
+        self.text = ""
+        if self.item.get_type() == SEGMENT:
+            if self.timeline.show_id:
+                self.text += "ID: " +  str(self.item.ID).ljust(5)
+            if self.timeline.show_name:
+                self.text += "Name: " +  str(self.item.get_name()) + "\t"
+            if self.timeline.show_text:
+                self.text += "Text: " + str(self.item.get_annotation_body())
+
+            self.setToolTip("<FONT>" + self.item.get_annotation_body() + "</FONT>")
+        else:
+            self.text = str(self.item.get_name())
+
+        self.update()
 
     def mousePressEvent(self, QMouseEvent):
         if not self.locked:

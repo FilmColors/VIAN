@@ -71,7 +71,6 @@ class EDialogWidget(QDialog):
         super(EDialogWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
 
-
         # self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Dialog)
         self.setWindowFlags(Qt.Dialog)
         self.main_window = main_window
@@ -88,6 +87,7 @@ class EDialogWidget(QDialog):
             if self.overlay_was_visible:
                 self.main_window.set_overlay_visibility(True)
         super(EDialogWidget, self).closeEvent(QCloseEvent)
+
 
 
 class EVisualizationDialog(EDialogWidget):

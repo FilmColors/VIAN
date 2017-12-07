@@ -35,6 +35,12 @@ QToolTip
      opacity: 200;
      color: #eaeaea;
 }
+QMenuBar
+{
+   border: 1px solid #252525;
+   background-color: #383838;
+}
+
 QMenuBar::item
 {
     background: transparent;
@@ -44,7 +50,7 @@ QMenuBar::item:selected
 {
 
     background: transparent;
-    border: 1px solid #ffaa00;
+    border: 2px solid #ffa02f;
 }
 
 QMenuBar::item:pressed
@@ -72,12 +78,15 @@ QMenu
 QMenu::item
 {
     padding: 2px 10px 2px 10px;
+
+
 }
 
 QMenu::item:selected
 {
     color: #000000;
 }
+
 
 QWidget:disabled
 {
@@ -694,3 +703,4 @@ QTreeView{
 QHBoxLayout{
     spacing: 2px;
 }
+
