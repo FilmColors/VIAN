@@ -33,6 +33,8 @@ class ExportTemplateDialog(EDialogWidget):
             self.main_window.print_message("Template Export Failed:", "Red")
             self.main_window.print_message(e, "Red")
 
+        self.close()
+
 
 
 

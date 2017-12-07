@@ -40,26 +40,77 @@ class ScreenshotsExporter():
             print(file_name)
 
 class SegmentationExporter(IConcurrentJob):
-    def __init__(self, file_path, export_ms = False, ):
+    def __init__(self, file_path, export_ms, export_formated, export_text, export_frame, t_start, t_end, t_duration, fps):
         self.file_path = file_path
+        self.fps = fps
+        self.export_formated = export_formated
+        self.export_text = export_text
+        self.export_frame = export_frame
+        self.t_start = t_start
+        self.t_end = t_end
+        self.t_duration = t_duration
         self.export_ms = export_ms
 
 
     def export(self, segmentations):
-        tab = "\t"
+        # tab = "\t"
         result = ""
         for segmentation in segmentations:
             name = segmentation['name']
+
             for s in segmentation['segments']:
-                value = s['additional_identifiers'][0]
-                start = ms_to_string(s['start'])
-                end = ms_to_string(s["end"])
-                duration = ms_to_string(s["end"] - s['start'])
+                id = s['scene_id']
+                line = name + "\t" + str(id) + "\t"
 
-                result += name + tab + tab + start + tab + end + tab + duration + tab + value + "\n"
 
-        with open("result.txt", "w") as output:
-            output.write(result)
+                start = int(s['start'])
+                end = int(s['end'])
+                duration = int(s["end"] - s['start'])
+                if self.export_ms:
+                    if self.t_start:
+                        line += str(start) + "\t"
+
+                    if self.t_end:
+                        line += str(end) + "\t"
+
+                    if self.t_duration:
+                        line += str(duration) + "\t"
+
+                if self.export_formated:
+                    if self.t_start:
+                        line += ms_to_string(start) + "\t"
+
+                    if self.t_end:
+                        line += ms_to_string(end) + "\t"
+
+                    if self.t_duration:
+                        line += ms_to_string(duration) + "\t"
+
+                if self.export_frame:
+                    if self.t_start:
+                        line += str(ms_to_frames(start, self.fps)) + "\t"
+
+                    if self.t_end:
+                        line += str(ms_to_frames(end, self.fps)) + "\t"
+
+                    if self.t_duration:
+                        line += str(ms_to_frames(duration, self.fps)) + "\t"
+
+                if self.export_text:
+                    line += s['annotation_body'].replace("\n", "")
+                result += line +"\n"
+                # value = s['additional_identifiers'][0]
+                # start = ms_to_string(s['start'])
+                # end = ms_to_string(s["end"])
+                # duration = ms_to_string(s["end"] - s['start'])
+
+                # result += name + tab + tab + start + tab + end + tab + duration + tab + value + "\n"
+        try:
+            with open(self.file_path , "w") as output:
+                output.write(result)
+            return True, None
+        except Exception as e:
+            return False, e
 
 
 def build_file_name(naming, screenshot, movie_descriptor):

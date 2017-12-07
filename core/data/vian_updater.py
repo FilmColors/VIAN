@@ -52,7 +52,7 @@ class VianUpdater(IConcurrentJob):
         if (self.current_version[0] < version[0]
             or (self.current_version[0] == version[0] and self.current_version[1] < version[1])
             or (self.current_version[0] == version[0] and self.current_version[1] == version[1] and self.current_version[2] < version[2])):
-                    return True
+            return True
         else:
             return False
 
@@ -65,7 +65,7 @@ class VianUpdater(IConcurrentJob):
         self.temp_dir = self.app_root + "/update/"
 
         r = requests.get(self.url_source, stream=True)
-        z = zipfile.ZipFile(io.StringIO(r.content))
+        z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(self.temp_dir)
 
     def replace_files(self):
@@ -102,7 +102,7 @@ class VianUpdaterJob(IConcurrentJob):
         self.temp_dir = self.app_root + "/update/"
 
         r = requests.get(self.url_source, stream=True)
-        z = zipfile.ZipFile(io.StringIO(r.content))
+        z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(self.temp_dir)
 
         sign_progress(0.5)

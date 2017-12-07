@@ -20,6 +20,7 @@ from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
 from core.gui.Dialogs.welcome_dialog import WelcomeDialog
+from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.progressbar_popup import DialogProgress
 from core.gui.analyses_widget import AnalysesWidget
 from core.gui.concurrent_tasks import ConcurrentTaskDock
@@ -49,7 +50,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.2.1"
+__version__ = "0.2.3"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Developement, (BETA)"
@@ -581,7 +582,6 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             QMessageBox.information(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version)
 
-
     def open_preferences(self):
         dialog = DialogPreferences(self)
         dialog.show()
@@ -853,14 +853,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message(e, "Red")
 
     def export_segmentation(self):
-        path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
-        path = parse_file_path(path)
-        exporter = SegmentationExporter(path)
-        segmentations = []
-        for s in self.project.segmentation:
-            segmentations.append(s.serialize())
-        exporter.export(segmentations)
-        self.print_message("Segmentation Exported to: " + path, "Green")
+        # path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
+        dialog = ExportSegmentationDialog(self)
+        dialog.show()
+
 
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)

@@ -352,6 +352,8 @@ class MovieDescriptorContextMenu(ContextMenu):
 
         self.action_set_movie_path = self.addAction("Set Movie Path")
         self.action_set_movie_path.triggered.connect(self.on_set_movie_path)
+        self.action_update_movie_desc = self.addAction("Update Duration")
+        self.action_update_movie_desc.triggered.connect(self.on_update_duration)
         self.popup(pos)
 
     def on_set_movie_path(self):
@@ -360,6 +362,8 @@ class MovieDescriptorContextMenu(ContextMenu):
         self.main_window.player.open_movie(path)
         self.main_window.dispatch_on_changed()
 
+    def on_update_duration(self):
+        self.main_window.project.movie_descriptor.set_duration(self.main_window.player.get_media_duration())
 
 class ScreenshotGroupContexMenu(ContextMenu):
     def __init__(self, parent, pos, screenshot_group, project):

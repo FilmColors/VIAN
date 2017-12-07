@@ -410,11 +410,12 @@ class Player_VLC(VideoPlayer):
         return False
 
     def get_media_duration(self):
-        if self.duration is 100:
-            self.duration = self.media.get_duration()
-            return self.duration
-        else:
-            return self.duration
+        # if self.duration == 100:
+        #     self.duration = self.media.get_duration()
+        #     return self.duration
+        # else:
+        #     return self.duration
+        return self.media.get_duration()
 
     def set_volume(self, volume):
         self.media_player.audio_set_volume(volume)
