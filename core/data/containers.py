@@ -197,6 +197,14 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def get_segmentations(self):
         return self.segmentation
 
+    def get_segment_of_main_segmentation(self, index):
+        """
+        Returns the segment of the Main Segmentation that is at index "index". 
+        Be aware, that the segment_id == index + 1. Since Segment IDS are counted from 1
+        :param index: 
+        :return: 
+        """
+        return self.get_main_segmentation().segments[index]
     # endregion
 
     # region Screenshots
@@ -788,6 +796,14 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         else:
             return None
 
+    def get_segment_of_time(self, time_ms):
+        for s in self.segments:
+            if s.get_start() <= time_ms < s.get_end():
+                return s
+        return None
+
+
+
     def create_segment(self, start, stop, ID = None, from_last_threshold = 100):
         if stop-start < from_last_threshold:
             last = None
@@ -1012,6 +1028,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def get_annotation_body(self):
         return self.annotation_body
+
     def set_additional_identifiers(self, additional):
         self.additional_identifiers = additional
         self.dispatch_on_changed(item=self)

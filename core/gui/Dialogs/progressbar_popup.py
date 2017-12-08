@@ -1,11 +1,9 @@
-from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox
+import os
+
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
+
 from core.gui.ewidgetbase import EDialogWidget
-from core.data.settings import UserSettings
-from core.data.enums import ScreenshotNamingConventionOptions
-import os
 
 
 class DialogProgress(EDialogWidget):

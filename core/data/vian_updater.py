@@ -6,7 +6,8 @@ import tempfile as tmp
 from shutil import copytree, move
 import shutil
 from core.data.interfaces import IConcurrentJob
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QApplication
+
 
 import requests, zipfile, io
 import os
@@ -55,7 +56,6 @@ class VianUpdater(IConcurrentJob):
             return True
         else:
             return False
-
 
     def fetch_folder(self):
         if os.path.exists(self.app_root + "/update/"):
@@ -131,4 +131,5 @@ class VianUpdaterJob(IConcurrentJob):
         return [True]
 
     def modify_project(self, project, result, sign_progress = None):
-        QMessageBox.information(project.main_window, "Update Finished", "Update Finished\n\n Please restart VIAN")
+        QMessageBox.information(project.main_window, "Update Finished", "Update Finished\n\n VIAN will restart now.")
+        QApplication.quit()

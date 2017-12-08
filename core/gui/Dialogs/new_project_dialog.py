@@ -1,11 +1,13 @@
-from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox
-from PyQt5 import uic
-from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
-from core.data.containers import ElanExtensionProject
-from core.gui.ewidgetbase import EDialogWidget
-from core.data.enums import MovieSource
-import os
 import glob
+import os
+
+from PyQt5 import uic
+from PyQt5.QtWidgets import QFileDialog
+
+from core.data.containers import ElanExtensionProject
+from core.data.enums import MovieSource
+from core.gui.ewidgetbase import EDialogWidget
+
 
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path):

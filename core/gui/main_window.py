@@ -1,50 +1,46 @@
-from functools import partial
-
 # from PyQt4 import QtCore, QtGui, uic
-from PyQt5 import uic
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QFileDialog, qApp, QLabel, QMessageBox, QWidget
 
-import webbrowser
 # from annotation_viewer import AnnotationViewer
-from core.concurrent.worker import Worker, CurrentSegmentEvaluater
+import webbrowser
+import os
+
+from core.concurrent.worker import Worker
 from core.concurrent.worker_functions import *
-from core.data.exporters import SegmentationExporter
+from core.data.enums import *
 from core.data.importers import ELANProjectImporter
 from core.data.masterfile import MasterFile
-from core.data.settings import UserSettings
-from core.data.enums import *
 from core.data.project_streaming import ProjectStreamer
-from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
+from core.data.settings import UserSettings
+from core.data.vian_updater import VianUpdater
+# from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
+from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
+from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
 from core.gui.Dialogs.welcome_dialog import WelcomeDialog
-from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
-from core.gui.Dialogs.progressbar_popup import DialogProgress
 from core.gui.analyses_widget import AnalysesWidget
 from core.gui.concurrent_tasks import ConcurrentTaskDock
+from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
 from core.gui.keyeventhandler import EKeyEventHandler
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
+from core.gui.player_controls import PlayerControls
+from core.gui.player_vlc import Player_VLC
+# from core.gui.shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
+from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
+from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
-from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
+from core.gui.vocabulary import VocabularyManager
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
 from core.remote.corpus.corpus import *
 from core.remote.elan.server.server import QTServer
-from .drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
 from extensions.colormetrics.hilbert_colors import HilbertHistogramProc
 from extensions.extension_list import ExtensionList
-from .player_controls import PlayerControls
-from .player_vlc import Player_VLC
-from .shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
-from .status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
-from core.gui.vocabulary import VocabularyManager
-from core.data.vian_updater import VianUpdater
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
@@ -58,6 +54,7 @@ __status__ = "Developement, (BETA)"
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
+    onSegmentStep = pyqtSignal(object)
     currentSegmentChanged = pyqtSignal(int)
     abortAllConcurrentThreads = pyqtSignal()
 
@@ -303,6 +300,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.time = 0
         self.time_counter = 0
         self.clock_synchronize_step = 5
+        self.last_segment_index = 0
 
 
         self.current_perspective = Perspective.Annotation.name
@@ -574,7 +572,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_vian(self):
         result = self.updater.get_server_version()
         if result:
-            answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\n\nDo you want to Update now?")
+            answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
             if answer == QMessageBox.Yes:
                 self.updater.update()
             else:
@@ -831,7 +829,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.create_annotation_layer("New Layer", curr_time, curr_time + 10000)
 
     def import_segmentation(self):
-        SegmentationImporterDialog(self, self.project, self)
+        QMessageBox.warning(self, "Deprecated", "The Segmentation Importer is deprecated and therefore removed from VIAN.\n "
+                                          "For ELAN Projects use the \"ELAN Project Importer\". \n "
+                                          "A new Version for importing arbitary Segmentations is planned but not yet included.")
+        # SegmentationImporterDialog(self, self.project, self)
 
     def import_elan_project(self):
         try:
@@ -914,8 +915,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.current_perspective = Perspective.ScreenshotsManager
             self.screenshots_manager.update_manager()
 
-            central = self.screenshots_manager
-            central.center_images()
+            # central = self.screenshots_manager
+            # central.center_images()
+            central = QWidget(self)
+            central.setFixedWidth(0)
+
 
             self.drawing_overlay.hide()
             self.annotation_toolbar.show()
@@ -926,7 +930,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner.hide()
             self.history_view.hide()
             self.screenshots_manager.center_images()
-            self.screenshots_manager_dock.hide()
+            self.screenshots_manager_dock.show()
             self.node_editor_dock.hide()
             self.node_editor_results.hide()
             self.vocabulary_manager.hide()
@@ -1160,6 +1164,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.timeline.timeline.on_timestep_update(time)
         self.onTimeStep.emit(time)
+
+        if self.project.get_main_segmentation() is not None:
+            current_segment = self.project.get_main_segmentation().get_segment_of_time(time)
+
+            if current_segment is not None and self.last_segment_index != current_segment.ID - 1:
+                self.last_segment_index = current_segment.ID - 1
+                self.onSegmentStep.emit(self.last_segment_index)
 
         if time == -1:
             for l in self.project.annotation_layers:

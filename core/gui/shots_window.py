@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 # from PyQt4 import QtCore, QtGui, uic
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
 
@@ -14,6 +14,8 @@ from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar
 
+SCALING_NONE = 0
+SALING_VIEWPORT_WIDTH = 1
 
 class ScreenshotsToolbar(EToolBar):
     def __init__(self, main_window, screenshot_manager):
@@ -39,12 +41,24 @@ class ScreenshotsManagerDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Screenshot Manager")
+        self.m_display = self.inner.menuBar().addMenu("Display")
+        self.a_static = self.m_display.addAction("Static")
+        self.a_scale_width =self.m_display.addAction("Reorder by Width")
+
+        self.a_static.triggered.connect(self.on_static)
+        self.a_scale_width.triggered.connect(self.on_scale_to_width)
 
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
+    def on_static(self):
+        self.screenshot_manager.scaling_mode = SCALING_NONE
+
+    def on_scale_to_width(self):
+        self.screenshot_manager.scaling_mode = SALING_VIEWPORT_WIDTH
 
     def set_manager(self, screenshot_manager):
         self.setWidget(screenshot_manager)
+        self.screenshot_manager = screenshot_manager
 
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
@@ -74,8 +88,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.setRubberBandSelectionMode(Qt.IntersectsItemShape)
         self.rubberband_rect = QtCore.QRect(0, 0, 0, 0)
         self.curr_scale = 1.0
+        self.curr_image_scale = 1.0
+
+        self.scaling_mode = SALING_VIEWPORT_WIDTH
 
         self.main_window = main_window
+
 
         self.scene = ScreenshotsManagerScene(self)
         self.setScene(self.scene)
@@ -97,6 +115,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.n_images = 0
 
         self.rubberBandChanged.connect(self.rubber_band_selection)
+
+
 
         # SEGMENT EVALUATOR
         # self.main_window.currentSegmentChanged.connect(self.frame_segment)
@@ -209,7 +229,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 pen.setColor(QtGui.QColor(200, 200, 200))
                 pen.setWidth(5)
                 line = self.scene.addLine(QtCore.QLineF(p1, p2), pen)
-
                 self.lines.append(line)
 
 
@@ -306,6 +325,89 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def selected_image(self):
         return self.selected_images
 
+    def reorder(self):
+        if len(self.images) == 0:
+            return
+
+        viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0,0))
+        viewport_width = viewport_size.x()
+        viewport_height = viewport_size.y()
+
+        image_width = self.images[0].pixmap().width()
+        image_height = self.images[0].pixmap().height()
+        image_scale = round(image_width / (viewport_size.x()), 4)
+        self.curr_image_scale = image_scale
+
+        caption_x = 0
+        caption_y = image_height + 20
+
+        self.n_per_row = np.clip(int(np.floor((viewport_width - (2 * self.border_width *image_scale)) / (image_width + self.x_offset))), 1, None)#+150 to giva little border - 1
+
+        x_counter = 0
+        y_counter = 0
+        segm_counter = 0
+
+        border_width = self.border_width
+        x = border_width
+        y = border_width
+
+        for i, img in enumerate(self.images):
+            if segm_counter != img.screenshot_obj.scene_id:
+                segm_counter = img.screenshot_obj.scene_id
+
+                # x_counter = 0
+                # y_counter += 1
+
+                # y = y_counter * (self.x_offset + image_height) + self.border_width
+                # x = border_width
+
+                self.segmentation_captions[(segm_counter - 1) * 2].setPos(border_width / 3, y)
+                self.segmentation_captions[(segm_counter - 1) * 2 + 1].setPos(border_width / 3, y + 200)
+
+                try:
+                    self.lines[segm_counter - 1].setPos(0, y)
+                except:
+                    pass
+
+
+            img.setPos(x, y)
+            self.captions[i].setPos(x + caption_x, y + caption_y)
+
+            if x_counter == self.n_per_row - 1:
+                x_counter = 0
+                y_counter += 1
+                x = border_width
+                y = y_counter * (self.x_offset + image_height) + self.border_width
+
+
+            else:
+                x_counter += 1
+                y_counter = y_counter
+                x = x_counter * (self.x_offset + image_width) + self.border_width
+                y = y
+
+            segm_counter = img.screenshot_obj.scene_id
+            # if i < len(self.images)- 1:
+            #     if self.images[i+1].screenshot_obj.scene_id != segm_counter:
+            #         self.segmentation_captions[(segm_counter - 1) * 2].setPos(border_width/3, y)
+            #         self.segmentation_captions[(segm_counter - 1) + 1].setPos(border_width / 3, y + 200)
+            #
+            #         x_counter = 0
+            #         y_counter += 1
+            #         x = border_width
+            #         y = y_counter * (self.x_offset + image_height) + self.border_width
+
+        pen = QtGui.QPen()
+        pen.setColor(QtGui.QColor(10, 10, 10))
+        pen.setWidth(5)
+
+        rect = self.scene.addRect(QtCore.QRectF(0, 0, self.n_per_row * (self.x_offset + image_width) + 2 * border_width,
+                                                y + self.y_offset + 2 * self.bottom_height), pen)
+        self.scene.removeItem(self.border)
+        self.border = rect
+        self.scene.setSceneRect(QtCore.QRectF(0, 0, self.n_per_row * (self.x_offset + image_width) + 2 * border_width,
+                                              y + self.y_offset + 2 * self.bottom_height))
+
     def update_manager(self, center = True):
         self.clear_caption()
         self.clear_selection()
@@ -361,18 +463,24 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     self.scale(l_factor, l_factor)
                     self.update_caption()
 
-                if len(self.images)>0:
-                    viewport_width = (self.mapToScene(self.width(), self.height()) - self.mapToScene(QtCore.QPoint(0,0)))
-                    self.n_per_row = np.clip(np.floor( viewport_width.x() / self.images[0].pixmap().width()), 1, None)
-                    print (self.n_per_row, viewport_width.x(), self.images[0].pixmap().width())
+                # if len(self.images)>0:
+                #     viewport_width = (self.mapToScene(self.width(), self.height()) - self.mapToScene(QtCore.QPoint(0,0)))
+                #     self.n_per_row = np.clip(np.floor( viewport_width.x() / self.images[0].pixmap().width()), 1, None)
+
 
                 cursor_pos = self.mapToScene(event.pos()) - old_pos
-                self.translate(cursor_pos.x(), cursor_pos.y())
+                if self.scaling_mode == SALING_VIEWPORT_WIDTH:
+                    self.reorder()
+                    self.translate(0, cursor_pos.y())
+                else:
+                    self.translate(cursor_pos.x(), cursor_pos.y())
+
 
 
 
             else:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - (500 * (float(event.angleDelta().y()) / 360)))
+                super(ScreenshotsManagerWidget, self).wheelEvent(event)
+                # self.verticalScrollBar().setValue(self.verticalScrollBar().value() - (500 * (float(event.angleDelta().y()) / 360)))
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Control:
@@ -514,21 +622,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.fitInView(rect, Qt.KeepAspectRatio)
         self.curr_scale = self.sceneRect().width() / rect.width()
 
-    # SEGMENT EVALUATOR
-    # def frame_segment(self, segment_index):
-    #     pos = QtCore.QPoint(0,0)
-    #     scrs = self.get_project().get_screenshots_of_segment(segment_index)
-    #     for i in self.images:
-    #         if i.screenshot_obj in scrs:
-    #             pos = i.sceneBoundingRect()
-    #             self.fitInView(rect, Qt.KeepAspectRatio)
-    #             break
-
     def get_project(self):
         return self.main_window.project
-
-
-
 
     def mouseDoubleClickEvent(self, *args, **kwargs):
         if len(self.selected_images) > 0:

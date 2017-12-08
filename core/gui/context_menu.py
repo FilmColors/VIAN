@@ -257,17 +257,23 @@ class LayerContextMenu(ContextMenu):
         self.hide()
         visibility = not self.layer[0].timeline_visibility
         for s in self.layer:
-            s.set_timeline_visibility(visibility)
+            try:
+                s.set_timeline_visibility(visibility)
+            except:
+                pass
         self.hide()
 
     def toggle_lock(self):
         self.hide()
         new_status = not self.layer[0].is_locked()
         for s in self.layer:
-            if new_status:
-                s.lock()
-            else:
-                s.unlock()
+            try:
+                if new_status:
+                    s.lock()
+                else:
+                    s.unlock()
+            except:
+                pass
 
 
 class AnnotationContextMenu(ContextMenu):
@@ -293,13 +299,20 @@ class AnnotationContextMenu(ContextMenu):
     def remove_keys(self):
         self.hide()
         for a in self.annotation:
-            a.remove_keys()
+            try:
+                a.remove_keys()
+            except:
+                pass
+
         self.close()
 
     def on_delete(self):
         self.hide()
         for a in self.annotation:
-            a.project.remove_annotation(a)
+            try:
+                a.project.remove_annotation(a)
+            except:
+                pass
         self.close()
 
 
@@ -317,14 +330,20 @@ class ScreenshotContextMenu(ContextMenu):
     def on_delete(self):
         self.hide()
         for s in self.screenshots:
-            s.project.remove_screenshot(s)
+            try:
+                s.project.remove_screenshot(s)
+            except:
+                pass
         self.close()
 
     def go_to(self):
-        self.hide()
-        last = self.screenshots[len(self.screenshots) - 1]
-        self.main_window.player.pause()
-        self.main_window.player.set_media_time(last.movie_timestamp)
+        try:
+            self.hide()
+            last = self.screenshots[len(self.screenshots) - 1]
+            self.main_window.player.pause()
+            self.main_window.player.set_media_time(last.movie_timestamp)
+        except:
+            pass
         self.close()
 
 
@@ -341,7 +360,10 @@ class SegmentContexMenu(ContextMenu):
     def on_delete(self):
         self.hide()
         for s in self.segments:
-            s.project.remove_segment(s)
+            try:
+                s.project.remove_segment(s)
+            except:
+                pass
         self.close()
 
 
@@ -364,6 +386,7 @@ class MovieDescriptorContextMenu(ContextMenu):
 
     def on_update_duration(self):
         self.main_window.project.movie_descriptor.set_duration(self.main_window.player.get_media_duration())
+
 
 class ScreenshotGroupContexMenu(ContextMenu):
     def __init__(self, parent, pos, screenshot_group, project):
@@ -438,6 +461,7 @@ class NodeScriptRootContextMenu(ContextMenu):
 
     def on_new_script(self):
         self.project.create_script()
+
 
 class ScriptsRootContexMenu(ContextMenu):
     def __init__(self, parent, pos, project):

@@ -9,69 +9,6 @@ import numpy as np
 from core.data.containers import Segment, Segmentation, ElanExtensionProject
 from core.data.interfaces import IConcurrentJob
 
-
-def import_elan_segmentation(path, name, id_identifier, prevent_overlapping = False): #, additional_identifiers):
-    path = os.path.abspath(path)
-    if not os.path.isfile(path):
-        return False, "Path not found\n" + path
-
-    lines = []
-    segments_data = []
-
-    try:
-        with open(path, 'rb') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter='\t', quotechar='|')
-            for row in spamreader:
-                lines.append(row)
-
-        curr_id = 0
-        last_end = 0
-        segments = []
-        for row in lines:
-            if row[0] in id_identifier:
-                id_sequence = curr_id
-                start_time = int(row[2])
-                end_time = int(row[3])
-                duration = int(row[4])
-                identifier = str(row[5])
-
-                if prevent_overlapping:
-                    start_time = np.clip(start_time, last_end, None)
-                    last_end = end_time
-
-                segments.append(Segment(id_sequence, start_time, end_time, duration, [identifier]))
-                curr_id += 1
-
-
-
-
-
-        segmentation = Segmentation(name, segments)
-        return True, segmentation
-
-    except Exception as e:
-        return False, str(e)
-
-def get_elan_segmentation_identifiers(path):
-    path = os.path.abspath(path)
-    if not os.path.isfile(path):
-        return False, "No such File Exists"
-
-    identifiers = []
-
-    # Finding all identifiers exported
-    try:
-        with open(path, 'rb') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter='\t', quotechar='|')
-
-            for row in spamreader:
-                if row[0] not in identifiers:
-                    identifiers.append(row[0])
-        return True, identifiers
-    except Exception as e:
-        print(e)
-        return False, e
-
 class ELANProjectImporter():
     def __init__(self, main_window, remote_movie = False, import_screenshots = False, movie_formats = None):
         self.main_window = main_window
@@ -240,3 +177,75 @@ class ScreenshotImporter(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         pass
     
+
+# OLD CODE
+# def import_elan_segmentation(path, name, id_identifier, prevent_overlapping = False): #, additional_identifiers):
+#     """
+#     This Function is deprecated.
+#
+#     :param path:
+#     :param name:
+#     :param id_identifier:
+#     :param prevent_overlapping:
+#     :return:
+#     """
+#     path = os.path.abspath(path)
+#     if not os.path.isfile(path):
+#         return False, "Path not found\n" + path
+#
+#     lines = []
+#     segments_data = []
+#
+#     try:
+#         with open(path, 'rb') as csvfile:
+#             spamreader = csv.reader(csvfile, delimiter='\t', quotechar='|')
+#             for row in spamreader:
+#                 lines.append(row)
+#
+#         curr_id = 0
+#         last_end = 0
+#         segments = []
+#         for row in lines:
+#             if row[0] in id_identifier:
+#                 id_sequence = curr_id
+#                 start_time = int(row[2])
+#                 end_time = int(row[3])
+#                 duration = int(row[4])
+#                 identifier = str(row[5])
+#
+#                 if prevent_overlapping:
+#                     start_time = np.clip(start_time, last_end, None)
+#                     last_end = end_time
+#
+#                 segments.append(Segment(id_sequence, start_time, end_time, duration, [identifier]))
+#                 curr_id += 1
+#
+#
+#
+#
+#
+#         segmentation = Segmentation(name, segments)
+#         return True, segmentation
+#
+#     except Exception as e:
+#         return False, str(e)
+#
+# def get_elan_segmentation_identifiers(path):
+#     path = os.path.abspath(path)
+#     if not os.path.isfile(path):
+#         return False, "No such File Exists"
+#
+#     identifiers = []
+#
+#     # Finding all identifiers exported
+#     try:
+#         with open(path, 'rb') as csvfile:
+#             spamreader = csv.reader(csvfile, delimiter='\t', quotechar='|')
+#
+#             for row in spamreader:
+#                 if row[0] not in identifiers:
+#                     identifiers.append(row[0])
+#         return True, identifiers
+#     except Exception as e:
+#         print(e)
+#         return False, e

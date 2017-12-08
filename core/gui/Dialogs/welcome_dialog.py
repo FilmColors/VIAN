@@ -1,8 +1,10 @@
-from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox
 from PyQt5 import uic
-from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
-from core.gui.ewidgetbase import EDialogWidget
 import os
+
+from PyQt5 import uic
+
+from core.gui.ewidgetbase import EDialogWidget
+
 
 class WelcomeDialog(EDialogWidget):
     def __init__(self, parent, main_window):

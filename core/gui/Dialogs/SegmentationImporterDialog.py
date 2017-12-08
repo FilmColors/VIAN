@@ -1,10 +1,14 @@
 from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox
 from PyQt5 import uic
-from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
+# from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
 from core.gui.ewidgetbase import EDialogWidget
 import os
 
 class SegmentationImporterDialog(EDialogWidget):
+    """
+    TODO
+    The SegmentationImporter is deprecated and should be removed at some Point
+    """
     def __init__(self, parent, project, main_window):
         super(SegmentationImporterDialog, self).__init__(main_window, parent)
         path = os.path.abspath("qt_ui/DialogSegmentImporter.ui")

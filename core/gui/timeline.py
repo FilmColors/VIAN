@@ -30,15 +30,15 @@ class TimelineContainer(EDockWidget):
         self.a_create_segmentation.triggered.connect(self.timeline.create_segmentation)
 
         self.menu_display = self.inner.menuBar().addMenu("Display")
-        self.a_show_id = self.menu_display.addAction("ID")
+        self.a_show_id = self.menu_display.addAction("\tID")
         self.a_show_id.setCheckable(True)
         self.a_show_id.setChecked(True)
 
-        self.a_show_name = self.menu_display.addAction("Name")
+        self.a_show_name = self.menu_display.addAction("\tName")
         self.a_show_name.setCheckable(True)
         self.a_show_name.setChecked(True)
 
-        self.a_show_text = self.menu_display.addAction("Text")
+        self.a_show_text = self.menu_display.addAction("\tText")
         self.a_show_text.setCheckable(True)
         self.a_show_text.setChecked(True)
 
@@ -148,7 +148,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Controls.move(self.scrollArea.mapToParent(QtCore.QPoint(value, 0)))
         self.relative_corner = QtCore.QPoint(value, self.relative_corner.y())
         self.time_bar.move(self.relative_corner)
-
 
     def scroll_v(self):
         value = self.scrollArea.verticalScrollBar().value()

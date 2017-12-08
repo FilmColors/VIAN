@@ -661,6 +661,7 @@ class NodeScriptsRootItem(AbstractOutlinerItem):
 
         self.setForeground(0, QtGui.QColor(81,109,90))
 
+
 class NodeScriptsItem(AbstractOutlinerItem):
     def __init__(self, parent, index, script):
         super(NodeScriptsItem, self).__init__(parent, index)
