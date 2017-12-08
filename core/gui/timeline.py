@@ -190,7 +190,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.main_window.print_message("No Segmentation Selected", "Orange")
 
     def on_interval_segment_end(self):
-        print("Selected", self.selected)
         if self.selected is not None and self.interval_segmentation_marker is not None:
             if self.selected.get_type() == SEGMENTATION:
                 self.selected.create_segment(self.interval_segmentation_start, self.curr_movie_time)

@@ -1,3 +1,9 @@
+"""
+DEPRECATED, screenshot_manager.py is the new Screenshot Manager
+"""
+
+
+
 import os
 import cv2
 import numpy as np

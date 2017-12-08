@@ -2129,15 +2129,24 @@ class Vocabulary(IProjectContainer, IHasName):
         return word
 
     def add_word(self, word, parent_word = None):
+        """
+        
+        :param word: the Word object to add
+        :param parent_word: the parent Word, either as String or Word Object
+        :return: 
+        """
         if parent_word is None:
             word.parent = self
             self.words.append(word)
             self.words_plain.append(word)
             word.set_project(self.project)
         else:
-            parent = self.get_word_by_name(parent_word)
+            if isinstance(parent_word, str):
+                parent = self.get_word_by_name(parent_word)
+            else:
+                parent = parent_word
             if parent is not None:
-                word.parent=parent
+                word.parent = parent
                 parent.add_children(word)
                 self.words_plain.append(word)
                 word.set_project(self.project)
@@ -2214,8 +2223,7 @@ class Vocabulary(IProjectContainer, IHasName):
         self.unique_id = serialization['unique_id']
 
         for w in serialization['words']:
-            parent = self.project.get_by_id(w['unique_id'])
-
+            parent = self.project.get_by_id(w['parent'])
             # If this is a root node in the Vocabulary
             if isinstance(parent, Vocabulary):
                 self.create_word(w['name'], unique_id=w['unique_id'])
@@ -2228,6 +2236,11 @@ class Vocabulary(IProjectContainer, IHasName):
     def get_type(self):
         return VOCABULARY
 
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
 
 class VocabularyWord(IProjectContainer, IHasName):
     def __init__(self, name, vocabulary, parent = None, is_checkable = False):
@@ -2248,7 +2261,6 @@ class VocabularyWord(IProjectContainer, IHasName):
             self.connected_items.remove(item)
 
     def add_children(self, children):
-        print(self.name, [c.name for c in self.children])
         if isinstance(children, list):
             for c in children:
                 self.children.append(c)

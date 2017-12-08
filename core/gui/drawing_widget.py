@@ -553,7 +553,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         return super(DrawingOverlay, self).eventFilter(QObject, QEvent)
 
     def mousePressEvent(self, event):
-        print("MousePress")
         self.project.set_selected(None, [])
         self.main_window.mousePressEvent(event)
         self.abort_freehand_drawing()

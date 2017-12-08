@@ -199,7 +199,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             self.tree.select(to_select, False)
             self.tree.selection_dispatch = True
 
-
     def keyPressEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Shift:
             self.tree.setSelectionMode(self.tree.MultiSelection)

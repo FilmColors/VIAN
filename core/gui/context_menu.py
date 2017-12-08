@@ -202,26 +202,41 @@ class SegmentationContextMenu(ContextMenu):
         self.hide()
         new_status = not self.segmentation[0].is_locked()
         for s in self.segmentation:
-            if new_status:
-                s.lock()
-            else:
-                s.unlock()
+            try:
+                if new_status:
+                    s.lock()
+                else:
+                    s.unlock()
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
 
     def toggle_timeline_visiblity(self):
         self.hide()
         visibility = not self.segmentation[0].timeline_visibility
         for s in self.segmentation:
-            s.set_timeline_visibility(visibility)
+            try:
+                s.set_timeline_visibility(visibility)
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
 
     def on_delete(self):
         self.hide()
         for s in self.segmentation:
-            s.project.remove_segmentation(s)
+            try:
+                s.project.remove_segmentation(s)
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
         self.close()
 
     def on_set_main(self):
         self.hide()
-        self.segmentation[0].project.set_main_segmentation(self.segmentation[0])
+        try:
+            self.segmentation[0].project.set_main_segmentation(self.segmentation[0])
+        except Exception as e:
+                print("ContextMenu Error", e)
         self.close()
 
 
@@ -250,7 +265,11 @@ class LayerContextMenu(ContextMenu):
     def on_delete(self):
         self.hide()
         for l in self.layer:
-            l.project.remove_annotation_layer(l)
+            try:
+                l.project.remove_annotation_layer(l)
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
         self.close()
 
     def toggle_timeline_visiblity(self):
@@ -259,21 +278,26 @@ class LayerContextMenu(ContextMenu):
         for s in self.layer:
             try:
                 s.set_timeline_visibility(visibility)
-            except:
-                pass
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
         self.hide()
 
     def toggle_lock(self):
         self.hide()
-        new_status = not self.layer[0].is_locked()
-        for s in self.layer:
-            try:
-                if new_status:
-                    s.lock()
-                else:
-                    s.unlock()
-            except:
-                pass
+        try:
+            new_status = not self.layer[0].is_locked()
+            for s in self.layer:
+                try:
+                    if new_status:
+                        s.lock()
+                    else:
+                        s.unlock()
+                except Exception as e:
+                    print("ContextMenu Error", e)
+                    continue
+        except Exception as e:
+            print("ContextMenu Error", e)
 
 
 class AnnotationContextMenu(ContextMenu):
@@ -301,8 +325,9 @@ class AnnotationContextMenu(ContextMenu):
         for a in self.annotation:
             try:
                 a.remove_keys()
-            except:
-                pass
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
 
         self.close()
 
@@ -311,8 +336,9 @@ class AnnotationContextMenu(ContextMenu):
         for a in self.annotation:
             try:
                 a.project.remove_annotation(a)
-            except:
-                pass
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
         self.close()
 
 
@@ -332,8 +358,9 @@ class ScreenshotContextMenu(ContextMenu):
         for s in self.screenshots:
             try:
                 s.project.remove_screenshot(s)
-            except:
-                pass
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
         self.close()
 
     def go_to(self):
@@ -342,8 +369,9 @@ class ScreenshotContextMenu(ContextMenu):
             last = self.screenshots[len(self.screenshots) - 1]
             self.main_window.player.pause()
             self.main_window.player.set_media_time(last.movie_timestamp)
-        except:
-            pass
+        except Exception as e:
+            print("ContextMenu Error", e)
+
         self.close()
 
 
@@ -362,8 +390,9 @@ class SegmentContexMenu(ContextMenu):
         for s in self.segments:
             try:
                 s.project.remove_segment(s)
-            except:
-                pass
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
         self.close()
 
 
@@ -403,7 +432,10 @@ class ScreenshotGroupContexMenu(ContextMenu):
 
     def on_remove(self):
         self.hide()
-        self.project.remove_screenshot_group(self.screenshot_group)
+        try:
+            self.project.remove_screenshot_group(self.screenshot_group)
+        except Exception as e:
+            print("ContextMenu Error", e)
 
     def on_set_active(self):
         self.project.set_current_screenshot_group(self.screenshot_group)
@@ -443,10 +475,17 @@ class NodeScriptContextMenu(ContextMenu):
 
     def on_remove_script(self):
         for script in self.scripts:
-            self.project.remove_script(script)
+            try:
+                self.project.remove_script(script)
+            except Exception as e:
+                print("ContextMenu Error", e)
+                continue
 
     def on_open_script(self):
-        self.project.set_current_script(self.scripts[0])
+        try:
+            self.project.set_current_script(self.scripts[0])
+        except Exception as e:
+            print("ContextMenu Error", e)
 
 
 class NodeScriptRootContextMenu(ContextMenu):

@@ -60,8 +60,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_static.triggered.connect(self.on_static)
         self.a_scale_width.triggered.connect(self.on_scale_to_width)
         self.m_display.addSeparator()
-        self.a_follow_time = self.m_display.addAction("Follow Time")
+        self.a_follow_time = self.m_display.addAction(" Follow Time")
         self.a_follow_time.setCheckable(True)
+        self.a_follow_time.setChecked(True)
         self.a_follow_time.triggered.connect(self.on_follow_time)
 
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
@@ -177,7 +178,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 current_segment_id = s.scene_id
                 segment = self.project.get_segment_of_main_segmentation(current_segment_id - 1)
                 current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
-            print (s.scene_id)
+
             # Should we use the Annotated Screenshot?
             if s.annotation_is_visible:
                 image = s.img_blend
@@ -200,9 +201,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             current_sm_object.segm_images.append(item_image)
 
         self.images_segmentation.append(current_sm_object)
-
-        print(len(self.images_plain))
-        print(len(self.images_segmentation))
 
         self.clear_selection_frames()
         self.arrange_images()
@@ -299,7 +297,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.captions = []
 
     def select_image(self, images, dispatch = True):
-        print("Selecting", len(images))
         self.selected = images
 
         # Drawing the New Selection Frames

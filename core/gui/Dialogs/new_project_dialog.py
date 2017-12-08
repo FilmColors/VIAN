@@ -18,6 +18,8 @@ class NewProjectDialog(EDialogWidget):
         self.templates = []
 
         self.project_name = "project_name"
+        self.auto_naming = False
+
         if movie_path is "":
             self.project_dir = settings.DIR_PROJECT
         else:
@@ -36,6 +38,7 @@ class NewProjectDialog(EDialogWidget):
 
         self.find_templates()
 
+        self.cB_AutomaticNaming.stateChanged.connect(self.on_automatic_naming_changed)
         self.lineEdit_ProjectName.textChanged.connect(self.on_proj_name_changed)
         self.lineEdit_ProjectPath.editingFinished.connect(self.on_proj_path_changed)
         self.btn_BrowseProject.clicked.connect(self.on_browse_project_path)
@@ -58,6 +61,16 @@ class NewProjectDialog(EDialogWidget):
 
         self.show()
 
+    def on_automatic_naming_changed(self):
+        auto = self.cB_AutomaticNaming.isChecked()
+        if auto:
+            self.lineEdit_ProjectName.setEnabled(False)
+            self.lineEdit_ProjectName.textChanged.disconnect()
+        else:
+            self.lineEdit_ProjectName.setEnabled(True)
+            self.lineEdit_ProjectName.textChanged.connect(self.on_proj_name_changed)
+        self.auto_naming = auto
+
     def find_templates(self):
         templates = glob.glob(self.settings.DIR_TEMPLATES + "*")
         self.templates.append(None)
@@ -68,8 +81,16 @@ class NewProjectDialog(EDialogWidget):
 
     def set_project_path(self):
         self.project.path = self.project_dir
-        self.project.name = self.project_name
-        self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
+        if self.auto_naming:
+            self.project_name = self.lineEdit_ID.text() + "_" + \
+                                self.lineEdit_Name.text().replace(" ", "_") + "_" + \
+                                self.lineEdit_Year.text() + "_" + \
+                                self.comboBox_Source.currentText()
+            self.lineEdit_ProjectName.setText(self.project_name)
+            self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
+        else:
+            self.project.name = self.project_name
+            self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
 
     def parse_project_path(self, path):
         path = path.split('/')
@@ -110,15 +131,19 @@ class NewProjectDialog(EDialogWidget):
 
     def on_desc_name_changed(self):
         self.project.movie_descriptor.movie_name = self.lineEdit_Name.text()
+        self.set_project_path()
 
     def on_desc_id_changed(self):
         self.project.movie_descriptor.movie_id = self.lineEdit_ID.text()
+        self.set_project_path()
 
     def on_desc_year_changed(self):
         self.project.movie_descriptor.year = self.lineEdit_Year.text()
+        self.set_project_path()
 
     def on_desc_ource_changed(self):
         self.project.movie_descriptor.source = self.comboBox_Source.currentText()
+        self.set_project_path()
 
     def on_desc_movie_path_changed(self):
         if not os.path.isfile(self.lineEdit_MoviePath.text()):
