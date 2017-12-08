@@ -36,6 +36,22 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
 
     return qimage, qpixmap
 
+def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
+    if cvt is not None:
+            arr = cv2.cvtColor(arr,cvt)
+
+    if target_width is not None:
+        factor = float(target_width) / arr.shape[1]
+        arr = cv2.resize(arr, None, None, factor, factor, cv2.INTER_CUBIC)
+
+    if not with_alpha:
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format_RGB888)
+        qpixmap = QPixmap(qimage)
+    else:
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format_RGBA8888)
+        qpixmap = QPixmap(qimage)
+
+    return qpixmap
 
 def convertQImageToMat(qimage):
     '''  Converts a QImage into an opencv MAT format  '''

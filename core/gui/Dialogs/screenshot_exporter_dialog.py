@@ -1,5 +1,6 @@
 import os
 
+from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog
 
 from core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum

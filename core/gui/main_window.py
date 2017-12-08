@@ -5,6 +5,7 @@ import webbrowser
 import os
 
 from core.concurrent.worker import Worker
+
 from core.concurrent.worker_functions import *
 from core.data.enums import *
 from core.data.importers import ELANProjectImporter

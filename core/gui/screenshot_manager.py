@@ -55,7 +55,11 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.setWindowTitle("Screenshot Manager")
         self.m_display = self.inner.menuBar().addMenu("Display")
         self.a_static = self.m_display.addAction("Static")
+        self.a_static.setCheckable(True)
+        self.a_static.setChecked(True)
         self.a_scale_width =self.m_display.addAction("Reorder by Width")
+        self.a_scale_width.setCheckable(True)
+        self.a_scale_width.setChecked(False)
 
         self.a_static.triggered.connect(self.on_static)
         self.a_scale_width.triggered.connect(self.on_scale_to_width)
@@ -65,14 +69,18 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_follow_time.setChecked(True)
         self.a_follow_time.triggered.connect(self.on_follow_time)
 
+        self.inner.resize(400, self.height())
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
     def on_static(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_NONE
+        self.screenshot_manager.arrange_images()
+        self.a_scale_width.setChecked(False)
 
     def on_scale_to_width(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_WIDTH
         self.screenshot_manager.arrange_images()
+        self.a_static.setChecked(False)
 
     def on_scale_to_height(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_HEIGHT
@@ -101,7 +109,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.is_hovered = False
         self.ctrl_is_pressed = False
         self.shift_is_pressed = False
-        self.follow_time = False
+        self.follow_time = True
 
         self.font = QFont("Consolas")
         self.font_size = 128
@@ -131,6 +139,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.selection_frames = []
 
         self.selected = []
+
+        self.current_segment_index = 0
         self.current_segment_frame = None
 
         self.x_offset = 100
@@ -144,14 +154,26 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.n_per_row = 10
 
         self.n_images = 0
+
+        # self.setBaseSize(500,500)
         self.rubberBandChanged.connect(self.rubber_band_selection)
 
-
-
-        # SEGMENT EVALUATOR
-        # self.main_window.currentSegmentChanged.connect(self.frame_segment)
-
     def toggle_annotations(self):
+        if len(self.selected) == 0:
+            return
+
+        state = not self.selected[0].screenshot_obj.annotation_is_visible
+        for s in self.selected:
+            # Only change those which aren't already
+            if s.screenshot_obj.annotation_is_visible != state:
+                if state and s.screenshot_obj.img_blend is not None:
+                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.img_blend))
+                    s.screenshot_obj.annotation_is_visible = state
+                else:
+                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.img_movie))
+                    s.screenshot_obj.annotation_is_visible = False
+
+
         pass
 
     def update_manager(self):
@@ -180,16 +202,16 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
 
             # Should we use the Annotated Screenshot?
-            if s.annotation_is_visible:
+            if s.annotation_is_visible and s.img_blend is not None:
                 image = s.img_blend
             else:
                 image = s.img_movie
 
             # Convert to Pixmap
             try:
-                qgraph, qpixmap = numpy_to_qt_image(image)
+                qpixmap = numpy_to_pixmap(image)
             except Exception as e:
-                print("An Error Occured, Save and Restart. An Error occured in the Screenshot")
+                print("An Error Occured, Save and Restart. An Error occured in the Screenshot", e)
                 # self.main_window.print_message("An Error Occured, Save and Restart. An Error occured in the Screenshot "
                 #                                "Manager, I suggest you restart the application" + str(e), "Orange")
                 continue
@@ -236,7 +258,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
             viewport_width = viewport_size.x()
             image_scale = round(img_width / (viewport_size.x()), 4)
-            self.n_per_row = np.clip(int(np.ceil(viewport_width/ (img_width + x_offset))), 1, None)
+            self.n_per_row = np.clip(int(np.floor(viewport_width / (img_width + x_offset))), 1, None)
 
         for segm in self.images_segmentation:
             self.add_line(y)
@@ -329,7 +351,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.fitInView(rect, Qt.KeepAspectRatio)
         self.curr_scale = self.sceneRect().width() / rect.width()
 
-    def frame_segment(self, segment_index):
+    def frame_segment(self, segment_index, center = True):
+        self.current_segment_index = segment_index
+
         if self.follow_time:
             x = self.scene.sceneRect().width()
             y = self.scene.sceneRect().height()
@@ -340,10 +364,13 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             # if segment_index >= len(self.images_segmentation):
             #     return
 
-            index = 0
+            index = -1
             for i, s in enumerate(self.images_segmentation):
                 if s.segm_id == segment_index + 1:
                     index = i
+
+            if index == -1:
+                return
 
             # Determining the Bounding Box
             for img in self.images_segmentation[index].segm_images:
@@ -356,7 +383,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 if img.scenePos().y() + img.pixmap().height() > height:
                     height = img.scenePos().y() + img.pixmap().height()
 
-            self.fitInView(0, y, self.sceneRect().width(), height - y, Qt.KeepAspectRatio)
 
             if self.current_segment_frame is not None:
                 self.scene.removeItem(self.current_segment_frame)
@@ -365,10 +391,14 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             pen.setColor(QtGui.QColor(251, 95, 2, 200))
             pen.setWidth(20)
             self.current_segment_frame = self.scene.addRect(0, y-int(self.img_height/5) - 10, self.sceneRect().width(), height - y + int(self.img_height / 7) + self.img_height - 100, pen)
+
+            if center:
+                self.fitInView(self.current_segment_frame, Qt.KeepAspectRatio)
         else:
             if self.current_segment_frame is not None:
                 self.scene.removeItem(self.current_segment_frame)
                 self.current_segment_frame = None
+
     def on_loaded(self, project):
         self.project = project
         self.update_manager()
@@ -376,6 +406,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def on_changed(self, project, item):
         self.update_manager()
         self.on_selected(None, project.get_selected())
+
+        if self.follow_time:
+            self.frame_segment(self.current_segment_index)
+        else:
+            self.center_images()
 
     def on_selected(self, sender, selected):
         if not sender is self:
@@ -395,12 +430,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         # If there are selected Screenshots, only export those,
         # Else export all
-        if len(self.selected_images) == 0:
+        if len(self.selected) == 0:
             for item in self.images_plain:
                 screenshots.append(item.screenshot_obj)
             self.main_window.print_message("No Screenshots selected, exporting all Screenshots", "red")
         else:
-            for item in self.selected_images:
+            for item in self.selected:
                 screenshots.append(item.screenshot_obj)
 
         try:
@@ -441,6 +476,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             if self.scaling_mode == SCALING_MODE_WIDTH:
                 self.arrange_images()
+                self.frame_segment(self.current_segment_index, center = False)
             self.translate(cursor_pos.x(), cursor_pos.y())
 
         else:
