@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>704</width>
-    <height>578</height>
+    <width>724</width>
+    <height>618</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>704</width>
+     <width>724</width>
      <height>21</height>
     </rect>
    </property>
@@ -451,7 +451,7 @@
     <string>Start Interval Segment</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Q</string>
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionIntervalSegmentEnd">
@@ -459,7 +459,7 @@
     <string>End Interval Segment</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+W</string>
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>

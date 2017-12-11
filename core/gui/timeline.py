@@ -36,15 +36,24 @@ class TimelineContainer(EDockWidget):
 
         self.a_show_name = self.menu_display.addAction("\tName")
         self.a_show_name.setCheckable(True)
-        self.a_show_name.setChecked(True)
+        self.a_show_name.setChecked(False)
 
         self.a_show_text = self.menu_display.addAction("\tText")
         self.a_show_text.setCheckable(True)
         self.a_show_text.setChecked(True)
 
+        self.menu_options = self.inner.menuBar().addMenu("Options")
+        self.a_inhibit_overlap = self.menu_options.addAction("\tInhibit Overlap")
+        self.a_inhibit_overlap.setCheckable(True)
+        self.a_inhibit_overlap.setChecked(True)
+        self.a_inhibit_overlap.triggered.connect(self.update_settings)
+
         self.a_show_id.triggered.connect(self.update_settings)
         self.a_show_name.triggered.connect(self.update_settings)
         self.a_show_text.triggered.connect(self.update_settings)
+
+
+
 
         # self.inner.addToolBar(self.toolbar)
 
@@ -56,10 +65,10 @@ class TimelineContainer(EDockWidget):
         self.timeline.show_id = self.a_show_id.isChecked()
         self.timeline.show_name = self.a_show_name.isChecked()
         self.timeline.show_text = self.a_show_text.isChecked()
+        self.timeline.inhibit_overlap = self.a_inhibit_overlap.isChecked()
 
 
         self.timeline.on_timeline_settings_update()
-
 
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
@@ -114,8 +123,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         # Settings
         self.show_id = True
-        self.show_name = True
+        self.show_name = False
         self.show_text = True
+
+        self.inhibit_overlap = True
 
         self.update_time_bar()
         self.update_ui()
@@ -420,6 +431,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.scrollArea.verticalScrollBar().setEnabled(False)
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.is_fast_selecting = True
+        else:
+            QKeyEvent.ignore()
 
     def keyReleaseEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Control:
@@ -427,6 +440,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.scrollArea.verticalScrollBar().setEnabled(True)
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.is_fast_selecting = False
+        else:
+            QKeyEvent.ignore()
 
     def wheelEvent(self, QWheelEvent):
         if self.is_scaling:
@@ -668,6 +683,25 @@ class TimelineBar(QtWidgets.QFrame):
         slice.resize((item.get_end() - item.get_start()) // self.timeline.scale, self.height())
         self.slices.append(slice)
 
+    def get_previous_slice(self, slice):
+        result = None
+        for s in self.slices:
+            if s.pos().x() < slice.pos().x():
+                result = s
+            else:
+                break
+
+        return result
+
+    def get_next_slice(self, slice):
+        result = None
+        for s in self.slices:
+            if s.pos().x() > slice.pos().x():
+                result = s
+                break
+
+        return result
+
     def rescale(self):
         for a in self.annotations:
             for k in a[1]:
@@ -730,6 +764,9 @@ class TimebarSlice(QtWidgets.QWidget):
         self.is_hovered = False
         self.is_selected = False
 
+        self.min_possible = 0
+        self.max_possible = 0
+
     def paintEvent(self, QPaintEvent):
         self.locked = False
         if isinstance(self.item, ILockable):
@@ -780,6 +817,21 @@ class TimebarSlice(QtWidgets.QWidget):
     def mousePressEvent(self, QMouseEvent):
         if not self.locked:
             if QMouseEvent.buttons() & Qt.LeftButton:
+
+                # Inhibiting Overlap by finding the surrounding Slices and get their boundaries
+                if self.timeline.inhibit_overlap:
+                    previous = self.parent().get_previous_slice(self)
+                    next = self.parent().get_next_slice(self)
+
+                    if previous is not None:
+                        self.min_possible = previous.pos().x() + previous.width()
+                    else:
+                        self.min_possible = 0
+                    if next is not None:
+                        self.max_possible = next.pos().x()
+                    else:
+                        self.max_possible = self.timeline.duration * self.timeline.scale
+
                 self.is_selected = True
                 self.timeline.project().set_selected(None, self.item)
                 self.offset = self.mapToParent(QMouseEvent.pos())
@@ -820,6 +872,7 @@ class TimebarSlice(QtWidgets.QWidget):
     def mouseMoveEvent(self, QMouseEvent):
         if not self.locked:
             if QMouseEvent.buttons() & Qt.LeftButton:
+
                 pos = self.mapToParent(QMouseEvent.pos())
                 target = pos - self.offset
                 tx = int(self.timeline.round_to_grid(target.x()))
@@ -827,7 +880,11 @@ class TimebarSlice(QtWidgets.QWidget):
                 target = QtCore.QPoint(int(tx), int(ty))
 
                 if self.mode == "right":
-                    x = np.clip(self.curr_size.width() + target.x(),self.curr_pos.x() - self.offset.x() + 5,None)
+                    if self.timeline.inhibit_overlap:
+                        x = np.clip(self.curr_size.width() + target.x(), self.curr_pos.x() - self.offset.x() + 5, self.max_possible - self.curr_pos.x())
+                    else:
+                        x = np.clip(self.curr_size.width() + target.x(), self.curr_pos.x() - self.offset.x() + 5, None)
+
                     self.resize(x, self.height())
                     self.update()
 
@@ -836,10 +893,22 @@ class TimebarSlice(QtWidgets.QWidget):
                     return
 
                 if self.mode == "left":
-                    x = np.clip(self.curr_pos.x() + target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
-                    w = np.clip(self.curr_size.width() - target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
-                    self.move(x, 0)
-                    self.resize(w, self.height())
+                    if self.timeline.inhibit_overlap:
+                        x = np.clip(self.curr_pos.x() + target.x(), a_min=self.min_possible, a_max=self.curr_pos.x() + self.curr_size.width())
+                        # w = np.clip(self.curr_size.width() - target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
+                        w = np.clip(self.curr_size.width() - target.x(), a_min=0,
+                                    a_max=self.curr_pos.x() + self.curr_size.width())
+
+                    else:
+                        x = np.clip(self.curr_pos.x() + target.x(), a_min=0,
+                                    a_max=self.curr_pos.x() + self.curr_size.width())
+                        w = np.clip(self.curr_size.width() - target.x(), a_min=0,
+                                    a_max=self.curr_pos.x() + self.curr_size.width())
+
+                    if self.pos().x() != x:
+                        self.move(x, 0)
+                        self.resize(w, self.height())
+
                     self.update()
 
                     time = (self.pos().x()) * self.timeline.scale
@@ -847,7 +916,16 @@ class TimebarSlice(QtWidgets.QWidget):
                     return
 
                 if self.mode == "center":
-                    x = np.clip(self.curr_pos.x() + target.x(), 0, self.parent().width()-self.width())
+                    if self.timeline.inhibit_overlap:
+                        x1 = np.clip(self.curr_pos.x() + target.x() + self.width(), None, self.max_possible - self.width())
+                        x2 = np.clip(self.curr_pos.x() + target.x(), self.min_possible, None)
+                        if x2 < x1:
+                            x = x2
+                        else:
+                            x = x1
+
+                    else:
+                        x = np.clip(self.curr_pos.x() + target.x(), 0, self.parent().width() - self.width())
                     self.move(x, 0)
                     self.update()
                     return
@@ -1011,7 +1089,7 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.curr_pos = self.pos()
 
         else:
-            QMouseEvent.ignore()
+            self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
             # self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
 
 

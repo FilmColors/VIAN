@@ -15,21 +15,28 @@ class StatusBar(QtWidgets.QWidget):
 
         self.label_selection = QtWidgets.QLabel(self)
         self.label_selection.setText("Selection: ")
+        self.label_selection.setStyleSheet("QLabel{background: transparent;}")
+
         self.label_selection_length = QtWidgets.QLabel("0 Items", self)
+        self.label_selection_length.setStyleSheet("QLabel{background: transparent;}")
         self.layout.addWidget(self.label_selection)
         self.layout.addWidget(self.label_selection_length)
         self.layout.addItem(QSpacerItem(20,20))
 
         self.label_server = QtWidgets.QLabel(self)
         self.label_server.setText("ELAN: ")
+        self.label_server.setStyleSheet("QLabel{background: transparent;}")
         self.lbl_connection_status = QtWidgets.QLabel(self)
+        self.lbl_connection_status.setStyleSheet("QLabel{background: transparent;}")
         self.layout.addWidget(self.label_server)
         self.layout.addWidget(self.lbl_connection_status)
         self.layout.addItem(QSpacerItem(20, 20))
 
         self.label_corpus = QtWidgets.QLabel(self)
         self.label_corpus.setText("Corpus: ")
+        self.label_corpus.setStyleSheet("QLabel{background: transparent;}")
         self.lbl_corpus_status = QtWidgets.QLabel(self)
+        self.lbl_corpus_status.setStyleSheet("QLabel{background: transparent;}")
         self.layout.addWidget(self.label_corpus)
         self.layout.addWidget(self.lbl_corpus_status)
         self.layout.addItem(QSpacerItem(20, 20))
@@ -53,17 +60,17 @@ class StatusBar(QtWidgets.QWidget):
     def check_server_info(self):
         if self.server.is_connected == True:
             self.lbl_connection_status.setText("Online")
-            self.lbl_connection_status.setStyleSheet("QLabel {color : green; }")
+            self.lbl_connection_status.setStyleSheet("QLabel {color : green; background: transparent;}")
         else:
             self.lbl_connection_status.setText("Offline")
-            self.lbl_connection_status.setStyleSheet("QLabel {color : red; }")
+            self.lbl_connection_status.setStyleSheet("QLabel {color : red; background: transparent;}")
 
         if self.main_window.corpus_client.is_connected == True:
             self.lbl_corpus_status.setText("Online")
-            self.lbl_corpus_status.setStyleSheet("QLabel {color : green; }")
+            self.lbl_corpus_status.setStyleSheet("QLabel {color : green; background: transparent;}")
         else:
             self.lbl_corpus_status.setText("Offline")
-            self.lbl_corpus_status.setStyleSheet("QLabel {color : red; }")
+            self.lbl_corpus_status.setStyleSheet("QLabel {color : red; background: transparent;}")
 
     def set_selection(self, selection):
         self.label_selection_length.setText(str(len(selection)) + " Items")
@@ -77,6 +84,7 @@ class OutputLine(QtWidgets.QWidget):
         self.main_window = main_window
 
         self.text_line = QtWidgets.QLabel(self)
+        self.text_line.setStyleSheet("QLabel{background: transparent;}")
         self.layout.addWidget(self.text_line)
         self.message_log = []
 
@@ -131,18 +139,22 @@ class StatusVideoSource(QtWidgets.QWidget):
         super(StatusVideoSource, self).__init__(main_window)
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
-        self.layout.addWidget(QtWidgets.QLabel("Video Source: "))
+        lbl = QtWidgets.QLabel("Video Source: ")
+        lbl.setStyleSheet("QLabel{background: transparent;}")
+        self.layout.addWidget(lbl)
         self.lbl_source = QtWidgets.QLabel("VLC")
         self.lbl_source.setFixedWidth(100)
+        self.lbl_source.setStyleSheet("QLabel{background: transparent;}")
         self.layout.addWidget(self.lbl_source)
+        self.setStyleSheet("QWiget{background: transparent;}")
 
     def on_source_changed(self, source):
         if source == "VLC":
             self.lbl_source.setText("VLC")
-            self.lbl_source.setStyleSheet("QLabel{color:Orange;}")
+            self.lbl_source.setStyleSheet("QLabel{color:Orange; background: transparent;}")
         else:
             self.lbl_source.setText("OpenCV")
-            self.lbl_source.setStyleSheet("QLabel{color:Green;}")
+            self.lbl_source.setStyleSheet("QLabel{color:Green; background: transparent;}")
 
 class StatusProgressBar(QtWidgets.QWidget):
     def __init__(self,main_window):
@@ -151,6 +163,7 @@ class StatusProgressBar(QtWidgets.QWidget):
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
         self.progress_bar = QtWidgets.QProgressBar(self)
+        self.progress_bar.setStyleSheet("QProgressBar{background: transparent;}")
         self.layout.addWidget(self.progress_bar)
 
         self.hide()

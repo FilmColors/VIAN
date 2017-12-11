@@ -70,6 +70,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_follow_time.triggered.connect(self.on_follow_time)
 
         self.inner.resize(400, self.height())
+
+
+
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
     def on_static(self):
@@ -91,9 +94,33 @@ class ScreenshotsManagerDockWidget(EDockWidget):
     def on_follow_time(self):
         self.screenshot_manager.follow_time = self.a_follow_time.isChecked()
 
+    def create_bottom_bar(self):
+        bar = QStatusBar(self)
+        l = QHBoxLayout(bar)
+
+        self.slider_n_per_row = QSlider(Qt.Horizontal, self)
+        self.slider_n_per_row.setRange(0, 20)
+        self.slider_n_per_row.setValue(10)
+        self.slider_n_per_row.setStyleSheet("QSlider{padding: 2px; margin: 2px; background: transparent}")
+
+
+
+        self.slider_n_per_row.valueChanged.connect(self.on_n_per_row_changed)
+        lbl = QLabel("N-Columns:")
+        lbl.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
+        bar.addPermanentWidget(lbl)
+        bar.addPermanentWidget(self.slider_n_per_row)
+        self.inner.setStatusBar(bar)
+
     def set_manager(self, screenshot_manager):
         self.setWidget(screenshot_manager)
         self.screenshot_manager = screenshot_manager
+        self.create_bottom_bar()
+
+    def on_n_per_row_changed(self, value):
+        self.screenshot_manager.n_per_row = value
+        self.screenshot_manager.arrange_images()
+        self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
 
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
@@ -221,7 +248,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.scene.addItem(item_image)
 
             self.images_plain.append(item_image)
-            current_sm_object.segm_images.append(item_image)
+            if current_sm_object is not None:
+                current_sm_object.segm_images.append(item_image)
 
         if current_sm_object is not None:
             self.images_segmentation.append(current_sm_object)
@@ -260,7 +288,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
             viewport_width = viewport_size.x()
             image_scale = round(img_width / (viewport_size.x()), 4)
-            self.n_per_row = np.clip(int(np.floor(viewport_width / (img_width + x_offset))), 1, None)
+            self.n_per_row = np.clip(int(np.floor((viewport_width + 0.5 * img_width) / (img_width + x_offset))), 1, None)
 
         for segm in self.images_segmentation:
             self.add_line(y)
@@ -284,13 +312,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             y += (2 * img_height)
 
 
-        self.scene.setSceneRect(self.sceneRect().x(), self.sceneRect().y(), self.n_per_row * (img_width + x_offset), y)
+        self.scene.setSceneRect(self.sceneRect().x(), self.sceneRect().y(), self.n_per_row * (img_width + x_offset) - 0.5 * img_width, y)
 
         # Drawing the New Selection Frames
         self.draw_selection_frames()
 
         self.img_height = img_height
         self.img_width = img_width
+
+        # self.frame_segment(self.current_segment_index, center=False)
 
     def add_line(self, y):
         p1 = QtCore.QPointF(0, y)
@@ -355,6 +385,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def frame_segment(self, segment_index, center = True):
         self.current_segment_index = segment_index
+        self.arrange_images()
 
         if self.follow_time:
             x = self.scene.sceneRect().width()
@@ -469,7 +500,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
             self.curr_scale = round(self.img_width / (viewport_size.x()), 4)
 
-            if event.angleDelta().y() > 0.0 and self.curr_scale < 100:
+            if event.angleDelta().y() > 0.0 and self.curr_scale < 10:
                 self.scale(h_factor, h_factor)
                 self.curr_scale *= h_factor
 
@@ -494,6 +525,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.ctrl_is_pressed = True
         elif event.key() == QtCore.Qt.Key_Shift:
             self.shift_is_pressed = True
+        else:
+            event.ignore()
 
     def keyReleaseEvent(self, event):
         if event.key() == QtCore.Qt.Key_Control:
@@ -501,6 +534,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.ctrl_is_pressed = False
         elif event.key() == QtCore.Qt.Key_Shift:
             self.shift_is_pressed = False
+        else:
+            event.ignore()
 
     def mouseReleaseEvent(self, QMouseEvent):
         selected = []

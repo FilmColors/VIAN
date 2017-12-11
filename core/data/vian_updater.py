@@ -131,5 +131,5 @@ class VianUpdaterJob(IConcurrentJob):
         return [True]
 
     def modify_project(self, project, result, sign_progress = None):
-        QMessageBox.information(project.main_window, "Update Finished", "Update Finished\n\n VIAN will restart now.")
+        QMessageBox.information(project.main_window, "Update Finished", "Update Finished\n\n VIAN will quit now.\nPlease restart the Application after it has closed.")
         QApplication.quit()

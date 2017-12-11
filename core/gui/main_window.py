@@ -47,7 +47,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.2.5"
+__version__ = "0.2.8"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Developement, (BETA)"
@@ -254,7 +254,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionScreenshot.triggered.connect(self.on_screenshot)
         self.actionAdd_Key.triggered.connect(self.on_key_annotation)
         self.actionAdd_Segment.triggered.connect(self.on_new_segment)
-
         self.actionAbout.triggered.connect(self.on_about)
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
@@ -303,9 +302,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.clock_synchronize_step = 5
         self.last_segment_index = 0
 
-
         self.current_perspective = Perspective.Annotation.name
-
 
         self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.QueuedConnection)
         self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
