@@ -194,6 +194,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             # If this Screenshot belongs to a new Segment, append the last SMObject to the list
             if s.scene_id != current_segment_id:
+
                 if current_sm_object is not None:
                     self.images_segmentation.append(current_sm_object)
 
@@ -222,7 +223,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.images_plain.append(item_image)
             current_sm_object.segm_images.append(item_image)
 
-        self.images_segmentation.append(current_sm_object)
+        if current_sm_object is not None:
+            self.images_segmentation.append(current_sm_object)
 
         self.clear_selection_frames()
         self.arrange_images()
@@ -366,8 +368,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             index = -1
             for i, s in enumerate(self.images_segmentation):
-                if s.segm_id == segment_index + 1:
-                    index = i
+                try:
+                    if s.segm_id == segment_index + 1:
+                        index = i
+                except:
+                    return
 
             if index == -1:
                 return

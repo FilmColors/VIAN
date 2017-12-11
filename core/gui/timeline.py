@@ -267,7 +267,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # This makes OSX go crazy
         # self.update_time_bar()
 
-
     def update_time_bar(self):
         if self.time_bar is None:
             self.time_bar = TimebarDrawing(self.frame_Bars, self)
@@ -328,8 +327,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.time_bar.raise_()
 
-
-
     def on_loaded(self, project):
         self.clear()
         self.time_bar.close()
@@ -362,6 +359,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
         # self.update_time_bar()
+        self.on_selected(None, project.selected)
         self.update_ui()
 
     def on_selected(self, sender, selected):
@@ -832,6 +830,9 @@ class TimebarSlice(QtWidgets.QWidget):
                     x = np.clip(self.curr_size.width() + target.x(),self.curr_pos.x() - self.offset.x() + 5,None)
                     self.resize(x, self.height())
                     self.update()
+
+                    time = (self.pos().x() + self.width()) * self.timeline.scale
+                    self.timeline.main_window.player.set_media_time(time)
                     return
 
                 if self.mode == "left":
@@ -840,6 +841,9 @@ class TimebarSlice(QtWidgets.QWidget):
                     self.move(x, 0)
                     self.resize(w, self.height())
                     self.update()
+
+                    time = (self.pos().x()) * self.timeline.scale
+                    self.timeline.main_window.player.set_media_time(time)
                     return
 
                 if self.mode == "center":
@@ -868,6 +872,7 @@ class TimebarSlice(QtWidgets.QWidget):
                     return
                 else:
                     self.setCursor(QtGui.QCursor(Qt.ArrowCursor))
+
 
     def update(self, *__args):
         super(TimebarSlice, self).update(*__args)
@@ -989,6 +994,7 @@ class TimelineScrubber(QtWidgets.QWidget):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.is_hovered = False
         self.was_playing = False
+        self.offset = 0
 
     def enterEvent(self, QEvent):
         self.is_hovered = True
@@ -1262,7 +1268,7 @@ class TimebarSelector(QtWidgets.QWidget):
         super(TimebarSelector, self).__init__(parent)
         self.timeline = timeline
         self.background_color = QtGui.QColor(50, 80, 100, 150)
-        self.start = self.mapToParent(pos).x() * timeline.scale
+        self.start = self.mapTo(self.timeline.frame_Bars, pos).x() * timeline.scale
         self.end = self.start
 
         self.rescale()
@@ -1270,6 +1276,7 @@ class TimebarSelector(QtWidgets.QWidget):
 
     def set_end(self, pos):
         self.end = self.mapToParent(pos).x() * self.timeline.scale
+        print(self.start, self.end)
         self.rescale()
 
     def rescale(self):
