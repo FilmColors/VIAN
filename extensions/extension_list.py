@@ -32,17 +32,20 @@ class ExtensionList:
         modules = []
 
         for f in files:
-            my_module = importlib.import_module(f)
-            modules.append(my_module)
+            try:
+                my_module = importlib.import_module(f)
+                modules.append(my_module)
 
-            for name, obj in inspect.getmembers(sys.modules[my_module.__name__]):
-                if inspect.isclass(obj) and issubclass(obj, IAnalysisJob):
-                    if obj is not IAnalysisJob and obj is not ExtensionList:
-                        self.analyses.append(obj(0))
+                for name, obj in inspect.getmembers(sys.modules[my_module.__name__]):
+                    if inspect.isclass(obj) and issubclass(obj, IAnalysisJob):
+                        if obj is not IAnalysisJob and obj is not ExtensionList:
+                            self.analyses.append(obj(0))
 
-                if inspect.isclass(obj) and issubclass(obj, GAPlugin):
-                    if obj is not GAPlugin and obj is not ExtensionList:
-                        self.plugins.append(obj(self.main_window))
+                    if inspect.isclass(obj) and issubclass(obj, GAPlugin):
+                        if obj is not GAPlugin and obj is not ExtensionList:
+                            self.plugins.append(obj(self.main_window))
+            except:
+                continue
 
 
         print("Loaded Analyses:", self.analyses)

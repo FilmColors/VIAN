@@ -7,22 +7,30 @@ University of Zurich
 import os
 import glob
 
+class MovieFetcher():
+    def __init__(self, root_dir="\\\\130.60.131.134\\fiwi_datenbank\\SCR\\"):
+        self.root_dir = root_dir
+
+    def get_all_movie_ids(self):
+        files = glob.glob(self.root_dir+ "/SCR/*")
+        print (files)
+
+
 
 class SegmentationFetcher():
 
     def __init__(self, root_dir = "\\\\130.60.131.134\\fiwi_datenbank\\SCR\\"):
         self.root_dir = root_dir
 
-    def get_segmentation_by_id(self, filemaker_id, path = None):
+    def get_segmentation_by_id(self, filemaker_id):
         """
         Loads the segmentation exported by ELAN.
         :param filemaker_id: filemaker_id as list of integers i.e [931,1,1]
         :return: a list of segments where: [SegmentID, Segment-Start, Segment-End], start and end in [ms]
         """
 
-        if path is None:
-            path  =  self.root_dir + "SEGM/" + str(filemaker_id[0]) + "_" + str(filemaker_id[1]) + "_" + str(filemaker_id[2]) + "_SEGM.txt"
 
+        path  =  self.root_dir + "SEGM/" + str(filemaker_id[0]) + "_" + str(filemaker_id[1]) + "_" + str(filemaker_id[2]) + "_SEGM.txt"
         if not os.path.isfile(path):
             raise IOError("File not found: ", path)
 
@@ -30,6 +38,7 @@ class SegmentationFetcher():
             segments = []
             with open(path, mode="rb") as f:
                 for l in f:
+                    l = l.decode()
                     segm_source = l.replace("\n", "")
                     segm_source = segm_source.split("\t")
                     if segm_source[0] == "Sequence_No":
@@ -39,8 +48,9 @@ class SegmentationFetcher():
 
             return segments
         except IOError as e:
-            print(e)
+            print (e)
             return None
+
 
 class ScreenshotFetcher():
     def __init__(self, root_path):
@@ -68,14 +78,14 @@ class ScreenshotFetcher():
 
 if __name__ == '__main__':
 
-    fm_id = [931,1,1]
+
 
     fetcher = SegmentationFetcher("\\\\130.60.131.134\\fiwi_datenbank\\")
     result = fetcher.get_segmentation_by_id(fm_id)
-    print(result)
+    print (result)
 
     fetcher = ScreenshotFetcher("\\\\130.60.131.134\\fiwi_datenbank\\")
     result = fetcher.get_all_shots_of_movie(fm_id)
-    print(result)
+    print (result)
 
 

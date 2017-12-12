@@ -16,7 +16,7 @@ from core.gui.Dialogs.file_dialogs import MultiDirFileDialog
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtWidgets
-from .segmentation_fetcher import SegmentationFetcher
+from extensions.fiwi_tools.segmentation_fetcher import SegmentationFetcher
 # class FiwiParserExtension(GAPlugin):
 #     def __init__(self, main_window):
 #         super(FiwiParserExtension, self).__init__(main_window)
@@ -956,8 +956,8 @@ class FiwiFetcher():
         scr_movies = []
         segm_movies = []
         mov_movies = []
-        for m in self.movie_objs:
-            print(m.filemaker_ID)
+        # for m in self.movie_objs:
+        #     print(m.filemaker_ID)
 
         for m in scr_movies_in:
             scr_movies.append(m.replace(SCR_Folder, ""))
@@ -968,6 +968,10 @@ class FiwiFetcher():
 
         for m in mov_movies_in:
             mov_movies.append(m.replace(MOV_Folder, "").split(".")[0].replace("_MOV", ""))
+
+        for m in scr_movies:
+            if m not in mov_movies:
+                print(m)
 
         # Missing in Segmentations
         print("####Missing Segmentations in /SEGM/####")
@@ -980,9 +984,9 @@ class FiwiFetcher():
         for m in scr_movies:
             if len(self.find_movies_by_id([m])) == 0:
                 print(m)
+
         print("\n####MISSING Movies in /MOV/####")
         for i, m in enumerate(scr_movies):
-            console.write(str(i) + "/" + str(len(scr_movies)))
             if m not in mov_movies:
                 if len(self.find_movies_by_id([m])) > 0:
                     movie_object = self.find_movies_by_id([m])[0]
@@ -996,6 +1000,8 @@ class FiwiFetcher():
 
 
     # pickle.dump([shots_export, shots_database], f)
+
+
 
     def clear_database_dir(self, movie = Movie):
         root_dir = "//130.60.131.134/fiwi_datenbank/"
@@ -1218,7 +1224,7 @@ if __name__ == '__main__':
     # id_list = [[272,1,1],[3460,1,1],[3558,1,1],[3557,1,1],[3561,1,1],[3562,1,1],[3564,1,1],[3589,1,1]]
     # id_list = [[3460, 1, 1]]
     fetcher = FiwiFetcher(source_dir)
-    fetcher.fiwi_database_integrity()
+    fetcher.fiwi_database_integrity(path="\\\\130.60.131.134\\fiwi_datenbank\\")
     # fetcher.load_movie_object("results/all_movies.pickle")
     # fetcher.fetch_databse_movies()
     # fetcher.diff_list2movies(fetcher.database_movies)
