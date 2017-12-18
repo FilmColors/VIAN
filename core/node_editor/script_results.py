@@ -1,7 +1,10 @@
+import os
+
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 # from PyQt5.QtWebKitWidgets import QWebView
+from PyQt5.QtWebKitWidgets import QWebView
 from core.data.containers import *
 from core.gui.ewidgetbase import EDockWidget
 
@@ -56,13 +59,14 @@ class ResultWidget(QWidget):
 
 
 class ImageResultWidget(ResultWidget):
-    def __init__(self, parent, qpixmap):
+    def __init__(self, parent, numpy_img):
         super(ImageResultWidget, self).__init__(parent, "Image Result")
 
         self.scene = QGraphicsScene(self)
         self.view = QGraphicsView(self.scene, self)
         self.pixm = None
         try:
+            qpixmap = numpy_to_pixmap(numpy_img)
             self.pixm = self.scene.addPixmap(qpixmap)
             rect = self.pixm.sceneBoundingRect()
             self.view.fitInView(rect, Qt.KeepAspectRatio)
@@ -88,7 +92,7 @@ class WebResultWidget(ResultWidget):
     def __init__(self, parent, html):
         super(WebResultWidget, self).__init__(parent, "Image Result")
 
-        # self.view = QWebView(self)
+        self.view = QWebView(self)
         self.view.setHtml(html)
         self.setLayout(QHBoxLayout(self))
         self.layout().addWidget(self.view)

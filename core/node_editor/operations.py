@@ -477,11 +477,9 @@ class OperationShowImage(Operation):
     def perform(self, args, progress_signal, project):
         try:
             img = np.array(np.clip(args[0], 0, 255)).astype(np.uint8)
-
-            qimage, qpixmap = numpy_to_qt_image(img)
+            # qimage, qpixmap = numpy_to_qt_image(img)
             # cv2.imshow("ImShow Output", img)
-            cv2.waitKey()
-            self.result = [qpixmap]
+            self.result = [img]
 
         except Exception as e:
             self.handle_exception(e)

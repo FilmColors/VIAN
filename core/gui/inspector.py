@@ -5,7 +5,6 @@ from core.data.interfaces import IProjectChangeNotify
 from core.data.containers import *
 from core.data.computation import ms_to_string, numpy_to_qt_image
 from core.data.enums import MovieSource
-from extensions.colormetrics.hilbert_colors import HilbertHistogramVis
 from core.node_editor.node_editor import *
 from core.data.tracking import BasicTrackingJob
 
@@ -111,7 +110,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.lbl_Type.setText("Annotation Layer")
             widgets = [AttributesITimeRange(self, target_item)]
 
-        if s_type == ANALYSIS:
+        if s_type == ANALYSIS_JOB_ANALYSIS:
             self.lbl_Type.setText("Analysis")
             widgets = [AttributesAnalysis(self, target_item)]
 
@@ -294,12 +293,13 @@ class AttributesAnalysis(QWidget):
     def __init__(self, parent, descriptor):
         super(AttributesAnalysis, self).__init__(parent)
         self.descriptor = descriptor
-        self.setLayout(QGridLayout(self))
-        self.layout().addWidget(QLabel("<b>Target: " +self.descriptor.get_target_item().get_name()))
-        index = self.descriptor.procedure_id
-        self.vis = self.parent().main_window.analyzes_list[index].get_visualization(self, descriptor)
+        self.setLayout(QVBoxLayout(self))
+        # self.layout().addWidget(QLabel("<b>Target: " + self.descriptor.get_target_item().get_name()))
+        # index = self.descriptor.procedure_id
+        self.vis = descriptor.get_preview()
         self.layout().addWidget(self.vis)
         self.show()
+
 
 
 class AttributesNode(QWidget):

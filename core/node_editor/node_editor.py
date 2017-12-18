@@ -89,6 +89,9 @@ class NodeEditor(QWidget, IProjectChangeNotify):
         self.is_dragging = False
 
         self.thread_pool = QThreadPool(self)
+        self.thread_pool.setMaxThreadCount(8)
+        self.thread_pool.maxThreadCount()
+
 
         # self.add_node(Node(self, self, OperationFrameReader()))
         # n2 = self.add_node(Node(self, self, OperationNormalize()))
@@ -171,9 +174,18 @@ class NodeEditor(QWidget, IProjectChangeNotify):
 
     def on_script_execution_finished(self, success):
         if success:
+            name = self.project.current_script.get_name() + "_result"
+            script_id = self.project.current_script.unique_id
+            final_node_ids = []
+            node_results = []
             for n in self.nodes:
                 if n.operation.is_final_node and n.operation.result is not None:
                     self.result_visualizer.visualize(n.operation)
+
+                    node_results.append( n.operation.result)
+                    final_node_ids.append(n.node_object.get_id())
+
+            self.project.create_node_analysis(name, node_results, script_id, final_node_ids)
 
     @pyqtSlot(list)
     def on_modify_project(self, l):
@@ -302,6 +314,11 @@ class NodeEditor(QWidget, IProjectChangeNotify):
     def on_loaded(self, project):
         self.project = project
         self.set_current_script(project.current_script)
+
+        for n in self.nodes:
+            if n.operation.is_final_node and n.operation.result is not None:
+                self.result_visualizer.visualize(n.operation)
+
 
     def on_changed(self, project, item):
         self.clear()
@@ -508,22 +525,12 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             if self.scale >= 0.2:
                 self.scale -= 0.1
 
-        center_point = QWheelEvent.pos() * self.scale - self.relative_corner * self.scale
-        offset_new = QPoint((self.size() / 2).width(), (self.size() / 2).height()) * self.scale
-
-        # center_point += offset_new
-        # old += offset_old
+        center_point = (QWheelEvent.pos()  - self.relative_corner) * self.scale
 
         if QWheelEvent.angleDelta().y() > 0:
-            center_point += offset_new
-            old += offset_old
+            new = old_c - (center_point - old) / self.scale  # - ((center_point-old)/ self.scale
         else:
-            center_point -= offset_new
-            old -= offset_old
-
-
-
-        new = old_c - ((center_point-old)/ self.scale)
+            new = old_c - (center_point - old) / self.scale  # - ((center_point-old)/ self.scale
 
 
         self.relative_corner = QPoint(np.clip(new.x(), None, 0), np.clip(new.y(), None, 0))

@@ -311,10 +311,15 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     #endregion
 
     #region Analysis
-    def add_analysis(self, analyze):
-        analyze.set_project(self)
-        self.analysis.append(analyze)
-        self.undo_manager.to_undo((self.add_analysis, [analyze]), (self.remove_analysis, [analyze]))
+    def create_node_analysis(self, name, result, script_id, final_node_ids):
+        analysis = NodeScriptAnalysis(name, result, script_id, final_node_ids)
+        self.add_analysis(analysis)
+        return analysis
+
+    def add_analysis(self, analysis):
+        analysis.set_project(self)
+        self.analysis.append(analysis)
+        self.undo_manager.to_undo((self.add_analysis, [analysis]), (self.remove_analysis, [analysis]))
         self.dispatch_changed()
 
     def remove_analysis(self, analysis):
@@ -325,7 +330,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def get_analyzes_of_item(self, item):
         result = []
         for a in self.analysis:
-            if a.target_id == item.unique_id:
+            if isinstance(a, IAnalysisJobAnalysis) and item.unique_id in a.parameters.target_items:
                 result.append(item)
         return item
     #endregion
@@ -574,7 +579,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.add_segmentation(new)
 
         for d in my_dict['analyzes']:
-            new = Analysis().deserialize(d)
+            new = eval(d['analysis_container_class'])().deserialize(d)
             self.add_analysis(new)
 
         try:
@@ -607,6 +612,16 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         except Exception as e:
             self.main_window.print_message("Loading Node Scripts failed", "Red")
             self.main_window.print_message(e, "Red")
+
+
+        # Finalizing the Project, Hooking up the ID Connections
+        # Connecting the NodeScriptAnalysis Objects to their Final Nodes
+        for a in self.analysis:
+            if isinstance(a, NodeScriptAnalysis):
+                for i, res in enumerate(a.data):
+                    node = self.get_by_id(a.final_node_ids[i])
+                    if node is not None:
+                        node.operation.result = res
 
 
         self.sort_screenshots()
@@ -1924,7 +1939,6 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
                 value = value.tolist()
             default_values.append(value)
 
-
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
@@ -1988,7 +2002,7 @@ class ConnectionDescriptor(IProjectContainer):
 
 #endregion
 
-#region Analysis/MovieDescriptor
+#region MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
                  duration=100):
@@ -2043,72 +2057,300 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
         cap = cv2.VideoCapture(self.movie_path)
         return cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
+#endregion
 
-class Analysis(IProjectContainer, ITimeRange, IHasName, ISelectable):
-    def __init__(self, name=None, t_start=None, t_end=None, data=None, procedure_id=None, target_id=None):
+#region Analysis
+
+
+class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
+    def __init__(self, name = "", data = None):
         IProjectContainer.__init__(self)
         self.name = name
-        self.data = data
-        self.visualizations = []
-        self.procedure_id = procedure_id
-        self.target_id = target_id
         self.notes = ""
+        self.data = data
 
-    def get_target_item(self):
-        return self.project.get_by_id(self.target_id)
-
-    def add_visualization(self, visualization):
-        self.visualizations.append(visualization)
-
-    def get_type(self):
-        return ANALYSIS
-
-    def get_start(self):
-        return self.time_range_item.get_start()
-
-    def get_end(self):
-        return self.time_range_item.get_start()
-
-    def set_name(self, name):
-        self.project.undo_manager.to_undo((self.set_name, [name]),
-                                          (self.set_name, [self.name]))
-        self.name = name
-        self.dispatch_on_changed(item=self)
-
-    def get_name(self):
-        return self.name
-
+    def get_preview(self):
+        pass
     def serialize(self):
         data_json = []
         for d in self.data:
             data_json.append(np.array(d).tolist())
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
-            data=data_json,
-            procedure_id=self.procedure_id,
-            target_id=self.target_id,
+            notes=self.notes
+        )
+
+        return data
+
+
+class NodeScriptAnalysis(AnalysisContainer):
+    def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
+        super(NodeScriptAnalysis, self).__init__(name, results)
+        self.script_id = script_id
+        self.final_node_ids = final_nodes_ids
+
+    def get_type(self):
+        return ANALYSIS_NODE_SCRIPT
+
+    def serialize(self):
+        data_json = []
+
+        #Loop over each final node of the Script
+        for i, n in enumerate(self.data):
+            node_id = self.final_node_ids[i]
+            node_result = []
+            result_dtypes = []
+
+            # Loop over each result in the final node
+            for d in n:
+                if isinstance(d, np.ndarray):
+                    node_result.append(d.tolist())
+                    result_dtypes.append(str(d.dtype))
+                elif isinstance(d, list):
+                    node_result.append(d)
+                    result_dtypes.append("list")
+                else:
+                    node_result.append(np.array(d).tolist())
+                    result_dtypes.append(str(np.array(d).dtype))
+            data_json.append([node_id, node_result, result_dtypes])
+
+        data = dict(
+            name=self.name,
+            analysis_container_class = self.__class__.__name__,
+            unique_id=self.unique_id,
+            script_id=self.script_id,
+            data_json=data_json,
             notes=self.notes
         )
 
         return data
 
     def deserialize(self, serialization):
-
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
-        self.target_id = serialization['target_id']
         self.notes = serialization['notes']
-        data = []
-        for d in serialization['data']:
-            data.append(np.array(d))
-        self.data = data
-        self.procedure_id = serialization['procedure_id']
+        self.script_id = serialization['script_id']
+
+        self.final_node_ids = []
+        self.data = []
+        # Loop over each final node of the Script
+        for r in serialization['data_json']:
+
+            node_id = r[0]
+            node_results = r[1]
+            result_dtypes = r[2]
+
+            node_data = []
+            self.final_node_ids.append(node_id)
+
+            # Loop over each Result of the Final Node
+            for j, res in enumerate(node_results):
+                if result_dtypes[j] == "list":
+                    node_data.append(res)
+                else:
+                    node_data.append(np.array(res, dtype=result_dtypes[j]))
+
+                self.data.append(node_data)
 
         return self
 
-    def delete(self):
-        self.project.remove_analysis(self)
+
+class IAnalysisJobAnalysis(AnalysisContainer):
+    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None):
+        super(IAnalysisJobAnalysis, self).__init__(name, results)
+        if analysis_job_class is not None:
+            self.analysis_job_class = analysis_job_class.__name__
+        else:
+            self.analysis_job_class = None
+
+        if parameters is not None:
+            self.parameters = parameters
+        else:
+            self.parameters = []
+
+    def get_preview(self):
+        return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self.data)
+
+    def get_type(self):
+        return ANALYSIS_JOB_ANALYSIS
+
+    def serialize(self):
+        data_json = []
+        data_dtypes = []
+        for d in self.data:
+            if isinstance(d, np.ndarray):
+                data_json.append(d.tolist())
+                data_dtypes.append(str(d.dtype))
+            elif isinstance(d, list):
+                data_json.append(d)
+                data_dtypes.append("list")
+            else:
+                data_json.append(np.array(d).tolist())
+                data_dtypes.append(str(np.array(d).dtype))
+
+
+        parameters = []
+        for p in self.parameters:
+            parameters.append(p.serialize())
+
+        data = dict(
+            name=self.name,
+            unique_id=self.unique_id,
+            analysis_container_class=self.__class__.__name__,
+            analysis_job_class=self.analysis_job_class,
+            parameters=parameters,
+            data_dtypes=data_dtypes,
+            data_json=data_json,
+            notes=self.notes
+        )
+
+        return data
+
+    def deserialize(self, serialization):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.analysis_job_class = serialization['analysis_job_class']
+        self.notes = serialization['notes']
+
+        result_dtypes = serialization['data_dtypes']
+
+        self.data = []
+        for i, r in enumerate(serialization['data_json']):
+            # Loop over each Result of the Final Node
+                if result_dtypes[i] == "list":
+                    self.data.append(r)
+                else:
+                    self.data.append(np.array(r, dtype=result_dtypes[i]))
+
+        for p in serialization['parameters']:
+            param = eval(p["parameter_class"])()
+            self.parameters.append(param.deserialize(p))
+
+        return self
+
+
+class AnalysisParameters():
+    def __init__(self, target_items):
+        self.target_items = []
+        self.set_targets(target_items)
+
+    def set_targets(self, project_container_list):
+        for o in project_container_list:
+            self.target_items.append(o.get_id())
+
+    def serialize(self):
+        data = dict(
+            parameter_class=self.__class__.__name__,
+            params=self.__dict__,
+        )
+
+        return data
+
+    def deserialize(self, serialization):
+        for key, val in serialization['params'].iter():
+            setattr(self, key, val)
+        return self
+
+
+# class AnalysisResult():
+#     def __init__(self, data):
+#         self.data = data
+#
+#     def get_visualization(self):
+#         pass
+#
+#     def get_preview(self):
+#         pass
+#
+#     def serialize(self):
+#         data_json = []
+#         for d in self.data:
+#             data_json.append(np.array(d).tolist())
+#
+#         data = dict(
+#             result_class=self.__class__.__name__,
+#             data_json=data_json,
+#         )
+#
+#         return data
+#
+#     def deserialize(self, serialization):
+#         for d in serialization['data']:
+#             self.data.append(np.array(d))
+#         return self
+
+
+
+
+
+# OLD CODE
+# class Analysis(IProjectContainer, ITimeRange, IHasName, ISelectable):
+#     def __init__(self, name=None, data=None, procedure_id=None, target_id=None):
+#         IProjectContainer.__init__(self)
+#         self.name = name
+#         self.data = data
+#         self.visualizations = []
+#         self.procedure_id = procedure_id
+#         self.target_id = target_id
+#         self.notes = ""
+#
+#     def get_target_item(self):
+#         return self.project.get_by_id(self.target_id)
+#
+#     def add_visualization(self, visualization):
+#         self.visualizations.append(visualization)
+#
+#     def get_type(self):
+#         return ANALYSIS
+#
+#     def get_start(self):
+#         return self.time_range_item.get_start()
+#
+#     def get_end(self):
+#         return self.time_range_item.get_start()
+#
+#     def set_name(self, name):
+#         self.project.undo_manager.to_undo((self.set_name, [name]),
+#                                           (self.set_name, [self.name]))
+#         self.name = name
+#         self.dispatch_on_changed(item=self)
+#
+#     def get_name(self):
+#         return self.name
+#
+#     def serialize(self):
+#         data_json = []
+#         for d in self.data:
+#             data_json.append(np.array(d).tolist())
+#         data = dict(
+#             name=self.name,
+#             unique_id=self.unique_id,
+#             data=data_json,
+#             procedure_id=self.procedure_id,
+#             target_id=self.target_id,
+#             notes=self.notes
+#         )
+#
+#         return data
+#
+#     def deserialize(self, serialization):
+#
+#         self.name = serialization['name']
+#         self.unique_id = serialization['unique_id']
+#         self.target_id = serialization['target_id']
+#         self.notes = serialization['notes']
+#         data = []
+#         for d in serialization['data']:
+#             data.append(np.array(d))
+#         self.data = data
+#         self.procedure_id = serialization['procedure_id']
+#
+#         return self
+#
+#     def delete(self):
+#         self.project.remove_analysis(self)
 
 #endregion
 

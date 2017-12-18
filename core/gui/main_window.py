@@ -20,7 +20,7 @@ from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
 from core.gui.Dialogs.welcome_dialog import WelcomeDialog
-from core.gui.analyses_widget import AnalysesWidget
+from core.gui.analyses_widget import AnalysisDialog
 from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
 from core.gui.history import HistoryView
@@ -40,9 +40,9 @@ from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
 from core.remote.corpus.corpus import *
 from core.remote.elan.server.server import QTServer
-from extensions.colormetrics.hilbert_colors import HilbertHistogramProc
 from extensions.extension_list import ExtensionList
 
+from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -50,7 +50,7 @@ __license__ = "GPL"
 __version__ = "0.2.9"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
-__status__ = "Developement, (BETA)"
+__status__ = "Development, (BETA)"
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -106,6 +106,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.allow_dispatch_on_change = True
 
         self.thread_pool = QThreadPool()
+        self.thread_pool.setMaxThreadCount(8)
 
         self.project_streamer = ProjectStreamer(self)
 
@@ -162,7 +163,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.create_widget_elan_status()
         self.create_widget_video_player()
-        self.create_analyses_widget()
+        # self.create_analyses_widget()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
         self.create_annotation_toolbar()
         # self.create_annotation_viewer()
@@ -259,6 +260,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
 
+        self.actionColorimetry.triggered.connect(partial(self.analysis_triggered, ColometricsAnalysis()))
+
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
@@ -314,8 +317,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.screenshot_blocked = False
 
+        self.menuAnalysis.addMenu("Extensions")
+
         self.analyzes_list =[
-            HilbertHistogramProc(0)
+            # HilbertHistogramProc(0)
         ]
 
         self.is_selecting_analyzes = False
@@ -412,13 +417,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_toolbar.raise_()
             self.annotation_toolbar.activateWindow()
 
-    def create_analyses_widget(self):
-        if self.analyses_widget is None:
-            self.analyses_widget = AnalysesWidget(self)
-            self.analyses_widget.hide()
-
-        else:
-            self.analyses_widget.activateWindow()
+    # def create_analyses_widget(self):
+    #     if self.analyses_widget is None:
+    #         self.analyses_widget = AnalysesWidget(self)
+    #         self.analyses_widget.hide()
+    #
+    #     else:
+    #         self.analyses_widget.activateWindow()
 
     def create_screenshot_manager(self):
         if self.screenshots_manager is None:
@@ -567,6 +572,9 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+    def eval_class(self, class_name):
+        return eval(class_name)
+
     def update_vian(self):
         result = self.updater.get_server_version()
         if result:
@@ -986,9 +994,36 @@ class MainWindow(QtWidgets.QMainWindow):
                 # self.set_darwin_player_visibility(True)
                 self.drawing_overlay.show()
 
-    def on_start_analysis(self, analysis, target_id, args):
-        worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished="Hilbert Histogram Calculated", target_id=target_id)
-        self.start_worker(worker, analysis.get_name())
+    def analysis_triggered(self, analysis):
+
+        targets = []
+        for sel in self.project.selected:
+            if sel.get_type() in analysis.source_types:
+                targets.append(sel)
+
+        dialog = AnalysisDialog(self, analysis, targets)
+        dialog.onAnalyse.connect(self.on_start_analysis)
+        dialog.show()
+
+
+    def on_start_analysis(self, from_dialog):
+        analysis = from_dialog['analysis']
+        targets = from_dialog['targets']
+        parameters = from_dialog['parameters']
+        fps = self.player.get_fps()
+        args = analysis.prepare(self.project, targets, parameters, fps)
+
+        if analysis.multiple_result:
+            for arg in args:
+                worker = Worker(analysis.process, self, self.analysis_result, arg,
+                                msg_finished=analysis.name+ " Finished", target_id=None)
+                self.start_worker(worker, analysis.get_name())
+        else:
+            worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished=analysis.name+ " Finished", target_id=None)
+            self.start_worker(worker, analysis.get_name())
+
+    def analysis_result(self, result):
+        self.project.add_analysis(result)
 
     def on_save_custom_perspective(self):
         setting = QSettings("UniversityOfZurich", "VIAN")
@@ -1003,9 +1038,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def start_worker(self, worker, name = "New Task"):
         self.concurrent_task_viewer.add_task(worker.task_id, name)
         self.thread_pool.start(worker)
-
-    def analysis_result(self, result):
-        self.project.add_analysis(result)
 
     def update_player_size(self):
         self.player.update()
