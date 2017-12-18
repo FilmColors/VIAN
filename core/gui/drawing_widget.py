@@ -270,9 +270,10 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
     def create_image(self, image_path):
         if self.project.current_annotation_layer is not None:
             image_path = str(image_path)
-
+            print (image_path)
             img = cv2.imread(image_path)
             if img is None:
+                self.main_window.print_message("Error occured when reading the image", "Red")
                 return
 
             image_size = (img.shape[1], img.shape[0])

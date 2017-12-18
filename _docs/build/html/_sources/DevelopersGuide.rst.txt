@@ -6,11 +6,34 @@
 =================
 Developer's Guide
 =================
-Welcome to the User's Guide of VIAN. In this documentation you'll find all information necessary to get the most out
-of VIAN. If your a developer, please refer to the Developer's Guide.
+
+Welcome to the Developer's Guide to VIAN.
+The following Sections are devoted to explain the fundamental programming interfaces for extending
+VIAN's functionality.
+
+In a nutshell there exist three different interfaces to implement your own functionality into VIAN:
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
+
+    dev_guide/analyses
+    dev_guide/nodes
+    dev_guide/plugins
+
+
+Deciding which Interface to use
+===============================
+Depending on what method you want to implement, choose on of these Interfaces.
+
+**Plug-Ins** are allow you to implement your completely own idea, the plug-in interface will give you access to the
+VIAN Project. As such, **Plug-Ins** should be used if neither of **IAnalysisJob** and **Node** will do.
+
+**IAnalysisJob** will give you the possibility to implement your own analysis procedure, which the user can call.
+Such an implementation contains an *Procedure* and a *Visualization* of the yielded result.
+
+**Node** a node is the most basic implementation, which allows you to enrich the functionality if VIAN's Node Editor.
+
+
 
 
 

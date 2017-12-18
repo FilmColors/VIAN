@@ -146,10 +146,18 @@
     <addaction name="actionRedo"/>
     <addaction name="actionDelete"/>
    </widget>
+   <widget class="QMenu" name="menuAnalysis">
+    <property name="title">
+     <string>Analysis</string>
+    </property>
+    <addaction name="actionColorimetry"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuWindows"/>
    <addaction name="menuAnalyze"/>
+   <addaction name="menuAnalysis"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -460,6 +468,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionColorimetry">
+   <property name="text">
+    <string>Colorimetry</string>
    </property>
   </action>
  </widget>

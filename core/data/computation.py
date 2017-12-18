@@ -217,7 +217,7 @@ def parse_file_path(path):
     if sys.platform =="darwin":
         return str(path.replace("file://", ""))
     else:
-        return str(path.replace("file://", ""))
+        return str(path.replace("file:///", ""))
 
 def create_icon(path):
     icon = QIcon(path)

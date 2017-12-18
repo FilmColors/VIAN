@@ -1,7 +1,8 @@
 from PyQt5.Qt import QApplication
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QScreen, QColor, QPainter, QPen
+from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent
 from PyQt5.QtWidgets import *
+from PyQt5.QtWebKitWidgets import QWebView
 from PyQt5 import uic
 import os
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -93,6 +94,7 @@ class EDialogWidget(QDialog):
         if self.help_path is not None:
             webbrowser.open("file://" + os.path.abspath(self.help_path))
 
+
 class EVisualizationDialog(EDialogWidget):
     def __init__(self, parent, visualization_widget):
         super(EVisualizationDialog, self).__init__(parent)
@@ -170,6 +172,21 @@ class MatplotlibFigure(FigureCanvas):
     def plot(self):
         print("plot not  implemented in", self)
 
+
+class EHtmlDisplay(QWidget):
+    def __init__(self, parent, html, plot_width = 600):
+        super(EHtmlDisplay, self).__init__(parent)
+
+        self.view = QWebView(self)
+        self.plot_width = plot_width
+        self.view.setHtml(html)
+        self.setLayout(QHBoxLayout(self))
+        self.layout().addWidget(self.view)
+        self.view.setZoomFactor(1.0)
+
+    def resizeEvent(self, a0: QResizeEvent):
+        super(EHtmlDisplay, self).resizeEvent(a0)
+        self.view.setZoomFactor(self.width()/self.plot_width - 0.1)
 
 class EToolBar(QToolBar):
     def __init__(self, main_window, title = "Toolbar Title"):

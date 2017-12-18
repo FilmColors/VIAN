@@ -46,22 +46,26 @@ def hilbert_traversal_3d(data, mapped, mode, s, rgb_multiplier = 1, x=0, y=0, z=
     :return: 
     """
     if s == 1:
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
         if mode == HilbertMode.Values_Non_Zero:
-            if data[x, y, z] != 0:
+            if data[int(x), int(y), int(z)] != 0:
                 # Adding the Movie to the Aligned Array
-                mapped.append((data[x, y, z] - 1, x, y, z))
+                mapped.append((data[int(x), int(y), int(z)] - 1, x, y, z))
 
         if mode == HilbertMode.Values_All:
-            mapped.append(data[x, y, z])
+            mapped.append(data[int(x), int(y), int(z)])
 
         if mode == HilbertMode.Indices_All:
-            mapped.append([x * rgb_multiplier + (rgb_multiplier / 2), y * rgb_multiplier + (rgb_multiplier / 2),
-                           z * rgb_multiplier + (rgb_multiplier / 2)])
+            mapped.append([int(x * rgb_multiplier + (rgb_multiplier / 2)), int(y * rgb_multiplier + (rgb_multiplier / 2)),
+                                                                               int(z * rgb_multiplier + (rgb_multiplier / 2))])
 
         if mode == HilbertMode.Indices_Non_Zero:
-            if data[x, y, z] != 0:
-                mapped.append([x * rgb_multiplier + (rgb_multiplier / 2), y * rgb_multiplier + (rgb_multiplier / 2),
-                               z * rgb_multiplier + (rgb_multiplier / 2)])
+            if data[int(x), int(y), int(z)] != 0:
+                mapped.append([int(x * rgb_multiplier + (rgb_multiplier / 2)), int(y * rgb_multiplier + (rgb_multiplier / 2)),
+                               int(z * rgb_multiplier + (rgb_multiplier / 2))])
 
     else:
         s /= 2
@@ -74,6 +78,7 @@ def hilbert_traversal_3d(data, mapped, mode, s, rgb_multiplier = 1, x=0, y=0, z=
         if dx3 < 0: x -= s * dx3
         if dy3 < 0: y -= s * dy3
         if dz3 < 0: z -= s * dz3
+
 
         hilbert_traversal_3d(data, mapped, mode, s, rgb_multiplier,
                              x, y, z,
@@ -139,7 +144,6 @@ def create_hilbert_color_map(s, rgb_multiplier, colorspace):
 
 
 def create_hilbert_color_pattern(s = 16, multiplier = 16, color_space = cv2.COLOR_Lab2BGR, filename = "color_pattern", write_to_disc=False):
-    print("Creating Hilbert Color Gradients")
     grad_hilbert = []
     # OLD Code
     # hilbert_walk_index(np.ones(shape=(s, s, s)), grad_hilbert, s, multiplier)#, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
@@ -159,7 +163,7 @@ def create_hilbert_color_pattern(s = 16, multiplier = 16, color_space = cv2.COLO
         grad_in_bgr = cv2.cvtColor(grad_img, color_space)
         cv2.imwrite("documents/color_gradient_2" + filename + str(s) + ".png", grad_in_bgr)
 
-    return grad_bokeh, grad_in_bgr
+    return grad_bokeh, grad_in_bgr[0]
 
 
 def create_hilbert_3d_to_2d_coordinates(n):

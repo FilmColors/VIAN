@@ -137,32 +137,44 @@ class ISelectable():
 
 
 class IAnalysisJob():
-    source_types = []
-    def get_name(self):
-        print("get_name not implemented by", self)
+    def __init__(self, name, source_types, help_path = "", author="No Author", version = "0.0.1", multiple_result = False):
+        self.name = name
+        self.source_types = source_types
+        self.help_path = help_path
+        self.author = author
+        self.version = version
+        self.multiple_result = multiple_result
 
-    def prepare(self, movie_path, targets):
+    def get_name(self):
+        return self.name
+
+    def prepare(self, project, targets, parameters, fps):
         print("prepare not implemented by", self)
         return None
 
-    def process(self, target_id, args, sign_progress):
+    def process(self, args, sign_progress):
         print("get_name not implemented by", self)
 
-    def get_preferences(self):
-        widget = QWidget()
-        widget.setLayout(QHBoxLayout(widget))
-        widget.layout().addWidget(QPushButton(widget))
-        widget.layout().addWidget(QPushButton(widget))
-        widget.layout().addWidget(QPushButton(widget))
+    def get_parameter_widget(self):
+        return ParameterWidget()
 
-        return widget
-
-    def get_visualization(self, parent, analysis):
+    def get_visualization(self, analysis):
         print("get_name not implemented by", self)
+
+    def get_preview(self, analysis):
+        pass
 
     def get_source_types(self):
         return self.source_types
 
+class ParameterWidget(QWidget):
+    def __init__(self):
+        super(ParameterWidget, self).__init__(None)
+
+
+
+    def get_parameters(self):
+        pass
 
 class IConcurrentJob():
     def __init__(self, args, show_modify_progress= False):
@@ -183,3 +195,5 @@ class IConcurrentJob():
 
     def abort(self):
         self.aborted = True
+
+

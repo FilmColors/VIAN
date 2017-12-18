@@ -28,12 +28,13 @@ def calculate_histogram(image_stack, n_bins = 16, range_min = 0, range_max = 255
     if len(image_stack.shape) > 2:
         # Reshaping to a a linear array of colors
         if not len(image_stack.shape) == 4:
-            data = np.resize(image_stack, (image_stack.shape[0] * image_stack.shape[1], 3))
+            data = np.resize(image_stack, (image_stack.shape[0] * image_stack.shape[1], 3)).astype(np.uint8)
         else:
-            data = np.resize(image_stack, (image_stack.shape[0] * image_stack.shape[1] * image_stack.shape[2], 3))
+            data = np.resize(image_stack, (image_stack.shape[0] * image_stack.shape[1] * image_stack.shape[2], 3)).astype(np.uint8)
     else:
         data = image_stack
     # Calculating the Histogram
+
     hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
                         [n_bins, n_bins, n_bins],
                         [range_min, range_max, range_min, range_max,

@@ -5,7 +5,6 @@ from core.data.interfaces import IProjectChangeNotify
 from core.data.containers import *
 from core.data.computation import ms_to_string, numpy_to_qt_image
 from core.data.enums import MovieSource
-from extensions.colormetrics.hilbert_colors import HilbertHistogramVis
 
 class ConcurrentTaskDock(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
