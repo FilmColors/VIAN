@@ -36,7 +36,7 @@ class AnnotationToolbar(EToolBar):
         self.action_ellipse.triggered.connect(self.on_ellipse)
         self.action_text.triggered.connect(self.on_text)
         self.action_image.triggered.connect(self.on_image)
-        self.action_test.triggered.connect(self.on_arrow)
+        self.action_test.triggered.connect(self.main_window.test_function)
         self.action_freehand.triggered.connect(self.on_freehand)
 
         self.spinBox_LineThickness = QtWidgets.QSpinBox(self)

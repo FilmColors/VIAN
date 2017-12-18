@@ -2,7 +2,7 @@ import glob
 import os
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from core.data.containers import ElanExtensionProject
 from core.data.enums import MovieSource
@@ -29,6 +29,7 @@ class NewProjectDialog(EDialogWidget):
             for i in range(len(mp) -1):
                 path += mp[i] + "/"
             self.project_dir = path
+
         self.project = ElanExtensionProject(parent, path = "", name="")
 
         self.path_set_from_dialog = False
@@ -80,29 +81,38 @@ class NewProjectDialog(EDialogWidget):
             self.comboBox_Template.addItem(t.replace("\\" , "/").split("/").pop().replace(".viant", ""))
 
     def set_project_path(self):
-        self.project.path = self.project_dir
+        #OLD System
+        # self.project.path = self.project_dir
+
+
+        self.project.folder = self.project_dir
+        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
+
         if self.auto_naming:
             self.project_name = self.lineEdit_ID.text() + "_" + \
                                 self.lineEdit_Name.text().replace(" ", "_") + "_" + \
                                 self.lineEdit_Year.text() + "_" + \
                                 self.comboBox_Source.currentText()
             self.lineEdit_ProjectName.setText(self.project_name)
-            self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
+            # self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
+
+            self.lineEdit_ProjectPath.setText(self.project.folder)
         else:
             self.project.name = self.project_name
-            self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
+            # self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
+            self.lineEdit_ProjectPath.setText(self.project.folder)
 
-    def parse_project_path(self, path):
-        path = path.split('/')
-        directory = ""
-        if path[len(path) - 1] == self.settings.PROJECT_FILE_EXTENSION:
-            path = path[0:len(path) - 2]
-
-        project_name = path[len(path) - 1]
-        for i in range(len(path) - 1):
-            directory += path[i] + "/"
-
-        return directory, project_name
+    # def parse_project_path(self, path):
+    #     path = path.split('/')
+    #     directory = ""
+    #     if path[len(path) - 1] == self.settings.PROJECT_FILE_EXTENSION:
+    #         path = path[0:len(path) - 2]
+    #
+    #     project_name = path[len(path) - 1]
+    #     for i in range(len(path) - 1):
+    #         directory += path[i] + "/"
+    #
+    #     return directory, project_name
 
     def on_proj_name_changed(self):
         self.project_name = self.lineEdit_ProjectName.text()
@@ -110,18 +120,32 @@ class NewProjectDialog(EDialogWidget):
             self.set_project_path()
 
     def on_proj_path_changed(self):
+        # path = self.lineEdit_ProjectPath.text()
+        # p_dir, p_name = self.parse_project_path(path)
+        # self.project_dir = p_dir
+        # self.project_name = p_name
+
         path = self.lineEdit_ProjectPath.text()
-        p_dir, p_name = self.parse_project_path(path)
-        self.project_dir = p_dir
-        self.project_name = p_name
+        if not os.path.isdir(path):
+            QMessageBox.warning(self, "Directory not Found", "The inserted path doesn't seem to be a valid directory. "
+                                      "\n\n Please insert a valid Directory path, or use the \"Browse\" Button.")
+            self.project_dir = ""
+            self.lineEdit_ProjectPath.setText("None")
+        else:
+            self.project_dir = path
+
+
 
     def on_browse_project_path(self):
-        path = QFileDialog.getSaveFileName(directory=self.project_dir)[0]
-        p_dir, p_name = self.parse_project_path(path)
-        self.project_dir = p_dir
-        self.project_name = p_name
+        # path = QFileDialog.getSaveFileName(directory=self.project_dir)[0]
+        # p_dir, p_name = self.parse_project_path(path)
+        # self.project_dir = p_dir
+        # self.project_name = p_name
 
-        self.lineEdit_ProjectPath.setText(p_dir + p_name)
+        # New System
+        path = QFileDialog.getExistingDirectory(directory=self.project_dir)
+        self.project_dir = path
+        self.lineEdit_ProjectPath.setText(self.project.folder)
 
     def on_browse_movie_path(self):
         path = QFileDialog.getOpenFileName()[0]
@@ -155,15 +179,20 @@ class NewProjectDialog(EDialogWidget):
         self.close()
 
     def on_ok(self):
-        try:
-            if not os.path.isdir(self.project.path):
-                os.mkdir(self.project.path)
-        except OSError as e:
-            print(e)
-            print("Forced silencing as Hotfix, if this statement is necessary is currently unclear anyway")
-            #TODO
+        # try:
+        #     if not os.path.isdir(self.project.path):
+        #         os.mkdir(self.project.path)
+        # except OSError as e:
+        #     print(e)
+        #     print("Forced silencing as Hotfix, if this statement is necessary is currently unclear anyway")
+        #     #TODO
 
         template = self.templates[self.comboBox_Template.currentIndex()]
-        self.project.path = self.project_dir + self.project_name
+        os.mkdir(self.project_dir + "/" + self.project_name)
+        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
+        self.project.folder = self.project_dir + "/" + self.project_name + "/"
+
+
+        print(self.project.folder, "\n", self.project.path)
         self.main_window.new_project(self.project, template)
         self.close()

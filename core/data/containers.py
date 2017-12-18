@@ -33,8 +33,9 @@ from PyQt5.QtCore import QPoint, QRect, QSize
 # NODE_SCRIPT = 9
 
 
+
 class ElanExtensionProject(IHasName, IHasVocabulary):
-    def __init__(self, main_window, path = "", name = ""):
+    def __init__(self, main_window, path = "", name = "", folder=""):
         IHasVocabulary.__init__(self)
         self.undo_manager = UndoRedoManager()
         self.main_window = main_window
@@ -43,6 +44,12 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
         self.path = path
         self.name = name
+        self.folder = folder
+        self.data_dir = ""
+        self.results_dir = ""
+        self.shots_dir = ""
+        self.export_dir = ""
+
         self.id_list = []
 
         self.annotation_layers = []
@@ -120,6 +127,22 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
     def get_type(self):
         return PROJECT
+
+    def create_file_structure(self):
+        root = self.folder
+
+        self.data_dir = root + "/data"
+        self.results_dir = root + "/results"
+        self.shots_dir = root + "/shots"
+        self.export_dir = root + "/export"
+
+        os.mkdir(root + "/data")
+        os.mkdir(root + "/shots")
+        os.mkdir(root + "/results")
+        os.mkdir(root + "/export")
+
+        print(self.path)
+
 
     #region Segmentation
     def create_segmentation(self, name = None):

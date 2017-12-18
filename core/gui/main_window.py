@@ -349,7 +349,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        self.scale_screenshots(0.1)
+        print(self.project.create_file_structure())
 
     #region WidgetCreation
 
@@ -602,23 +602,33 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_new_project(self, movie_path = ""):
         # self.set_darwin_player_visibility(False)
         self.update()
-        if self.project is not None:
-            self.project.cleanup()
+
+        answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+        if answer == QMessageBox.Yes:
+            self.on_save_project()
 
         dialog = NewProjectDialog(self, self.settings, movie_path)
         dialog.show()
 
     def new_project(self, project, template_path = None):
+        if self.project is not None:
+            self.close_project()
+
         self.project = project
         if template_path is not None:
             self.project.apply_template(template_path)
 
+        self.project.create_file_structure()
         self.player.open_movie(project.movie_descriptor.movie_path)
         self.master_file.add_project(project)
         self.project.store_project(self.settings, self.master_file)
         self.dispatch_on_loaded()
 
     def on_load_project(self):
+        answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+        if answer == QMessageBox.Yes:
+            self.on_save_project()
+
         self.set_overlay_visibility(False)
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
         self.set_overlay_visibility(True)
@@ -627,10 +637,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.load_project(path)
 
     def close_project(self):
+        self.player.stop()
         self.abortAllConcurrentThreads.emit()
         self.project.cleanup()
         self.project = ElanExtensionProject(self, name="No Project")
-        self.player.stop()
+
         #self.project_streamer.release_project()
 
 
@@ -864,7 +875,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = ExportSegmentationDialog(self)
         dialog.show()
 
-
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)
 
@@ -1005,7 +1015,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.onAnalyse.connect(self.on_start_analysis)
         dialog.show()
 
-
     def on_start_analysis(self, from_dialog):
         analysis = from_dialog['analysis']
         targets = from_dialog['targets']
@@ -1110,6 +1119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("**********************")
         print("Test function called")
         print(a)
+        print (self.project.create_file_structure())
         print("**********************")
     #endregion
 
