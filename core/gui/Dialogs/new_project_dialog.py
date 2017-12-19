@@ -2,7 +2,7 @@ import glob
 import os
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QCheckBox, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy
 
 from core.data.containers import ElanExtensionProject
 from core.data.enums import MovieSource
@@ -10,13 +10,13 @@ from core.gui.ewidgetbase import EDialogWidget
 
 
 class NewProjectDialog(EDialogWidget):
-    def __init__(self, parent, settings, movie_path):
+    def __init__(self, parent, settings, movie_path, vocabularies):
         super(NewProjectDialog, self).__init__(parent, parent, "_docs/build/html/step_by_step/project_management/create_project.html")
         path = os.path.abspath("qt_ui/DialogNewProject.ui")
         uic.loadUi(path, self)
         self.settings = settings
         self.templates = []
-
+        self.vocabularies = vocabularies
         self.project_name = "project_name"
         self.auto_naming = False
 
@@ -36,6 +36,26 @@ class NewProjectDialog(EDialogWidget):
 
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
+
+        n_per_col = int(len(self.vocabularies) / 3)
+        self.voc_cbs = []
+        vbox = QVBoxLayout(self.frame_Vocabularies)
+        counter = 0
+        for voc in self.vocabularies:
+            cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.frame_Vocabularies)
+            cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
+            cb.setChecked(True)
+            vbox.addWidget(cb)
+            self.voc_cbs.append([cb, voc])
+            counter += 1
+            if counter == n_per_col:
+                self.frame_Vocabularies.layout().addItem(vbox)
+                vbox = QVBoxLayout(self.frame_Vocabularies)
+                counter = 0
+        if counter != 0:
+            vbox.addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
+            self.frame_Vocabularies.layout().addItem(vbox)
+
 
         self.find_templates()
 
@@ -194,5 +214,11 @@ class NewProjectDialog(EDialogWidget):
 
 
         print(self.project.folder, "\n", self.project.path)
-        self.main_window.new_project(self.project, template)
+
+        vocabularies = []
+        for c in self.voc_cbs:
+            if c[0].isChecked:
+                vocabularies.append(c[1])
+
+        self.main_window.new_project(self.project, template, vocabularies)
         self.close()

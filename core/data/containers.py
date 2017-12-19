@@ -14,7 +14,7 @@ from core.data.project_streaming import ProjectStreamer
 from core.data.enums import *
 
 from core.node_editor.node_editor import *
-
+from shutil import copy2
 from enum import Enum
 # from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -66,15 +66,12 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.node_scripts = []
         self.create_script(dispatch=False)
 
-
         self.add_screenshot_group("All Shots", initial=True)
         self.active_screenshot_group = self.screenshot_groups[0]
         self.active_screenshot_group.is_current = True
 
         self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
-
-
 
         self.add_vocabulary(get_default_vocabulary())
         self.inhibit_dispatch = False
@@ -552,10 +549,16 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         except:
             self.notes = ""
 
+        move_project_to_directory_project = False
         try:
-            version = my_dict['locked']
+            version = my_dict['version']
+            version = version.split(".")
+            print("Loaded Version:", version)
+            if version_check([0,2,10], version):
+                move_project_to_directory_project = True
+
         except:
-            pass
+            move_project_to_directory_project = True
 
 
         splitted = path.split("/")[0:len(path.split("/")) - 1]
@@ -647,6 +650,27 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                         node.operation.result = res
 
 
+        # Migrating the Project to the new FileSystem
+        if move_project_to_directory_project:
+            answer = QMessageBox.question(self.main_window, "Project Migration", "This Project seems to be older than 0.2.9.\n\n"
+                                                            "VIAN uses a directory System since 0.2.10,\n "
+                                                            "do you want to move the Project to the new System now?")
+            if answer == QMessageBox.Yes:
+                try:
+                    old_path = self.path
+
+                    folder = QFileDialog.getExistingDirectory()
+                    self.folder = folder + "/" + self.name
+                    self.path = self.folder + "/" + self.name
+                    os.mkdir(self.folder)
+                    self.create_file_structure()
+                    print(old_path, self.path)
+                    copy2(old_path, self.path + settings.PROJECT_FILE_EXTENSION)
+
+                except Exception as e:
+                    print(e)
+
+
         self.sort_screenshots()
         self.undo_manager.clear()
 
@@ -732,6 +756,11 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             for w in v.words_plain:
                 if w.name == name:
                     return w
+
+    def import_vocabulary(self, path):
+        new_voc = Vocabulary("New").import_vocabulary(path, self)
+        self.add_vocabulary(new_voc)
+
     #endregion
 
     # region Setters/Getters
@@ -1559,6 +1588,9 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         IProjectContainer.set_project(self, project)
         for a in self.annotations:
             a.set_project(project)
+
+    def delete(self):
+        self.project.remove_annotation_layer(self)
 #endregion
 
 #region Screenshots
@@ -1795,6 +1827,8 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
         return self
 
+    def delete(self):
+        self.project.remove_screenshot_group(self)
 #endregion
 
 #region NodeScripts
@@ -1815,6 +1849,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
 
     def add_node(self, node):
         self.nodes.append(node)
+        node.node_script = self
         self.dispatch_on_changed()
 
     def remove_node(self, node, dispatch = True):
@@ -1909,12 +1944,15 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
 
         return self
 
+    def delete(self):
+        self.project.remove_script(self)
 
 class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
     def __init__(self, operation = None, pos = (0, 0), unique_id = -1):
         IProjectContainer.__init__(self)
         self.unique_id = unique_id
         self.node_size = (200,200)
+        self.node_script = None
         if isinstance(pos, tuple):
             self.node_pos = pos
         else:
@@ -1992,6 +2030,9 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
                 s.default_value = default_values[i]
 
         return self
+
+    def delete(self):
+        self.node_script.remove_node(self)
 
 
 class ConnectionDescriptor(IProjectContainer):
@@ -2094,6 +2135,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
 
     def get_preview(self):
         pass
+
     def serialize(self):
         data_json = []
         for d in self.data:
@@ -2107,6 +2149,8 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
 
         return data
 
+    def delete(self):
+        self.project.remove_analysis(self)
 
 class NodeScriptAnalysis(AnalysisContainer):
     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
@@ -2385,7 +2429,7 @@ class Vocabulary(IProjectContainer, IHasName):
         self.words = []
         self.words_plain = []
         self.was_expanded = False
-
+        self.category = "default"
 
     def create_word(self, name, parent_word = None, unique_id = -1):
         word = VocabularyWord(name, vocabulary=self)
@@ -2476,6 +2520,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
         voc_data = dict(
             name = self.name,
+            category = self.category,
             unique_id = self.unique_id,
             words = words_data
         )
@@ -2486,7 +2531,7 @@ class Vocabulary(IProjectContainer, IHasName):
         self.project = project
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
-
+        self.category = serialization['category']
         for w in serialization['words']:
             parent = self.project.get_by_id(w['parent'])
             # If this is a root node in the Vocabulary
@@ -2495,6 +2540,61 @@ class Vocabulary(IProjectContainer, IHasName):
 
             else:
                 self.create_word(w['name'], parent, unique_id=w['unique_id'])
+
+        return self
+
+    def export_vocabulary(self, path):
+        data = self.serialize()
+        with open(path, "w") as f:
+            json.dump(data, f)
+
+    def import_vocabulary(self, path, project):
+        with open(path, "r") as f:
+            serialization = json.load(f)
+
+        id_replacing_table = []
+
+        self.project = project
+        self.name = serialization['name']
+        self.category = serialization['category']
+
+        old_id = serialization['unique_id']
+        new_id = project.create_unique_id()
+        self.unique_id = new_id
+
+        id_replacing_table.append([old_id, new_id])
+
+
+        # Replace all IDs with new one:
+        for w in serialization['words']:
+            old = w['unique_id']
+            new = self.project.create_unique_id()
+            id_replacing_table.append([old, new])
+
+        for w in serialization['words']:
+            old_parent = w['parent']
+
+            new_parent = -1
+            for tpl in id_replacing_table:
+                if tpl[0] == old_parent:
+                    new_parent = tpl[1]
+                    break
+
+            old_id = w['unique_id']
+            new_id = -1
+            for tpl in id_replacing_table:
+                if tpl[0] == old_id:
+                    new_id = tpl[1]
+                    break
+
+
+            parent = self.project.get_by_id(new_parent)
+            # If this is a root node in the Vocabulary
+            if isinstance(parent, Vocabulary):
+                self.create_word(w['name'], unique_id=new_id)
+
+            else:
+                self.create_word(w['name'], parent, unique_id=new_id)
 
         return self
 

@@ -23,6 +23,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.lineEdit_Vocabulary.returnPressed.connect(self.add_voc_word)
         self.completer = QCompleter()
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.btn_VocMatrix.clicked.connect(self.main_window.create_vocabulary_matrix)
 
         # self.lineEdit_Vocabulary.keyPressEvent.connect(self.vocabulary_key_press)
         self.lineEdit_Vocabulary.setCompleter(self.completer)
@@ -299,7 +300,6 @@ class AttributesAnalysis(QWidget):
         self.vis = descriptor.get_preview()
         self.layout().addWidget(self.vis)
         self.show()
-
 
 
 class AttributesNode(QWidget):

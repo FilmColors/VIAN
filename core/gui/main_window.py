@@ -3,7 +3,7 @@
 # from annotation_viewer import AnnotationViewer
 import webbrowser
 import os
-
+import glob
 from core.concurrent.worker import Worker
 
 from core.concurrent.worker_functions import *
@@ -34,7 +34,7 @@ from core.gui.player_vlc import Player_VLC
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
-from core.gui.vocabulary import VocabularyManager
+from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, VocabularyMatrix
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
@@ -47,7 +47,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.2.9"
+__version__ = "0.2.10"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -134,6 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.node_editor_dock = None
         self.node_editor_results = None
         self.vocabulary_manager = None
+        self.vocabulary_matrix = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -184,6 +185,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_concurrent_task_viewer()
 
         self.create_vocabulary_manager()
+        self.create_vocabulary_matrix()
 
 
 
@@ -222,10 +224,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad.triggered.connect(self.on_load_project)
         self.actionSave.triggered.connect(self.on_save_project)
         self.actionSaveAs.triggered.connect(self.on_save_project_as)
+
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.action_importELAN_Project.triggered.connect(self.import_elan_project)
+        self.actionImportVocabulary.triggered.connect(self.import_vocabulary)
+
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
         self.actionExportTemplate.triggered.connect(self.export_template)
+        self.actionExportVocabulary.triggered.connect(self.export_vocabulary)
         self.actionClose_Project.triggered.connect(self.close_project)
         self.actionExit.triggered.connect(self.on_exit)
 
@@ -279,7 +285,9 @@ class MainWindow(QtWidgets.QMainWindow):
                                  self.inspector,
                                  self.history_view,
                                  self.node_editor_dock.node_editor,
-                                 self.vocabulary_manager]
+                                 self.vocabulary_manager,
+                                 self.vocabulary_matrix
+                                          ]
 
 
         # self.actionElanConnection.triggered.connect(self.create_widget_elan_status)
@@ -527,6 +535,14 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.vocabulary_manager.show()
             self.vocabulary_manager.activateWindow()
+
+    def create_vocabulary_matrix(self):
+        if self.vocabulary_matrix is None:
+            self.vocabulary_matrix = VocabularyMatrix(self)
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_matrix, QtCore.Qt.Vertical)
+        else:
+            self.vocabulary_matrix.show()
+            self.vocabulary_matrix.activateWindow()
     #endregion
 
     #region QEvent Overrides
@@ -607,21 +623,34 @@ class MainWindow(QtWidgets.QMainWindow):
         if answer == QMessageBox.Yes:
             self.on_save_project()
 
-        dialog = NewProjectDialog(self, self.settings, movie_path)
+
+        vocabularies = []
+        built_in = glob.glob("user/vocabularies/*.txt")
+        vocabularies = built_in
+
+        dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
         dialog.show()
 
-    def new_project(self, project, template_path = None):
+    def new_project(self, project, template_path = None, vocabularies = None):
         if self.project is not None:
             self.close_project()
 
         self.project = project
+        self.project.inhibit_dispatch = True
         if template_path is not None:
             self.project.apply_template(template_path)
 
         self.project.create_file_structure()
+        # Importing all Vocabularies
+        for i, v in enumerate(vocabularies):
+            print("Importing: " + str(i) + " " + v + "\r")
+            self.project.import_vocabulary(v)
+
         self.player.open_movie(project.movie_descriptor.movie_path)
         self.master_file.add_project(project)
         self.project.store_project(self.settings, self.master_file)
+
+        self.project.inhibit_dispatch = False
         self.dispatch_on_loaded()
 
     def on_load_project(self):
@@ -658,10 +687,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         new = ElanExtensionProject(self)
         print("Loading Project Path", path)
+        new.inhibit_dispatch = True
         new.load_project(self.settings ,path)
 
-        self.project = new
 
+
+        self.project = new
+        new.inhibit_dispatch = False
         #self.project_streamer.set_project(new)
         self.dispatch_on_loaded()
 
@@ -713,9 +745,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_delete(self):
         to_delete = self.project.selected
+        try:
+            for d in to_delete:
+                d.delete()
+        except Exception as e:
+            print(e)
 
-        for d in to_delete:
-            d.delete()
 
     def update_overlay(self):
         if self.drawing_overlay is not None and self.drawing_overlay.isVisible():
@@ -870,10 +905,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
             self.print_message(e, "Red")
 
+    def import_vocabulary(self):
+        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
+        try:
+            self.project.import_vocabulary(path)
+        except Exception as e:
+            self.print_message("Vocabulary Import Failed", "Red")
+            self.print_message(str(e), "Red")
+
     def export_segmentation(self):
         # path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
         dialog = ExportSegmentationDialog(self)
         dialog.show()
+
+    def export_vocabulary(self):
+        dialog = VocabularyExportDialog(self)
+        dialog.show()
+
 
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)

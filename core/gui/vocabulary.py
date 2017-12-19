@@ -1,9 +1,9 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QTreeView, QMenu, QHBoxLayout
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
 from PyQt5 import uic
-from core.gui.ewidgetbase import EDockWidget
-from core.data.interfaces import IProjectChangeNotify
+from core.gui.ewidgetbase import EDockWidget, EDialogWidget
+from core.data.interfaces import IProjectChangeNotify, IHasVocabulary
 import os
 from core.data.enums import *
 
@@ -163,6 +163,178 @@ class VocabularyItem(QStandardItem):
         super(VocabularyItem, self).__init__(text)
         self.voc_object = object
 
+
+class VocabularyExportDialog(EDialogWidget):
+    def __init__(self, main_window):
+        super(VocabularyExportDialog, self).__init__(main_window, main_window)
+        path = os.path.abspath("qt_ui/DialogExportVocabulary.ui")
+        uic.loadUi(path, self)
+        self.project = main_window.project
+        self.lineEdit_Path.setText(self.project.export_dir)
+
+        self.entries = []
+        for voc in self.project.vocabularies:
+
+            item = QWidget(self.vocList)
+            item.setLayout(QHBoxLayout(item))
+            item.layout().addWidget(QLabel(voc.name, item))
+            cb = QCheckBox(item)
+            item.layout().addWidget(cb)
+            self.entries.append([cb, voc])
+            self.vocList.layout().addWidget(item)
+
+
+        self.btn_Export.clicked.connect(self.export)
+        self.btn_Cancel.clicked.connect(self.close)
+        self.btn_Browse.clicked.connect(self.on_browse)
+
+    def on_browse(self):
+        path = QFileDialog.getExistingDirectory(directory=self.project.export_dir)
+        self.lineEdit_Path.setText(path)
+
+    def export(self):
+        if not os.path.isdir(self.lineEdit_Path.text()):
+            QMessageBox.warning(self, "No valid Directory", "Please select a valid Directory first")
+        else:
+            dir = self.lineEdit_Path.text()
+            for itm in self.entries:
+                if itm[0].isChecked():
+                    itm[1].export_vocabulary(dir + "/" +itm[1].name + ".txt")
+
+            self.close()
+
+
+class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
+    def __init__(self, main_window):
+        super(VocabularyMatrix, self).__init__(main_window,limit_size=False)
+
+        self.main_window = main_window
+        self.n_per_row = 20
+        self.setWindowTitle("Vocabulary Matrix")
+
+        self.tabs_list = []
+        self.voc_categories = []
+        self.tabs = QTabWidget(self)
+        self.setLayout(QHBoxLayout(self))
+        self.setWidget(self.tabs)
+        self.update_widget()
+
+    def on_changed(self, project, item):
+        self.update_widget()
+
+    def on_loaded(self, project):
+        self.update_widget()
+
+    def on_selected(self, sender, selected):
+        pass
+
+    def update_widget(self):
+        self.tabs.clear()
+        self.voc_categories = []
+        self.tabs_list = []
+
+        for voc in self.project().vocabularies:
+            if voc.category not in self.voc_categories:
+                self.voc_categories.append(voc.category)
+                area = QScrollArea(self.tabs)
+                t = QWidget(None)
+                t.setMinimumSize(200,200)
+                t.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+                l = QVBoxLayout(t)
+                t.setLayout(l)
+                l.setSizeConstraint(l.SetMinAndMaxSize)
+
+                area.setWidget(t)
+                self.tabs.addTab(area, voc.category)
+                self.tabs_list.append(t)
+
+        for voc in self.project().vocabularies:
+            print(voc.category)
+            tab_idx = self.voc_categories.index(voc.category)
+            tab = self.tabs_list[tab_idx]
+            # l = QVBoxLayout(tab)
+            # tab.setLayout(l)
+            frame = QFrame(tab)
+            frame.setFrameStyle(QFrame.StyledPanel)
+
+            tab.layout().addWidget(frame)
+
+            frame.setLayout(QHBoxLayout(frame))
+            lbl = QLabel(voc.name)
+            lbl.setStyleSheet("QLabel{color:#6391b5;}")
+            lbl.setFixedWidth(150)
+            lbl.setWordWrap(True)
+            frame.layout().addWidget(lbl)
+            col_count = 0
+            hbox = QVBoxLayout(frame)
+            for w in voc.get_vocabulary_as_list():
+                cb = QCheckBox(w.name, frame)
+                cb.stateChanged.connect(self.on_cb_change)
+                cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
+                hbox.addWidget(cb)
+                col_count += 1
+
+                if col_count == self.n_per_row:
+                    frame.layout().addItem(hbox)
+                    hbox = QVBoxLayout(tab)
+                    col_count = 0
+
+            if col_count != 0:
+                frame.layout().addItem(hbox)
+
+            frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
+            tab.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+
+        # for voc in self.project().vocabularies:
+        #     model = voc.get_vocabulary_item_model()
+        #     # model = QStandardItemModel()
+        #     tab_idx = self.voc_categories.index(voc.category)
+        #     tab = self.tabs_list[tab_idx]
+        #     l = QVBoxLayout(tab)
+        #     tab.setLayout(l)
+        #     for i in range(model.rowCount()):
+        #         word_model = model.child(i, 0)
+        #         word = word_model.voc_object
+        #         l.addWidget(QLabel(word.name))
+        #         frame = QFrame(tab)
+        #         vbox = QVBoxLayout(frame)
+        #         frame.setLayout(vbox)
+        #         l.addWidget(frame)
+        #
+        #         col_count = 0
+        #         hbox = QHBoxLayout(frame)
+        #         for j in range(word_model.rowCount()):
+        #             w = word_model.child(j , 0).voc_object
+        #             cb = QCheckBox(w.name, frame)
+        #             cb.stateChanged.connect(self.on_cb_change)
+        #             hbox.addWidget(cb)
+        #             col_count += 1
+        #             if col_count == self.n_per_row:
+        #                 vbox.addItem(hbox)
+        #                 hbox = QHBoxLayout(frame)
+        #                 col_count = 0
+
+                # vbox.addItem(hbox)
+
+
+            # tab.layout().addItem(QSpacerItem(1,1,QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+            # self.tabs.addTab(tab, voc.name)
+
+    def on_cb_change(self):
+        sender = self.sender()
+        state = sender.isChecked()
+        name = sender.text()
+        word = self.project().get_word_object_from_name(name)
+
+        for itm in self.project().selected:
+            if isinstance(itm, IHasVocabulary):
+                if state:
+                    itm.add_word(word)
+                else:
+                    itm.remove_word(word)
+                    sender.setStyleSheet("QCheckBox{color: #b1b1b1;}")
 
 #endregion
 

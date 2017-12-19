@@ -45,6 +45,7 @@
      </property>
      <addaction name="actionImportELANSegmentation"/>
      <addaction name="action_importELAN_Project"/>
+     <addaction name="actionImportVocabulary"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="title">
@@ -52,6 +53,7 @@
      </property>
      <addaction name="action_ExportSegmentation"/>
      <addaction name="actionExportTemplate"/>
+     <addaction name="actionExportVocabulary"/>
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionLoad"/>
@@ -473,6 +475,16 @@
   <action name="actionColorimetry">
    <property name="text">
     <string>Colorimetry</string>
+   </property>
+  </action>
+  <action name="actionImportVocabulary">
+   <property name="text">
+    <string>VIAN Vocabulary</string>
+   </property>
+  </action>
+  <action name="actionExportVocabulary">
+   <property name="text">
+    <string>VIAN Vocabulary</string>
    </property>
   </action>
  </widget>

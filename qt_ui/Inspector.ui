@@ -162,6 +162,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="btn_VocMatrix">
+          <property name="text">
+           <string>Matrix</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLineEdit" name="lineEdit_Vocabulary"/>
         </item>
         <item>

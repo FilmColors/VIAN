@@ -22,9 +22,16 @@ class IHasVocabulary():
     def __init__(self):
         self.voc_list = []
 
+    def toggle_word(self, word):
+        if word in self.voc_list:
+            self.remove_word(word)
+        else:
+            self.add_word(word)
+
     def add_word(self, word):
-        self.voc_list.append(word)
-        word.add_connected_item(self)
+        if word not in self.voc_list:
+            self.voc_list.append(word)
+            word.add_connected_item(self)
 
     def remove_word(self, word):
         if word in self.voc_list:

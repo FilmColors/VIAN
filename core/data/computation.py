@@ -36,6 +36,7 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
 
     return qimage, qpixmap
 
+
 def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)
@@ -52,6 +53,7 @@ def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alph
         qpixmap = QPixmap(qimage)
 
     return qpixmap
+
 
 def convertQImageToMat(qimage):
     '''  Converts a QImage into an opencv MAT format  '''
@@ -153,8 +155,10 @@ def get_mouse_handle_by_location(pos, rect, border_size = 0.1, corner_size = 0.1
 def ms_to_frames(time, fps):
     return int(float(time) / 1000 * fps)
 
+
 def frame2ms(frame, fps):
     return int(round(int(frame) * 1000.0 / fps,0))
+
 
 def mse(imageA, imageB):
     # the 'Mean Squared Error' between the two images is the
@@ -166,6 +170,7 @@ def mse(imageA, imageB):
     # return the MSE, the lower the error, the more "similar"
     # the two images are
     return err
+
 
 def compare_images(imageA, imageB):
     # compute the mean squared error and structural similarity
@@ -213,13 +218,32 @@ def find_time_of_screenshot(movie, shot, start, end):
     video_capture.release()
     return frame_index
 
+
 def parse_file_path(path):
     if sys.platform =="darwin":
         return str(path.replace("file://", ""))
     else:
         return str(path.replace("file:///", ""))
 
+
 def create_icon(path):
     icon = QIcon(path)
     # print icon.availableSizes()
     return icon
+
+
+def version_check(smaller_than, version):
+    if isinstance(version, str):
+        version = version.split(".")
+    version = [int(version[0]), int(version[1]), int(version[2])]
+
+    if version[0] < smaller_than[0]:
+        return True
+    elif version[0] == smaller_than[0]:
+        if version[1]< smaller_than[1]:
+            return True
+        elif version[1] == smaller_than[1]:
+            if version[2] < smaller_than[2]:
+                return True
+
+    return False
