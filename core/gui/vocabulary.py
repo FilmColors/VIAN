@@ -211,24 +211,38 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
         self.main_window = main_window
         self.n_per_row = 20
         self.setWindowTitle("Vocabulary Matrix")
+        self.all_boxes = []
 
         self.tabs_list = []
         self.voc_categories = []
         self.tabs = QTabWidget(self)
         self.setLayout(QHBoxLayout(self))
         self.setWidget(self.tabs)
-        self.update_widget()
+        self.recreate_widget()
+
 
     def on_changed(self, project, item):
-        self.update_widget()
+        if item is not None:
+            if item.get_type() == VOCABULARY or item.get_type() == VOCABULARY_WORD:
+                self.recreate_widget()
+            else:
+                self.update_widget()
 
     def on_loaded(self, project):
-        self.update_widget()
+        self.recreate_widget()
 
     def on_selected(self, sender, selected):
-        pass
+        self.update_widget()
 
     def update_widget(self):
+        if len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
+            for itm in self.all_boxes:
+                itm[0].setEnabled(True)
+                itm[0].setChecked(self.project().selected[0].has_word(itm[1]))
+        else:
+            for itm in self.all_boxes:
+                itm[0].setEnabled(False)
+    def recreate_widget(self):
         self.tabs.clear()
         self.voc_categories = []
         self.tabs_list = []
@@ -271,8 +285,11 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
                 cb = QCheckBox(w.name, frame)
                 cb.stateChanged.connect(self.on_cb_change)
                 cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
+                if len(self.project().selected) > 0 and self.project().selected[0].has_word(w):
+                    cb.setChecked(True)
                 hbox.addWidget(cb)
                 col_count += 1
+                self.all_boxes.append([cb, w])
 
                 if col_count == self.n_per_row:
                     frame.layout().addItem(hbox)

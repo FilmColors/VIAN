@@ -141,8 +141,6 @@ class ColometricsAnalysis(IAnalysisJob):
         return EHtmlDisplay(None, file_html(self.plot_histogram(analysis[0], analysis[1]), CDN, "Histogram"))
 
     def get_preview(self, analysis):
-        print(analysis[0])
-        print(analysis[1])
         plot = self.plot_histogram(analysis[0], analysis[1])
         html = file_html(plot, CDN, "Histogram")
         return EHtmlDisplay(None, html)

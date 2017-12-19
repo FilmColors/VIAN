@@ -154,8 +154,6 @@ class NewProjectDialog(EDialogWidget):
         else:
             self.project_dir = path
 
-
-
     def on_browse_project_path(self):
         # path = QFileDialog.getSaveFileName(directory=self.project_dir)[0]
         # p_dir, p_name = self.parse_project_path(path)

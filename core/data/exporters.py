@@ -115,7 +115,6 @@ class SegmentationExporter(IConcurrentJob):
 
 def build_file_name(naming, screenshot, movie_descriptor):
     file_name = "/"
-    print(screenshot.scene_id)
 
     for i, name in enumerate(naming):
         if name is not ScreenshotNamingConventionOptions.empty.name:

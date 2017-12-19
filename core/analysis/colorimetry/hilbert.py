@@ -186,7 +186,6 @@ def create_hilbert_conversion_tables(dir, n1=13, n2=256):
         for index, i in enumerate(indices_hilbert_3d_list):
             indices_hilbert_3d[i[0], i[1], i[2],] = index
 
-        print(indices_hilbert_3d.shape)
 
         np.savez(dir + str("hilbert_conversion.npz"), hilbert_2d=indices_hilbert_2d_list, hilbert_3d=indices_hilbert_3d)
 

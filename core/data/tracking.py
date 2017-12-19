@@ -17,8 +17,6 @@ class BasicTrackingJob(IConcurrentJob):
         end_frame = ms_to_frames(args[4], fps)
         method = args[6]
 
-        print(start_frame, end_frame)
-
         keys = []
 
         # TRACKING
