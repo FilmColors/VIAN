@@ -12,12 +12,13 @@ class WorkerSignals(QObject):
 
 class Worker(QRunnable):
 
-    def __init__(self, function, main_window, result_cb, args = None, msg_finished = "Worker Finished", concurrent_job = None, target_id= None):
+    def __init__(self, function, main_window, result_cb, args = None, msg_finished = "Worker Finished", concurrent_job = None, target_id= None, i_analysis_job=None):
         super(Worker, self).__init__()
         self.message_finished = msg_finished
         self.function = function
         self.args = args
         self.concurrent_job = concurrent_job
+        self.i_analysis_job = i_analysis_job
         self.setAutoDelete(True)
         self.task_id = randint(100000,999999)
         self.target_id = target_id
@@ -47,8 +48,10 @@ class Worker(QRunnable):
             exctype, value = sys.exc_info()[:2]
             self.signals.sign_error.emit((exctype, value, traceback.format_exc()))
         else:
-            if self.concurrent_job is None:
+            if self.concurrent_job is None and self.i_analysis_job is None:
                 self.signals.sign_result.emit(result)  # Return the result of the processing
+            elif self.i_analysis_job is not None:
+                self.signals.sign_result.emit([result, self.i_analysis_job])
             else:
                 self.signals.sign_result.emit([result, self.concurrent_job])
         finally:

@@ -6,6 +6,7 @@ import os
 import glob
 from core.concurrent.worker import Worker
 
+import importlib
 from core.concurrent.worker_functions import *
 from core.data.enums import *
 from core.data.importers import ELANProjectImporter
@@ -79,6 +80,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.menuWindows.addMenu(self.extension_list.get_plugin_menu(self.menuWindows))
+        self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
 
         self.settings = UserSettings()
         self.settings.load()
@@ -194,11 +196,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.tabifyDockWidget(self.annotation_toolbar, self.screenshot_toolbar)
         self.tabifyDockWidget(self.inspector, self.history_view)
+        self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
 
         self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
         # self.tabifyDockWidget(self.inspector, self.screenshots_manager_dock)
         self.annotation_toolbar.raise_()
         self.inspector.raise_()
+        self.screenshots_manager_dock.raise_()
         # self.annotation_tb2 = AnnotationToolbar2(self,self.drawing_overlay)
         # self.addToolBar(self.annotation_tb2)
 
@@ -325,7 +329,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.screenshot_blocked = False
 
-        self.menuAnalysis.addMenu("Extensions")
+        # self.menuAnalysis.addMenu("Extensions")
 
         self.analyzes_list =[
             # HilbertHistogramProc(0)
@@ -589,7 +593,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #region MainWindow Event Handlers
     def eval_class(self, class_name):
-        return eval(class_name)
+        try:
+            return eval(class_name)
+        except:
+            try:
+                for c in self.extension_list.get_importables():
+                    if c[0] == class_name:
+                        module = importlib.import_module(c[1])
+                        print(getattr(module, class_name))
+                        return getattr(module, class_name)
+            except Exception as e:
+                print(e)
+
 
     def update_vian(self):
         result = self.updater.get_server_version()
@@ -1073,13 +1088,17 @@ class MainWindow(QtWidgets.QMainWindow):
         if analysis.multiple_result:
             for arg in args:
                 worker = Worker(analysis.process, self, self.analysis_result, arg,
-                                msg_finished=analysis.name+ " Finished", target_id=None)
+                                msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
                 self.start_worker(worker, analysis.get_name())
         else:
-            worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished=analysis.name+ " Finished", target_id=None)
+            worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
             self.start_worker(worker, analysis.get_name())
 
     def analysis_result(self, result):
+        analysis = result[1]
+        result = result[0]
+
+        analysis.modify_project(self.project, result)
         self.project.add_analysis(result)
 
     def on_save_custom_perspective(self):
@@ -1167,7 +1186,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("**********************")
         print("Test function called")
         print(a)
-        print (self.project.create_file_structure())
+        print(self.project.create_file_structure())
         print("**********************")
     #endregion
 
@@ -1274,8 +1293,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     if l.is_visible == False:
                         l.is_visible = True
                         for a in l.annotations:
-                            a.widget.show()
-                            a.widget.is_active = True
+                            if a.widget is not None:
+                                a.widget.show()
+                                a.widget.is_active = True
                 else:
                     if l.is_visible is True:
                             l.is_visible = False

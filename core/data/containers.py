@@ -499,6 +499,10 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             path = self.path,
             name = self.name,
             notes=self.notes,
+            results_dir = self.results_dir,
+            export_dir=self.export_dir,
+            shots_dir=self.shots_dir,
+            data_dir=self.data_dir,
             annotation_layers = a_layer,
             current_annotation_layer = None,
             main_segmentation_index = self.main_segmentation_index,
@@ -548,6 +552,14 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.notes = my_dict['notes']
         except:
             self.notes = ""
+
+        try:
+            self.results_dir = my_dict['results_dir']
+            self.export_dir = my_dict['export_dir']
+            self.shots_dir = my_dict['shots_dir']
+            self.data_dir = my_dict['data_dir']
+        except:
+            pass
 
         move_project_to_directory_project = False
         try:
@@ -1488,9 +1500,12 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         self.t_end = end
         self.dispatch_on_changed(item=self)
 
-    def create_annotation(self, type = AnnotationType.Rectangle, position = (150,150), size=(100,100), color = (255,255,255), line_width = 5, name = "New Annotation") :
+    def create_annotation(self, type = AnnotationType.Rectangle, position = (150,150), size=(100,100),
+                          color = (255,255,255), line_width = 5, name = "New Annotation", font_size = 10,
+                          resource_path = ""):
         annotation = Annotation(type, size = size, color=color, line_w=line_width, name=name,
-                                orig_position=position)
+                                orig_position=position, font_size=font_size, resource_path=resource_path)
+
         self.add_annotation(annotation)
         annotation.set_project(self.project)
         return annotation
@@ -2133,6 +2148,9 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         self.notes = ""
         self.data = data
 
+    def get_name(self):
+        return self.name
+
     def get_preview(self):
         pass
 
@@ -2151,6 +2169,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
 
     def delete(self):
         self.project.remove_analysis(self)
+
 
 class NodeScriptAnalysis(AnalysisContainer):
     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
@@ -2238,7 +2257,21 @@ class IAnalysisJobAnalysis(AnalysisContainer):
             self.parameters = []
 
     def get_preview(self):
-        return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self.data)
+        try:
+            return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
+        except Exception as e:
+            print(e)
+            QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
+                                " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
+
+    def get_visualization(self):
+        try:
+            self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self, self.project.results_dir, self.project.data_dir)
+        except Exception as e:
+            print(e)
+            QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
+                                " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
+
 
     def get_type(self):
         return ANALYSIS_JOB_ANALYSIS

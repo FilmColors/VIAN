@@ -20,6 +20,7 @@ import os
 import sys
 sys.path.insert(0, "E:\\\\Programming\\Git\\visual-movie-annotator\\_docs\\source\\documentation\\")
 sys.path.insert(0, "E:\\\\Programming\\Git\\visual-movie-annotator\\_docs\\source\\")
+sys.path.insert(0, "E:\\\\Programming\\Git\\visual-movie-annotator\\")
 
 
 # sys.path.insert(0, os.path.abspath('.'))
@@ -142,7 +143,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'VIAM.tex', 'VIAM Documentation',
+    (master_doc, 'VIAN.tex', 'VIAM Documentation',
      'Gaudenz Halter', 'manual'),
 ]
 
@@ -152,7 +153,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'viam', 'VIAM Documentation',
+    (master_doc, 'viam', 'VIAN Documentation',
      [author], 1)
 ]
 
@@ -163,8 +164,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'VIAM', 'VIAM Documentation',
-     author, 'VIAM', 'One line description of project.',
+    (master_doc, 'VIAN', 'VIAN Documentation',
+     author, 'VIAN', 'One line description of project.',
      'Miscellaneous'),
 ]
 

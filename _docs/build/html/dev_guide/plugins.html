@@ -166,9 +166,44 @@
             
   <div class="section" id="plug-ins">
 <span id="plugins"></span><h1>Plug-Ins<a class="headerlink" href="#plug-ins" title="Permalink to this headline">¶</a></h1>
-<p>The Timeline is used for all modifications of the VIAN project that is directed to time-dependent entities and as such
-the a major component of the UI.
-Use the Timeline to create and modify <em>Segmentations</em>, <em>Segments</em>, <em>Screenshots</em> and <em>Annotation Layers</em>.</p>
+<p>A Plugin is the most basic class you can implement. Essentially a Plugin is a QMainWindow or a EDockWidget,
+having access to the current project and the MainWindow.</p>
+<p>Subclass the GAPlugin class an put your module into the <em>extensions/plugins</em> and your plugin will be listed in the MainWindow’s menu under
+tools/plugins.</p>
+<dl class="class">
+<dt id="core.data.plugin.GAPlugin">
+<em class="property">class </em><code class="descclassname">core.data.plugin.</code><code class="descname">GAPlugin</code><span class="sig-paren">(</span><em>main_window</em>, <em>plugin_name='Plugin'</em>, <em>windowtype=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/plugin.html#GAPlugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.plugin.GAPlugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>The GAPlugin is the Base-Class for all Plugins. 
+For creating your own Plugin, subclass GAPlugin an overwrite the GAPlugin.get_window() function. 
+Access current Project by using GAPlugin.get_project().</p>
+<dl class="method">
+<dt id="core.data.plugin.GAPlugin.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>main_window</em>, <em>plugin_name='Plugin'</em>, <em>windowtype=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/plugin.html#GAPlugin.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.plugin.GAPlugin.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a Plugin.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>main_window</strong> – The VIAN MainWindow.</li>
+<li><strong>plugin_name</strong> – The Name of the Plugin</li>
+<li><strong>windowtype</strong> – The returned WindowType, specified in plugin.py. This should be a variant of GAPLUGIN_WNDTYPE_*</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.plugin.GAPlugin.get_window">
+<code class="descname">get_window</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/plugin.html#GAPlugin.get_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.plugin.GAPlugin.get_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function should be overwritten shows your Plugin-Window. This can either be an EDockWidget or a WMainWindow. 
+(Specified accordingly to the GAplugin.windowtype)</p>
+</dd></dl>
+
+</dd></dl>
+
 <ul class="simple">
 <li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>

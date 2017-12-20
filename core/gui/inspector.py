@@ -297,10 +297,15 @@ class AttributesAnalysis(QWidget):
         self.setLayout(QVBoxLayout(self))
         # self.layout().addWidget(QLabel("<b>Target: " + self.descriptor.get_target_item().get_name()))
         # index = self.descriptor.procedure_id
+        self.vis_button = QPushButton("Show Visualization", self)
+        self.layout().addWidget(self.vis_button)
+        self.vis_button.clicked.connect(self.on_show_vis)
         self.vis = descriptor.get_preview()
         self.layout().addWidget(self.vis)
         self.show()
 
+    def on_show_vis(self):
+        self.descriptor.get_visualization()
 
 class AttributesNode(QWidget):
     def __init__(self, parent, descriptor):

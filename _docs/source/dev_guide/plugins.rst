@@ -2,11 +2,15 @@
 
 Plug-Ins
 ========
-The Timeline is used for all modifications of the VIAN project that is directed to time-dependent entities and as such
-the a major component of the UI.
-Use the Timeline to create and modify *Segmentations*, *Segments*, *Screenshots* and *Annotation Layers*.
+A Plugin is the most basic class you can implement. Essentially a Plugin is a QMainWindow or a EDockWidget,
+having access to the current project and the MainWindow.
+
+Subclass the GAPlugin class an put your module into the *extensions/plugins* and your plugin will be listed in the MainWindow's menu under
+tools/plugins.
 
 
+..  autoclass:: core.data.plugin.GAPlugin
+    :members: __init__, get_window
 
 
 * :ref:`genindex`

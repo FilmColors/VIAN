@@ -9,7 +9,6 @@ QWidget
     color: #b1b1b1;
     background-color: #323232;
 
-
 }
 
 
@@ -192,6 +191,7 @@ QTextEdit:focus
 QScrollArea{
     padding: 2px;
     margin: 5px 5px 5px 5px;
+    border: 1px solid #323232;
 }
 
 QScrollBar{
@@ -698,7 +698,9 @@ QTreeView{
     margin: 2px;
     spacing: 2px;
     background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #323232, stop: 0.5 #242424, stop:1 #323232);
+    border: 1px solid #252525;
 }
+
 
 QHBoxLayout{
     spacing: 2px;

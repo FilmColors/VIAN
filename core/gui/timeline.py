@@ -618,6 +618,9 @@ class TimelineControl(QtWidgets.QWidget):
         pen.setWidth(1)
         qp.setPen(pen)
 
+
+
+
         for i,a in enumerate(self.groups):
             y = i * self.timeline.group_height + self.timeline.group_height
             if i == 0:
@@ -631,6 +634,17 @@ class TimelineControl(QtWidgets.QWidget):
 
         pen.setColor(QtGui.QColor(255, 255, 255, 200))
         qp.setPen(pen)
+
+        if self.is_selected:
+            qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height() - 10), QtGui.QColor(200, 200, 255, 50))
+        else:
+            gradient = QLinearGradient(QPointF(0, 0), QPointF(0, self.height()))
+            gradient.setColorAt(0.0, QColor(50, 50, 50))
+            gradient.setColorAt(0.5, QColor(65, 65, 65))
+            gradient.setColorAt(1.0, QColor(50, 50, 50))
+            gradient.setSpread(QGradient.PadSpread)
+            qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height() - 10), gradient)
+
         for i, a in enumerate(self.groups):
             y = i * self.timeline.group_height + self.timeline.group_height
             text_rect = QtCore.QRect(0, y, self.width(), self.timeline.group_height)
@@ -642,14 +656,15 @@ class TimelineControl(QtWidgets.QWidget):
 
         # Title of the Control
 
-        qp.drawText(QtCore.QPoint(0,10), self.name)
+
 
         if isinstance(self.item, ILockable):
             if self.item.is_locked():
                 qp.drawPixmap(QtCore.QRect(0, 25, 16, 16), QPixmap("qt_ui/icons/icon_locked.png"))
         # qp.drawLine(QtCore.QPoint(0, self.height()), QtCore.QPoint(self.width(), self.height()))
-        if self.is_selected:
-            qp.fillRect(QtCore.QRect(0,0,self.width(), self.height() - 10), QtGui.QColor(200, 200, 255, 50))
+
+
+        qp.drawText(QtCore.QPoint(10, 20), self.name)
         qp.end()
 
 
@@ -661,7 +676,8 @@ class TimelineBar(QtWidgets.QFrame):
 
         self.is_selected = False
 
-        self.setFrameStyle(1)
+        self.setFrameStyle(QFrame.Box)
+
         self.slices = []
         self.annotations = []
         self.show()
@@ -717,7 +733,7 @@ class TimelineBar(QtWidgets.QFrame):
         pen = QtGui.QPen()
         qp.begin(self)
         qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        pen.setColor(QtGui.QColor(255, 255, 255, 50))
+        pen.setColor(QtGui.QColor(20, 20, 20, 50))
         pen.setWidth(1)
         qp.setPen(pen)
         for i,a in enumerate(self.annotations):
@@ -773,16 +789,16 @@ class TimebarSlice(QtWidgets.QWidget):
             self.locked = self.item.is_locked()
 
         if self.locked :
-            col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 20)
+            col = (self.color[0], self.color[1], self.color[2], 20)
 
         else:
             if self.is_hovered:
-                col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 80)
+                col = (self.color[0], self.color[1], self.color[2], 80)
             else:
-                col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 50)
+                col = (self.color[0], self.color[1], self.color[2], 50)
 
             if self.is_selected:
-                col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 100)
+                col = (self.color[0], self.color[1], self.color[2], 100)
 
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
@@ -793,8 +809,18 @@ class TimebarSlice(QtWidgets.QWidget):
         pen.setWidth(2)
         qp.setPen(pen)
 
+        # col = QtGui.QColor(col[0], col[1], col[2], col[3])
+        gradient = QLinearGradient(QPointF(0, 0), QPointF(0, self.height()))
+        gradient.setColorAt(0.0, QColor(col[0] - 20, col[1] - 20, col[2] - 20, col[3] - 20))
+        gradient.setColorAt(0.5, QColor(col[0], col[1], col[2], col[3]))
+        gradient.setColorAt(1.0, QColor(col[0] - 20, col[1] - 20, col[2] - 20, col[3]  - 20))
+        gradient.setSpread(QGradient.PadSpread)
+
+        pen.setColor(QColor(col[0], col[1], col[2], 150))
         qp.drawRect(QtCore.QRect(0, 0, self.width(), self.height()))
-        qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), col)
+        qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), gradient)
+
+        pen.setColor(QtGui.QColor(255, 255, 255))
         qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
         qp.end()
 
@@ -1089,12 +1115,13 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.curr_pos = self.pos()
 
         else:
-            self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
-            # self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
-
-
-        # if QMouseEvent.buttons() & Qt.RightButton:
-        #     self.timeline.mousePressEvent(QMouseEvent)
+            QMouseEvent.ignore()
+        #     self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
+        #     # self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
+        #
+        #
+        # # if QMouseEvent.buttons() & Qt.RightButton:
+        # #     self.timeline.mousePressEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
@@ -1354,7 +1381,6 @@ class TimebarSelector(QtWidgets.QWidget):
 
     def set_end(self, pos):
         self.end = self.mapToParent(pos).x() * self.timeline.scale
-        print(self.start, self.end)
         self.rescale()
 
     def rescale(self):

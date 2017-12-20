@@ -116,7 +116,6 @@ class VocabularyTreeView(QTreeView):
         current_word = self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object
         new_name = self.model().itemFromIndex(self.selectedIndexes()[0]).text()
         current_word.name = new_name
-        print(new_name)
 
     def edit(self, *args, **kwargs):
         self.is_editing = True
@@ -263,7 +262,6 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
                 self.tabs_list.append(t)
 
         for voc in self.project().vocabularies:
-            print(voc.category)
             tab_idx = self.voc_categories.index(voc.category)
             tab = self.tabs_list[tab_idx]
             # l = QVBoxLayout(tab)

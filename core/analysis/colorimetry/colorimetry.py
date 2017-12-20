@@ -137,8 +137,8 @@ class ColometricsAnalysis(IAnalysisJob):
 
         return color_hist
 
-    def get_visualization(self, analysis):
-        return EHtmlDisplay(None, file_html(self.plot_histogram(analysis[0], analysis[1]), CDN, "Histogram"))
+    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path):
+        return EHtmlDisplay(None, file_html(self.plot_histogram(analysis.data[0], analysis.data[1]), CDN, "Histogram"))
 
     def get_preview(self, analysis):
         plot = self.plot_histogram(analysis[0], analysis[1])

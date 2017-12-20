@@ -20,7 +20,7 @@ is located at a different location, or when the movie file has been changed.
    :align: center
    :alt: map to buried treasure
 
-   Caption
+   The VIAN Project Dialog
 
 .. seealso::
 

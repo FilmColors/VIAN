@@ -94,7 +94,10 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User’s Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../DevelopersGuide.html">Developer’s Guide</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">IAnalysisJob</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">IAnalysisJob</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#functionallity">Functionallity</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="nodes.html">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugins.html">Plug-Ins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
@@ -167,14 +170,186 @@
             
   <div class="section" id="ianalysisjob">
 <span id="id1"></span><h1>IAnalysisJob<a class="headerlink" href="#ianalysisjob" title="Permalink to this headline">¶</a></h1>
-<p>The Timeline is used for all modifications of the VIAN project that is directed to time-dependent entities and as such
-the a major component of the UI.
-Use the Timeline to create and modify <em>Segmentations</em>, <em>Segments</em>, <em>Screenshots</em> and <em>Annotation Layers</em>.</p>
+<p>To implement your own Analysis, subclass the IAnalysisJob Interface and add your class into the
+<em>extension/analysis/your_package/</em> folder.
+Your analysis will then automatically appear in the Analysis/Extensions Menu of the MainWindow.</p>
+<div class="section" id="functionallity">
+<h2>Functionallity<a class="headerlink" href="#functionallity" title="Permalink to this headline">¶</a></h2>
+<p>Once the user has triggered the Button in the MainWindow menu, following process will take place:</p>
+<p><strong>Analysis</strong></p>
+<ol class="arabic simple">
+<li>A Dialog Appears where the user can select all targets and additional Parameters defined by your function.</li>
+<li>On Accept, the analysis will take place as follows:</li>
+</ol>
+<p>3.1 <strong>IAnalysisJob.prepare()</strong> will be performed, where you will pack all information needed into a list.</p>
+<p>3.2 <strong>IAnalysisJob.process()</strong> will be performed in an external Thread. All information packed in the last step will be available for you, and no more!</p>
+<p>3.3 <strong>IAnalysisJob.modify_project()</strong> Once the process() function has finished the Thread will be destroyed and the your result will be sent back to the Main-Thread into the IAnalysisJob.modify_project() function. Here you can perform any modifications to the Project if necessary.</p>
+<ol class="arabic simple" start="4">
+<li>You Analysis will be stored in the Project</li>
+</ol>
+<p><strong>Visualization</strong></p>
+<p>If the user triggers the Visualization, a new QMainWindow or a Webbrower will be opened and all results of your analysis will be
+handed to the widget, or url in case of a webbrowser.</p>
+<div class="figure align-center" id="id4">
+<a class="reference internal image-reference" href="../_images/ianalysisparameterwidget.png"><img alt="map to buried treasure" src="../_images/ianalysisparameterwidget.png" style="width: 555.0px; height: 562.0px;" /></a>
+<p class="caption"><span class="caption-text">The AnalysisDialog, note the Widget beneath <em>Parameters</em> is returned by IAnalysisJob.get_parameter_widget()</span></p>
+</div>
+<p><strong>IAnalysisJob.get_preview()</strong></p>
+<div class="figure align-center" id="id5">
+<a class="reference internal image-reference" href="../_images/analysis_preview.png"><img alt="map to buried treasure" src="../_images/analysis_preview.png" style="width: 453.0px; height: 652.0px;" /></a>
+<p class="caption"><span class="caption-text">The Preview Widget as shown in the Inspector when an Analysis is selected. Here as a QWebView</span></p>
+</div>
+<dl class="class">
+<dt id="core.data.interfaces.IAnalysisJob">
+<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">IAnalysisJob</code><span class="sig-paren">(</span><em>name</em>, <em>source_types</em>, <em>help_path=''</em>, <em>author='No Author'</em>, <em>version='0.0.1'</em>, <em>multiple_result=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the BaseClass for all Analyses. 
+Subclass it to implement your own Analyses.</p>
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.get_parameter_widget">
+<code class="descname">get_parameter_widget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_parameter_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_parameter_widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>If your Analysis has additional parameters which can be set by the User, Subclass the ParameterWidget, 
+and return it in this Function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Subclass of ParameterWidget</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.get_preview">
+<code class="descname">get_preview</code><span class="sig-paren">(</span><em>analysis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_preview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_preview" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Preview should be a visual representation of your analysis data, which can be displayed in the 
+Inspector, when the Analysis is selected.</p>
+<p>Make sure, that the creation of this widget should be fast.
+Easiest would be to render your data into an Image, convert it into a qpixamp and 
+attach it to a QLabel using QLabel(your_pixmap).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A QWidget serving as a preview</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.get_visualization">
+<code class="descname">get_visualization</code><span class="sig-paren">(</span><em>analysis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_visualization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_visualization" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is called by VIAN if the User wants to display the complete Visualization of the Data. 
+While you may essentially use any type Type of Visualization, you should either:</p>
+<ol class="arabic">
+<li><p class="first">subclass QMainWindow and implement your visualization into it.</p>
+</li>
+<li><p class="first">if you use a WebBased visualization use</p>
+<blockquote>
+<div><p>save your visualitations into the results/ directory of the project
+during the IAnalysisJob.modify_project() or IAnalysisJob.process()</p>
+<p>and in this function:
+import webbrowser
+webbrowser.open(url/to/your/result.html)</p>
+</div></blockquote>
+</li>
+</ol>
+<p>When using a QMainWindow, don’t forget to call QMainWindow.show() at the end of your __init__()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.modify_project">
+<code class="descname">modify_project</code><span class="sig-paren">(</span><em>project</em>, <em>result</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.modify_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.modify_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>If your Analysis should perform any modifications to the project, except storing the analysis,
+this is the place to perform them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>project</strong> – The Current Project to perform modifications on</li>
+<li><strong>result</strong> – The Result as returned from IAnalysisJob.process()</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.prepare">
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>project</em>, <em>targets</em>, <em>parameters</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>A step that should be performed in the main-thread before the processing takes place. 
+This is a good point to fetch all necessary data from the project and pack it to your needs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>project</strong> – The current Project</li>
+<li><strong>targets</strong> – The Target IProjectContainer Objects</li>
+<li><strong>parameters</strong> – Additional Parameters as returned from your ParameterWidget.get_parameters()</li>
+<li><strong>fps</strong> – The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A List of packed Data which will be handed to the IAnalysisJob.process()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>args</em>, <em>sign_progress</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Processing function, this will be executed in a seperate thread. 
+Make sure to <strong>NOT</strong> use the ProjectContainers within this Operation.</p>
+<p>Also, for User-Convenience call the sign_progress function regularilly to indicate the current progress:</p>
+<p><em>Example</em>:
+progress is a number E [0.0, … , 1.0]
+sign_progress(0.5)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> – the Arguments as packed in IAnalysisJob.prepare()</li>
+<li><strong>sign_progress</strong> – a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 <ul class="simple">
 <li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="../search.html"><span class="std std-ref">Search Page</span></a></li>
+<li>:ref:<a href="#id2"><span class="problematic" id="id3">`</span></a>search`cd _docs</li>
 </ul>
+</div>
 </div>
 
 
