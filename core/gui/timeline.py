@@ -521,7 +521,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         if self.is_selecting:
             self.is_selecting = False
-            pos = self.selector.pos().x() + self.selector.width() + self.pos().x()
+            # pos = self.selector.pos().x() + self.selector.width() + self.pos().x()
+            pos = self.selector.pos().x() + self.selector.width() - self.relative_corner.x()
 
             self.selector_context = SelectorContextMenu(self, self.mapToGlobal(QtCore.QPoint(pos, self.pos().y())), self.selector)
             self.selector_context.new_segmentation.connect(self.create_segmentation)
@@ -1115,8 +1116,8 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.curr_pos = self.pos()
 
         else:
-            QMouseEvent.ignore()
-        #     self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
+            # QMouseEvent.ignore()
+            self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
         #     # self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
         #
         #
@@ -1129,7 +1130,8 @@ class TimelineScrubber(QtWidgets.QWidget):
                 self.player.play()
                 self.was_playing = False
         else:
-            QMouseEvent.ignore()
+            self.timeline.end_selector()
+            # QMouseEvent.ignore()
             # self.timeline.end_selector()
 
     def mouseMoveEvent(self, QMouseEvent):
@@ -1139,7 +1141,8 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.player.set_media_time((self.curr_pos.x() + pos.x() + 5) * self.timeline.scale)
 
         if QMouseEvent.buttons() & Qt.RightButton:
-            QMouseEvent.ignore()
+            self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
+            # QMouseEvent.ignore()
 
     def paintEvent(self, QPaintEvent):
         self.raise_()
