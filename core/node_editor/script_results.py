@@ -6,11 +6,9 @@ from PyQt5.QtCore import Qt
 # from PyQt5.QtWebKitWidgets import QWebView
 import sys
 if sys.platform == "darwin":
-    print("OK")
     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
 else:
     from PyQt5.QtWebKitWidgets import QWebView
-    print("Not Darwin")
 from core.data.containers import *
 from core.gui.ewidgetbase import EDockWidget
 

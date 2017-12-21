@@ -1,4 +1,4 @@
-name: vian_osx
+name: vian_osx3
 channels:
 - conda-forge
 - defaults
