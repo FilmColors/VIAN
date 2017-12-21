@@ -230,7 +230,10 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         :param index: 
         :return: 
         """
-        return self.get_main_segmentation().segments[index]
+        try:
+            return self.get_main_segmentation().segments[index]
+        except:
+            return None
     # endregion
 
     # region Screenshots

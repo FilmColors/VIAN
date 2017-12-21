@@ -324,15 +324,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 b.rescale()
             ctrl.resize(self.controls_width - 4, ctrl_height)
 
-        if loc_y + self.bar_height < 400:
-            loc_y = 400 - self.bar_height
+        # if loc_y + self.bar_height < 400:
+        #     loc_y = 400 - self.bar_height
 
         # self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail, loc_y + self.bar_height)
         # self.frame_Controls.setFixedSize(self.controls_width, self.frame_Bars.height())
 
         self.frame_Controls.setFixedSize(self.controls_width, self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,
-                                     self.frame_Bars.height())
+                                     loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
         self.time_scrubber.setFixedHeight(self.frame_Bars.height())
 

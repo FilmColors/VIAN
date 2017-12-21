@@ -56,9 +56,9 @@ Interval Selection
 1. In the Timeline, **click** on the name of the Segmentation you want to add a Segment to.
 2. The Segmentation should now be highlighted with a steel-blue color.
 3. Navigate to the start point of your segment.
-4. Press **Ctrl + Q** to set a start-point. A new green line should appear.
+4. Press **Ctrl + W** to set a start-point. A new green line should appear.
 5. Navigate to the end-point of your Segment.
-6. Press **Ctrl + W** to finish up the new Segment
+6. Press **Ctrl + E** to finish up the new Segment
 
 
 .. figure:: create_segment_03.png

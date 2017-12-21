@@ -603,6 +603,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
         self.opencv_image.lower()
 
+
 class DrawingBase(QtWidgets.QWidget):
     def __init__(self, parent, annotation_object):
         super(DrawingBase, self).__init__(parent)

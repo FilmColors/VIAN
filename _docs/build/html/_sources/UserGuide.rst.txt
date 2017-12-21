@@ -10,7 +10,7 @@ Welcome to the User's Guide of VIAN. In this documentation you'll find all infor
 of VIAN. If your a developer, please refer to the Developer's Guide.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
 
     user_interface/user_interface
     step_by_step/step_by_step

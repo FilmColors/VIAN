@@ -359,7 +359,7 @@
 <span class="sd">        </span>
 <span class="sd">        :param args: the Arguments as packed in IAnalysisJob.prepare()</span>
 <span class="sd">        :param sign_progress: a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])</span>
-<span class="sd">        :return: </span>
+<span class="sd">        :return: AnalysisJobAnalysis Object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;get_name not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
 
@@ -369,7 +369,7 @@
 <span class="sd">        this is the place to perform them. </span>
 <span class="sd">        </span>
 <span class="sd">        :param project: The Current Project to perform modifications on</span>
-<span class="sd">        :param result: The Result as returned from IAnalysisJob.process()</span>
+<span class="sd">        :param result: The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
@@ -383,7 +383,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ParameterWidget</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.get_visualization"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.get_visualization">[docs]</a>    <span class="k">def</span> <span class="nf">get_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.get_visualization"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.get_visualization">[docs]</a>    <span class="k">def</span> <span class="nf">get_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">result_path</span><span class="p">,</span> <span class="n">data_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function is called by VIAN if the User wants to display the complete Visualization of the Data. </span>
 <span class="sd">        While you may essentially use any type Type of Visualization, you should either: </span>
@@ -400,7 +400,9 @@
 <span class="sd">        </span>
 <span class="sd">        When using a QMainWindow, don&#39;t forget to call QMainWindow.show() at the end of your __init__()</span>
 <span class="sd">        </span>
-<span class="sd">        :param analysis: </span>
+<span class="sd">        :param analysis: The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</span>
+<span class="sd">        :param result_path: The Path to the results directory of the project</span>
+<span class="sd">        :param data_path: The Path to the data directory of the project</span>
 <span class="sd">        :return: </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;get_name not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
@@ -415,7 +417,7 @@
 <span class="sd">        attach it to a QLabel using QLabel(your_pixmap).</span>
 <span class="sd">        </span>
 <span class="sd">        </span>
-<span class="sd">        :param analysis: </span>
+<span class="sd">        :param analysis: The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</span>
 <span class="sd">        :return: A QWidget serving as a preview</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
@@ -444,6 +446,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span>
 
+
+<span class="k">class</span> <span class="nc">AutomatedTextSource</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">get_source_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">get_auto_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
 <span class="k">class</span> <span class="nc">IConcurrentJob</span><span class="p">():</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">show_modify_progress</span><span class="o">=</span> <span class="kc">False</span><span class="p">):</span>

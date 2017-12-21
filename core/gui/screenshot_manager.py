@@ -227,7 +227,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
                 current_segment_id = s.scene_id
                 segment = self.project.get_segment_of_main_segmentation(current_segment_id - 1)
-                current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
+                if segment is not None:
+                    current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
 
             # Should we use the Annotated Screenshot?
             if s.annotation_is_visible and s.img_blend is not None:
@@ -290,14 +291,31 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             image_scale = round(img_width / (viewport_size.x()), 4)
             self.n_per_row = np.clip(int(np.floor((viewport_width + 0.5 * img_width) / (img_width + x_offset))), 1, None)
 
-        for segm in self.images_segmentation:
-            self.add_line(y)
-            self.add_caption(100, y + 100, segm.segm_name)
-            self.add_caption(100, y + 250, segm.segm_id)
+        if len(self.images_segmentation) > 0:
+            for segm in self.images_segmentation:
+                self.add_line(y)
+                self.add_caption(100, y + 100, segm.segm_name)
+                self.add_caption(100, y + 250, segm.segm_id)
 
+                x_counter = 0
+                x = caption_width - (x_offset + img_width)
+                for i, img in enumerate(segm.segm_images):
+                    if x_counter == self.n_per_row - 1:
+                        x = caption_width
+                        x_counter = 1
+                        y += (y_offset + img_height)
+                    else:
+                        x_counter += 1
+                        x += (x_offset + img_width)
+
+                    img.setPos(x, y + int(img_height/5))
+                    img.selection_rect = QtCore.QRect(x, y + int(img_height/5), img_width, img_height)
+
+                y += (2 * img_height)
+        else:
             x_counter = 0
             x = caption_width - (x_offset + img_width)
-            for i, img in enumerate(segm.segm_images):
+            for i, img in enumerate(self.images_plain):
                 if x_counter == self.n_per_row - 1:
                     x = caption_width
                     x_counter = 1
@@ -306,10 +324,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     x_counter += 1
                     x += (x_offset + img_width)
 
-                img.setPos(x, y + int(img_height/5))
-                img.selection_rect = QtCore.QRect(x, y + int(img_height/5), img_width, img_height)
+                img.setPos(x, y + int(img_height / 5))
+                img.selection_rect = QtCore.QRect(x, y + int(img_height / 5), img_width, img_height)
 
-            y += (2 * img_height)
 
 
         self.scene.setSceneRect(self.sceneRect().x(), self.sceneRect().y(), self.n_per_row * (img_width + x_offset) - 0.5 * img_width, y)
