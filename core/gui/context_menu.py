@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QMainWindow, QMenu, QFileDialog
 from core.data.enums import *
 from core.data.computation import parse_file_path
-
+from core.data.containers import *
 
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):
 
@@ -49,7 +49,7 @@ def open_context_menu(main_window, pos, containers, project, screenshot_root = F
 
         if container_type == SCREENSHOT:
             screenshots = containers
-            cm = ScreenshotContextMenu(main_window, pos, screenshots)
+            cm = ScreenshotContextMenu(main_window, pos, screenshots, project)
             return cm
 
         if container_type == SCREENSHOT_GROUP:
@@ -343,14 +343,27 @@ class AnnotationContextMenu(ContextMenu):
 
 
 class ScreenshotContextMenu(ContextMenu):
-    def __init__(self, parent, pos, screenshots):
+    def __init__(self, parent, pos, screenshots, project: ElanExtensionProject):
         super(ScreenshotContextMenu, self).__init__(parent, pos)
         self.screenshots = screenshots
+        self.project = project
+
 
         self.action_goto = self.addAction("Go To Time")
         self.action_delete = self.addAction("Remove Screenshot")
         self.action_goto.triggered.connect(self.go_to)
         self.action_delete.triggered.connect(self.on_delete)
+
+        self.group_menu = self.addMenu("Assign to Group ...")
+        self.a_new_grp = self.group_menu.addAction("Create new Group")
+        self.a_new_grp.triggered.connect(self.on_assign_to_new)
+        self.group_menu.addSeparator()
+
+        for grp in self.project.screenshot_groups:
+            action = self.group_menu.addAction(grp.get_name())
+            action.triggered.connect(partial(self.on_assign_grp, grp))
+
+
         self.popup(pos)
 
     def on_delete(self):
@@ -373,6 +386,19 @@ class ScreenshotContextMenu(ContextMenu):
             print("ContextMenu Error", e)
 
         self.close()
+
+    def on_assign_to_new(self):
+        grp = self.project.add_screenshot_group()
+        self.on_assign_grp(grp)
+
+
+    def on_assign_grp(self, grp):
+        to_assign = []
+        for s in self.screenshots:
+            if isinstance(s, Screenshot):
+                to_assign.append(s)
+
+        grp.add_screenshots(to_assign)
 
 
 class SegmentContexMenu(ContextMenu):

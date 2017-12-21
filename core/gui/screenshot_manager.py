@@ -457,6 +457,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.update_manager()
 
     def on_changed(self, project, item):
+        self.project = project
         self.update_manager()
         self.on_selected(None, project.get_selected())
 
@@ -464,6 +465,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.frame_segment(self.current_segment_index)
         else:
             self.center_images()
+
 
     def on_selected(self, sender, selected):
         if not sender is self:

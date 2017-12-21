@@ -357,6 +357,9 @@ class Player_VLC(VideoPlayer):
     def stop(self):
         self.media_player.stop()
         self.playing = False
+        if self.media is not None:
+            self.media.release()
+            self.media = None
         #self.update_timer.stop()
 
     def is_playing(self):

@@ -693,6 +693,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.abortAllConcurrentThreads.emit()
         self.project.cleanup()
         self.project = ElanExtensionProject(self, name="No Project")
+        print(len(self.project.screenshots))
 
         #self.project_streamer.release_project()
 

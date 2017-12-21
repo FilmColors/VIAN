@@ -310,6 +310,8 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         if not initial:
             self.dispatch_changed()
 
+        return grp
+
     def remove_screenshot_group(self, grp):
         if grp is not self.screenshot_groups[0]:
             self.screenshot_groups.remove(grp)
@@ -1870,6 +1872,8 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         for s in shots:
             self.screenshots.append(s)
             s.screenshot_group = self.get_name()
+
+        self.dispatch_on_changed()
 
     def remove_screenshots(self, shots):
         if not isinstance(shots, list):

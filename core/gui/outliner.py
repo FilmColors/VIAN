@@ -273,8 +273,11 @@ class OutlinerTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() == Qt.RightButton:
-            super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
+            if len(self.selectedIndexes()) <= 1:
+                super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
+
             self.open_context_menu(QMouseEvent)
+            self.setSelectionMode(self.SingleSelection)
         else:
             super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
 
