@@ -6,9 +6,11 @@ from core.gui.ewidgetbase import EHtmlDisplay
 from bokeh.embed import file_html
 from bokeh.colors import RGB
 from bokeh.resources import CDN
+from bokeh.io import save
 import numpy as np
 from typing import List
 import cv2
+import webbrowser
 from core.data.computation import ms_to_frames
 from PyQt5 import uic
 from PyQt5.QtCore import *
@@ -138,10 +140,19 @@ class ColometricsAnalysis(IAnalysisJob):
         return color_hist
 
     def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path):
-        return EHtmlDisplay(None, file_html(self.plot_histogram(analysis.data[0], analysis.data[1]), CDN, "Histogram"))
+        hist = self.plot_histogram(analysis.data[0], analysis.data[1])
+        l = layout([
+            [hist]
+        ])
+
+        path = data_path + "/" + analysis.get_name() + ".html"
+        save(l, path)
+        print(path)
+
+        open_web_browser(path)
 
     def get_preview(self, analysis):
-        plot = self.plot_histogram(analysis[0], analysis[1])
+        plot = self.plot_histogram(analysis.data[0], analysis.data[1])
         html = file_html(plot, CDN, "Histogram")
         return EHtmlDisplay(None, html)
 

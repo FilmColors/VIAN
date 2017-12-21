@@ -163,7 +163,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
 
         print(path)
         save(l, path)
-        webbrowser.open(path)
+        open_web_browser(path)
 
     def barcode_to_image(self, barcode_colors, image_width, image_height, interpolation):
 

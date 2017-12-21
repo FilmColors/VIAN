@@ -8,7 +8,7 @@ import cv2
 import sys
 import argparse
 import os
-
+import webbrowser
 
 def ms_to_string(ms):
     ms = int(ms)
@@ -247,3 +247,9 @@ def version_check(smaller_than, version):
                 return True
 
     return False
+
+
+def open_web_browser(file_path):
+    if sys.platform == "darwin":  # check if on OSX
+        file_path = "file:///" + file_path
+    webbrowser.get().open(file_path)

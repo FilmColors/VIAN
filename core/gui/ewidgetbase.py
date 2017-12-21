@@ -2,9 +2,17 @@ from PyQt5.Qt import QApplication
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent
 from PyQt5.QtWidgets import *
-from PyQt5.QtWebKitWidgets import QWebView
+
 from PyQt5 import uic
 import os
+import sys
+if sys.platform == "darwin":
+    print("OK")
+    from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
+else:
+    from PyQt5.QtWebKitWidgets import QWebView
+    print("Not Darwin")
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import webbrowser

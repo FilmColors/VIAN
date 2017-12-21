@@ -2362,7 +2362,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         try:
             self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self, self.project.results_dir, self.project.data_dir)
         except Exception as e:
-            print(e)
+            print("Exception in get_visualization()", e)
             QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
                                 " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 

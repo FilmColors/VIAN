@@ -330,11 +330,12 @@ QCheckBox::indicator{
     border: 1px solid #b1b1b1;
     width: 9px;
     height: 9px;
+    border-radius: 2px;
 }
 
 QCheckBox::indicator:checked
 {
-    background-color: #b1b1b1;
+    background-color: #3f7eaf;
 
 }
 
