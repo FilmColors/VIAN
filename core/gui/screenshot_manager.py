@@ -47,6 +47,8 @@ class SMSegment(object):
         self.segm_id = segm_id
         self.segm_start = segm_start
         self.segm_images = []
+        self.scr_captions = []
+        self.scr_caption_offset = QPoint(0,0)
 
 
 class ScreenshotsManagerDockWidget(EDockWidget):
@@ -142,7 +144,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.font_size = 128
         self.font_size_segments = 120
         self.font.setPointSize(self.font_size)
-        self.color = QColor(255,255,255)
+        self.color = QColor(225,225,225)
 
         self.setDragMode(self.RubberBandDrag)
         self.setRubberBandSelectionMode(Qt.IntersectsItemShape)
@@ -162,6 +164,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.images_plain = []
         self.images_segmentation = []
         self.captions = []
+        self.scr_captions = []
         self.selected = []
         self.selection_frames = []
 
@@ -252,6 +255,13 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if current_sm_object is not None:
                 current_sm_object.segm_images.append(item_image)
 
+                scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font)
+                scr_lbl.setPos(item_image.pos() + QPoint(10, qpixmap.height()))
+                scr_lbl.setDefaultTextColor(self.color)
+                current_sm_object.scr_captions.append(scr_lbl)
+                current_sm_object.scr_caption_offset = QPoint(10, qpixmap.height())
+                self.scr_captions.append(scr_lbl)
+
         if current_sm_object is not None:
             self.images_segmentation.append(current_sm_object)
 
@@ -259,6 +269,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.arrange_images()
 
     def clear_manager(self):
+        self.clear_scr_captions()
+
         for img in self.images_plain:
             self.scene.removeItem(img)
         for cap in self.captions:
@@ -310,6 +322,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
                     img.setPos(x, y + int(img_height/5))
                     img.selection_rect = QtCore.QRect(x, y + int(img_height/5), img_width, img_height)
+                    segm.scr_captions[i].setPos(img.pos() + segm.scr_caption_offset)
+
 
                 y += (2 * img_height)
         else:
@@ -352,7 +366,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def add_caption(self, x, y, text):
         caption = self.scene.addText(str(text), self.font)
-        caption.setDefaultTextColor(QColor(255, 255, 255))
+        caption.setDefaultTextColor(self.color)
         caption.setPos(QtCore.QPointF(x, y))
         self.captions.append(caption)
         return caption
@@ -365,7 +379,14 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def clear_captions(self):
         for cap in self.captions:
             self.scene.removeItem(cap)
+
         self.captions = []
+
+    def clear_scr_captions(self):
+        for cap in self.scr_captions:
+            self.scene.removeItem(cap)
+
+        self.scr_captions = []
 
     def select_image(self, images, dispatch = True):
         self.selected = images
@@ -465,7 +486,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.frame_segment(self.current_segment_index)
         else:
             self.center_images()
-
 
     def on_selected(self, sender, selected):
         if not sender is self:
