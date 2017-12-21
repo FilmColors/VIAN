@@ -904,16 +904,37 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
 
 
-    def create_segment(self, start, stop, ID = None, from_last_threshold = 100):
+    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False):
         if stop-start < from_last_threshold:
-            last = None
-            for s in self.segments:
-                if s.end < start:
-                    last = s
-            if last is None:
-                start = 0
+            if forward_segmenting:
+                # Find the next Segment if there is one and create a segment from start to the next segment start
+                next = None
+                last = None
+                for s in self.segments:
+                    if s.start < start:
+                        last = s
+                    if s.start > start and next is None:
+                        next = s
+                    if last is not None and next is not None:
+                        break
+
+                if next is None:
+                    stop = self.project.movie_descriptor.duration
+                else:
+                    stop = next.get_start()
+
+                if last is not None:
+                    last.set_end(start)
+
             else:
-                start = last.end
+                last = None
+                for s in self.segments:
+                    if s.end < start:
+                        last = s
+                if last is None:
+                    start = 0
+                else:
+                    start = last.end
 
         if ID is None:
             ID = len(self.segments) + 1

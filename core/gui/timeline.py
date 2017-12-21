@@ -48,6 +48,12 @@ class TimelineContainer(EDockWidget):
         self.a_inhibit_overlap.setChecked(True)
         self.a_inhibit_overlap.triggered.connect(self.update_settings)
 
+        self.a_forward_segmentation = self.menu_options.addAction("\tForward Segmentation")
+        self.a_forward_segmentation.setCheckable(True)
+        self.a_forward_segmentation.setChecked(False)
+        self.a_forward_segmentation.triggered.connect(self.update_settings)
+
+
         self.a_show_id.triggered.connect(self.update_settings)
         self.a_show_name.triggered.connect(self.update_settings)
         self.a_show_text.triggered.connect(self.update_settings)
@@ -66,6 +72,8 @@ class TimelineContainer(EDockWidget):
         self.timeline.show_name = self.a_show_name.isChecked()
         self.timeline.show_text = self.a_show_text.isChecked()
         self.timeline.inhibit_overlap = self.a_inhibit_overlap.isChecked()
+
+        self.timeline.is_forward_segmenting = self.a_forward_segmentation.isChecked()
 
 
         self.timeline.on_timeline_settings_update()
@@ -125,6 +133,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.show_id = True
         self.show_name = False
         self.show_text = True
+        self.is_forward_segmenting = False
 
         self.inhibit_overlap = True
 
@@ -558,11 +567,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def create_segment(self, lst = None):
         # If Nothing is handed in, we're performing a fast-segmentation
         # which means, that the segment is created from the last segments end to the current movie-time
+
+
         if not lst:
-            lst = [self.curr_movie_time - 1, self.curr_movie_time]
+                lst = [self.curr_movie_time - 1, self.curr_movie_time]
         if self.selected is not None:
             if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment(lst[0], lst[1])
+                self.selected.create_segment(lst[0], lst[1], forward_segmenting = self.is_forward_segmenting)
 
     def create_layer(self, lst):
         if len(lst) == 0:
