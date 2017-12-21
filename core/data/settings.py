@@ -72,6 +72,9 @@ class UserSettings():
         self.MAIN_FONT = Font(font_family="Lucida Console", font_color=(50,50,50,255), font_size=14)
         self.PALETTES = [palette_sand, palette_grass, palette_difference, palette_beach, palette_earth, palette_gray]
 
+        self.recent_files_name = []
+        self.recent_files_path = []
+
 
     def get_qt_color(self, color):
         font = QFont(color.font_family)
@@ -91,6 +94,29 @@ class UserSettings():
         except Exception as e:
             print(e)
 
+
+    def add_to_recent_files(self, project):
+        path = project.path
+        name = project.name
+
+        if name not in self.recent_files_name:
+            n_name = [name]
+            n_name.extend(self.recent_files_name)
+            self.recent_files_name = n_name
+
+            n_path = [path]
+            n_path.extend(self.recent_files_path)
+            self.recent_files_path = n_path
+        else:
+            idx = self.recent_files_name.index(name)
+
+            n_name = [self.recent_files_name.pop(idx)]
+            n_name.extend(self.recent_files_name)
+            self.recent_files_name = n_name
+
+            n_path = [self.recent_files_path.pop(idx)]
+            n_path.extend(self.recent_files_path)
+            self.recent_files_path = n_path
 
     def load(self):
         try:

@@ -284,6 +284,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionUpdate.triggered.connect(self.update_vian)
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
+
+        self.actionClearRecent.triggered.connect(self.clear_recent)
+
+
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
                                  self.drawing_overlay,
@@ -344,6 +348,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_selecting_analyzes = False
 
         loading_screen.hide()
+
+        self.update_recent_menu()
         self.switch_perspective(Perspective.Annotation.name)
 
         # self.load_project("projects/ratatouille/Ratatouille.eext")
@@ -568,6 +574,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.profiler.disable()
         self.profiler.dump_stats("Profile.prof")
+
+        self.settings.store()
         QtWidgets.QMainWindow.close(self)
 
     def resizeEvent(self, *args, **kwargs):
@@ -601,6 +609,26 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+    def open_recent(self, index):
+        path = self.settings.recent_files_path[index]
+        self.load_project(path)
+
+    def clear_recent(self):
+        self.settings.recent_files_name = []
+        self.settings.recent_files_path = []
+        self.update_recent_menu()
+
+    def update_recent_menu(self):
+        self.menuRecently_Opened.clear()
+        try:
+            for i, recent in enumerate(self.settings.recent_files_name):
+                action = self.menuRecently_Opened.addAction(recent)
+                action.triggered.connect(partial(self.open_recent, i))
+        except:
+            self.settings.recent_files_path = []
+            self.settings.recent_files_name = []
+
+
     def eval_class(self, class_name):
         try:
             return eval(class_name)
@@ -659,6 +687,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close_project()
 
         self.project = project
+        self.settings.add_to_recent_files(self.project)
+        self.update_recent_menu()
+
         self.project.inhibit_dispatch = True
         if template_path is not None:
             self.project.apply_template(template_path)
@@ -717,6 +748,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.project = new
+        self.settings.add_to_recent_files(self.project)
+        self.update_recent_menu()
+
         new.inhibit_dispatch = False
         #self.project_streamer.set_project(new)
         self.dispatch_on_loaded()

@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>724</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -55,6 +55,13 @@
      <addaction name="actionExportTemplate"/>
      <addaction name="actionExportVocabulary"/>
     </widget>
+    <widget class="QMenu" name="menuRecently_Opened">
+     <property name="title">
+      <string>Recently Opened</string>
+     </property>
+     <addaction name="actionClearRecent"/>
+     <addaction name="separator"/>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
@@ -64,6 +71,7 @@
     <addaction name="menuImport"/>
     <addaction name="menuExport"/>
     <addaction name="separator"/>
+    <addaction name="menuRecently_Opened"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuAnalyze">
@@ -485,6 +493,11 @@
   <action name="actionExportVocabulary">
    <property name="text">
     <string>VIAN Vocabulary</string>
+   </property>
+  </action>
+  <action name="actionClearRecent">
+   <property name="text">
+    <string>Clear List</string>
    </property>
   </action>
  </widget>
