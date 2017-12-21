@@ -10,7 +10,7 @@ from PyQt5.QtGui import QIcon, QFont
 from core.data.computation import *
 from core.data.containers import AnnotationLayer, Annotation
 from core.data.enums import *
-from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
+from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending, IConcurrentJob
 from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu
 from .ewidgetbase import EDockWidget, EToolBar
@@ -587,6 +587,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             # Thus we want to test if there is really a new Frame position
             if self.current_opencv_frame_index != idx:
                 self.current_opencv_frame_index = idx
+
                 # idx = int(float(time) / (1000.0 / fps))
                 self.videoCap.set(cv2.CAP_PROP_POS_FRAMES, idx)
                 ret, frame = self.videoCap.read()
@@ -598,6 +599,9 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             print(e)
             pass
 
+    def set_opencv_pixmap(self, qpixmap):
+        self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
+        self.opencv_image.lower()
 
 class DrawingBase(QtWidgets.QWidget):
     def __init__(self, parent, annotation_object):
@@ -1063,6 +1067,12 @@ class DrawingText(DrawingBase):
         self.text = text
 
     def drawShape(self, qp, rect = None, scale = 1.0):
+        # Get the Automation Text
+        if self.annotation_object.is_automated:
+            source = self.annotation_object.project.get_by_id(self.annotation_object.automated_source)
+            if source is not None:
+               self.text = source.get_auto_text(self.annotation_object.automate_property, self.overlay.current_time, self.overlay.main_window.player.get_fps())
+
         self.font.setFamily(self.annotation_object.font)
         self.font.setPointSize(int(round(float(self.annotation_object.font_size) * self.scale, 0)))
         if rect is None:
@@ -1312,64 +1322,5 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
         super(DrawingEditorWidget, self).focusOutEvent(*args, **kwargs)
 
 
-#OLD CODE
-# class AnnotationToolbar(EDockWidget):
-#     def __init__(self, main_window, drawing_widget):
-#         super(AnnotationToolbar, self).__init__(main_window)
-#         path = os.path.abspath("qt_ui/AnnotationToolbar.ui")
-#         uic.loadUi(path, self)
-#         self.setWindowTitle("Annotation")
-#
-#         self.drawing_widget = drawing_widget
-#         self.color_picker = ColorSelector(self, main_window.settings)
-#         self.horizontalLayout_2.addWidget(self.color_picker)
-#         self.spinBox_LineThickness.valueChanged.connect(self.on_line_width_change)
-#         spacer = QtWidgets.QSpacerItem(1,1, QtWidgets.QSizePolicy.MinimumExpanding,QtWidgets.QSizePolicy.Minimum )
-#         spacer.setAlignment(Qt.AlignRight)
-#
-#         self.horizontalLayout_2.addItem(spacer)
-#
-#         self.btn_Rectangle.clicked.connect(self.on_rectangle)
-#         self.btn_Ellipse.clicked.connect(self.on_ellipse)
-#         self.btn_Text.clicked.connect(self.on_text)
-#         self.btn_Image.clicked.connect(self.on_image)
-#         self.btn_Line.clicked.connect(self.on_line)
-#         self.btn_Arrow.clicked.connect(self.on_arrow)
-#         self.btn_FreeHand.clicked.connect(self.on_freehand)
-#
-#         self.current_color = (0,0,0)
-#         self.line_width = 5
-#
-#         self.color_picker.on_selection.connect(self.on_color_change)
-#
-#     def on_color_change(self, color):
-#         self.current_color = color
-#
-#     def on_line_width_change(self):
-#         self.line_width = self.spinBox_LineThickness.value()
-#
-#     def on_rectangle(self):
-#         self.drawing_widget.create_rectangle(self.current_color, self.spinBox_LineThickness.value())
-#
-#     def on_ellipse(self):
-#         self.drawing_widget.create_ellipse(self.current_color, self.spinBox_LineThickness.value())
-#
-#     def on_text(self):
-#         self.drawing_widget.create_text(self.current_color, self.spinBox_LineThickness.value(), self.spinBox_FontSize.value())
-#
-#     def on_line(self):
-#         pass
-#
-#     def on_image(self):
-#         image_path = QFileDialog.getOpenFileUrl()[0].url()
-#         print image_path
-#         image_path = parse_file_path(image_path)
-#         print image_path
-#         self.drawing_widget.create_image(image_path)
-#
-#     def on_freehand(self):
-#         freehand = self.drawing_widget.create_freehand(self.current_color, self.spinBox_LineThickness.value())
-#
-#     def on_arrow(self):
-#         self.main_window.test_function()
+
 

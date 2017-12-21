@@ -105,7 +105,12 @@ class Inspector(EDockWidget, IProjectChangeNotify):
 
         if s_type == ANNOTATION:
             self.lbl_Type.setText("Annotation")
-            widgets = [AttributesITimeRange(self, target_item), AttributesAnnotation(self, target_item)]
+
+            if target_item.a_type == AnnotationType.Text:
+                widgets = [AttributesITimeRange(self, target_item), AttributesAnnotation(self, target_item), AttributesTextAnnotation(self, target_item)]
+            else:
+                widgets = [AttributesITimeRange(self, target_item), AttributesAnnotation(self, target_item)]
+
 
         if s_type == ANNOTATION_LAYER:
             self.lbl_Type.setText("Annotation Layer")
@@ -234,11 +239,12 @@ class AttributesAnnotation(QWidget):
         self.main_window = parent.main_window
 
         self.comboBox_Tracking.setCurrentText(self.annotation.tracking)
-        self.comboBox_Tracking.currentIndexChanged.connect(self.on_tracking_changed)
+        # self.comboBox_Tracking.currentIndexChanged.connect(self.on_tracking_changed)
+        self.btn_Track.clicked.connect(self.on_track)
 
         self.show()
 
-    def on_tracking_changed(self):
+    def on_track(self):
         index =  self.comboBox_Tracking.currentIndex()
         if index != 0:
             # Removing all keys from the Annotation
@@ -256,12 +262,58 @@ class AttributesAnnotation(QWidget):
                                     self.annotation.annotation_layer.get_start(),
                                     self.annotation.annotation_layer.get_end(),
                                     self.main_window.player.get_fps(),
-                                    self.comboBox_Tracking.currentText()
+                                    self.comboBox_Tracking.currentText(),
+                                    self.spinBox_Resolution.value()
                                     ])
             self.annotation.tracking = self.comboBox_Tracking.currentText()
             self.main_window.run_job_concurrent(job)
 
 
+
+class AttributesTextAnnotation(QWidget):
+    def __init__(self, parent, descriptor):
+        super(AttributesTextAnnotation, self).__init__(parent)
+        path = os.path.abspath("qt_ui/AttributesTextAnnotation.ui")
+        uic.loadUi(path, self)
+        self.annotation = descriptor
+        self.main_window = parent.main_window
+
+        self.checkBox_TextAutomation.setChecked(self.annotation.is_automated)
+
+        self.source_objects = []
+        for obj in self.main_window.project.get_all_containers():
+            if isinstance(obj, AutomatedTextSource):
+                self.comboBox_AutoSourceObject.addItem(obj.get_name())
+                self.source_objects.append(obj)
+
+        self.update_source_property_cb()
+
+        try:
+            self.comboBox_AutoSourceObject.setCurrentText(self.main_window.project.get_by_id(self.annotation.automated_source).get_name())
+            self.comboBox_AutoSourceProperty.setCurrentText(self.annotation.automate_property)
+        except:
+            pass
+
+        self.comboBox_AutoSourceObject.currentIndexChanged.connect(self.on_source_changed)
+        self.comboBox_AutoSourceProperty.currentIndexChanged.connect(self.on_automation_changed)
+        self.checkBox_TextAutomation.stateChanged.connect(self.on_automation_changed)
+        self.show()
+
+
+    def update_source_property_cb(self):
+        self.comboBox_AutoSourceProperty.clear()
+        obj =  self.source_objects[self.comboBox_AutoSourceObject.currentIndex()]
+        for attr in obj.get_source_properties():
+            self.comboBox_AutoSourceProperty.addItem(attr)
+
+    def on_source_changed(self):
+        self.update_source_property_cb()
+
+    def on_automation_changed(self):
+        self.annotation.is_automated = self.checkBox_TextAutomation.isChecked()
+        if self.annotation.is_automated:
+            self.annotation.automated_source = self.source_objects[self.comboBox_AutoSourceObject.currentIndex()].get_id()
+            self.annotation.automate_property = self.comboBox_AutoSourceProperty.currentText()
 
 
 
@@ -306,6 +358,7 @@ class AttributesAnalysis(QWidget):
 
     def on_show_vis(self):
         self.descriptor.get_visualization()
+
 
 class AttributesNode(QWidget):
     def __init__(self, parent, descriptor):

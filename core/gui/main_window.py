@@ -2,9 +2,11 @@
 
 # from annotation_viewer import AnnotationViewer
 import webbrowser
+import cProfile
 import os
 import glob
 from core.concurrent.worker import Worker
+
 
 import importlib
 from core.concurrent.worker_functions import *
@@ -64,6 +66,9 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
+
+        self.profiler = cProfile.Profile()
+        self.profiler.enable()
         loading_screen = LoadingScreen()
         self.has_open_project = False
         self.version = __version__
@@ -290,7 +295,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                  self.history_view,
                                  self.node_editor_dock.node_editor,
                                  self.vocabulary_manager,
-                                 self.vocabulary_matrix
+                                 self.vocabulary_matrix,
+                                 self.project_streamer,
                                           ]
 
 
@@ -361,7 +367,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        print(self.project.create_file_structure())
+        self.project.clean_id_list()
 
     #region WidgetCreation
 
@@ -559,6 +565,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vlc_player.release()
         self.vlc_instance.release()
         self.corpus_client.send_disconnect(self.settings.USER_NAME)
+
+        self.profiler.disable()
+        self.profiler.dump_stats("Profile.prof")
         QtWidgets.QMainWindow.close(self)
 
     def resizeEvent(self, *args, **kwargs):
@@ -604,7 +613,6 @@ class MainWindow(QtWidgets.QMainWindow):
                         return getattr(module, class_name)
             except Exception as e:
                 print(e)
-
 
     def update_vian(self):
         result = self.updater.get_server_version()
@@ -937,7 +945,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = VocabularyExportDialog(self)
         dialog.show()
 
-
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)
 
@@ -1268,7 +1275,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 o.on_selected(sender, selected)
 
     def dispatch_on_timestep_update(self, time):
-
         # self.timeline.timeline.on_timestep_update(time)
         self.onTimeStep.emit(time)
 

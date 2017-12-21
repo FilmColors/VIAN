@@ -1,6 +1,7 @@
 import os
 import platform
 import sys
+import cProfile
 import traceback
 from datetime import datetime
 from threading import Thread
@@ -16,7 +17,6 @@ from core.gui.main_window import MainWindow
 
 #TODO DEBUG needs to be fixed, start in non debug does not work currently
 DEBUG = True
-
 
 class MainThread(Thread):
     def __init__(self, vlc_media_player, vlc_instance, server):
@@ -68,6 +68,7 @@ if __name__ == '__main__':
 
     # vlc_argmuents = "--avcodec-hw=dxva2 --no-keyboard-events --no-mouse-events --verbose 2"
     vlc_argmuents = "--no-keyboard-events --no-mouse-events --verbose 1 --no-embedded-video"
+
     if not DEBUG:
         try:
             sys._excepthook = sys.excepthook
@@ -129,7 +130,6 @@ if __name__ == '__main__':
         main = MainWindow(vlc_instance, vlc_media_player)
 
         sys.exit(app.exec_())
-
 
 
 

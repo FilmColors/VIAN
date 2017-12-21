@@ -470,7 +470,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
             self.scrollArea.horizontalScrollBar().setValue(side_offset // self.scale)
 
-
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
             if self.is_fast_selecting:

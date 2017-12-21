@@ -289,6 +289,13 @@ class ParameterWidget(QWidget):
         return None
 
 
+class AutomatedTextSource():
+    def get_source_properties(self):
+        return None
+
+    def get_auto_text(self, property_name, time_ms, fps):
+        return ""
+
 class IConcurrentJob():
     def __init__(self, args, show_modify_progress= False):
         self.show_modify_progress = show_modify_progress

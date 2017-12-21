@@ -16,6 +16,7 @@ class BasicTrackingJob(IConcurrentJob):
         start_frame = ms_to_frames(args[3], fps)
         end_frame = ms_to_frames(args[4], fps)
         method = args[6]
+        resolution = args[7]
 
         keys = []
 
@@ -66,15 +67,16 @@ class BasicTrackingJob(IConcurrentJob):
             # Draw bounding box
             if ok:
                 # Tracking success
-                time = frame2ms(i, fps)
-                pos = [bbox[0], bbox[1]]
-                keys.append([time, pos])
+                if i % resolution == 0:
+                    time = frame2ms(i, fps)
+                    pos = [bbox[0], bbox[1]]
+                    keys.append([time, pos])
 
-                p1 = (int(bbox[0]), int(bbox[1]))
-                p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-                cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
-                # cv2.imshow("Returned", frame)
-                cv2.waitKey(30)
+                    p1 = (int(bbox[0]), int(bbox[1]))
+                    p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
+                    cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
+                    # cv2.imshow("Returned", frame)
+                    # cv2.waitKey(30)
 
 
         return [annotation_id, keys]

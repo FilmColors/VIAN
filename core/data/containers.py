@@ -140,6 +140,12 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
         print(self.path)
 
+    def get_all_containers(self):
+        result = []
+        for itm in self.id_list:
+            result.append(itm[1])
+        return result
+
 
     #region Segmentation
     def create_segmentation(self, name = None):
@@ -558,7 +564,13 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.export_dir = my_dict['export_dir']
             self.shots_dir = my_dict['shots_dir']
             self.data_dir = my_dict['data_dir']
+            self.main_window.project_streamer.set_store_dir(self.data_dir)
         except:
+            self.results_dir = self.folder + "/results"
+            self.export_dir = self.folder + "/export"
+            self.shots_dir = self.folder + "/shots"
+            self.data_dir = self.folder + "/data"
+            self.main_window.project_streamer.set_store_dir(self.data_dir)
             pass
 
         move_project_to_directory_project = False
@@ -617,7 +629,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.add_segmentation(new)
 
         for d in my_dict['analyzes']:
-            new = eval(d['analysis_container_class'])().deserialize(d)
+            new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.project_streamer)
             self.add_analysis(new)
 
         try:
@@ -811,6 +823,12 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                 self.id_list.remove(d)
                 break
 
+    def clean_id_list(self):
+        for itm in self.id_list:
+            if itm[0] != itm[1].unique_id:
+                self.id_list.remove(itm)
+                print(itm, " removed from ID-List")
+
     def get_by_id(self, item_id):
         """
         Binary Search
@@ -855,7 +873,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     pass
 
 #region Segmentaion
-class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable):
+class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
@@ -1042,6 +1060,21 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     def delete(self):
         self.project.remove_segmentation(self)
 
+    def get_source_properties(self):
+        return ["Segment ID", "Segment Text", "Segment Name"]
+
+    def get_auto_text(self, property_name, time_ms, fps):
+        segm = self.get_segment_of_time(time_ms)
+        if segm is not None:
+            if property_name == "Segment ID":
+                return str(segm.ID)
+            elif property_name == "Segment Text":
+                return str(segm.annotation_body)
+            elif property_name == "Segment Name":
+                return str(segm.get_name())
+            else:
+                return "Invalid Property"
+        return ""
 
 class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
     def __init__(self, ID = None, start = None, end  = None, duration  = None, additional_identifiers = None, segmentation=None):
@@ -1209,6 +1242,10 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.free_hand_paths = []
         self.notes = ""
 
+        self.is_automated = False
+        self.automated_source = -1
+        self.automate_property = None
+
         self.tracking = tracking
 
         self.annotation_layer = None
@@ -1359,7 +1396,6 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
     def serialize(self):
         words = []
 
-
         for w in self.voc_list:
             if w is not None:
                 words.append(w.unique_id)
@@ -1378,13 +1414,17 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             line_w = self.line_w,
             text = self.text,
             font_size = self.font_size,
+            font = self.font,
             widget = None,
             keys = self.keys,
             resource_path = self.resource_path,
             free_hand_paths = self.free_hand_paths,
             notes = self.notes,
             words=words,
-            tracking = self.tracking
+            tracking = self.tracking,
+            is_automated = self.is_automated,
+            automated_source = self.automated_source,
+            automate_property = self.automate_property,
 
 
         )
@@ -1410,6 +1450,10 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.notes = serialization['notes']
 
         try:
+            self.font = serialization['font']
+        except:
+            pass
+        try:
             self.tracking = serialization['tracking']
         except:
             self.tracking = "Static"
@@ -1426,6 +1470,14 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
                     self.add_word(self.project.get_by_id(w))
 
         except Exception as e:
+            pass
+
+        try:
+            self.is_automated = serialization['is_automated']
+            self.automated_source = serialization['automated_source']
+            self.automate_property = serialization['automate_property']
+
+        except:
             pass
 
         if len(self.keys)>0:
@@ -2082,11 +2134,11 @@ class ConnectionDescriptor(IProjectContainer):
 #endregion
 
 #region MovieDescriptor
-class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
+class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource):
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
                  duration=100):
         IProjectContainer.__init__(self)
-        self.set_project(project)
+        self.set_project(project) # TODO This should be changed
         self.movie_name = movie_name
         self.movie_path = movie_path
         self.movie_id = movie_id
@@ -2096,6 +2148,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
         self.notes = ""
 
     def serialize(self):
+
         data = dict(
             movie_name=self.movie_name,
             unique_id=self.unique_id,
@@ -2106,6 +2159,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
             duration=self.duration,
             notes=self.notes,
         )
+
         return data
 
     def set_duration(self, duration):
@@ -2113,8 +2167,14 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
         self.dispatch_on_changed(item=self)
 
     def deserialize(self, serialization):
+        # Dirty but should work, since the movie is the only Container that is added during Project Creation
+        # we have to remove it from the id-list
+        self.project.remove_from_id_list(self)
+
         for key, value in list(serialization.items()):
             setattr(self, key, value)
+
+        self.set_project(self.project)
         return self
 
     def get_type(self):
@@ -2135,6 +2195,31 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange):
     def get_end(self):
         cap = cv2.VideoCapture(self.movie_path)
         return cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    def get_source_properties(self):
+        return ["Current Time", "Current Frame", "Movie Name", "Movie Path", "Movie ID", "Year", "Source", "Duration", "Notes"]
+
+    def get_auto_text(self, property_name, time_ms, fps):
+        if property_name == "Current Time":
+            return ms_to_string(time_ms)
+        elif property_name == "Current Frame":
+            return str(ms_to_frames(time_ms, fps))
+        elif property_name == "Movie Name":
+            return self.movie_name
+        elif property_name == "Movie Path":
+            return self.movie_path
+        elif property_name == "Movie ID":
+            return self.movie_id
+        elif property_name == "Year":
+            return self.year
+        elif property_name == "Source":
+            return self.source
+        elif property_name == "Duration":
+            return ms_to_string(self.duration)
+        elif property_name == "Notes":
+            return self.notes
+        else:
+            return "Invalid Property"
 
 #endregion
 
@@ -2159,6 +2244,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         for d in self.data:
             data_json.append(np.array(d).tolist())
 
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
@@ -2166,6 +2252,9 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         )
 
         return data
+
+    def deserialize(self, serialization, streamer):
+        pass
 
     def delete(self):
         self.project.remove_analysis(self)
@@ -2202,18 +2291,20 @@ class NodeScriptAnalysis(AnalysisContainer):
                     result_dtypes.append(str(np.array(d).dtype))
             data_json.append([node_id, node_result, result_dtypes])
 
+        self.project.main_window.project_streamer.sync_store(self.unique_id, self.data)
+
         data = dict(
             name=self.name,
             analysis_container_class = self.__class__.__name__,
             unique_id=self.unique_id,
             script_id=self.script_id,
-            data_json=data_json,
+            # data_json=data_json,
             notes=self.notes
         )
 
         return data
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, streamer):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.notes = serialization['notes']
@@ -2272,7 +2363,6 @@ class IAnalysisJobAnalysis(AnalysisContainer):
             QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
                                 " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 
-
     def get_type(self):
         return ANALYSIS_JOB_ANALYSIS
 
@@ -2291,42 +2381,46 @@ class IAnalysisJobAnalysis(AnalysisContainer):
                 data_dtypes.append(str(np.array(d).dtype))
 
 
-        parameters = []
-        for p in self.parameters:
-            parameters.append(p.serialize())
+        # parameters = []
+        # for p in self.parameters:
+        #     parameters.append(p)
+
+        self.project.main_window.project_streamer.sync_store(self.unique_id, self.data)
 
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
             analysis_container_class=self.__class__.__name__,
             analysis_job_class=self.analysis_job_class,
-            parameters=parameters,
-            data_dtypes=data_dtypes,
-            data_json=data_json,
+            parameters=self.parameters,
+            # data_dtypes=data_dtypes,
+            # data_json=data_json,
             notes=self.notes
         )
 
         return data
 
-    def deserialize(self, serialization):
+    def deserialize(self, serialization, streamer):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.analysis_job_class = serialization['analysis_job_class']
         self.notes = serialization['notes']
 
-        result_dtypes = serialization['data_dtypes']
+        # result_dtypes = serialization['data_dtypes']
 
         self.data = []
-        for i, r in enumerate(serialization['data_json']):
-            # Loop over each Result of the Final Node
-                if result_dtypes[i] == "list":
-                    self.data.append(r)
-                else:
-                    self.data.append(np.array(r, dtype=result_dtypes[i]))
+        self.data = streamer.sync_load(self.unique_id)
+        # for i, r in enumerate(serialization['data_json']):
+        #     # Loop over each Result of the Final Node
+        #         if result_dtypes[i] == "list":
+        #             self.data.append(r)
+        #         else:
+        #             self.data.append(np.array(r, dtype=result_dtypes[i]))
 
-        for p in serialization['parameters']:
-            param = eval(p["parameter_class"])()
-            self.parameters.append(param.deserialize(p))
+        self.parameters = serialization['parameters']
+        # for p in serialization['parameters']:
+        #     param = eval(p["parameter_class"])()
+        #     self.parameters.append(param.deserialize(p))
 
         return self
 

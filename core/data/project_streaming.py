@@ -1,58 +1,116 @@
 import os
 import shelve
 
-from core.data.interfaces import IConcurrentJob
+from core.data.interfaces import IConcurrentJob, IProjectChangeNotify
 
 
-class ProjectStreamer():
+class ProjectStreamer(IProjectChangeNotify):
     def __init__(self, main_window):
+        super(ProjectStreamer, self).__init__()
         self.stream_path = ""
         self.stream = None
         self.main_window = main_window
+        self.thread_pool = main_window.thread_pool
+        self.project = None
+
+        self.store_dir = None
+        self.container_db = None
+        self.arbitrary_db = None
         pass
 
-    def set_project(self, project):
-        p = str(project.path)
-        p = p.replace("\\", "/").split("/")
-        p.pop()
-        p = "/".join(p)
-        path = p
-        name = project.name
+    def set_store_dir(self, store_dir):
+        self.store_dir = store_dir + "/"
+        self.container_db = self.store_dir + "container"
+        self.arbitrary_db = self.store_dir + "arbitrary"
 
-        self.stream_path = path + "/." + name
-        self.stream = shelve.open(self.stream_path, writeback=True)
+    def asynch_store(self, id: int, obj, proceed_slot, is_arbitrary_data = False):
+        if is_arbitrary_data:
+            path = self.arbitrary_db
+        else:
+            path = self.container_db
 
-    def release_project(self):
-        self.stream.close()
-        self.stream = None
-        self.stream_path = ""
-
-        # Removing the temporary File
-        try:
-            os.remove(self.stream_path)
-        except:
-            self.main_window.print_message("No Streaming File Found", "Orange")
-
-    def to_stream(self, unique_id, object):
-        job = ProjectToStreamJob([self.stream, unique_id, object])
+        job = ASyncStoreJob([id, obj, path], proceed_slot)
         self.main_window.run_job_concurrent(job)
 
-        # if self.stream is not None:
-        #     self.stream[str(unique_id)] = object
+    def async_load(self, id: int, proceed_slot, is_arbitrary_data = False):
+        if is_arbitrary_data:
+            path = self.arbitrary_db
+        else:
+            path = self.container_db
+
+        job = ASyncLoadJob([id, path, is_arbitrary_data], proceed_slot)
+        self.main_window.run_job_concurrent(job)
+
+    def sync_store(self,  id: int, obj, is_arbitrary_data = False):
+        if is_arbitrary_data:
+            path = self.arbitrary_db
+        else:
+            path = self.container_db
+
+        print(path)
+        with shelve.open(path) as db:
+            db[str(id)] = obj
+
+    def sync_load(self, id: int, is_arbitrary_data = False):
+        if is_arbitrary_data:
+            path = self.arbitrary_db
+        else:
+            path = self.container_db
+        with shelve.open(path) as db:
+            obj = db[str(id)]
+        return obj
+
+    #region IProjectChangeNotify
+    def on_loaded(self, project):
+        self.project = project
+        self.set_store_dir(self.project.data_dir)
+
+    def on_changed(self, project, item):
+        pass
+
+    def on_selected(self, sender, selected):
+        pass
+    #endregion
+    pass
 
 
+class ASyncStoreJob(IConcurrentJob):
+    def __init__(self, args, proceed_slot):
+        super(ASyncStoreJob, self).__init__(args, show_modify_progress=False)
+        self.proceed_slot = proceed_slot
 
-    def from_stream(self, unique_id):
-        if self.stream is not None:
-            return self.stream[str(unique_id)]
 
-
-class ProjectToStreamJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
-        stream = args[0]
-        unique_id = args[1]
-        obj = args[2]
+        unique_id = args[0]
+        obj = args[1]
+        path = args[2]
+        is_arbitrary = args[3]
 
-        if stream is not None:
-            stream[str(unique_id)] = obj
+        with shelve.open(path) as db:
+            db[str(unique_id)] = obj
 
+        return [True]
+
+    def modify_project(self, project, result, sign_progress = None):
+        if self.proceed_slot is not None:
+            self.proceed_slot()
+
+
+class ASyncLoadJob(IConcurrentJob):
+    def __init__(self, args, proceed_slot):
+        super(ASyncLoadJob, self).__init__(args, show_modify_progress=False)
+        self.proceed_slot = proceed_slot
+
+    def run_concurrent(self, args, sign_progress):
+        unique_id = args[0]
+        path = args[1]
+        is_arbitrary = args[2]
+
+        with shelve.open(path) as db:
+            obj = db[str(unique_id)]
+
+        return [obj]
+
+    def modify_project(self, project, result, sign_progress=None):
+        if self.proceed_slot is not None:
+            self.proceed_slot(result[0])
