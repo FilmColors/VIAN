@@ -70,6 +70,11 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_follow_time.setCheckable(True)
         self.a_follow_time.setChecked(True)
         self.a_follow_time.triggered.connect(self.on_follow_time)
+        self.m_display.addSeparator()
+        self.a_toggle_name = self.m_display.addAction(" Show Segment Names")
+        self.a_toggle_name.setCheckable(True)
+        self.a_toggle_name.setChecked(False)
+        self.a_toggle_name.triggered.connect(self.on_toggle_name)
 
         self.inner.resize(400, self.height())
 
@@ -81,6 +86,11 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.screenshot_manager.scaling_mode = SCALING_MODE_NONE
         self.screenshot_manager.arrange_images()
         self.a_scale_width.setChecked(False)
+
+    def on_toggle_name(self):
+        state = self.a_toggle_name.isChecked()
+        self.screenshot_manager.show_segment_name = state
+        self.screenshot_manager.update_manager()
 
     def on_scale_to_width(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_WIDTH
@@ -139,6 +149,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.ctrl_is_pressed = False
         self.shift_is_pressed = False
         self.follow_time = True
+        self.show_segment_name = False
 
         self.font = QFont("Consolas")
         self.font_size = 128
@@ -306,8 +317,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if len(self.images_segmentation) > 0:
             for segm in self.images_segmentation:
                 self.add_line(y)
-                self.add_caption(100, y + 100, segm.segm_name)
-                self.add_caption(100, y + 250, segm.segm_id)
+
+                self.add_caption(100, y + 100, segm.segm_id)
+                if self.show_segment_name:
+                    self.add_caption(100, y + 250, segm.segm_name)
+
 
                 x_counter = 0
                 x = caption_width - (x_offset + img_width)
@@ -462,11 +476,13 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.scene.removeItem(self.current_segment_frame)
 
             pen = QtGui.QPen()
-            pen.setColor(QtGui.QColor(251, 95, 2, 200))
+            pen.setColor(QtGui.QColor(251, 95, 2, 60))
             pen.setWidth(20)
-            self.current_segment_frame = self.scene.addRect(0, y-int(self.img_height/5) - 10, self.sceneRect().width(), height - y + int(self.img_height / 7) + self.img_height - 100, pen)
+            self.current_segment_frame = self.scene.addRect(0, y-int(self.img_height/5) - 10, self.sceneRect().width() + 100, height - y + int(self.img_height / 7) + self.img_height - 100, pen)
 
             if center:
+                self.current_segment_frame.boundingRect()
+
                 self.fitInView(self.current_segment_frame, Qt.KeepAspectRatio)
         else:
             if self.current_segment_frame is not None:
