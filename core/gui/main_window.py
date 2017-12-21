@@ -55,6 +55,7 @@ __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
 
+PROFILE = False
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
@@ -67,8 +68,9 @@ class MainWindow(QtWidgets.QMainWindow):
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
 
-        self.profiler = cProfile.Profile()
-        self.profiler.enable()
+        if PROFILE:
+            self.profiler = cProfile.Profile()
+            self.profiler.enable()
         loading_screen = LoadingScreen()
         self.has_open_project = False
         self.version = __version__
@@ -572,8 +574,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vlc_instance.release()
         self.corpus_client.send_disconnect(self.settings.USER_NAME)
 
-        self.profiler.disable()
-        self.profiler.dump_stats("Profile.prof")
+        if PROFILE:
+            self.profiler.disable()
+            self.profiler.dump_stats("Profile.prof")
 
         self.settings.store()
         QtWidgets.QMainWindow.close(self)
