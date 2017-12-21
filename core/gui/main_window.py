@@ -611,7 +611,8 @@ class MainWindow(QtWidgets.QMainWindow):
     #region MainWindow Event Handlers
     def open_recent(self, index):
         path = self.settings.recent_files_path[index]
-        self.load_project(path)
+        if os.path.isfile(path):
+            self.load_project(path)
 
     def clear_recent(self):
         self.settings.recent_files_name = []

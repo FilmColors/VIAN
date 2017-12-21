@@ -43,12 +43,14 @@ class NewProjectDialog(EDialogWidget):
         counter = 0
         for voc in self.vocabularies:
             cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.frame_Vocabularies)
+            cb.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
             cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
             cb.setChecked(True)
             vbox.addWidget(cb)
             self.voc_cbs.append([cb, voc])
             counter += 1
             if counter == n_per_col:
+                vbox.setSpacing(10)
                 self.frame_Vocabularies.layout().addItem(vbox)
                 vbox = QVBoxLayout(self.frame_Vocabularies)
                 counter = 0
