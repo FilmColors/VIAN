@@ -29,7 +29,11 @@ class BarcodeAnalysisJob(IAnalysisJob):
         super(BarcodeAnalysisJob, self).__init__("Barcode", [SEGMENTATION], author="Gaudenz Halter", version="1.0.0", multiple_result=True)
 
     def prepare(self, project: ElanExtensionProject, targets: List[Segmentation], parameters, fps):
-
+        """
+        This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
+        and gather all data we need.
+        
+        """
         # Since multiple_result is True, we want to generate a Barcode for each Segmentation
         # Thus an array of arguments has to be returned. For each Segmentation one argument Array
         args = []
@@ -52,7 +56,14 @@ class BarcodeAnalysisJob(IAnalysisJob):
         return args
 
     def process(self, args, sign_progress):
-
+        """
+        This is the actual analysis, which takes place in a WorkerThread. 
+        Do NOT and NEVER modify the project within this function.
+        
+        We want to read though the movie and get the Average Colors from each Segment.
+        
+        Once done, we create an Analysis Object from it.
+        """
         # Signal the Progress
         sign_progress(0.0)
 
@@ -104,6 +115,10 @@ class BarcodeAnalysisJob(IAnalysisJob):
         return analysis
 
     def modify_project(self, project: ElanExtensionProject, result: IAnalysisJobAnalysis):
+        """
+        This Function will be called after the processing is completed. 
+        Since this function is called within the Main-Thread, we can modify our project here.
+        """
         # We want to create an Image Annotation with the Barcode in the upper part of the Display
         barcode_colors = result.data[0]
         image_width = result.data[1]
@@ -130,7 +145,9 @@ class BarcodeAnalysisJob(IAnalysisJob):
                                              resource_path=path)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
-
+        """
+        This should return the Widget that is shown in the Inspector when the analysis is selected
+        """
         if analysis.parameters['interpolation'] == "Cubic":
             interpolation = cv2.INTER_CUBIC
         else:
@@ -144,7 +161,9 @@ class BarcodeAnalysisJob(IAnalysisJob):
         return view
 
     def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path):
-
+        """
+        This function should show the complete Visualization
+        """
         barcode = analysis.data[0]
         colors = []
         for c in barcode:
@@ -175,6 +194,10 @@ class BarcodeAnalysisJob(IAnalysisJob):
         return image
 
     def get_parameter_widget(self):
+        """
+        Returning a ParameterWidget subclass which will be displayed in the Analysis Dialog, when the user 
+        activates the Analysis.
+        """
         return BarcodeParameterWidget()
 
 
@@ -209,7 +232,6 @@ class BarcodeParameterWidget(ParameterWidget):
         self.layout().addItem(l2)
 
     def get_parameters(self):
-
         resolution = self.spin_frame.value()
         interpolation = self.interpolation.currentText()
         parameters = dict(

@@ -435,7 +435,30 @@
 216
 217
 218
-219</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Gaudenz Halter</span>
 <span class="sd">University of Zurich</span>
 <span class="sd">December 2017</span>
@@ -466,7 +489,11 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">BarcodeAnalysisJob</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Barcode&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">SEGMENTATION</span><span class="p">],</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;Gaudenz Halter&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span> <span class="n">multiple_result</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="n">ElanExtensionProject</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Segmentation</span><span class="p">],</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, </span>
+<span class="sd">        and gather all data we need.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Since multiple_result is True, we want to generate a Barcode for each Segmentation</span>
         <span class="c1"># Thus an array of arguments has to be returned. For each Segmentation one argument Array</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
@@ -489,7 +516,14 @@
         <span class="k">return</span> <span class="n">args</span>
 
     <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the actual analysis, which takes place in a WorkerThread. </span>
+<span class="sd">        Do NOT and NEVER modify the project within this function.</span>
+<span class="sd">        </span>
+<span class="sd">        We want to read though the movie and get the Average Colors from each Segment.</span>
+<span class="sd">        </span>
+<span class="sd">        Once done, we create an Analysis Object from it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Signal the Progress</span>
         <span class="n">sign_progress</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 
@@ -541,6 +575,10 @@
         <span class="k">return</span> <span class="n">analysis</span>
 
     <span class="k">def</span> <span class="nf">modify_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="n">ElanExtensionProject</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">IAnalysisJobAnalysis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This Function will be called after the processing is completed. </span>
+<span class="sd">        Since this function is called within the Main-Thread, we can modify our project here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># We want to create an Image Annotation with the Barcode in the upper part of the Display</span>
         <span class="n">barcode_colors</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">image_width</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -567,7 +605,9 @@
                                              <span class="n">resource_path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">IAnalysisJobAnalysis</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This should return the Widget that is shown in the Inspector when the analysis is selected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;interpolation&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Cubic&quot;</span><span class="p">:</span>
             <span class="n">interpolation</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">INTER_CUBIC</span>
         <span class="k">else</span><span class="p">:</span>
@@ -581,7 +621,9 @@
         <span class="k">return</span> <span class="n">view</span>
 
     <span class="k">def</span> <span class="nf">get_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">IAnalysisJobAnalysis</span><span class="p">,</span> <span class="n">result_path</span><span class="p">,</span> <span class="n">data_path</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function should show the complete Visualization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">barcode</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">barcode</span><span class="p">:</span>
@@ -612,6 +654,10 @@
         <span class="k">return</span> <span class="n">image</span>
 
     <span class="k">def</span> <span class="nf">get_parameter_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returning a ParameterWidget subclass which will be displayed in the Analysis Dialog, when the user </span>
+<span class="sd">        activates the Analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">BarcodeParameterWidget</span><span class="p">()</span>
 
 
