@@ -13,7 +13,7 @@ from core.concurrent.worker_functions import *
 from core.data.enums import *
 from core.data.importers import ELANProjectImporter
 from core.data.masterfile import MasterFile
-from core.data.project_streaming import ProjectStreamer
+from core.data.project_streaming import ProjectStreamerShelve
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
 # from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
@@ -117,7 +117,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread_pool = QThreadPool()
         self.thread_pool.setMaxThreadCount(8)
 
-        self.project_streamer = ProjectStreamer(self)
+        self.project_streamer = ProjectStreamerShelve(self)
 
 
         # DockWidgets
@@ -560,6 +560,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_matrix, QtCore.Qt.Vertical)
         else:
             self.vocabulary_matrix.show()
+            self.vocabulary_matrix.raise_()
             self.vocabulary_matrix.activateWindow()
     #endregion
 

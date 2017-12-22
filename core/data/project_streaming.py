@@ -3,8 +3,44 @@ import shelve
 
 from core.data.interfaces import IConcurrentJob, IProjectChangeNotify
 
+STREAM_DATA_IPROJECT_CONTAINER = 0
+STREAM_DATA_ARBITRARY = 1
+
 
 class ProjectStreamer(IProjectChangeNotify):
+    def __init__(self, main_window):
+        super(ProjectStreamer, self).__init__()
+        self.main_window = main_window
+        self.project = None
+
+
+    def asynch_store(self, id: int, obj, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        pass
+
+    def async_load(self, id: int, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        pass
+
+    def sync_store(self,  id: int, obj,data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        pass
+
+    def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        pass
+
+    #region IProjectChangeNotify
+    def on_loaded(self, project):
+        pass
+
+    def on_changed(self, project, item):
+        pass
+
+    def on_selected(self, sender, selected):
+        pass
+    #endregion
+    pass
+
+
+#region ShelveProjectStreamer
+class ProjectStreamerShelve(ProjectStreamer):
     def __init__(self, main_window):
         super(ProjectStreamer, self).__init__()
         self.stream_path = ""
@@ -23,8 +59,8 @@ class ProjectStreamer(IProjectChangeNotify):
         self.container_db = self.store_dir + "container"
         self.arbitrary_db = self.store_dir + "arbitrary"
 
-    def asynch_store(self, id: int, obj, proceed_slot, is_arbitrary_data = False):
-        if is_arbitrary_data:
+    def asynch_store(self, id: int, obj, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        if data_type == STREAM_DATA_ARBITRARY:
             path = self.arbitrary_db
         else:
             path = self.container_db
@@ -32,17 +68,17 @@ class ProjectStreamer(IProjectChangeNotify):
         job = ASyncStoreJob([id, obj, path], proceed_slot)
         self.main_window.run_job_concurrent(job)
 
-    def async_load(self, id: int, proceed_slot, is_arbitrary_data = False):
-        if is_arbitrary_data:
+    def async_load(self, id: int, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        if data_type == STREAM_DATA_ARBITRARY:
             path = self.arbitrary_db
         else:
             path = self.container_db
 
-        job = ASyncLoadJob([id, path, is_arbitrary_data], proceed_slot)
+        job = ASyncLoadJob([id, path], proceed_slot)
         self.main_window.run_job_concurrent(job)
 
-    def sync_store(self,  id: int, obj, is_arbitrary_data = False):
-        if is_arbitrary_data:
+    def sync_store(self,  id: int, obj,data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        if data_type == STREAM_DATA_ARBITRARY:
             path = self.arbitrary_db
         else:
             path = self.container_db
@@ -51,8 +87,8 @@ class ProjectStreamer(IProjectChangeNotify):
         with shelve.open(path) as db:
             db[str(id)] = obj
 
-    def sync_load(self, id: int, is_arbitrary_data = False):
-        if is_arbitrary_data:
+    def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        if data_type == STREAM_DATA_ARBITRARY:
             path = self.arbitrary_db
         else:
             path = self.container_db
@@ -104,7 +140,6 @@ class ASyncLoadJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         unique_id = args[0]
         path = args[1]
-        is_arbitrary = args[2]
 
         with shelve.open(path) as db:
             obj = db[str(unique_id)]
@@ -114,3 +149,5 @@ class ASyncLoadJob(IConcurrentJob):
     def modify_project(self, project, result, sign_progress=None):
         if self.proceed_slot is not None:
             self.proceed_slot(result[0])
+#endregion
+pass

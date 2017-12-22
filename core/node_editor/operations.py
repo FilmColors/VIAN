@@ -578,7 +578,7 @@ class OperationAddSegmentation(ProjectOperation):
             segms = args[1]
 
         for s in segms:
-            segmentation.create_segment(int(s[1]), int(s[2]), s[0])
+            segmentation.create_segment(int(s[1]), int(s[2]), s[0], inhibit_overlap=False)
 
 
 class OperationCreateSegment(Operation):

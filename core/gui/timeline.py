@@ -119,6 +119,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.interval_segmentation_start = None
         self.interval_segmentation_marker = None
 
+        self.selector_context = None
+
         self.lay_controls = QtWidgets.QVBoxLayout()
         self.lay_bars = QtWidgets.QVBoxLayout()
         self.frame_Controls.setLayout(self.lay_controls)
@@ -212,7 +214,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def on_interval_segment_end(self):
         if self.selected is not None and self.interval_segmentation_marker is not None:
             if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment(self.interval_segmentation_start, self.curr_movie_time)
+                self.selected.create_segment(self.interval_segmentation_start,
+                                             self.curr_movie_time,
+                                             forward_segmenting=False,
+                                             inhibit_overlap=self.inhibit_overlap)
             else:
                 self.main_window.print_message("No Segmentation Selected", "Orange")
 
@@ -255,6 +260,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def add_bar(self):
         b = TimelineBar(self.frame_Bars, self)
         return b
+
+    def get_current_bar(self):
+        for itm in self.item_segments:
+            if itm[0].item == self.selected:
+                return itm[1][0]
+        return None
 
     def clear(self):
         # self.time_bar.close()
@@ -519,6 +530,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def move_selector(self, pos):
         if self.is_selecting:
+
             pos_r = pos - self.delta
             self.selector.set_end(pos_r)
 
@@ -526,28 +538,29 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.main_window.player.set_media_time(time)
 
     def end_selector(self):
-
-        if self.is_selecting:
+        if self.is_selecting and self.selector_context is None:
+            print("TEST", "END SELECTOR")
             self.is_selecting = False
             # pos = self.selector.pos().x() + self.selector.width() + self.pos().x()
             pos = self.selector.pos().x() + self.selector.width() - self.relative_corner.x()
-
             self.selector_context = SelectorContextMenu(self, self.mapToGlobal(QtCore.QPoint(pos, self.pos().y())), self.selector)
             self.selector_context.new_segmentation.connect(self.create_segmentation)
             self.selector_context.new_segment.connect(self.create_segment)
             self.selector_context.new_layer.connect(self.create_layer)
-            self.selector_context.show()
+
 
     # CONTEXT MENU BINDINGS
     def new_segment(self):
         if self.selector is not None and self.selected is not None:
             if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment(self.selector.start, self.selector.stop)
+                self.selected.create_segment(self.selector.start, self.selector.stop, forward_segmenting=False, inhibit_overlap=self.inhibit_overlap)
 
     def close_selector(self):
+        print("TEST", "CLOSED SELECTOR")
         if self.selector is not None:
             self.selector.close()
             self.selector.deleteLater()
+            self.update()
         self.selector = None
 
     def round_to_grid(self, a):
@@ -568,12 +581,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # If Nothing is handed in, we're performing a fast-segmentation
         # which means, that the segment is created from the last segments end to the current movie-time
 
-
+        forward = False
         if not lst:
                 lst = [self.curr_movie_time - 1, self.curr_movie_time]
+                forward = self.is_forward_segmenting
         if self.selected is not None:
             if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment(lst[0], lst[1], forward_segmenting = self.is_forward_segmenting)
+                self.selected.create_segment(lst[0], lst[1], forward_segmenting = forward, inhibit_overlap=self.inhibit_overlap)
 
     def create_layer(self, lst):
         if len(lst) == 0:
@@ -724,8 +738,11 @@ class TimelineBar(QtWidgets.QFrame):
         result = None
         for s in self.slices:
             if s.pos().x() > slice.pos().x():
-                result = s
-                break
+                if result is None:
+                    result = s
+                else:
+                    if result.pos().x() > s.pos().x():
+                        result = s
 
         return result
 
@@ -792,7 +809,7 @@ class TimebarSlice(QtWidgets.QWidget):
         self.is_selected = False
 
         self.min_possible = 0
-        self.max_possible = 0
+        self.max_possible = self.timeline.duration * self.timeline.scale
 
     def paintEvent(self, QPaintEvent):
         self.locked = False
@@ -954,7 +971,7 @@ class TimebarSlice(QtWidgets.QWidget):
 
                 if self.mode == "center":
                     if self.timeline.inhibit_overlap:
-                        x1 = np.clip(self.curr_pos.x() + target.x() + self.width(), None, self.max_possible - self.width())
+                        x1 = np.clip(self.curr_pos.x() + target.x() + self.width(), self.min_possible, self.max_possible - self.width())
                         x2 = np.clip(self.curr_pos.x() + target.x(), self.min_possible, None)
                         if x2 < x1:
                             x = x2
@@ -963,6 +980,7 @@ class TimebarSlice(QtWidgets.QWidget):
 
                     else:
                         x = np.clip(self.curr_pos.x() + target.x(), 0, self.parent().width() - self.width())
+
                     self.move(x, 0)
                     self.update()
                     return
@@ -1140,7 +1158,8 @@ class TimelineScrubber(QtWidgets.QWidget):
                 self.player.play()
                 self.was_playing = False
         else:
-            self.timeline.end_selector()
+            QMouseEvent.ignore()
+            # self.timeline.end_selector()
             # QMouseEvent.ignore()
             # self.timeline.end_selector()
 
@@ -1348,7 +1367,8 @@ class TimebarDrawing(QtWidgets.QWidget):
 
 
         if QMouseEvent.button() == Qt.RightButton:
-            self.timeline.end_selector()
+            # self.timeline.end_selector()
+            QMouseEvent.ignore()
 
     def mousePressEvent(self, QMouseEvent):
         self.was_playing = self.timeline.main_window.player.is_playing()
@@ -1371,7 +1391,7 @@ class TimebarDrawing(QtWidgets.QWidget):
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
             pos = self.mapToParent(QMouseEvent.pos()).x()
-            pos += 1 #offset correction
+            pos += 1 # offset correction
             self.timeline.time_scrubber.move(pos, 0)
             self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             if self.timeline.is_fast_selecting and self.timeline.selector is not None:
@@ -1387,6 +1407,7 @@ class TimebarSelector(QtWidgets.QWidget):
         self.timeline = timeline
         self.background_color = QtGui.QColor(50, 80, 100, 150)
         self.start = self.mapTo(self.timeline.frame_Bars, pos).x() * timeline.scale
+
         self.end = self.start
 
         self.rescale()
@@ -1433,6 +1454,7 @@ class SelectorContextMenu(QtWidgets.QMenu):
             if self.timeline.selected.get_type() == SEGMENTATION:
                 self.action_add_segment = self.addAction("Add Segment")
                 self.action_add_segment.triggered.connect(self.add_segment)
+
         self.true_end = self.selector.end
         if self.selector.width() < 10:
             self.selector.end = self.selector.start + 100 * self.timeline.scale
@@ -1447,17 +1469,20 @@ class SelectorContextMenu(QtWidgets.QMenu):
 
     def add_segment(self):
         self.new_segment.emit([self.selector.start, self.true_end])
-        self.hide()
+        self.close()
 
     def on_add_segmentation(self):
         self.new_segmentation.emit()
-        self.hide()
+        self.close()
 
     def on_add_layer(self):
         self.new_layer.emit([self.selector.start, self.selector.end])
-        self.hide()
+        self.close()
 
     def closeEvent(self, *args, **kwargs):
         self.timeline.close_selector()
-        super(SelectorContextMenu, self).closeEvent(*args, **kwargs)
+        self.timeline.selector_context = None
         self.timeline.update()
+        super(SelectorContextMenu, self).closeEvent(*args, **kwargs)
+
+

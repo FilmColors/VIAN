@@ -101,7 +101,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
 
         if s_type == SEGMENT:
             self.lbl_Type.setText("Segment")
-            widgets = [AttributesSegment(self, target_item), AttributesITimeRange(self, target_item)]
+            widgets = [AttributesITimeRange(self, target_item), AttributesSegment(self, target_item)]
 
         if s_type == ANNOTATION:
             self.lbl_Type.setText("Annotation")

@@ -906,8 +906,13 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
 
 
-    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False):
-        if stop-start < from_last_threshold:
+    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False, inhibit_overlap = True):
+
+        # Are we fast segmenting?
+        if stop - start < from_last_threshold:
+
+            # Forward Segmentation: Create a Segment from Position to next Segment or End
+            # If the new overlaps with the last: shorten the last
             if forward_segmenting:
                 # Find the next Segment if there is one and create a segment from start to the next segment start
                 next = None
@@ -923,20 +928,40 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 if next is None:
                     stop = self.project.movie_descriptor.duration
                 else:
-                    stop = next.get_start()
+                    stop = next.get_start() - 1
 
-                if last is not None:
-                    last.set_end(start)
+                if last is not None and last.end > start:
+                    last.set_end(start - 1)
 
+            # Backwards Segmentation: Create a Segment from the Last to current Position
             else:
                 last = None
-                for s in self.segments:
-                    if s.end < start:
+                for i, s in enumerate(self.segments):
+                    if s.start < start:
                         last = s
-                if last is None:
-                    start = 0
+                if last is not None:
+                    start = last.end + 1
                 else:
-                    start = last.end
+                    start = 0
+
+        if inhibit_overlap:
+            last = None
+            next = None
+            for i, s in enumerate(self.segments):
+                if s.start < start:
+                    last = s
+                    if len(self.segments) > i + 1:
+                        next = self.segments[i + 1]
+                    else:
+                        next = None
+
+            if last is not None and last.end > start:
+                start = last.end
+            if next is not None and next.start < stop:
+                stop = next.start
+
+        print("Test:", start, stop)
+
 
         if ID is None:
             ID = len(self.segments) + 1
