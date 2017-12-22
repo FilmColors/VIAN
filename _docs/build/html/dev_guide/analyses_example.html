@@ -1,0 +1,739 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>IAnalysisJob Example &mdash; VIAN 0.4.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="VIAN 0.4.0 documentation" href="../index.html"/>
+        <link rel="up" title="IAnalysisJob" href="analyses.html"/>
+        <link rel="next" title="Nodes" href="nodes.html"/>
+        <link rel="prev" title="IAnalysisJob" href="analyses.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VIAN
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_interface/user_interface.html">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/inspector.html">Inspector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/outliner.html">Outliner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/perspectives.html">Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#player-perspective">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#id1">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#screenshots-perspective">Screenshots Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#node-scripting-perspective">Node Scripting Perspective</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/timeline.html">Timeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../step_by_step/step_by_step.html">Step-by-Step Guides</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/project_management/project_management.html">Vian Projects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/create_project.html">Creating new Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/project_templates.html">Project Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/segmentation/segmentation.html">Segmentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../DevelopersGuide.html">Developer’s Guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="analyses.html">IAnalysisJob</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="analyses.html#functionality">Functionality</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="analyses.html#example">Example</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">IAnalysisJob Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins.html">Plug-Ins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VIAN</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../DevelopersGuide.html">Developer’s Guide</a> &raquo;</li>
+        
+          <li><a href="analyses.html">IAnalysisJob</a> &raquo;</li>
+        
+      <li>IAnalysisJob Example</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dev_guide/analyses_example.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ianalysisjob-example">
+<span id="ianalysisjobexample"></span><h1>IAnalysisJob Example<a class="headerlink" href="#ianalysisjob-example" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Gaudenz Halter</span>
+<span class="sd">University of Zurich</span>
+<span class="sd">December 2017</span>
+
+<span class="sd">This Script should be a basic example of how to use the IAnalysisJob Interface. </span>
+
+<span class="sd">The Goal is: </span>
+<span class="sd">    Creating a Barcode from the Segmentation of the user. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">core.data.interfaces</span> <span class="kn">import</span> <span class="n">IAnalysisJob</span><span class="p">,</span> <span class="n">ParameterWidget</span>
+<span class="kn">from</span> <span class="nn">core.data.containers</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">core.data.computation</span> <span class="kn">import</span> <span class="n">ms_to_frames</span><span class="p">,</span> <span class="n">numpy_to_pixmap</span>
+
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span><span class="n">save</span>
+<span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">layout</span>
+<span class="kn">from</span> <span class="nn">bokeh.colors</span> <span class="kn">import</span> <span class="n">RGB</span>
+
+<span class="k">class</span> <span class="nc">BarcodeAnalysisJob</span><span class="p">(</span><span class="n">IAnalysisJob</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BarcodeAnalysisJob</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Barcode&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">SEGMENTATION</span><span class="p">],</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;Gaudenz Halter&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span> <span class="n">multiple_result</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="n">ElanExtensionProject</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Segmentation</span><span class="p">],</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+
+        <span class="c1"># Since multiple_result is True, we want to generate a Barcode for each Segmentation</span>
+        <span class="c1"># Thus an array of arguments has to be returned. For each Segmentation one argument Array</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">movie_path</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">movie_path</span>
+
+
+        <span class="c1"># Targets are Segmentations</span>
+        <span class="k">for</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
+            <span class="c1"># Collecting all Segment start and end point in Frame-Indices</span>
+            <span class="n">segments</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">segm</span> <span class="ow">in</span> <span class="n">tgt</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">ms_to_frames</span><span class="p">(</span><span class="n">segm</span><span class="o">.</span><span class="n">get_start</span><span class="p">(),</span> <span class="n">fps</span><span class="p">)</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">ms_to_frames</span><span class="p">(</span><span class="n">segm</span><span class="o">.</span><span class="n">get_end</span><span class="p">(),</span> <span class="n">fps</span><span class="p">)</span>
+
+                <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">])</span>
+
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">segments</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">movie_path</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>
+
+        <span class="c1"># Signal the Progress</span>
+        <span class="n">sign_progress</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">movie_path</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Creating the VideoCapture</span>
+        <span class="n">video_capture</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="n">movie_path</span><span class="p">)</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">video_capture</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
+
+        <span class="n">barcode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">segm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">segments</span><span class="p">):</span>
+            <span class="n">sign_progress</span><span class="p">(</span><span class="n">idx</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">))</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">segm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">end</span>   <span class="o">=</span> <span class="n">segm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+
+            <span class="n">video_capture</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_POS_FRAMES</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+            <span class="n">segm_colors</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Looping over all Frames of the Segment and</span>
+            <span class="c1"># Calculate the Average Color</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">duration</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">/</span> <span class="n">resolution</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">video_capture</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># segm_colors[i] = np.mean(frame, axis=(0,1))</span>
+                <span class="n">segm_colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+
+            <span class="n">barcode</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">segm_colors</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># Creating an IAnalysisJobAnalysis Object that will be handed back to the Main-Thread</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">IAnalysisJobAnalysis</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Barcode_&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span>
+                                        <span class="n">results</span><span class="o">=</span><span class="p">[</span><span class="n">barcode</span><span class="p">,</span> <span class="n">width</span><span class="p">],</span>
+                                        <span class="n">analysis_job_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span>
+                                        <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="n">sign_progress</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">analysis</span>
+
+    <span class="k">def</span> <span class="nf">modify_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="n">ElanExtensionProject</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">IAnalysisJobAnalysis</span><span class="p">):</span>
+        <span class="c1"># We want to create an Image Annotation with the Barcode in the upper part of the Display</span>
+        <span class="n">barcode_colors</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">image_width</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;interpolation&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Cubic&quot;</span><span class="p">:</span>
+            <span class="n">interpolation</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">INTER_CUBIC</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interpolation</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">INTER_LINEAR</span>
+
+        <span class="c1"># Creating an Image from the Color Array</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">barcode_to_image</span><span class="p">(</span><span class="n">barcode_colors</span><span class="p">,</span> <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">)</span>
+
+        <span class="c1"># Storing the Image to Disc</span>
+        <span class="nb">dir</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">results_dir</span>
+        <span class="k">print</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">get_name</span><span class="p">())</span>
+        <span class="n">path</span>  <span class="o">=</span> <span class="nb">dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
+
+        <span class="c1"># Modifying the Project by creating a new Layer and a new Annotation</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">create_annotation_layer</span><span class="p">(</span><span class="s2">&quot;Barcode&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+        <span class="n">layer</span><span class="o">.</span><span class="n">create_annotation</span><span class="p">(</span><span class="n">AnnotationType</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span>
+                                             <span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                                             <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">image_width</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
+                                             <span class="n">resource_path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">IAnalysisJobAnalysis</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">analysis</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;interpolation&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Cubic&quot;</span><span class="p">:</span>
+            <span class="n">interpolation</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">INTER_CUBIC</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interpolation</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">INTER_LINEAR</span>
+
+        <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">barcode_to_image</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">400</span><span class="p">,</span> <span class="n">image_height</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">)</span>
+        <span class="n">barcode_pixm</span> <span class="o">=</span> <span class="n">numpy_to_pixmap</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">barcode_pixm</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">barcode_pixm</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">QGraphicsView</span><span class="p">(</span><span class="n">QGraphicsScene</span><span class="p">())</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">barcode_pixm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">view</span>
+
+    <span class="k">def</span> <span class="nf">get_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">IAnalysisJobAnalysis</span><span class="p">,</span> <span class="n">result_path</span><span class="p">,</span> <span class="n">data_path</span><span class="p">):</span>
+
+        <span class="n">barcode</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">barcode</span><span class="p">:</span>
+            <span class="n">colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RGB</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">data_path</span> <span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span>
+
+        <span class="n">plot</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+        <span class="n">plot</span><span class="o">.</span><span class="n">rect</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">barcode</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">)</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="n">layout</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">plot</span><span class="p">]</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">save</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">open_web_browser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">barcode_to_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">barcode_colors</span><span class="p">,</span> <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span><span class="p">,</span> <span class="n">interpolation</span><span class="p">):</span>
+
+        <span class="c1"># Creating an Image from the Color Array</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">image_height</span><span class="p">,</span> <span class="n">barcode_colors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">image</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">barcode_colors</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">image</span>
+
+    <span class="k">def</span> <span class="nf">get_parameter_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BarcodeParameterWidget</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">BarcodeParameterWidget</span><span class="p">(</span><span class="n">ParameterWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    We want the User to be able to determine the resolution of frames when reading and the </span>
+<span class="sd">    interpolation type for the Preview. </span>
+<span class="sd">    </span>
+<span class="sd">    To do so we create a Parameter Widget and override the get_parameters function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BarcodeParameterWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="n">l1</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;Cubic&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;Linear&quot;</span><span class="p">)</span>
+        <span class="n">l1</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Sizing Interpolation&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">25</span><span class="p">)))</span>
+        <span class="n">l1</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">)</span>
+
+        <span class="n">l2</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin_frame</span> <span class="o">=</span> <span class="n">QSpinBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin_frame</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin_frame</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin_frame</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">l2</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Frame Resolution&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">25</span><span class="p">)))</span>
+        <span class="n">l2</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_frame</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_frame</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="n">interpolation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">parameters</span>
+</pre></div>
+</td></tr></table></div>
+<ul class="simple">
+<li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>search`cd _docs</li>
+</ul>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nodes.html" class="btn btn-neutral float-right" title="Nodes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="analyses.html" class="btn btn-neutral" title="IAnalysisJob" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Gaudenz Halter.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

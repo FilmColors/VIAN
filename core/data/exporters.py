@@ -3,6 +3,12 @@ import numpy as np
 from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
+import os
+import shutil
+
+def zip_project(output_file, project_folder):
+    shutil.make_archive(output_file, 'zip', project_folder)
+
 class ScreenshotsExporter():
     def __init__(self, settings, project, naming):
         self.settings = settings

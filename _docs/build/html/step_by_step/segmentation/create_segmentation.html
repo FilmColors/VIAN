@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Creating Segmentations &mdash; VIAN 0.1.1 documentation</title>
+  <title>Creating Segmentations &mdash; VIAN 0.4.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="VIAN 0.1.1 documentation" href="../../index.html"/>
+    <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/>
         <link rel="up" title="Segmentation" href="segmentation.html"/>
         <link rel="next" title="Creating Segments" href="create_segment.html"/>
         <link rel="prev" title="Segmentation" href="segmentation.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.4
               </div>
             
           
@@ -93,9 +93,27 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../../UserGuide.html">User’s Guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../user_interface/user_interface.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_interface/user_interface.html">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/inspector.html">Inspector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/outliner.html">Outliner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/perspectives.html">Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#player-perspective">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#id1">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#screenshots-perspective">Screenshots Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#node-scripting-perspective">Node Scripting Perspective</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/timeline.html">Timeline</a></li>
+</ul>
+</li>
 <li class="toctree-l2 current"><a class="reference internal" href="../step_by_step.html">Step-by-Step Guides</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../project_management/project_management.html">Vian Projects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project_management/project_management.html">Vian Projects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/create_project.html">Creating new Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/project_templates.html">Project Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+</ul>
+</li>
 <li class="toctree-l3 current"><a class="reference internal" href="segmentation.html">Segmentation</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Creating Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="create_segment.html">Creating Segments</a></li>
@@ -104,13 +122,32 @@
 <li class="toctree-l4"><a class="reference internal" href="exporting_segmentations.html">Exporting Segmentations</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../annotation/annotation.html">Annotations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../screenshots/screenshots.html">Screenshots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../annotation/annotation.html">Annotations</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../screenshots/screenshots.html">Screenshots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../screenshots/export_screenshots.html">Exporting Screenshots</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_guide/analyses.html">IAnalysisJob</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/analyses.html#functionality">Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/analyses.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_guide/nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_guide/plugins.html">Plug-Ins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -261,7 +298,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.1.1',
+            VERSION:'0.4.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

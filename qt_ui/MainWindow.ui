@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>724</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -54,6 +54,7 @@
      <addaction name="action_ExportSegmentation"/>
      <addaction name="actionExportTemplate"/>
      <addaction name="actionExportVocabulary"/>
+     <addaction name="actionZip_Project"/>
     </widget>
     <widget class="QMenu" name="menuRecently_Opened">
      <property name="title">
@@ -498,6 +499,11 @@
   <action name="actionClearRecent">
    <property name="text">
     <string>Clear List</string>
+   </property>
+  </action>
+  <action name="actionZip_Project">
+   <property name="text">
+    <string>Zip Project</string>
    </property>
   </action>
  </widget>

@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QRunnable, QObject, Qt
+from PyQt5.QtCore import QRunnable, QObject, Qt, QThread
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from random import randint
 import traceback, sys
@@ -9,6 +9,7 @@ class WorkerSignals(QObject):
     sign_error = pyqtSignal(tuple)
     sign_result = pyqtSignal(object)
     sign_progress = pyqtSignal(tuple)
+
 
 class Worker(QRunnable):
 
@@ -61,8 +62,10 @@ class Worker(QRunnable):
     def on_progress(self, float_value):
         self.signals.sign_progress.emit((self.task_id, float_value))
 
+
 class ProjectModifierSignals(QObject):
     sign_progress = pyqtSignal(int)
+
 
 class ProjectModifier(QRunnable):
     def __init__(self, function, worker_result, main_window, project, progress_popup = None):
@@ -93,6 +96,7 @@ class ProjectModifier(QRunnable):
 
 class CurrentSegmentEvaluaterSignals(QObject):
     segmentChanged = pyqtSignal(int)
+
 
 class CurrentSegmentEvaluater(QRunnable):
     def __init__(self):
@@ -130,3 +134,43 @@ class CurrentSegmentEvaluater(QRunnable):
     @pyqtSlot(list)
     def set_segments(self, segments):
         self.segments = segments
+
+
+class MinimalThreadWorker(QObject):
+
+    finished = pyqtSignal()
+    error = pyqtSignal(str)
+
+    def __init__(self, func):
+        super(MinimalThreadWorker, self).__init__()
+        self.function = func
+
+    @pyqtSlot()
+    def process(self):
+        try:
+            result = self.function()
+            self.finished.emit(result)
+        except Exception as e:
+            self.error.emit(e)
+
+
+class LiveWidgetThreadWorker(MinimalThreadWorker):
+    def __init__(self, frame, data, func):
+        super(LiveWidgetThreadWorker, self).__init__(func)
+        self.frame = frame
+        self.data = data
+
+    def process(self):
+        try:
+            result = self.function(self.frame, self.data)
+            self.finished.emit(result)
+        except Exception as e:
+            self.error.emit(e)
+
+
+
+def run_minimal_worker(worker: MinimalThreadWorker, finish_func):
+    thread = QThread()
+    worker.moveToThread(thread)
+    worker.finished.connect(finish_func)
+    thread.start()

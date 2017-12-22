@@ -45,6 +45,16 @@ Fast Segmentation
 
    **Tools/Add Segment**
 
+.. note::
+   **Forward vs. Backward Segmentation**
+   By default, VIAN uses a **Backward Segmentation** algorithm when fast-segmenting.
+   This means, that the new segment is created from the last Segment's end to the current time.
+
+   Alternatively, you may activate **Forward Segmentation** in the *Timeline/Options* Menu, this means,
+   that the new segment is created from the current time to the next Segment's start or the end of the movie,
+   cutting the overlapping Segment if existing.
+
+
 .. figure:: create_segment_02.png
    :scale: 80 %
    :align: center

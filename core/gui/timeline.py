@@ -539,7 +539,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def end_selector(self):
         if self.is_selecting and self.selector_context is None:
-            print("TEST", "END SELECTOR")
             self.is_selecting = False
             # pos = self.selector.pos().x() + self.selector.width() + self.pos().x()
             pos = self.selector.pos().x() + self.selector.width() - self.relative_corner.x()
@@ -556,7 +555,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.selected.create_segment(self.selector.start, self.selector.stop, forward_segmenting=False, inhibit_overlap=self.inhibit_overlap)
 
     def close_selector(self):
-        print("TEST", "CLOSED SELECTOR")
         if self.selector is not None:
             self.selector.close()
             self.selector.deleteLater()

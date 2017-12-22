@@ -960,7 +960,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             if next is not None and next.start < stop:
                 stop = next.start
 
-        print("Test:", start, stop)
 
 
         if ID is None:

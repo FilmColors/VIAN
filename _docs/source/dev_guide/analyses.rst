@@ -8,8 +8,8 @@ Your analysis will then automatically appear in the Analysis/Extensions Menu of 
 
 
 
-Functionallity
-**************
+Functionality
+*************
 Once the user has triggered the Button in the MainWindow menu, following process will take place:
 
 **Analysis**
@@ -53,6 +53,15 @@ handed to the widget, or url in case of a webbrowser.
 ..  autoclass:: core.data.interfaces.IAnalysisJob
     :members:
 
+
+Example
+*******
+.. toctree::
+   :maxdepth: 4
+
+   analyses_example
+
+* :ref:'_IAnalysisJobExample'
 
 * :ref:`genindex`
 * :ref:`modindex`

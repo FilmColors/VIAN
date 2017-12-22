@@ -3,7 +3,7 @@ Step-by-Step Guides
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    project_management/project_management
    segmentation/segmentation.rst

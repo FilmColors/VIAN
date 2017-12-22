@@ -391,7 +391,6 @@ class FiwiFetcher():
 
             segm_folders = glob.glob(base_path + movie_folder + "/*")
 
-            print("Testing:", base_path + movie_folder + "/*")
 
             if len(segm_folders) == 0:
                 base_path = base_path_2

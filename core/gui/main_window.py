@@ -16,6 +16,7 @@ from core.data.masterfile import MasterFile
 from core.data.project_streaming import ProjectStreamerShelve
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
+from core.data.exporters import zip_project
 # from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -160,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.server.player = self.player
 
         self.server.start()
-        self.project = ElanExtensionProject(self, "","New Project")
+        self.project = ElanExtensionProject(self, "","Default Project")
 
 
 
@@ -244,6 +245,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExportTemplate.triggered.connect(self.export_template)
         self.actionExportVocabulary.triggered.connect(self.export_vocabulary)
         self.actionClose_Project.triggered.connect(self.close_project)
+        self.actionZip_Project.triggered.connect(self.on_zip_project)
         self.actionExit.triggered.connect(self.on_exit)
 
         self.actionUndo.triggered.connect(self.on_undo)
@@ -633,7 +635,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.settings.recent_files_path = []
             self.settings.recent_files_name = []
 
-
     def eval_class(self, class_name):
         try:
             return eval(class_name)
@@ -675,9 +676,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.set_darwin_player_visibility(False)
         self.update()
 
-        answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-        if answer == QMessageBox.Yes:
-            self.on_save_project()
+        if self.project.undo_manager.has_modifications():
+            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+            if answer == QMessageBox.Yes:
+                self.on_save_project()
 
 
         vocabularies = []
@@ -713,9 +715,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_loaded()
 
     def on_load_project(self):
-        answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-        if answer == QMessageBox.Yes:
-            self.on_save_project()
+        if self.project.undo_manager.has_modifications():
+            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+            if answer == QMessageBox.Yes:
+                self.on_save_project()
 
         self.set_overlay_visibility(False)
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
@@ -725,6 +728,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.load_project(path)
 
     def close_project(self):
+        if self.project.undo_manager.has_modifications():
+            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+            if answer == QMessageBox.Yes:
+                self.on_save_project()
+
         self.player.stop()
         self.abortAllConcurrentThreads.emit()
         self.project.cleanup()
@@ -984,6 +992,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def export_vocabulary(self):
         dialog = VocabularyExportDialog(self)
         dialog.show()
+
+    def on_zip_project(self):
+        try:
+            zip_project(self.project.export_dir + "/" + self.project.name, self.project.folder)
+        except Exception as e:
+            self.print_message("Zipping Project Failed", "Red")
+            self.print_message(str(e), "Red")
 
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)

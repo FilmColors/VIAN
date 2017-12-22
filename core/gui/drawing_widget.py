@@ -13,6 +13,8 @@ from core.data.enums import *
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending, IConcurrentJob
 from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu
+
+from core.concurrent.worker import LiveWidgetThreadWorker, run_minimal_worker
 from .ewidgetbase import EDockWidget, EToolBar
 
 class AnnotationToolbar(EToolBar):
@@ -1232,6 +1234,31 @@ class DrawingFreeHand(DrawingBase):
 
             qp.drawPath(path)
 
+
+# class DrawingLiveWidget(DrawingBase):
+#     def __init__(self, parent, annotation_object):
+#         super(DrawingLiveWidget, self).__init__(parent, annotation_object)
+#         self.live_widget =
+#
+#     def update_live_widget_source(self):
+#         self.live_widget =
+#
+#
+#     def compute_concurrent(self):
+#         pass
+#
+#     def set_result(self, result):
+#         pass
+#
+#     def on_update_time(self, frame):
+#         worker = LiveWidgetThreadWorker(frame, self.overlay.project.get_by_id(self.annotation_object.automated_source), self.compute_concurrent())
+#         run_minimal_worker(worker, self.set_result)
+#
+#
+#     def drawShape(self, qp, rect = None):
+#         if rect is None:
+#             rect = self.inner_rect
+#         qp.drawImage(self.inner_rect, self.annotation_object.image)
 
 class DrawingEditorWidget(QtWidgets.QMainWindow):
     def __init__(self, drawing, parent, settings):

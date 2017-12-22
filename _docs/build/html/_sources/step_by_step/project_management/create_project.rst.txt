@@ -28,6 +28,10 @@ Creating a new VIAN Project as follows:
       4. Assign a **Creation Year** to the Movie
       5. Select a **Source**
 
+   4. **Vocabulary**
+
+      1. Choose all vocabularies you want to add to the project, by checking/un-checking the specific Checkboxes.
+
 .. figure:: new_project.png
    :scale: 80 %
    :align: center

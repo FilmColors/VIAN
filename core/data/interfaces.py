@@ -145,8 +145,13 @@ class ISelectable():
     def get_type(self):
         print("ISelectable: Not Implemented by", self)
 
+class ILiveWidgetExposing():
+    def get_live_widget(self):
+        pass
+    def compute_widget(self, frame, data):
+        pass
 
-class IAnalysisJob():
+class IAnalysisJob(ILiveWidgetExposing):
     """
     This is the BaseClass for all Analyses. 
     Subclass it to implement your own Analyses. 
@@ -295,6 +300,7 @@ class AutomatedTextSource():
 
     def get_auto_text(self, property_name, time_ms, fps):
         return ""
+
 
 class IConcurrentJob():
     def __init__(self, args, show_modify_progress= False):
