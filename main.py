@@ -1,3 +1,17 @@
+"""
+VIAN - Visual Movie Annotation and Analysis
+
+
+copyright by 
+Gaudenz Halter
+University of Zurich
+2017
+
+Visualization and MultimediaLab 
+
+"""
+
+
 import os
 import platform
 import sys
@@ -31,7 +45,7 @@ class MainThread(Thread):
 
             app = QApplication(sys.argv)
             self.set_style_sheet(app)
-            main = MainWindow(self.vlc_instance, self.vlc_media_player,self.qt_server)
+            main = MainWindow(self.vlc_instance, self.vlc_media_player, self.qt_server)
 
             sys.exit(app.exec_())
 

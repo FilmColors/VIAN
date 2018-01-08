@@ -104,7 +104,6 @@ def store_project_concurrent(args, sign_progress):
     numpy_path = path + "_scr"
     project_path = path + ".eext"
 
-
     if settings.SCREENSHOTS_STATIC_SAVE:
         np.savez(numpy_path, imgs=screenshots_img, annotations=screenshots_ann, empty=[True])
 

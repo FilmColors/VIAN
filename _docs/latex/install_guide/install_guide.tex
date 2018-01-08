@@ -49,15 +49,17 @@
 
 	\vspace{0.5cm}
 	\Huge
-	{\textbf \textsf{VIAN\\ \huge Installation Guide}}
+	{\textbf \textsf{VIAN \& WebApp\\ \huge Project Planning 2018: Protocol (04.01.2018)}}
 
-	\vfill \vfill \vfill
-	\includegraphics*[width=1.0\textwidth]{figures/VIAN.png}
 
-	\vfill
+	
 	\large
 	Author:\\
 	Gaudenz Halter\\
+	
+	\vfill\vfill\vfill
+	\vfill
+	
 	
 
 	\vfill \vfill \vfill
@@ -83,57 +85,52 @@
 
 
 %=====================================================================
-\chapter{Installation} \label{chp:introduction}
+\section{Basics} \label{chp:introduction}
 %=====================================================================
 
-\section{System Requirements}
-\begin{center}
-	\begin{tabular}{|c|c|c|}
-		\hline 
-		OS & OSX & Windows 64bit \\ 
-		\hline 
-		RAM & 4096 MB & 4096 MB \\ 
-		\hline 
-		HDD/SSD & ~1.5 GB & \~1.5 GB \\ 
-		\hline 
-	\end{tabular} 
-\end{center}
-
-Since VIAN is cross-platform, it will also run on Linux systems, but OpenCV, ffmpeg has to be compiled by the user. That is, why it is currently not listed in supported OS. This will most probably change in the future.
-
-
-\section{Preliminary Steps}
-Before VIAN can be installed, make sure that both, textbf{VLC} and textbf{Anaconda} are installed on your machine:\\
-
-
-\begin{mdframed}[backgroundcolor=Orange] 
-	\textbf{For members of the FIWI:}\\ Get VIAN from the server:\\ ".../team/Software/VIAN/". Copy the complete folder which corresponds to your OS onto your computer.\\
-	Both, anaconda and vlc installers are located in the directory, run them. Once completed, you may remove the anaconda-blablalb.dmg, resp. vlc-blablabla.dmg and proceed with "Installing VIAN".
-
-\end{mdframed}
- 
 \begin{itemize}
-	\item If you haven't installed \textbf{Anaconda} yet, download and install anaconda for python 2.7.\\
-	\url{https://www.anaconda.com/download/}
-	\item Install or update the \textit{latest} \textbf{VLC}. On Windows: Make sure you have a 64bit Version.
-	\url{https://www.videolan.org/vlc/index.de.html}
+	\item All Methods take a Movie as input, Stills are only a selection of subjectively representative Frames.
+	\item There is a Mikro (Stills), Meta (Movies) and Makro (Database)layer which should all be covered by the WebApp, VIAN does only 
+	allow visualization up to the Meta Layer.
+	
 \end{itemize}
 
-\section{Installing VIAN}
+%=====================================================================
+\section{Use Cases} \label{chp:introduction}
+%=====================================================================
 
-\begin{itemize}
-	\item To install VIAN, run the Script which is located in the root directory of VIAN. 
-	\subitem On OSX: "OSX\_Install"
-	\subitem On Win64: "Win64\_Install.bat"
-	\item A Console/Terminal Window will appear and install all necessary files used by VIAN on your Computer. 
-	\item Depending on your internet-connection, this might take a while.
-\end{itemize}
+\subsection{Use Case 1: Color Contrast}
+\textbf{Question:} Does Color-Scheme X apply to a given set of Movies Y?\\
+\textbf{Description:} This is the currently developed Tool,using the Template approximation Algorithm shown by following papers
 
-\section{Running VIAN}
+\subsection{Use Case 2: Facial Recognition}
+\textbf{Question:} Identify each Character as a persistent Object, find it's appearance\\ 
+
+
+\subsection{Use Case 3: Skin Tone}
+\textbf{Question:} Show the Set of Skin-Tones for each Character within a movie\\
+\textbf{Description:} After Facial Recognition, we should compute the skin-tone, for each character.
+
+\subsection{Use Case 4: Texture Complexity}
+\textbf{Question:} Identify each Character as a persistent Object, find it's appearance\\
+\textbf{Description:} Texture Complexity refers to the variation of color within a small region of the Character/Object Layer 
+
+\subsection{Use Case 5: Similarity}
+\textbf{Question:} Identify similar movies Based on Filemaker-, Object- and Color-Metadata\\
+\textbf{Description:} The goal is to compute a similarity measure based on all collected features.
+
+\subsection{Use Case 6: Visual Momentum}
+\textbf{Question:} Identify similar movies Based on Filemaker-, Object- and Color-Metadata\\
+\textbf{Description:} Motion : Character Motion/ Camera Motion / Object Motion
+Character-Associated or Independent Camera Movement\\
+
+James Eric Cutting Cornell University
+
+\section{Project Schedule}
 \begin{itemize}
-	\item  In order to run VIAN, just use the other file located in the VIAN directory:
-	\subitem On OSX: "OSX\_Run"
-	\subitem On Win64: "Win64\_Run.bat"
-	\item Make sure to \textbf{NOT} close the Console/Terminal window while the program is running.
+	\item Protoyping Tools: End of March
+	\item Database Setup / VIAN Binding: End of June
+	\item WebApp Basic: End of August
+	\item WebApp Beta: End of Dezember
 \end{itemize}
 \end{document}

@@ -83,7 +83,6 @@ class ProjectStreamerShelve(ProjectStreamer):
         else:
             path = self.container_db
 
-        print(path)
         with shelve.open(path) as db:
             db[str(id)] = obj
 
@@ -94,6 +93,7 @@ class ProjectStreamerShelve(ProjectStreamer):
             path = self.container_db
         with shelve.open(path) as db:
             obj = db[str(id)]
+
         return obj
 
     #region IProjectChangeNotify
@@ -114,7 +114,6 @@ class ASyncStoreJob(IConcurrentJob):
     def __init__(self, args, proceed_slot):
         super(ASyncStoreJob, self).__init__(args, show_modify_progress=False)
         self.proceed_slot = proceed_slot
-
 
     def run_concurrent(self, args, sign_progress):
         unique_id = args[0]

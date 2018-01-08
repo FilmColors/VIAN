@@ -158,10 +158,10 @@ class EMatplotLibVis(EAnalyseVisualization):
 class MatplotlibFigure(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, analyze=None, width=5, height=4, dpi=100):
+    def __init__(self, parent=None, analysis=None, width=5, height=4, dpi=300):
         self.background = (50.0/255, 50.0/255, 50.0/255)
         fig = Figure(figsize=(width, height), dpi=dpi, facecolor=self.background)
-        self.analyze = analyze
+        self.analysis = analysis
         self.axes = fig.add_subplot(111)
         self.axes.set_facecolor(self.background)
 
@@ -193,6 +193,7 @@ class EHtmlDisplay(QWidget):
     def resizeEvent(self, a0: QResizeEvent):
         super(EHtmlDisplay, self).resizeEvent(a0)
         self.view.setZoomFactor(self.width()/self.plot_width - 0.1)
+
 
 class EToolBar(QToolBar):
     def __init__(self, main_window, title = "Toolbar Title"):

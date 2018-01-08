@@ -230,7 +230,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         """
         return ParameterWidget()
 
-    def get_visualization(self, analysis, result_path, data_path):
+    def get_visualization(self, analysis, result_path, data_path, project, main_window):
         """
         This function is called by VIAN if the User wants to display the complete Visualization of the Data. 
         While you may essentially use any type Type of Visualization, you should either: 

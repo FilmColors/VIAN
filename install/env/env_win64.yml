@@ -1,58 +1,85 @@
-name: vian_win
+name: vian_win3
 channels:
-- anaconda
 - conda-forge
+- anaconda
 - menpo
 - anaconda-fusion
 - defaults
 dependencies:
-- backports=1.0=py27h6492d98_1
-- backports_abc=0.5=py27h0ec6b72_0
-- bokeh=0.12.10=py27h5ac3b79_0
-- ca-certificates=2017.08.26=h94faf87_0
-- futures=3.1.1=py27h71313b4_0
-- icc_rt=2017.0.4=h97af966_0
-- icu=58.2=vc9h3e79e4e_0
-- intel-openmp=2018.0.0=hcd89f80_7
-- jinja2=2.9.6=py27hb525989_1
-- jpeg=9b=vc9hb90d6ad_1
-- markupsafe=1.0=py27h9d4480d_1
-- mkl=2018.0.0=h36b65af_4
-- numpy=1.13.3=py27h9ac254c_0
-- openssl=1.0.2l=vc9hb274bc6_5
-- pyqt=5.6.0=py27h224ed30_5
-- python-dateutil=2.6.1=py27hbdcc174_1
-- pyyaml=3.12=py27_0
-- singledispatch=3.4.0.3=py27h3f9d112_0
-- sip=4.18.1=py27h5ec1c1a_2
-- six=1.11.0=py27ha5e1701_1
-- sqlite=3.20.1=vc9h5ec81ce_1
-- ssl_match_hostname=3.5.0.1=py27hea8a0f4_2
-- tornado=4.5.2=py27hbdd278e_0
-- zlib=1.2.11=vc9ha80f4e8_1
-- backports.functools_lru_cache=1.4=py27_1
-- cycler=0.10.0=py27_0
-- freetype=2.7=vc9_2
-- functools32=3.2.3.2=py27_1
-- libpng=1.6.28=vc9_2
-- matplotlib=2.1.0=py27_1
-- pyparsing=2.2.0=py27_0
-- pytz=2017.3=py_2
-- qt=5.6.2=vc9_1
-- certifi=2016.2.28=py27_0
-- enum34=1.1.6=py27_0
-- pip=9.0.1=py27_1
-- pyodbc=4.0.17=py27_0
-- python=2.7.13=1
-- setuptools=36.4.0=py27_1
-- vc=9=0
-- vs2008_runtime=9.00.30729.5054=0
-- wheel=0.29.0=py27_0
-- wincertstore=0.2=py27_0
-- opencv3=3.1.0=py27_0
+- bzip2=1.0.6=vc14_3
+- click=6.7=py35h10df73f_0
+- cloudpickle=0.5.2=py35hd830302_0
+- dask=0.16.0=py35hc436b91_0
+- dask-core=0.16.0=py35h0988329_0
+- decorator=4.1.2=py35hc7d1f2e_0
+- distributed=1.20.2=py35_0
+- freetype=2.5.5=vc14_2
+- heapdict=1.0.0=py35_1
+- imageio=2.2.0=py35hcd4b9a4_0
+- locket=0.2.0=py35h0dfcdd0_1
+- msgpack-python=0.4.8=py35hdef45cb_0
+- networkx=1.11=py35h097edc8_0
+- olefile=0.44=py35h7ba86d0_0
+- pandas=0.21.1=py35h047fa9f_0
+- partd=0.3.8=py35h894d1e4_0
+- pillow=4.2.1=py35_0
+- psutil=5.4.1=py35h5f28cdc_0
+- pyqtgraph=0.10.0=py35_0
+- pywavelets=0.5.2=py35h7c47ace_0
+- scikit-image=0.13.1=py35ha2243b5_0
+- scipy=0.19.1=np113py35_0
+- snakeviz=0.4.2=py35h62ba958_0
+- sortedcontainers=1.5.7=py35h9857911_0
+- tblib=1.3.2=py35hd2cf7e1_0
+- tk=8.5.18=vc14_0
+- toolz=0.8.2=py35h7afdc4e_0
+- zict=0.1.3=py35hf5542e0_0
+- ca-certificates=2017.11.5=0
+- icu=58.2=vc14_0
+- jpeg=9b=vc14_2
+- libpng=1.6.28=vc14_2
+- libtiff=4.0.7=vc14_1
+- libwebp=0.5.2=vc14_7
+- opencv=3.3.0=py35_202
+- openssl=1.0.2m=vc14_0
+- pyqt=5.6.0=py35_4
+- qt=5.6.2=vc14_1
+- zlib=1.2.11=vc14_0
+- bkcharts=0.2=py35_0
+- bokeh=0.12.7=py35_0
+- certifi=2016.2.28=py35_0
+- cycler=0.10.0=py35_0
+- jinja2=2.9.6=py35_0
+- markupsafe=1.0=py35_0
+- matplotlib=2.0.2=np113py35_0
+- mkl=2017.0.3=0
+- numpy=1.13.1=py35_0
+- pip=9.0.1=py35_1
+- pyparsing=2.2.0=py35_0
+- python=3.5.4=0
+- python-dateutil=2.6.1=py35_0
+- pytz=2017.2=py35_0
+- pyyaml=3.12=py35_0
+- requests=2.14.2=py35_0
+- setuptools=36.4.0=py35_1
+- sip=4.18=py35_0
+- six=1.10.0=py35_1
+- tornado=4.5.2=py35_0
+- vc=14=0
+- vs2015_runtime=14.0.25420=0
+- wheel=0.29.0=py35_0
+- wincertstore=0.2=py35_0
 - pip:
-  - backports-abc==0.5
-  - backports.functools-lru-cache==1.4
-  - backports.ssl-match-hostname==3.5.0.1
-prefix: C:\dev\anaconda\envs\vian_win
+  - alabaster==0.7.10
+  - babel==2.5.1
+  - colorama==0.3.9
+  - docutils==0.14
+  - guzzle-sphinx-theme==0.7.11
+  - imagesize==0.7.1
+  - pygments==2.2.0
+  - snowballstemmer==1.2.1
+  - sphinx==1.6.5
+  - sphinx-rtd-theme==0.2.4
+  - sphinxcontrib-websupport==1.0.1
+prefix: C:\dev\anaconda\envs\vian_win3
 

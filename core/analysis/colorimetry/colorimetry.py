@@ -2,7 +2,7 @@ from core.data.interfaces import IAnalysisJob, ParameterWidget
 from core.data.containers import *
 from core.analysis.colorimetry.hilbert import *
 from core.analysis.colorimetry.computation import *
-from core.gui.ewidgetbase import EHtmlDisplay
+from core.gui.ewidgetbase import EHtmlDisplay, MatplotlibFigure
 from bokeh.embed import file_html
 from bokeh.colors import RGB
 from bokeh.resources import CDN
@@ -16,11 +16,13 @@ from PyQt5 import uic
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+import pyqtgraph as pg
+
 class ColometricsAnalysis(IAnalysisJob):
 
     def __init__(self):
         super(ColometricsAnalysis, self).__init__(name="Colorimetry",
-                                                  source_types=[SEGMENTATION, SCREENSHOT, SEGMENT, ANNOTATION_LAYER, MOVIE_DESCRIPTOR],
+                                                  source_types=[MOVIE_DESCRIPTOR, SEGMENT],
                                                   author="Gaudenz Halter",
                                                   version="0.0.1",
                                                   multiple_result=True)
@@ -31,8 +33,25 @@ class ColometricsAnalysis(IAnalysisJob):
         color_space = cv2.COLOR_BGR2Lab
 
         args = []
+
+        # TODO Dirty hack because a Moviedescirptor returns Frames instead of MS on get_end() (STUPID... SHIT, Have fun finding its usage)
         for tgt in targets:
-            args.append([path, ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps), resolution, color_space])
+            if tgt.get_type() == MOVIE_DESCRIPTOR:
+                args.append([path,
+                             ms_to_frames(tgt.get_start(), fps),
+                             tgt.get_end(),
+                             resolution,
+                             color_space,
+                             parameters,
+                             fps])
+            else:
+                args.append([path,
+                             ms_to_frames(tgt.get_start(), fps),
+                             ms_to_frames(tgt.get_end(), fps),
+                             resolution,
+                             color_space,
+                             parameters,
+                             fps])
 
         return args
 
@@ -45,11 +64,12 @@ class ColometricsAnalysis(IAnalysisJob):
         end = args[2]
         color_space = args[3]
         resolution = args[4]
-        cache_size = 100
+        parameters = args[5]
+        fps = args[6]
 
+        print(start, end)
         length = np.clip(int(end - start),1,None)
         data_size = int(np.ceil(length / resolution))
-        data_size_cached = int(np.ceil(np.ceil(float(length / cache_size)) / resolution))
         video_capture = cv2.VideoCapture(movie_path)
 
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, start)
@@ -59,102 +79,155 @@ class ColometricsAnalysis(IAnalysisJob):
 
         grad_bokeh, grad_in_bgr = create_hilbert_color_pattern(8, 32)
 
-        frame_stack = np.zeros(shape=(int(cache_size), height, width, 3), dtype=np.uint8)
-        hist_stack = np.zeros(shape=(data_size_cached, 8, 8, 8))
-        avg_color_tuples = np.zeros(shape=(data_size, 3))
+        frame_pos = np.zeros(shape=(data_size, 1), dtype=np.uint16)
+        hist_stack = np.zeros(shape=(data_size, 16, 16, 16), dtype=np.float16)
+        avg_color_tuples = np.zeros(shape=(data_size, 3), dtype=np.uint8)
 
         progress_counter = 0
-        cache_counter = 0
         hist_counter = 0
+
         for i in range(length):
             ret, frame = video_capture.read()
             if i % resolution == 0:
 
-                if progress_counter % 5 == 0:
+                if progress_counter % 2 == 0:
                     progress = float(i) / length
                     sign_progress(progress)
 
                 if frame is not None:
-                    frame = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2Lab)
-                    frame_stack[cache_counter] = frame
-                    cache_counter += 1
+                    # Colorspace Conversion
+                    frame_pos[hist_counter] = i
+                    frame_lab = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2Lab)
 
-                    # avg_color_tuples[progress_counter] = np.mean(frame, axis=(0, 1))
-
-                if cache_counter == cache_size:
-                    hist = calculate_histogram(frame_stack, 8)
+                    # Histogram
+                    hist = calculate_histogram(frame_lab, 16)
                     hist_stack[hist_counter] = hist
-                    frame_stack = np.zeros(shape=(cache_size, height, width, 3))
+
+                    # AVG Color
+                    avg_color_tuples[hist_counter] = np.mean(frame_lab, axis=(0, 1))
+
                     hist_counter += 1
-                    cache_counter = 0
 
 
                 progress_counter += 1
 
-        # adding the Frames to the Hist_stack which haven reached the Cache-Limit
-        if cache_counter != 0:
-            frame_stack = frame_stack[:cache_counter]
-            hist = calculate_histogram(frame_stack, 8)
-            hist_stack[hist_counter] = hist
+        # result = np.sum(hist_stack, axis=0)
+        # result = np.divide(result, width * height)
+        # result = np.divide(result, length)
+        # hist = hilbert_mapping_3d(8, result, HilbertMode.Values_All)
+
+        # Normalize Hist
+        hist_stack = np.divide(hist_stack, (width * height))
+        print(hist_stack.nbytes / 1000000, "MB")
 
 
 
-        result = np.sum(hist_stack, axis=0)
-        result = np.divide(result, width * height)
-        result = np.divide(result, length)
-        hist = hilbert_mapping_3d(8, result, HilbertMode.Values_All)
+        result = dict(
+            fps = fps,
+            hist_stack = hist_stack,
+            avg_colors = avg_color_tuples,
+            frame_pos=frame_pos
+        )
 
-        analysis = IAnalysisJobAnalysis("Colormetrics", [hist, grad_in_bgr], self.__class__, None)
+        analysis = IAnalysisJobAnalysis("Colormetrics", result, self.__class__, parameters)
         sign_progress(1.0)
         return analysis
 
     def get_parameter_widget(self):
         return ColormetricsPreferences()
 
-    def plot_histogram(self, data, colors):
-        colors_bokeh = []
-        for c in colors:
-            colors_bokeh.append(RGB(c[2], c[1], c[0]))
+    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:ElanExtensionProject, main_window: QMainWindow):
+        pg.setConfigOption("background", pg.mkColor(30, 30, 30))
+        win = pg.GraphicsWindow(title="Basic plotting examples")
+        pg.setConfigOptions(antialias=True)
 
-        colors = colors_bokeh
-        y_range = [10 ** -10, 1]
-        bottom = 10 ** -9
-        floor = 10 ** -10
-        x = range(len(data))
-        tools = "wheel_zoom, box_zoom, reset,save"
-        color_hist = figure(width=600, height=400, y_axis_type="log", y_range=y_range, tools=tools)
-        color_hist.vbar(x=x, width=1, bottom=floor, top=bottom, color=colors, alpha=1.0)
-        color_hist.vbar(x=x, width=1, bottom=bottom, top=data, color=colors, alpha=1.0)
+        frame_pos = analysis.data['frame_pos']
 
-        color_hist.title.text = "Histogram"
-        color_hist.title.align = "center"
-            # color_hist.title.text_font_size = title_size
+        lum_dt = np.multiply(np.divide(analysis.data["avg_colors"][:, 0], 255), 100)
+        a_dt = np.subtract(analysis.data["avg_colors"][:, 1].astype(np.int16), 128)
+        b_dt = np.subtract(analysis.data['avg_colors'][:, 2].astype(np.int16), 128)
 
-        # color_hist.xaxis.axis_label_text_font_size = label_size
-        # color_hist.yaxis.axis_label_text_font_size = label_size
+        major_ticks = []
+        minor_ticks = []
+        step = int(round(lum_dt.shape[0] / 5, 0))
+        for i in range(frame_pos.shape[0]):
+            if i % step == 0:
+                major_ticks.append((i, ms_to_string(frame2ms(frame_pos[i], fps=analysis.data['fps']))))
+            else:
+                minor_ticks.append(
+                    (i, ms_to_string(frame2ms(frame_pos[i], fps=analysis.data['fps']))))
+        h_axis1 = pg.AxisItem("bottom")
+        h_axis2 = pg.AxisItem("bottom")
+        h_axis3 = pg.AxisItem("bottom")
+        h_axis1.setTicks([major_ticks, minor_ticks])
+        h_axis2.setTicks([major_ticks, minor_ticks])
+        h_axis3.setTicks([major_ticks, minor_ticks])
+
+        plot_lum = win.addPlot(title="L-Channel", y=lum_dt, axisItems=dict(bottom=h_axis1), name= "LChannel")
+        plot_lum.setYRange(0, 100)
+        plot_lum.setXLink('AChannel')
+
+        plot_a = win.addPlot(title="a-Channel", y=a_dt, axisItems=dict(bottom=h_axis2), name= "AChannel")
+        plot_a.setYRange(-128, 128)
+        plot_a.setYLink("BChannel")
+        plot_a.setXLink('BChannel')
+        plot_b = win.addPlot(title="b-Channel", y=b_dt, axisItems=dict(bottom=h_axis3), name= "BChannel")
+        plot_b.setYRange(-128, 128)
 
 
-        color_hist.xaxis.axis_label = "Histogram Bin"
+        print(np.amin(b_dt),
+              np.amax(b_dt),
+              np.amin(analysis.data['avg_colors'][:, 2]),
+              np.amax(analysis.data['avg_colors'][:, 2]))
 
+        mw = EDockWidget(main_window, limit_size=False)
+        mw.setWindowTitle("Colorimetry Result")
+        mw.setWidget(win)
 
-        return color_hist
+        main_window.addDockWidget(Qt.RightDockWidgetArea, mw, Qt.Horizontal)
 
-    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path):
-        hist = self.plot_histogram(analysis.data[0], analysis.data[1])
-        l = layout([
-            [hist]
-        ])
-
-        path = data_path + "/" + analysis.get_name() + ".html"
-        save(l, path)
-        print(path)
-
-        open_web_browser(path)
+        # hist = self.plot_histogram(analysis.data[0], analysis.data[1])
+        # l = layout([
+        #     [hist]
+        # ])
+        #
+        # path = data_path + "/" + analysis.get_name() + ".html"
+        # save(l, path)
+        #
+        # open_web_browser(path)
 
     def get_preview(self, analysis):
-        plot = self.plot_histogram(analysis.data[0], analysis.data[1])
-        html = file_html(plot, CDN, "Histogram")
-        return EHtmlDisplay(None, html)
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout(widget))
+
+        try:
+            avg_c = analysis.data['avg_colors']
+        except:
+            print(analysis.data.items())
+
+        n_sample = QHBoxLayout(widget)
+        n_sample.addWidget(QLabel("n-Samples: ", widget))
+        n_sample.addWidget(QLabel(str(avg_c.shape[0]), widget))
+
+        avg_color = QHBoxLayout(widget)
+        avg_color.addWidget(QLabel("Average Color: ", widget))
+        avg_color.addWidget(QLabel("L:" + str(np.round(np.mean(avg_c[:,0]) / 255 * 100, 0)) + " " +
+                                   "a:" + str(np.round(np.mean(avg_c[:,1]),0) - 128) + " " +
+                                   "b:" + str(np.round(np.mean(avg_c[:,2]),0) - 128), widget))
+
+
+        widget.layout().addItem(n_sample)
+        widget.layout().addItem(avg_color)
+        widget.show()
+        return widget
+        # plot = self.plot_histogram(analysis.data[0], analysis.data[1])
+        # html = file_html(plot, CDN, "Histogram")
+        # return EHtmlDisplay(None, html)
+
+
+class ColormetryVisualization(EDockWidget):
+    def __init__(self, main_window):
+        super(ColormetryVisualization, self).__init__(main_window, limit_size=False)
 
 
 

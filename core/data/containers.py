@@ -2248,6 +2248,8 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         cap = cv2.VideoCapture(self.movie_path)
         return cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
+
+
     def get_source_properties(self):
         return ["Current Time", "Current Frame", "Movie Name", "Movie Path", "Movie ID", "Year", "Source", "Duration", "Notes"]
 
@@ -2409,7 +2411,11 @@ class IAnalysisJobAnalysis(AnalysisContainer):
 
     def get_visualization(self):
         try:
-            self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self, self.project.results_dir, self.project.data_dir)
+            self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
+                                                                                             self.project.results_dir,
+                                                                                             self.project.data_dir,
+                                                                                             self.project,
+                                                                                             self.project.main_window)
         except Exception as e:
             print("Exception in get_visualization()", e)
             QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
@@ -2421,16 +2427,17 @@ class IAnalysisJobAnalysis(AnalysisContainer):
     def serialize(self):
         data_json = []
         data_dtypes = []
-        for d in self.data:
-            if isinstance(d, np.ndarray):
-                data_json.append(d.tolist())
-                data_dtypes.append(str(d.dtype))
-            elif isinstance(d, list):
-                data_json.append(d)
-                data_dtypes.append("list")
-            else:
-                data_json.append(np.array(d).tolist())
-                data_dtypes.append(str(np.array(d).dtype))
+
+        # for d in self.data.items():
+        #     if isinstance(d, np.ndarray):
+        #         data_json.append(d.tolist())
+        #         data_dtypes.append(str(d.dtype))
+        #     elif isinstance(d, list):
+        #         data_json.append(d)
+        #         data_dtypes.append("list")
+        #     else:
+        #         data_json.append(np.array(d).tolist())
+        #         data_dtypes.append(str(np.array(d).dtype))
 
 
         # parameters = []
@@ -2462,17 +2469,8 @@ class IAnalysisJobAnalysis(AnalysisContainer):
 
         self.data = []
         self.data = streamer.sync_load(self.unique_id)
-        # for i, r in enumerate(serialization['data_json']):
-        #     # Loop over each Result of the Final Node
-        #         if result_dtypes[i] == "list":
-        #             self.data.append(r)
-        #         else:
-        #             self.data.append(np.array(r, dtype=result_dtypes[i]))
 
         self.parameters = serialization['parameters']
-        # for p in serialization['parameters']:
-        #     param = eval(p["parameter_class"])()
-        #     self.parameters.append(param.deserialize(p))
 
         return self
 
