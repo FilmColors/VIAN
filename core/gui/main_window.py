@@ -9,6 +9,8 @@ from core.concurrent.worker import Worker
 
 
 import importlib
+from functools import partial
+
 from core.concurrent.worker_functions import *
 from core.data.enums import *
 from core.data.importers import ELANProjectImporter
@@ -288,6 +290,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionUpdate.triggered.connect(self.update_vian)
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
+        self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
+        self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
 
         self.actionClearRecent.triggered.connect(self.clear_recent)
 
@@ -707,7 +711,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Importing: " + str(i) + " " + v + "\r")
             self.project.import_vocabulary(v)
 
-        self.player.open_movie(project.movie_descriptor.movie_path)
+        # self.player.open_movie(project.movie_descriptor.movie_path)
         self.master_file.add_project(project)
         self.project.store_project(self.settings, self.master_file)
 
@@ -821,7 +825,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 d.delete()
         except Exception as e:
             print(e)
-
 
     def update_overlay(self):
         if self.drawing_overlay is not None and self.drawing_overlay.isVisible():

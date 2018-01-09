@@ -88,6 +88,8 @@
     </widget>
     <addaction name="actionPlay_Pause"/>
     <addaction name="menuPlay_Rate"/>
+    <addaction name="actionFrame_Forward"/>
+    <addaction name="actionFrame_Backward"/>
     <addaction name="separator"/>
     <addaction name="actionScreenshot"/>
     <addaction name="actionAdd_Key"/>
@@ -504,6 +506,22 @@
   <action name="actionZip_Project">
    <property name="text">
     <string>Zip Project</string>
+   </property>
+  </action>
+  <action name="actionFrame_Forward">
+   <property name="text">
+    <string>Frame Forward</string>
+   </property>
+   <property name="shortcut">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionFrame_Backward">
+   <property name="text">
+    <string>Frame Backward</string>
+   </property>
+   <property name="shortcut">
+    <string>Left</string>
    </property>
   </action>
  </widget>

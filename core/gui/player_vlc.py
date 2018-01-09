@@ -485,6 +485,12 @@ class Player_VLC(VideoPlayer):
         pos = round(float(time) * fps / 1000, 0)
         return int(pos)
 
+    def frame_step(self, backward = False):
+        if backward:
+            self.set_media_time(self.media_player.get_time() - (1000 / self.fps))
+        else:
+            self.set_media_time(self.media_player.get_time() + (1000 / self.fps))
+
     def on_selected(self,sender, selected):
         pass
 

@@ -161,6 +161,20 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.undo_manager.to_undo((self.add_segmentation, [segmentation]), (self.remove_segmentation, [segmentation]))
         self.dispatch_changed()
 
+    def copy_segmentation(self, segmentation):
+        new = self.create_segmentation(name = segmentation.name + "_Copy")
+
+        for s in segmentation.segments:
+            segm = new.create_segment(start = s.get_start(), stop = s.get_end(), dispatch=False)
+            segm.annotation_body = s.annotation_body
+
+        print("Dispatching")
+        self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
+        self.dispatch_changed(item = new)
+
+
+
+
     def remove_segmentation(self, segmentation):
         if self.segmentation[self.main_segmentation_index] is segmentation:
             main_segmentation = self.segmentation[0]
@@ -906,7 +920,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
 
 
-    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False, inhibit_overlap = True):
+    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False, inhibit_overlap = True,  dispatch = True):
 
         # Are we fast segmenting?
         if stop - start < from_last_threshold:
@@ -968,9 +982,11 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         new_seg = Segment(ID = ID, start = start, end = stop, additional_identifiers=[str(ID)], segmentation = self)
         new_seg.set_project(self.project)
 
-        self.add_segment(new_seg)
+        self.add_segment(new_seg, dispatch)
 
-    def add_segment(self, segment):
+        return new_seg
+
+    def add_segment(self, segment, dispatch = True):
         # Finding the Segments location
 
         if len(self.segments) == 0:
@@ -989,8 +1005,11 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.project.sort_screenshots()
 
 
-        self.project.undo_manager.to_undo((self.add_segment, [segment]), (self.remove_segment, [segment]))
-        self.dispatch_on_changed()
+
+
+        if dispatch:
+            self.project.undo_manager.to_undo((self.add_segment, [segment]), (self.remove_segment, [segment]))
+            self.dispatch_on_changed()
 
     def remove_segment(self, segment):
         self.segments.remove(segment)

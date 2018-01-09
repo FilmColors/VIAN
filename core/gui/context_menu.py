@@ -187,6 +187,9 @@ class SegmentationContextMenu(ContextMenu):
         self.action_cleanup_borders.triggered.connect(self.cleanup_borders)
         self.action_set_timeline_visibility.triggered.connect(self.toggle_timeline_visiblity)
 
+        self.action_copy_segmentation = self.addAction("Copy Segmentation")
+        self.action_copy_segmentation.triggered.connect(self.copy_segmentation)
+
         self.action_delete.triggered.connect(self.on_delete)
         self.action_set_as_main.triggered.connect(self.on_set_main)
 
@@ -197,6 +200,9 @@ class SegmentationContextMenu(ContextMenu):
     def cleanup_borders(self):
         for s in self.segmentation:
             s.cleanup_borders()
+
+    def copy_segmentation(self):
+        self.segmentation[0].project.copy_segmentation(self.segmentation[0])
 
     def toggle_lock(self):
         self.hide()
