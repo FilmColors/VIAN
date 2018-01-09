@@ -3,7 +3,7 @@ import os
 import cv2
 import enum
 import numpy as np
-from bokeh import colors
+# from bokeh import colors
 
 
 class HilbertMode(enum.Enum):
@@ -137,8 +137,10 @@ def create_hilbert_color_map(s, rgb_multiplier, colorspace):
     # hilbert_walk_index(np.ones(shape=(s, s, s)), grad_rgb, s, rgb_multiplier)#, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
     hilbert_traversal_3d(np.ones(shape=(s, s, s)), grad_rgb, HilbertMode.Indices_All, s, rgb_multiplier)  # , 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
     cv2.cvtColor(grad_rgb, colorspace)
-    for bgr in grad_rgb:
-        grad_bokeh.append(colors.RGB(bgr[2], bgr[1], bgr[0]))
+
+    # TODO pyqtGraph, is it in use anyway?
+    # for bgr in grad_rgb:
+    #     grad_bokeh.append(colors.RGB(bgr[2], bgr[1], bgr[0]))
 
     return grad_bokeh, grad_rgb
 
@@ -152,10 +154,10 @@ def create_hilbert_color_pattern(s = 16, multiplier = 16, color_space = cv2.COLO
     grad_source = np.array([grad_hilbert] * 1).astype(dtype=np.uint8)
     grad_in_bgr = cv2.cvtColor(grad_source, color_space)
 
-    grad_bokeh = []
-    for i in range(grad_in_bgr.shape[1]):
-        rgb = grad_in_bgr[0][i]
-        grad_bokeh.append(colors.RGB(rgb[2], rgb[1], rgb[0]))
+    # grad_bokeh = []
+    # for i in range(grad_in_bgr.shape[1]):
+    #     rgb = grad_in_bgr[0][i]
+        # grad_bokeh.append(colors.RGB(rgb[2], rgb[1], rgb[0]))
 
     # Write Gradient to the Disc as Image
     if write_to_disc:
@@ -163,6 +165,7 @@ def create_hilbert_color_pattern(s = 16, multiplier = 16, color_space = cv2.COLO
         grad_in_bgr = cv2.cvtColor(grad_img, color_space)
         cv2.imwrite("documents/color_gradient_2" + filename + str(s) + ".png", grad_in_bgr)
 
+    grad_bokeh = None #TODO pyqtGraph
     return grad_bokeh, grad_in_bgr[0]
 
 

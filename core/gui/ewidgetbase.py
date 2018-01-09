@@ -11,8 +11,8 @@ if sys.platform == "darwin":
 else:
     from PyQt5.QtWebKitWidgets import QWebView
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+# from matplotlib.figure import Figure
 import webbrowser
 
 class EDockWidget(QDockWidget):
@@ -141,7 +141,7 @@ class EMatplotLibVis(EAnalyseVisualization):
         super(EMatplotLibVis, self).__init__(parent, analyze)
 
         # a figure instance to plot on
-        self.figure = MatplotlibFigure(self, self.analyze)
+        # self.figure = MatplotlibFigure(self, self.analyze)
 
         # this is the Canvas Widget that displays the `figure`
         # it takes the `figure` instance as a parameter to __init__
@@ -155,28 +155,28 @@ class EMatplotLibVis(EAnalyseVisualization):
         self.figure.plot()
 
 
-class MatplotlibFigure(FigureCanvas):
-    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-
-    def __init__(self, parent=None, analysis=None, width=5, height=4, dpi=300):
-        self.background = (50.0/255, 50.0/255, 50.0/255)
-        fig = Figure(figsize=(width, height), dpi=dpi, facecolor=self.background)
-        self.analysis = analysis
-        self.axes = fig.add_subplot(111)
-        self.axes.set_facecolor(self.background)
-
-        self.plot()
-
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-    def plot(self):
-        print("plot not  implemented in", self)
+# class MatplotlibFigure(FigureCanvas):
+#     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+#
+#     def __init__(self, parent=None, analysis=None, width=5, height=4, dpi=300):
+#         self.background = (50.0/255, 50.0/255, 50.0/255)
+#         fig = Figure(figsize=(width, height), dpi=dpi, facecolor=self.background)
+#         self.analysis = analysis
+#         self.axes = fig.add_subplot(111)
+#         self.axes.set_facecolor(self.background)
+#
+#         self.plot()
+#
+#         FigureCanvas.__init__(self, fig)
+#         self.setParent(parent)
+#
+#         FigureCanvas.setSizePolicy(self,
+#                                    QSizePolicy.Expanding,
+#                                    QSizePolicy.Expanding)
+#         FigureCanvas.updateGeometry(self)
+#
+#     def plot(self):
+#         print("plot not  implemented in", self)
 
 
 class EHtmlDisplay(QWidget):

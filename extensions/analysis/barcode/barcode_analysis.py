@@ -20,9 +20,9 @@ import cv2
 import numpy as np
 
 
-from bokeh.plotting import figure,save
-from bokeh.layouts import layout
-from bokeh.colors import RGB
+# from bokeh.plotting import figure,save
+# from bokeh.layouts import layout
+# from bokeh.colors import RGB
 
 class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
@@ -166,23 +166,24 @@ class BarcodeAnalysisJob(IAnalysisJob):
         """
         barcode = analysis.data[0]
         colors = []
-        for c in barcode:
-            colors.append(RGB(c[2], c[1], c[0]))
-
-        path = data_path +"/"+ analysis.get_name() + ".html"
-
-        plot = figure(width=800, height=400)
-        plot.rect(x=range(barcode.shape[0]), y = 0.5, width = 1, height=1, color=colors)
-
-        l = layout(
-            [
-                [plot]
-            ]
-        )
-
-        print(path)
-        save(l, path)
-        open_web_browser(path)
+        #TODO pyqtGraph Visualization
+        # for c in barcode:
+        #     colors.append(RGB(c[2], c[1], c[0]))
+        #
+        # path = data_path +"/"+ analysis.get_name() + ".html"
+        #
+        # plot = figure(width=800, height=400)
+        # plot.rect(x=range(barcode.shape[0]), y = 0.5, width = 1, height=1, color=colors)
+        #
+        # l = layout(
+        #     [
+        #         [plot]
+        #     ]
+        # )
+        #
+        # print(path)
+        # save(l, path)
+        # open_web_browser(path)
 
     def barcode_to_image(self, barcode_colors, image_width, image_height, interpolation):
 

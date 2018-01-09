@@ -2,7 +2,7 @@ from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import sys

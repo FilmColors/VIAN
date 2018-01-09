@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import *
 from core.data.computation import numpy_to_qt_image
@@ -9,10 +9,10 @@ from core.node_editor.datatypes import *
 from core.node_editor.script_results import *
 from core.data.enums import *
 
-from bokeh.plotting import figure
-from bokeh.layouts import layout
-from bokeh.resources import CDN
-from bokeh.embed import file_html
+# from bokeh.plotting import figure
+# from bokeh.layouts import layout
+# from bokeh.resources import CDN
+# from bokeh.embed import file_html
 
 
 # DT_IMAGE = (0, QColor(255,255,199))
@@ -541,13 +541,15 @@ class OperationBarPlot(Operation):
             #
             # plt.bar(range(y.shape[0]), y)
             # plt.show()
-            plot = figure()
-            plot.circle([1, 2], [3, 4])
-
-            vis = layout([[plot]], sizing_mode="scale_width")
-
-            html = file_html(vis, CDN, "my plot")
-            self.result = [html]
+            pass
+            #TODO here comes the new visualization code
+            # plot = figure()
+            # plot.circle([1, 2], [3, 4])
+            #
+            # vis = layout([[plot]], sizing_mode="scale_width")
+            #
+            # html = file_html(vis, CDN, "my plot")
+            # self.result = [html]
 
         except Exception as e:
             self.handle_exception(e)

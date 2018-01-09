@@ -2,11 +2,8 @@ from core.data.interfaces import IAnalysisJob, ParameterWidget
 from core.data.containers import *
 from core.analysis.colorimetry.hilbert import *
 from core.analysis.colorimetry.computation import *
-from core.gui.ewidgetbase import EHtmlDisplay, MatplotlibFigure
-from bokeh.embed import file_html
-from bokeh.colors import RGB
-from bokeh.resources import CDN
-from bokeh.io import save
+from core.gui.ewidgetbase import EHtmlDisplay
+
 import numpy as np
 from typing import List
 import cv2
