@@ -1,0 +1,4 @@
+conda install -c anaconda pyqt
+conda install -c conda-forge opencv
+conda install -c anaconda requests
+conda install -c conda-forge pyqtgraph

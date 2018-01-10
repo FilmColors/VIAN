@@ -1,6 +1,7 @@
 import os
+import numpy as np
 import shelve
-
+import sqlite3
 from core.data.interfaces import IConcurrentJob, IProjectChangeNotify
 
 STREAM_DATA_IPROJECT_CONTAINER = 0
@@ -14,27 +15,34 @@ class ProjectStreamer(IProjectChangeNotify):
         self.project = None
 
 
-    def asynch_store(self, id: int, obj, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+    def asynch_store(self, id: int, data_dict, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         pass
 
     def async_load(self, id: int, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         pass
 
-    def sync_store(self,  id: int, obj,data_type = STREAM_DATA_IPROJECT_CONTAINER):
-        pass
+    def sync_store(self,  id: int, data_dict,data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        self.dump(id, data_dict, data_type)
 
     def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        return self.load(id, data_type)
+
+    def dump(self, key, data_dict, data_type):
+        pass
+
+    def load(self, key, data_type):
         pass
 
     #region IProjectChangeNotify
     def on_loaded(self, project):
-        pass
+        self.project = project
 
     def on_changed(self, project, item):
         pass
 
     def on_selected(self, sender, selected):
         pass
+
     #endregion
     pass
 
@@ -59,13 +67,13 @@ class ProjectStreamerShelve(ProjectStreamer):
         self.container_db = self.store_dir + "container"
         self.arbitrary_db = self.store_dir + "arbitrary"
 
-    def asynch_store(self, id: int, obj, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+    def asynch_store(self, id: int, data_dict, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         if data_type == STREAM_DATA_ARBITRARY:
             path = self.arbitrary_db
         else:
             path = self.container_db
 
-        job = ASyncStoreJob([id, obj, path], proceed_slot)
+        job = ASyncStoreJob([id, data_dict, path], proceed_slot)
         self.main_window.run_job_concurrent(job)
 
     def async_load(self, id: int, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
@@ -150,3 +158,23 @@ class ASyncLoadJob(IConcurrentJob):
             self.proceed_slot(result[0])
 #endregion
 pass
+
+
+class NumpyStreamer(ProjectStreamer):
+    def __init__(self, main_window):
+        super(NumpyStreamer, self).__init__(main_window)
+
+    def dump(self, key, data_dict, data_type):
+        np.savez(self.project.data_dir + "/" +str(key) + ".npz", **data_dict)
+
+    def load(self, key, data_type):
+        try:
+            res =np.load(self.project.data_dir + "/" + str(key) + ".npz")
+            print(res)
+            return res
+        except:
+            print("Tried to load ", key, "from ", self.project.data_dir + "/" + str(key) + ".npy")
+            return None
+
+    #endregion
+    pass

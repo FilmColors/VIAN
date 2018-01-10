@@ -15,7 +15,7 @@ from core.concurrent.worker_functions import *
 from core.data.enums import *
 from core.data.importers import ELANProjectImporter
 from core.data.masterfile import MasterFile
-from core.data.project_streaming import ProjectStreamerShelve
+from core.data.project_streaming import ProjectStreamerShelve, NumpyStreamer
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
 from core.data.exporters import zip_project
@@ -120,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread_pool = QThreadPool()
         self.thread_pool.setMaxThreadCount(8)
 
-        self.project_streamer = ProjectStreamerShelve(self)
+        self.project_streamer = NumpyStreamer(self)
 
 
         # DockWidgets
@@ -1302,15 +1302,6 @@ class MainWindow(QtWidgets.QMainWindow):
         print("LOADED")
 
     def dispatch_on_changed(self, receiver = None, item = None):
-
-        # SEGMENT EVALUATOR
-        # if self.project.get_main_segmentation() is not None:
-        #     segm = []
-        #     for s in self.project.get_main_segmentation().segments:
-        #         segm.append([s.get_start(), s.get_end()])
-        #     self.current_segment_evaluator.set_segments(segm)
-
-
         if not self.allow_dispatch_on_change:
             return
 

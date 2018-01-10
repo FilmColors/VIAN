@@ -578,19 +578,24 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         except:
             self.notes = ""
 
-        try:
-            self.results_dir = my_dict['results_dir']
-            self.export_dir = my_dict['export_dir']
-            self.shots_dir = my_dict['shots_dir']
-            self.data_dir = my_dict['data_dir']
-            self.main_window.project_streamer.set_store_dir(self.data_dir)
-        except:
-            self.results_dir = self.folder + "/results"
-            self.export_dir = self.folder + "/export"
-            self.shots_dir = self.folder + "/shots"
-            self.data_dir = self.folder + "/data"
-            self.main_window.project_streamer.set_store_dir(self.data_dir)
-            pass
+        # try:
+        #     self.results_dir = my_dict['results_dir']
+        #     self.export_dir = my_dict['export_dir']
+        #     self.shots_dir = my_dict['shots_dir']
+        #     self.data_dir = my_dict['data_dir']
+        #     self.main_window.project_streamer.project = self
+        # except:
+        splitted = path.split("/")[0:len(path.split("/")) - 1]
+        self.folder = ""
+        for f in splitted:
+            self.folder += f + "/"
+
+        self.results_dir = self.folder + "/results"
+        self.export_dir = self.folder + "/export"
+        self.shots_dir = self.folder + "/shots"
+        self.data_dir = self.folder + "/data"
+        self.main_window.project_streamer.project = self
+
 
         move_project_to_directory_project = False
         try:
@@ -604,10 +609,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             move_project_to_directory_project = True
 
 
-        splitted = path.split("/")[0:len(path.split("/")) - 1]
-        self.folder = ""
-        for f in splitted:
-            self.folder += f + "/"
+
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
@@ -918,8 +920,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return s
         return None
 
-
-
     def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False, inhibit_overlap = True,  dispatch = True):
 
         # Are we fast segmenting?
@@ -961,6 +961,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if inhibit_overlap:
             last = None
             next = None
+
             for i, s in enumerate(self.segments):
                 if s.start < start:
                     last = s
@@ -970,14 +971,32 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                         next = None
 
             if last is not None and last.end > start:
-                start = last.end
+                start = last.end + 1
             if next is not None and next.start < stop:
-                stop = next.start
-
-
+                stop = next.start - 1
 
         if ID is None:
             ID = len(self.segments) + 1
+
+        #IF the Segment is to small, we don't want to create it
+        if start > stop - 100:
+            return
+
+        # if the Segment does still overlap, we don't want to create it
+        last = None
+        next = None
+        for i, s in enumerate(self.segments):
+            if s.start < start:
+                last = s
+                if len(self.segments) > i + 1:
+                    next = self.segments[i + 1]
+                else:
+                    next = None
+
+        if last is not None and last.end > start:
+            return
+        if next is not None and next.start < stop:
+            return
 
         new_seg = Segment(ID = ID, start = start, end = stop, additional_identifiers=[str(ID)], segmentation = self)
         new_seg.set_project(self.project)
@@ -1004,20 +1023,18 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.update_segment_ids()
         self.project.sort_screenshots()
 
-
-
-
         if dispatch:
             self.project.undo_manager.to_undo((self.add_segment, [segment]), (self.remove_segment, [segment]))
             self.dispatch_on_changed()
 
-    def remove_segment(self, segment):
+    def remove_segment(self, segment, dispatch = True):
         self.segments.remove(segment)
 
         self.update_segment_ids()
         self.project.sort_screenshots()
         self.project.undo_manager.to_undo((self.remove_segment, [segment]), (self.add_segment, [segment]))
-        self.dispatch_on_changed()
+        if dispatch:
+            self.dispatch_on_changed()
 
     def update_segment_ids(self):
         self.segments = sorted(self.segments, key=lambda x: x.start)
@@ -1031,7 +1048,14 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
         return None
 
+    def remove_unreal_segments(self, length = 1):
+        for s in self.segments:
+            if s.start >= s.end or s.end - s.start < length:
+                self.remove_segment(s, dispatch=False)
+        self.dispatch_on_changed()
+
     def cleanup_borders(self):
+        self.remove_unreal_segments(length = 100)
         for i, s in enumerate(self.segments):
             if i < len(self.segments) - 1:
                 end = s.get_end()
@@ -1039,7 +1063,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 center = (start + end) / 2
                 s.end = center
                 self.segments[i + 1].start = center + 1
-
+                
         self.dispatch_on_changed()
 
     def set_name(self, name):
@@ -1146,13 +1170,15 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         return ""
 
 class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
-    def __init__(self, ID = None, start = None, end  = None, duration  = None, additional_identifiers = None, segmentation=None):
+    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, additional_identifiers = None, segmentation=None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
-
+        self.MIN_SIZE = 100
         self.ID = ID
         self.start = start
         self.end = end
+
+
         self.duration = duration
         if additional_identifiers is None:
             additional_identifiers = []
@@ -1167,6 +1193,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def set_start(self, start):
+        if start > self.end - self.MIN_SIZE :
+            start = self.end - self.MIN_SIZE
         self.project.undo_manager.to_undo((self.set_start, [start]), (self.set_start, [self.start]))
         self.start = start
         self.segmentation.update_segment_ids()
@@ -1174,6 +1202,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def set_end(self, end):
+        if end < self.start + self.MIN_SIZE :
+            end = self.start + self.MIN_SIZE
         self.project.undo_manager.to_undo((self.set_end, [end]), (self.set_end, [self.end]))
         self.end = end
         self.segmentation.update_segment_ids()
