@@ -58,22 +58,19 @@ class ELANProjectImporter():
 
         for i in segmentations:
             segmentation_name = i[0]
-            segmentation = Segmentation(segmentation_name)
-            project.add_segmentation(segmentation)
+            segmentation = project.create_segmentation(segmentation_name, dispatch=False)
 
             for j in i[1]:
+                print(j)
                 value = j[0]
                 t_start = j[1]
                 t_stop = j[2]
-                segm = Segment(start = t_start, end = t_stop, additional_identifiers=[value])
+                segm = segmentation.create_segment(start = t_start, stop = t_stop, dispatch=False)# , additional_identifiers=[value])
+                segm.annotation_body = value
 
-                # segmentation.segments.append(segm)
-                segmentation.add_segment(segm)
-            # project.segmentation.append(segmentation)
 
         for s in project.segmentation:
             s.update_segment_ids()
-
         print(project.name)
         print(project.path)
         print(project.movie_descriptor.movie_path)

@@ -75,6 +75,9 @@ class UserSettings():
         self.recent_files_name = []
         self.recent_files_path = []
 
+        self.USE_CORPUS = False
+        self.USE_ELAN = False
+
 
     def get_qt_color(self, color):
         font = QFont(color.font_family)

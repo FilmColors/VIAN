@@ -61,6 +61,9 @@ class DialogPreferences(EDialogWidget):
         self.lineEdit_CorpusPort.setText(str(self.settings.COPRUS_PORT))
         self.lineEdit_CorpusPW.setText(self.settings.COPRUS_PW)
 
+        self.checkBox_UseCorpus.setChecked(self.settings.USE_CORPUS)
+        self.checkBox_UseELANRemote.setChecked(self.settings.USE_ELAN)
+
 
     def set_autosave(self):
         state = self.checkBox_Autosave.isChecked()

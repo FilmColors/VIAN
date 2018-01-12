@@ -270,7 +270,6 @@ class OutlinerTreeWidget(QTreeWidget):
         if dispatch:
             self.project.set_selected(self.outliner, selected_objs)
 
-
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() == Qt.RightButton:
             if len(self.selectedIndexes()) <= 1:
@@ -465,7 +464,7 @@ class SegmentOutlinerItem(AbstractOutlinerItem):
 
     def update_item(self):
         super(SegmentOutlinerItem, self).update_item()
-        self.setText(0, str(str(self.segment.ID) + "\t" +self.segment.additional_identifiers[0]))
+        self.setText(0, str(str(self.segment.ID)))# + "\t" +self.segment.additional_identifiers[0]))
 
 
 class AnnotationLayerOutlinerRootItem(AbstractOutlinerItem):

@@ -5,6 +5,7 @@ import webbrowser
 import cProfile
 import os
 import glob
+import cv2
 from core.concurrent.worker import Worker
 
 
@@ -15,7 +16,7 @@ from core.concurrent.worker_functions import *
 from core.data.enums import *
 from core.data.importers import ELANProjectImporter
 from core.data.masterfile import MasterFile
-from core.data.project_streaming import ProjectStreamerShelve, NumpyStreamer
+from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
 from core.data.exporters import zip_project
@@ -47,13 +48,15 @@ from core.remote.corpus.client import CorpusClient
 from core.remote.corpus.corpus import *
 from core.remote.elan.server.server import QTServer
 from extensions.extension_list import ExtensionList
+from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
+
 
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -62,6 +65,7 @@ PROFILE = False
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
+    onUpdateFrame = pyqtSignal(int, int)
     onSegmentStep = pyqtSignal(object)
     currentSegmentChanged = pyqtSignal(int)
     abortAllConcurrentThreads = pyqtSignal()
@@ -101,7 +105,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.corpus_client = CorpusClient(self.settings.USER_NAME)
         self.corpus_client.send_connect(self.settings.USER_NAME)
-        self.corpus_client.start()
+        if self.settings.USE_CORPUS:
+            self.corpus_client.start()
 
 
         self.vlc_instance = vlc_instance
@@ -120,7 +125,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread_pool = QThreadPool()
         self.thread_pool.setMaxThreadCount(8)
 
-        self.project_streamer = NumpyStreamer(self)
+        self.numpy_data_manager = NumpyDataManager(self)
+        self.project_streamer = ProjectStreamerShelve(self)
+        self.video_capture = None
 
 
         # DockWidgets
@@ -161,26 +168,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.server = QTServer(self.player)
         self.server.player = self.player
+        if self.settings.USE_ELAN:
+            self.server.start()
 
-        self.server.start()
         self.project = ElanExtensionProject(self, "","Default Project")
 
-
-
-        # In OSX the DockPanels are brocken with the libVLC binding,
-        # To Avoid this problem, we create a new QMainWindow, holding the Player, floating above the
-        # CentralWidget
-        # if self.is_darwin:  # for MacOS
-        #     self.player_placeholder = QWidget(self)
-        #     self.player_container = MacPlayerContainer(self, self.player)
+        self.frame_update_worker = TimestepUpdateWorkerSingle()
+        self.frame_update_thread = QThread(self)
+        self.frame_update_worker.moveToThread(self.frame_update_thread)
+        self.onUpdateFrame.connect(self.frame_update_worker.perform)
+        # self.frame_update_thread.started.connect(self.frame_update_worker.run)
+        self.frame_update_worker.signals.onMessage.connect(self.print_time)
+        self.frame_update_thread.start()
 
         self.create_widget_elan_status()
         self.create_widget_video_player()
         # self.create_analyses_widget()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
         self.create_annotation_toolbar()
-        # self.create_annotation_viewer()
-        # self.create_screenshot_editor()
         self.create_screenshot_manager()
 
         self.create_node_editor_results()
@@ -308,6 +313,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                  self.node_editor_dock.node_editor,
                                  self.vocabulary_manager,
                                  self.vocabulary_matrix,
+                                 self.numpy_data_manager,
                                  self.project_streamer,
                                           ]
 
@@ -341,6 +347,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
         self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
         self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
+
+        self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
+        self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
 
         self.drawing_overlay.onSourceChanged.connect(self.source_status.on_source_changed)
         self.dispatch_on_changed()
@@ -576,17 +585,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update()
 
     def closeEvent(self, *args, **kwargs):
-        self.drawing_overlay.close()
-        self.vlc_player.release()
-        self.vlc_instance.release()
-        self.corpus_client.send_disconnect(self.settings.USER_NAME)
-
-        if PROFILE:
-            self.profiler.disable()
-            self.profiler.dump_stats("Profile.prof")
-
-        self.settings.store()
-        QtWidgets.QMainWindow.close(self)
+        self.on_exit()
 
     def resizeEvent(self, *args, **kwargs):
         QtWidgets.QMainWindow.resizeEvent(self, *args, **kwargs)
@@ -809,7 +808,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.on_save_project(True)
 
     def on_exit(self):
+        self.drawing_overlay.close()
+        self.vlc_player.release()
+        self.vlc_instance.release()
+        self.corpus_client.send_disconnect(self.settings.USER_NAME)
+
+        if PROFILE:
+            self.profiler.disable()
+            self.profiler.dump_stats("Profile.prof")
+
+        self.settings.store()
+
         self.on_save_project(False)
+        self.frame_update_thread.quit()
+
         QCoreApplication.quit()
 
     def on_undo(self):
@@ -977,7 +989,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.print_message("Import Failed", "Red")
             self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
-            self.print_message(e, "Red")
+            self.print_message(str(e), "Red")
 
     def import_vocabulary(self):
         path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
@@ -1294,6 +1306,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             screenshot_annotation_dicts.append(a_dicts)
 
+        self.frame_update_worker.set_movie_path(self.project.movie_descriptor.movie_path)
+
         job = LoadScreenshotsJob([self.project.movie_descriptor.movie_path, screenshot_position, screenshot_annotation_dicts])
         self.run_job_concurrent(job)
 
@@ -1325,7 +1339,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def dispatch_on_timestep_update(self, time):
         # self.timeline.timeline.on_timestep_update(time)
+        frame = self.player.get_frame_pos_by_time(time)
         self.onTimeStep.emit(time)
+        QCoreApplication.removePostedEvents(self.frame_update_worker)
+        self.onUpdateFrame.emit(time, frame)
+
+
+        # self.frame_update_worker.setMSPosition(time, frame)
+        # self.frame_update_thread.start()
 
         if self.project.get_main_segmentation() is not None:
             current_segment = self.project.get_main_segmentation().get_segment_of_time(time)

@@ -145,19 +145,21 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
         self.main_window.onTimeStep.connect(self.on_timestep_update)
         self.main_window.player.started.connect(self.hide_opencv_image)
+        self.main_window.frame_update_worker.signals.onOpenCVFrameUpdate.connect(self.assign_opencv_image)
+
         # self.main_window.player.stopped.connect(self.show_opencv_image)
 
     def on_loaded(self, project):
         self.cleanup()
         self.project = project
-        try:
-            if self.videoCap:
-                self.videoCap.release()
-                self.videoCap = None
-
-            self.videoCap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
-        except Exception as e:
-            print(e, "OpenCV Error: ", self.project.movie_descriptor.movie_path)
+        # try:
+        #     if self.videoCap:
+        #         self.videoCap.release()
+        #         self.videoCap = None
+        #
+        #     self.videoCap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
+        # except Exception as e:
+        #     print(e, "OpenCV Error: ", self.project.movie_descriptor.movie_path)
         if len(self.project.get_annotation_layers()) > 0:
             for l in self.project.get_annotation_layers():
                 for a in l.annotations:
@@ -514,7 +516,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.move(location)
         self.setFixedSize(x,y)
 
-        if self.opencv_image_visible and self.videoCap is not None and self.settings.OPENCV_PER_FRAME and self.opencv_image.pixmap():
+        # if self.opencv_image_visible and self.videoCap is not None and self.settings.OPENCV_PER_FRAME and self.opencv_image.pixmap():
+        if self.opencv_image_visible and self.settings.OPENCV_PER_FRAME and self.opencv_image.pixmap():
             self.opencv_image.setFixedSize(x, y)
             if old_size.width() != x or old_size.height() != y:
                 self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
@@ -574,13 +577,18 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.current_time = time
 
 
-        if self.settings.OPENCV_PER_FRAME and self.opencv_image_visible and self.videoCap is not None:
-            self.update_opencv_image(time)
+        # if self.settings.OPENCV_PER_FRAME and self.opencv_image_visible and self.videoCap is not None:
+        #     self.update_opencv_image(time)
 
         # self.update()
 
+    def assign_opencv_image(self, qpixmap):
+        self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
+        self.opencv_image.lower()
+
 
     def update_opencv_image(self, time):
+        return
         try:
             idx = self.main_window.player.get_frame_pos_by_time(time)
 
@@ -601,9 +609,9 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             print(e)
             pass
 
-    def set_opencv_pixmap(self, qpixmap):
-        self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
-        self.opencv_image.lower()
+    # def set_opencv_pixmap(self, qpixmap):
+    #     self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
+    #     self.opencv_image.lower()
 
 
 class DrawingBase(QtWidgets.QWidget):
@@ -1234,31 +1242,6 @@ class DrawingFreeHand(DrawingBase):
 
             qp.drawPath(path)
 
-
-# class DrawingLiveWidget(DrawingBase):
-#     def __init__(self, parent, annotation_object):
-#         super(DrawingLiveWidget, self).__init__(parent, annotation_object)
-#         self.live_widget =
-#
-#     def update_live_widget_source(self):
-#         self.live_widget =
-#
-#
-#     def compute_concurrent(self):
-#         pass
-#
-#     def set_result(self, result):
-#         pass
-#
-#     def on_update_time(self, frame):
-#         worker = LiveWidgetThreadWorker(frame, self.overlay.project.get_by_id(self.annotation_object.automated_source), self.compute_concurrent())
-#         run_minimal_worker(worker, self.set_result)
-#
-#
-#     def drawShape(self, qp, rect = None):
-#         if rect is None:
-#             rect = self.inner_rect
-#         qp.drawImage(self.inner_rect, self.annotation_object.image)
 
 class DrawingEditorWidget(QtWidgets.QMainWindow):
     def __init__(self, drawing, parent, settings):

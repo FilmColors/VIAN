@@ -148,18 +148,18 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
 
     #region Segmentation
-    def create_segmentation(self, name = None):
+    def create_segmentation(self, name = None, dispatch = True):
         s = Segmentation(name)
-
-        self.add_segmentation(s)
+        self.add_segmentation(s, dispatch)
         return s
 
-    def add_segmentation(self, segmentation):
+    def add_segmentation(self, segmentation, dispatch=True):
         self.segmentation.append(segmentation)
         segmentation.set_project(self)
 
-        self.undo_manager.to_undo((self.add_segmentation, [segmentation]), (self.remove_segmentation, [segmentation]))
-        self.dispatch_changed()
+        if dispatch:
+            self.undo_manager.to_undo((self.add_segmentation, [segmentation]), (self.remove_segmentation, [segmentation]))
+            self.dispatch_changed()
 
     def copy_segmentation(self, segmentation):
         new = self.create_segmentation(name = segmentation.name + "_Copy")
@@ -594,7 +594,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.export_dir = self.folder + "/export"
         self.shots_dir = self.folder + "/shots"
         self.data_dir = self.folder + "/data"
-        self.main_window.project_streamer.project = self
+        self.main_window.numpy_data_manager.project = self
 
 
         move_project_to_directory_project = False
@@ -650,7 +650,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.add_segmentation(new)
 
         for d in my_dict['analyzes']:
-            new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.project_streamer)
+            new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
             self.add_analysis(new)
 
         try:
@@ -922,6 +922,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
     def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False, inhibit_overlap = True,  dispatch = True):
 
+
         # Are we fast segmenting?
         if stop - start < from_last_threshold:
 
@@ -978,7 +979,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if ID is None:
             ID = len(self.segments) + 1
 
-        #IF the Segment is to small, we don't want to create it
+        # IF the Segment is to small, we don't want to create it
         if start > stop - 100:
             return
 
@@ -1063,7 +1064,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 center = (start + end) / 2
                 s.end = center
                 self.segments[i + 1].start = center + 1
-                
+
         self.dispatch_on_changed()
 
     def set_name(self, name):
@@ -1781,6 +1782,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.annotation_is_visible = False
         self.timeline_visibility = True
 
+        self.curr_size = 1.0
+
 
     def to_stream(self, project = None):
         obj = dict(
@@ -1790,14 +1793,19 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         if project is None:
             project = self.project
-        project.streamer.to_stream(self.unique_id, obj)
+        project.main_window.project_streamer.async_store(self.unique_id, obj)
 
     def from_stream(self, project = None):
         if project is None:
             project = self.project
+
         obj = project.streamer.from_stream(self.unique_id)
-        self.img_movie = obj['img_movie']
-        self.img_blend = obj['img_blend']
+
+
+    pyqtSlot(object)
+    def on_images_loaded(self, obj):
+        self.img_movie = cv2.resize(obj['img_movie'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
+        self.img_blend = cv2.resize(obj['img_blend'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
 
     def set_title(self, title):
         self.title = title
@@ -2394,7 +2402,7 @@ class NodeScriptAnalysis(AnalysisContainer):
                     result_dtypes.append(str(np.array(d).dtype))
             data_json.append([node_id, node_result, result_dtypes])
 
-        self.project.main_window.project_streamer.sync_store(self.unique_id, self.data)
+        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
 
         data = dict(
             name=self.name,
@@ -2493,7 +2501,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         # for p in self.parameters:
         #     parameters.append(p)
 
-        self.project.main_window.project_streamer.sync_store(self.unique_id, self.data)
+        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
 
         data = dict(
             name=self.name,

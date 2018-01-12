@@ -169,8 +169,9 @@ class LiveWidgetThreadWorker(MinimalThreadWorker):
 
 
 
-def run_minimal_worker(worker: MinimalThreadWorker, finish_func):
+def run_minimal_worker(worker: MinimalThreadWorker, finish_func = None):
     thread = QThread()
     worker.moveToThread(thread)
-    worker.finished.connect(finish_func)
+    if finish_func is not None:
+        worker.finished.connect(finish_func)
     thread.start()

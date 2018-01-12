@@ -3,6 +3,7 @@ import numpy as np
 import shelve
 import sqlite3
 from core.data.interfaces import IConcurrentJob, IProjectChangeNotify
+from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, QThread
 
 STREAM_DATA_IPROJECT_CONTAINER = 0
 STREAM_DATA_ARBITRARY = 1
@@ -13,7 +14,6 @@ class ProjectStreamer(IProjectChangeNotify):
         super(ProjectStreamer, self).__init__()
         self.main_window = main_window
         self.project = None
-
 
     def asynch_store(self, id: int, data_dict, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         pass
@@ -47,6 +47,11 @@ class ProjectStreamer(IProjectChangeNotify):
     pass
 
 
+class ProjectStreamerSingals(QObject):
+    on_async_store = pyqtSignal(int, object, int, object)
+    on_async_load = pyqtSignal(int, int, object)
+
+
 #region ShelveProjectStreamer
 class ProjectStreamerShelve(ProjectStreamer):
     def __init__(self, main_window):
@@ -60,30 +65,27 @@ class ProjectStreamerShelve(ProjectStreamer):
         self.store_dir = None
         self.container_db = None
         self.arbitrary_db = None
-        pass
+        self.signals = ProjectStreamerSingals()
+
+        self.async_stream_worker = AsyncShelveStream()
+        self.signals.on_async_store.connect(self.async_stream_worker.store)
+        self.signals.on_async_load.connect(self.async_stream_worker.load)
+
+        self.async_stream_thread = QThread()
+        self.async_stream_worker.moveToThread(self.async_stream_thread)
 
     def set_store_dir(self, store_dir):
         self.store_dir = store_dir + "/"
         self.container_db = self.store_dir + "container"
         self.arbitrary_db = self.store_dir + "arbitrary"
 
-    def asynch_store(self, id: int, data_dict, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
-        if data_type == STREAM_DATA_ARBITRARY:
-            path = self.arbitrary_db
-        else:
-            path = self.container_db
+        self.async_stream_worker.set_paths(self.container_db, self.arbitrary_db)
 
-        job = ASyncStoreJob([id, data_dict, path], proceed_slot)
-        self.main_window.run_job_concurrent(job)
+    def async_store(self, id: int, data_dict, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        self.on_async_store.emit(id, data_dict, data_type, proceed_slot)
 
     def async_load(self, id: int, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
-        if data_type == STREAM_DATA_ARBITRARY:
-            path = self.arbitrary_db
-        else:
-            path = self.container_db
-
-        job = ASyncLoadJob([id, path], proceed_slot)
-        self.main_window.run_job_concurrent(job)
+        self.on_async_store.emit(id, data_type, proceed_slot)
 
     def sync_store(self,  id: int, obj,data_type = STREAM_DATA_IPROJECT_CONTAINER):
         if data_type == STREAM_DATA_ARBITRARY:
@@ -104,8 +106,17 @@ class ProjectStreamerShelve(ProjectStreamer):
 
         return obj
 
+    def clean_up(self):
+        try:
+            os.remove(self.container_db)
+            os.remove(self.arbitrary_db)
+        except Exception as e:
+            print(e)
+
+
     #region IProjectChangeNotify
     def on_loaded(self, project):
+        self.clean_up()
         self.project = project
         self.set_store_dir(self.project.data_dir)
 
@@ -118,51 +129,70 @@ class ProjectStreamerShelve(ProjectStreamer):
     pass
 
 
-class ASyncStoreJob(IConcurrentJob):
-    def __init__(self, args, proceed_slot):
-        super(ASyncStoreJob, self).__init__(args, show_modify_progress=False)
-        self.proceed_slot = proceed_slot
-
-    def run_concurrent(self, args, sign_progress):
-        unique_id = args[0]
-        obj = args[1]
-        path = args[2]
-        is_arbitrary = args[3]
-
-        with shelve.open(path) as db:
-            db[str(unique_id)] = obj
-
-        return [True]
-
-    def modify_project(self, project, result, sign_progress = None):
-        if self.proceed_slot is not None:
-            self.proceed_slot()
+class AsyncShelveStreamSignals(QObject):
+    finished = pyqtSignal(object)
 
 
-class ASyncLoadJob(IConcurrentJob):
-    def __init__(self, args, proceed_slot):
-        super(ASyncLoadJob, self).__init__(args, show_modify_progress=False)
-        self.proceed_slot = proceed_slot
+class AsyncShelveStream(QObject):
+    def __init__(self):
+        super(AsyncShelveStream, self).__init__()
+        self.container_db = ""
+        self.arbitrary_db = ""
 
-    def run_concurrent(self, args, sign_progress):
-        unique_id = args[0]
-        path = args[1]
+        self.signals = AsyncShelveStreamSignals()
 
-        with shelve.open(path) as db:
-            obj = db[str(unique_id)]
+    @pyqtSlot(str, str)
+    def set_paths(self, container_db, arbitrary_db):
+        self.container_db = container_db
+        self.arbitrary_db = arbitrary_db
 
-        return [obj]
+    @pyqtSlot(int, object, int, object)
+    def store(self, unique_id, obj, data_type, slot = None):
+        try:
+            if slot is not None:
+                self.signals.finished.connect(slot)
 
-    def modify_project(self, project, result, sign_progress=None):
-        if self.proceed_slot is not None:
-            self.proceed_slot(result[0])
+            if data_type == STREAM_DATA_ARBITRARY:
+                path = self.arbitrary_db
+            else:
+                path = self.container_db
+
+            with shelve.open(path) as db:
+                db[str(unique_id)] = obj
+
+            if slot is not None:
+                self.signals.finished.emit()
+                self.signals.finished.disconnect()
+        except Exception as e:
+            print(e)
+
+    @pyqtSlot(int, int, object)
+    def load(self, unique_id, data_type, slot):
+        try:
+            self.signals.finished.connect(slot)
+            if data_type == STREAM_DATA_ARBITRARY:
+                path = self.arbitrary_db
+            else:
+                path = self.container_db
+
+            with shelve.open(path) as db:
+                obj = db[str(unique_id)]
+
+            self.signals.finished.emit(obj)
+            self.signals.finished.disconnect()
+        except Exception as e:
+            print(e)
+
+        finally:
+            self.signals.finished.emit(None)
+            self.signals.finished.disconnect()
+
 #endregion
-pass
 
 
-class NumpyStreamer(ProjectStreamer):
+class NumpyDataManager(ProjectStreamer):
     def __init__(self, main_window):
-        super(NumpyStreamer, self).__init__(main_window)
+        super(NumpyDataManager, self).__init__(main_window)
 
     def dump(self, key, data_dict, data_type):
         np.savez(self.project.data_dir + "/" +str(key) + ".npz", **data_dict)
