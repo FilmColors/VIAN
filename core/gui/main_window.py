@@ -52,6 +52,7 @@ from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 
 
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
+from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -287,6 +288,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
 
         self.actionColorimetry.triggered.connect(partial(self.analysis_triggered, ColometricsAnalysis()))
+        self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
@@ -390,7 +392,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        self.project.clean_id_list()
+        print(self.player.get_fps())
 
     #region WidgetCreation
 
@@ -819,7 +821,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.settings.store()
 
-        self.on_save_project(False)
+        if self.project.undo_manager.has_modifications():
+            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+            if answer == QMessageBox.Yes:
+                self.on_save_project()
+
         self.frame_update_thread.quit()
 
         QCoreApplication.quit()
@@ -1357,7 +1363,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if time == -1:
             for l in self.project.annotation_layers:
-                l.is_visible = False
                 for a in l.annotations:
                     a.widget.hide()
                     a.widget.is_active = False
@@ -1365,29 +1370,49 @@ class MainWindow(QtWidgets.QMainWindow):
 
         else:
             for l in self.project.annotation_layers:
-                if l.get_start() <= time <= l.get_end():
-                    if l.is_visible == False:
-                        l.is_visible = True
-                        for a in l.annotations:
+                if l.is_visible:
+                    for a in l.annotations:
+                        if a.get_start() <= time <= a.get_end():
                             if a.widget is not None:
+                                a.is_visible = True
                                 a.widget.show()
                                 a.widget.is_active = True
-                else:
-                    if l.is_visible is True:
-                            l.is_visible = False
-                            for a in l.annotations:
-                                if a.widget is not None:
-                                    a.widget.hide()
-                                    a.widget.is_active = False
+                        else:
+                            if a.widget is not None:
+                                a.is_visible = False
+                                a.widget.hide()
 
 
 
-            # self.drawing_overlay.on_timestep_update(time)
+                    # self.drawing_overlay.on_timestep_update(time)
 
 
-    #endregion
+            #endregion
+            # DEPRECATED
+            # for l in self.project.annotation_layers:
+            #     if l.is_visible:
+            #
+            #     if l.get_start() <= time <= l.get_end():
+            #         if l.is_visible == False:
+            #             l.is_visible = True
+            #             for a in l.annotations:
+            #                 if a.widget is not None:
+            #                     a.widget.show()
+            #                     a.widget.is_active = True
+            #     else:
+            #         if l.is_visible is True:
+            #             l.is_visible = False
+            #             for a in l.annotations:
+            #                 if a.widget is not None:
+            #                     a.widget.hide()
+            #                     a.widget.is_active = False
 
 
+
+                                        # self.drawing_overlay.on_timestep_update(time)
+
+
+                                        # endregion
 class LoadingScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(LoadingScreen, self).__init__(None)

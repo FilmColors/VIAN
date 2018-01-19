@@ -244,34 +244,85 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             self.project.current_annotation_layer = None
         self.cleanup()
 
-    def create_rectangle(self, color, line):
+    def create_rectangle(self, color = None, line = None, start = None, end = None):
+        if start == None:
+            start = self.current_time
+
+        if end == None:
+            end = start + 1000
+
+        if color == None:
+            color = (200, 200, 200)
+
+        if line == None:
+            line = 5
+
         if self.project.current_annotation_layer is not None:
-            rectangle = Annotation(AnnotationType.Rectangle, (150,150), color=color, line_w=line, name="New Rectangle")
+            rectangle = Annotation(AnnotationType.Rectangle,
+                                   size=(150,150),
+                                   color=color,
+                                   line_w=line,
+                                   name="New Rectangle",
+                                   t_start=start, t_end=end)
             self.project.current_annotation_layer.add_annotation(rectangle)
             rectangle.set_project(self.project)
             # self.main_window.annotation_viewer.update_list()
             self.update_annotation_widgets()
             rectangle.widget.select()
 
-    def create_ellipse(self, color, line):
+    def create_ellipse(self, color = None, line= None, start = None, end = None):
+        if start == None:
+            start = self.current_time
+        if end == None:
+            end = start + 1000
+
+        if color == None:
+            color = (200, 200, 200)
+        if line == None:
+            line = 5
+
         if self.project.current_annotation_layer is not None:
-            ellipse = Annotation(AnnotationType.Ellipse, (150, 150), color=color, line_w=line, name="New Ellipse")
+            ellipse = Annotation(AnnotationType.Ellipse, (150, 150), color=color, line_w=line, name="New Ellipse",
+                                 t_start = start, t_end = end)
             ellipse.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(ellipse)
             # self.main_window.annotation_viewer.update_list()
             self.update_annotation_widgets()
             ellipse.widget.select()
 
-    def create_text(self, color, line, font_size):
+    def create_text(self, color= None, line = None, font_size = None, start = None, end = None):
+        if start == None:
+            start = self.current_time
+        if end == None:
+            end = start + 1000
+
+        if color == None:
+            color = (200, 200, 200)
+        if font_size == None:
+            font_size = 12
+        if line == None:
+            line = 5
+
         if self.project.current_annotation_layer is not None:
-            a_text = Annotation(AnnotationType.Text, (200, 200), color=color, line_w=line, text="^This is some sample text", name="New Text")
+            a_text = Annotation(AnnotationType.Text, (200, 200), color=color, line_w=line,
+                                text="^This is some sample text", name="New Text",
+                                t_start=start, t_end=end)
             a_text.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_text)
             # self.main_window.annotation_viewer.update_list()
             self.update_annotation_widgets()
             a_text.widget.select()
 
-    def create_image(self, image_path):
+    def create_image(self, image_path = None, start = None, end = None):
+        if start == None:
+            start = self.current_time
+        if end == None:
+            end = start + 1000
+
+        if image_path == None:
+            image_path = QFileDialog.getOpenFileUrl()[0].url()
+            image_path = parse_file_path(image_path)
+
         if self.project.current_annotation_layer is not None:
             image_path = str(image_path)
             print (image_path)
@@ -281,15 +332,28 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 return
 
             image_size = (img.shape[1], img.shape[0])
-            a_image = Annotation(AnnotationType.Image, image_size, resource_path=image_path, name="New Image")
+            a_image = Annotation(AnnotationType.Image, image_size, resource_path=image_path, name="New Image",
+                                 t_start=start, t_end=end)
             a_image.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_image)
             self.update_annotation_widgets()
             a_image.widget.select()
 
-    def create_freehand(self, color, line):
+    def create_freehand(self, color = None, line = None, start = None, end = None):
+        if start == None:
+            start = self.current_time
+        if end == None:
+            end = start + 1000
+
+        if color == None:
+            color = (200, 200, 200)
+
+        if line == None:
+            line = 5
+
         if self.project.current_annotation_layer is not None:
-            a_hand = Annotation(AnnotationType.FreeHand, (200, 200), color=color, line_w=line, name= "New FreeHand")
+            a_hand = Annotation(AnnotationType.FreeHand, (200, 200), color=color, line_w=line, name= "New FreeHand",
+                                t_start=start, t_end=end)
             a_hand.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_hand)
             # self.main_window.annotation_viewer.update_list()
@@ -630,6 +694,7 @@ class DrawingBase(QtWidgets.QWidget):
 
         # The current color, this can be set for instance if a drawing is selected
         self.curr_col = annotation_object.get_color()
+
 
         # The thickness color, this can be set for instance if a drawing is selected
         self.curr_line_thickness = annotation_object.line_w

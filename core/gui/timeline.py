@@ -102,11 +102,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_screenshots = []
         self.item_ann_layers = []
         self.items = []
+
         self.bar_height = 45
-        self.group_height = 15
+        self.group_height = 25
         self.controls_width = 200
         self.time_bar_height = 50
         self.timeline_tail = 100
+
         self.time_bar = None
         self.frame_Bars.setFixedSize(self.duration, 500)
         self.frame_Bars.move(self.controls_width, 0)
@@ -229,6 +231,29 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.main_window.print_message("Please set a Start Point First", "Orange")
 
     def add_annotation_layer(self, layer):
+        control = TimelineControl(self.frame_Controls, self, layer)
+        height = self.bar_height
+        bars = []
+        for i, a in enumerate(layer.annotations):
+            new = TimelineBar(self.frame_Bars, self, self.group_height)
+            new.add_slice(a)
+            keys = []
+            for k in a.keys:
+                keys.append(k)
+            new.add_annotation(a, keys)
+            control.add_group(a)
+            bars.append(new)
+            if i * self.group_height + self.group_height > self.bar_height:
+                height += self.group_height
+
+        height += self.group_height
+
+        item = [control, bars, height]
+        self.item_ann_layers.append(item)
+        self.items.append(item)
+        self.update_ui()
+
+    def add_annotation_layer_old(self, layer):
         control = TimelineControl(self.frame_Controls,self, layer)
         bars = TimelineBar(self.frame_Bars, self)
         bars.add_slice(layer)
@@ -330,27 +355,31 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_scrubber.resize(self.scrubber_width, h)
 
         loc_y = self.time_bar_height
-        for i in self.items:
+        for c, i in enumerate(self.items):
+            bar_start = loc_y
             ctrl_height = 6
             ctrl = i[0]
             bars = i[1]
             item_height = i[2]
             ctrl.move(2, loc_y)
+
+            if len(bars) >= 1 and len(bars[0].annotations) > 0:
+                loc_y += self.group_height
             for b in bars:
                 b.move(0, loc_y)
-                b.resize(self.duration/self.scale, item_height)
-                loc_y += item_height
-                ctrl_height += item_height + 4
+                b.resize(self.duration/self.scale, b.height())#item_height)
+                loc_y += b.height() #item_height
+                ctrl_height += b.height() + 4 # + item_height
                 b.rescale()
-            ctrl.resize(self.controls_width - 4, ctrl_height)
 
-        # if loc_y + self.bar_height < 400:
-        #     loc_y = 400 - self.bar_height
+            if loc_y - bar_start < self.bar_height:
+                loc_y = self.bar_height + bar_start
+                ctrl.resize(self.controls_width - 4, self.bar_height)
+            else:
+                ctrl.resize(self.controls_width - 4, loc_y - bar_start)
 
-        # self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail, loc_y + self.bar_height)
-        # self.frame_Controls.setFixedSize(self.controls_width, self.frame_Bars.height())
 
-        self.frame_Controls.setFixedSize(self.controls_width, self.frame_Controls.height())
+        self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,
                                      loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
@@ -508,12 +537,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             # self.selector = TimebarSelector(self, self.frame_Bars, pos)
             # self.is_selecting = True
 
-    # def start_selector(self, pos):
-    #     self.delta = pos - self.frame_Bars.pos()
-    #     pos = pos - self.frame_Bars.pos()
-    #     self.selector = TimebarSelector(self, self.frame_Bars, pos)
-    #     self.is_selecting = True
-
     def mouseReleaseEvent(self, QMouseEvent):
         if self.is_selecting and not self.is_fast_selecting:
             self.end_selector()
@@ -641,9 +664,6 @@ class TimelineControl(QtWidgets.QWidget):
         pen.setWidth(1)
         qp.setPen(pen)
 
-
-
-
         for i,a in enumerate(self.groups):
             y = i * self.timeline.group_height + self.timeline.group_height
             if i == 0:
@@ -659,19 +679,20 @@ class TimelineControl(QtWidgets.QWidget):
         qp.setPen(pen)
 
         if self.is_selected:
-            qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height() - 10), QtGui.QColor(200, 200, 255, 50))
+            # qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), QtGui.QColor(200, 200, 255, 50))
+            qp.fillRect(self.rect(), QtGui.QColor(200, 200, 255, 50))
         else:
             gradient = QLinearGradient(QPointF(0, 0), QPointF(0, self.height()))
             gradient.setColorAt(0.0, QColor(50, 50, 50))
             gradient.setColorAt(0.5, QColor(65, 65, 65))
             gradient.setColorAt(1.0, QColor(50, 50, 50))
             gradient.setSpread(QGradient.PadSpread)
-            qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height() - 10), gradient)
+            qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), gradient)
 
         for i, a in enumerate(self.groups):
             y = i * self.timeline.group_height + self.timeline.group_height
             text_rect = QtCore.QRect(0, y, self.width(), self.timeline.group_height)
-            qp.drawText(text_rect, Qt.AlignRight, a[1])
+            qp.drawText(text_rect, Qt.AlignRight|Qt.AlignVCenter, a[1])
 
         pen.setColor(QtGui.QColor(255, 255, 255, 255))
         qp.setPen(pen)
@@ -680,14 +701,16 @@ class TimelineControl(QtWidgets.QWidget):
         # Title of the Control
 
 
+        qp.drawText(QRect(5, 5, self.width(), 25), Qt.AlignVCenter | Qt.AlignLeft, self.name)
 
         if isinstance(self.item, ILockable):
             if self.item.is_locked():
-                qp.drawPixmap(QtCore.QRect(0, 25, 16, 16), QPixmap("qt_ui/icons/icon_locked.png"))
+                qp.drawPixmap(QtCore.QRect(self.width() - 20, 9, 16, 16), QPixmap("qt_ui/icons/icon_locked.png"))
+        if isinstance(self.item, AnnotationLayer):
+            if self.item.is_visible == False:
+                qp.drawPixmap(QtCore.QRect(self.width() - 40, 9, 16, 16), QPixmap("qt_ui/icons/icon_hidden.png"))
         # qp.drawLine(QtCore.QPoint(0, self.height()), QtCore.QPoint(self.width(), self.height()))
 
-
-        qp.drawText(QtCore.QPoint(10, 20), self.name)
         qp.end()
 
 
@@ -696,6 +719,7 @@ class TimelineBar(QtWidgets.QFrame):
         super(TimelineBar, self).__init__(parent)
         self.resize(parent.width(), height)
         self.timeline = timeline
+        self.orig_height = height
 
         self.is_selected = False
 
@@ -754,7 +778,7 @@ class TimelineBar(QtWidgets.QFrame):
             s.resize((s.item.get_end() - s.item.get_start()) // self.timeline.scale, self.height())
 
     def paintEvent(self, QPaintEvent):
-        super(TimelineBar, self).paintEvent(QPaintEvent)
+        # super(TimelineBar, self).paintEvent(QPaintEvent)
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
@@ -773,6 +797,10 @@ class TimelineBar(QtWidgets.QFrame):
             p2 = QtCore.QPoint(self.width(), y)
             qp.drawLine(p1, p2)
 
+        pen.setColor(QtGui.QColor(200, 200, 200, 50))
+        pen.setWidth(1)
+        qp.setPen(pen)
+        qp.drawRect(self.rect())
         if self.is_selected:
             qp.fillRect(self.rect(), QtGui.QColor(255, 255, 255, 50))
         qp.end()
@@ -795,10 +823,11 @@ class TimebarSlice(QtWidgets.QWidget):
 
         self.color = (232, 174, 12, 100)
         if item.get_type() == ANNOTATION_LAYER:
-            self.color = (232,55,40,100)
+            self.color = (232, 55, 40, 100)
         if item.get_type() == SEGMENT:
-            self.color = (202, 54, 109, 100)
-
+            self.color = (54,146,182, 100)
+        if item.get_type() == ANNOTATION:
+            self.color = (133, 42, 42, 100)
         self.text_size = 10
 
 
@@ -1462,6 +1491,24 @@ class SelectorContextMenu(QtWidgets.QMenu):
 
         self.action_add_layer.triggered.connect(self.on_add_layer)
         self.action_add_segmentation.triggered.connect(self.on_add_segmentation)
+
+        self.annotation_menu = self.addMenu("Create Annotation")
+        self.a_add_rectangle = self.annotation_menu.addAction("Rectangle")
+        self.a_add_ellipse = self.annotation_menu.addAction("Ellipse")
+        self.a_add_text = self.annotation_menu.addAction("Text")
+        self.a_add_image = self.annotation_menu.addAction("Image")
+        self.a_add_free_hand = self.annotation_menu.addAction("Free Hand")
+
+        self.a_add_rectangle.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_rectangle,
+                                                       None, None, start=self.selector.start, end=self.selector.end))
+        self.a_add_ellipse.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_ellipse,
+                                                       None, None, start=self.selector.start, end=self.selector.end))
+        self.a_add_text.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_text,
+                                                       None, None, None, start=self.selector.start, end=self.selector.end))
+        self.a_add_image.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_image,
+                                                       None, None, start=self.selector.start, end=self.selector.end))
+        self.a_add_free_hand.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_freehand,
+                                                       None, None, start=self.selector.start, end=self.selector.end))
 
         self.popup(pos)
 

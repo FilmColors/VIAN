@@ -504,6 +504,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.center_images()
 
     def on_selected(self, sender, selected):
+        if selected is None:
+            selected = []
         if not sender is self:
             sel = []
             for i in self.images_plain:

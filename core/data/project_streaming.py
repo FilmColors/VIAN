@@ -27,6 +27,7 @@ class ProjectStreamer(IProjectChangeNotify):
     def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         return self.load(id, data_type)
 
+
     def dump(self, key, data_dict, data_type):
         pass
 
@@ -195,16 +196,24 @@ class NumpyDataManager(ProjectStreamer):
         super(NumpyDataManager, self).__init__(main_window)
 
     def dump(self, key, data_dict, data_type):
-        np.savez(self.project.data_dir + "/" +str(key) + ".npz", **data_dict)
+        if os.path.isfile(self.project.data_dir + "/" + str(key) + ".npz"):
+            os.remove(self.project.data_dir + "/" + str(key) + ".npz")
+        with open(self.project.data_dir + "/" +str(key) + ".npz", "wb") as f:
+            np.savez(f, **data_dict)
 
     def load(self, key, data_type):
         try:
-            res =np.load(self.project.data_dir + "/" + str(key) + ".npz")
-            print(res)
+            with open(self.project.data_dir + "/" + str(key) + ".npz", "rb") as f:
+                res = dict(np.load(f).items())
+
             return res
-        except:
+        except Exception as e:
             print("Tried to load ", key, "from ", self.project.data_dir + "/" + str(key) + ".npy")
+            print(e)
             return None
 
+    def remove_item(self, unique_id):
+        if os.path.isfile(self.project.data_dir + "/" + str(unique_id) + ".npz"):
+            os.remove(self.project.data_dir + "/" + str(unique_id) + ".npz")
     #endregion
     pass

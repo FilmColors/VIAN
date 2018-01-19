@@ -17,6 +17,41 @@ VOCABULARY_WORD = 11
 ANALYSIS_NODE_SCRIPT = 12
 ANALYSIS_JOB_ANALYSIS = 13
 
+def get_type_as_string(type):
+    if type == PROJECT:
+        return "PROJECT"
+    elif type == SEGMENTATION:
+        return "SEGMENTATION"
+    elif type == SEGMENT:
+        return "SEGMENT"
+    elif type == ANNOTATION:
+        return "ANNOTATION"
+    elif type == ANNOTATION_LAYER:
+        return "ANNOTATION_LAYER"
+    elif type == SCREENSHOT:
+        return "SCREENSHOT"
+    elif type == MOVIE_DESCRIPTOR:
+        return "MOVIE_DESCRIPTOR"
+    elif type == ANALYSIS:
+        return "ANALYSIS"
+    elif type == SCREENSHOT_GROUP:
+        return "SCREENSHOT_GROUP"
+    elif type == NODE:
+        return "NODE"
+    elif type == NODE_SCRIPT:
+        return "NODE_SCRIPT"
+    elif type == VOCABULARY:
+        return "VOCABULARY"
+    elif type == VOCABULARY_WORD:
+        return "VOCABULARY_WORD"
+    elif type == ANALYSIS_NODE_SCRIPT:
+        return "ANALYSIS_NODE_SCRIPT"
+    elif type == ANALYSIS_JOB_ANALYSIS:
+        return "ANALYSIS_JOB_ANALYSIS"
+    else:
+        return "Mehh, Whatever this should be"
+
+
 class AnnotationType(Enum):
     Rectangle = 0
     Ellipse = 1

@@ -273,8 +273,9 @@ class Player_VLC(VideoPlayer):
         self.volume = 50
         fps = self.media_player.get_fps()
         print("FPS:", self.media_player.get_fps())
+        capture = cv2.VideoCapture(self.movie_path)
         if fps != 0:
-            self.fps = fps
+            self.fps = capture.get(cv2.CAP_PROP_FPS)
 
         self.user_fps = self.fps
 

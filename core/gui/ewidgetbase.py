@@ -1,6 +1,6 @@
 from PyQt5.Qt import QApplication
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent
+from PyQt5.QtCore import *
+from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent, QWheelEvent, QKeyEvent, QCursor, QMouseEvent
 from PyQt5.QtWidgets import *
 
 from PyQt5 import uic
@@ -177,6 +177,87 @@ class EMatplotLibVis(EAnalyseVisualization):
 #
 #     def plot(self):
 #         print("plot not  implemented in", self)
+
+class GraphicsViewDockWidget(EDockWidget):
+    def __init__(self, main_window, pixmap = None):
+        super(GraphicsViewDockWidget, self).__init__(main_window, False)
+        self.view = EGraphicsView(self, auto_frame=False)
+
+        self.setWidget(self.view)
+        if pixmap is not None:
+            self.set_pixmap(pixmap)
+
+    def set_pixmap(self, pixmap):
+        self.view.set_image(pixmap)
+
+class EGraphicsView(QGraphicsView):
+    def __init__(self, parent, auto_frame = True):
+        super(EGraphicsView, self).__init__(parent)
+        self.gscene = QGraphicsScene()
+        self.setScene(self.gscene)
+        self.pixmap = None
+        self.auto_frame = auto_frame
+        self.ctrl_is_pressed = False
+        self.curr_scale = 1.0
+
+    def set_image(self, pixmap, clear = True):
+        if clear:
+            self.gscene.clear()
+
+        self.pixmap = self.gscene.addPixmap(pixmap)
+
+    def resizeEvent(self, event: QResizeEvent):
+        super(EGraphicsView, self).resizeEvent(event)
+        if self.pixmap is not None and self.auto_frame:
+            rect = self.pixmap.sceneBoundingRect()
+            self.fitInView(rect, Qt.KeepAspectRatio)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Control:
+            self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
+            self.ctrl_is_pressed = True
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if self.pixmap is not None and self.auto_frame:
+            rect = self.pixmap.sceneBoundingRect()
+            self.fitInView(rect, Qt.KeepAspectRatio)
+
+    def keyReleaseEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Control:
+            self.viewport().setCursor(QCursor(Qt.ArrowCursor))
+            self.ctrl_is_pressed = False
+
+    def wheelEvent(self, event: QWheelEvent):
+        if self.ctrl_is_pressed:
+            self.setTransformationAnchor(QGraphicsView.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.NoAnchor)
+
+            old_pos = self.mapToScene(event.pos())
+
+            h_factor = 1.1
+            l_factor = 0.9
+
+            viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
+            self.curr_scale = round(self.pixmap.pixmap().width() / (viewport_size.x()), 4)
+
+            if event.angleDelta().y() > 0.0 and self.curr_scale < 10:
+                self.scale(h_factor, h_factor)
+                self.curr_scale *= h_factor
+
+            elif event.angleDelta().y() < 0.0 and self.curr_scale > 0.01:
+                self.curr_scale *= l_factor
+                self.scale(l_factor, l_factor)
+
+            cursor_pos = self.mapToScene(event.pos()) - old_pos
+
+            self.translate(cursor_pos.x(), cursor_pos.y())
+
+        else:
+            super(EGraphicsView, self).wheelEvent(event)
+
+
+
+
 
 
 class EHtmlDisplay(QWidget):

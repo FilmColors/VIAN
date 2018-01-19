@@ -164,6 +164,7 @@
      <string>Analysis</string>
     </property>
     <addaction name="actionColorimetry"/>
+    <addaction name="actionMovie_Mosaic"/>
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
@@ -522,6 +523,11 @@
    </property>
    <property name="shortcut">
     <string>Left</string>
+   </property>
+  </action>
+  <action name="actionMovie_Mosaic">
+   <property name="text">
+    <string>Movie Mosaic</string>
    </property>
   </action>
  </widget>

@@ -250,10 +250,14 @@ class LayerContextMenu(ContextMenu):
     def __init__(self, parent, pos, layer):
         super(LayerContextMenu, self).__init__(parent, pos)
         self.layer = layer
-
         self.action_delete = self.addAction("Remove Layer")
         self.action_delete.triggered.connect(self.on_delete)
 
+        if self.layer[0].is_visible is False:
+            self.action_visibility = self.addAction("Show Layer")
+        else:
+            self.action_visibility = self.addAction("Hide Layer")
+        self.action_visibility.triggered.connect(self.toggle_visibility)
         if self.layer[0].timeline_visibility is True:
             self.action_set_timeline_visibility = self.addAction("Hide in Timeline")
         else:
@@ -277,6 +281,11 @@ class LayerContextMenu(ContextMenu):
                 print("ContextMenu Error", e)
                 continue
         self.close()
+
+    def toggle_visibility(self):
+        for l in self.layer:
+            l.set_visibility(not l.is_visible)
+
 
     def toggle_timeline_visiblity(self):
         self.hide()

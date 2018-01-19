@@ -146,11 +146,13 @@ class ISelectable():
     def get_type(self):
         print("ISelectable: Not Implemented by", self)
 
+
 class ILiveWidgetExposing():
     def get_live_widget(self):
         pass
     def compute_widget(self, frame, data):
         pass
+
 
 class IAnalysisJob(ILiveWidgetExposing):
     """

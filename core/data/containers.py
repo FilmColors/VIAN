@@ -370,6 +370,8 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def remove_analysis(self, analysis):
         self.analysis.remove(analysis)
         self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
+        if analysis.get_type() == ANALYSIS_JOB_ANALYSIS:
+            self.main_window.numpy_data_manager.remove_item(analysis.get_id())
         self.dispatch_changed()
 
     def get_analyzes_of_item(self, item):
@@ -436,6 +438,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.current_annotation_layer = None
 
         self.selected = None
+
         for a in layer.annotations:
             layer.remove_annotation(a)
         self.annotation_layers.remove(layer)
@@ -1325,6 +1328,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
                  name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static"):
         IProjectContainer.__init__(self)
+        ILockable.__init__(self)
         self.name = name
         self.a_type = a_type
         self.t_start = t_start
@@ -1350,6 +1354,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 
         self.annotation_layer = None
 
+        self.is_visible = False
         self.widget = None
         self.image = None
 
@@ -1507,6 +1512,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             unique_id=self.unique_id,
             a_type = self.a_type.value,
             t_start = self.t_start,
+            t_end = self.t_end,
             size = self.size,
             curr_size = self.size,
             color = self.color,
@@ -1536,6 +1542,10 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.unique_id = serialization['unique_id']
         self.a_type = AnnotationType(serialization['a_type'])
         self.t_start = serialization['t_start']
+        try:
+            self.t_end = serialization['t_end']
+        except:
+            pass
         self.size = serialization['size']
         self.curr_size = serialization['curr_size']
         self.color = serialization['color']
@@ -1587,7 +1597,6 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         if self.a_type is AnnotationType.Image:
             self.load_image()
 
-
         return self
 
     def get_type(self):
@@ -1615,7 +1624,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         self.t_end = t_end
         self.annotations = []
         self.is_current_layer = False
-        self.is_visible = False
+        self.is_visible = True
         self.timeline_visibility = True
         self.notes = ""
 
@@ -1698,7 +1707,8 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             annotations = s_annotations,
             notes = self.notes,
             locked=self.locked,
-            words=words
+            words=words,
+            is_visible = self.is_visible
         )
         return result
 
@@ -1731,6 +1741,12 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         except Exception as e:
             pass
 
+        try:
+            self.is_visible = serialization['is_visible']
+        except Exception as e:
+            print("No Visibility Found")
+            pass
+
         return self
 
     def get_type(self):
@@ -1743,6 +1759,15 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
     def unlock(self):
         ILockable.unlock(self)
         self.dispatch_on_changed(item=self)
+
+    def set_visibility(self, state):
+        self.is_visible = state
+
+        for a in self.annotations:
+            if state:
+                a.widget.show()
+            else:
+                a.widget.hide()
 
     def set_timeline_visibility(self, visibility):
         self.timeline_visibility = visibility
@@ -2245,7 +2270,7 @@ class ConnectionDescriptor(IProjectContainer):
 #region MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource):
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
-                 duration=100):
+                 duration=100, fps = 30):
         IProjectContainer.__init__(self)
         self.set_project(project) # TODO This should be changed
         self.movie_name = movie_name
@@ -2255,6 +2280,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.source = source
         self.duration = duration
         self.notes = ""
+        self.fps = fps
 
     def serialize(self):
 
@@ -2281,7 +2307,10 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.project.remove_from_id_list(self)
 
         for key, value in list(serialization.items()):
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except:
+                continue
 
         self.set_project(self.project)
         return self
@@ -2304,8 +2333,6 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
     def get_end(self):
         cap = cv2.VideoCapture(self.movie_path)
         return cap.get(cv2.CAP_PROP_FRAME_COUNT)
-
-
 
     def get_source_properties(self):
         return ["Current Time", "Current Frame", "Movie Name", "Movie Path", "Movie ID", "Year", "Source", "Duration", "Notes"]

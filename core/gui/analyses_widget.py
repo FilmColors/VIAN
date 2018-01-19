@@ -83,7 +83,7 @@ class SelectedItem(QListWidgetItem):
     def __init__(self, item):
         super(SelectedItem, self).__init__()
         self.item = item
-        self.setText(item.get_name())
+        self.setText(item.get_name().ljust(30) + "[" + get_type_as_string(self.item.get_type()) + "]")
 
 
 # class AnalysesWidget(EDockWidget, IProjectChangeNotify):
