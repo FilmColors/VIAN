@@ -165,12 +165,6 @@ Extensive List
 
    * Numpy and Pickle implementation for Async Loading and Saving of large data
 
-   *
-
-
-
-
-
 
 * :ref:`genindex`
 * :ref:`modindex`

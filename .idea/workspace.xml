@@ -5,111 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5f86adad-e443-47bd-a2df-ab0eb0627df8" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/latest.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/doctrees/whatsnew.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/html/_images/annotations.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_01.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_02.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_03.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_04.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_05.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_06.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_07.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_08.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_09.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_10.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_11.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading/loading_12.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading128.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading256.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/loading512.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/output_y2AxwV.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/html/whats_new/latest.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/html/whatsnew.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/DevelopersGuide.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/DevelopersGuide.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/UserGuide.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/UserGuide.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses_example.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses_example.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/nodes.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/nodes.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/plugins.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/plugins.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/environment.pickle" afterPath="$PROJECT_DIR$/_docs/build/doctrees/environment.pickle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/index.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/index.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/annotation/annotation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/annotation/annotation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/changing_movie_paths.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/changing_movie_paths.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/create_project.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/create_project.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/import_elan_projects.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/import_elan_projects.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_management.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_management.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_templates.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_templates.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/create_screenshot.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/create_screenshot.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/export_screenshots.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/export_screenshots.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/screenshots.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/screenshots.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/changing_main_segmentation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/changing_main_segmentation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segment.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segment.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segmentation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segmentation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/exporting_segmentations.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/exporting_segmentations.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/locking_segmentations.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/locking_segmentations.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/segmentation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/segmentation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/step_by_step.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/step_by_step.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/inspector.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/inspector.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/outliner.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/outliner.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/perspectives.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/perspectives.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/timeline.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/timeline.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/user_interface.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/user_interface.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/objects.inv" afterPath="$PROJECT_DIR$/_docs/build/html/objects.inv" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/latest.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/latest.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/.buildinfo" afterPath="$PROJECT_DIR$/_docs/build/html/.buildinfo" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/DevelopersGuide.html" afterPath="$PROJECT_DIR$/_docs/build/html/DevelopersGuide.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/UserGuide.html" afterPath="$PROJECT_DIR$/_docs/build/html/UserGuide.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/interfaces.html" afterPath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/interfaces.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/plugin.html" afterPath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/plugin.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/index.html" afterPath="$PROJECT_DIR$/_docs/build/html/_modules/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/index.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/index.rst.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_static/basic.css" afterPath="$PROJECT_DIR$/_docs/build/html/_static/basic.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_static/doctools.js" afterPath="$PROJECT_DIR$/_docs/build/html/_static/doctools.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_static/searchtools.js" afterPath="$PROJECT_DIR$/_docs/build/html/_static/searchtools.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_static/websupport.js" afterPath="$PROJECT_DIR$/_docs/build/html/_static/websupport.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses_example.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses_example.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/nodes.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/nodes.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/plugins.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/plugins.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/genindex.html" afterPath="$PROJECT_DIR$/_docs/build/html/genindex.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/index.html" afterPath="$PROJECT_DIR$/_docs/build/html/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/search.html" afterPath="$PROJECT_DIR$/_docs/build/html/search.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/searchindex.js" afterPath="$PROJECT_DIR$/_docs/build/html/searchindex.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/annotation/annotation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/annotation/annotation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/changing_movie_paths.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/changing_movie_paths.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/create_project.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/create_project.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/import_elan_projects.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/import_elan_projects.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_management.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_management.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_templates.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_templates.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/create_screenshot.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/create_screenshot.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/export_screenshots.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/export_screenshots.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/screenshots.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/screenshots.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/changing_main_segmentation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/changing_main_segmentation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segment.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segment.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segmentation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segmentation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/exporting_segmentations.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/exporting_segmentations.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/locking_segmentations.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/locking_segmentations.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/segmentation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/segmentation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/step_by_step.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/step_by_step.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/inspector.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/inspector.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/outliner.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/outliner.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/perspectives.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/perspectives.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/timeline.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/timeline.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/user_interface.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/user_interface.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/index.rst" afterPath="$PROJECT_DIR$/_docs/source/index.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/analysis/movie_mosaic/movie_mosaic.py" afterPath="$PROJECT_DIR$/core/analysis/movie_mosaic/movie_mosaic.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/concurrent/worker_functions.py" afterPath="$PROJECT_DIR$/core/concurrent/worker_functions.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/computation.py" afterPath="$PROJECT_DIR$/core/data/computation.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/containers.py" afterPath="$PROJECT_DIR$/core/data/containers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/vian_updater.py" afterPath="$PROJECT_DIR$/core/data/vian_updater.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/analyses_widget.py" afterPath="$PROJECT_DIR$/core/gui/analyses_widget.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/ewidgetbase.py" afterPath="$PROJECT_DIR$/core/gui/ewidgetbase.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/whats_new/latest.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/whats_new/latest.rst.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/whats_new/latest.html" afterPath="$PROJECT_DIR$/_docs/build/html/whats_new/latest.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/whats_new/latest.rst" afterPath="$PROJECT_DIR$/_docs/source/whats_new/latest.rst" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/main_window.py" afterPath="$PROJECT_DIR$/core/gui/main_window.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/player_vlc.py" afterPath="$PROJECT_DIR$/core/gui/player_vlc.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/screenshot_manager.py" afterPath="$PROJECT_DIR$/core/gui/screenshot_manager.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/qt_ui/MainWindow.ui" afterPath="$PROJECT_DIR$/qt_ui/MainWindow.ui" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/user/master_file.ems" afterPath="$PROJECT_DIR$/user/master_file.ems" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vian_version.txt" afterPath="$PROJECT_DIR$/vian_version.txt" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -171,8 +74,8 @@
       <file leaf-file-name="main_window.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="475" column="0" lean-forward="false" selection-start-line="475" selection-start-column="0" selection-end-line="475" selection-end-column="0" />
+            <state relative-caret-position="108">
+              <caret line="59" column="20" lean-forward="false" selection-start-line="59" selection-start-column="20" selection-end-line="59" selection-end-column="20" />
               <folding>
                 <element signature="n#!!doc" expanded="false" />
                 <element signature="e#3345#17490#0" expanded="false" />
@@ -404,8 +307,18 @@
                 <element signature="e#59796#59871#0" expanded="false" />
                 <element signature="e#59914#59983#0" expanded="false" />
                 <element signature="e#60014#60281#0" expanded="false" />
-                <marker date="1516469051345" expanded="false" signature="19559:19982" ph="..." />
+                <marker date="1516470525247" expanded="false" signature="19559:19982" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vian_version.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/vian_version.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="18">
+              <caret line="1" column="18" lean-forward="false" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -606,21 +519,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="create_project.rst" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/project_management/create_project.rst">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="34" column="0" lean-forward="false" selection-start-line="34" selection-start-column="0" selection-end-line="39" selection-end-column="36" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="latest.rst" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/_docs/source/whats_new/latest.rst">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="267">
-              <caret line="148" column="0" lean-forward="false" selection-start-line="148" selection-start-column="0" selection-end-line="148" selection-end-column="0" />
+            <state relative-caret-position="393">
+              <caret line="164" column="0" lean-forward="true" selection-start-line="164" selection-start-column="0" selection-end-line="164" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -1219,7 +1122,6 @@
         <option value="$PROJECT_DIR$/core/analysis/colorimetry/hilbert.py" />
         <option value="$PROJECT_DIR$/python_sandbox.py" />
         <option value="$PROJECT_DIR$/install/dependencies.txt" />
-        <option value="$PROJECT_DIR$/vian_version.txt" />
         <option value="$PROJECT_DIR$/core/data/importers.py" />
         <option value="$PROJECT_DIR$/core/concurrent/opencv_frame_thread.py" />
         <option value="$PROJECT_DIR$/core/concurrent/worker.py" />
@@ -1250,8 +1152,9 @@
         <option value="$PROJECT_DIR$/core/analysis/movie_mosaic/movie_mosaic.py" />
         <option value="$PROJECT_DIR$/core/data/computation.py" />
         <option value="$PROJECT_DIR$/core/gui/ewidgetbase.py" />
-        <option value="$PROJECT_DIR$/core/gui/main_window.py" />
         <option value="$PROJECT_DIR$/core/gui/player_vlc.py" />
+        <option value="$PROJECT_DIR$/core/gui/main_window.py" />
+        <option value="$PROJECT_DIR$/vian_version.txt" />
         <option value="$PROJECT_DIR$/_docs/source/whats_new/latest.rst" />
       </list>
     </option>
@@ -1632,6 +1535,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32827735" sideWeight="0.4952343" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1639,7 +1543,7 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28602383" sideWeight="0.619403" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930756" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20693392" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25460455" sideWeight="0.4936034" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25460455" sideWeight="0.4936034" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18230277" sideWeight="0.88372093" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32502708" sideWeight="0.48933902" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2531983" sideWeight="0.48659793" order="1" side_tool="false" content_ui="tabs" />
@@ -4109,14 +4013,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/vian_version.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="18" lean-forward="false" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/_docs/source/index.rst">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
@@ -4742,10 +4638,125 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/player_vlc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="139">
+          <caret line="209" column="43" lean-forward="false" selection-start-line="209" selection-start-column="43" selection-end-line="209" selection-end-column="43" />
+          <folding>
+            <element signature="e#419#1233#0" expanded="false" />
+            <element signature="e#463#975#0" expanded="false" />
+            <element signature="e#1012#1231#0" expanded="false" />
+            <element signature="e#1315#6353#0" expanded="false" />
+            <element signature="e#1315#1362#1" expanded="false" />
+            <element signature="e#1541#2250#0" expanded="false" />
+            <element signature="e#2319#2383#0" expanded="false" />
+            <element signature="e#2416#2478#0" expanded="false" />
+            <element signature="e#2512#2575#0" expanded="false" />
+            <element signature="e#2619#2692#0" expanded="false" />
+            <element signature="e#2728#2793#0" expanded="false" />
+            <element signature="e#2873#2938#0" expanded="false" />
+            <element signature="e#2968#3027#0" expanded="false" />
+            <element signature="e#3058#3118#0" expanded="false" />
+            <element signature="e#3148#3207#0" expanded="false" />
+            <element signature="e#3243#3354#0" expanded="false" />
+            <element signature="e#3243#3280#1" expanded="false" />
+            <element signature="e#3412#3480#0" expanded="false" />
+            <element signature="e#3516#3636#0" expanded="false" />
+            <element signature="e#3516#3562#1" expanded="false" />
+            <element signature="e#3672#3737#0" expanded="false" />
+            <element signature="e#3782#3850#0" expanded="false" />
+            <element signature="e#3886#3951#0" expanded="false" />
+            <element signature="e#3991#4060#0" expanded="false" />
+            <element signature="e#4122#4207#0" expanded="false" />
+            <element signature="e#4253#4322#0" expanded="false" />
+            <element signature="e#4362#4431#0" expanded="false" />
+            <element signature="e#4471#4534#0" expanded="false" />
+            <element signature="e#4568#4631#0" expanded="false" />
+            <element signature="e#4684#4766#0" expanded="false" />
+            <element signature="e#4810#4883#0" expanded="false" />
+            <element signature="e#4927#4992#0" expanded="false" />
+            <element signature="e#5028#5093#0" expanded="false" />
+            <element signature="e#5141#5210#0" expanded="false" />
+            <element signature="e#5250#5319#0" expanded="false" />
+            <element signature="e#5359#5422#0" expanded="false" />
+            <element signature="e#5456#5519#0" expanded="false" />
+            <element signature="e#5561#5632#0" expanded="false" />
+            <element signature="e#5675#5747#0" expanded="false" />
+            <element signature="e#5789#5860#0" expanded="false" />
+            <element signature="e#5909#5980#0" expanded="false" />
+            <element signature="e#6032#6113#0" expanded="false" />
+            <element signature="e#6169#6250#0" expanded="false" />
+            <element signature="e#6294#6298#0" expanded="false" />
+            <element signature="e#6349#6353#0" expanded="false" />
+            <element signature="e#6432#6819#0" expanded="false" />
+            <element signature="e#7167#8981#0" expanded="false" />
+            <element signature="e#7167#7208#0" expanded="false" />
+            <element signature="e#7319#7426#0" expanded="false" />
+            <element signature="e#7500#7554#0" expanded="false" />
+            <element signature="e#8126#8531#0" expanded="false" />
+            <element signature="e#9015#9056#0" expanded="false" />
+            <element signature="e#9888#9960#0" expanded="false" />
+            <element signature="e#10005#10043#0" expanded="false" />
+            <element signature="e#10146#11230#0" expanded="false" />
+            <element signature="e#10693#10712#0" expanded="false" />
+            <element signature="e#10782#10811#0" expanded="false" />
+            <element signature="e#11266#11387#0" expanded="false" />
+            <element signature="e#11417#11679#0" expanded="false" />
+            <element signature="e#11710#11798#0" expanded="false" />
+            <element signature="e#11828#12013#0" expanded="false" />
+            <element signature="e#11929#12013#0" expanded="false" />
+            <element signature="e#12049#12114#0" expanded="false" />
+            <element signature="e#12049#12086#1" expanded="false" />
+            <element signature="e#12172#12240#0" expanded="false" />
+            <element signature="e#12276#12388#0" expanded="false" />
+            <element signature="e#12276#12314#1" expanded="false" />
+            <element signature="e#12424#12489#0" expanded="false" />
+            <element signature="e#12534#12602#0" expanded="false" />
+            <element signature="e#12638#12668#0" expanded="false" />
+            <element signature="e#12708#12712#0" expanded="false" />
+            <element signature="e#12774#12859#0" expanded="false" />
+            <element signature="e#12905#13013#0" expanded="false" />
+            <element signature="e#13053#13088#0" expanded="false" />
+            <element signature="e#13128#13167#0" expanded="false" />
+            <element signature="e#13201#13236#0" expanded="false" />
+            <element signature="e#13289#13364#0" expanded="false" />
+            <element signature="e#13408#13617#0" expanded="false" />
+            <element signature="e#13408#13434#0" expanded="false" />
+            <element signature="e#13661#13703#0" expanded="false" />
+            <element signature="e#13739#13782#0" expanded="false" />
+            <element signature="e#13830#13879#0" expanded="false" />
+            <element signature="e#13919#13943#0" expanded="false" />
+            <element signature="e#13983#14027#0" expanded="false" />
+            <element signature="e#14061#14102#0" expanded="false" />
+            <element signature="e#14144#14188#0" expanded="false" />
+            <element signature="e#14231#14275#0" expanded="false" />
+            <element signature="e#14317#14432#0" expanded="false" />
+            <element signature="e#14481#14552#0" expanded="false" />
+            <element signature="e#14604#14612#0" expanded="false" />
+            <element signature="e#14668#14749#0" expanded="false" />
+            <element signature="e#14782#14878#0" expanded="false" />
+            <element signature="e#14922#15295#0" expanded="false" />
+            <element signature="e#15086#15194#0" expanded="false" />
+            <element signature="e#15346#15350#0" expanded="false" />
+            <element signature="e#15403#15557#0" expanded="false" />
+            <element signature="e#15611#15801#0" expanded="false" />
+            <element signature="e#15855#15859#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/whatsnew.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="475" column="0" lean-forward="false" selection-start-line="475" selection-start-column="0" selection-end-line="475" selection-end-column="0" />
+        <state relative-caret-position="108">
+          <caret line="59" column="20" lean-forward="false" selection-start-line="59" selection-start-column="20" selection-end-line="59" selection-end-column="20" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
             <element signature="e#3345#17490#0" expanded="false" />
@@ -4977,130 +4988,23 @@
             <element signature="e#59796#59871#0" expanded="false" />
             <element signature="e#59914#59983#0" expanded="false" />
             <element signature="e#60014#60281#0" expanded="false" />
-            <marker date="1516469051345" expanded="false" signature="19559:19982" ph="..." />
+            <marker date="1516470525247" expanded="false" signature="19559:19982" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/player_vlc.py">
+    <entry file="file://$PROJECT_DIR$/vian_version.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="139">
-          <caret line="209" column="43" lean-forward="false" selection-start-line="209" selection-start-column="43" selection-end-line="209" selection-end-column="43" />
-          <folding>
-            <element signature="e#419#1233#0" expanded="false" />
-            <element signature="e#463#975#0" expanded="false" />
-            <element signature="e#1012#1231#0" expanded="false" />
-            <element signature="e#1315#6353#0" expanded="false" />
-            <element signature="e#1315#1362#1" expanded="false" />
-            <element signature="e#1541#2250#0" expanded="false" />
-            <element signature="e#2319#2383#0" expanded="false" />
-            <element signature="e#2416#2478#0" expanded="false" />
-            <element signature="e#2512#2575#0" expanded="false" />
-            <element signature="e#2619#2692#0" expanded="false" />
-            <element signature="e#2728#2793#0" expanded="false" />
-            <element signature="e#2873#2938#0" expanded="false" />
-            <element signature="e#2968#3027#0" expanded="false" />
-            <element signature="e#3058#3118#0" expanded="false" />
-            <element signature="e#3148#3207#0" expanded="false" />
-            <element signature="e#3243#3354#0" expanded="false" />
-            <element signature="e#3243#3280#1" expanded="false" />
-            <element signature="e#3412#3480#0" expanded="false" />
-            <element signature="e#3516#3636#0" expanded="false" />
-            <element signature="e#3516#3562#1" expanded="false" />
-            <element signature="e#3672#3737#0" expanded="false" />
-            <element signature="e#3782#3850#0" expanded="false" />
-            <element signature="e#3886#3951#0" expanded="false" />
-            <element signature="e#3991#4060#0" expanded="false" />
-            <element signature="e#4122#4207#0" expanded="false" />
-            <element signature="e#4253#4322#0" expanded="false" />
-            <element signature="e#4362#4431#0" expanded="false" />
-            <element signature="e#4471#4534#0" expanded="false" />
-            <element signature="e#4568#4631#0" expanded="false" />
-            <element signature="e#4684#4766#0" expanded="false" />
-            <element signature="e#4810#4883#0" expanded="false" />
-            <element signature="e#4927#4992#0" expanded="false" />
-            <element signature="e#5028#5093#0" expanded="false" />
-            <element signature="e#5141#5210#0" expanded="false" />
-            <element signature="e#5250#5319#0" expanded="false" />
-            <element signature="e#5359#5422#0" expanded="false" />
-            <element signature="e#5456#5519#0" expanded="false" />
-            <element signature="e#5561#5632#0" expanded="false" />
-            <element signature="e#5675#5747#0" expanded="false" />
-            <element signature="e#5789#5860#0" expanded="false" />
-            <element signature="e#5909#5980#0" expanded="false" />
-            <element signature="e#6032#6113#0" expanded="false" />
-            <element signature="e#6169#6250#0" expanded="false" />
-            <element signature="e#6294#6298#0" expanded="false" />
-            <element signature="e#6349#6353#0" expanded="false" />
-            <element signature="e#6432#6819#0" expanded="false" />
-            <element signature="e#7167#8981#0" expanded="false" />
-            <element signature="e#7167#7208#0" expanded="false" />
-            <element signature="e#7319#7426#0" expanded="false" />
-            <element signature="e#7500#7554#0" expanded="false" />
-            <element signature="e#8126#8531#0" expanded="false" />
-            <element signature="e#9015#9056#0" expanded="false" />
-            <element signature="e#9888#9960#0" expanded="false" />
-            <element signature="e#10005#10043#0" expanded="false" />
-            <element signature="e#10146#11230#0" expanded="false" />
-            <element signature="e#10693#10712#0" expanded="false" />
-            <element signature="e#10782#10811#0" expanded="false" />
-            <element signature="e#11266#11387#0" expanded="false" />
-            <element signature="e#11417#11679#0" expanded="false" />
-            <element signature="e#11710#11798#0" expanded="false" />
-            <element signature="e#11828#12013#0" expanded="false" />
-            <element signature="e#11929#12013#0" expanded="false" />
-            <element signature="e#12049#12114#0" expanded="false" />
-            <element signature="e#12049#12086#1" expanded="false" />
-            <element signature="e#12172#12240#0" expanded="false" />
-            <element signature="e#12276#12388#0" expanded="false" />
-            <element signature="e#12276#12314#1" expanded="false" />
-            <element signature="e#12424#12489#0" expanded="false" />
-            <element signature="e#12534#12602#0" expanded="false" />
-            <element signature="e#12638#12668#0" expanded="false" />
-            <element signature="e#12708#12712#0" expanded="false" />
-            <element signature="e#12774#12859#0" expanded="false" />
-            <element signature="e#12905#13013#0" expanded="false" />
-            <element signature="e#13053#13088#0" expanded="false" />
-            <element signature="e#13128#13167#0" expanded="false" />
-            <element signature="e#13201#13236#0" expanded="false" />
-            <element signature="e#13289#13364#0" expanded="false" />
-            <element signature="e#13408#13617#0" expanded="false" />
-            <element signature="e#13408#13434#0" expanded="false" />
-            <element signature="e#13661#13703#0" expanded="false" />
-            <element signature="e#13739#13782#0" expanded="false" />
-            <element signature="e#13830#13879#0" expanded="false" />
-            <element signature="e#13919#13943#0" expanded="false" />
-            <element signature="e#13983#14027#0" expanded="false" />
-            <element signature="e#14061#14102#0" expanded="false" />
-            <element signature="e#14144#14188#0" expanded="false" />
-            <element signature="e#14231#14275#0" expanded="false" />
-            <element signature="e#14317#14432#0" expanded="false" />
-            <element signature="e#14481#14552#0" expanded="false" />
-            <element signature="e#14604#14612#0" expanded="false" />
-            <element signature="e#14668#14749#0" expanded="false" />
-            <element signature="e#14782#14878#0" expanded="false" />
-            <element signature="e#14922#15295#0" expanded="false" />
-            <element signature="e#15086#15194#0" expanded="false" />
-            <element signature="e#15346#15350#0" expanded="false" />
-            <element signature="e#15403#15557#0" expanded="false" />
-            <element signature="e#15611#15801#0" expanded="false" />
-            <element signature="e#15855#15859#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/whatsnew.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        <state relative-caret-position="18">
+          <caret line="1" column="18" lean-forward="false" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/_docs/source/whats_new/latest.rst">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="267">
-          <caret line="148" column="0" lean-forward="false" selection-start-line="148" selection-start-column="0" selection-end-line="148" selection-end-column="0" />
+        <state relative-caret-position="393">
+          <caret line="164" column="0" lean-forward="true" selection-start-line="164" selection-start-column="0" selection-end-line="164" selection-end-column="0" />
           <folding />
         </state>
       </provider>
