@@ -28,9 +28,10 @@ class PerspectiveManager(EDockWidget):
 
 class Perspective(Enum):
         VideoPlayer = 1
-        Annotation = 2
-        ScreenshotsManager = 3
-        Analyses = 4
+        Segmentation = 2
+        Annotation = 3
+        ScreenshotsManager = 4
+        Analyses = 5
 
 
 

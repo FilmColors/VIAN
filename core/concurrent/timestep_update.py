@@ -57,7 +57,7 @@ class TimestepUpdateWorkerSingle(QObject):
                 self.signals.onOpenCVFrameUpdate.emit(frame_pixmap)
 
         except Exception as e:
-            self.signals.onError.emit(e)
+            self.signals.onError.emit([e])
 
     def get_opencv_frame(self, time_frame):
         if self.video_capture is not None:

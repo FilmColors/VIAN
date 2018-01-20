@@ -37,12 +37,11 @@ class DialogScreenshotExporter(EDialogWidget):
             index = cb.findText(self.default[i])
             cb.setCurrentIndex(index)
 
-
-
-
         self.checkBox_OverrideV.stateChanged.connect(self.on_override_visibility_changed)
         self.checkBox_Visibility.setEnabled(self.override_visibility)
         self.cB_ImageFormat.addItems(self.types)
+
+        self.QualitySlider.valueChanged.connect(self.on_quality_changed)
 
         self.folder_path = self.main_window.project.folder + self.main_window.settings.DIR_SCREENSHOTS
         self.lineEdit_Folder.setText(self.folder_path)
@@ -52,6 +51,8 @@ class DialogScreenshotExporter(EDialogWidget):
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.btn_OK.clicked.connect(self.on_export)
         self.btn_Help.clicked.connect(self.on_help)
+
+        self.on_quality_changed()
 
     def on_override_visibility_changed(self):
         self.override_visibility = self.checkBox_OverrideV.isChecked()
@@ -63,6 +64,9 @@ class DialogScreenshotExporter(EDialogWidget):
 
     def on_edit_path_finished(self):
         self.folder_path =  self.lineEdit_Folder.text()
+
+    def on_quality_changed(self):
+        self.lbl_Quality.setText((str(self.QualitySlider.value()) + " %").ljust(6))
 
     def on_export(self):
         path = self.folder_path

@@ -210,12 +210,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
-        # self.tabifyDockWidget(self.annotation_toolbar, self.screenshot_toolbar)
         self.tabifyDockWidget(self.inspector, self.history_view)
         self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
 
         self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
-        # self.tabifyDockWidget(self.inspector, self.screenshots_manager_dock)
+
         self.annotation_toolbar.raise_()
         self.inspector.raise_()
         self.screenshots_manager_dock.raise_()
@@ -270,10 +269,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionOutliner.triggered.connect(self.create_outliner)
         self.actionVocabularyManager.triggered.connect(self.create_vocabulary_manager)
         self.actionInspector.triggered.connect(self.create_inspector)
+
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
         self.actionScreenshotsPersp.triggered.connect(partial(self.switch_perspective, Perspective.ScreenshotsManager.name))
         self.actionAnalysisPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses.name))
+        self.actionSegmentationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Segmentation.name))
+
         self.actionHistory.triggered.connect(self.create_history_view)
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
         self.actionAdd_Annotation_Layer.triggered.connect(self.on_new_annotation_layer)
@@ -369,7 +371,7 @@ class MainWindow(QtWidgets.QMainWindow):
         loading_screen.hide()
 
         self.update_recent_menu()
-        self.switch_perspective(Perspective.Annotation.name)
+        self.switch_perspective(Perspective.Segmentation.name)
 
         # self.load_project("projects/ratatouille/Ratatouille.eext")
 
@@ -381,12 +383,18 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.current_segment_evaluator.signals.segmentChanged.connect(self.currentSegmentChanged.emit)
         # self.thread_pool.start(self.current_segment_evaluator)
 
-        self.showMaximized()
+        self.show()
+
+        self.setWindowState(Qt.WindowMaximized)
+
         if self.settings.SHOW_WELCOME:
            self.show_welcome()
 
         if self.settings.USER_NAME == "":
             self.show_first_start()
+
+        self.player_controls.setState(False)
+        self.timeline.timeline.setState(False)
 
     def print_time(self, segment):
         print(segment)
@@ -515,6 +523,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.perspective_manager is None:
             self.perspective_manager = PerspectiveManager(self)
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.perspective_manager, Qt.Horizontal)
+            self.perspective_manager.hide()
         else:
             self.perspective_manager.show()
             self.perspective_manager.raise_()
@@ -594,12 +603,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update()
 
     def keyPressEvent(self, event):
-        self.key_event_handler.pressEvent(event)
-        self.update()
+        self.screenshots_manager.ctrl_is_pressed = True
+        self.timeline.timeline.is_scaling = True
+
 
     def keyReleaseEvent(self, event):
-        self.key_event_handler.releaseEvent(event)
-        self.update()
+        self.screenshots_manager.ctrl_is_pressed = False
+        self.timeline.timeline.is_scaling = False
+
 
     def mousePressEvent(self, event):
         self.close_drawing_editor()
@@ -748,6 +759,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         #self.project_streamer.set_project(self.project)
+        self.player_controls.setState(False)
+        self.timeline.timeline.setState(False)
+
         self.dispatch_on_changed()
 
     def load_project(self, path):
@@ -1051,6 +1065,30 @@ class MainWindow(QtWidgets.QMainWindow):
             self.node_editor_results.hide()
             self.screenshots_manager_dock.hide()
             self.vocabulary_manager.hide()
+            self.vocabulary_matrix.hide()
+
+        elif perspective == Perspective.Segmentation.name:
+            self.current_perspective = Perspective.Segmentation
+            central = self.player
+
+            self.drawing_overlay.hide()
+            self.outliner.hide()
+            self.annotation_toolbar.hide()
+            self.screenshot_toolbar.hide()
+            self.timeline.show()
+            self.player_controls.show()
+            self.perspective_manager.hide()
+            self.inspector.hide()
+            self.history_view.hide()
+            self.concurrent_task_viewer.hide()
+            self.node_editor_dock.hide()
+            self.node_editor_results.hide()
+            self.screenshots_manager_dock.show()
+            self.vocabulary_manager.hide()
+            self.vocabulary_matrix.hide()
+
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
         elif perspective == Perspective.Annotation.name:
             self.current_perspective = Perspective.Annotation
@@ -1059,17 +1097,22 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_overlay.show()
             self.outliner.show()
             self.annotation_toolbar.show()
-            self.screenshot_toolbar.show()
+            self.screenshot_toolbar.hide()
             self.timeline.show()
             self.history_view.hide()
-            self.player_controls.show()
+            self.perspective_manager.hide()
+            self.player_controls.hide()
             self.annotation_toolbar.raise_()
             self.inspector.show()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
-            self.screenshots_manager_dock.show()
+            self.screenshots_manager_dock.hide()
             self.node_editor_dock.hide()
             self.vocabulary_manager.hide()
             self.node_editor_results.hide()
+            self.vocabulary_matrix.hide()
+
+            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
+            self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
             # self.concurrent_task_viewer.show()
             # self.history_view.show()
 
@@ -1082,20 +1125,24 @@ class MainWindow(QtWidgets.QMainWindow):
             central = QWidget(self)
             central.setFixedWidth(0)
 
-
             self.drawing_overlay.hide()
-            self.annotation_toolbar.show()
+            self.annotation_toolbar.hide()
             self.screenshot_toolbar.show()
             self.timeline.hide()
             self.player_controls.hide()
             self.screenshot_toolbar.raise_()
-            self.outliner.hide()
+            self.outliner.show()
             self.history_view.hide()
             self.screenshots_manager.center_images()
             self.screenshots_manager_dock.show()
             self.node_editor_dock.hide()
             self.node_editor_results.hide()
             self.vocabulary_manager.hide()
+            self.vocabulary_matrix.hide()
+            self.inspector.show()
+
+            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
 
         elif perspective == Perspective.Analyses.name:
             self.current_perspective = Perspective.Analyses
@@ -1109,8 +1156,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.drawing_overlay.hide()
             self.outliner.show()
-            self.annotation_toolbar.show()
-            self.screenshot_toolbar.show()
+            self.annotation_toolbar.hide()
+            self.screenshot_toolbar.hide()
             self.timeline.hide()
             self.player_controls.hide()
             self.screenshot_toolbar.raise_()
@@ -1119,6 +1166,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.hide()
             self.node_editor_results.show()
             self.vocabulary_manager.hide()
+
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
+
 
 
         self.setCentralWidget(central)
@@ -1215,9 +1267,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def increase_playrate(self):
         self.player.set_rate(self.player.get_rate() + 0.1)
+        self.player_controls.update_rate()
 
     def decrease_playrate(self):
         self.player.set_rate(self.player.get_rate() - 0.1)
+        self.player_controls.update_rate()
     #region MISC
     def update_autosave_timer(self):
         self.autosave_timer.stop()
@@ -1413,6 +1467,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
                                         # endregion
+
+
 class LoadingScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(LoadingScreen, self).__init__(None)

@@ -580,6 +580,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if event.key() == QtCore.Qt.Key_Control:
             self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.UpArrowCursor))
             self.ctrl_is_pressed = True
+
+        elif event.key() == QtCore.Qt.Key_A and self.ctrl_is_pressed:
+            self.select_image(self.images_plain)
+
         elif event.key() == QtCore.Qt.Key_Shift:
             self.shift_is_pressed = True
         else:

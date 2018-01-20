@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>724</width>
-    <height>618</height>
+    <width>1092</width>
+    <height>887</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>724</width>
+     <width>1092</width>
      <height>21</height>
     </rect>
    </property>
@@ -79,17 +79,6 @@
     <property name="title">
      <string>Tools</string>
     </property>
-    <widget class="QMenu" name="menuPlay_Rate">
-     <property name="title">
-      <string>Play Rate</string>
-     </property>
-     <addaction name="actionIncreasePlayRate"/>
-     <addaction name="actionDecreasePlayRate"/>
-    </widget>
-    <addaction name="actionPlay_Pause"/>
-    <addaction name="menuPlay_Rate"/>
-    <addaction name="actionFrame_Forward"/>
-    <addaction name="actionFrame_Backward"/>
     <addaction name="separator"/>
     <addaction name="actionScreenshot"/>
     <addaction name="actionAdd_Key"/>
@@ -129,6 +118,7 @@
      <addaction name="actionPerspectivesToggle"/>
      <addaction name="separator"/>
      <addaction name="actionPlayerPersp"/>
+     <addaction name="actionSegmentationPersp"/>
      <addaction name="actionAnnotationPersp"/>
      <addaction name="actionScreenshotsPersp"/>
      <addaction name="actionAnalysisPerspective"/>
@@ -167,9 +157,26 @@
     <addaction name="actionMovie_Mosaic"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuPlayer">
+    <property name="title">
+     <string>Player</string>
+    </property>
+    <widget class="QMenu" name="menuFrame_Rate">
+     <property name="title">
+      <string>Frame Rate</string>
+     </property>
+     <addaction name="actionIncreasePlayRate"/>
+     <addaction name="actionDecreasePlayRate"/>
+    </widget>
+    <addaction name="actionPlay_Pause"/>
+    <addaction name="actionFrame_Forward"/>
+    <addaction name="actionFrame_Backward"/>
+    <addaction name="menuFrame_Rate"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuPlayer"/>
    <addaction name="menuAnalyze"/>
    <addaction name="menuAnalysis"/>
    <addaction name="menuHelp"/>
@@ -308,7 +315,7 @@
     <string>Annotation</string>
    </property>
    <property name="shortcut">
-    <string>Alt+2</string>
+    <string>Alt+3</string>
    </property>
   </action>
   <action name="actionScreenshotsPersp">
@@ -316,7 +323,7 @@
     <string>Screenshots Manager</string>
    </property>
    <property name="shortcut">
-    <string>Alt+3</string>
+    <string>Alt+4</string>
    </property>
   </action>
   <action name="actionPerspectivesToggle">
@@ -391,7 +398,7 @@
     <string>Analysis</string>
    </property>
    <property name="shortcut">
-    <string>Alt+4</string>
+    <string>Alt+5</string>
    </property>
   </action>
   <action name="actionPlay_Pause">
@@ -400,22 +407,6 @@
    </property>
    <property name="shortcut">
     <string>Space</string>
-   </property>
-  </action>
-  <action name="actionIncreasePlayRate">
-   <property name="text">
-    <string>Increase</string>
-   </property>
-   <property name="shortcut">
-    <string>+</string>
-   </property>
-  </action>
-  <action name="actionDecreasePlayRate">
-   <property name="text">
-    <string>Decrease</string>
-   </property>
-   <property name="shortcut">
-    <string>-</string>
    </property>
   </action>
   <action name="actionWelcome">
@@ -528,6 +519,35 @@
   <action name="actionMovie_Mosaic">
    <property name="text">
     <string>Movie Mosaic</string>
+   </property>
+  </action>
+  <action name="actionSegmentationPersp">
+   <property name="text">
+    <string>Segmentation</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+2</string>
+   </property>
+  </action>
+  <action name="actionJp">
+   <property name="text">
+    <string>jp</string>
+   </property>
+  </action>
+  <action name="actionIncreasePlayRate">
+   <property name="text">
+    <string>Increase</string>
+   </property>
+   <property name="shortcut">
+    <string>+</string>
+   </property>
+  </action>
+  <action name="actionDecreasePlayRate">
+   <property name="text">
+    <string>Decrease</string>
+   </property>
+   <property name="shortcut">
+    <string>-</string>
    </property>
   </action>
  </widget>

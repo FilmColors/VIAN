@@ -216,16 +216,22 @@ class EGraphicsView(QGraphicsView):
         if event.key() == Qt.Key_Control:
             self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
             self.ctrl_is_pressed = True
+        else:
+            QKeyEvent.ignore()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
         if self.pixmap is not None and self.auto_frame:
             rect = self.pixmap.sceneBoundingRect()
             self.fitInView(rect, Qt.KeepAspectRatio)
+        else:
+            QKeyEvent.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
             self.viewport().setCursor(QCursor(Qt.ArrowCursor))
             self.ctrl_is_pressed = False
+        else:
+            QKeyEvent.ignore()
 
     def wheelEvent(self, event: QWheelEvent):
         if self.ctrl_is_pressed:

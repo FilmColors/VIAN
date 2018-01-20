@@ -202,10 +202,14 @@ class Outliner(EDockWidget, IProjectChangeNotify):
     def keyPressEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Shift:
             self.tree.setSelectionMode(self.tree.MultiSelection)
+        else:
+            QKeyEvent.ignore()
 
     def keyReleaseEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Shift:
             self.tree.setSelectionMode(self.tree.SingleSelection)
+        else:
+            QKeyEvent.ignore()
 
 
 class OutlinerTreeWidget(QTreeWidget):

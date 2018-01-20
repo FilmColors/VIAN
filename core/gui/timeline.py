@@ -42,6 +42,12 @@ class TimelineContainer(EDockWidget):
         self.a_show_text.setCheckable(True)
         self.a_show_text.setChecked(True)
 
+        self.menu_display.addSeparator()
+
+        self.a_show_time_indicator = self.menu_display.addAction("\tShow Time Indicator")
+        self.a_show_time_indicator.setCheckable(True)
+        self.a_show_time_indicator.setChecked(True)
+
         self.menu_options = self.inner.menuBar().addMenu("Options")
         self.a_inhibit_overlap = self.menu_options.addAction("\tInhibit Overlap")
         self.a_inhibit_overlap.setCheckable(True)
@@ -52,6 +58,11 @@ class TimelineContainer(EDockWidget):
         self.a_forward_segmentation.setCheckable(True)
         self.a_forward_segmentation.setChecked(False)
         self.a_forward_segmentation.triggered.connect(self.update_settings)
+
+        self.a_kee_slider_in_view = self.menu_options.addAction("\tInhibit Overlap")
+        self.a_kee_slider_in_view.setCheckable(True)
+        self.a_kee_slider_in_view.setChecked(True)
+        self.a_kee_slider_in_view.triggered.connect(self.update_settings)
 
 
         self.a_show_id.triggered.connect(self.update_settings)
@@ -73,8 +84,10 @@ class TimelineContainer(EDockWidget):
         self.timeline.show_text = self.a_show_text.isChecked()
         self.timeline.inhibit_overlap = self.a_inhibit_overlap.isChecked()
 
-        self.timeline.is_forward_segmenting = self.a_forward_segmentation.isChecked()
+        self.timeline.show_time_indicator = self.a_show_time_indicator.isChecked()
 
+        self.timeline.is_forward_segmenting = self.a_forward_segmentation.isChecked()
+        self.timeline.keep_slider_in_view = self.a_kee_slider_in_view.isChecked()
 
         self.timeline.on_timeline_settings_update()
 
@@ -138,8 +151,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.show_name = False
         self.show_text = True
         self.is_forward_segmenting = False
+        self.keep_slider_in_view = True
 
         self.inhibit_overlap = True
+        self.show_time_indicator = True
 
         self.update_time_bar()
         self.update_ui()
@@ -152,8 +167,14 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.main_window.actionIntervalSegmentEnd.triggered.connect(self.on_interval_segment_end)
 
 
-
-
+        self.time_label = QLabel("00:00:00::1000", self)
+        self.time_label.setMinimumWidth(150)
+        self.time_label.setStyleSheet("QLabel{"
+                                      "background: rgba(30,30,30,200); "
+                                      "border: 1px solid black; "
+                                      "margin: 5px,5px,5px,5px;"
+                                      "}")
+        self.set_time_indicator_visibility(False)
         # self.update_timer = QtCore.QTimer()
         # self.update_timer.setInterval(100)
         # self.update_timer.timeout.connect(self.update_time)
@@ -309,6 +330,18 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.curr_movie_time = self.main_window.player.get_media_time() / 1000
         self.update()
 
+    def set_time_indicator_visibility(self, bool):
+        if self.show_time_indicator or not bool:
+            self.time_label.setVisible(bool)
+
+    def move_scrubber(self, pos):
+        pos = np.clip(pos, 0, self.duration / self.scale)
+        self.time_scrubber.move(pos, 0)
+        self.main_window.player.set_media_time(pos * self.scale)
+
+        self.time_label.setText(ms_to_string(pos * self.scale, True))
+        self.time_label.move(pos + 20 + self.controls_width - self.scrollArea.horizontalScrollBar().value(), 5)
+
     def paintEvent(self, QPaintEvent):
         #TODO are these statements really necessary??
         # self.frame_Controls.setFixedSize(self.controls_width, self.frame_Controls.height())
@@ -384,10 +417,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                                      loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
         self.time_scrubber.setFixedHeight(self.frame_Bars.height())
-
         self.time_bar.raise_()
 
     def on_loaded(self, project):
+        self.setState(True)
+
         self.clear()
         self.time_bar.close()
         for s in project.segmentation:
@@ -471,13 +505,21 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def on_timestep_update(self, time):
         self.curr_movie_time = time
         self.time_scrubber.move(self.curr_movie_time / self.scale - 5, 0)
+
+        if self.keep_slider_in_view:
+            if self.time_scrubber.pos().x() > self.scrollArea.horizontalScrollBar().value() + \
+                        self.scrollArea.width() - self.controls_width - 100 and self.main_window.player.is_playing():
+                self.scrollArea.horizontalScrollBar().setValue(self.scrollArea.horizontalScrollBar().value() + self.scrollArea.width() - self.controls_width - 100)
+            elif self.time_scrubber.pos().x() < self.scrollArea.horizontalScrollBar().value():
+                self.scrollArea.horizontalScrollBar().setValue(self.time_scrubber.pos().x() - self.controls_width)
+
         self.update_time_bar()
         self.update()
 
     def keyPressEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Control:
-            self.is_scaling = True
             self.scrollArea.verticalScrollBar().setEnabled(False)
+            self.main_window.keyPressEvent(QKeyEvent)
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.is_fast_selecting = True
         else:
@@ -487,6 +529,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         if QKeyEvent.key() == Qt.Key_Control:
             self.is_scaling = False
             self.scrollArea.verticalScrollBar().setEnabled(True)
+            self.main_window.keyReleaseEvent(QKeyEvent)
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.is_fast_selecting = False
         else:
@@ -547,17 +590,21 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.move_selector(pos)
 
     def start_selector(self, pos):
+        if self.interval_segmentation_start is not None:
+            return
+
         self.delta = pos
         self.selector = TimebarSelector(self, self.frame_Bars, pos)
         self.is_selecting = True
 
     def move_selector(self, pos):
         if self.is_selecting:
+            dx = np.clip(pos.x(), self.selector.pos().x(), self.duration / self.scale)
 
-            pos_r = pos - self.delta
+            pos_r = QPoint(dx - self.delta.x(), pos.y() - self.delta.y())
             self.selector.set_end(pos_r)
 
-            time = (pos.x() * self.scale)
+            time = dx * self.scale
             self.main_window.player.set_media_time(time)
 
     def end_selector(self):
@@ -570,6 +617,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.selector_context.new_segment.connect(self.create_segment)
             self.selector_context.new_layer.connect(self.create_layer)
 
+    def setState(self, state):
+        for c in self.children():
+            if isinstance(c, QWidget):
+                c.setEnabled(state)
 
     # CONTEXT MENU BINDINGS
     def new_segment(self):
@@ -830,8 +881,6 @@ class TimebarSlice(QtWidgets.QWidget):
             self.color = (133, 42, 42, 100)
         self.text_size = 10
 
-
-
         self.is_hovered = False
         self.is_selected = False
 
@@ -1033,7 +1082,6 @@ class TimebarSlice(QtWidgets.QWidget):
                 else:
                     self.setCursor(QtGui.QCursor(Qt.ArrowCursor))
 
-
     def update(self, *__args):
         super(TimebarSlice, self).update(*__args)
 
@@ -1164,6 +1212,7 @@ class TimelineScrubber(QtWidgets.QWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
+            self.timeline.set_time_indicator_visibility(True)
             self.was_playing = self.player.is_playing()
             self.player.pause()
             self.timeline.main_window.update_timer.stop()
@@ -1180,6 +1229,7 @@ class TimelineScrubber(QtWidgets.QWidget):
         # #     self.timeline.mousePressEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
+        self.timeline.set_time_indicator_visibility(False)
         if QMouseEvent.buttons() & Qt.LeftButton:
             if self.was_playing:
                 self.player.play()
@@ -1192,12 +1242,19 @@ class TimelineScrubber(QtWidgets.QWidget):
 
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
-            pos = self.mapToParent(QMouseEvent.pos()) - self.offset
-            self.move(self.curr_pos.x() + pos.x() + 5, 0)
-            self.player.set_media_time((self.curr_pos.x() + pos.x() + 5) * self.timeline.scale)
+            pos = self.mapToParent(QMouseEvent.pos())# - self.offset
+            self.timeline.move_scrubber(pos.x())
+            # self.move(self.curr_pos.x() + pos.x() + 5, 0)
+            # self.player.set_media_time((self.curr_pos.x() + pos.x() + 5) * self.timeline.scale)
 
         if QMouseEvent.buttons() & Qt.RightButton:
-            self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
+            if self.timeline.selector is not None:
+                self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
+            else:
+                pos = self.mapToParent(QMouseEvent.pos()).x()
+                self.timeline.move_scrubber(pos)
+                # self.timeline.time_scrubber.move(pos, 0)
+                # self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             # QMouseEvent.ignore()
 
     def paintEvent(self, QPaintEvent):
@@ -1385,6 +1442,7 @@ class TimebarDrawing(QtWidgets.QWidget):
         qp.end()
 
     def mouseReleaseEvent(self, QMouseEvent):
+        self.timeline.set_time_indicator_visibility(False)
         if QMouseEvent.button() == Qt.LeftButton:
             if self.was_playing:
                 self.timeline.main_window.player.play()
@@ -1399,18 +1457,19 @@ class TimebarDrawing(QtWidgets.QWidget):
 
     def mousePressEvent(self, QMouseEvent):
         self.was_playing = self.timeline.main_window.player.is_playing()
+        self.timeline.set_time_indicator_visibility(True)
         if QMouseEvent.buttons() & Qt.LeftButton:
             old_pos = self.mapToParent(self.pos())
             if self.was_playing:
                 self.timeline.main_window.player.pause()
 
             pos = self.mapToParent(QMouseEvent.pos()).x()
-            self.timeline.time_scrubber.move(pos, 0)
-            self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
+            # self.timeline.time_scrubber.move(pos, 0)
+            # self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
+            self.timeline.move_scrubber(pos)
             if self.timeline.is_fast_selecting:
                 self.timeline.start_selector(old_pos)
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
-
 
         if QMouseEvent.buttons() & Qt.RightButton:
             self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
@@ -1419,13 +1478,20 @@ class TimebarDrawing(QtWidgets.QWidget):
         if QMouseEvent.buttons() & Qt.LeftButton:
             pos = self.mapToParent(QMouseEvent.pos()).x()
             pos += 1 # offset correction
-            self.timeline.time_scrubber.move(pos, 0)
-            self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
+            self.timeline.move_scrubber(pos)
+            # self.timeline.time_scrubber.move(pos, 0)
+            # self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             if self.timeline.is_fast_selecting and self.timeline.selector is not None:
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
 
         if QMouseEvent.buttons() & Qt.RightButton:
-            self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
+            if self.timeline.selector is not None:
+                self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
+            else:
+                pos = self.mapToParent(QMouseEvent.pos()).x()
+                # self.timeline.time_scrubber.move(pos, 0)
+                # self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
+                self.timeline.move_scrubber(pos)
 
 
 class TimebarSelector(QtWidgets.QWidget):

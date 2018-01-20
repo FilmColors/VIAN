@@ -1,6 +1,7 @@
 from PyQt5 import QtCore
+from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit, QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit, QSpacerItem, QSizePolicy, QMenu
 from PyQt5.QtGui import QColor
 class StatusBar(QtWidgets.QWidget):
     def __init__(self,main_window,server):
@@ -156,6 +157,17 @@ class StatusVideoSource(QtWidgets.QWidget):
             self.lbl_source.setText("OpenCV")
             self.lbl_source.setStyleSheet("QLabel{color:Green; background: transparent;}")
 
+    def mousePressEvent(self, a0: QMouseEvent):
+        menu = QMenu(self)
+        a_vlc = menu.addAction("\tAlways VLC")
+        a_vlc.setCheckable(True)
+        a_opencv = menu.addAction("\tAlways OpenCV")
+        a_opencv.setCheckable(True)
+        a_scale_depending = menu.addAction("\tTimeline Scale Depending")
+        a_scale_depending.setCheckable(True)
+
+        menu.popup(self.mapToGlobal(a0.pos())- QtCore.QPoint())
+
 class StatusProgressBar(QtWidgets.QWidget):
     def __init__(self,main_window):
         super(StatusProgressBar, self).__init__(main_window)
@@ -167,7 +179,6 @@ class StatusProgressBar(QtWidgets.QWidget):
         self.layout.addWidget(self.progress_bar)
 
         self.hide()
-
 
     def set_progress(self, float):
         if self.isVisible() is False:
