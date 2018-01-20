@@ -390,8 +390,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowState(Qt.WindowMaximized)
 
-        if self.settings.SHOW_WELCOME:
-           self.show_welcome()
+        if self.settings.SHOW_WELCOME or os.path.isfile(os.path.abspath("install/force_welcome.txt")):
+            try:
+                if os.path.isfile(os.path.abspath("install/force_welcome.txt")):
+                    os.remove(os.path.abspath("install/force_welcome.txt"))
+            except:
+                pass
+
+            self.show_welcome()
 
         if self.settings.USER_NAME == "":
             self.show_first_start()
