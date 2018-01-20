@@ -195,17 +195,42 @@
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox_OpenCV">
+            <widget class="QComboBox" name="comboBox_Source">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="text">
-              <string>Active</string>
-             </property>
+             <item>
+              <property name="text">
+               <string>Always VLC</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Always OpenCV</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Timeline Scale Dependent</string>
+              </property>
+             </item>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </item>

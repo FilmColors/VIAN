@@ -3,6 +3,8 @@ from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit, QSpacerItem, QSizePolicy, QMenu
 from PyQt5.QtGui import QColor
+from functools import partial
+
 class StatusBar(QtWidgets.QWidget):
     def __init__(self,main_window,server):
         super(StatusBar, self).__init__(main_window)
@@ -11,8 +13,6 @@ class StatusBar(QtWidgets.QWidget):
         self.server = server
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
-
-        # self.setSizePolicy(QtWidgets.QSizePolicy.Preferred,QtWidgets.QSizePolicy.Preferred)
 
         self.label_selection = QtWidgets.QLabel(self)
         self.label_selection.setText("Selection: ")
@@ -42,15 +42,12 @@ class StatusBar(QtWidgets.QWidget):
         self.layout.addWidget(self.lbl_corpus_status)
         self.layout.addItem(QSpacerItem(20, 20))
 
-
-
         self.update_timer = QtCore.QTimer(self)
         self.update_timer.setInterval(1000)
         self.update_timer.timeout.connect(self.check_server_info)
         self.update_timer.start()
         self.check_server_info()
-        # self.label_server.setFixedWidth(130)
-        # self.lbl_connection_status.setFixedWidth(110)
+
         self.label_server.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
         self.show()
 
@@ -75,6 +72,7 @@ class StatusBar(QtWidgets.QWidget):
 
     def set_selection(self, selection):
         self.label_selection_length.setText(str(len(selection)) + " Items")
+
 
 class OutputLine(QtWidgets.QWidget):
     def __init__(self,main_window):
@@ -113,8 +111,6 @@ class OutputLine(QtWidgets.QWidget):
         log_wnd.show()
         self.log_wnd = log_wnd
 
-
-
     def on_timeout(self):
         self.text_time.stop()
         if len(self.message_queue) > 0:
@@ -135,9 +131,11 @@ class OutputLine(QtWidgets.QWidget):
         else:
             self.text_line.setText("")
 
+
 class StatusVideoSource(QtWidgets.QWidget):
     def __init__(self,main_window):
         super(StatusVideoSource, self).__init__(main_window)
+        self.main_window = main_window
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
         lbl = QtWidgets.QLabel("Video Source: ")
@@ -159,6 +157,7 @@ class StatusVideoSource(QtWidgets.QWidget):
 
     def mousePressEvent(self, a0: QMouseEvent):
         menu = QMenu(self)
+        current = self.main_window.settings.OPENCV_PER_FRAME
         a_vlc = menu.addAction("\tAlways VLC")
         a_vlc.setCheckable(True)
         a_opencv = menu.addAction("\tAlways OpenCV")
@@ -166,7 +165,37 @@ class StatusVideoSource(QtWidgets.QWidget):
         a_scale_depending = menu.addAction("\tTimeline Scale Depending")
         a_scale_depending.setCheckable(True)
 
-        menu.popup(self.mapToGlobal(a0.pos())- QtCore.QPoint())
+        if current == 0:
+            a_vlc.setChecked(True)
+        elif current == 1:
+            a_opencv.setChecked(True)
+        else:
+            a_scale_depending.setChecked(True)
+
+        a_vlc.triggered.connect(partial(self.set_source, 0))
+        a_opencv.triggered.connect(partial(self.set_source, 1))
+        a_scale_depending.triggered.connect(partial(self.set_source, 2))
+
+        menu.popup(self.mapToGlobal(a0.pos())- QtCore.QPoint(0, 100))
+
+    def set_source(self, idx):
+        self.main_window.settings.OPENCV_PER_FRAME = idx
+
+        # Apply the change to the drawing widget, while this should work
+        # we are only going to try.
+        try:
+            if idx == 0:
+                self.main_window.onOpenCVFrameVisibilityChanged.emit(False)
+            elif idx == 1 and not self.main_window.player.is_playing():
+                self.main_window.onOpenCVFrameVisibilityChanged.emit(True)
+            elif (idx == 2 and not self.main_window.player.is_playing()
+                  and self.main_window.timeline.timeline.scale < self.main_window.timeline.timeline.opencv_frame_scale_threshold):
+                self.main_window.onOpenCVFrameVisibilityChanged.emit(True)
+            else:
+                self.main_window.onOpenCVFrameVisibilityChanged.emit(False)
+        except:
+            pass
+
 
 class StatusProgressBar(QtWidgets.QWidget):
     def __init__(self,main_window):

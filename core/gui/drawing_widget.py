@@ -2,6 +2,7 @@ import os
 
 import cv2
 import numpy as np
+from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLayout, QLabel
@@ -10,12 +11,18 @@ from PyQt5.QtGui import QIcon, QFont
 from core.data.computation import *
 from core.data.containers import AnnotationLayer, Annotation
 from core.data.enums import *
+from core.gui.perspectives import Perspective
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending, IConcurrentJob
 from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu
 
 from core.concurrent.worker import LiveWidgetThreadWorker, run_minimal_worker
 from .ewidgetbase import EDockWidget, EToolBar
+
+
+ALWAYS_VLC = 0
+ALWAYS_OPENCV = 1
+TIMELINE_SCALE_DEPENDENT = 2
 
 class AnnotationToolbar(EToolBar):
     def __init__(self, main_window, drawing_widget):
@@ -132,22 +139,23 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.is_freehand_drawing = False
         self.multi_selection = False
 
-        self.opencv_image = QLabel(self)
-        self.opencv_image.setAttribute(Qt.WA_TransparentForMouseEvents)
-        self.opencv_image.installEventFilter(self)
+        self.opencv_pixmap = None
         self.videoCap = None
         self.opencv_image_visible = False
         self.current_opencv_frame_index = 0
+
+        self.show_annotations = True
 
 
 
         self.show()
 
         self.main_window.onTimeStep.connect(self.on_timestep_update)
-        self.main_window.player.started.connect(self.hide_opencv_image)
+        self.main_window.player.started.connect(partial(self.on_opencv_frame_visibilty_changed, False))
+        self.main_window.onOpenCVFrameVisibilityChanged.connect(self.on_opencv_frame_visibilty_changed)
         self.main_window.frame_update_worker.signals.onOpenCVFrameUpdate.connect(self.assign_opencv_image)
 
-        # self.main_window.player.stopped.connect(self.show_opencv_image)
+
 
     def on_loaded(self, project):
         self.cleanup()
@@ -490,11 +498,13 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     def update(self):
         if self.isVisible():
+            if self.main_window.current_perspective == Perspective.Segmentation:
+                self.show_annotations = False
+            else:
+                self.show_annotations = True
+
             super(DrawingOverlay, self).update()
-            # self.raise_()
-            self.synchronize_transforms()
-        if not self.settings.OPENCV_PER_FRAME and self.opencv_image.isVisible():
-            self.hide_opencv_image()
+            # self.synchronize_transforms()
 
     def set_input_transparent(self, transparent):
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents,transparent)
@@ -510,6 +520,14 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.begin(self)
             qp.setPen(pen)
             qp.fillRect(self.rect(), QtGui.QColor(0,0,0,1))
+            if self.opencv_pixmap is not None and self.opencv_image_visible:
+                qp.drawPixmap(self.rect(), self.opencv_pixmap)
+                pen.setWidth(1)
+
+                pen.setColor(QtGui.QColor(105,143,63))
+                qp.setPen(pen)
+                qp.drawText(QtCore.QRect(self.width() - 100, self.height() - 50, 100, 50), 12, "OpenCV")
+
             qp.end()
         else:
             qp = QtGui.QPainter()
@@ -522,28 +540,24 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.drawRect(QtCore.QRect(self.rect().x(), self.rect().y(), self.rect().width()-1, self.rect().height()-1))
             qp.end()
 
-    def hide_opencv_image(self):
-        if self.opencv_image_visible == True:
-            self.opencv_image_visible = False
-            self.opencv_image.hide()
+    def on_opencv_frame_visibilty_changed(self, visibility):
+        if visibility:
+            if not self.settings.OPENCV_PER_FRAME == ALWAYS_VLC:
+                if self.opencv_image_visible == False:
+                    self.opencv_image_visible = True
+                    self.update()
+                self.onSourceChanged.emit("OPENCV")
+        else:
+            if self.opencv_image_visible == True:
+                self.opencv_image_visible = False
+                self.update()
             self.onSourceChanged.emit("VLC")
 
-    def show_opencv_image(self):
-        if self.settings.OPENCV_PER_FRAME:
-            if self.opencv_image_visible == False:
-                self.opencv_image_visible = True
-                self.update_opencv_image(self.main_window.player.get_media_time())
-                self.opencv_image.show()
-                self.onSourceChanged.emit("OPENCV")
-
     def synchronize_transforms(self):
-        if self.main_window.centralWidget() is self.main_window.screenshots_manager:
-            return
-
-        old_size = self.size()
+        # old_size = self.size()
 
         s = self.main_window.player.movie_size
-        aspect =self.main_window.player.get_aspect_ratio()
+        # aspect =self.main_window.player.get_aspect_ratio()
 
 
         if s[0] == 0 or s[1] == 0:
@@ -580,17 +594,16 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.move(location)
         self.setFixedSize(x,y)
 
-        # if self.opencv_image_visible and self.videoCap is not None and self.settings.OPENCV_PER_FRAME and self.opencv_image.pixmap():
-        if self.opencv_image_visible and self.settings.OPENCV_PER_FRAME and self.opencv_image.pixmap():
-            self.opencv_image.setFixedSize(x, y)
-            if old_size.width() != x or old_size.height() != y:
-                self.opencv_image.setPixmap(self.opencv_image.pixmap().scaled(self.size(), Qt.KeepAspectRatio))
-
-        for n in self.project.get_annotation_layers():
-            for m in n.annotations:
-                m.widget.scale = scale
-                m.widget.interpolate_location()
-                m.widget.update()
+        if self.show_annotations:
+            for n in self.project.get_annotation_layers():
+                for m in n.annotations:
+                    m.widget.scale = scale
+                    m.widget.interpolate_location()
+                    m.widget.update()
+        else:
+            for n in self.project.get_annotation_layers():
+                for m in n.annotations:
+                    m.widget.hide()
 
     def drawLines(self, qp):
         pen = QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine)
@@ -640,42 +653,9 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
     def on_timestep_update(self, time):
         self.current_time = time
 
-
-        # if self.settings.OPENCV_PER_FRAME and self.opencv_image_visible and self.videoCap is not None:
-        #     self.update_opencv_image(time)
-
-        # self.update()
-
     def assign_opencv_image(self, qpixmap):
-        self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
-        self.opencv_image.lower()
-
-
-    def update_opencv_image(self, time):
-        return
-        try:
-            idx = self.main_window.player.get_frame_pos_by_time(time)
-
-            # We don't want to update more than necessary,
-            # When the Timeline is highly zoomed it is possible to call more updates than there are frames
-            # Thus we want to test if there is really a new Frame position
-            if self.current_opencv_frame_index != idx:
-                self.current_opencv_frame_index = idx
-
-                # idx = int(float(time) / (1000.0 / fps))
-                self.videoCap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-                ret, frame = self.videoCap.read()
-                qimage, qpixmap = numpy_to_qt_image(frame)
-                self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
-                self.opencv_image.lower()
-
-        except Exception as e:
-            print(e)
-            pass
-
-    # def set_opencv_pixmap(self, qpixmap):
-    #     self.opencv_image.setPixmap(qpixmap.scaled(self.size(), Qt.KeepAspectRatio))
-    #     self.opencv_image.lower()
+        self.opencv_pixmap = qpixmap.scaled(self.size(), Qt.KeepAspectRatio)
+        self.update()
 
 
 class DrawingBase(QtWidgets.QWidget):

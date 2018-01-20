@@ -36,7 +36,7 @@ class UserSettings():
 
         self.SHOW_WELCOME = True
 
-        self.OPENCV_PER_FRAME = False
+        self.OPENCV_PER_FRAME = 0
 
         self.SCREENSHOTS_EXPORT_NAMING = self.SCREENSHOTS_EXPORT_NAMING_DEFAULT
         self.SCREENSHOTS_STATIC_SAVE = False

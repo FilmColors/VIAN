@@ -10,6 +10,7 @@ from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
 from core.gui.ewidgetbase import EDockWidget, EToolBar
 from core.data.containers import *
 from core.gui.context_menu import open_context_menu
+from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 
 
 class TimelineContainer(EDockWidget):
@@ -121,6 +122,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.controls_width = 200
         self.time_bar_height = 50
         self.timeline_tail = 100
+        self.opencv_frame_scale_threshold = 200
 
         self.time_bar = None
         self.frame_Bars.setFixedSize(self.duration, 500)
@@ -375,11 +377,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.time_scrubber.move(self.curr_movie_time, 0)
         value = self.scrollArea.horizontalScrollBar().value()
 
-        # self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
-        # # self.time_bar.setFixedSize(self.duration / self.scale + self.controls_width, self.time_bar_height)
-        # self.time_bar.setFixedSize(self.width() - self.controls_width, self.time_bar_height)
-        # self.time_bar.raise_()
-
         self.relative_corner = QtCore.QPoint(value, self.relative_corner.y())
 
         h = self.scrubber_min_h
@@ -411,13 +408,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             else:
                 ctrl.resize(self.controls_width - 4, loc_y - bar_start)
 
-
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
-        self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,
-                                     loc_y)
+        self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
         self.time_scrubber.setFixedHeight(self.frame_Bars.height())
         self.time_bar.raise_()
+
+
 
     def on_loaded(self, project):
         self.setState(True)
@@ -438,6 +435,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scroll_h()
 
     def on_changed(self, project, item):
+        vlocation = self.scrollArea.verticalScrollBar().value()
         self.clear()
         self.duration = project.get_movie().duration
 
@@ -455,6 +453,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.update_time_bar()
         self.on_selected(None, project.selected)
         self.update_ui()
+
+        self.scrollArea.verticalScrollBar().setValue(vlocation)
 
     def on_selected(self, sender, selected):
         if sender is self:
@@ -556,6 +556,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
             side_offset = center_point - delta * self.scale
             self.time_scrubber.move(self.curr_movie_time // self.scale - 5, 0)
+
+            if self.settings.OPENCV_PER_FRAME == TIMELINE_SCALE_DEPENDENT:
+                if self.scale < self.opencv_frame_scale_threshold:
+                    self.main_window.onOpenCVFrameVisibilityChanged.emit(True)
+                else:
+                    self.main_window.onOpenCVFrameVisibilityChanged.emit(False)
 
             if self.interval_segmentation_marker is not None:
                 self.interval_segmentation_marker.move(QPoint(self.interval_segmentation_start/self.scale, 0))
@@ -985,6 +991,7 @@ class TimebarSlice(QtWidgets.QWidget):
                 self.item.move(int(self.pos().x() * self.timeline.scale), int((self.pos().x() + self.width()) * self.timeline.scale))
                 return
             if self.mode == "left":
+                print("LEFT", self.pos().x() * self.timeline.scale, self.item.get_start())
                 self.item.set_start(int(self.pos().x() * self.timeline.scale))
                 return
             if self.mode == "right":
@@ -1337,8 +1344,6 @@ class TimebarDrawing(QtWidgets.QWidget):
         t_end = t_start + float(self.width() * self.timeline.scale / 1000)
         self.time_offset = 0
         if self.timeline.scale <= self.a:
-            if not self.timeline.main_window.player.playing:
-                self.timeline.main_window.drawing_overlay.show_opencv_image()
             for i in range(int(t_start), int(t_end)):
 
             #for i in range(int(self.timeline.duration) / 1000):
@@ -1362,8 +1367,6 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.a  < self.timeline.scale <= self.b:
-            if not self.timeline.main_window.player.playing:
-                self.timeline.main_window.drawing_overlay.show_opencv_image()
             for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 # pos = i * 1000 / self.timeline.scale
@@ -1386,7 +1389,6 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
         if self.b  < self.timeline.scale <= self.c:
-            self.timeline.main_window.drawing_overlay.hide_opencv_image()
             for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 paint = True
@@ -1413,7 +1415,6 @@ class TimebarDrawing(QtWidgets.QWidget):
                     qp.drawLine(a, b)
 
         if self.c < self.timeline.scale:
-
             for i in range(int(t_start), int(t_end)):
             #for i in range(int(self.timeline.duration) / 1000):
                 paint = True

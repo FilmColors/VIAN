@@ -28,9 +28,14 @@ class DialogPreferences(EDialogWidget):
             index = cb.findText(self.settings.SCREENSHOTS_EXPORT_NAMING[i])
             cb.setCurrentIndex(index)
 
-        # OPENCV
-        self.checkBox_OpenCV.setChecked(self.settings.OPENCV_PER_FRAME)
-        self.checkBox_OpenCV.stateChanged.connect(self.set_opencv_per_frame)
+        # Frame Source when Paused
+        # This might cause an error when the version is older thant 0.4.1 as it once was a bool
+        try:
+            self.comboBox_Source.setCurrentIndex(self.settings.OPENCV_PER_FRAME)
+        except:
+            pass
+
+        self.comboBox_Source.currentIndexChanged.connect(self.set_opencv_per_frame)
 
         # AUTOSAVE
         print(self.settings.AUTOSAVE)
@@ -77,7 +82,7 @@ class DialogPreferences(EDialogWidget):
         self.settings.GRID_SIZE = self.spinBox_GridSize.value()
 
     def set_opencv_per_frame(self):
-        state = self.checkBox_OpenCV.isChecked()
+        state = self.comboBox_Source.currentIndex()
         self.settings.OPENCV_PER_FRAME = state
 
     def set_screenshot_export_naming(self):

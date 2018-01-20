@@ -70,6 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onSegmentStep = pyqtSignal(object)
     currentSegmentChanged = pyqtSignal(int)
     abortAllConcurrentThreads = pyqtSignal()
+    onOpenCVFrameVisibilityChanged = pyqtSignal(bool)
 
     def __init__(self,vlc_instance, vlc_player):
         super(MainWindow, self).__init__()
@@ -129,6 +130,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.numpy_data_manager = NumpyDataManager(self)
         self.project_streamer = ProjectStreamerShelve(self)
         self.video_capture = None
+
+        self.current_perspective = Perspective.Annotation.name
 
 
         # DockWidgets
@@ -345,8 +348,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.clock_synchronize_step = 5
         self.last_segment_index = 0
 
-        self.current_perspective = Perspective.Annotation.name
-
         self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.QueuedConnection)
         self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
         self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
@@ -356,6 +357,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
 
         self.drawing_overlay.onSourceChanged.connect(self.source_status.on_source_changed)
+        self.onOpenCVFrameVisibilityChanged.connect(self.on_frame_source_changed)
         self.dispatch_on_changed()
 
         self.screenshot_blocked = False
@@ -395,6 +397,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.player_controls.setState(False)
         self.timeline.timeline.setState(False)
+
+        self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
 
     def print_time(self, segment):
         print(segment)
@@ -1249,6 +1253,16 @@ class MainWindow(QtWidgets.QMainWindow):
     def start_worker(self, worker, name = "New Task"):
         self.concurrent_task_viewer.add_task(worker.task_id, name)
         self.thread_pool.start(worker)
+
+    def on_frame_source_changed(self, visibility):
+        if visibility:
+            if (self.current_perspective == Perspective.Segmentation or
+                    self.current_perspective == Perspective.Annotation):
+                self.set_overlay_visibility(True)
+
+        else:
+            if self.current_perspective == Perspective.Segmentation:
+                self.set_overlay_visibility(False)
 
     def update_player_size(self):
         self.player.update()

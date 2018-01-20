@@ -1398,7 +1398,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 
     def set_start(self, start):
         self.project.undo_manager.to_undo((self.set_start, [start]), (self.set_start, [self.t_start]))
-        self.start = start
+        self.t_start = start
         self.dispatch_on_changed(item=self)
 
     def set_end(self, end):
