@@ -148,6 +148,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../whats_new/latest.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -286,7 +295,7 @@ attach it to a QLabel using QLabel(your_pixmap).</p>
 
 <dl class="method">
 <dt id="core.data.interfaces.IAnalysisJob.get_visualization">
-<code class="descname">get_visualization</code><span class="sig-paren">(</span><em>analysis</em>, <em>result_path</em>, <em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_visualization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_visualization" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_visualization</code><span class="sig-paren">(</span><em>analysis</em>, <em>result_path</em>, <em>data_path</em>, <em>project</em>, <em>main_window</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_visualization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_visualization" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is called by VIAN if the User wants to display the complete Visualization of the Data. 
 While you may essentially use any type Type of Visualization, you should either:</p>
 <ol class="arabic">

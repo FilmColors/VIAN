@@ -12,6 +12,7 @@ Welcome to VIAN's documentation!
 
    UserGuide
    DevelopersGuide
+   whatsnew
 
 
 

@@ -55,6 +55,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Screenshot Manager")
+
         self.m_display = self.inner.menuBar().addMenu("Display")
         self.a_static = self.m_display.addAction("Static")
         self.a_static.setCheckable(True)
@@ -62,6 +63,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_scale_width =self.m_display.addAction("Reorder by Width")
         self.a_scale_width.setCheckable(True)
         self.a_scale_width.setChecked(False)
+
+        self.lbl_n = None
+        self.bar = None
 
         self.a_static.triggered.connect(self.on_static)
         self.a_scale_width.triggered.connect(self.on_scale_to_width)
@@ -80,12 +84,16 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
 
 
+
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
     def on_static(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_NONE
         self.screenshot_manager.arrange_images()
         self.a_scale_width.setChecked(False)
+
+        if self.bar is not None:
+            self.bar.setEnabled(True)
 
     def on_toggle_name(self):
         state = self.a_toggle_name.isChecked()
@@ -96,6 +104,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.screenshot_manager.scaling_mode = SCALING_MODE_WIDTH
         self.screenshot_manager.arrange_images()
         self.a_static.setChecked(False)
+
+        if self.bar is not None:
+            self.bar.setEnabled(False)
 
     def on_scale_to_height(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_HEIGHT
@@ -111,10 +122,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         l = QHBoxLayout(bar)
 
         self.slider_n_per_row = QSlider(Qt.Horizontal, self)
-        self.slider_n_per_row.setRange(0, 20)
+        self.slider_n_per_row.setRange(1, 20)
         self.slider_n_per_row.setValue(10)
         self.slider_n_per_row.setStyleSheet("QSlider{padding: 2px; margin: 2px; background: transparent}")
-
 
 
         self.slider_n_per_row.valueChanged.connect(self.on_n_per_row_changed)
@@ -122,7 +132,11 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         lbl.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
         bar.addPermanentWidget(lbl)
         bar.addPermanentWidget(self.slider_n_per_row)
+        self.lbl_n = QLabel("\t" + str(self.slider_n_per_row.value()))
+        bar.addPermanentWidget(self.lbl_n)
         self.inner.setStatusBar(bar)
+
+        self.bar = bar
 
     def set_manager(self, screenshot_manager):
         self.setWidget(screenshot_manager)
@@ -130,7 +144,8 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.create_bottom_bar()
 
     def on_n_per_row_changed(self, value):
-        self.screenshot_manager.n_per_row = value
+        self.screenshot_manager.n_per_row = value + 1
+        self.lbl_n.setText("\t" + str(value))
         self.screenshot_manager.arrange_images()
         self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
 
@@ -156,6 +171,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.font_size_segments = 120
         self.font.setPointSize(self.font_size)
         self.color = QColor(225,225,225)
+
+        self.loading_icon = None
+        self.loading_text= None
 
         self.setDragMode(self.RubberBandDrag)
         self.setRubberBandSelectionMode(Qt.IntersectsItemShape)
@@ -198,6 +216,30 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         # self.setBaseSize(500,500)
         self.rubberBandChanged.connect(self.rubber_band_selection)
+
+    def set_loading(self, state):
+        if state:
+            self.clear_manager()
+            lbl = QLabel()
+            movie = QtGui.QMovie(os.path.abspath("qt_ui/icons/loading512.gif"))
+            lbl.setMovie(movie)
+            lbl.setAttribute(Qt.WA_NoSystemBackground)
+            movie.start()
+
+            font = QFont("Consolas", 36)
+            self.loading_icon = self.scene.addWidget(lbl)
+            self.loading_text = self.scene.addText("Loading Screenshots... please wait.", font)
+            self.loading_text.setDefaultTextColor(QColor(255,255,255))
+            self.loading_icon.setPos(256, 256)
+            self.loading_text.setPos(100, 786)
+            self.scene.removeItem(self.current_segment_frame)
+
+            rect = QRectF(0.0 ,0.0 , 1280 , 1024)
+            self.fitInView(rect, QtCore.Qt.KeepAspectRatio)
+        else:
+            if self.loading_icon is not None:
+                self.scene.removeItem(self.loading_icon)
+                self.scene.removeItem(self.loading_text)
 
     def toggle_annotations(self):
         if len(self.selected) == 0:

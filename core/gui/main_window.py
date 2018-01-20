@@ -272,6 +272,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionOutliner.triggered.connect(self.create_outliner)
         self.actionVocabularyManager.triggered.connect(self.create_vocabulary_manager)
         self.actionInspector.triggered.connect(self.create_inspector)
+        self.actionTimeline.triggered.connect(self.create_timeline)
 
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
@@ -400,6 +401,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
 
+        self.update_vian(False)
+
     def print_time(self, segment):
         print(segment)
 
@@ -413,8 +416,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def show_welcome(self):
-        welcome_dialog = WelcomeDialog(self, self)
-        welcome_dialog.raise_()
+        open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
 
     def show_first_start(self):
         dialog = DialogFirstStart(self)
@@ -472,14 +474,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_toolbar.raise_()
             self.annotation_toolbar.activateWindow()
 
-    # def create_analyses_widget(self):
-    #     if self.analyses_widget is None:
-    #         self.analyses_widget = AnalysesWidget(self)
-    #         self.analyses_widget.hide()
-    #
-    #     else:
-    #         self.analyses_widget.activateWindow()
-
     def create_screenshot_manager(self):
         if self.screenshots_manager is None:
             self.screenshots_manager = ScreenshotsManagerWidget(self, key_event_handler = self.key_event_handler, parent=None)
@@ -493,9 +487,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.inspector = Inspector(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
         else:
-            self.inspector.show()
-            self.inspector.raise_()
-            self.inspector.activateWindow()
+            if self.inspector.isVisible():
+                self.inspector.hide()
+            else:
+                self.inspector.show()
+                self.inspector.raise_()
+                self.inspector.activateWindow()
 
     def create_concurrent_task_viewer(self):
         if self.concurrent_task_viewer is None:
@@ -538,9 +535,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner = Outliner(self)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.outliner)
         else:
-            self.outliner.show()
-            self.outliner.raise_()
-            self.outliner.activateWindow()
+            if self.outliner.isVisible():
+                self.outliner.hide()
+            else:
+                self.outliner.show()
+                self.outliner.raise_()
+                self.outliner.activateWindow()
 
     def create_timeline(self):
         if self.timeline is None:
@@ -548,7 +548,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.timeline, QtCore.Qt.Vertical)
             # self.on_movie_updated()
         else:
-            self.timeline.activateWindow()
+            if self.timeline.isVisible():
+                self.timeline.hide()
+            else:
+                self.timeline.show()
+                self.timeline.raise_()
+                self.timeline.activateWindow()
+
 
     def create_screenshot_manager_dock_widget(self):
         if self.screenshots_manager_dock is None:
@@ -557,8 +563,11 @@ class MainWindow(QtWidgets.QMainWindow):
             # self.on_movie_updated()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
         else:
-            self.screenshots_manager_dock.show()
-            self.screenshots_manager_dock.activateWindow()
+            if self.screenshots_manager_dock.isVisible():
+                self.screenshots_manager_dock.hide()
+            else:
+                self.screenshots_manager_dock.show()
+                self.screenshots_manager_dock.activateWindow()
 
     def create_node_editor(self):
         if self.node_editor_dock is None:
@@ -668,7 +677,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 print(e)
 
-    def update_vian(self):
+    def update_vian(self, show_newest = True):
         result = self.updater.get_server_version()
         if result:
             answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
@@ -677,7 +686,10 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.print_message("Update Aborted", "Orange")
         else:
-            QMessageBox.information(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version)
+            if show_newest:
+                QMessageBox.information(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version)
+            else:
+                self.print_message("VIAN is up to date with version: " + str(__version__), "Green")
 
     def open_preferences(self):
         dialog = DialogPreferences(self)
@@ -1286,6 +1298,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def decrease_playrate(self):
         self.player.set_rate(self.player.get_rate() - 0.1)
         self.player_controls.update_rate()
+
     #region MISC
     def update_autosave_timer(self):
         self.autosave_timer.stop()
@@ -1382,6 +1395,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.frame_update_worker.set_movie_path(self.project.movie_descriptor.movie_path)
 
+        self.screenshots_manager.set_loading(True)
         job = LoadScreenshotsJob([self.project.movie_descriptor.movie_path, screenshot_position, screenshot_annotation_dicts])
         self.run_job_concurrent(job)
 

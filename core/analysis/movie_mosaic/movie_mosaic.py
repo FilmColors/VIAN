@@ -132,7 +132,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
 
 
     def get_preview(self, analysis):
-        gw = EGraphicsView(None)
+        gw = EGraphicsView(None, main_window=analysis.project.main_window)
         gw.set_image(numpy_to_pixmap(analysis.data["mosaic"]))
         return gw
 

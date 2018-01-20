@@ -165,6 +165,8 @@ class LoadScreenshotsJob(IConcurrentJob):
 
         # sign_progress(100)
 
+        project.main_window.screenshots_manager.set_loading(False)
+
 
 class CreateScreenshotJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):

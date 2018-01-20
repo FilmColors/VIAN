@@ -131,6 +131,7 @@
     <addaction name="separator"/>
     <addaction name="actionInspector"/>
     <addaction name="actionOutliner"/>
+    <addaction name="actionTimeline"/>
     <addaction name="separator"/>
     <addaction name="actionScreenshot_Manager"/>
     <addaction name="actionVocabularyManager"/>
@@ -263,6 +264,9 @@
    <property name="text">
     <string>Screenshot Manager</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
   </action>
   <action name="actionVocabularyManager">
    <property name="text">
@@ -287,6 +291,9 @@
   <action name="actionOutliner">
    <property name="text">
     <string>Outliner</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionSaveAs">
@@ -438,6 +445,9 @@
    <property name="text">
     <string>Inspector</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
   </action>
   <action name="actionGeneral">
    <property name="text">
@@ -548,6 +558,14 @@
    </property>
    <property name="shortcut">
     <string>-</string>
+   </property>
+  </action>
+  <action name="actionTimeline">
+   <property name="text">
+    <string>Timeline</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
  </widget>

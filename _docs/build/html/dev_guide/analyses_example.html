@@ -148,6 +148,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../whats_new/latest.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -480,9 +489,9 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
-<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span><span class="n">save</span>
-<span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">layout</span>
-<span class="kn">from</span> <span class="nn">bokeh.colors</span> <span class="kn">import</span> <span class="n">RGB</span>
+<span class="c1"># from bokeh.plotting import figure,save</span>
+<span class="c1"># from bokeh.layouts import layout</span>
+<span class="c1"># from bokeh.colors import RGB</span>
 
 <span class="k">class</span> <span class="nc">BarcodeAnalysisJob</span><span class="p">(</span><span class="n">IAnalysisJob</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -626,23 +635,24 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">barcode</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">barcode</span><span class="p">:</span>
-            <span class="n">colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RGB</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-
-        <span class="n">path</span> <span class="o">=</span> <span class="n">data_path</span> <span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span>
-
-        <span class="n">plot</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
-        <span class="n">plot</span><span class="o">.</span><span class="n">rect</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">barcode</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">)</span>
-
-        <span class="n">l</span> <span class="o">=</span> <span class="n">layout</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="p">[</span><span class="n">plot</span><span class="p">]</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-
-        <span class="k">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">save</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-        <span class="n">open_web_browser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="c1">#TODO pyqtGraph Visualization</span>
+        <span class="c1"># for c in barcode:</span>
+        <span class="c1">#     colors.append(RGB(c[2], c[1], c[0]))</span>
+        <span class="c1">#</span>
+        <span class="c1"># path = data_path +&quot;/&quot;+ analysis.get_name() + &quot;.html&quot;</span>
+        <span class="c1">#</span>
+        <span class="c1"># plot = figure(width=800, height=400)</span>
+        <span class="c1"># plot.rect(x=range(barcode.shape[0]), y = 0.5, width = 1, height=1, color=colors)</span>
+        <span class="c1">#</span>
+        <span class="c1"># l = layout(</span>
+        <span class="c1">#     [</span>
+        <span class="c1">#         [plot]</span>
+        <span class="c1">#     ]</span>
+        <span class="c1"># )</span>
+        <span class="c1">#</span>
+        <span class="c1"># print(path)</span>
+        <span class="c1"># save(l, path)</span>
+        <span class="c1"># open_web_browser(path)</span>
 
     <span class="k">def</span> <span class="nf">barcode_to_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">barcode_colors</span><span class="p">,</span> <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span><span class="p">,</span> <span class="n">interpolation</span><span class="p">):</span>
 
@@ -692,7 +702,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="n">resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_frame</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
         <span class="n">interpolation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>

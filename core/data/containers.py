@@ -2500,6 +2500,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
                                                                                              self.project.data_dir,
                                                                                              self.project,
                                                                                              self.project.main_window)
+
         except Exception as e:
             print("Exception in get_visualization()", e)
             QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +

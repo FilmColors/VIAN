@@ -207,8 +207,8 @@ class Player_VLC(VideoPlayer):
     # *** EXTENSION METHODS *** #
 
     def get_frame(self):
-        fps = self.media_player.get_fps()
-        pos = float(self.get_media_time()) / 1000 * fps
+        # fps = self.media_player.get_fps()
+        pos = float(self.get_media_time()) / 1000 * self.fps
         vid = cv2.VideoCapture(self.movie_path)
         vid.set(cv2.CAP_PROP_POS_FRAMES, pos)
         ret, frame = vid.read()
@@ -271,11 +271,15 @@ class Player_VLC(VideoPlayer):
         self.movie_size = self.media_player.video_get_size()
         self.millis_per_sample = 40
         self.volume = 50
-        fps = self.media_player.get_fps()
+
+
+        # Uncomment this line to get the old functionality
+        # fps = self.media_player.get_fps()
         print("FPS:", self.media_player.get_fps())
         capture = cv2.VideoCapture(self.movie_path)
-        if fps != 0:
-            self.fps = capture.get(cv2.CAP_PROP_FPS)
+        #if fps != 0:
+        #    self.fps = capture.get(cv2.CAP_PROP_FPS)
+        self.fps = capture.get(cv2.CAP_PROP_FPS)
 
         self.user_fps = self.fps
 

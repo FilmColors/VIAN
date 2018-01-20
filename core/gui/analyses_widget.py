@@ -22,6 +22,8 @@ class AnalysisDialog(EDialogWidget):
         uic.loadUi(path, self)
 
         # self.list_Targets = QListWidget()
+        if len(selected) == 0 and MOVIE_DESCRIPTOR in analysis.source_types and main_window.project is not None:
+            selected = [main_window.project.movie_descriptor]
         self.targets = selected
         self.analysis = analysis
         self.param_widget = self.analysis.get_parameter_widget()

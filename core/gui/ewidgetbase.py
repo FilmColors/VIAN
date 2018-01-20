@@ -3,6 +3,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent, QWheelEvent, QKeyEvent, QCursor, QMouseEvent
 from PyQt5.QtWidgets import *
 
+from core.data.computation import pixmap_to_numpy
+import cv2
 from PyQt5 import uic
 import os
 import sys
@@ -191,7 +193,7 @@ class GraphicsViewDockWidget(EDockWidget):
         self.view.set_image(pixmap)
 
 class EGraphicsView(QGraphicsView):
-    def __init__(self, parent, auto_frame = True):
+    def __init__(self, parent, auto_frame = True, main_window = None):
         super(EGraphicsView, self).__init__(parent)
         self.gscene = QGraphicsScene()
         self.setScene(self.gscene)
@@ -199,6 +201,7 @@ class EGraphicsView(QGraphicsView):
         self.auto_frame = auto_frame
         self.ctrl_is_pressed = False
         self.curr_scale = 1.0
+        self.main_window = main_window
 
     def set_image(self, pixmap, clear = True):
         if clear:
@@ -212,26 +215,31 @@ class EGraphicsView(QGraphicsView):
             rect = self.pixmap.sceneBoundingRect()
             self.fitInView(rect, Qt.KeepAspectRatio)
 
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.RightButton:
+            self.create_context_menu(event.pos())
+
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
             self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
             self.ctrl_is_pressed = True
+            event.ignore()
         else:
-            QKeyEvent.ignore()
+            event.ignore()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
         if self.pixmap is not None and self.auto_frame:
             rect = self.pixmap.sceneBoundingRect()
             self.fitInView(rect, Qt.KeepAspectRatio)
         else:
-            QKeyEvent.ignore()
+            event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
             self.viewport().setCursor(QCursor(Qt.ArrowCursor))
             self.ctrl_is_pressed = False
         else:
-            QKeyEvent.ignore()
+            event.ignore()
 
     def wheelEvent(self, event: QWheelEvent):
         if self.ctrl_is_pressed:
@@ -262,8 +270,19 @@ class EGraphicsView(QGraphicsView):
             super(EGraphicsView, self).wheelEvent(event)
 
 
+    def create_context_menu(self, pos):
+        menu = QMenu(self.main_window)
+        a_export = menu.addAction("Export Image")
+        a_export.triggered.connect(self.on_export_image)
+        menu.popup(self.mapToGlobal(pos))
 
 
+    def on_export_image(self):
+        img = pixmap_to_numpy(self.pixmap.pixmap())
+        file_name = QFileDialog.getSaveFileName(self.main_window,
+                                                directory = self.main_window.project.export_dir,
+                                                filter ="*.png *.jpg")[0]
+        cv2.imwrite(file_name, img)
 
 
 class EHtmlDisplay(QWidget):
