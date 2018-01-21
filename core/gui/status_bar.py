@@ -201,6 +201,7 @@ class StatusProgressBar(QtWidgets.QWidget):
     def __init__(self,main_window):
         super(StatusProgressBar, self).__init__(main_window)
 
+        self.main_window = main_window
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
         self.progress_bar = QtWidgets.QProgressBar(self)
@@ -217,6 +218,9 @@ class StatusProgressBar(QtWidgets.QWidget):
     def on_finished(self):
         self.progress_bar.setValue(0)
         self.hide()
+
+    def mouseDoubleClickEvent(self, a0: QMouseEvent):
+        self.main_window.create_concurrent_task_viewer()
 
 
 class MessageLogWindow(QMainWindow):

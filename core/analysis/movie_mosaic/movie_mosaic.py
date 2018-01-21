@@ -23,6 +23,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
                                                   author="Gaudenz Halter",
                                                   version = "0.0.1",
                                                   multiple_result=True)
+
     def prepare(self, project, targets, parameters, fps):
         args = []
         for t in targets:
@@ -138,9 +139,10 @@ class MovieMosaicAnalysis(IAnalysisJob):
 
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
-        dock = GraphicsViewDockWidget(main_window, numpy_to_pixmap(analysis.data["mosaic"]))
-        main_window.addDockWidget(Qt.LeftDockWidgetArea, dock, Qt.Horizontal)
-        return dock
+        view = EGraphicsView(None, False, main_window)
+        view.set_image(numpy_to_pixmap(analysis.data["mosaic"]))
+        return view
+
 
     def get_parameter_widget(self):
         return MovieMosaicPreferences()

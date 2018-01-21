@@ -42,6 +42,7 @@ from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToo
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, VocabularyMatrix
+from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
@@ -155,6 +156,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.node_editor_results = None
         self.vocabulary_manager = None
         self.vocabulary_matrix = None
+        self.analysis_results_widget = None
+        self.analysis_results_widget_dock = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -205,6 +208,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_manager()
         self.create_vocabulary_matrix()
 
+        self.create_analysis_results_widget()
 
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
@@ -274,8 +278,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
         self.actionScreenshotsPersp.triggered.connect(partial(self.switch_perspective, Perspective.ScreenshotsManager.name))
-        self.actionAnalysisPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses.name))
+        self.actionNodeEditorPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses.name))
         self.actionSegmentationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Segmentation.name))
+        self.actionResultsPersp.triggered.connect(partial(self.switch_perspective, Perspective.Results.name))
 
         self.actionHistory.triggered.connect(self.create_history_view)
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
@@ -308,18 +313,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
-                                 self.drawing_overlay,
-                                 # self.annotation_viewer,
-                                 self.screenshots_manager,
-                                 self.outliner,
-                                 self.timeline.timeline,
-                                 self.inspector,
-                                 self.history_view,
-                                 self.node_editor_dock.node_editor,
-                                 self.vocabulary_manager,
-                                 self.vocabulary_matrix,
-                                 self.numpy_data_manager,
-                                 self.project_streamer,
+                                    self.drawing_overlay,
+                                    # self.annotation_viewer,
+                                    self.screenshots_manager,
+                                    self.outliner,
+                                    self.timeline.timeline,
+                                    self.inspector,
+                                    self.history_view,
+                                    self.node_editor_dock.node_editor,
+                                    self.vocabulary_manager,
+                                    self.vocabulary_matrix,
+                                    self.numpy_data_manager,
+                                    self.project_streamer,
+                                    self.analysis_results_widget
                                           ]
 
 
@@ -441,9 +447,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_controls = PlayerControls(self)
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.player_controls, Qt.Vertical)
         else:
-            self.player_controls.show()
-            self.player_controls.raise_()
-            self.player_controls.activateWindow()
+            if self.player_controls.isVisible():
+                self.player_controls.hide()
+            else:
+                self.player_controls.show()
+                self.player_controls.raise_()
+                self.player_controls.activateWindow()
 
     def create_widget_elan_status(self):
         if self.elan_status is None:
@@ -505,16 +514,22 @@ class MainWindow(QtWidgets.QMainWindow):
             self.concurrent_task_viewer = ConcurrentTaskDock(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.concurrent_task_viewer)
         else:
-            self.concurrent_task_viewer.show()
-            self.concurrent_task_viewer.raise_()
-            self.concurrent_task_viewer.activateWindow()
+            if self.concurrent_task_viewer.isVisible():
+                self.concurrent_task_viewer.hide()
+            else:
+                self.concurrent_task_viewer.show()
+                self.concurrent_task_viewer.raise_()
+                self.concurrent_task_viewer.activateWindow()
 
     def create_history_view(self):
         if self.history_view is None:
             self.history_view = HistoryView(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.history_view)
         else:
-            self.history_view.show()
+            if self.history_view.isVisible():
+                self.history_view.hide()
+            else:
+                self.history_view.show()
 
     def create_screenshots_toolbar(self):
         if self.screenshot_toolbar is None:
@@ -604,6 +619,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_matrix.show()
             self.vocabulary_matrix.raise_()
             self.vocabulary_matrix.activateWindow()
+
+    def create_analysis_results_widget(self):
+        if self.analysis_results_widget is None:
+            self.analysis_results_widget_dock = AnalysisResultsDock(self)
+            self.analysis_results_widget = AnalysisResultsWidget(self.analysis_results_widget_dock, self)
+            self.analysis_results_widget_dock.setWidget(self.analysis_results_widget)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Vertical)
+        else:
+            if self.analysis_results_widget.isVisible():
+                self.analysis_results_widget.hide()
+            else:
+                self.analysis_results_widget.show()
+                self.analysis_results_widget.raise_()
+                self.analysis_results_widget.activateWindow()
     #endregion
 
     #region QEvent Overrides
@@ -1095,6 +1124,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.hide()
             self.vocabulary_manager.hide()
             self.vocabulary_matrix.hide()
+            self.analysis_results_widget_dock.hide()
 
         elif perspective == Perspective.Segmentation.name:
             self.current_perspective = Perspective.Segmentation
@@ -1118,6 +1148,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.show()
             self.vocabulary_manager.hide()
             self.vocabulary_matrix.hide()
+            self.analysis_results_widget_dock.hide()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
@@ -1144,6 +1175,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_manager.hide()
             self.node_editor_results.hide()
             self.vocabulary_matrix.hide()
+            self.analysis_results_widget_dock.hide()
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
@@ -1176,6 +1208,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_manager.hide()
             self.vocabulary_matrix.hide()
             self.inspector.show()
+            self.analysis_results_widget_dock.hide()
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
@@ -1199,16 +1232,47 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner.show()
             self.timeline.hide()
             self.player_controls.hide()
-            self.screenshot_toolbar.raise_()
             self.history_view.hide()
             self.node_editor_dock.show()
             self.screenshots_manager_dock.hide()
             self.node_editor_results.show()
             self.vocabulary_manager.hide()
+            self.analysis_results_widget_dock.hide()
+            self.inspector.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
+
+        elif perspective == Perspective.Results.name:
+            self.current_perspective = Perspective.Results
+
+            central = QWidget(self)
+            central.setFixedWidth(0)
+
+            if self.annotation_toolbar.isVisible():
+                self.annotation_toolbar.hide()
+            if self.screenshot_toolbar.isVisible():
+                self.screenshot_toolbar.hide()
+
+            self.drawing_overlay.hide()
+            self.outliner.show()
+            self.timeline.hide()
+            self.player_controls.hide()
+            self.history_view.hide()
+            self.node_editor_dock.hide()
+            self.screenshots_manager_dock.hide()
+            self.node_editor_results.hide()
+            self.vocabulary_manager.hide()
+            self.analysis_results_widget_dock.hide()
+            self.inspector.show()
+
+            self.analysis_results_widget_dock.show()
+
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Horizontal)
+            self.splitDockWidget(self.outliner, self.inspector, Qt.Vertical)
+
 
         self.setCentralWidget(central)
         self.centralWidget().show()

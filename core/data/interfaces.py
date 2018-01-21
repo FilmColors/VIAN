@@ -253,7 +253,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         :param analysis: The IAnalysisJobAnalysis Object created in IAnalysisJob.process()
         :param result_path: The Path to the results directory of the project
         :param data_path: The Path to the data directory of the project
-        :return: 
+        :return: A QWidget which will be added to the Visualizations Tab
         """
         print("get_name not implemented by", self)
 

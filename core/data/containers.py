@@ -2494,8 +2494,9 @@ class IAnalysisJobAnalysis(AnalysisContainer):
                                 " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 
     def get_visualization(self):
+
         try:
-            self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
+            return self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
                                                                                              self.project.results_dir,
                                                                                              self.project.data_dir,
                                                                                              self.project,

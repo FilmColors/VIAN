@@ -32,6 +32,7 @@ class Perspective(Enum):
         Annotation = 3
         ScreenshotsManager = 4
         Analyses = 5
+        Results = 6
 
 
 

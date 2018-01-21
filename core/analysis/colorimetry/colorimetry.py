@@ -135,7 +135,7 @@ class ColometricsAnalysis(IAnalysisJob):
 
     def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:ElanExtensionProject, main_window: QMainWindow):
         pg.setConfigOption("background", pg.mkColor(30, 30, 30))
-        win = pg.GraphicsWindow(title="Basic plotting examples")
+        win = pg.GraphicsWindow(title="Colorimetry Results")
         pg.setConfigOptions(antialias=True)
 
         frame_pos = analysis.data['frame_pos']
@@ -177,11 +177,12 @@ class ColometricsAnalysis(IAnalysisJob):
               np.amin(analysis.data['avg_colors'][:, 2]),
               np.amax(analysis.data['avg_colors'][:, 2]))
 
-        mw = EDockWidget(main_window, limit_size=False)
-        mw.setWindowTitle("Colorimetry Result")
-        mw.setWidget(win)
-
-        main_window.addDockWidget(Qt.RightDockWidgetArea, mw, Qt.Horizontal)
+        return win
+        # mw = EDockWidget(main_window, limit_size=False)
+        # mw.setWindowTitle("Colorimetry Result")
+        # mw.setWidget(win)
+        #
+        # main_window.addDockWidget(Qt.RightDockWidgetArea, mw, Qt.Horizontal)
 
         # hist = self.plot_histogram(analysis.data[0], analysis.data[1])
         # l = layout([
@@ -225,7 +226,6 @@ class ColometricsAnalysis(IAnalysisJob):
 class ColormetryVisualization(EDockWidget):
     def __init__(self, main_window):
         super(ColormetryVisualization, self).__init__(main_window, limit_size=False)
-
 
 
 class ColormetricsPreferences(ParameterWidget):

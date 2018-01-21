@@ -121,7 +121,8 @@
      <addaction name="actionSegmentationPersp"/>
      <addaction name="actionAnnotationPersp"/>
      <addaction name="actionScreenshotsPersp"/>
-     <addaction name="actionAnalysisPerspective"/>
+     <addaction name="actionNodeEditorPerspective"/>
+     <addaction name="actionResultsPersp"/>
      <addaction name="separator"/>
      <addaction name="actionSave_Perspective"/>
      <addaction name="actionLoad_Perspective"/>
@@ -215,6 +216,9 @@
    <property name="text">
     <string>Player Controls</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
   </action>
   <action name="actionColor">
    <property name="text">
@@ -265,7 +269,7 @@
     <string>Screenshot Manager</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Alt+S</string>
    </property>
   </action>
   <action name="actionVocabularyManager">
@@ -293,7 +297,7 @@
     <string>Outliner</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+O</string>
+    <string>Alt+O</string>
    </property>
   </action>
   <action name="actionSaveAs">
@@ -381,6 +385,9 @@
    <property name="text">
     <string>History</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+H</string>
+   </property>
   </action>
   <action name="action_importELAN_Project">
    <property name="text">
@@ -400,9 +407,9 @@
     <string>Del</string>
    </property>
   </action>
-  <action name="actionAnalysisPerspective">
+  <action name="actionNodeEditorPerspective">
    <property name="text">
-    <string>Analysis</string>
+    <string>Node Editor</string>
    </property>
    <property name="shortcut">
     <string>Alt+5</string>
@@ -446,7 +453,7 @@
     <string>Inspector</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+I</string>
+    <string>Alt+I</string>
    </property>
   </action>
   <action name="actionGeneral">
@@ -457,6 +464,9 @@
   <action name="actionTaksMonitor">
    <property name="text">
     <string>Task Monitor</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+M</string>
    </property>
   </action>
   <action name="actionExportTemplate">
@@ -565,7 +575,15 @@
     <string>Timeline</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+T</string>
+    <string>Alt+T</string>
+   </property>
+  </action>
+  <action name="actionResultsPersp">
+   <property name="text">
+    <string>Results</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+6</string>
    </property>
   </action>
  </widget>

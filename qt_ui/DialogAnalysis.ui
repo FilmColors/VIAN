@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>557</width>
-    <height>418</height>
+    <width>533</width>
+    <height>554</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,6 +43,31 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;1. Select all targets you want to include into the analysis in the &lt;span style=&quot; font-weight:600;&quot;&gt;outliner&lt;/span&gt; and press the&lt;span style=&quot; font-weight:600;&quot;&gt; [+] button&lt;/span&gt;.&lt;/p&gt;&lt;p&gt;2. Set the &lt;span style=&quot; font-weight:600;&quot;&gt;parameters&lt;/span&gt; given by the analysis.&lt;/p&gt;&lt;p&gt;3. Press &lt;span style=&quot; font-weight:600;&quot;&gt;Analyse &lt;/span&gt;to run the Analysis&lt;/p&gt;&lt;p&gt;4. Once the Analysis is finished, you can inspect it by select it in the &lt;span style=&quot; font-weight:600;&quot;&gt;Outliner&lt;/span&gt; in the &lt;span style=&quot; font-style:italic;&quot;&gt;Analysis&lt;/span&gt; category and use the &lt;span style=&quot; font-weight:600;&quot;&gt;Inspector&lt;/span&gt; to view it.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+     <zorder>label_6</zorder>
+     <zorder>label_6</zorder>
+     <zorder>label_6</zorder>
     </widget>
    </item>
    <item>

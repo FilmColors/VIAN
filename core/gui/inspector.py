@@ -7,13 +7,13 @@ from core.data.computation import ms_to_string, numpy_to_qt_image
 from core.data.enums import MovieSource
 from core.node_editor.node_editor import *
 from core.data.tracking import BasicTrackingJob
+from core.gui.perspectives import Perspective
 
 class Inspector(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(Inspector, self).__init__(main_window)
         path = os.path.abspath("qt_ui/Inspector.ui")
         uic.loadUi(path, self)
-
 
         self.max_width = 450
         self.current_att_widgets = []
@@ -357,7 +357,8 @@ class AttributesAnalysis(QWidget):
         self.show()
 
     def on_show_vis(self):
-        self.descriptor.get_visualization()
+        self.descriptor.project.main_window.switch_perspective(Perspective.Results.name)
+        # self.descriptor.get_visualization()
 
 
 class AttributesNode(QWidget):
