@@ -94,7 +94,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # self.setAttribute(Qt.WA_MacNormalSize)
 
-
         self.menuWindows.addMenu(self.extension_list.get_plugin_menu(self.menuWindows))
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
 
@@ -109,7 +108,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_client.send_connect(self.settings.USER_NAME)
         if self.settings.USE_CORPUS:
             self.corpus_client.start()
-
 
         self.vlc_instance = vlc_instance
         self.vlc_player = vlc_player
@@ -132,7 +130,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.video_capture = None
 
         self.current_perspective = Perspective.Annotation.name
-
 
         # DockWidgets
         self.player_controls = None
@@ -374,7 +371,6 @@ class MainWindow(QtWidgets.QMainWindow):
         loading_screen.hide()
 
         self.update_recent_menu()
-        self.switch_perspective(Perspective.Segmentation.name)
 
         # self.load_project("projects/ratatouille/Ratatouille.eext")
 
@@ -385,18 +381,21 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.onTimeStep.connect(self.current_segment_evaluator.set_time)
         # self.current_segment_evaluator.signals.segmentChanged.connect(self.currentSegmentChanged.emit)
         # self.thread_pool.start(self.current_segment_evaluator)
-
+        self.switch_perspective(Perspective.Segmentation.name)
         self.show()
 
         self.setWindowState(Qt.WindowMaximized)
 
-        if self.settings.SHOW_WELCOME or os.path.isfile(os.path.abspath("install/force_welcome.txt")):
+        # This can be used for a oneshot forced command.
+        force_file_path = os.path.abspath("install/force.txt")
+        if os.path.isfile(force_file_path):
             try:
-                if os.path.isfile(os.path.abspath("install/force_welcome.txt")):
-                    os.remove(os.path.abspath("install/force_welcome.txt"))
-            except:
-                pass
+                os.remove(force_file_path)
+                self.show_welcome()
+            except Exception as e:
+                print(e)
 
+        if self.settings.SHOW_WELCOME:
             self.show_welcome()
 
         if self.settings.USER_NAME == "":
@@ -408,6 +407,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
 
         self.update_vian(False)
+
 
     def print_time(self, segment):
         print(segment)
@@ -423,6 +423,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def show_welcome(self):
         open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
+        self.settings.SHOW_WELCOME = False
+        self.settings.store()
 
     def show_first_start(self):
         dialog = DialogFirstStart(self)
@@ -477,8 +479,6 @@ class MainWindow(QtWidgets.QMainWindow):
             # self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.annotation_toolbar)
         else:
             self.annotation_toolbar.show()
-            self.annotation_toolbar.raise_()
-            self.annotation_toolbar.activateWindow()
 
     def create_screenshot_manager(self):
         if self.screenshots_manager is None:
@@ -523,8 +523,6 @@ class MainWindow(QtWidgets.QMainWindow):
             #self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.screenshot_toolbar)
         else:
             self.screenshot_toolbar.show()
-            self.screenshot_toolbar.raise_()
-            self.screenshot_toolbar.activateWindow()
 
     def create_perspectives_manager(self):
         if self.perspective_manager is None:
@@ -560,7 +558,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.timeline.show()
                 self.timeline.raise_()
                 self.timeline.activateWindow()
-
 
     def create_screenshot_manager_dock_widget(self):
         if self.screenshots_manager_dock is None:
@@ -684,7 +681,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 print(e)
 
     def update_vian(self, show_newest = True):
-        result = self.updater.get_server_version()
+        try:
+            result = self.updater.get_server_version()
+        except:
+            return
+
         if result:
             answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
             if answer == QMessageBox.Yes:
@@ -1069,14 +1070,20 @@ class MainWindow(QtWidgets.QMainWindow):
         central = self.player
 
         self.centralWidget().setParent(None)
+
+        if self.is_darwin:
+            self.screenshot_toolbar.show()
+            self.annotation_toolbar.show()
+
         if perspective == Perspective.VideoPlayer.name:
             self.current_perspective = Perspective.VideoPlayer
             central = self.player
 
-            self.drawing_overlay.hide()
-            self.outliner.hide()
             self.annotation_toolbar.hide()
             self.screenshot_toolbar.hide()
+
+            self.drawing_overlay.hide()
+            self.outliner.hide()
             self.timeline.hide()
             self.player_controls.hide()
             self.perspective_manager.hide()
@@ -1093,10 +1100,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.current_perspective = Perspective.Segmentation
             central = self.player
 
+            if self.annotation_toolbar.isVisible():
+                self.annotation_toolbar.hide()
+            if self.screenshot_toolbar.isVisible():
+                self.screenshot_toolbar.hide()
+
             self.drawing_overlay.hide()
             self.outliner.hide()
-            self.annotation_toolbar.hide()
-            self.screenshot_toolbar.hide()
             self.timeline.show()
             self.player_controls.show()
             self.perspective_manager.hide()
@@ -1116,15 +1126,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.current_perspective = Perspective.Annotation
             central = self.player
 
+            if not self.annotation_toolbar.isVisible():
+                self.annotation_toolbar.show()
+            if self.screenshot_toolbar.isVisible():
+                self.screenshot_toolbar.hide()
+
             self.drawing_overlay.show()
             self.outliner.show()
-            self.annotation_toolbar.show()
-            self.screenshot_toolbar.hide()
             self.timeline.show()
             self.history_view.hide()
             self.perspective_manager.hide()
             self.player_controls.hide()
-            self.annotation_toolbar.raise_()
             self.inspector.show()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
             self.screenshots_manager_dock.hide()
@@ -1147,12 +1159,14 @@ class MainWindow(QtWidgets.QMainWindow):
             central = QWidget(self)
             central.setFixedWidth(0)
 
+            if self.annotation_toolbar.isVisible():
+                self.annotation_toolbar.hide()
+            if not self.screenshot_toolbar.isVisible():
+                self.screenshot_toolbar.show()
+
             self.drawing_overlay.hide()
-            self.annotation_toolbar.hide()
-            self.screenshot_toolbar.show()
             self.timeline.hide()
             self.player_controls.hide()
-            self.screenshot_toolbar.raise_()
             self.outliner.show()
             self.history_view.hide()
             self.screenshots_manager.center_images()
@@ -1176,10 +1190,13 @@ class MainWindow(QtWidgets.QMainWindow):
             central = QWidget(self)
             central.setFixedWidth(0)
 
+            if self.annotation_toolbar.isVisible():
+                self.annotation_toolbar.hide()
+            if self.screenshot_toolbar.isVisible():
+                self.screenshot_toolbar.hide()
+
             self.drawing_overlay.hide()
             self.outliner.show()
-            self.annotation_toolbar.hide()
-            self.screenshot_toolbar.hide()
             self.timeline.hide()
             self.player_controls.hide()
             self.screenshot_toolbar.raise_()
@@ -1193,14 +1210,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
-
-
         self.setCentralWidget(central)
         self.centralWidget().show()
         # self.centralWidget().setBaseSize(size_central)
 
-
-        if perspective != Perspective.Annotation.name:
+        if perspective != (Perspective.Annotation.name or Perspective.Segmentation.name):
             self.set_overlay_visibility(False)
 
     def changeEvent(self, event):
