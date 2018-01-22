@@ -177,6 +177,7 @@ class ColometricsAnalysis(IAnalysisJob):
               np.amin(analysis.data['avg_colors'][:, 2]),
               np.amax(analysis.data['avg_colors'][:, 2]))
 
+        print("WINDOW Returned", win)
         return win
         # mw = EDockWidget(main_window, limit_size=False)
         # mw.setWindowTitle("Colorimetry Result")

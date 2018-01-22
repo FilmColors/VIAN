@@ -88,7 +88,7 @@ class OutputLine(QtWidgets.QWidget):
         self.message_log = []
 
         self.text_time = QtCore.QTimer(self)
-        self.text_time.setInterval(2000)
+        self.text_time.setInterval(5000)
         self.text_time.timeout.connect(self.on_timeout)
         self.setMinimumWidth(100)
 
@@ -124,6 +124,7 @@ class OutputLine(QtWidgets.QWidget):
             if color is not "":
                 self.setStyleSheet("QLabel{color : " + color + ";}")
 
+            print("LOG: ", str(msg))
             self.message_log.append(curr_msg)
             self.text_time.start()
             if self.log_wnd is not None:

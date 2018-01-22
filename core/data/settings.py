@@ -97,6 +97,36 @@ class UserSettings():
         except Exception as e:
             print(e)
 
+    def generate_dir_paths(self):
+        self.DIR_BASE = (os.path.abspath(".") + "/").replace("\\", "/")
+        self.DIR_USERHOME = os.path.expanduser("~") + "/"
+        self.DIR_USER = "user/"
+        self.DIR_SCREENSHOTS = "shots/"
+        self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
+        self.store_path = self.DIR_PROJECT + "settings.json"
+        self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
+        self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
+
+    def integritiy_check(self):
+        """
+        Check if the settings are possible, 
+        else regenereate it.
+        :return: 
+        """
+
+        integer = True
+        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_PROJECT, self.DIR_TEMPLATES]:
+            if not os.path.isdir(dir):
+                self.generate_dir_paths()
+                integer = False
+                print("Settings: Directories regenerated")
+                break
+
+
+        if not integer:
+            print("Settings regenerated")
+        else:
+            print("Successfully Loaded Settings from: ", self.store_path)
 
     def add_to_recent_files(self, project):
         path = project.path
@@ -121,6 +151,11 @@ class UserSettings():
             n_path.extend(self.recent_files_path)
             self.recent_files_path = n_path
 
+    def remove_from_recent_files(self, file):
+        idx = self.recent_files_path.index(file)
+        self.recent_files_name.pop(idx)
+        self.recent_files_path.pop(idx)
+
     def load(self):
         try:
             with open(self.store_path ,"r") as f:
@@ -128,9 +163,10 @@ class UserSettings():
                 for attr, value in dict.items():
                     if not attr == "PALETTES" and not attr=="MAIN_FONT":
                         setattr(self, attr, value)
-                print("Loaded Settings from: ", self.store_path)
         except IOError as e:
             print("No Settings found", e)
+
+        self.integritiy_check()
 
     def load_last(self):
         files = glob.glob(self.DIR_PROJECT)

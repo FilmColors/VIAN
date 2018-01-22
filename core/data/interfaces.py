@@ -1,6 +1,9 @@
 from random import randint
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSlot
+#
+# from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
+
 class IProjectChangeNotify():
     def __init__(self, dummy = None):
         dummy = dummy
@@ -16,6 +19,9 @@ class IProjectChangeNotify():
 
     def on_selected(self, sender, selected):
         print("IProjectChangeNotify: Not Implemented by ",self)
+
+    def on_closed(self):
+        pass
 
 
 class IHasVocabulary():

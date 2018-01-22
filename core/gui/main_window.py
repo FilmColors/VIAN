@@ -58,7 +58,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.4.2"
+__version__ = "0.4.4"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -128,6 +128,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.numpy_data_manager = NumpyDataManager(self)
         self.project_streamer = ProjectStreamerShelve(self)
+
         self.video_capture = None
 
         self.current_perspective = Perspective.Annotation.name
@@ -414,12 +415,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.update_vian(False)
 
-
     def print_time(self, segment):
         print(segment)
 
     def test_function(self):
         print(self.player.get_fps())
+        self.project.print_all(ANALYSIS_JOB_ANALYSIS)
+
+        self.project.replace_ids()
 
     #region WidgetCreation
 
@@ -680,6 +683,13 @@ class MainWindow(QtWidgets.QMainWindow):
         path = self.settings.recent_files_path[index]
         if os.path.isfile(path):
             self.load_project(path)
+        else:
+            try:
+                self.settings.remove_from_recent_files(path)
+                self.update_recent_menu()
+            except:
+                pass
+            self.print_message("Project not Found", "Red")
 
     def clear_recent(self):
         self.settings.recent_files_name = []
@@ -790,7 +800,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.set_overlay_visibility(False)
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
-        self.set_overlay_visibility(True)
+
+        if self.current_perspective == (Perspective.Segmentation.name or Perspective.Annotation.name):
+            self.set_overlay_visibility(True)
         path = path[0]
         self.close_project()
         self.load_project(path)
@@ -814,7 +826,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.setState(False)
         self.timeline.timeline.setState(False)
 
+        self.dispatch_on_closed()
         self.dispatch_on_changed()
+
 
     def load_project(self, path):
 
@@ -828,8 +842,6 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Loading Project Path", path)
         new.inhibit_dispatch = True
         new.load_project(self.settings ,path)
-
-
 
         self.project = new
         self.settings.add_to_recent_files(self.project)
@@ -1336,6 +1348,9 @@ class MainWindow(QtWidgets.QMainWindow):
         analysis.modify_project(self.project, result)
         self.project.add_analysis(result)
 
+        # Unload the analysis from Memory
+        result.unload_container()
+
     def on_save_custom_perspective(self):
         setting = QSettings("UniversityOfZurich", "VIAN")
         setting.setValue("geometry", self.saveGeometry())
@@ -1466,6 +1481,8 @@ class MainWindow(QtWidgets.QMainWindow):
         for o in self.i_project_notify_reciever:
             o.on_loaded(self.project)
 
+        self.project.unload_all()
+
         for s in self.project.screenshots:
             screenshot_position.append(s.frame_pos)
             a_dicts = []
@@ -1579,6 +1596,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
                                         # endregion
+
+    def dispatch_on_closed(self):
+        for o in self.i_project_notify_reciever:
+            o.on_closed()
 
 
 class LoadingScreen(QtWidgets.QMainWindow):

@@ -1,17 +1,20 @@
 import os
 import numpy as np
 import shelve
+import glob
 import sqlite3
 from core.data.interfaces import IConcurrentJob, IProjectChangeNotify
-from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, QThread
+from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, QThread, Qt
 
 STREAM_DATA_IPROJECT_CONTAINER = 0
 STREAM_DATA_ARBITRARY = 1
 
 
-class ProjectStreamer(IProjectChangeNotify):
+class ProjectStreamer(IProjectChangeNotify, QObject):
     def __init__(self, main_window):
-        super(ProjectStreamer, self).__init__()
+        QObject.__init__(self, main_window)
+        IProjectChangeNotify.__init__(self)
+
         self.main_window = main_window
         self.project = None
 
@@ -26,7 +29,6 @@ class ProjectStreamer(IProjectChangeNotify):
 
     def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         return self.load(id, data_type)
-
 
     def dump(self, key, data_dict, data_type):
         pass
@@ -43,20 +45,18 @@ class ProjectStreamer(IProjectChangeNotify):
 
     def on_selected(self, sender, selected):
         pass
-
     #endregion
     pass
 
 
 class ProjectStreamerSingals(QObject):
-    on_async_store = pyqtSignal(int, object, int, object)
-    on_async_load = pyqtSignal(int, int, object)
-
+    on_async_store = pyqtSignal(str, object, int, object, object)
+    on_async_load = pyqtSignal(str, int, object, object)
 
 #region ShelveProjectStreamer
 class ProjectStreamerShelve(ProjectStreamer):
     def __init__(self, main_window):
-        super(ProjectStreamer, self).__init__()
+        ProjectStreamer.__init__(self, main_window)
         self.stream_path = ""
         self.stream = None
         self.main_window = main_window
@@ -74,6 +74,7 @@ class ProjectStreamerShelve(ProjectStreamer):
 
         self.async_stream_thread = QThread()
         self.async_stream_worker.moveToThread(self.async_stream_thread)
+        self.async_stream_thread.start()
 
     def set_store_dir(self, store_dir):
         self.store_dir = store_dir + "/"
@@ -82,11 +83,11 @@ class ProjectStreamerShelve(ProjectStreamer):
 
         self.async_stream_worker.set_paths(self.container_db, self.arbitrary_db)
 
-    def async_store(self, id: int, data_dict, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
-        self.on_async_store.emit(id, data_dict, data_type, proceed_slot)
+    def async_store(self, id: int, data_dict, data_type = STREAM_DATA_IPROJECT_CONTAINER, proceed_slot = None, proceed_slot_args = None):
+        self.signals.on_async_store.emit(str(id), data_dict, data_type, proceed_slot, proceed_slot_args)
 
-    def async_load(self, id: int, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
-        self.on_async_store.emit(id, data_type, proceed_slot)
+    def async_load(self, id: int, proceed_slot, proceed_slot_args = None, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        self.signals.on_async_load.emit(str(id), data_type, proceed_slot, proceed_slot_args)
 
     def sync_store(self,  id: int, obj,data_type = STREAM_DATA_IPROJECT_CONTAINER):
         if data_type == STREAM_DATA_ARBITRARY:
@@ -114,7 +115,6 @@ class ProjectStreamerShelve(ProjectStreamer):
         except Exception as e:
             print(e)
 
-
     #region IProjectChangeNotify
     def on_loaded(self, project):
         self.clean_up()
@@ -126,12 +126,24 @@ class ProjectStreamerShelve(ProjectStreamer):
 
     def on_selected(self, sender, selected):
         pass
+
+    def on_closed(self):
+        try:
+            files = glob.glob(self.arbitrary_db + ".*")
+            files.extend(glob.glob(self.container_db + ".*"))
+            for f in files:
+                try:
+                    os.remove(f)
+                except Exception as e:
+                    print(e)
+        except:
+            pass
     #endregion
     pass
 
 
 class AsyncShelveStreamSignals(QObject):
-    finished = pyqtSignal(object)
+    finished = pyqtSignal(object, object)
 
 
 class AsyncShelveStream(QObject):
@@ -147,8 +159,8 @@ class AsyncShelveStream(QObject):
         self.container_db = container_db
         self.arbitrary_db = arbitrary_db
 
-    @pyqtSlot(int, object, int, object)
-    def store(self, unique_id, obj, data_type, slot = None):
+    @pyqtSlot(str, object, int, object, object)
+    def store(self, unique_id, obj, data_type, slot = None, slot_arguments = None):
         try:
             if slot is not None:
                 self.signals.finished.connect(slot)
@@ -162,31 +174,40 @@ class AsyncShelveStream(QObject):
                 db[str(unique_id)] = obj
 
             if slot is not None:
-                self.signals.finished.emit()
-                self.signals.finished.disconnect()
-        except Exception as e:
-            print(e)
+                self.signals.finished.emit(slot_arguments, None)
 
-    @pyqtSlot(int, int, object)
-    def load(self, unique_id, data_type, slot):
+        except Exception as e:
+            print("Exception in Streamer", str(e))
+            self.signals.finished.disconnect()
+
+    @pyqtSlot(str, int, object, object)
+    def load(self, unique_id, data_type, slot, slot_arguments):
         try:
+            print("TEST", "\tDATA Loading")
             self.signals.finished.connect(slot)
+
             if data_type == STREAM_DATA_ARBITRARY:
                 path = self.arbitrary_db
             else:
                 path = self.container_db
 
             with shelve.open(path) as db:
-                obj = db[str(unique_id)]
+                obj = db[unique_id]
 
-            self.signals.finished.emit(obj)
-            self.signals.finished.disconnect()
+            self.signals.finished.emit(obj, slot_arguments)
+            self.signals.finished.disconnect(slot)
+
         except Exception as e:
-            print(e)
+            print("Exception in Streamer", str(e))
+            try:
+                self.signals.finished.disconnect(slot)
+            except Exception as e:
+                print(str(e))
 
-        finally:
-            self.signals.finished.emit(None)
-            self.signals.finished.disconnect()
+
+    @pyqtSlot()
+    def run(self):
+        pass
 
 #endregion
 
@@ -208,12 +229,59 @@ class NumpyDataManager(ProjectStreamer):
 
             return res
         except Exception as e:
-            print("Tried to load ", key, "from ", self.project.data_dir + "/" + str(key) + ".npy")
+            print("Tried to load ", key, "from ", self.project.data_dir + "/" + str(key) + ".npz")
             print(e)
             return None
 
     def remove_item(self, unique_id):
         if os.path.isfile(self.project.data_dir + "/" + str(unique_id) + ".npz"):
             os.remove(self.project.data_dir + "/" + str(unique_id) + ".npz")
+
+    def clean_up(self, ids):
+        try:
+            ids = [str(id) for id in ids]
+            files = glob.glob(self.project.data_dir + "/*.npz*")
+            file_names = [f.replace("\\", "/").split("/").pop().split(".")[0] for f in files]
+            for i, n in enumerate(file_names):
+                if n not in ids:
+                    try:
+                        os.remove(files[i])
+                    except Exception as e:
+                        print(str(e))
+        except:
+            pass
+
+
+
     #endregion
     pass
+
+
+class IStreamableContainer():
+    def apply_loaded(self, obj):
+        pass
+
+    @pyqtSlot(object, object)
+    def on_data_loaded(self, obj, args):
+        print("OK")
+        self.apply_loaded(obj)
+        if len(args) > 1 and args[1] is not None:
+            args[0](args[1])
+        else:
+            args[0]()
+
+    def load_container(self, callback=None, args = None, sync = False):
+        if not sync:
+            self.project.main_window.project_streamer.async_load(id=self.unique_id,
+                                                                 proceed_slot=self.on_data_loaded,
+                                                                 proceed_slot_args=[callback, args],
+                                                                 data_type=STREAM_DATA_IPROJECT_CONTAINER)
+        else:
+            obj = self.project.main_window.project_streamer.sync_load(id=self.unique_id,
+                                                                 data_type=STREAM_DATA_IPROJECT_CONTAINER)
+            self.on_data_loaded(obj, [callback, args])
+
+    def unload_container(self, data = None):
+        self.project.main_window.project_streamer.async_store(self.unique_id, data)
+
+

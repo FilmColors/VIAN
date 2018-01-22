@@ -2,7 +2,7 @@ import glob
 import os
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QCheckBox, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QCheckBox, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
 
 from core.data.containers import ElanExtensionProject
 from core.data.enums import MovieSource
@@ -37,12 +37,20 @@ class NewProjectDialog(EDialogWidget):
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
 
+        self.vocabulary_inner = QWidget(self)
+        self.vocabulary_inner.setLayout(QHBoxLayout(self))
+        self.vocabulary_scroll = QScrollArea(self)
+        self.vocabulary_scroll.setWidget(self.vocabulary_inner)
+        self.frame_Vocabularies.layout().addWidget(self.vocabulary_scroll)
+        self.vocabulary_inner.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+
         n_per_col = int(len(self.vocabularies) / 3)
         self.voc_cbs = []
-        vbox = QVBoxLayout(self.frame_Vocabularies)
+        vbox = QVBoxLayout(self.vocabulary_inner)
         counter = 0
+
         for voc in self.vocabularies:
-            cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.frame_Vocabularies)
+            cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.vocabulary_inner)
             cb.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
             cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
             cb.setChecked(True)
@@ -51,13 +59,14 @@ class NewProjectDialog(EDialogWidget):
             counter += 1
             if counter == n_per_col:
                 vbox.setSpacing(10)
-                self.frame_Vocabularies.layout().addItem(vbox)
-                vbox = QVBoxLayout(self.frame_Vocabularies)
+                self.vocabulary_inner.layout().addItem(vbox)
+                vbox = QVBoxLayout(self.vocabulary_inner)
                 counter = 0
         if counter != 0:
             vbox.addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
-            self.frame_Vocabularies.layout().addItem(vbox)
+            self.vocabulary_inner.layout().addItem(vbox)
 
+        self.vocabulary_inner.resize(self.vocabulary_inner.sizeHint())
 
         self.find_templates()
 
@@ -124,29 +133,12 @@ class NewProjectDialog(EDialogWidget):
             # self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
             self.lineEdit_ProjectPath.setText(self.project.folder)
 
-    # def parse_project_path(self, path):
-    #     path = path.split('/')
-    #     directory = ""
-    #     if path[len(path) - 1] == self.settings.PROJECT_FILE_EXTENSION:
-    #         path = path[0:len(path) - 2]
-    #
-    #     project_name = path[len(path) - 1]
-    #     for i in range(len(path) - 1):
-    #         directory += path[i] + "/"
-    #
-    #     return directory, project_name
-
     def on_proj_name_changed(self):
         self.project_name = self.lineEdit_ProjectName.text()
         if not self.path_set_from_dialog:
             self.set_project_path()
 
     def on_proj_path_changed(self):
-        # path = self.lineEdit_ProjectPath.text()
-        # p_dir, p_name = self.parse_project_path(path)
-        # self.project_dir = p_dir
-        # self.project_name = p_name
-
         path = self.lineEdit_ProjectPath.text()
         if not os.path.isdir(path):
             QMessageBox.warning(self, "Directory not Found", "The inserted path doesn't seem to be a valid directory. "
@@ -157,12 +149,6 @@ class NewProjectDialog(EDialogWidget):
             self.project_dir = path
 
     def on_browse_project_path(self):
-        # path = QFileDialog.getSaveFileName(directory=self.project_dir)[0]
-        # p_dir, p_name = self.parse_project_path(path)
-        # self.project_dir = p_dir
-        # self.project_name = p_name
-
-        # New System
         path = QFileDialog.getExistingDirectory(directory=self.project_dir)
         self.project_dir = path
         self.lineEdit_ProjectPath.setText(self.project.folder)
@@ -199,21 +185,30 @@ class NewProjectDialog(EDialogWidget):
         self.close()
 
     def on_ok(self):
-        # try:
-        #     if not os.path.isdir(self.project.path):
-        #         os.mkdir(self.project.path)
-        # except OSError as e:
-        #     print(e)
-        #     print("Forced silencing as Hotfix, if this statement is necessary is currently unclear anyway")
-        #     #TODO
-
         template = self.templates[self.comboBox_Template.currentIndex()]
-        os.mkdir(self.project_dir + "/" + self.project_name)
+
+        # Checking if the project dir is existing
+        if not os.path.isdir(self.project_dir):
+            self.settings.integritiy_check()
+            self.project_dir = self.settings.DIR_PROJECT
+        try:
+            os.mkdir(self.project_dir + "/" + self.project_name)
+        except:
+            QMessageBox.warning(self, "Could not Find Root Directory",
+                                "The Root directory of your projects could not be found, please set it manually.")
+            self.project_dir = QFileDialog.getExistingDirectory()
+            try:
+                os.mkdir(self.project_dir + "/" + self.project_name)
+            except:
+                self.main_window.print_message("Project Creating failed due to an error in the settings file")
+                return
+
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
 
-
-        print(self.project.folder, "\n", self.project.path)
+        print(self.project.folder, "\n",
+              self.project.path, "\n",
+              self.settings.DIR_PROJECT)
 
         vocabularies = []
         for c in self.voc_cbs:

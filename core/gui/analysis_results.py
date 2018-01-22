@@ -21,17 +21,24 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.setLayout(QHBoxLayout(self))
         self.layout().addWidget(self.analysis_widget)
         self.current_visualization = None
+        self.current_analysis = None
 
         self.analysis_widget.setLayout(QHBoxLayout(self))
 
 
-    def activate_analysis(self, analysis):
+    def activate_analysis(self, analysis: IAnalysisJobAnalysis):
         self.clear_analysis_widget()
-        self.current_visualization = analysis.get_visualization()
+        self.current_analysis = analysis
+        self.current_analysis.load_container(self.apply_analysis, sync=True)
 
-    def apply_analysis(self, visualization):
-        if self.current_visualization is not None:
-            self.analysis_widget.layout().addWidget(self.current_visualization)
+    def apply_analysis(self):
+        print("TEST, Applying Analysis")
+        visualization = self.current_analysis.get_visualization()
+
+        self.current_analysis.unload_container()
+        if visualization is not None:
+            self.analysis_widget.layout().addWidget(visualization)
+            self.current_visualization = visualization
             self.current_visualization.show()
         else:
             self.main_window.print_message("Visualization returned None", "Red")

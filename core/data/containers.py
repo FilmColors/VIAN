@@ -13,6 +13,8 @@ from core.gui.vocabulary import VocabularyItem
 from core.data.project_streaming import ProjectStreamer
 from core.data.enums import *
 
+from core.data.project_streaming import IStreamableContainer
+
 from core.node_editor.node_editor import *
 from shutil import copy2
 from enum import Enum
@@ -146,6 +148,15 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             result.append(itm[1])
         return result
 
+    def unload_all(self):
+        for c in self.get_all_containers():
+            if isinstance(c, IStreamableContainer):
+                c.unload_container()
+
+    def print_all(self, type = None):
+        for c in self.get_all_containers():
+            if type is not None and type == c.get_type():
+                print(c.unique_id, c)
 
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):
@@ -171,8 +182,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         print("Dispatching")
         self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
         self.dispatch_changed(item = new)
-
-
 
 
     def remove_segmentation(self, segmentation):
@@ -370,8 +379,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def remove_analysis(self, analysis):
         self.analysis.remove(analysis)
         self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
-        if analysis.get_type() == ANALYSIS_JOB_ANALYSIS:
-            self.main_window.numpy_data_manager.remove_item(analysis.get_id())
         self.dispatch_changed()
 
     def get_analyzes_of_item(self, item):
@@ -581,13 +588,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         except:
             self.notes = ""
 
-        # try:
-        #     self.results_dir = my_dict['results_dir']
-        #     self.export_dir = my_dict['export_dir']
-        #     self.shots_dir = my_dict['shots_dir']
-        #     self.data_dir = my_dict['data_dir']
-        #     self.main_window.project_streamer.project = self
-        # except:
         splitted = path.split("/")[0:len(path.split("/")) - 1]
         self.folder = ""
         for f in splitted:
@@ -611,9 +611,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         except:
             move_project_to_directory_project = True
 
-
-
-
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
 
@@ -633,17 +630,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
 
-        # THIS IS OLD CODE AND SHOULD BE REMOVED
-        # if settings.SCREENSHOTS_STATIC_SAVE:
-        #     screenshots_path = path.replace(settings.PROJECT_FILE_EXTENSION, "_scr.npz")
-        #     loaded_scr = np.load(screenshots_path)
-        #     # screenshot_imgs = loaded_scr['imgs']
-        #     # screenshot_ann = loaded_scr['annotations']
-        #     for i, b in enumerate(my_dict['screenshots']):
-        #         new = Screenshot().deserialize(b)
-        #         self.add_screenshot(new)
-        #
-        # else:
         for i, b in enumerate(my_dict['screenshots']):
             new = Screenshot().deserialize(b, self)
             self.add_screenshot(new)
@@ -655,6 +641,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         for d in my_dict['analyzes']:
             new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
             self.add_analysis(new)
+            print(new.unique_id)
 
         try:
             old = self.screenshot_groups
@@ -813,6 +800,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
     # region Setters/Getters
     def cleanup(self):
+        self.main_window.numpy_data_manager.clean_up([f[0] for f in self.id_list])
         for l in self.annotation_layers:
             for w in l.annotations:
                 w.widget.close()
@@ -852,6 +840,13 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             if itm[0] != itm[1].unique_id:
                 self.id_list.remove(itm)
                 print(itm, " removed from ID-List")
+
+    def replace_ids(self):
+        for itm in self.id_list:
+            if itm[0] != itm[1].unique_id:
+                old = itm[0]
+                itm[0] = itm[1].unique_id
+                print("Updated ", old, " --> ", itm[1].unique_id, itm[1])
 
     def get_by_id(self, item_id):
         """
@@ -2246,6 +2241,9 @@ class ConnectionDescriptor(IProjectContainer):
         self.input_pin_id = input_pin_id
         self.output_pin_id = output_pin_id
 
+    def get_type(self):
+        return -1
+
     def serialize(self):
         data = dict(
             input_node = self.input_node,
@@ -2364,12 +2362,22 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 #region Analysis
 
 
-class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
+class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableContainer):
     def __init__(self, name = "", data = None):
         IProjectContainer.__init__(self)
         self.name = name
         self.notes = ""
         self.data = data
+
+
+    def unload_container(self, data=None):
+        print("Unload: ", self.unique_id, "\tANALYSIS")
+        super(AnalysisContainer, self).unload_container(self.data)
+        self.data = None
+
+    def apply_loaded(self, obj):
+        print("Loaded: ", self.unique_id, "\tANALYSIS")
+        self.data = obj
 
     def get_name(self):
         return self.name
@@ -2398,12 +2406,19 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         self.project.remove_analysis(self)
 
 
-class NodeScriptAnalysis(AnalysisContainer):
+class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
         super(NodeScriptAnalysis, self).__init__(name, results)
         self.script_id = script_id
         self.final_node_ids = final_nodes_ids
 
+    # def unload_container(self, data = None):
+    #     super(NodeScriptAnalysis, self).unload_container(self.data)
+    #     self.data = None
+    #
+    # def apply_loaded(self, obj):
+    #     self.data = obj
+    #
     def get_type(self):
         return ANALYSIS_NODE_SCRIPT
 
@@ -2472,7 +2487,7 @@ class NodeScriptAnalysis(AnalysisContainer):
         return self
 
 
-class IAnalysisJobAnalysis(AnalysisContainer):
+class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
     def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None):
         super(IAnalysisJobAnalysis, self).__init__(name, results)
         if analysis_job_class is not None:
@@ -2489,12 +2504,11 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         try:
             return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
         except Exception as e:
-            print(e)
-            QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
-                                " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
+            print("Preview:", e)
+            # QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
+            #                     " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 
     def get_visualization(self):
-
         try:
             return self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
                                                                                              self.project.results_dir,
@@ -2530,6 +2544,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         # for p in self.parameters:
         #     parameters.append(p)
 
+        self.data = self.project.main_window.project_streamer.sync_load(self.unique_id)
         self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
 
         data = dict(
@@ -2543,6 +2558,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
             notes=self.notes
         )
 
+
         return data
 
     def deserialize(self, serialization, streamer):
@@ -2555,7 +2571,6 @@ class IAnalysisJobAnalysis(AnalysisContainer):
 
         self.data = []
         self.data = streamer.sync_load(self.unique_id)
-
         self.parameters = serialization['parameters']
 
         return self
