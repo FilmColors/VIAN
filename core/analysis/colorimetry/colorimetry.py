@@ -137,6 +137,8 @@ class ColometricsAnalysis(IAnalysisJob):
         pg.setConfigOption("background", pg.mkColor(30, 30, 30))
         win = pg.GraphicsWindow(title="Colorimetry Results")
         pg.setConfigOptions(antialias=True)
+        l = pg.GraphicsLayout(border=(100, 100, 100))
+        win.setCentralWidget(l)
 
         frame_pos = analysis.data['frame_pos']
 
@@ -160,15 +162,17 @@ class ColometricsAnalysis(IAnalysisJob):
         h_axis2.setTicks([major_ticks, minor_ticks])
         h_axis3.setTicks([major_ticks, minor_ticks])
 
-        plot_lum = win.addPlot(title="L-Channel", y=lum_dt, axisItems=dict(bottom=h_axis1), name= "LChannel")
+        plot_lum = l.addPlot(title="L-Channel", y=lum_dt, axisItems=dict(bottom=h_axis1), name= "LChannel", row=0, column = 0, colspan = 2)
         plot_lum.setYRange(0, 100)
         plot_lum.setXLink('AChannel')
-
-        plot_a = win.addPlot(title="a-Channel", y=a_dt, axisItems=dict(bottom=h_axis2), name= "AChannel")
+        l.nextRow()
+        plot_a = l.addPlot(title="a-Channel", y=a_dt, axisItems=dict(bottom=h_axis2), name= "AChannel", row=1, column = 0, colspan = 2)
         plot_a.setYRange(-128, 128)
         plot_a.setYLink("BChannel")
         plot_a.setXLink('BChannel')
-        plot_b = win.addPlot(title="b-Channel", y=b_dt, axisItems=dict(bottom=h_axis3), name= "BChannel")
+
+        l.nextRow()
+        plot_b = l.addPlot(title="b-Channel", y=b_dt, axisItems=dict(bottom=h_axis3), name= "BChannel", row=2, column = 0, colspan = 2)
         plot_b.setYRange(-128, 128)
 
 

@@ -61,6 +61,7 @@ def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alph
 def pixmap_to_numpy(pixmap: QPixmap):
     return convertQImageToMat(pixmap.toImage().convertToFormat(QImage.Format_ARGB32_Premultiplied))
 
+
 def convertQImageToMat(qimage):
     '''  Converts a QImage into an opencv MAT format  '''
 
