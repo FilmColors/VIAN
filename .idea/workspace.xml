@@ -8,9 +8,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/app.iml" afterPath="$PROJECT_DIR$/.idea/app.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/analysis/colorimetry/colorimetry.py" afterPath="$PROJECT_DIR$/core/analysis/colorimetry/colorimetry.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/computation.py" afterPath="$PROJECT_DIR$/core/data/computation.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/inspector.py" afterPath="$PROJECT_DIR$/core/gui/inspector.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/user/master_file.ems" afterPath="$PROJECT_DIR$/user/master_file.ems" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -307,12 +304,10 @@
                 <element signature="e#3093#3233#0" expanded="false" />
                 <element signature="e#3283#3350#0" expanded="false" />
                 <element signature="e#4387#4502#0" expanded="false" />
-                <element signature="e#5209#7947#0" expanded="false" />
                 <element signature="e#5249#5845#0" expanded="false" />
                 <element signature="e#5896#6201#0" expanded="false" />
                 <element signature="e#5928#6050#0" expanded="false" />
                 <element signature="e#6077#6201#0" expanded="false" />
-                <element signature="e#6259#7082#0" expanded="false" />
                 <element signature="e#7123#7947#0" expanded="false" />
                 <element signature="e#7181#7245#0" expanded="false" />
                 <element signature="e#7307#7914#0" expanded="false" />
@@ -324,6 +319,9 @@
                 <element signature="e#9166#9647#0" expanded="false" />
                 <element signature="e#9303#9330#0" expanded="false" />
                 <element signature="e#9555#9647#0" expanded="false" />
+                <marker date="1516621140631" expanded="true" signature="5204:7082" ph="..." />
+                <marker date="1516621140631" expanded="true" signature="6236:6248" ph="..." />
+                <marker date="1516621140631" expanded="true" signature="8694:8706" ph="..." />
               </folding>
             </state>
           </provider>
@@ -368,6 +366,7 @@
                 <element signature="e#8185#8664#0" expanded="false" />
                 <element signature="e#8547#8664#0" expanded="false" />
                 <element signature="e#9034#9094#0" expanded="false" />
+                <marker date="1516622079383" expanded="true" signature="8857:8962" ph="..." />
               </folding>
             </state>
           </provider>
@@ -376,12 +375,11 @@
       <file leaf-file-name="colorimetry.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/analysis/colorimetry/colorimetry.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1044">
+            <state relative-caret-position="1224">
               <caret line="169" column="35" lean-forward="false" selection-start-line="169" selection-start-column="35" selection-end-line="169" selection-end-column="35" />
               <folding>
                 <element signature="e#0#62#0" expanded="true" />
                 <element signature="e#542#909#0" expanded="false" />
-                <element signature="e#1017#2047#0" expanded="false" />
                 <element signature="e#1345#2026#0" expanded="false" />
                 <element signature="e#1400#1686#0" expanded="false" />
                 <element signature="e#1412#1685#0" expanded="false" />
@@ -403,6 +401,10 @@
                 <element signature="e#8726#9201#0" expanded="false" />
                 <element signature="e#8754#8917#0" expanded="false" />
                 <element signature="e#8957#9201#0" expanded="false" />
+                <marker date="1516634638479" expanded="true" signature="508:2047" ph="..." />
+                <marker date="1516634638479" expanded="true" signature="941:971" ph="..." />
+                <marker date="1516634638479" expanded="true" signature="4657:4711" ph="..." />
+                <marker date="1516634638479" expanded="true" signature="6707:6865" ph="..." />
               </folding>
             </state>
           </provider>
@@ -421,8 +423,8 @@
       <file leaf-file-name="computation.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/core/data/computation.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="81" column="0" lean-forward="false" selection-start-line="81" selection-start-column="0" selection-end-line="101" selection-end-column="19" />
+            <state relative-caret-position="250">
+              <caret line="78" column="14" lean-forward="false" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
               <folding>
                 <element signature="e#255#702#0" expanded="false" />
                 <element signature="e#803#1349#0" expanded="false" />
@@ -433,7 +435,6 @@
                 <element signature="e#1550#1668#0" expanded="false" />
                 <element signature="e#1701#1823#0" expanded="false" />
                 <element signature="e#1842#1966#0" expanded="false" />
-                <element signature="e#2031#2126#0" expanded="false" />
                 <element signature="e#2165#2604#0" expanded="false" />
                 <element signature="e#2492#2589#0" expanded="false" />
                 <element signature="e#3353#4566#0" expanded="false" />
@@ -505,11 +506,19 @@
                 <element signature="e#9181#9255#0" expanded="false" />
                 <element signature="e#10076#10569#0" expanded="false" />
                 <element signature="e#10136#10405#0" expanded="false" />
-                <element signature="e#10460#10569#0" expanded="false" />
                 <element signature="e#10602#11738#0" expanded="false" />
                 <element signature="e#10668#11119#0" expanded="false" />
                 <element signature="e#11168#11624#0" expanded="false" />
                 <element signature="e#11678#11738#0" expanded="false" />
+                <marker date="1516467791352" expanded="true" signature="2510:2646" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="6726:7507" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="7278:7291" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="7545:7557" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="7690:7700" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="7961:7973" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="8214:8224" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="8446:8458" ph="..." />
+                <marker date="1516467791352" expanded="true" signature="10436:10449" ph="..." />
               </folding>
             </state>
           </provider>
@@ -644,7 +653,7 @@
       <file leaf-file-name="inspector.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/gui/inspector.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="279">
+            <state relative-caret-position="558">
               <caret line="260" column="55" lean-forward="false" selection-start-line="260" selection-start-column="55" selection-end-line="260" selection-end-column="55" />
               <folding>
                 <element signature="e#486#5131#0" expanded="false" />
@@ -904,7 +913,6 @@
     </navigator>
     <panes>
       <pane id="Scratches" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -969,6 +977,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -1293,8 +1302,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19083156" sideWeight="0.82231855" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20362474" sideWeight="0.82231855" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32827735" sideWeight="0.4952343" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2990249" sideWeight="0.5063966" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3109426" sideWeight="0.619403" order="5" side_tool="false" content_ui="tabs" />
@@ -1451,13 +1461,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://C:/dev/anaconda/pkgs/sphinx_rtd_theme-0.2.4-py35_0/Lib/site-packages/sphinx_rtd_theme/static/css/theme.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://C:/dev/anaconda/pkgs/sphinx_rtd_theme-0.2.4-py35_0/Lib/site-packages/sphinx_rtd_theme/static/css/theme.css" />
     <entry file="file://$PROJECT_DIR$/_docs/source/index.rst">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
@@ -1507,13 +1511,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/vlc_lib_pyqt5.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="9" column="12" lean-forward="false" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/vlc_lib_pyqt5.py" />
     <entry file="file://$USER_HOME$/Desktop/vlc_lib_pyqt5.py" />
     <entry file="file://$PROJECT_DIR$/core/gui/player_vlc.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -1573,13 +1571,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://C:/dev/anaconda/envs/vian_dev/Lib/threading.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="1012" column="0" lean-forward="false" selection-start-line="1012" selection-start-column="0" selection-end-line="1012" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://C:/dev/anaconda/envs/vian_dev/Lib/threading.py" />
     <entry file="file://$PROJECT_DIR$/core/analysis/movie_mosaic/movie_mosaic.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="211">
@@ -1675,12 +1667,10 @@
             <element signature="e#3093#3233#0" expanded="false" />
             <element signature="e#3283#3350#0" expanded="false" />
             <element signature="e#4387#4502#0" expanded="false" />
-            <element signature="e#5209#7947#0" expanded="false" />
             <element signature="e#5249#5845#0" expanded="false" />
             <element signature="e#5896#6201#0" expanded="false" />
             <element signature="e#5928#6050#0" expanded="false" />
             <element signature="e#6077#6201#0" expanded="false" />
-            <element signature="e#6259#7082#0" expanded="false" />
             <element signature="e#7123#7947#0" expanded="false" />
             <element signature="e#7181#7245#0" expanded="false" />
             <element signature="e#7307#7914#0" expanded="false" />
@@ -1692,6 +1682,9 @@
             <element signature="e#9166#9647#0" expanded="false" />
             <element signature="e#9303#9330#0" expanded="false" />
             <element signature="e#9555#9647#0" expanded="false" />
+            <marker date="1516621140631" expanded="true" signature="5204:7082" ph="..." />
+            <marker date="1516621140631" expanded="true" signature="6236:6248" ph="..." />
+            <marker date="1516621140631" expanded="true" signature="8694:8706" ph="..." />
           </folding>
         </state>
       </provider>
@@ -1734,6 +1727,7 @@
             <element signature="e#8185#8664#0" expanded="false" />
             <element signature="e#8547#8664#0" expanded="false" />
             <element signature="e#9034#9094#0" expanded="false" />
+            <marker date="1516622079383" expanded="true" signature="8857:8962" ph="..." />
           </folding>
         </state>
       </provider>
@@ -2001,12 +1995,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/core/analysis/colorimetry/colorimetry.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1044">
+        <state relative-caret-position="1224">
           <caret line="169" column="35" lean-forward="false" selection-start-line="169" selection-start-column="35" selection-end-line="169" selection-end-column="35" />
           <folding>
             <element signature="e#0#62#0" expanded="true" />
             <element signature="e#542#909#0" expanded="false" />
-            <element signature="e#1017#2047#0" expanded="false" />
             <element signature="e#1345#2026#0" expanded="false" />
             <element signature="e#1400#1686#0" expanded="false" />
             <element signature="e#1412#1685#0" expanded="false" />
@@ -2028,6 +2021,10 @@
             <element signature="e#8726#9201#0" expanded="false" />
             <element signature="e#8754#8917#0" expanded="false" />
             <element signature="e#8957#9201#0" expanded="false" />
+            <marker date="1516634638479" expanded="true" signature="508:2047" ph="..." />
+            <marker date="1516634638479" expanded="true" signature="941:971" ph="..." />
+            <marker date="1516634638479" expanded="true" signature="4657:4711" ph="..." />
+            <marker date="1516634638479" expanded="true" signature="6707:6865" ph="..." />
           </folding>
         </state>
       </provider>
@@ -2081,11 +2078,19 @@
             <element signature="e#9181#9255#0" expanded="false" />
             <element signature="e#10076#10569#0" expanded="false" />
             <element signature="e#10136#10405#0" expanded="false" />
-            <element signature="e#10460#10569#0" expanded="false" />
             <element signature="e#10602#11738#0" expanded="false" />
             <element signature="e#10668#11119#0" expanded="false" />
             <element signature="e#11168#11624#0" expanded="false" />
             <element signature="e#11678#11738#0" expanded="false" />
+            <marker date="1516467791352" expanded="true" signature="2510:2646" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="6726:7507" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="7278:7291" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="7545:7557" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="7690:7700" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="7961:7973" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="8214:8224" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="8446:8458" ph="..." />
+            <marker date="1516467791352" expanded="true" signature="10436:10449" ph="..." />
           </folding>
         </state>
       </provider>
@@ -2214,7 +2219,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/core/gui/inspector.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
+        <state relative-caret-position="558">
           <caret line="260" column="55" lean-forward="false" selection-start-line="260" selection-start-column="55" selection-end-line="260" selection-end-column="55" />
           <folding>
             <element signature="e#486#5131#0" expanded="false" />
@@ -2307,8 +2312,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/core/data/computation.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="81" column="0" lean-forward="false" selection-start-line="81" selection-start-column="0" selection-end-line="101" selection-end-column="19" />
+        <state relative-caret-position="250">
+          <caret line="78" column="14" lean-forward="false" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
           <folding>
             <element signature="e#255#702#0" expanded="false" />
             <element signature="e#803#1349#0" expanded="false" />
@@ -2319,7 +2324,6 @@
             <element signature="e#1550#1668#0" expanded="false" />
             <element signature="e#1701#1823#0" expanded="false" />
             <element signature="e#1842#1966#0" expanded="false" />
-            <element signature="e#2031#2126#0" expanded="false" />
             <element signature="e#2165#2604#0" expanded="false" />
             <element signature="e#2492#2589#0" expanded="false" />
             <element signature="e#3353#4566#0" expanded="false" />
