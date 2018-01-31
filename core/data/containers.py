@@ -1101,7 +1101,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.notes = serialization['notes']
         for s in serialization["segments"]:
             new = Segment()
-            new.deserialize(s, self)
+            new.deserialize(s, self.project)
             new.segmentation = self
             self.segments.append(new)
 
@@ -1289,7 +1289,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
                     self.add_word(self.project.get_by_id(w))
 
         except Exception as e:
-            pass
+            print(e)
 
         return self
 

@@ -14,7 +14,7 @@ from functools import partial
 
 from core.concurrent.worker_functions import *
 from core.data.enums import *
-from core.data.importers import ELANProjectImporter
+from core.data.importers import ELANProjectImporter, FilmColorsPipelineImporter, FileMakerVocImporter
 from core.data.masterfile import MasterFile
 from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
@@ -54,6 +54,7 @@ from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
+from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -252,6 +253,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.action_importELAN_Project.triggered.connect(self.import_elan_project)
         self.actionImportVocabulary.triggered.connect(self.import_vocabulary)
+        self.actionImportFilmColorsPipeline.triggered.connect(self.import_pipeline)
+        self.actionImportFilmColorsFilemaker.triggered.connect(self.import_filemaker)
 
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
         self.actionExportTemplate.triggered.connect(self.export_template)
@@ -429,6 +432,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def export_template(self):
         dialog = ExportTemplateDialog(self)
         dialog.show()
+
 
     def show_welcome(self):
         open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
@@ -627,7 +631,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.analysis_results_widget is None:
             self.analysis_results_widget_dock = AnalysisResultsDock(self)
             self.analysis_results_widget = AnalysisResultsWidget(self.analysis_results_widget_dock, self)
-            self.analysis_results_widget_dock.setWidget(self.analysis_results_widget)
+            self.analysis_results_widget_dock.set_analysis_widget(self.analysis_results_widget)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Vertical)
         else:
             if self.analysis_results_widget.isVisible():
@@ -829,7 +833,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_closed()
         self.dispatch_on_changed()
 
-
     def load_project(self, path):
 
         if path == "" or path is None:
@@ -888,6 +891,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.on_save_project(True)
 
     def on_exit(self):
+        if self.project.undo_manager.has_modifications():
+            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+            if answer == QMessageBox.Yes:
+                self.on_save_project()
+            elif answer == QMessageBox.No:
+                pass
+            else:
+                return
+
         self.drawing_overlay.close()
         self.vlc_player.release()
         self.vlc_instance.release()
@@ -898,11 +910,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.profiler.dump_stats("Profile.prof")
 
         self.settings.store()
-
-        if self.project.undo_manager.has_modifications():
-            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.Yes:
-                self.on_save_project()
 
         self.frame_update_thread.quit()
 
@@ -1076,12 +1083,33 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message(str(e), "Red")
 
     def import_vocabulary(self):
-        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
+        paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
+        # path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
         try:
-            self.project.import_vocabulary(path)
+            self.project.inhibit_dispatch = True
+            for p in paths:
+                self.project.import_vocabulary(p)
+            self.project.inhibit_dispatch = False
+            self.project.dispatch_changed()
         except Exception as e:
             self.print_message("Vocabulary Import Failed", "Red")
             self.print_message(str(e), "Red")
+
+    def import_pipeline(self):
+        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
+        if not os.path.isfile(path):
+            self.print_message("Could not Open File", "Red")
+            return
+        importer = FilmColorsPipelineImporter()
+        importer.import_pipeline(path, self.project)
+
+    def import_filemaker(self):
+        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
+        if not os.path.isfile(path):
+            self.print_message("Could not Open File", "Red")
+            return
+        importer = FileMakerVocImporter()
+        importer.import_filemaker(path, self.project)
 
     def export_segmentation(self):
         # path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]

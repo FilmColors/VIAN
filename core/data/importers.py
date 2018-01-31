@@ -1,13 +1,15 @@
 import csv
 import os
+import pickle
 import glob
 import xml.dom.minidom
 from xml.dom.minidom import parse
 
 import numpy as np
 
-from core.data.containers import Segment, Segmentation, ElanExtensionProject
+from core.data.containers import Segment, Segmentation, ElanExtensionProject, IAnalysisJobAnalysis
 from core.data.interfaces import IConcurrentJob
+from core.analysis.filmcolors_pipeline.filmcolors_pipeline import *
 
 class ELANProjectImporter():
     def __init__(self, main_window, remote_movie = False, import_screenshots = False, movie_formats = None):
@@ -16,7 +18,6 @@ class ELANProjectImporter():
         self.import_screenshots = import_screenshots
         if movie_formats is None:
             self.movie_formats = [".mov", ".mp4", ".mkv", ".m4v"]
-
 
     def import_project(self, path):
         movie_path, segmentations = self.elan_project_importer(path)
@@ -76,7 +77,6 @@ class ELANProjectImporter():
         print(project.movie_descriptor.movie_path)
 
         return project
-
 
     def find_time_slot(self, slots, slot_name):
         for s in slots:
@@ -174,6 +174,116 @@ class ScreenshotImporter(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         pass
     
+class FilmColorsPipelineImporter():
+    def import_pipeline(self, path, project: ElanExtensionProject):
+
+        try:
+            with open(path, "rb") as file:
+                data = pickle.load(file)
+            #region #--- Import Analysis ---
+            analysis = IAnalysisJobAnalysis("FilmColors Pipeline",
+                                            results=data,
+                                            analysis_job_class=FilmColorsPipelineAnalysis().__class__,
+                                            parameters= FilmColorsPipelinePreferences().get_parameters())
+
+            thumb_fg = []
+            for img in data["thumbnails_fg"]:
+                thumb_fg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
+            thumb_bg = []
+            for img in data["thumbnails_bg"]:
+                thumb_bg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
+
+            data['thumbnails_fg'] = thumb_fg
+            data['thumbnails_bg'] = thumb_bg
+
+            project.add_analysis(analysis)
+            analysis.unload_container()
+            #endregion
+
+            return analysis
+        except Exception as e:
+            print(e)
+
+class FileMakerVocImporter():
+    def import_filemaker(self, path, project: ElanExtensionProject):
+        with open(path, "r") as file:
+            film_id = project.movie_descriptor.movie_id
+            reader = csv.reader(file, delimiter=';')
+            table = None
+            for row in reader:
+                if table is None:
+                    table = self.parse_header(row)
+
+                elif row[0] == film_id:
+                    for i, w in enumerate(row):
+                        w = w.replace("\n", "")
+                        w = w.rstrip()
+                        w = w.lstrip()
+                        w = w.split("°")
+                        keywords = []
+                        for k in w:
+                            k = k.rstrip()
+                            k = k.lstrip()
+                            keywords.append(k)
+                        table[i].append(keywords)
+
+            for r in table:
+                print(len(r), r)
+            self.apply_vocabulary(table, project)
+
+    def parse_header(self, header):
+        header_words = []
+        for w in header:
+            w = w.replace("_sortiert", "")
+            w = w.replace("_Checkboxes_", "")
+            w = w.replace("_Checkboxes", "")
+            w = w.replace("Checkboxes", "")
+            w = w.replace("sortiert", "")
+            w = w.replace("Keywords_", "")
+            w = w.replace("_", " ")
+            header_words.append([w])
+        return header_words
+
+
+    def apply_vocabulary(self, table, project: ElanExtensionProject, print_failed = False):
+        voc_names = [v.name for v in project.vocabularies]
+        voc_obj = [v for v in project.vocabularies]
+
+        segments = []
+        skipped = 0
+        added  = 0
+        for i, row in enumerate(table):
+            category = row[0]
+            if category in voc_names:
+                voc = voc_obj[voc_names.index(category)]
+                for j in range(1, len(row)):
+                    segm = [j - 1, []]
+                    word_group = row[j]
+                    for word in word_group:
+                        if word != "":
+                            word_obj = voc.get_word_by_name(word)
+                            if word_obj is None:
+                                skipped += 1
+                            else:
+                                added += 1
+                                segm[1].append(word_obj)
+
+                    segments.append(segm)
+
+        main_seg = project.get_main_segmentation()
+        for s in segments:
+            idx = s[0]
+            objs = s[1]
+            if idx < len(main_seg.segments):
+                for word in objs:
+                    main_seg.segments[idx].add_word(word)
+            else:
+                print("Exceeded")
+
+        print("Filemaker Data Loaded")
+        print("Skipped: ", skipped)
+        print("  Added: ", added)
+
 
 # OLD CODE
 # def import_elan_segmentation(path, name, id_identifier, prevent_overlapping = False): #, additional_identifiers):

@@ -1,4 +1,4 @@
-from core.data.interfaces import IAnalysisJob, ParameterWidget
+from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 from core.data.containers import *
 from core.analysis.colorimetry.hilbert import *
 from core.analysis.colorimetry.computation import *
@@ -133,7 +133,7 @@ class ColometricsAnalysis(IAnalysisJob):
     def get_parameter_widget(self):
         return ColormetricsPreferences()
 
-    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:ElanExtensionProject, main_window: QMainWindow):
+    def create_graph_plot(self, analysis):
         pg.setConfigOption("background", pg.mkColor(30, 30, 30))
         win = pg.GraphicsWindow(title="Colorimetry Results")
         pg.setConfigOptions(antialias=True)
@@ -162,27 +162,34 @@ class ColometricsAnalysis(IAnalysisJob):
         h_axis2.setTicks([major_ticks, minor_ticks])
         h_axis3.setTicks([major_ticks, minor_ticks])
 
-        plot_lum = l.addPlot(title="L-Channel", y=lum_dt, axisItems=dict(bottom=h_axis1), name= "LChannel", row=0, column = 0, colspan = 2)
+        plot_lum = l.addPlot(title="L-Channel", y=lum_dt, axisItems=dict(bottom=h_axis1), name="LChannel", row=0,
+                             column=0, colspan=2)
         plot_lum.setYRange(0, 100)
         plot_lum.setXLink('AChannel')
         l.nextRow()
-        plot_a = l.addPlot(title="a-Channel", y=a_dt, axisItems=dict(bottom=h_axis2), name= "AChannel", row=1, column = 0, colspan = 2)
+        plot_a = l.addPlot(title="a-Channel", y=a_dt, axisItems=dict(bottom=h_axis2), name="AChannel", row=1, column=0,
+                           colspan=2)
         plot_a.setYRange(-128, 128)
         plot_a.setYLink("BChannel")
         plot_a.setXLink('BChannel')
 
         l.nextRow()
-        plot_b = l.addPlot(title="b-Channel", y=b_dt, axisItems=dict(bottom=h_axis3), name= "BChannel", row=2, column = 0, colspan = 2)
+        plot_b = l.addPlot(title="b-Channel", y=b_dt, axisItems=dict(bottom=h_axis3), name="BChannel", row=2, column=0,
+                           colspan=2)
         plot_b.setYRange(-128, 128)
-
 
         print(np.amin(b_dt),
               np.amax(b_dt),
               np.amin(analysis.data['avg_colors'][:, 2]),
               np.amax(analysis.data['avg_colors'][:, 2]))
-
-        print("WINDOW Returned", win)
         return win
+
+    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:ElanExtensionProject, main_window: QMainWindow):
+
+        p_graphs = self.create_graph_plot(analysis)
+
+
+        return [VisualizationTab(name="Colorimetric", widget=p_graphs)]
         # mw = EDockWidget(main_window, limit_size=False)
         # mw.setWindowTitle("Colorimetry Result")
         # mw.setWidget(win)

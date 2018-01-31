@@ -46,6 +46,9 @@
      <addaction name="actionImportELANSegmentation"/>
      <addaction name="action_importELAN_Project"/>
      <addaction name="actionImportVocabulary"/>
+     <addaction name="separator"/>
+     <addaction name="actionImportFilmColorsPipeline"/>
+     <addaction name="actionImportFilmColorsFilemaker"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="title">
@@ -584,6 +587,16 @@
    </property>
    <property name="shortcut">
     <string>Alt+6</string>
+   </property>
+  </action>
+  <action name="actionImportFilmColorsPipeline">
+   <property name="text">
+    <string>FilmColors Pipeline</string>
+   </property>
+  </action>
+  <action name="actionImportFilmColorsFilemaker">
+   <property name="text">
+    <string>FilmColors Filemaker</string>
    </property>
   </action>
  </widget>
