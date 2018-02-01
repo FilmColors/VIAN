@@ -8,6 +8,10 @@ from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal
 
 from core.data.computation import *
 
+SOURCE_FOREGROUND = 0
+SOURCE_BACKGROUND = 1
+SOURCE_COMPLETE = 2
+
 class ImagePlot(QGraphicsView):
     def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
         super(ImagePlot, self).__init__(parent)
@@ -140,18 +144,21 @@ class ImagePlotCircular(ImagePlot):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
 
     def add_image(self, x, y, img, convert = True, luminance = None):
-        if convert:
-            itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
-        else:
-            itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None))
-        self.scene().addItem(itm)
-        itm.setPos((x -128) * self.magnification, (y -128) * self.magnification)
-        self.images.append(itm)
+        try:
+            if convert:
+                itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
+            else:
+                itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None,  with_alpha = True))
+            self.scene().addItem(itm)
+            itm.setPos((x -128) * self.magnification, (y -128) * self.magnification)
+            self.images.append(itm)
 
-        if luminance is not None:
-            self.luminances.append([luminance, itm])
+            if luminance is not None:
+                self.luminances.append([luminance, itm])
 
-        itm.show()
+            itm.show()
+        except Exception as e:
+            print(e)
 
     def add_grid(self):
         pen = QPen()
@@ -180,6 +187,7 @@ class ImagePlotCircular(ImagePlot):
             self.scene().addLine(0, 0 , x, y, pen)
         self.circle0.show()
 
+
 class ImagePlotPlane(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None, title=""):
         super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
@@ -188,7 +196,7 @@ class ImagePlotPlane(ImagePlot):
         if convert:
             itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
         else:
-            itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None))
+            itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None, with_alpha=True))
         self.scene().addItem(itm)
 
         itm.setPos(x * self.magnification, self.range_y[1] * self.magnification - y * self.magnification)
@@ -231,6 +239,7 @@ class ImagePlotPlane(ImagePlot):
 class ImagePlotControls(QWidget):
     onLowCutChange = pyqtSignal(int)
     onHighCutChange = pyqtSignal(int)
+    onSourceChanged = pyqtSignal(int)
 
     def __init__(self, parent):
         super(ImagePlotControls, self).__init__(parent)
@@ -263,6 +272,13 @@ class ImagePlotControls(QWidget):
         self.layout().addItem(self.lay_lcut)
         self.layout().addItem(self.lay_hcut)
 
+        self.cb_source = QComboBox(self)
+        self.cb_source.addItem("Foreground")
+        self.cb_source.addItem("Background")
+        self.cb_source.addItem("Complete")
+
+        self.cb_source.currentIndexChanged.connect(self.onSourceChanged)
+        self.layout().addWidget(self.cb_source)
         self.resize(200, 100)
 
     def on_low_cut(self):

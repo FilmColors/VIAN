@@ -72,9 +72,24 @@ class ELANProjectImporter():
 
         for s in project.segmentation:
             s.update_segment_ids()
+
+
+        QMessageBox.information(self.main_window,
+                                "Choose the File Path",
+                                "Please Choose the Directory in which the new Project should be created.")
+        dir = QFileDialog.getExistingDirectory(directory=self.main_window.settings.DIR_PROJECT)
+        try:
+            os.mkdir(dir + "/" + filename)
+        except:
+            self.main_window.print_message("IMPORT FAILED: Could not Create Directory: " + str(dir + filename), "Red")
+            return False
+
+        project.folder = dir + "/" + filename + "/"
         print(project.name)
-        print(project.path)
+        print(project.folder)
         print(project.movie_descriptor.movie_path)
+
+        project.create_file_structure()
 
         return project
 
@@ -186,15 +201,19 @@ class FilmColorsPipelineImporter():
                                             analysis_job_class=FilmColorsPipelineAnalysis().__class__,
                                             parameters= FilmColorsPipelinePreferences().get_parameters())
 
-            thumb_fg = []
-            for img in data["thumbnails_fg"]:
-                thumb_fg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
-            thumb_bg = []
-            for img in data["thumbnails_bg"]:
-                thumb_bg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
+            print(np.mean(data['frame_lab_fg'], axis = 0))
+            print(np.mean(data['frame_lab_bg'], axis=0))
+            print(np.mean(np.divide(np.add(data['frame_lab_bg'].astype(np.float32),data['frame_lab_fg']), 2), axis=0))
 
-            data['thumbnails_fg'] = thumb_fg
-            data['thumbnails_bg'] = thumb_bg
+            # thumb_fg = []
+            # for img in data["thumbnails_fg"]:
+            #     thumb_fg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
+            # thumb_bg = []
+            # for img in data["thumbnails_bg"]:
+            #     thumb_bg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
+
+            # data['thumbnails_fg'] = thumb_fg
+            # data['thumbnails_bg'] = thumb_bg
 
             project.add_analysis(analysis)
             analysis.unload_container()
@@ -227,8 +246,6 @@ class FileMakerVocImporter():
                             keywords.append(k)
                         table[i].append(keywords)
 
-            for r in table:
-                print(len(r), r)
             self.apply_vocabulary(table, project)
 
     def parse_header(self, header):
@@ -240,12 +257,16 @@ class FileMakerVocImporter():
             w = w.replace("Checkboxes", "")
             w = w.replace("sortiert", "")
             w = w.replace("Keywords_", "")
+            w = w.replace("Merger", "")
             w = w.replace("_", " ")
             header_words.append([w])
         return header_words
 
 
     def apply_vocabulary(self, table, project: ElanExtensionProject, print_failed = False):
+        if table is None:
+            return
+
         voc_names = [v.name for v in project.vocabularies]
         voc_obj = [v for v in project.vocabularies]
 
@@ -271,6 +292,7 @@ class FileMakerVocImporter():
                     segments.append(segm)
 
         main_seg = project.get_main_segmentation()
+        print("Main Segmentation Length: ",len(main_seg.segments))
         for s in segments:
             idx = s[0]
             objs = s[1]

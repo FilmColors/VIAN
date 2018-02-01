@@ -70,6 +70,7 @@
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
+    <addaction name="actionBackup"/>
     <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="menuImport"/>
@@ -145,6 +146,8 @@
     <addaction name="actionTaksMonitor"/>
     <addaction name="actionHistory"/>
     <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionFullscreen"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -597,6 +600,16 @@
   <action name="actionImportFilmColorsFilemaker">
    <property name="text">
     <string>FilmColors Filemaker</string>
+   </property>
+  </action>
+  <action name="actionBackup">
+   <property name="text">
+    <string>Backup</string>
+   </property>
+  </action>
+  <action name="actionFullscreen">
+   <property name="text">
+    <string>Fullscreen</string>
    </property>
   </action>
  </widget>

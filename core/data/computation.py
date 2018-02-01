@@ -48,7 +48,7 @@ def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alph
         factor = float(target_width) / arr.shape[1]
         arr = cv2.resize(arr, None, None, factor, factor, cv2.INTER_CUBIC)
 
-    if not with_alpha:
+    if not with_alpha or arr.shape[2] < 4:
         qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format_RGB888)
         qpixmap = QPixmap(qimage)
     else:

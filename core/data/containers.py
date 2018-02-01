@@ -387,6 +387,13 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             if isinstance(a, IAnalysisJobAnalysis) and item.unique_id in a.parameters.target_items:
                 result.append(item)
         return item
+
+    def get_job_analyses(self):
+        result = []
+        for a in self.analysis:
+            if isinstance(a, IAnalysisJobAnalysis):
+                result.append(a)
+        return result
     #endregion
 
 
@@ -757,7 +764,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
-
 
     #region Vocabularies
     def create_vocabulary(self, name="New Vocabulary"):

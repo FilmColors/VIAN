@@ -39,6 +39,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from core.visualization.image_plots import *
+from core.visualization.feature_plot import *
 
 
 
@@ -149,9 +150,11 @@ class FilmColorsPipelineAnalysis(IAnalysisJob):
         data = analysis.data
 
         cs_plots = ColorSpaceVis(None, data)
+        feature_plot = FeaturePlotWidget(None, project)
 
         tabs = [
-            VisualizationTab(name="ColorSpace Plots", widget=cs_plots)
+            VisualizationTab(name="ColorSpace Plots", widget=cs_plots, use_filter=True, controls=cs_plots.controls),
+            VisualizationTab(name="Feature Plot", widget=feature_plot, use_filter=True, controls=None)
         ]
 
         return tabs
@@ -186,6 +189,9 @@ class ColorSpaceVis(QWidget):
         super(ColorSpaceVis, self).__init__(parent)
         self.data = data
 
+        print(np.mean(self.data['frame_lab_fg'], axis=0))
+        print(np.mean(self.data['frame_lab_bg'], axis=0))
+
         self.ab_view = ImagePlotCircular(self)
         self.la_view = ImagePlotPlane(self, range_x=[-128, 128], range_y=[0, 100], title="L-a Plane")
         self.lb_view = ImagePlotPlane(self, range_x=[-128, 128], range_y=[0, 100], title="L-b Plane")
@@ -211,15 +217,32 @@ class ColorSpaceVis(QWidget):
         ctrl.onHighCutChange.connect(self.lb_view.on_high_cut)
         layout_left.addWidget(self.lb_view)
 
+        ctrl.onSourceChanged.connect(self.on_source_changed)
+
         self.layout().addItem(layout_left)
 
-        self.plot_foreground()
+        self.controls = ctrl
+
+        self.on_source_changed(0)
         self.show()
 
-    def plot_complete(self):
-        c_sum = np.divide(np.add(self.data['frame_lab_fg'], self.data['frame_lab_bg']), 2.0)
-        print("TEST", np.amax(c_sum), np.amin(c_sum))
+    @pyqtSlot(list)
+    def on_filter(self, names):
+        print(names)
 
+    @pyqtSlot(int)
+    def on_source_changed(self, index):
+        if index == SOURCE_BACKGROUND:
+            self.plot_background()
+        elif index == SOURCE_FOREGROUND:
+            self.plot_foreground()
+        else:
+            self.plot_complete()
+
+    def plot_complete(self):
+        c_sum = np.divide(np.add(self.data['frame_lab_fg'].astype(np.float32),
+                                 self.data['frame_lab_bg'].astype(np.float32)),
+                          2.0)
         self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], self.data['thumbnails'], view=self.ab_view)
         self.image_plot_la(c_sum[:, 0], c_sum[:, 1], self.data['thumbnails'], view=self.la_view)
         self.image_plot_la(c_sum[:, 0], c_sum[:, 2], self.data['thumbnails'], view=self.lb_view)
@@ -227,12 +250,19 @@ class ColorSpaceVis(QWidget):
     def plot_foreground(self):
         c_sum = self.data['frame_lab_fg']
 
+        print(np.mean(self.data['frame_lab_fg'], axis=0))
+        print(np.mean(self.data['frame_lab_bg'], axis=0))
+
         self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], self.data['thumbnails_fg'], view=self.ab_view)
         self.image_plot_la(c_sum[:, 0], c_sum[:, 1], self.data['thumbnails_fg'], view=self.la_view)
         self.image_plot_la(c_sum[:, 0], c_sum[:, 2], self.data['thumbnails_fg'], view=self.lb_view)
 
     def plot_background(self):
-        pass
+        c_sum = self.data['frame_lab_bg']
+        print(np.mean(c_sum, axis=0))
+        self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], self.data['thumbnails_bg'], view=self.ab_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 1], self.data['thumbnails_bg'], view=self.la_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 2], self.data['thumbnails_bg'], view=self.lb_view)
 
     def image_plot_ab(self, luminances, xs, ys, imgs, range_x=None, range_y=None, view = None):
         if view is None:
@@ -265,3 +295,17 @@ class ColorSpaceVis(QWidget):
         view.sort_images()
 
         return view
+
+
+class FeaturePlotWidget(QWidget):
+    def __init__(self, parent, project):
+        super(FeaturePlotWidget, self).__init__(parent)
+        self.project = project
+
+        self.setLayout(QHBoxLayout(self))
+        self.plot = FeaturePlot(self, project)
+        self.layout().addWidget(self.plot)
+
+    @pyqtSlot(list)
+    def on_filter(self, names):
+        self.plot.on_filter(names)

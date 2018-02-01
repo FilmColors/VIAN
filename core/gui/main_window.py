@@ -7,7 +7,7 @@ import os
 import glob
 import cv2
 from core.concurrent.worker import Worker
-
+import time
 
 import importlib
 from functools import partial
@@ -249,6 +249,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad.triggered.connect(self.on_load_project)
         self.actionSave.triggered.connect(self.on_save_project)
         self.actionSaveAs.triggered.connect(self.on_save_project_as)
+        self.actionBackup.triggered.connect(self.on_backup)
 
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.action_importELAN_Project.triggered.connect(self.import_elan_project)
@@ -278,6 +279,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionVocabularyManager.triggered.connect(self.create_vocabulary_manager)
         self.actionInspector.triggered.connect(self.create_inspector)
         self.actionTimeline.triggered.connect(self.create_timeline)
+        self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
 
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
@@ -855,10 +857,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_loaded()
 
     def on_save_project(self, open_dialog=False):
-        if not self.has_open_project:
-            self.print_message("No Project Open", "red")
-            return
-
         if open_dialog is True or self.project.path is "" or self.project.name is "":
 
             path = QFileDialog.getSaveFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION)
@@ -1073,6 +1071,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             importer = ELANProjectImporter(self, remote_movie=True, import_screenshots=True)
             self.project = importer.import_project(path)
+            self.on_save_project(False)
 
             self.project.main_window = self
             self.project.dispatch_loaded()
@@ -1125,6 +1124,29 @@ class MainWindow(QtWidgets.QMainWindow):
             zip_project(self.project.export_dir + "/" + self.project.name, self.project.folder)
         except Exception as e:
             self.print_message("Zipping Project Failed", "Red")
+            self.print_message(str(e), "Red")
+
+    def on_backup(self):
+        answer = QMessageBox.question(self, "Backup", "Do you want to store the Backup into the default Directory?",
+                                      buttons=QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
+        if answer == QMessageBox.No:
+            path = QFileDialog.getExistingDirectory(self, directory = self.settings.DIR_PROJECT)[0] + "/"
+        elif answer == QMessageBox.Yes:
+            path = self.settings.DIR_BACKUPS
+        else:
+            return
+
+        if path is None or path == "":
+            self.print_message("The Path: " + str(path) + " does not exist, please choose it manually.", "Orange")
+            return
+
+        filename = time.strftime("%Y_%m_%d_%H_%M_%S", time.gmtime(time.time()))+"_"+self.project.name + "_backup"
+        try:
+            print(path + filename)
+            zip_project(path + filename, self.project.folder)
+            self.print_message("Backup sucessfully stored to: " + path + filename + ".zip", "Green")
+        except Exception as e:
+            self.print_message("Backup Failed", "Red")
             self.print_message(str(e), "Red")
 
     def print_message(self, msg, color = "green"):
@@ -1390,8 +1412,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.restoreState(setting.value("windowState"))
 
     def start_worker(self, worker, name = "New Task"):
-        self.concurrent_task_viewer.add_task(worker.task_id, name)
+        self.concurrent_task_viewer.add_task(worker.task_id, name, worker)
         self.thread_pool.start(worker)
+
+    def toggle_fullscreen(self):
+        if self.isFullScreen():
+            self.showMaximized()
+        else:
+            self.showFullScreen()
 
     def on_frame_source_changed(self, visibility):
         if visibility:
