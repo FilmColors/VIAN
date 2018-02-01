@@ -74,7 +74,7 @@ class MainWindow(QtWidgets.QMainWindow):
     abortAllConcurrentThreads = pyqtSignal()
     onOpenCVFrameVisibilityChanged = pyqtSignal(bool)
 
-    def __init__(self,vlc_instance, vlc_player):
+    def __init__(self):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
@@ -111,8 +111,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.USE_CORPUS:
             self.corpus_client.start()
 
-        self.vlc_instance = vlc_instance
-        self.vlc_player = vlc_player
 
         self.updater = VianUpdater(self, self.version)
 
@@ -898,9 +896,9 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 return
 
-        self.drawing_overlay.close()
-        self.vlc_player.release()
-        self.vlc_instance.release()
+        self.dispatch_on_closed()
+
+        # self.drawing_overlay.close()
         self.corpus_client.send_disconnect(self.settings.USER_NAME)
 
         if PROFILE:
