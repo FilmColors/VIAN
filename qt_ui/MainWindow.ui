@@ -148,6 +148,7 @@
     <addaction name="actionPreferences"/>
     <addaction name="separator"/>
     <addaction name="actionFullscreen"/>
+    <addaction name="actionToggleStatusBar"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -613,6 +614,14 @@
    </property>
    <property name="shortcut">
     <string>F11</string>
+   </property>
+  </action>
+  <action name="actionToggleStatusBar">
+   <property name="text">
+    <string>Toggle StatusBar</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
    </property>
   </action>
  </widget>

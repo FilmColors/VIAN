@@ -5,6 +5,7 @@ from PyQt5 import uic
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 from core.data.interfaces import IProjectChangeNotify, IHasVocabulary
 import os
+from functools import partial
 from core.data.enums import *
 
 class VocabularyManager(EDockWidget, IProjectChangeNotify):
@@ -142,9 +143,14 @@ class VocabularyContextMenu(QMenu):
             self.a_remove = self.addAction("Remove Word")
             self.a_remove.triggered.connect(self.on_remove)
             self.a_add_word = self.addAction("Add Word")
-        self.a_new_voc = self.addAction("New Vocabulary")
+            if self.item.get_type() == VOCABULARY and self.main_window.project is not None:
+                self.a_copy = self.addAction("Copy Vocabulary")
+                self.a_copy.triggered.connect(partial(self.main_window.project.copy_vocabulary, self.item))
 
+        self.a_new_voc = self.addAction("New Vocabulary")
         self.a_new_voc.triggered.connect(self.on_new_voc)
+
+
 
 
         self.popup(pos)
@@ -153,8 +159,10 @@ class VocabularyContextMenu(QMenu):
         self.main_window.project.create_vocabulary("New Vocabulary")
 
     def on_remove(self):
-
-        self.item.vocabulary.remove_word(self.item)
+        if self.item.get_type() == VOCABULARY:
+            self.main_window.project.remove_vocabulary(self.item)
+        else:
+            self.item.vocabulary.remove_word(self.item)
 
 
 class VocabularyItem(QStandardItem):
@@ -198,7 +206,7 @@ class VocabularyExportDialog(EDialogWidget):
             dir = self.lineEdit_Path.text()
             for itm in self.entries:
                 if itm[0].isChecked():
-                    itm[1].export_vocabulary(dir + "/" +itm[1].name + ".txt")
+                    itm[1].export_vocabulary(dir + "/" +itm[1].name + ".json")
 
             self.close()
 

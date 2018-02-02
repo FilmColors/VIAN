@@ -104,7 +104,12 @@ class ProjectStreamerShelve(ProjectStreamer):
         else:
             path = self.container_db
         with shelve.open(path) as db:
-            obj = db[str(id)]
+            try:
+                obj = db[str(id)]
+            except Exception as e:
+                self.main_window.print_message("Error in Streamer: " + str(e), "Orange")
+                self.main_window.print_message("If you have just loaded the Project please wait some seconds and try again", "Orange")
+                return None
 
         return obj
 
@@ -183,7 +188,6 @@ class AsyncShelveStream(QObject):
     @pyqtSlot(str, int, object, object)
     def load(self, unique_id, data_type, slot, slot_arguments):
         try:
-            print("TEST", "\tDATA Loading")
             self.signals.finished.connect(slot)
 
             if data_type == STREAM_DATA_ARBITRARY:

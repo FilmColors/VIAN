@@ -5,12 +5,13 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-import numpy  as np
+import numpy as np
 
 from core.data.containers import IAnalysisJobAnalysis
 from core.data.interfaces import IProjectChangeNotify
 
 FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
+
 
 class AnalysisResultsDock(EDockWidget):
     def __init__(self, main_window):
@@ -42,7 +43,6 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.layout().addWidget(self.analysis_widget)
         self.current_visualization = []
         self.current_analysis = None
-
         self.fullscreen_view = None
         self.analysis_widget.setLayout(QHBoxLayout(self))
 
@@ -52,9 +52,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.current_analysis.load_container(self.apply_analysis, sync=True)
 
     def apply_analysis(self):
-        print("TEST, Applying Analysis")
         visualizations = self.current_analysis.get_visualization()
-        print(visualizations)
         self.current_analysis.unload_container()
         if visualizations is not None:
             self.analysis_widget.layout().addWidget(visualizations[0].widget)
@@ -91,10 +89,16 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
 
 class AnalysisFullScreenWindow(QMainWindow):
     onFilter = pyqtSignal(list)
+    onVisChanged = pyqtSignal(int)
+
     def __init__(self, main_window, analysis_widget):
         super(AnalysisFullScreenWindow, self).__init__(main_window)
         self.main_window = main_window
-        self.setStyleSheet("AnalysisFullScreenWindow{background: rgb(30,30,30)}")
+        self.setStyleSheet("QMainWindow{background: rgb(30,30,30);} QGraphicsView{border: 1px solid rgb(22, 22, 22);}}")
+
+        self.tab_selector_open = False
+        self.tab_filters_open = False
+
         # self.setWindowFlags(Qt.FramelessWindowHint)
         self.analysis_widget = analysis_widget
         self.tab_selector = AnalysisFullScreenTabSelector(self)
@@ -125,35 +129,47 @@ class AnalysisFullScreenWindow(QMainWindow):
         self.tabs = []
         self.current_tab = None
 
+
         self.tab_selector_anim = QPropertyAnimation(self.tab_selector, b"geometry")
         self.tab_selector_anim.setStartValue(QRect(0, 0, 0, 0))
         self.tab_selector_anim.setEndValue(QRect(0, 0, self.tab_selector_width, self.height()))
         self.tab_selector_hover.onEnter.connect(self.on_show_tab_selector)
+        self.tab_selector.onLeave.connect(self.on_hide_tab_selector)
 
         self.showFullScreen()
+
+    def enterEvent(self, a0: QEvent):
+        super(AnalysisFullScreenWindow, self).enterEvent(a0)
 
     def on_show_filter_tab(self):
         self.filter_section_anim.setDirection(self.filter_section_anim.Forward)
         self.filter_section_anim.start()
+        self.tab_filters_open = True
 
     def on_hide_filter_tab(self):
         self.filter_section_anim.setDirection(self.filter_section_anim.Backward)
         self.filter_section_anim.start()
+        self.tab_filters_open = False
 
     def on_show_tab_selector(self):
         self.tab_selector_anim.setDirection(self.tab_selector_anim.Forward)
         self.tab_selector_anim.start()
+        self.tab_selector_open = True
 
     def on_hide_tab_selector(self):
         self.tab_selector_anim.setDirection(self.tab_selector_anim.Backward)
         self.tab_selector_anim.start()
+        self.tab_selector_open = False
 
     def update_view(self):
         self.tab_selector.clear()
+        for t in self.tabs:
+            self.stack.removeWidget(t.widget)
         self.tabs = []
 
         for v in self.analysis_widget.current_visualization:
             self.add_tab(v)
+
         self.select_tab(0)
         self.tab_selector.add_spacer()
 
@@ -161,6 +177,8 @@ class AnalysisFullScreenWindow(QMainWindow):
         self.tabs.append(tab)
         self.stack.addWidget(tab.widget)
         self.tab_selector.add_tab(tab.name, len(self.tabs) - 1)
+        if tab.use_filter == True:
+            self.onFilter.connect(tab.widget.on_filter)
 
     def select_tab(self, idx):
         if idx > (len(self.tabs) - 1):
@@ -168,11 +186,12 @@ class AnalysisFullScreenWindow(QMainWindow):
 
         self.current_tab = self.tabs[idx].widget
 
-        if self.tabs[idx].use_filter == True:
-            self.onFilter.connect(self.current_tab.on_filter)
+        # if self.tabs[idx].use_filter == True:
+        #     self.onFilter.connect(self.current_tab.on_filter)
 
         if self.tabs[idx].controls is not None:
             self.filter_section.set_controls(self.tabs[idx].controls)
+
 
         self.stack.setCurrentIndex(idx)
 
@@ -182,8 +201,7 @@ class AnalysisFullScreenWindow(QMainWindow):
         self.filter_hover.raise_()
         self.tab_selector_anim.setEndValue(QRect(0, 0, self.tab_selector_width, self.height()))
         self.current_tab.show()
-
-        print("TEST", self.tabs)
+        self.onVisChanged.emit(idx)
 
     def add_filter(self, word):
         self.filters.append(word)
@@ -195,7 +213,6 @@ class AnalysisFullScreenWindow(QMainWindow):
             self.onFilter.emit(self.filters)
         except:
             pass
-
 
     def keyPressEvent(self, a0: QKeyEvent):
         if a0.key() == Qt.Key_Escape:
@@ -248,16 +265,18 @@ class HoverWidget(QWidget):
 
 
 class AnalysisFullScreenTabSelector(QWidget):
+    onLeave = pyqtSignal()
+
     def __init__(self, fullscreen_window):
         super(AnalysisFullScreenTabSelector, self).__init__(fullscreen_window)
+        self.setMouseTracking(True)
         self.fullscreen_window = fullscreen_window
         self.setLayout(QVBoxLayout(self))
-
         self.analysis_ctrl = AnalysisFullScreenAnalysisSelector(self, fullscreen_window.analysis_widget,
                                                                 fullscreen_window.main_window)
         self.layout().addWidget(self.analysis_ctrl)
         self.resize(100, fullscreen_window.height())
-        self.button_height = 100
+        self.button_height = 50
         self.hovered = False
 
         self.buttons = []
@@ -266,7 +285,7 @@ class AnalysisFullScreenTabSelector(QWidget):
     def add_tab(self, name, idx):
         btn = QPushButton(name, self)
         btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        btn.setStyleSheet("QPushButton{border-radius: 2px}")
+        btn.setStyleSheet("QPushButton{border-radius: 2px; color:rgb(200,200,200)}")
         btn.setFixedHeight(self.button_height)
         btn.clicked.connect(partial(self.fullscreen_window.select_tab, idx))
 
@@ -288,13 +307,13 @@ class AnalysisFullScreenTabSelector(QWidget):
         self.buttons.append(spacer)
 
     def leaveEvent(self, a0: QEvent):
-        self.fullscreen_window.on_hide_tab_selector()
+        self.onLeave.emit()
 
     def paintEvent(self, a0: QPaintEvent):
         super(AnalysisFullScreenTabSelector, self).paintEvent(a0)
         qp = QPainter()
         qp.begin(self)
-        qp.fillRect(self.rect(), QColor(28, 28, 28, 100))
+        qp.fillRect(self.rect(), QColor(37, 37, 37, 100))
         qp.end()
 
 
@@ -303,10 +322,18 @@ class AnalysisFullScreenAnalysisSelector(QWidget):
         super(AnalysisFullScreenAnalysisSelector, self).__init__(parent)
         self.main_window = main_window
         self.analysis_result_widget = analysis_result_widget
+        if self.analysis_result_widget.current_analysis is not None:
+            idx = self.main_window.project.get_job_analyses().index(self.analysis_result_widget.current_analysis)
+        else:
+            idx = 0
+
         self.cb_curr_analysis = QComboBox(self)
 
         for a in self.main_window.project.get_job_analyses():
             self.cb_curr_analysis.addItem(a.get_name())
+
+        if len(self.cb_curr_analysis) > 0:
+            self.cb_curr_analysis.setCurrentIndex(idx)
 
         self.btn_next = QPushButton("->", self)
         self.btn_previous = QPushButton("<-", self)
@@ -324,7 +351,7 @@ class AnalysisFullScreenAnalysisSelector(QWidget):
         self.btn_previous.clicked.connect(self.on_previous)
         self.btn_next.clicked.connect(self.on_next)
 
-        self.curr_index = 0
+        self.curr_index = idx
         self.show()
 
     def on_next(self):
@@ -361,10 +388,10 @@ class AnalysisFullScreenFilterSection(QWidget):
         self.main_window = main_window
         self.setAttribute(Qt.WA_AlwaysStackOnTop)
         self.setLayout(QVBoxLayout(self))
-
         self.filter_model = None
-        self.filters = []
+        self.filter_categories = []
         self.scrollarea = QScrollArea(self)
+        self.scrollarea.setStyleSheet("QScrollArea{background: transparent} QWidget{background:transparent")
         self.scrollarea.setWidget(QWidget(self))
         self.scrollarea.widget().resize(180, 2000)
         self.layout().addWidget(self.scrollarea)
@@ -375,6 +402,17 @@ class AnalysisFullScreenFilterSection(QWidget):
         self.current_controls = None
         self.controls_widget.setLayout(QVBoxLayout(self.controls_widget))
         self.scrollarea.widget().layout().addWidget(self.controls_widget)
+
+        self.filter_controls = QWidget(self)
+        self.filter_controls.setLayout(QHBoxLayout(self.filter_controls))
+        self.btn_mark_all = QPushButton("Select All" ,self.filter_controls)
+        self.btn_mark_all.clicked.connect(self.on_select_all)
+        self.btn_reset = QPushButton("Reset", self.filter_controls)
+        self.btn_reset.clicked.connect(self.on_reset)
+
+        self.filter_controls.layout().addWidget(self.btn_mark_all)
+        self.filter_controls.layout().addWidget(self.btn_reset)
+        self.scrollarea.widget().layout().addWidget(self.filter_controls)
 
         self.add_filter_menu()
         self.scrollarea.widget().layout().addItem(QSpacerItem(10,10, QSizePolicy.Preferred, QSizePolicy.Expanding))
@@ -389,11 +427,29 @@ class AnalysisFullScreenFilterSection(QWidget):
         project = self.main_window.project
 
         for voc in project.vocabularies:
-            self.scrollarea.widget().layout().addWidget(FilterCategory(self, voc))
-            if c == 30:
-                break
-            else:
-                c+=1
+            is_used = False
+            for w in voc.get_vocabulary_as_list():
+                if len(w.connected_items) > 0:
+                    is_used = True
+                    break
+            if is_used:
+                cat = FilterCategory(self, voc)
+                self.filter_categories.append(cat)
+                self.scrollarea.widget().layout().addWidget(cat)
+                if c == 30:
+                    break
+                else:
+                    c+=1
+
+    def on_select_all(self):
+        for cat in self.filter_categories:
+            for cb in cat.entries:
+                cb.setChecked(True)
+
+    def on_reset(self):
+        for cat in self.filter_categories:
+            for cb in cat.entries:
+                cb.setChecked(False)
 
     def set_controls(self, controls):
         if self.current_controls is not None:
@@ -401,7 +457,7 @@ class AnalysisFullScreenFilterSection(QWidget):
 
         self.controls_widget.layout().addWidget(controls)
         self.current_controls = controls
-
+        self.current_controls.show()
 
     def leaveEvent(self, a0: QEvent):
         super(AnalysisFullScreenFilterSection, self).leaveEvent(a0)
@@ -411,16 +467,17 @@ class AnalysisFullScreenFilterSection(QWidget):
         super(AnalysisFullScreenFilterSection, self).paintEvent(a0)
         qp = QPainter()
         qp.begin(self)
-        qp.fillRect(self.rect(), QColor(28,28,28,100))
+        qp.fillRect(self.rect(), QColor(37,37,37,100))
         qp.end()
 
     def enlarge(self, size):
         self.scrollarea.widget().resize(self.scrollarea.widget().width(), np.clip(self.scrollarea.widget().height() + size, self.height(), None))
 
 
-class FilterCategory(QWidget):
+class FilterCategory(QFrame):
     def __init__(self, parent, voc):
         super(FilterCategory, self).__init__(parent)
+        self.setFrameStyle(QFrame.Box)
         self.voc = voc
         self.filter_section = parent
         self.setStyleSheet("QPushButton{border-radius: 0px;}")
@@ -437,11 +494,12 @@ class FilterCategory(QWidget):
         # self.w_words.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
         for w in voc.get_vocabulary_as_list():
-            cb = QCheckBox(w.name, self.w_words)
-            cb.stateChanged.connect(partial(self.on_filter, w))
-            self.entries.append(cb)
-            self.w_words.layout().addWidget(cb)
-            cb.show()
+            if len(w.connected_items) > 0:
+                cb = QCheckBox(w.name, self.w_words)
+                cb.stateChanged.connect(partial(self.on_filter, w))
+                self.entries.append(cb)
+                self.w_words.layout().addWidget(cb)
+                cb.show()
 
         self.show()
         self.collapse()
@@ -472,5 +530,11 @@ class FilterCategory(QWidget):
         self.filter_section.enlarge(len(self.entries * 150))
 
 
+    def paintEvent(self, a0: QPaintEvent):
+        super(FilterCategory, self).paintEvent(a0)
+        qp = QPainter()
+        qp.begin(self)
+        qp.fillRect(self.rect(), QColor(37,37,37,100))
+        qp.end()
 
 

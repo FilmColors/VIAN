@@ -42,7 +42,6 @@ from core.visualization.image_plots import *
 from core.visualization.feature_plot import *
 
 
-
 import pyqtgraph as pg
 
 #region #--- Analysis ---
@@ -138,10 +137,6 @@ class FilmColorsPipelineAnalysis(IAnalysisJob):
                            colspan=2)
         plot_b.setYRange(-128, 128)
 
-        print(np.amin(b_dt),
-              np.amax(b_dt),
-              np.amin(a),
-              np.amax(a))
         return win
 
     #endregion
@@ -151,10 +146,16 @@ class FilmColorsPipelineAnalysis(IAnalysisJob):
 
         cs_plots = ColorSpaceVis(None, data)
         feature_plot = FeaturePlotWidget(None, project)
+        channel_dt = ChannelTimeVis(None, data)
+
+        cs_plots.controls.onSourceChanged.connect(channel_dt.on_source_changed)
+        cs_plots.controls.onChannelChanged.connect(channel_dt.on_channel_changed)
+        cs_plots.controls.onNthImageChanged.connect(channel_dt.on_nth_frame_changed)
 
         tabs = [
-            VisualizationTab(name="ColorSpace Plots", widget=cs_plots, use_filter=True, controls=cs_plots.controls),
-            VisualizationTab(name="Feature Plot", widget=feature_plot, use_filter=True, controls=None)
+            VisualizationTab(name="Color Space", widget=cs_plots, use_filter=True, controls=cs_plots.controls),
+            VisualizationTab(name="Features", widget=feature_plot, use_filter=True, controls=None),
+            VisualizationTab(name="Channels dT", widget=channel_dt, use_filter=True, controls=cs_plots.controls)
         ]
 
         return tabs
@@ -189,8 +190,8 @@ class ColorSpaceVis(QWidget):
         super(ColorSpaceVis, self).__init__(parent)
         self.data = data
 
-        print(np.mean(self.data['frame_lab_fg'], axis=0))
-        print(np.mean(self.data['frame_lab_bg'], axis=0))
+        self.filter_indices = []
+        self.current_source = 0 # FOREGROUND, BACKGROUND, BOTH
 
         self.ab_view = ImagePlotCircular(self)
         self.la_view = ImagePlotPlane(self, range_x=[-128, 128], range_y=[0, 100], title="L-a Plane")
@@ -228,10 +229,29 @@ class ColorSpaceVis(QWidget):
 
     @pyqtSlot(list)
     def on_filter(self, names):
-        print(names)
+        if len(names) == 0:
+            self.filter_indices = []
+
+        segments_time = []
+        for word in names:
+            for con in word.connected_items:
+                if isinstance(con, Segment):
+                    segments_time.append([con.get_start(), con.get_end()])
+
+        image_frames = np.arange(0, self.data['m_duration'] - self.data['resolution'], self.data['resolution'])
+        image_times = np.divide(np.multiply(image_frames, 1000), self.data['fps'])
+
+        self.filter_indices = []
+        for s in segments_time:
+            self.filter_indices.extend(np.where((s[0]<=image_times) & (image_times<s[1]))[0].tolist())
+
+        self.filter_indices = np.unique(np.array(self.filter_indices))
+        self.on_source_changed(self.current_source)
 
     @pyqtSlot(int)
     def on_source_changed(self, index):
+        self.current_source = index
+
         if index == SOURCE_BACKGROUND:
             self.plot_background()
         elif index == SOURCE_FOREGROUND:
@@ -240,29 +260,40 @@ class ColorSpaceVis(QWidget):
             self.plot_complete()
 
     def plot_complete(self):
-        c_sum = np.divide(np.add(self.data['frame_lab_fg'].astype(np.float32),
-                                 self.data['frame_lab_bg'].astype(np.float32)),
-                          2.0)
-        self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], self.data['thumbnails'], view=self.ab_view)
-        self.image_plot_la(c_sum[:, 0], c_sum[:, 1], self.data['thumbnails'], view=self.la_view)
-        self.image_plot_la(c_sum[:, 0], c_sum[:, 2], self.data['thumbnails'], view=self.lb_view)
+        indices = self.filter_indices
+        if len(self.filter_indices) == 0:
+            indices = range(self.data['frame_lab_comp'].shape[0])
+
+        c_sum = self.data['frame_lab_comp'][indices]
+        thumbnails = self.data['thumbnails'][indices]
+
+        self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], thumbnails, view=self.ab_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 1], thumbnails, view=self.la_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 2], thumbnails, view=self.lb_view)
 
     def plot_foreground(self):
-        c_sum = self.data['frame_lab_fg']
+        indices = self.filter_indices
+        if len(self.filter_indices) == 0:
+            indices = range(self.data['frame_lab_fg'].shape[0])
 
-        print(np.mean(self.data['frame_lab_fg'], axis=0))
-        print(np.mean(self.data['frame_lab_bg'], axis=0))
+        c_sum = self.data['frame_lab_fg'][indices]
+        thumbnails = self.data['thumbnails_fg'][indices]
 
-        self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], self.data['thumbnails_fg'], view=self.ab_view)
-        self.image_plot_la(c_sum[:, 0], c_sum[:, 1], self.data['thumbnails_fg'], view=self.la_view)
-        self.image_plot_la(c_sum[:, 0], c_sum[:, 2], self.data['thumbnails_fg'], view=self.lb_view)
+        self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], thumbnails, view=self.ab_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 1], thumbnails, view=self.la_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 2], thumbnails, view=self.lb_view)
 
     def plot_background(self):
-        c_sum = self.data['frame_lab_bg']
-        print(np.mean(c_sum, axis=0))
-        self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], self.data['thumbnails_bg'], view=self.ab_view)
-        self.image_plot_la(c_sum[:, 0], c_sum[:, 1], self.data['thumbnails_bg'], view=self.la_view)
-        self.image_plot_la(c_sum[:, 0], c_sum[:, 2], self.data['thumbnails_bg'], view=self.lb_view)
+        indices = self.filter_indices
+        if len(self.filter_indices) == 0:
+            indices = range(self.data['frame_lab_bg'].shape[0])
+
+        c_sum = self.data['frame_lab_bg'][indices]
+        thumbnails = self.data['thumbnails_bg'][indices]
+
+        self.image_plot_ab(c_sum[:, 0], c_sum[:, 1], c_sum[:, 2], thumbnails, view=self.ab_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 1], thumbnails, view=self.la_view)
+        self.image_plot_la(c_sum[:, 0], c_sum[:, 2], thumbnails, view=self.lb_view)
 
     def image_plot_ab(self, luminances, xs, ys, imgs, range_x=None, range_y=None, view = None):
         if view is None:
@@ -309,3 +340,124 @@ class FeaturePlotWidget(QWidget):
     @pyqtSlot(list)
     def on_filter(self, names):
         self.plot.on_filter(names)
+
+
+class ChannelTimeVis(QWidget):
+    def __init__(self, parent, data):
+        super(ChannelTimeVis, self).__init__(parent)
+        self.data = data
+
+        self.nth_frame = 30
+
+        self.current_source = SOURCE_COMPLETE
+        self.filter_indices = []
+
+        self.setLayout(QHBoxLayout(self))
+        self.view = ImagePlotTime(self)
+        self.layout().addWidget(self.view)
+
+        self.curr_channel = 0
+
+
+        self.on_source_changed(self.current_source)
+
+
+    @pyqtSlot(list)
+    def on_filter(self, names):
+        if len(names) == 0:
+            self.filter_indices = []
+
+        segments_time = []
+        for word in names:
+            for con in word.connected_items:
+                if isinstance(con, Segment):
+                    segments_time.append([con.get_start(), con.get_end()])
+
+        image_frames = np.arange(0, self.data['m_duration'] - self.data['resolution'], self.data['resolution'])
+        image_times = np.divide(np.multiply(image_frames, 1000), self.data['fps'])
+
+        self.filter_indices = []
+        for s in segments_time:
+            self.filter_indices.extend(np.where((s[0]<=image_times) & (image_times<s[1]))[0].tolist())
+
+        self.filter_indices = np.unique(np.array(self.filter_indices))
+        self.on_source_changed(self.current_source)
+
+    @pyqtSlot(int)
+    def on_source_changed(self, index):
+        self.current_source = index
+
+        if index == SOURCE_BACKGROUND:
+            self.plot_background()
+        elif index == SOURCE_FOREGROUND:
+            self.plot_foreground()
+        else:
+            self.plot_complete()
+
+    @pyqtSlot(int)
+    def on_channel_changed(self, idx):
+        print(idx)
+        self.curr_channel = idx
+        self.on_source_changed(self.current_source)
+
+    @pyqtSlot(int)
+    def on_nth_frame_changed(self, nth):
+        self.nth_frame = nth
+        self.on_source_changed(self.current_source)
+
+    def plot_complete(self):
+        indices = self.filter_indices
+        if len(self.filter_indices) == 0:
+            indices = range(self.data['frame_lab_comp'].shape[0])
+
+        image_frames = np.arange(0, self.data['m_duration'] - self.data['resolution'], self.data['resolution'])
+        image_times = np.divide(np.multiply(image_frames, 1000), self.data['fps'])
+
+        c_sum = self.data['frame_lab_comp'][indices]
+        thumbnails = self.data['thumbnails'][indices]
+
+        self.plot(image_times, c_sum[:, self.curr_channel], thumbnails)
+
+    def plot_foreground(self):
+        indices = self.filter_indices
+        if len(self.filter_indices) == 0:
+            indices = range(self.data['frame_lab_fg'].shape[0])
+
+        image_frames = np.arange(0, self.data['m_duration'] - self.data['resolution'], self.data['resolution'])
+        image_times = np.divide(np.multiply(image_frames, 1000), self.data['fps'])
+        c_sum = self.data['frame_lab_fg'][indices]
+        thumbnails = self.data['thumbnails_fg'][indices]
+
+        self.plot(image_times, c_sum[:, self.curr_channel], thumbnails)
+
+    def plot_background(self):
+        indices = self.filter_indices
+        if len(self.filter_indices) == 0:
+            indices = range(self.data['frame_lab_bg'].shape[0])
+
+        image_frames = np.arange(0, self.data['m_duration'] - self.data['resolution'], self.data['resolution'])
+        image_times = np.divide(np.multiply(image_frames, 1000), self.data['fps'])
+        c_sum = self.data['frame_lab_bg'][indices]
+        thumbnails = self.data['thumbnails_bg'][indices]
+
+        self.plot(image_times, c_sum[:, self.curr_channel], thumbnails)
+
+
+    def plot(self, time, channel, imgs, is_liminance = True):
+        self.view.clear_view()
+
+        indices = np.arange(0, channel.shape[0], self.nth_frame)
+        time = np.array(time)[indices]
+        channel = np.array(channel)[indices]
+        imgs = np.array(imgs)[indices]
+        if is_liminance:
+            channel = np.multiply(np.divide(channel.astype(np.float32), 255), 100)
+
+        for i, img in enumerate(imgs):
+            self.view.add_image(time[i], channel[i], img, convert=False)
+
+        self.view.update_grid()
+        self.view.sort_images()
+
+
+

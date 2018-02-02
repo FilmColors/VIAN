@@ -552,7 +552,6 @@ class Player_VLC(VideoPlayer):
             self.set_media_time(self.media_player.get_time() + (1000 / self.fps))
 
     def on_closed(self):
-        print("TEST, Releasing Player")
         self.release_player()
 
     def on_selected(self,sender, selected):

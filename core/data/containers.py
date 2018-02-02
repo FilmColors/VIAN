@@ -771,7 +771,24 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.add_vocabulary(voc)
 
     def add_vocabulary(self, voc):
+
+        not_ok = True
+        counter = 0
+        name = voc.name
+        while(not_ok):
+            has_duplicate = False
+            for v in self.vocabularies:
+                if v.name == name:
+                    name = voc.name + "_" + str(counter).zfill(2)
+                    has_duplicate = True
+                    counter += 1
+                    break
+            if not has_duplicate:
+                not_ok = False
+                break
+        voc.name = name
         voc.set_project(self)
+
         self.vocabularies.append(voc)
         self.dispatch_changed()
 
@@ -779,6 +796,11 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         if voc in self.vocabularies:
             self.vocabularies.remove(voc)
         self.dispatch_changed()
+
+    def copy_vocabulary(self, voc):
+        voc.export_vocabulary(self.data_dir + "/temp_voc.json")
+        self.import_vocabulary(self.data_dir + "/temp_voc.json")
+        os.remove(self.data_dir + "/temp_voc.json")
 
     def get_auto_completer_model(self):
         """
@@ -2918,7 +2940,6 @@ class VocabularyWord(IProjectContainer, IHasName):
             self.children.append(children)
 
     def get_children(self, parent_item):
-
         item = VocabularyItem(self.name, self)
         parent_item.appendRow(item)
         if len(self.children) > 0:

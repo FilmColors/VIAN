@@ -278,6 +278,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionInspector.triggered.connect(self.create_inspector)
         self.actionTimeline.triggered.connect(self.create_timeline)
         self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
+        self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
 
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
@@ -1419,6 +1420,11 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.showFullScreen()
 
+    def toggle_statusbar(self):
+        if self.statusBar().isVisible():
+            self.statusBar().hide()
+        else:
+            self.statusBar().show()
     def on_frame_source_changed(self, visibility):
         if visibility:
             if (self.current_perspective == Perspective.Segmentation or
@@ -1499,12 +1505,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if t > 0:
             self.dispatch_on_timestep_update(t)
 
-    def testfunction(self, a = None):
-        print("**********************")
-        print("Test function called")
-        print(a)
-        print(self.project.create_file_structure())
-        print("**********************")
     #endregion
 
     def get_version_as_string(self):

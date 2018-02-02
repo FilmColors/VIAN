@@ -11,6 +11,7 @@ from core.data.containers import Segment, Segmentation, ElanExtensionProject, IA
 from core.data.interfaces import IConcurrentJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import *
 
+
 class ELANProjectImporter():
     def __init__(self, main_window, remote_movie = False, import_screenshots = False, movie_formats = None):
         self.main_window = main_window
@@ -62,7 +63,6 @@ class ELANProjectImporter():
             segmentation = project.create_segmentation(segmentation_name, dispatch=False)
 
             for j in i[1]:
-                print(j)
                 value = j[0]
                 t_start = j[1]
                 t_stop = j[2]
@@ -77,17 +77,29 @@ class ELANProjectImporter():
         QMessageBox.information(self.main_window,
                                 "Choose the File Path",
                                 "Please Choose the Directory in which the new Project should be created.")
+
         dir = QFileDialog.getExistingDirectory(directory=self.main_window.settings.DIR_PROJECT)
         try:
+            # If this project does already exist, we want to test for an increasing number at the end
+            if os.path.isdir(dir + "/" + filename):
+                counter = 0
+                while(os.path.isdir(dir + "/" + filename + "_" + str(counter).zfill(2))):
+                    counter += 1
+                filename = filename + "_" + str(counter).zfill(2)
+
             os.mkdir(dir + "/" + filename)
         except:
             self.main_window.print_message("IMPORT FAILED: Could not Create Directory: " + str(dir + filename), "Red")
             return False
 
         project.folder = dir + "/" + filename + "/"
-        print(project.name)
-        print(project.folder)
-        print(project.movie_descriptor.movie_path)
+        project.path = dir + "/" + filename + "/" + filename
+        print("Imported ELAN Project:")
+        print("      Name: ", project.name)
+        print(" Directory: ", project.folder)
+        print("      Path: ", project.movie_descriptor.movie_path)
+        print("Movie Path: ", project.movie_descriptor.movie_path)
+        print("######################")
 
         project.create_file_structure()
 
@@ -182,13 +194,15 @@ class ELANProjectImporter():
 
         return movie_path, segmentations
 
+
 class ScreenshotImporter(IConcurrentJob):
     def __init__(self, args):
         super(ScreenshotImporter, self).__init__(args=args)
 
     def run_concurrent(self, args, sign_progress):
         pass
-    
+
+
 class FilmColorsPipelineImporter():
     def import_pipeline(self, path, project: ElanExtensionProject):
 
@@ -222,6 +236,7 @@ class FilmColorsPipelineImporter():
             return analysis
         except Exception as e:
             print(e)
+
 
 class FileMakerVocImporter():
     def import_filemaker(self, path, project: ElanExtensionProject):
@@ -257,8 +272,11 @@ class FileMakerVocImporter():
             w = w.replace("Checkboxes", "")
             w = w.replace("sortiert", "")
             w = w.replace("Keywords_", "")
+            w = w.replace("KeyWords_", "")
             w = w.replace("Merger", "")
             w = w.replace("_", " ")
+            w = w.rstrip()
+            w = w.lstrip()
             header_words.append([w])
         return header_words
 
@@ -290,6 +308,8 @@ class FileMakerVocImporter():
                                 segm[1].append(word_obj)
 
                     segments.append(segm)
+            else:
+                print("No Such Category:", category.replace(" ", "_"))
 
         main_seg = project.get_main_segmentation()
         print("Main Segmentation Length: ",len(main_seg.segments))
@@ -300,7 +320,7 @@ class FileMakerVocImporter():
                 for word in objs:
                     main_seg.segments[idx].add_word(word)
             else:
-                print("Exceeded")
+                print("Sub-Segmentation Ignored")
 
         print("Filemaker Data Loaded")
         print("Skipped: ", skipped)

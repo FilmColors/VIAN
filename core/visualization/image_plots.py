@@ -2,9 +2,9 @@ import numpy as np
 import cv2
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont
+from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent
 
 from core.data.computation import *
 
@@ -15,7 +15,7 @@ SOURCE_COMPLETE = 2
 class ImagePlot(QGraphicsView):
     def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
         super(ImagePlot, self).__init__(parent)
-
+        self.setRenderHint(QPainter.Antialiasing)
         if range_x is None:
             range_x = [-128, 128]
         if range_y is None:
@@ -40,12 +40,13 @@ class ImagePlot(QGraphicsView):
         self.n_grid = 12
         self.controls_itm = None
 
-        self.fitInView(   range_x[0] * self.magnification,
-                          range_y[0] * self.magnification,
-                         (range_x[1] - range_x[0]) * self.magnification,
-                         (range_y[1] - range_y[0]) * self.magnification, Qt.KeepAspectRatio)
         self.add_grid()
         self.create_title()
+
+        self.fitInView(   -range_x[0] * self.magnification / 12,
+                          -range_y[0] * self.magnification/ 12,
+                         (range_x[1] - range_x[0]) * self.magnification/ 12,
+                         (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
 
     def add_image(self, x, y, img, convert = True, luminance = None):
         pass
@@ -139,9 +140,20 @@ class ImagePlot(QGraphicsView):
                 tpl[1].show()
 
 
+class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
+    def __init__(self, pixmap, hover_text):
+        super(VIANPixmapGraphicsItem, self).__init__(pixmap)
+        self.setToolTip(hover_text)
+
+
 class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
+
+        # self.fitInView(-range_x[0] * self.magnification / 14,
+        #                -range_y[0] * self.magnification / 14,
+        #                (range_x[1] - range_x[0]) * self.magnification / 14,
+        #                (range_y[1] - range_y[0]) * self.magnification / 14, Qt.KeepAspectRatio)
 
     def add_image(self, x, y, img, convert = True, luminance = None):
         try:
@@ -240,6 +252,8 @@ class ImagePlotControls(QWidget):
     onLowCutChange = pyqtSignal(int)
     onHighCutChange = pyqtSignal(int)
     onSourceChanged = pyqtSignal(int)
+    onChannelChanged = pyqtSignal(int)
+    onNthImageChanged = pyqtSignal(int)
 
     def __init__(self, parent):
         super(ImagePlotControls, self).__init__(parent)
@@ -254,7 +268,7 @@ class ImagePlotControls(QWidget):
         self.sl_hcut.setRange(0, 100)
         self.sl_hcut.setValue(100)
         self.sl_hcut.valueChanged.connect(self.on_high_cut)
-        self.lbl_hcut = QLabel("L-High Cut: 0", self)
+        self.lbl_hcut = QLabel("High Cut: 100", self)
         self.lbl_hcut.setStyleSheet("QLabel {color: rgb(255,255,255)}")
         self.lay_hcut.addWidget(self.sl_hcut)
         self.lay_hcut.addWidget(self.lbl_hcut)
@@ -264,7 +278,7 @@ class ImagePlotControls(QWidget):
         self.sl_lcut.setRange(0, 100)
         self.sl_hcut.setValue(0)
         self.sl_lcut.valueChanged.connect(self.on_low_cut)
-        self.lbl_lcut = QLabel("L-Low Cut: 0", self)
+        self.lbl_lcut = QLabel("Low Cut: 0", self)
         self.lbl_lcut.setStyleSheet("QLabel {color: rgb(255,255,255)}")
         self.lay_lcut.addWidget(self.sl_lcut)
         self.lay_lcut.addWidget(self.lbl_lcut)
@@ -272,14 +286,44 @@ class ImagePlotControls(QWidget):
         self.layout().addItem(self.lay_lcut)
         self.layout().addItem(self.lay_hcut)
 
+        self.layout().addWidget(QLabel("Color Source"))
         self.cb_source = QComboBox(self)
         self.cb_source.addItem("Foreground")
         self.cb_source.addItem("Background")
         self.cb_source.addItem("Complete")
-
-        self.cb_source.currentIndexChanged.connect(self.onSourceChanged)
         self.layout().addWidget(self.cb_source)
+
+        self.ctrl_color_dt = QWidget(self)
+        self.ctrl_color_dt.setLayout(QVBoxLayout(self.ctrl_color_dt))
+        self.ctrl_color_dt.layout().addWidget(QLabel("Color dT Vis"))
+        self.ctrl_color_dt.layout().addWidget(QLabel("Channel"))
+        self.cb_channel = QComboBox(self.ctrl_color_dt)
+        self.cb_channel.addItems(["Luminance", "a-Channel", "b-Channel"])
+
+        self.ctrl_color_dt.layout().addWidget(self.cb_channel)
+        self.layout().addWidget(self.ctrl_color_dt)
+        self.ctrl_color_dt.layout().addWidget(QLabel("Image Density"))
+        self.sl_image_density = QSlider(Qt.Horizontal, self.ctrl_color_dt)
+        self.sl_image_density.setRange(1, 300)
+        self.sl_image_density.setValue(30)
+
+        self.cb_channel.currentIndexChanged.connect(self.onChannelChanged)
+        self.sl_image_density.valueChanged.connect(self.onNthImageChanged)
+        self.cb_source.currentIndexChanged.connect(self.onSourceChanged)
+
+        self.ctrl_color_dt.layout().addWidget(self.sl_image_density)
+
+        self.cb_channel.view().installEventFilter(self)
+        self.cb_source.view().installEventFilter(self)
+
         self.resize(200, 100)
+
+    @pyqtSlot(int)
+    def on_plot_changed(self, index):
+        if index == 2:
+            self.ctrl_color_dt.show()
+        else:
+            self.ctrl_color_dt.hide()
 
     def on_low_cut(self):
         value = self.sl_lcut.value()
@@ -290,4 +334,85 @@ class ImagePlotControls(QWidget):
         value = self.sl_hcut.value()
         self.lbl_hcut.setText("L-Low Cut:" + str(value))
         self.onHighCutChange.emit(value)
+
+    def eventFilter(self, a0: 'QObject', a1: 'QEvent'):
+        if a1.type() == QEvent.HoverLeave:
+            return True
+
+        return super(ImagePlotControls, self).eventFilter(a0, a1)
+
+
+class ImagePlotTime(ImagePlot):
+    def __init__(self, parent, range_x = None, range_y = None, title=""):
+        self.x_scale = 0.001
+        self.y_scale = 10
+        self.base_line = 1000
+        self.x_end = 0
+        self.lines = []
+
+        self.labels = []
+
+        super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
+        self.font_size = 30
+
+    def add_image(self, x, y, img, convert=True):
+        if convert:
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
+                                         hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
+        else:
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=None, with_alpha=True),
+                                         hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
+        self.scene().addItem(itm)
+
+        itm.setPos(x * self.x_scale, self.base_line - (y * self.y_scale))
+        self.images.append(itm)
+
+        if self.x_end < x * self.x_scale:
+            self.x_end = x * self.x_scale
+
+        self.luminances.append([y, itm])
+
+        itm.show()
+
+    def clear_view(self):
+        super(ImagePlotTime, self).clear_view()
+        self.x_end = 0
+
+    def add_grid(self):
+        pen = QPen()
+        pen.setWidth(10)
+        pen.setColor(QColor(200, 200, 200, 150))
+
+        font = QFont()
+        font.setPointSize(self.font_size)
+        self.lines.append(self.scene().addLine(0,self.base_line, self.x_end, self.base_line, pen))
+        self.lines.append(self.scene().addLine(0, self.base_line, 0, 0, pen))
+
+        for y in range(self.base_line):
+            if (y / self.y_scale) % 10 == 0:
+                lbl = self.scene().addText(str((self.base_line/ self.y_scale)-(y / self.y_scale)).rjust(4), font)
+                lbl.setDefaultTextColor(QColor(200,200,200,200))
+                lbl.setPos(-100, y)
+                self.labels.append(lbl)
+
+    def update_grid(self):
+        self.lines = []
+        self.add_grid()
+
+        # for x in range(self.range_x[0] * self.magnification, self.range_x[1] * self.magnification, 1):
+        #     if x % (20 * self.magnification) == 0:
+        #         self.scene().addLine(x, y0, x, y1, pen)
+        #
+        #         text = self.scene().addText(str(round((x / self.magnification), 0)), font)
+        #         text.setPos(x, self.range_y[1] * self.magnification)
+        #         text.setDefaultTextColor(QColor(200, 200, 200, 200))
+        #
+        # for x in range(self.range_y[0] * self.magnification, self.range_y[1] * self.magnification, 1):
+        #     if x % (20 * self.magnification) == 0:
+        #         self.scene().addLine(x0, x, x1, x, pen)
+        #
+        #         text = self.scene().addText(
+        #             str(round(((self.range_y[1] * self.magnification - x) / self.magnification), 0)), font)
+        #         text.setPos(self.range_x[0] * self.magnification, x)
+        #         text.setDefaultTextColor(QColor(200, 200, 200, 200))
 
