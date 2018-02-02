@@ -35,6 +35,28 @@ class MacPlayerContainer(QtWidgets.QMainWindow):
         self.resize(target.size())
         self.player.videoframe.resize(target.size())
 
+class PlayerDockWidget(EDockWidget):
+    def __init__(self, main_window):
+        super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
+        self.setWindowTitle("Player")
+        self.video_player = None
+        self.setMinimumWidth(100)
+        self.setMinimumHeight(100)
+
+    def set_player(self, video_player):
+        self.setWidget(video_player)
+        self.video_player = video_player
+
+    def resizeEvent(self, *args, **kwargs):
+        super(PlayerDockWidget, self).resizeEvent(*args, **kwargs)
+        self.main_window.drawing_overlay.update()
+
+    # def dockLocationChanged(self, Qt_DockWidgetArea):
+    #     super(PlayerDockWidget, self).dockLocationChanged(Qt_DockWidgetArea)
+    #     self.main_window.drawing_overlay.raise_()
+
+
+
 # QtWidgets.QFrame
 class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
     """

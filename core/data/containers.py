@@ -151,7 +151,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def unload_all(self):
         for c in self.get_all_containers():
             if isinstance(c, IStreamableContainer):
-                c.unload_container()
+                c.unload_container(sync=True)
 
     def print_all(self, type = None):
         for c in self.get_all_containers():
@@ -2398,9 +2398,9 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.data = data
 
 
-    def unload_container(self, data=None):
+    def unload_container(self, data=None, sync=False):
         print("Unload: ", self.unique_id, "\tANALYSIS")
-        super(AnalysisContainer, self).unload_container(self.data)
+        super(AnalysisContainer, self).unload_container(self.data, sync=sync)
         self.data = None
 
     def apply_loaded(self, obj):

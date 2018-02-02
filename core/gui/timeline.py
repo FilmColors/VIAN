@@ -414,8 +414,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_scrubber.setFixedHeight(self.frame_Bars.height())
         self.time_bar.raise_()
 
-
-
     def on_loaded(self, project):
         self.setState(True)
 
@@ -544,13 +542,16 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.scrollArea.horizontalScrollBar().setValue(x)
             self.scrollArea.verticalScrollBar().setValue(y)
 
-    def zoom_timeline(self, pos, angleDelta):
-        if self.is_scaling:
+    def zoom_timeline(self, pos, angleDelta=0, abs_scale = 0, force = False):
+        if self.is_scaling or force:
             center_point = (pos.x() - self.controls_width) * self.scale + self.scrollArea.horizontalScrollBar().value() * self.scale
             delta = (pos.x() - self.controls_width)
 
             s_max = int(self.duration / self.width()) + self.controls_width + 400 # + 400 to make sure the whole timeline can be looked at once
-            self.scale = np.clip(- angleDelta.y() * (0.0005 * self.scale) + self.scale, None, s_max)
+            if abs_scale != 0:
+                self.scale = abs_scale
+            else:
+                self.scale = np.clip(- angleDelta.y() * (0.0005 * self.scale) + self.scale, None, s_max)
             self.update_ui()
             self.update()
 
@@ -567,6 +568,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.interval_segmentation_marker.move(QPoint(self.interval_segmentation_start/self.scale, 0))
 
             self.scrollArea.horizontalScrollBar().setValue(side_offset // self.scale)
+
+    def frame_time_range(self, t_start, t_end):
+        scale = (t_end - t_start) / (self.width() - self.controls_width) + 3
+        self.zoom_timeline(QPoint(0,0), abs_scale=scale, force = True)
+        self.scrollArea.horizontalScrollBar().setValue(t_start / self.scale - (self.scale/2))
+
+
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:

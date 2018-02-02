@@ -36,7 +36,7 @@ from core.gui.keyeventhandler import EKeyEventHandler
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
-from core.gui.player_vlc import Player_VLC
+from core.gui.player_vlc import Player_VLC, PlayerDockWidget
 # from core.gui.shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
@@ -169,6 +169,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.player = Player_VLC(self)
         self.player = Player_VLC(self)
+        self.player_dock_widget = None
 
         self.server = QTServer(self.player)
         self.server.player = self.player
@@ -286,6 +287,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionNodeEditorPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses.name))
         self.actionSegmentationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Segmentation.name))
         self.actionResultsPersp.triggered.connect(partial(self.switch_perspective, Perspective.Results.name))
+        self.actionVocabularyPersp.triggered.connect(partial(self.switch_perspective, Perspective.Categorize.name))
 
         self.actionHistory.triggered.connect(self.create_history_view)
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
@@ -344,7 +346,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Autosave
         self.autosave_timer = QTimer()
         self.autosave_timer.timeout.connect(self.on_save_project, False)
-        self.update_autosave_timer()
+        self.update_autosave_timer(do_start=False)
 
         self.time_update_interval = 100
         self.update_timer = QtCore.QTimer()
@@ -477,15 +479,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar().setFixedHeight(45)
 
     def create_widget_video_player(self):
-        if self.video_player is None:
-            # #DARWIN
-            # if self.is_darwin:  # for MacOS
-            #     self.player_container.show()
-            #     self.setCentralWidget(self.player_placeholder)
-            # else:
-            self.setCentralWidget(self.player)
+        if self.player_dock_widget is None:
+            self.player_dock_widget = PlayerDockWidget(self)
+            self.player_dock_widget.set_player(self.player)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
+            # # #DARWIN
+            # # if self.is_darwin:  # for MacOS
+            # #     self.player_container.show()
+            # #     self.setCentralWidget(self.player_placeholder)
+            # # else:
+            # self.setCentralWidget(self.player)
         else:
-            self.video_player.activateWindow()
+            self.player_dock_widget.set_player(self.player)
+            self.player_dock_widget.show()
+
 
 #OLD CODE
 
@@ -855,7 +862,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #self.project_streamer.set_project(new)
         self.dispatch_on_loaded()
 
-    def on_save_project(self, open_dialog=False):
+    def on_save_project(self, open_dialog=False, sync = False):
         if open_dialog is True or self.project.path is "" or self.project.name is "":
 
             path = QFileDialog.getSaveFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION)
@@ -876,10 +883,13 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             args = [self.project, self.project.path, self.settings, self.master_file]
 
-        worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
-        self.start_worker(worker, "Saving Project")
+        if sync:
+            store_project_concurrent(args, self.dummy_func)
+        else:
+            worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
+            self.start_worker(worker, "Saving Project")
 
-        self.corpus_client.send_update_project(ProjectData().from_EEXTProject(self.project))
+            self.corpus_client.send_update_project(ProjectData().from_EEXTProject(self.project))
 
 
         return
@@ -891,13 +901,16 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
             if answer == QMessageBox.Yes:
-                self.on_save_project()
+                self.on_save_project(sync=True)
             elif answer == QMessageBox.No:
                 pass
             else:
                 return
 
         self.dispatch_on_closed()
+        self.settings.store()
+
+        self.frame_update_thread.quit()
 
         # self.drawing_overlay.close()
         self.corpus_client.send_disconnect(self.settings.USER_NAME)
@@ -905,10 +918,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if PROFILE:
             self.profiler.disable()
             self.profiler.dump_stats("Profile.prof")
-
-        self.settings.store()
-
-        self.frame_update_thread.quit()
 
         QCoreApplication.quit()
 
@@ -1151,27 +1160,42 @@ class MainWindow(QtWidgets.QMainWindow):
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)
 
+    def default_dock_locations(self):
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.timeline, QtCore.Qt.Vertical)
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.player_controls, QtCore.Qt.Vertical)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Vertical)
+        self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
+
+    def dummy_func(self, *args):
+        pass
+
     def switch_perspective(self, perspective):
         # DARWIN
         # if self.is_darwin:
         #     central = self.player_placeholder
         # else:
 
-        central = self.player
+        # central = self.player
 
         self.centralWidget().setParent(None)
+        self.statusBar().show()
 
+        self.default_dock_locations()
         if self.is_darwin:
             self.screenshot_toolbar.show()
             self.annotation_toolbar.show()
 
         if perspective == Perspective.VideoPlayer.name:
             self.current_perspective = Perspective.VideoPlayer
-            central = self.player
+            # central = self.player
+
+            central = QWidget(self)
+            central.setFixedWidth(0)
 
             self.annotation_toolbar.hide()
             self.screenshot_toolbar.hide()
 
+            self.create_widget_video_player()
             self.drawing_overlay.hide()
             self.outliner.hide()
             self.timeline.hide()
@@ -1189,13 +1213,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elif perspective == Perspective.Segmentation.name:
             self.current_perspective = Perspective.Segmentation
-            central = self.player
+            # central = self.player
+
+            central = QWidget(self)
+            central.setFixedWidth(0)
 
             if self.annotation_toolbar.isVisible():
                 self.annotation_toolbar.hide()
             if self.screenshot_toolbar.isVisible():
                 self.screenshot_toolbar.hide()
 
+            self.create_widget_video_player()
             self.drawing_overlay.hide()
             self.outliner.hide()
             self.timeline.show()
@@ -1216,7 +1244,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elif perspective == Perspective.Annotation.name:
             self.current_perspective = Perspective.Annotation
-            central = self.player
+            # central = self.player
+            central = QWidget(self)
+            central.setFixedWidth(0)
+
+            self.create_widget_video_player()
 
             if not self.annotation_toolbar.isVisible():
                 self.annotation_toolbar.show()
@@ -1257,6 +1289,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if not self.screenshot_toolbar.isVisible():
                 self.screenshot_toolbar.show()
 
+            self.player_dock_widget.hide()
             self.drawing_overlay.hide()
             self.timeline.hide()
             self.player_controls.hide()
@@ -1289,6 +1322,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.screenshot_toolbar.isVisible():
                 self.screenshot_toolbar.hide()
 
+            self.player_dock_widget.hide()
             self.drawing_overlay.hide()
             self.outliner.show()
             self.timeline.hide()
@@ -1298,6 +1332,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.hide()
             self.node_editor_results.show()
             self.vocabulary_manager.hide()
+            self.vocabulary_matrix.hide()
             self.analysis_results_widget_dock.hide()
             self.inspector.show()
 
@@ -1316,6 +1351,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.screenshot_toolbar.isVisible():
                 self.screenshot_toolbar.hide()
 
+            self.player_dock_widget.hide()
             self.drawing_overlay.hide()
             self.outliner.show()
             self.timeline.hide()
@@ -1325,6 +1361,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.hide()
             self.node_editor_results.hide()
             self.vocabulary_manager.hide()
+            self.vocabulary_matrix.hide()
             self.analysis_results_widget_dock.hide()
             self.inspector.show()
 
@@ -1334,6 +1371,44 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Horizontal)
             self.splitDockWidget(self.outliner, self.inspector, Qt.Vertical)
 
+        elif perspective == Perspective.Categorize.name:
+            self.current_perspective = Perspective.Segmentation
+            # central = self.player
+
+            central = QWidget(self)
+            central.setFixedWidth(0)
+
+            if self.annotation_toolbar.isVisible():
+                self.annotation_toolbar.hide()
+            if self.screenshot_toolbar.isVisible():
+                self.screenshot_toolbar.hide()
+
+            self.create_widget_video_player()
+            self.drawing_overlay.hide()
+            self.outliner.hide()
+            self.timeline.show()
+            self.player_controls.hide()
+            self.perspective_manager.hide()
+            self.inspector.hide()
+            self.history_view.hide()
+            self.concurrent_task_viewer.hide()
+            self.node_editor_dock.hide()
+            self.node_editor_results.hide()
+            self.screenshots_manager_dock.show()
+            self.vocabulary_manager.hide()
+            self.vocabulary_matrix.show()
+            self.analysis_results_widget_dock.hide()
+
+
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.screenshots_manager_dock, Qt.Vertical)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.timeline, Qt.Vertical)
+            self.resizeDocks([self.timeline], [150], Qt.Vertical)
+
+
+            self.statusBar().hide()
+            # self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
+            # self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
         self.setCentralWidget(central)
         self.centralWidget().show()
@@ -1425,6 +1500,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar().hide()
         else:
             self.statusBar().show()
+
     def on_frame_source_changed(self, visibility):
         if visibility:
             if (self.current_perspective == Perspective.Segmentation or
@@ -1459,12 +1535,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.update_rate()
 
     #region MISC
-    def update_autosave_timer(self):
+    def update_autosave_timer(self, do_start = True):
         self.autosave_timer.stop()
-        if  self.settings.AUTOSAVE:
+        if self.settings.AUTOSAVE:
             ms =  self.settings.AUTOSAVE_TIME * 60 * 1000
             self.autosave_timer.setInterval(ms)
-            self.autosave_timer.start()
+            if do_start:
+                self.autosave_timer.start()
 
     def open_drawing_editor(self, drawing, pos):
         if self.drawing_editor is not None:
@@ -1527,6 +1604,8 @@ class MainWindow(QtWidgets.QMainWindow):
     #region IProjectChangedNotify
     def dispatch_on_loaded(self):
         # self.set_darwin_player_visibility(True)
+        self.autosave_timer.start()
+
         screenshot_position = []
         screenshot_annotation_dicts = []
 
@@ -1652,6 +1731,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                         # endregion
 
     def dispatch_on_closed(self):
+        self.autosave_timer.stop()
+
         for o in self.i_project_notify_reciever:
             o.on_closed()
 

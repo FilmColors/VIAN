@@ -125,8 +125,9 @@
      <addaction name="actionSegmentationPersp"/>
      <addaction name="actionAnnotationPersp"/>
      <addaction name="actionScreenshotsPersp"/>
-     <addaction name="actionNodeEditorPerspective"/>
+     <addaction name="actionVocabularyPersp"/>
      <addaction name="actionResultsPersp"/>
+     <addaction name="actionNodeEditorPerspective"/>
      <addaction name="separator"/>
      <addaction name="actionSave_Perspective"/>
      <addaction name="actionLoad_Perspective"/>
@@ -419,7 +420,7 @@
     <string>Node Editor</string>
    </property>
    <property name="shortcut">
-    <string>Alt+5</string>
+    <string>Alt+7</string>
    </property>
   </action>
   <action name="actionPlay_Pause">
@@ -622,6 +623,14 @@
    </property>
    <property name="shortcut">
     <string>F10</string>
+   </property>
+  </action>
+  <action name="actionVocabularyPersp">
+   <property name="text">
+    <string>Vocabulary</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+5</string>
    </property>
   </action>
  </widget>

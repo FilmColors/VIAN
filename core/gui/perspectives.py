@@ -33,6 +33,7 @@ class Perspective(Enum):
         ScreenshotsManager = 4
         Analyses = 5
         Results = 6
+        Categorize = 7
 
 
 

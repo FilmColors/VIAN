@@ -219,12 +219,36 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
         self.n_per_row = 20
         self.setWindowTitle("Vocabulary Matrix")
         self.all_boxes = []
+        self.current_segment = 0
 
         self.tabs_list = []
         self.voc_categories = []
+
+        # Header Segment Selection Buttons
+        self.segment_selection = QWidget(self)
+        self.segment_selection.setLayout(QHBoxLayout(self.segment_selection))
+        self.btn_previous = QPushButton("Previous Segment", self.segment_selection)
+        self.btn_previous.clicked.connect(self.on_button_previous)
+        self.btn_previous.setMinimumHeight(30)
+        self.lbl_current = QLabel(str(self.current_segment), self.segment_selection)
+        self.btn_next = QPushButton("Next Segment", self.segment_selection)
+        self.btn_next.clicked.connect(self.on_button_next)
+        self.btn_next.setMinimumHeight(30)
+        self.segment_selection.layout().addWidget(self.btn_previous)
+        self.segment_selection.layout().addItem(QSpacerItem(10, 2, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.segment_selection.layout().addWidget(self.lbl_current)
+        self.segment_selection.layout().addItem(QSpacerItem(10, 2, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.segment_selection.layout().addWidget(self.btn_next)
+
+        self.central = QWidget(self)
+        self.central.setLayout(QVBoxLayout(self.central))
+
         self.tabs = QTabWidget(self)
-        self.setLayout(QHBoxLayout(self))
-        self.setWidget(self.tabs)
+
+        self.central.layout().addWidget(self.segment_selection)
+        self.central.layout().addWidget(self.tabs)
+        # self.setLayout(QHBoxLayout(self))
+        self.setWidget(self.central)
         self.recreate_widget()
 
 
@@ -249,6 +273,7 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
         else:
             for itm in self.all_boxes:
                 itm[0].setEnabled(False)
+
     def recreate_widget(self):
         self.tabs.clear()
         self.voc_categories = []
@@ -258,12 +283,13 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
             if voc.category not in self.voc_categories:
                 self.voc_categories.append(voc.category)
                 area = QScrollArea(self.tabs)
+                area.setWidgetResizable(True)
                 t = QWidget(None)
-                t.setMinimumSize(200,200)
-                t.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+                # t.setMinimumSize(200,200)
+                # t.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
                 l = QVBoxLayout(t)
                 t.setLayout(l)
-                l.setSizeConstraint(l.SetMinAndMaxSize)
+                # l.setSizeConstraint(l.SetMinAndMaxSize)
 
                 area.setWidget(t)
                 self.tabs.addTab(area, voc.category)
@@ -274,20 +300,32 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
             tab = self.tabs_list[tab_idx]
             # l = QVBoxLayout(tab)
             # tab.setLayout(l)
-            frame = QFrame(tab)
-            frame.setFrameStyle(QFrame.StyledPanel)
+            outer = QFrame(tab)
+            # outer.setFrameStyle(QFrame.Panel)
+            outer.setLayout(QVBoxLayout(outer))
+            outer.setStyleSheet("QWidget{background: rgb(30,30,30)}")
+            tab.layout().addWidget(outer)
 
-            tab.layout().addWidget(frame)
+            frame = QWidget(tab)
+            # frame.setFrameStyle(QFrame.StyledPanel)
+
+
+            # tab.layout().addWidget(frame)
 
             frame.setLayout(QHBoxLayout(frame))
             lbl = QLabel(voc.name)
             lbl.setStyleSheet("QLabel{color:#6391b5;}")
-            lbl.setFixedWidth(150)
+            # lbl.setFixedWidth(150)
             lbl.setWordWrap(True)
-            frame.layout().addWidget(lbl)
+            outer.layout().addWidget(lbl)
+            outer.layout().addWidget(frame)
             col_count = 0
             hbox = QVBoxLayout(frame)
-            for w in voc.get_vocabulary_as_list():
+            hbox.setSpacing(2)
+            voc_list = voc.get_vocabulary_as_list()
+
+            voc_list = sorted(voc_list, key=lambda x:x.name.lower())
+            for w in voc_list:
                 cb = QCheckBox(w.name, frame)
                 cb.stateChanged.connect(self.on_cb_change)
                 cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
@@ -303,12 +341,15 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
                     col_count = 0
 
             if col_count != 0:
+                hbox.addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))
                 frame.layout().addItem(hbox)
 
-            frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
-            tab.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
+            # frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
+            # frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
+            # tab.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
 
-
+        for t in self.tabs_list:
+            t.layout().addItem(QSpacerItem(2,2,QSizePolicy.Preferred, QSizePolicy.Expanding))
         # for voc in self.project().vocabularies:
         #     model = voc.get_vocabulary_item_model()
         #     # model = QStandardItemModel()
@@ -359,6 +400,32 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
                     itm.remove_word(word)
                     sender.setStyleSheet("QCheckBox{color: #b1b1b1;}")
 
+    def on_button_previous(self):
+        segm = self.project().get_main_segmentation()
+        if segm is None:
+            return
+        if self.current_segment > 0:
+            self.current_segment -= 1
+        self.frame_segment(segm)
+
+    def frame_segment(self, segmentation):
+        if self.current_segment - 1 < len(segmentation.segments):
+            s = segmentation.segments[self.current_segment]
+            self.main_window.timeline.timeline.frame_time_range(s.get_start() + 1000, s.get_end())
+            self.lbl_current.setText(str(s.ID).zfill(3))
+            self.main_window.player.set_media_time(s.get_start() + 1000)
+            self.project().set_selected(self, [s])
+
+    def on_button_next(self):
+        segm = self.project().get_main_segmentation()
+        if segm is None:
+            return
+        if self.current_segment + 1 < len(segm.segments):
+            self.current_segment += 1
+        self.frame_segment(segm)
+
+    def resizeEvent(self, *args, **kwargs):
+        super(VocabularyMatrix, self).resizeEvent(*args, **kwargs)
 #endregion
 
 
