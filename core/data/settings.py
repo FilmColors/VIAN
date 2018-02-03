@@ -40,6 +40,9 @@ class UserSettings():
 
         self.SCREENSHOTS_EXPORT_NAMING = self.SCREENSHOTS_EXPORT_NAMING_DEFAULT
         self.SCREENSHOTS_STATIC_SAVE = False
+
+        # Timeline Grid
+        self.USE_GRID = True
         self.GRID_SIZE = 100
         # Theme
         self.THEME_PATH = "qt_ui/themes/qt_stylesheet_dark.css"

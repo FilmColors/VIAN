@@ -18,11 +18,14 @@ else:
 import webbrowser
 
 class EDockWidget(QDockWidget):
-    def __init__(self, main_window, limit_size = True):
+    def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
         self.main_window = main_window
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
         self.limit_size = limit_size
+        self.setLayout(QVBoxLayout(self))
+        self.default_width = width
+        self.default_height = height
 
         #NEWCODE
         self.inner = QMainWindow(None)
@@ -40,17 +43,28 @@ class EDockWidget(QDockWidget):
 
     def resizeEvent(self, *args, **kwargs):
         # Keeping the size of the Dockwidgets
+
         if self.limit_size:
             if self.maximumWidth() != self.max_width:
                 self.areas = self.main_window.dockWidgetArea(self)
                 if self.areas == Qt.LeftDockWidgetArea or self.areas == Qt.RightDockWidgetArea:
                     self.setMaximumWidth(self.max_width)
 
-            super(EDockWidget, self).resizeEvent( *args, **kwargs)
+        super(EDockWidget, self).resizeEvent( *args, **kwargs)
 
-            if self.project():
-                self.main_window.update_player_size()
-                self.main_window.update_overlay()
+            # if self.project():
+            #     self.main_window.update_player_size()
+            #     self.main_window.update_overlay()
+
+    def resize_dock(self, w=-1, h=-1):
+        if w == -1:
+            w = self.widget().width()
+        if h == -1:
+            h = self.widget().height()
+
+        self.widget().resize(w, h)
+        self.main_window.resizeDocks([self], [w], Qt.Horizontal)
+        self.main_window.resizeDocks([self], [h], Qt.Vertical)
 
     def setWidget(self, QWidget):
         # NEWCODE
@@ -66,6 +80,9 @@ class EDockWidget(QDockWidget):
 
     def close(self):
         self.hide()
+
+    def show(self):
+        super(EDockWidget, self).show()
 
     def project(self):
         try:
@@ -191,6 +208,7 @@ class GraphicsViewDockWidget(EDockWidget):
 
     def set_pixmap(self, pixmap):
         self.view.set_image(pixmap)
+
 
 class EGraphicsView(QGraphicsView):
     def __init__(self, parent, auto_frame = True, main_window = None):

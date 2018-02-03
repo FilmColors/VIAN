@@ -425,10 +425,11 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
+        self.timeline.resize_dock(h=100)
         print(self.player.get_fps())
-        self.project.print_all(ANALYSIS_JOB_ANALYSIS)
-
-        self.project.replace_ids()
+        # self.project.print_all(ANALYSIS_JOB_ANALYSIS)
+        #
+        # self.project.replace_ids()
 
     #region WidgetCreation
 
@@ -1226,18 +1227,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.create_widget_video_player()
             self.drawing_overlay.hide()
             self.outliner.hide()
-            self.timeline.show()
-            self.player_controls.show()
             self.perspective_manager.hide()
             self.inspector.hide()
             self.history_view.hide()
             self.concurrent_task_viewer.hide()
             self.node_editor_dock.hide()
             self.node_editor_results.hide()
-            self.screenshots_manager_dock.show()
             self.vocabulary_manager.hide()
             self.vocabulary_matrix.hide()
             self.analysis_results_widget_dock.hide()
+
+            self.timeline.show()
+            self.player_controls.show()
+            self.screenshots_manager_dock.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
@@ -1256,12 +1258,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.screenshot_toolbar.hide()
 
             self.drawing_overlay.show()
-            self.outliner.show()
-            self.timeline.show()
             self.history_view.hide()
             self.perspective_manager.hide()
             self.player_controls.hide()
-            self.inspector.show()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
             self.screenshots_manager_dock.hide()
             self.node_editor_dock.hide()
@@ -1269,6 +1268,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.node_editor_results.hide()
             self.vocabulary_matrix.hide()
             self.analysis_results_widget_dock.hide()
+
+            self.outliner.show()
+            self.timeline.show()
+            self.inspector.show()
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
@@ -1293,16 +1296,18 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_overlay.hide()
             self.timeline.hide()
             self.player_controls.hide()
-            self.outliner.show()
             self.history_view.hide()
             self.screenshots_manager.center_images()
-            self.screenshots_manager_dock.show()
             self.node_editor_dock.hide()
             self.node_editor_results.hide()
             self.vocabulary_manager.hide()
             self.vocabulary_matrix.hide()
-            self.inspector.show()
             self.analysis_results_widget_dock.hide()
+
+            self.screenshots_manager_dock.show()
+            self.inspector.show()
+            self.outliner.show()
+
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
@@ -1324,17 +1329,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.player_dock_widget.hide()
             self.drawing_overlay.hide()
-            self.outliner.show()
             self.timeline.hide()
             self.player_controls.hide()
             self.history_view.hide()
-            self.node_editor_dock.show()
             self.screenshots_manager_dock.hide()
-            self.node_editor_results.show()
             self.vocabulary_manager.hide()
             self.vocabulary_matrix.hide()
             self.analysis_results_widget_dock.hide()
+
             self.inspector.show()
+            self.outliner.show()
+            self.node_editor_results.show()
+            self.node_editor_dock.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
@@ -1353,7 +1359,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.player_dock_widget.hide()
             self.drawing_overlay.hide()
-            self.outliner.show()
             self.timeline.hide()
             self.player_controls.hide()
             self.history_view.hide()
@@ -1363,7 +1368,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_manager.hide()
             self.vocabulary_matrix.hide()
             self.analysis_results_widget_dock.hide()
+
             self.inspector.show()
+            self.outliner.show()
 
             self.analysis_results_widget_dock.show()
 
@@ -1372,7 +1379,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.splitDockWidget(self.outliner, self.inspector, Qt.Vertical)
 
         elif perspective == Perspective.Categorize.name:
-            self.current_perspective = Perspective.Segmentation
+            self.current_perspective = Perspective.Categorize
             # central = self.player
 
             central = QWidget(self)
@@ -1386,7 +1393,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.create_widget_video_player()
             self.drawing_overlay.hide()
             self.outliner.hide()
-            self.timeline.show()
+
             self.player_controls.hide()
             self.perspective_manager.hide()
             self.inspector.hide()
@@ -1394,17 +1401,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.concurrent_task_viewer.hide()
             self.node_editor_dock.hide()
             self.node_editor_results.hide()
-            self.screenshots_manager_dock.show()
             self.vocabulary_manager.hide()
-            self.vocabulary_matrix.show()
             self.analysis_results_widget_dock.hide()
 
+            self.timeline.show()
+            self.screenshots_manager_dock.show()
+            self.vocabulary_matrix.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.screenshots_manager_dock, Qt.Vertical)
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.addDockWidget(Qt.RightDockWidgetArea, self.timeline, Qt.Vertical)
-            self.resizeDocks([self.timeline], [150], Qt.Vertical)
-
 
             self.statusBar().hide()
             # self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
@@ -1416,6 +1422,23 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if perspective != (Perspective.Annotation.name or Perspective.Segmentation.name):
             self.set_overlay_visibility(False)
+
+        self.set_default_dock_sizes(self.current_perspective)
+
+    def set_default_dock_sizes(self, perspective):
+        if perspective == Perspective.Segmentation:
+            self.timeline.resize_dock(h=300)
+            self.screenshots_manager_dock.resize_dock(w=self.width() / 2)
+
+        elif perspective == Perspective.Annotation:
+            self.timeline.resize_dock(h=300)
+
+        elif perspective == Perspective.Categorize:
+            self.timeline.resize_dock(h=100)
+            self.player_dock_widget.resize_dock(w=800, h=400)
+            self.screenshots_manager_dock.resize_dock(h=self.height() / 2)
+            self.player_dock_widget.resize_dock(h=self.height() / 2)
+            print("OK")
 
     def changeEvent(self, event):
         if event.type() == QEvent.ActivationChange:

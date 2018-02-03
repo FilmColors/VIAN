@@ -11,7 +11,7 @@ from core.data.interfaces import ITimeStepDepending
 
 class PlayerControls(EDockWidget, ITimeStepDepending):
     def __init__(self,main_window):
-        super(PlayerControls, self).__init__(main_window)
+        super(PlayerControls, self).__init__(main_window, height=100)
         path = os.path.abspath("qt_ui/PlayerControls.ui")
         uic.loadUi(path,self)
 

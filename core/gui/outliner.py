@@ -13,7 +13,7 @@ from .ewidgetbase import EDockWidget
 
 class Outliner(EDockWidget, IProjectChangeNotify):
     def __init__(self,main_window):
-        super(Outliner, self).__init__(main_window)
+        super(Outliner, self).__init__(main_window, width=500)
         path = os.path.abspath("qt_ui/Outliner.ui")
         uic.loadUi(path, self)
 
@@ -418,7 +418,7 @@ class SegmentationOutlinerRootItem(AbstractOutlinerItem):
     def update_item(self):
         super(SegmentationOutlinerRootItem, self).update_item()
         self.setText(0, "Segmentations")
-        self.setForeground(0, QtGui.QColor(0,113,122))
+        self.setForeground(0, QtGui.QColor(0, 113, 122))
 
 
 class SegmentationOutlinerItem(AbstractOutlinerItem):

@@ -293,7 +293,7 @@ class Player_VLC(VideoPlayer):
         elif sys.platform == "win32":  # for Windows
             self.media_player.set_hwnd(self.videoframe.winId())
         elif sys.platform == "darwin":  # for MacOS
-            self.media_player.set_nsobject(int(self.mac_frame.winId()))
+            self.media_player.set_nsobject(int(self.videoframe.winId()))
             self.videoframe.setCocoaView(self.media_player.get_nsobject())
 
             self.videoframe.setAttribute(Qt.WA_TransparentForMouseEvents, True)
@@ -381,8 +381,8 @@ class Player_VLC(VideoPlayer):
 
         self.movieOpened.emit()
 
-        if self.main_window.is_darwin:
-            self.mac_frame.update()
+        # if self.main_window.is_darwin:
+        #     self.mac_frame.update()
 
     def play_pause(self):
         if not self.is_playing():

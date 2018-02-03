@@ -15,7 +15,7 @@ from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 
 class TimelineContainer(EDockWidget):
     def __init__(self, main_window):
-        super(TimelineContainer, self).__init__(main_window, limit_size=False)
+        super(TimelineContainer, self).__init__(main_window, limit_size=False, height=300)
         self.timeline = Timeline(main_window, self)
         self.setWidget(self.timeline)
         self.setWindowTitle("Timeline")
@@ -29,6 +29,10 @@ class TimelineContainer(EDockWidget):
         self.a_create_annotation_layer = self.menu_create.addAction("New Annotation Layer")
         self.a_create_annotation_layer.triggered.connect(partial(self.timeline.create_layer, []))
         self.a_create_segmentation.triggered.connect(self.timeline.create_segmentation)
+
+        self.menu_tools = self.inner.menuBar().addMenu("Tools")
+        self.a_cut_segment = self.menu_tools.addAction("Cut Segments")
+        self.a_cut_segment.triggered.connect(self.on_cut_tools)
 
         self.menu_display = self.inner.menuBar().addMenu("Display")
         self.a_show_id = self.menu_display.addAction("\tID")
@@ -60,11 +64,15 @@ class TimelineContainer(EDockWidget):
         self.a_forward_segmentation.setChecked(False)
         self.a_forward_segmentation.triggered.connect(self.update_settings)
 
-        self.a_kee_slider_in_view = self.menu_options.addAction("\tInhibit Overlap")
+        self.a_kee_slider_in_view = self.menu_options.addAction("\tFollow Time Scrubber")
         self.a_kee_slider_in_view.setCheckable(True)
         self.a_kee_slider_in_view.setChecked(True)
         self.a_kee_slider_in_view.triggered.connect(self.update_settings)
 
+        self.a_use_grid = self.menu_options.addAction("\tUse Grid")
+        self.a_use_grid.setCheckable(True)
+        self.a_use_grid.setChecked(self.main_window.settings.USE_GRID)
+        self.a_use_grid.triggered.connect(self.update_settings)
 
         self.a_show_id.triggered.connect(self.update_settings)
         self.a_show_name.triggered.connect(self.update_settings)
@@ -79,11 +87,16 @@ class TimelineContainer(EDockWidget):
         super(TimelineContainer, self).resizeEvent(*args, **kwargs)
         self.timeline.update_time_bar()
 
+    def on_cut_tools(self):
+        self.timeline.activate_cutting_tool()
+
+
     def update_settings(self):
         self.timeline.show_id = self.a_show_id.isChecked()
         self.timeline.show_name = self.a_show_name.isChecked()
         self.timeline.show_text = self.a_show_text.isChecked()
         self.timeline.inhibit_overlap = self.a_inhibit_overlap.isChecked()
+        self.timeline.settings.USE_GRID = self.a_use_grid.isChecked()
 
         self.timeline.show_time_indicator = self.a_show_time_indicator.isChecked()
 
@@ -108,10 +121,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.duration = 5400000
         self.curr_movie_time = 0
         self.scale = 100
+
         self.is_scaling = False
         self.is_selecting = False
         self.is_fast_selecting = False
         self.is_marquee_selecting = False
+        self.is_cutting = False
+
         self.item_segments = []
         self.item_screenshots = []
         self.item_ann_layers = []
@@ -157,6 +173,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.inhibit_overlap = True
         self.show_time_indicator = True
+
+        self.cutting_indicator = None
 
         self.update_time_bar()
         self.update_ui()
@@ -574,7 +592,20 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.zoom_timeline(QPoint(0,0), abs_scale=scale, force = True)
         self.scrollArea.horizontalScrollBar().setValue(t_start / self.scale - (self.scale/2))
 
+    def activate_cutting_tool(self):
+        self.is_cutting = True
+        self.cutting_indicator = TimelineTimemark(self.frame_Bars, QColor(200,20,5,200))
+        self.cutting_indicator.resize(1, self.height())
 
+    def move_cutting_tool(self, pos):
+        self.cutting_indicator.move(pos)
+        self.cutting_indicator.raise_()
+
+    def finish_cutting_tool(self, pos, segm_container):
+        segm_container.segmentation.cut_segment(segm_container, pos.x() * self.scale)
+        self.is_cutting = False
+        self.cutting_indicator.deleteLater()
+        self.cutting_indicator = None
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
@@ -584,7 +615,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                     self.move_selector(QMouseEvent.pos())
                 else:
                     self.move_selector(QMouseEvent.pos())
-
 
         if QMouseEvent.button() == Qt.RightButton:
             self.start_selector(QMouseEvent.pos())
@@ -650,12 +680,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.selector = None
 
     def round_to_grid(self, a):
-        if isinstance(a, QtCore.QPoint):
-            px = a.x() - (a.x() % (float(self.settings.GRID_SIZE) / self.scale))
-            py = a.y() - (a.y() % (float(self.settings.GRID_SIZE) / self.scale))
-            return QtCore.QPoint(int(px), int(py))
+        if self.settings.USE_GRID:
+            if isinstance(a, QtCore.QPoint):
+                px = a.x() - (a.x() % (float(self.settings.GRID_SIZE) / self.scale))
+                py = a.y() - (a.y() % (float(self.settings.GRID_SIZE) / self.scale))
+                return QtCore.QPoint(int(px), int(py))
+            else:
+                return int(a - (a % (float(self.settings.GRID_SIZE) / self.scale)))
         else:
-            return int(a - (a % (float(self.settings.GRID_SIZE) / self.scale)))
+            return a
 
     def on_timeline_settings_update(self):
         for s in self.item_segments:
@@ -785,6 +818,7 @@ class TimelineBar(QtWidgets.QFrame):
         self.resize(parent.width(), height)
         self.timeline = timeline
         self.orig_height = height
+        self.setMouseTracking(True)
 
         self.is_selected = False
 
@@ -961,7 +995,9 @@ class TimebarSlice(QtWidgets.QWidget):
     def mousePressEvent(self, QMouseEvent):
         if not self.locked:
             if QMouseEvent.buttons() & Qt.LeftButton:
-
+                if self.timeline.is_cutting:
+                    self.timeline.finish_cutting_tool(self.mapToParent(QMouseEvent.pos()), self.item)
+                    return
                 # Inhibiting Overlap by finding the surrounding Slices and get their boundaries
                 if self.timeline.inhibit_overlap:
                     previous = self.parent().get_previous_slice(self)
@@ -976,6 +1012,7 @@ class TimebarSlice(QtWidgets.QWidget):
                     else:
                         self.max_possible = self.timeline.duration * self.timeline.scale
 
+
                 self.is_selected = True
                 self.timeline.project().set_selected(None, self.item)
                 self.offset = self.mapToParent(QMouseEvent.pos())
@@ -989,11 +1026,15 @@ class TimebarSlice(QtWidgets.QWidget):
     def mouseReleaseEvent(self, QMouseEvent):
         # if the the movement is smaller than the grid-size ignore it
         if not self.locked:
-            if np.abs(self.pos().x() * self.timeline.scale - self.item.get_start()) < self.timeline.settings.GRID_SIZE and \
-                 np.abs(self.width() * self.timeline.scale - (self.item.get_end() - self.item.get_start())) < self.timeline.settings.GRID_SIZE:
-                self.move(self.item.get_start()//self.timeline.scale, 0)
-                self.resize((self.item.get_end() - self.item.get_start()) // self.timeline.scale, self.height())
-                return
+
+            # if the Move was smaller than the Settings.Grid_SIZE, undo the movement
+            if self.timeline.settings.USE_GRID:
+                if np.abs(self.pos().x() * self.timeline.scale - self.item.get_start()) < self.timeline.settings.GRID_SIZE and \
+                     np.abs(self.width() * self.timeline.scale - (self.item.get_end() - self.item.get_start())) < self.timeline.settings.GRID_SIZE:
+                    self.move(self.item.get_start()//self.timeline.scale, 0)
+                    self.resize((self.item.get_end() - self.item.get_start()) // self.timeline.scale, self.height())
+                    return
+
 
             if self.mode == "center":
                 self.item.move(int(self.pos().x() * self.timeline.scale), int((self.pos().x() + self.width()) * self.timeline.scale))
@@ -1075,7 +1116,10 @@ class TimebarSlice(QtWidgets.QWidget):
                     self.move(x, 0)
                     self.update()
                     return
-    
+
+            elif self.timeline.is_cutting:
+                self.timeline.move_cutting_tool(QPoint(self.mapToParent(QMouseEvent.pos()).x(), 0))
+
             else:
                 # Moving the Left Sid
                 if  self.mapFromGlobal(self.cursor().pos()).x() < self.border_width:
@@ -1295,6 +1339,7 @@ class TimelineScrubber(QtWidgets.QWidget):
 class TimelineTimemark(QtWidgets.QWidget):
     def __init__(self, parent, color = QColor(255,255,255,50)):
         super(TimelineTimemark, self).__init__(parent)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.color = color
         self.setFixedWidth(5)
         self.setAttribute(Qt.WA_AlwaysStackOnTop)

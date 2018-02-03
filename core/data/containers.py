@@ -1063,6 +1063,14 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if dispatch:
             self.dispatch_on_changed()
 
+    def cut_segment(self, segm, time):
+        if segm in self.segments:
+            print(segm.get_start(), time, segm.get_end())
+            old_start = segm.get_start()
+            segm.set_start(time)
+            self.create_segment(old_start, time - 1)
+
+
     def update_segment_ids(self):
         self.segments = sorted(self.segments, key=lambda x: x.start)
         for i, s in enumerate(self.segments):
@@ -1231,6 +1239,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     def set_end(self, end):
         if end < self.start + self.MIN_SIZE :
             end = self.start + self.MIN_SIZE
+
         self.project.undo_manager.to_undo((self.set_end, [end]), (self.set_end, [self.end]))
         self.end = end
         self.segmentation.update_segment_ids()
