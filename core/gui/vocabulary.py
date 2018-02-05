@@ -4,6 +4,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
 from PyQt5 import uic
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 from core.data.interfaces import IProjectChangeNotify, IHasVocabulary
+from core.data.enums import get_type_as_string
 import os
 from functools import partial
 from core.data.enums import *
@@ -214,12 +215,15 @@ class VocabularyExportDialog(EDialogWidget):
 class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(VocabularyMatrix, self).__init__(main_window,limit_size=False)
-
         self.main_window = main_window
         self.n_per_row = 20
         self.setWindowTitle("Vocabulary Matrix")
         self.all_boxes = []
         self.current_segment = 0
+
+        self.stick_to_type = False
+        self.stick_type = None
+        self.lbl_stick_type = QLabel("Updating on Selection of any Type",self)
 
         self.tabs_list = []
         self.voc_categories = []
@@ -247,9 +251,11 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
 
         self.central.layout().addWidget(self.segment_selection)
         self.central.layout().addWidget(self.tabs)
+        self.central.layout().addWidget(self.lbl_stick_type)
         # self.setLayout(QHBoxLayout(self))
         self.setWidget(self.central)
         self.recreate_widget()
+        self.set_stick_to_type(False)
 
 
     def on_changed(self, project, item):
@@ -263,7 +269,25 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
         self.recreate_widget()
 
     def on_selected(self, sender, selected):
-        self.update_widget()
+        if self.stick_to_type:
+            if selected[0].get_type() == self.stick_type:
+                self.update_widget()
+        else:
+            self.update_widget()
+
+    def set_stick_to_type(self, enabled, type = None):
+        if enabled:
+            self.segment_selection.show()
+            self.stick_to_type = True
+            self.stick_type = type
+            self.lbl_stick_type.setText("Only change when " + get_type_as_string(type) + " are selected.")
+            self.lbl_stick_type.setStyleSheet("QLabel{color: Green;}")
+        else:
+            self.segment_selection.hide()
+            self.stick_type = False
+            self.stick_type = None
+            self.lbl_stick_type.setStyleSheet("QLabel{color: White;}")
+            self.lbl_stick_type.setText("Updating on Selection of any Type.")
 
     def update_widget(self):
         if len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
@@ -414,7 +438,7 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
             self.main_window.timeline.timeline.frame_time_range(s.get_start() + 1000, s.get_end())
             self.lbl_current.setText(str(s.ID).zfill(3))
             self.main_window.player.set_media_time(s.get_start() + 1000)
-            self.project().set_selected(self, [s])
+            self.project().set_selected(None, [s])
 
     def on_button_next(self):
         segm = self.project().get_main_segmentation()
@@ -426,6 +450,7 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
 
     def resizeEvent(self, *args, **kwargs):
         super(VocabularyMatrix, self).resizeEvent(*args, **kwargs)
+
 #endregion
 
 

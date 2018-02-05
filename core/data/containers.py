@@ -981,7 +981,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                     if s.start < start:
                         last = s
                 if last is not None:
-                    start = last.end + 1
+                    start = last.end
                 else:
                     start = 0
 
@@ -998,7 +998,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                         next = None
 
             if last is not None and last.end > start:
-                start = last.end + 1
+                start = last.end
             if next is not None and next.start < stop:
                 stop = next.start - 1
 
@@ -1065,10 +1065,20 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
     def cut_segment(self, segm, time):
         if segm in self.segments:
-            print(segm.get_start(), time, segm.get_end())
-            old_start = segm.get_start()
-            segm.set_start(time)
-            self.create_segment(old_start, time - 1)
+            old_end = segm.get_end()
+            segm.end = time
+            new = self.create_segment(time, old_end)
+            self.project.undo_manager.to_undo((self.cut_segment, [segm, time]), (self.merge_segments, [segm, new]))
+
+    def merge_segments(self, a, b):
+        if abs(a.ID - b.ID) <= 1:
+            if a.get_start() < b.get_start():
+                a.end = b.get_end()
+                self.remove_segment(b, dispatch=False)
+            else:
+                b.end = a.get_end()
+                self.remove_segment(a, dispatch=False)
+        self.dispatch_on_changed()
 
 
     def update_segment_ids(self):
@@ -1090,14 +1100,14 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.dispatch_on_changed()
 
     def cleanup_borders(self):
-        self.remove_unreal_segments(length = 100)
+        self.remove_unreal_segments(length = 1)
         for i, s in enumerate(self.segments):
             if i < len(self.segments) - 1:
                 end = s.get_end()
                 start = self.segments[i + 1].get_start()
-                center = (start + end) / 2
+                center = int(round((start + end) / 2, 0))
                 s.end = center
-                self.segments[i + 1].start = center + 1
+                self.segments[i + 1].start = center
 
         self.dispatch_on_changed()
 
@@ -1208,11 +1218,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, additional_identifiers = None, segmentation=None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
-        self.MIN_SIZE = 100
+        self.MIN_SIZE = 10
         self.ID = ID
         self.start = start
         self.end = end
-
 
         self.duration = duration
         if additional_identifiers is None:

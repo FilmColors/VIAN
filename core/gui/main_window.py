@@ -404,6 +404,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if os.path.isfile(force_file_path):
             try:
                 os.remove(force_file_path)
+                self.settings.GRID_SIZE = 1
+                self.settings.store()
                 self.show_welcome()
             except Exception as e:
                 print(e)
@@ -664,14 +666,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update()
 
     def keyPressEvent(self, event):
-        self.screenshots_manager.ctrl_is_pressed = True
-        self.timeline.timeline.is_scaling = True
+        if event.key() == Qt.Key_Control:
+            self.screenshots_manager.ctrl_is_pressed = True
+            self.timeline.timeline.is_scaling = True
+        elif event.key() == Qt.Key_Shift:
+            pass
+            # self.timeline.timeline.is_multi_selecting = True
 
 
     def keyReleaseEvent(self, event):
-        self.screenshots_manager.ctrl_is_pressed = False
-        self.timeline.timeline.is_scaling = False
-
+        if event.key() == Qt.Key_Control:
+            print("Control")
+            self.screenshots_manager.ctrl_is_pressed = False
+            self.timeline.timeline.is_scaling = False
+        elif event.key() == Qt.Key_Shift:
+            pass
+            # self.timeline.timeline.is_multi_selecting = False
 
     def mousePressEvent(self, event):
         self.close_drawing_editor()
@@ -1180,6 +1190,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.centralWidget().setParent(None)
         self.statusBar().show()
+        self.vocabulary_matrix.set_stick_to_type(False)
 
         self.default_dock_locations()
         if self.is_darwin:
@@ -1407,7 +1418,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.show()
             self.screenshots_manager_dock.show()
             self.vocabulary_matrix.show()
-
+            self.vocabulary_matrix.set_stick_to_type(True, SEGMENT)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.screenshots_manager_dock, Qt.Vertical)
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.addDockWidget(Qt.RightDockWidgetArea, self.timeline, Qt.Vertical)

@@ -46,7 +46,6 @@ class VianUpdater(IConcurrentJob):
                 version = version.split(".")
                 version = [int(version[0]), int(version[1]), int(version[2])]
 
-
         if version == None:
             return False
 

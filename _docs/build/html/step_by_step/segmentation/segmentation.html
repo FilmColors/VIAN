@@ -38,7 +38,7 @@
     <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/>
         <link rel="up" title="Step-by-Step Guides" href="../step_by_step.html"/>
         <link rel="next" title="Creating Segmentations" href="create_segmentation.html"/>
-        <link rel="prev" title="Changing Movie Paths" href="../project_management/changing_movie_paths.html"/> 
+        <link rel="prev" title="Backups" href="../project_management/backups.html"/> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
@@ -112,11 +112,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../project_management/project_templates.html">Project Templates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/backups.html">Backups</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Segmentation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="create_segmentation.html">Creating Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="create_segment.html">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cutting_segments.html">Cutting Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="changing_main_segmentation.html">Changing the Main Segmentation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="locking_segmentations.html">Locking Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="exporting_segmentations.html">Exporting Segmentations</a></li>
@@ -128,6 +130,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../screenshots/screenshots.html">Screenshots</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../screenshots/create_screenshot.html">Creating a Screenshot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../screenshots/export_screenshots.html">Exporting Screenshots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../analyses/analyses.html">Analyses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analyses/running_analyses.html">Running Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analyses/viewing_analyses.html">Viewing Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analyses/analyses_list.html">All Analyses of VIAN</a></li>
 </ul>
 </li>
 </ul>
@@ -149,10 +157,16 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../whats_new/latest.html">VIAN 0.4.2</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#perspectives">Perspectives</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#changing-the-video-source">Changing the Video-Source</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/latest.html">VIAN 0.4.5</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#extensive-list">Extensive List</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#extensive-list">Extensive List</a></li>
 </ul>
 </li>
 </ul>
@@ -235,6 +249,7 @@
 <li class="toctree-l2"><a class="reference internal" href="create_segment.html#interval-selection">Interval Selection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="cutting_segments.html">Cutting Segments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changing_main_segmentation.html">Changing the Main Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="locking_segmentations.html">Locking Segmentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exporting_segmentations.html">Exporting Segmentations</a></li>
@@ -261,7 +276,7 @@ sorting the Screenshots. How to change the current Main Segmentation is explaine
         <a href="create_segmentation.html" class="btn btn-neutral float-right" title="Creating Segmentations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../project_management/changing_movie_paths.html" class="btn btn-neutral" title="Changing Movie Paths" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../project_management/backups.html" class="btn btn-neutral" title="Backups" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

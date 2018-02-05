@@ -9,6 +9,7 @@ Step-by-Step Guides
    segmentation/segmentation.rst
    annotation/annotation.rst
    screenshots/screenshots.rst
+   analyses/analyses.rst
 
 
 

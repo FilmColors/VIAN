@@ -65,6 +65,13 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
             self.main_window.print_message("Visualization returned None", "Red")
             self.current_visualization = []
 
+    def return_from_fullscreen(self, widgets):
+        self.analysis_widget.layout().addWidget(widgets[0].widget)
+        self.current_visualization = widgets
+        self.current_visualization[0].widget.show()
+        self.fullscreen_view = None
+
+
     def clear_analysis_widget(self):
         for c in self.analysis_widget.children():
             if isinstance(c, QWidget):
@@ -217,6 +224,10 @@ class AnalysisFullScreenWindow(QMainWindow):
     def keyPressEvent(self, a0: QKeyEvent):
         if a0.key() == Qt.Key_Escape:
             self.close()
+
+    def closeEvent(self, a0: QCloseEvent):
+        self.analysis_widget.return_from_fullscreen(self.tabs)
+        super(AnalysisFullScreenWindow, self).closeEvent(a0)
 
     def resizeEvent(self, a0: QResizeEvent):
         super(AnalysisFullScreenWindow, self).resizeEvent(a0)
