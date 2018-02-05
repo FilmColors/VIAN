@@ -204,7 +204,7 @@ class AsyncShelveStream(QObject):
         except Exception as e:
             print("Exception in AsyncShelveStream.load()", str(e))
             try:
-                self.signals.finished.disconnect(slot)
+                self.signals.finished.disconnect()
             except Exception as e:
                 print("Exception during Exception Handling in AsyncShelveStream.load()", str(e))
 

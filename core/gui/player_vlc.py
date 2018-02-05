@@ -255,17 +255,11 @@ class Player_VLC(VideoPlayer):
         self.init_ui()
 
     def release_player(self):
-        if self.media is not None:
-            self.media.release()
-            self.media = None
-        if self.media_player is not None:
-            self.media_player.release()
-            self.media_player = None
         if self.vlc_instance is not None:
             self.vlc_instance.release()
             self.vlc_instance = None
-        # if self.videoframe is not None:
-        #     self.videoframe.deleteLater()
+            self.media_player = None
+            self.media = None
 
     def get_frame(self):
         # fps = self.media_player.get_fps()
@@ -294,7 +288,7 @@ class Player_VLC(VideoPlayer):
             self.media_player.set_hwnd(self.videoframe.winId())
         elif sys.platform == "darwin":  # for MacOS
             self.media_player.set_nsobject(int(self.videoframe.winId()))
-            self.videoframe.setCocoaView(self.media_player.get_nsobject())
+            # self.videoframe.setCocoaView(self.media_player.get_nsobject())
 
             self.videoframe.setAttribute(Qt.WA_TransparentForMouseEvents, True)
             self.videoframe.setAttribute(Qt.WA_NativeWindow, True)
@@ -362,15 +356,6 @@ class Player_VLC(VideoPlayer):
         # Wait for a little
         # time.sleep(0.5)
         self.set_initial_values()
-
-        # Setting the movie to Paused
-
-        # Set the position to the beginning
-
-
-        # We need to wait a little, otherwise, VLC will automatically start playing
-        # time.sleep(1)
-        # self.pause()
 
         if from_server:
             self.new_movie_loaded = True
@@ -552,6 +537,9 @@ class Player_VLC(VideoPlayer):
         self.media_descriptor = project.movie_descriptor
 
         if path is "" or not os.path.isfile(path):
+            QMessageBox.information(self.main_window, "Could not find movie",
+                                    "Could not find movie: " + str(path) +
+                                    "\nPlease set it manually after clicking \"OK\".")
             path = QtWidgets.QFileDialog.getOpenFileName(self)[0]
             project.movie_descriptor.movie_path = path
 

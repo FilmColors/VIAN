@@ -1,11 +1,16 @@
 
 
-VIAN 0.4.5
-==========
+VIAN 0.4.5 - 0.4.6
+==================
+
+**READ THIS**
+
 
 Analyses - Visualization
 ************************
-
+The Analyses Visualizations have been implemented in their basic form.
+This mean: You can now run analyses, and view them.
+Read more about how to use them here: :ref:`running_analyses` and here: :ref:`viewing_analyses`.
 
 
 Analyses - Mosaic Vis
@@ -21,7 +26,7 @@ Read more about Analyses and how to perform them here: :ref:`analyses`
 
 Backups
 *******
-VIAN now allows you to perform backups of a Project.
+VIAN now allows you to perform backups of a Project semi-automatically.
 Read more about creating and loading backups here: :ref:`backups`
 
 
@@ -38,6 +43,18 @@ A Step-By-Step Tutorial can be found here: :ref:`cutting_segments`
 
 Extensive List
 **************
+* Accuracy in Timeline increased, no borders should be visible now.
+* Increased stability during loading and closing of projects.
+* Moved the VLC player into it's own window, creating much more reliable Player Interface
+* Pipeline Import
+* Filemaker Data Import finished, the correct vocabularies have to be created though
+* Backups implemented
+* Cutting Segments (and Merging) implmeneted
+* Synchronous Save and Load of Stream
+
+Hot-Fixes
+*********
+* OSX Error in Streaming solved (0.4.6)
 
 * :ref:`genindex`
 * :ref:`modindex`

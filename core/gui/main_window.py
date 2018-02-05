@@ -59,7 +59,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.4.4"
+__version__ = "0.4.6"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -439,7 +439,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = ExportTemplateDialog(self)
         dialog.show()
 
-
     def show_welcome(self):
         open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
         self.settings.SHOW_WELCOME = False
@@ -673,7 +672,6 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
             # self.timeline.timeline.is_multi_selecting = True
 
-
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_Control:
             print("Control")
@@ -857,8 +855,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if path == "" or path is None:
             self.print_message("Not Loaded, Path was Empty")
             return
-
-
 
         new = ElanExtensionProject(self)
         print("Loading Project Path", path)

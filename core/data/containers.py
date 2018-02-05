@@ -632,7 +632,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.main_window.print_message("Loading Vocabularies failed", "Red")
             self.main_window.print_message(e, "Red")
 
-
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)

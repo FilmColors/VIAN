@@ -11,9 +11,12 @@ If your Analysis has finished, you can inspect it as follows:
 3. In the Analysis Results Widget on the Right, your Analysis should appear.
 4. Use **Display/Fullscreen** in the Analysis Results Window to look at the Visualization in Fullscreen
 
+.. figure:: analyses_result.jpg
+   :scale: 80 %
+   :align: center
+   :alt: map to buried treasure
 
-.. note::
-   A current Bug makes the Visualizations not always appear in the Analysis Results Window, use **Display/Fullscreen** to view the Analysis.
+   The Analysis Result Perspective as it appears when running a Mosaic Plot Analysis.
 
 .. seealso::
 
