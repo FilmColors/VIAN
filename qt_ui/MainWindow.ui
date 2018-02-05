@@ -46,6 +46,9 @@
      <addaction name="actionImportELANSegmentation"/>
      <addaction name="action_importELAN_Project"/>
      <addaction name="actionImportVocabulary"/>
+     <addaction name="separator"/>
+     <addaction name="actionImportFilmColorsPipeline"/>
+     <addaction name="actionImportFilmColorsFilemaker"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="title">
@@ -67,6 +70,7 @@
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
+    <addaction name="actionBackup"/>
     <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="menuImport"/>
@@ -121,8 +125,9 @@
      <addaction name="actionSegmentationPersp"/>
      <addaction name="actionAnnotationPersp"/>
      <addaction name="actionScreenshotsPersp"/>
-     <addaction name="actionNodeEditorPerspective"/>
+     <addaction name="actionVocabularyPersp"/>
      <addaction name="actionResultsPersp"/>
+     <addaction name="actionNodeEditorPerspective"/>
      <addaction name="separator"/>
      <addaction name="actionSave_Perspective"/>
      <addaction name="actionLoad_Perspective"/>
@@ -142,6 +147,9 @@
     <addaction name="actionTaksMonitor"/>
     <addaction name="actionHistory"/>
     <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionFullscreen"/>
+    <addaction name="actionToggleStatusBar"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -412,7 +420,7 @@
     <string>Node Editor</string>
    </property>
    <property name="shortcut">
-    <string>Alt+5</string>
+    <string>Alt+7</string>
    </property>
   </action>
   <action name="actionPlay_Pause">
@@ -584,6 +592,45 @@
    </property>
    <property name="shortcut">
     <string>Alt+6</string>
+   </property>
+  </action>
+  <action name="actionImportFilmColorsPipeline">
+   <property name="text">
+    <string>FilmColors Pipeline</string>
+   </property>
+  </action>
+  <action name="actionImportFilmColorsFilemaker">
+   <property name="text">
+    <string>FilmColors Filemaker</string>
+   </property>
+  </action>
+  <action name="actionBackup">
+   <property name="text">
+    <string>Backup</string>
+   </property>
+  </action>
+  <action name="actionFullscreen">
+   <property name="text">
+    <string>Fullscreen</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="actionToggleStatusBar">
+   <property name="text">
+    <string>Toggle StatusBar</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
+   </property>
+  </action>
+  <action name="actionVocabularyPersp">
+   <property name="text">
+    <string>Vocabulary</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+5</string>
    </property>
   </action>
  </widget>

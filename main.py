@@ -79,24 +79,18 @@ if __name__ == '__main__':
     attributes = None
 
 
-
-    # vlc_argmuents = "--avcodec-hw=dxva2 --no-keyboard-events --no-mouse-events --verbose 2"
-    vlc_argmuents = "--no-keyboard-events --no-mouse-events --verbose 1 --no-embedded-video"
-
     if not DEBUG:
         try:
             sys._excepthook = sys.excepthook
             sys.excepthook = my_exception_hook
-            vlc_instance = vlc.Instance(vlc_argmuents)
-            vlc_media_player = vlc_instance.media_player_new()
+
             settings = UserSettings()
             settings.load()
-
 
             app = QApplication(sys.argv)
             set_attributes(app)
             set_style_sheet(app, settings.THEME_PATH)
-            main = MainWindow(vlc_instance, vlc_media_player)
+            main = MainWindow()
             main.run()
             sys.exit(app.exec_())
 
@@ -133,15 +127,13 @@ if __name__ == '__main__':
         sys._excepthook = sys.excepthook
         sys.excepthook = my_exception_hook
 
-        vlc_instance = vlc.Instance(vlc_argmuents)
-        vlc_media_player = vlc_instance.media_player_new()
         settings = UserSettings()
         settings.load()
 
         app = QApplication(sys.argv)
         set_attributes(app)
         set_style_sheet(app, settings.THEME_PATH)
-        main = MainWindow(vlc_instance, vlc_media_player)
+        main = MainWindow()
 
         sys.exit(app.exec_())
 

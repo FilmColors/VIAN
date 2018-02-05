@@ -1,8 +1,10 @@
 from random import randint
+from collections import namedtuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QObject, pyqtSlot
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
+VisualizationTab = namedtuple("VisualizationTab", ["name", "widget", "use_filter", "controls"])
 
 class IProjectChangeNotify():
     def __init__(self, dummy = None):

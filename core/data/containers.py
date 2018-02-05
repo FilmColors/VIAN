@@ -151,7 +151,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def unload_all(self):
         for c in self.get_all_containers():
             if isinstance(c, IStreamableContainer):
-                c.unload_container()
+                c.unload_container(sync=True)
 
     def print_all(self, type = None):
         for c in self.get_all_containers():
@@ -387,6 +387,13 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             if isinstance(a, IAnalysisJobAnalysis) and item.unique_id in a.parameters.target_items:
                 result.append(item)
         return item
+
+    def get_job_analyses(self):
+        result = []
+        for a in self.analysis:
+            if isinstance(a, IAnalysisJobAnalysis):
+                result.append(a)
+        return result
     #endregion
 
 
@@ -625,7 +632,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.main_window.print_message("Loading Vocabularies failed", "Red")
             self.main_window.print_message(e, "Red")
 
-
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
@@ -758,14 +764,30 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
 
-
     #region Vocabularies
     def create_vocabulary(self, name="New Vocabulary"):
         voc = Vocabulary(name)
         self.add_vocabulary(voc)
 
     def add_vocabulary(self, voc):
+
+        not_ok = True
+        counter = 0
+        name = voc.name
+        while(not_ok):
+            has_duplicate = False
+            for v in self.vocabularies:
+                if v.name == name:
+                    name = voc.name + "_" + str(counter).zfill(2)
+                    has_duplicate = True
+                    counter += 1
+                    break
+            if not has_duplicate:
+                not_ok = False
+                break
+        voc.name = name
         voc.set_project(self)
+
         self.vocabularies.append(voc)
         self.dispatch_changed()
 
@@ -773,6 +795,11 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         if voc in self.vocabularies:
             self.vocabularies.remove(voc)
         self.dispatch_changed()
+
+    def copy_vocabulary(self, voc):
+        voc.export_vocabulary(self.data_dir + "/temp_voc.json")
+        self.import_vocabulary(self.data_dir + "/temp_voc.json")
+        os.remove(self.data_dir + "/temp_voc.json")
 
     def get_auto_completer_model(self):
         """
@@ -953,7 +980,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                     if s.start < start:
                         last = s
                 if last is not None:
-                    start = last.end + 1
+                    start = last.end
                 else:
                     start = 0
 
@@ -970,7 +997,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                         next = None
 
             if last is not None and last.end > start:
-                start = last.end + 1
+                start = last.end
             if next is not None and next.start < stop:
                 stop = next.start - 1
 
@@ -1035,6 +1062,24 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if dispatch:
             self.dispatch_on_changed()
 
+    def cut_segment(self, segm, time):
+        if segm in self.segments:
+            old_end = segm.get_end()
+            segm.end = time
+            new = self.create_segment(time, old_end)
+            self.project.undo_manager.to_undo((self.cut_segment, [segm, time]), (self.merge_segments, [segm, new]))
+
+    def merge_segments(self, a, b):
+        if abs(a.ID - b.ID) <= 1:
+            if a.get_start() < b.get_start():
+                a.end = b.get_end()
+                self.remove_segment(b, dispatch=False)
+            else:
+                b.end = a.get_end()
+                self.remove_segment(a, dispatch=False)
+        self.dispatch_on_changed()
+
+
     def update_segment_ids(self):
         self.segments = sorted(self.segments, key=lambda x: x.start)
         for i, s in enumerate(self.segments):
@@ -1054,14 +1099,14 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.dispatch_on_changed()
 
     def cleanup_borders(self):
-        self.remove_unreal_segments(length = 100)
+        self.remove_unreal_segments(length = 1)
         for i, s in enumerate(self.segments):
             if i < len(self.segments) - 1:
                 end = s.get_end()
                 start = self.segments[i + 1].get_start()
-                center = (start + end) / 2
+                center = int(round((start + end) / 2, 0))
                 s.end = center
-                self.segments[i + 1].start = center + 1
+                self.segments[i + 1].start = center
 
         self.dispatch_on_changed()
 
@@ -1101,7 +1146,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.notes = serialization['notes']
         for s in serialization["segments"]:
             new = Segment()
-            new.deserialize(s, self)
+            new.deserialize(s, self.project)
             new.segmentation = self
             self.segments.append(new)
 
@@ -1172,11 +1217,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, additional_identifiers = None, segmentation=None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
-        self.MIN_SIZE = 100
+        self.MIN_SIZE = 10
         self.ID = ID
         self.start = start
         self.end = end
-
 
         self.duration = duration
         if additional_identifiers is None:
@@ -1203,6 +1247,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     def set_end(self, end):
         if end < self.start + self.MIN_SIZE :
             end = self.start + self.MIN_SIZE
+
         self.project.undo_manager.to_undo((self.set_end, [end]), (self.set_end, [self.end]))
         self.end = end
         self.segmentation.update_segment_ids()
@@ -1289,7 +1334,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
                     self.add_word(self.project.get_by_id(w))
 
         except Exception as e:
-            pass
+            print(e)
 
         return self
 
@@ -2370,9 +2415,9 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.data = data
 
 
-    def unload_container(self, data=None):
+    def unload_container(self, data=None, sync=False):
         print("Unload: ", self.unique_id, "\tANALYSIS")
-        super(AnalysisContainer, self).unload_container(self.data)
+        super(AnalysisContainer, self).unload_container(self.data, sync=sync)
         self.data = None
 
     def apply_loaded(self, obj):
@@ -2912,7 +2957,6 @@ class VocabularyWord(IProjectContainer, IHasName):
             self.children.append(children)
 
     def get_children(self, parent_item):
-
         item = VocabularyItem(self.name, self)
         parent_item.appendRow(item)
         if len(self.children) > 0:

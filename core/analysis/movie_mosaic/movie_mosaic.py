@@ -1,4 +1,4 @@
-from core.data.interfaces import IAnalysisJob, ParameterWidget
+from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 from core.data.containers import *
 from core.analysis.colorimetry.hilbert import *
 from core.analysis.colorimetry.computation import *
@@ -141,7 +141,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
         view = EGraphicsView(None, False, main_window)
         view.set_image(numpy_to_pixmap(analysis.data["mosaic"]))
-        return view
+        return [VisualizationTab("Mosaic", widget=view, use_filter=False, controls=None)]
 
 
     def get_parameter_widget(self):

@@ -104,7 +104,12 @@ class ProjectStreamerShelve(ProjectStreamer):
         else:
             path = self.container_db
         with shelve.open(path) as db:
-            obj = db[str(id)]
+            try:
+                obj = db[str(id)]
+            except Exception as e:
+                self.main_window.print_message("Error in Streamer: " + str(e), "Orange")
+                self.main_window.print_message("If you have just loaded the Project please wait some seconds and try again", "Orange")
+                return None
 
         return obj
 
@@ -177,13 +182,12 @@ class AsyncShelveStream(QObject):
                 self.signals.finished.emit(slot_arguments, None)
 
         except Exception as e:
-            print("Exception in Streamer", str(e))
+            print("Exception in AsyncShelveStream.store()", str(e))
             self.signals.finished.disconnect()
 
     @pyqtSlot(str, int, object, object)
     def load(self, unique_id, data_type, slot, slot_arguments):
         try:
-            print("TEST", "\tDATA Loading")
             self.signals.finished.connect(slot)
 
             if data_type == STREAM_DATA_ARBITRARY:
@@ -198,11 +202,11 @@ class AsyncShelveStream(QObject):
             self.signals.finished.disconnect(slot)
 
         except Exception as e:
-            print("Exception in Streamer", str(e))
+            print("Exception in AsyncShelveStream.load()", str(e))
             try:
-                self.signals.finished.disconnect(slot)
+                self.signals.finished.disconnect()
             except Exception as e:
-                print(str(e))
+                print("Exception during Exception Handling in AsyncShelveStream.load()", str(e))
 
 
     @pyqtSlot()
@@ -210,8 +214,6 @@ class AsyncShelveStream(QObject):
         pass
 
 #endregion
-
-
 class NumpyDataManager(ProjectStreamer):
     def __init__(self, main_window):
         super(NumpyDataManager, self).__init__(main_window)
@@ -219,8 +221,11 @@ class NumpyDataManager(ProjectStreamer):
     def dump(self, key, data_dict, data_type):
         if os.path.isfile(self.project.data_dir + "/" + str(key) + ".npz"):
             os.remove(self.project.data_dir + "/" + str(key) + ".npz")
-        with open(self.project.data_dir + "/" +str(key) + ".npz", "wb") as f:
-            np.savez(f, **data_dict)
+        try:
+            with open(self.project.data_dir + "/" +str(key) + ".npz", "wb") as f:
+                np.savez(f, **data_dict)
+        except Exception as e:
+            print("Error in NumpyDataManager.dump: ", str(e))
 
     def load(self, key, data_type):
         try:
@@ -235,7 +240,11 @@ class NumpyDataManager(ProjectStreamer):
 
     def remove_item(self, unique_id):
         if os.path.isfile(self.project.data_dir + "/" + str(unique_id) + ".npz"):
-            os.remove(self.project.data_dir + "/" + str(unique_id) + ".npz")
+            try:
+                os.remove(self.project.data_dir + "/" + str(unique_id) + ".npz")
+            except Exception as e:
+                print("Error in NumpyDataManager.remove_item:", str(e))
+
 
     def clean_up(self, ids):
         try:
@@ -248,7 +257,8 @@ class NumpyDataManager(ProjectStreamer):
                         os.remove(files[i])
                     except Exception as e:
                         print(str(e))
-        except:
+        except Exception as e:
+            print("Error in NumpyDataManager.CleanUp:", str(e))
             pass
 
 
@@ -258,12 +268,15 @@ class NumpyDataManager(ProjectStreamer):
 
 
 class IStreamableContainer():
+    """
+    Without overriding the functions, this may only be used together with a class that has 
+    an attribute "project" of type containers.ELANExtensionProject
+    """
     def apply_loaded(self, obj):
         pass
 
     @pyqtSlot(object, object)
     def on_data_loaded(self, obj, args):
-        print("OK")
         self.apply_loaded(obj)
         if len(args) > 1 and args[1] is not None:
             args[0](args[1])
@@ -281,7 +294,11 @@ class IStreamableContainer():
                                                                  data_type=STREAM_DATA_IPROJECT_CONTAINER)
             self.on_data_loaded(obj, [callback, args])
 
-    def unload_container(self, data = None):
-        self.project.main_window.project_streamer.async_store(self.unique_id, data)
+    def unload_container(self, data = None, sync = False):
+        if sync:
+            self.project.main_window.project_streamer.sync_store(self.unique_id, data)
+        else:
+            self.project.main_window.project_streamer.async_store(self.unique_id, data)
+
 
 

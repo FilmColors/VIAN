@@ -12,3 +12,5 @@ Vian Projects
    project_templates
    import_elan_projects
    changing_movie_paths
+   backups
+

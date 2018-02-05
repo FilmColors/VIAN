@@ -15,8 +15,8 @@ class ConcurrentTaskDock(EDockWidget, IProjectChangeNotify):
         self.show()
 
 
-    def add_task(self, task_id, task_name):
-        self.task_list_widget.add_task(task_id, task_name)
+    def add_task(self, task_id, task_name, task_object):
+        self.task_list_widget.add_task(task_id, task_name, task_object)
 
     def remove_task(self, task_id):
         self.task_list_widget.remove_task(task_id)
@@ -33,8 +33,8 @@ class ConcurrentTasksList(QWidget):
         self.task_entries = []
         self.show()
 
-    def add_task(self, task_id, name):
-        entry = ConcurrentTaskEntry(self,task_id, name)
+    def add_task(self, task_id, name, task_object):
+        entry = ConcurrentTaskEntry(self,task_id, name, task_object)
         self.task_entries.append(entry)
         self.widget_task_list.layout().addWidget(entry)
 
@@ -65,20 +65,27 @@ class ConcurrentTasksList(QWidget):
 
 
 class ConcurrentTaskEntry(QWidget):
-    def __init__(self, parent, task_id, name):
+    def __init__(self, parent, task_id, name, task_object):
         super(ConcurrentTaskEntry, self).__init__(parent)
         self.task_id = task_id
         self.name = name
         self.progress = 0.0
+        self.task_object = task_object
 
         self.setLayout(QHBoxLayout(self))
         self.lbl_name = QLabel(name)
         self.progress_bar = QProgressBar(self)
+        self.btn_abort = QPushButton("Abort")
+
         self.layout().addWidget(self.lbl_name)
         self.layout().addWidget(self.progress_bar)
+        self.layout().addWidget(self.btn_abort)
+
         self.show()
 
     def update_progress(self, float_value):
         self.progress_bar.setValue(float_value * 100)
         self.progress = float_value
 
+    def abort(self):
+        pass

@@ -8,6 +8,7 @@ Segmentation
 
    create_segmentation
    create_segment
+   cutting_segments
    changing_main_segmentation
    locking_segmentations
    exporting_segmentations

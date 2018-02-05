@@ -102,6 +102,7 @@ class NewProjectDialog(EDialogWidget):
             self.lineEdit_ProjectName.setEnabled(True)
             self.lineEdit_ProjectName.textChanged.connect(self.on_proj_name_changed)
         self.auto_naming = auto
+        self.set_project_path()
 
     def find_templates(self):
         templates = glob.glob(self.settings.DIR_TEMPLATES + "*")

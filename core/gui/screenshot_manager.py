@@ -80,6 +80,11 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_toggle_name.setChecked(False)
         self.a_toggle_name.triggered.connect(self.on_toggle_name)
 
+        self.a_show_only_current = self.m_display.addAction(" Only Show Current Segment")
+        self.a_show_only_current.setCheckable(True)
+        self.a_show_only_current.setChecked(False)
+        self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
+
         self.inner.resize(400, self.height())
 
 
@@ -143,6 +148,11 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.screenshot_manager = screenshot_manager
         self.create_bottom_bar()
 
+    def on_toggle_show_current(self):
+        state = self.a_show_only_current.isChecked()
+        self.screenshot_manager.only_show_current_segment = state
+        self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
+
     def on_n_per_row_changed(self, value):
         self.screenshot_manager.n_per_row = value + 1
         self.lbl_n.setText("\t" + str(value))
@@ -165,6 +175,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.shift_is_pressed = False
         self.follow_time = True
         self.show_segment_name = False
+        self.only_show_current_segment = False
 
         self.font = QFont("Consolas")
         self.font_size = 128
@@ -487,6 +498,19 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             width = 0
             height = 0
 
+            if self.only_show_current_segment:
+                for i, img_segm in enumerate(self.images_segmentation):
+                    if img_segm.segm_id - 1 != self.current_segment_index:
+                        for img in img_segm.segm_images:
+                            img.hide()
+                        for cap in img_segm.scr_captions:
+                            cap.hide()
+                    else:
+                        for img in img_segm.segm_images:
+                            img.show()
+                        for cap in img_segm.scr_captions:
+                            cap.show()
+
             # # Segments that are empty are not represented in self.images_segmentation
             # if segment_index >= len(self.images_segmentation):
             #     return
@@ -516,6 +540,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             if self.current_segment_frame is not None:
                 self.scene.removeItem(self.current_segment_frame)
+
+
 
             pen = QtGui.QPen()
             pen.setColor(QtGui.QColor(251, 95, 2, 60))

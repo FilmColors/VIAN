@@ -40,6 +40,9 @@ class UserSettings():
 
         self.SCREENSHOTS_EXPORT_NAMING = self.SCREENSHOTS_EXPORT_NAMING_DEFAULT
         self.SCREENSHOTS_STATIC_SAVE = False
+
+        # Timeline Grid
+        self.USE_GRID = True
         self.GRID_SIZE = 100
         # Theme
         self.THEME_PATH = "qt_ui/themes/qt_stylesheet_dark.css"
@@ -56,6 +59,7 @@ class UserSettings():
         self.store_path = self.DIR_PROJECT + path
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
+        self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
 
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
@@ -103,9 +107,16 @@ class UserSettings():
         self.DIR_USER = "user/"
         self.DIR_SCREENSHOTS = "shots/"
         self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
+        self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
         self.store_path = self.DIR_PROJECT + "settings.json"
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
+
+
+        for d in [self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_BACKUPS]:
+            if not os.path.isdir(d):
+                os.mkdir(d)
+                print(d + "\t Directory created.")
 
     def integritiy_check(self):
         """
