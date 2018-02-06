@@ -53,6 +53,7 @@ class ProjectStreamerSingals(QObject):
     on_async_store = pyqtSignal(str, object, int, object, object)
     on_async_load = pyqtSignal(str, int, object, object)
 
+
 #region ShelveProjectStreamer
 class ProjectStreamerShelve(ProjectStreamer):
     def __init__(self, main_window):
@@ -189,7 +190,6 @@ class AsyncShelveStream(QObject):
             except Exception as e:
                 print("Exception during Exception handling in AsyncShelveStream.store()", str(e))
 
-
     @pyqtSlot(str, int, object, object)
     def load(self, unique_id, data_type, slot, slot_arguments):
         try:
@@ -212,7 +212,6 @@ class AsyncShelveStream(QObject):
                 self.signals.finished.disconnect()
             except Exception as e:
                 print("Exception during Exception Handling in AsyncShelveStream.load()", str(e))
-
 
     @pyqtSlot()
     def run(self):
