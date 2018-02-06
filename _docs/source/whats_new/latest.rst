@@ -1,6 +1,6 @@
 
 
-VIAN 0.4.5 - 0.4.6
+VIAN 0.4.5 - 0.4.7
 ==================
 
 **READ THIS**
@@ -51,10 +51,12 @@ Extensive List
 * Backups implemented
 * Cutting Segments (and Merging) implmeneted
 * Synchronous Save and Load of Stream
+* Subtitles can be chosen again
 
 Hot-Fixes
 *********
 * OSX Error in Streaming solved (0.4.6)
+* Checking Project integrity on Start-Up (0.4.7)
 
 * :ref:`genindex`
 * :ref:`modindex`

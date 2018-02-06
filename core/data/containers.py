@@ -35,7 +35,6 @@ from PyQt5.QtCore import QPoint, QRect, QSize
 # NODE_SCRIPT = 9
 
 
-
 class ElanExtensionProject(IHasName, IHasVocabulary):
     def __init__(self, main_window, path = "", name = "", folder=""):
         IHasVocabulary.__init__(self)
@@ -499,7 +498,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         if dispatch:
             self.dispatch_changed()
     #endregion
-
 
     def store_project(self, settings, global_settings, path = None):
         """

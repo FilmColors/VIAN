@@ -249,7 +249,6 @@ class NumpyDataManager(ProjectStreamer):
             except Exception as e:
                 print("Error in NumpyDataManager.remove_item:", str(e))
 
-
     def clean_up(self, ids):
         try:
             ids = [str(id) for id in ids]
@@ -264,8 +263,6 @@ class NumpyDataManager(ProjectStreamer):
         except Exception as e:
             print("Error in NumpyDataManager.CleanUp:", str(e))
             pass
-
-
 
     #endregion
     pass
