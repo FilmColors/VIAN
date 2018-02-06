@@ -107,6 +107,7 @@ class ProjectStreamerShelve(ProjectStreamer):
             try:
                 obj = db[str(id)]
             except Exception as e:
+                print("Error in Streamer.sync_load()", str(e))
                 self.main_window.print_message("Error in Streamer: " + str(e), "Orange")
                 self.main_window.print_message("If you have just loaded the Project please wait some seconds and try again", "Orange")
                 return None
@@ -186,7 +187,7 @@ class AsyncShelveStream(QObject):
             try:
                 self.signals.finished.disconnect()
             except Exception as e:
-                print(e)
+                print("Exception during Exception handling in AsyncShelveStream.store()", str(e))
 
 
     @pyqtSlot(str, int, object, object)
@@ -222,14 +223,38 @@ class NumpyDataManager(ProjectStreamer):
     def __init__(self, main_window):
         super(NumpyDataManager, self).__init__(main_window)
 
+    # def dump(self, key, data_dict, data_type):
+    #
+    #     if os.path.isfile(self.project.data_dir + "/" + str(key) + ".npz"):
+    #         os.remove(self.project.data_dir + "/" + str(key) + ".npz")
+    #     try:
+    #         with open(self.project.data_dir + "/" +str(key) + ".npz", "wb") as f:
+    #             np.savez(f, **data_dict)
+    #     except Exception as e:
+    #         print("Error in NumpyDataManager.dump: ", str(e))
+
     def dump(self, key, data_dict, data_type):
-        if os.path.isfile(self.project.data_dir + "/" + str(key) + ".npz"):
-            os.remove(self.project.data_dir + "/" + str(key) + ".npz")
+        temp_indic = "_temp"
+        temp_file_path = self.project.data_dir + "/" +str(key) + temp_indic +".npz"
+        dest_file_path = self.project.data_dir + "/" + str(key) + ".npz"
         try:
-            with open(self.project.data_dir + "/" +str(key) + ".npz", "wb") as f:
+            # Save the new data in a temporary file
+            with open(temp_file_path, "wb") as f:
                 np.savez(f, **data_dict)
+
+            # If this key alreay exists, remove it
+            if os.path.isfile(dest_file_path):
+                os.remove(dest_file_path)
+
+            # Rename the temporary file to the correct key
+            try:
+                os.rename(temp_file_path, dest_file_path)
+            except Exception as e:
+                print("Error in NumpyDataManager.dump.rename(): ", str(e))
+
         except Exception as e:
             print("Error in NumpyDataManager.dump: ", str(e))
+
 
     def load(self, key, data_type):
         try:

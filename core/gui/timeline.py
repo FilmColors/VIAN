@@ -455,7 +455,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scroll_h()
 
     def on_changed(self, project, item):
-        print("TEst, On Changed", item)
         vlocation = self.scrollArea.verticalScrollBar().value()
         self.clear()
         self.duration = project.get_movie().duration
