@@ -183,7 +183,11 @@ class AsyncShelveStream(QObject):
 
         except Exception as e:
             print("Exception in AsyncShelveStream.store()", str(e))
-            self.signals.finished.disconnect()
+            try:
+                self.signals.finished.disconnect()
+            except Exception as e:
+                print(e)
+
 
     @pyqtSlot(str, int, object, object)
     def load(self, unique_id, data_type, slot, slot_arguments):

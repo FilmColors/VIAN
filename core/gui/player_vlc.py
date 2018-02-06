@@ -13,6 +13,7 @@ from core.vlc import vlc
 import os
 
 
+#TODO REMOVE
 class MacPlayerContainer(QtWidgets.QMainWindow):
     def __init__(self, parent, player):
         super(MacPlayerContainer, self).__init__()
@@ -35,6 +36,7 @@ class MacPlayerContainer(QtWidgets.QMainWindow):
         self.resize(target.size())
         self.player.videoframe.resize(target.size())
 
+
 class PlayerDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
@@ -56,8 +58,6 @@ class PlayerDockWidget(EDockWidget):
     #     self.main_window.drawing_overlay.raise_()
 
 
-
-# QtWidgets.QFrame
 class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify

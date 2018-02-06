@@ -1197,7 +1197,7 @@ def track_description_list(head):
         while item:
             item = item.contents
             r.append((item.id, item.name))
-            item = item.__next__
+            item = item.next
         try:
             libvlc_track_description_release(head)
         except NameError:

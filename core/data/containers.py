@@ -135,12 +135,15 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.shots_dir = root + "/shots"
         self.export_dir = root + "/export"
 
-        os.mkdir(root + "/data")
-        os.mkdir(root + "/shots")
-        os.mkdir(root + "/results")
-        os.mkdir(root + "/export")
+        if not os.path.isdir(self.data_dir):
+            os.mkdir(self.data_dir)
+        if not os.path.isdir(self.results_dir):
+            os.mkdir(self.results_dir)
+        if not os.path.isdir(self.shots_dir):
+            os.mkdir(self.shots_dir)
+        if not os.path.isdir(self.export_dir):
+            os.mkdir(self.export_dir)
 
-        print(self.path)
 
     def get_all_containers(self):
         result = []
@@ -604,6 +607,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.export_dir = self.folder + "/export"
         self.shots_dir = self.folder + "/shots"
         self.data_dir = self.folder + "/data"
+
         self.main_window.numpy_data_manager.project = self
 
 
@@ -611,11 +615,18 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         try:
             version = my_dict['version']
             version = version.split(".")
-            print("Loaded Version:", version)
+            print("Loaded Project Version:", version)
+
+            # We know that versions before 0.2.10 have no folder structure
             if version_check([0,2,10], version):
                 move_project_to_directory_project = True
 
-        except:
+            # If the Root folder does not exist, something is very odd, we need to recreate the project
+            elif not os.path.isdir(self.folder):
+                move_project_to_directory_project = True
+
+        except Exception as e:
+            print("Exception occured during loading:", str(e))
             move_project_to_directory_project = True
 
         self.current_annotation_layer = None
@@ -705,12 +716,13 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                     self.path = self.folder + "/" + self.name
                     os.mkdir(self.folder)
                     self.create_file_structure()
-                    print(old_path, self.path)
                     copy2(old_path, self.path + settings.PROJECT_FILE_EXTENSION)
 
                 except Exception as e:
                     print(e)
-
+        # Check the FileStructure integrity anyway
+        else:
+            self.create_file_structure()
 
         self.sort_screenshots()
         self.undo_manager.clear()

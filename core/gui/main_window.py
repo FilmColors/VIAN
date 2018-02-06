@@ -427,8 +427,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        self.timeline.resize_dock(h=100)
-        print(self.player.get_fps())
+        print(self.player.get_subtitles())
         # self.project.print_all(ANALYSIS_JOB_ANALYSIS)
         #
         # self.project.replace_ids()

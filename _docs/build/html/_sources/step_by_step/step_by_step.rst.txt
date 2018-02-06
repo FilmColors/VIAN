@@ -10,7 +10,7 @@ Step-by-Step Guides
    annotation/annotation.rst
    screenshots/screenshots.rst
    analyses/analyses.rst
-
+   player/player.rst
 
 
 

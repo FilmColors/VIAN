@@ -180,7 +180,7 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         else:
             if len(self.subs) > 0:
                 for s in self.subs:
-                    self.comboBox_Subs.addItem(s[1])
+                    self.comboBox_Subs.addItem(str(s[1]))
 
     def on_subs_changed(self, index):
         if len(self.subs) > 0:
