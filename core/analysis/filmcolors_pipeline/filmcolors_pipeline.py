@@ -358,7 +358,6 @@ class ChannelTimeVis(QWidget):
 
         self.curr_channel = 0
 
-
         self.on_source_changed(self.current_source)
 
 

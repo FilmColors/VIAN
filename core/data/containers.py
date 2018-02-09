@@ -10,7 +10,7 @@ from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelec
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 from core.gui.vocabulary import VocabularyItem
-from core.data.project_streaming import ProjectStreamer
+from core.data.project_streaming import ProjectStreamer, NUMPY_NO_OVERWRITE
 from core.data.enums import *
 
 from core.data.project_streaming import IStreamableContainer
@@ -401,7 +401,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
     # Getters for easier changes later in the project
     def set_selected(self,sender, selected = []):
-
         if not isinstance(selected, list):
             selected = [selected]
 
@@ -929,10 +928,11 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     pass
 
 #region Segmentaion
-class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
+class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource, IHasVocabulary):
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
+        IHasVocabulary.__init__(self)
         self.name = name
         if segments is None:
             segments = []
@@ -1223,10 +1223,11 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return "Invalid Property"
         return ""
 
-class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
+class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary):
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, additional_identifiers = None, segmentation=None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
+        IHasVocabulary.__init__(self)
         self.MIN_SIZE = 10
         self.ID = ID
         self.start = start
@@ -1374,11 +1375,12 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 #     FreeHand = 5
 #
 
-class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable):
+class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IHasVocabulary):
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
                  name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
+        IHasVocabulary.__init__(self)
         self.name = name
         self.a_type = a_type
         self.t_start = t_start
@@ -1664,10 +1666,11 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.annotation_layer.remove_annotation(self)
 
 
-class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
+class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary):
     def __init__(self, name = None, t_start = None, t_end = None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
+        IHasVocabulary.__init__(self)
 
         self.name = name
         self.t_start = t_start
@@ -1837,11 +1840,12 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 
 #region Screenshots
 
-class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem):
+class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IHasVocabulary):
     def __init__(self, title = "", image = None,
                  img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
                  shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None):
         IProjectContainer.__init__(self)
+        IHasVocabulary.__init__(self)
         self.title = title
         self.img_movie = image
         self.img_blend = img_blend
@@ -2004,9 +2008,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.project.remove_screenshot(self)
 
 
-class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
+class ScreenshotGroup(IProjectContainer, IHasName, ISelectable, IHasVocabulary):
     def __init__(self, project, name = "New Screenshot Group"):
         IProjectContainer.__init__(self)
+        IHasVocabulary.__init__(self)
         self.set_project(project)
         self.name = name
         self.screenshots = []
@@ -2321,10 +2326,11 @@ class ConnectionDescriptor(IProjectContainer):
 #endregion
 
 #region MovieDescriptor
-class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource):
+class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IHasVocabulary):
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
                  duration=100, fps = 30):
         IProjectContainer.__init__(self)
+        IHasVocabulary.__init__(self)
         self.set_project(project) # TODO This should be changed
         self.movie_name = movie_name
         self.movie_path = movie_path
@@ -2426,12 +2432,10 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
 
 
     def unload_container(self, data=None, sync=False):
-        print("Unload: ", self.unique_id, "\tANALYSIS")
         super(AnalysisContainer, self).unload_container(self.data, sync=sync)
         self.data = None
 
     def apply_loaded(self, obj):
-        print("Loaded: ", self.unique_id, "\tANALYSIS")
         self.data = obj
 
     def get_name(self):
@@ -2499,6 +2503,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
                     result_dtypes.append(str(np.array(d).dtype))
             data_json.append([node_id, node_result, result_dtypes])
 
+        # We want to store the analysis container if it is not already stored
         self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
 
         data = dict(
@@ -2583,24 +2588,9 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         data_json = []
         data_dtypes = []
 
-        # for d in self.data.items():
-        #     if isinstance(d, np.ndarray):
-        #         data_json.append(d.tolist())
-        #         data_dtypes.append(str(d.dtype))
-        #     elif isinstance(d, list):
-        #         data_json.append(d)
-        #         data_dtypes.append("list")
-        #     else:
-        #         data_json.append(np.array(d).tolist())
-        #         data_dtypes.append(str(np.array(d).dtype))
-
-
-        # parameters = []
-        # for p in self.parameters:
-        #     parameters.append(p)
-
         self.data = self.project.main_window.project_streamer.sync_load(self.unique_id)
-        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
+        # Store the data as numpy if it does not already exist (since it is imutable)
+        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data, data_type=NUMPY_NO_OVERWRITE)
 
         data = dict(
             name=self.name,
@@ -2759,6 +2749,8 @@ class Vocabulary(IProjectContainer, IHasName):
     def __init__(self, name):
         IProjectContainer.__init__(self)
         self.name = name
+        self.comment = ""
+        self.info_url = ""
         self.words = []
         self.words_plain = []
         self.was_expanded = False
@@ -2944,6 +2936,8 @@ class VocabularyWord(IProjectContainer, IHasName):
     def __init__(self, name, vocabulary, parent = None, is_checkable = False):
         IProjectContainer.__init__(self)
         self.name = name
+        self.comment = ""
+        self.info_url = ""
         self.vocabulary = vocabulary
         self.is_checkable = is_checkable
         self.was_expanded = False

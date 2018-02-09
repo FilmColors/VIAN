@@ -50,7 +50,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.lineEdit_Vocabulary.setText(self.completer.currentCompletion())
 
     def set_voc_words(self):
-        if self.item is not None:
+        if self.item is not None and isinstance(self.item, IHasVocabulary):
             text = ""
             for word in self.item.voc_list:
                 text += word.name + ", "
@@ -111,7 +111,6 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             else:
                 widgets = [AttributesITimeRange(self, target_item), AttributesAnnotation(self, target_item)]
 
-
         if s_type == ANNOTATION_LAYER:
             self.lbl_Type.setText("Annotation Layer")
             widgets = [AttributesITimeRange(self, target_item)]
@@ -124,8 +123,18 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.lbl_Type.setText("Node")
             widgets = [AttributesNode(self, target_item)]
 
+        if s_type == VOCABULARY or s_type == VOCABULARY_WORD:
+            self.lbl_Type.setText("Vocabulary")
+            widgets = [AttributesVocabulary(self, target_item)]
+
         for w in widgets:
             self.add_attribute_widget(w)
+
+        if self.item is not None and isinstance(self.item, IHasVocabulary):
+            print("TEST, SHOWING")
+            self.widget_vocabulary_section.show()
+        else:
+            self.widget_vocabulary_section.hide()
 
         self.allow_change = True
 
@@ -269,7 +278,6 @@ class AttributesAnnotation(QWidget):
             self.main_window.run_job_concurrent(job)
 
 
-
 class AttributesTextAnnotation(QWidget):
     def __init__(self, parent, descriptor):
         super(AttributesTextAnnotation, self).__init__(parent)
@@ -316,6 +324,22 @@ class AttributesTextAnnotation(QWidget):
             self.annotation.automate_property = self.comboBox_AutoSourceProperty.currentText()
 
 
+class AttributesVocabulary(QWidget):
+    def __init__(self, parent, descriptor):
+        super(AttributesVocabulary, self).__init__(parent)
+        path = os.path.abspath("qt_ui/AttributesVocabulary.ui")
+        uic.loadUi(path, self)
+        self.voc_entry = descriptor
+        self.textEdit_Comment.setText(self.voc_entry.comment)
+        self.textEdit_Comment.textChanged.connect(self.on_comment_changed)
+        self.lineEdit_HelpURL.setText(self.voc_entry.info_url)
+        self.lineEdit_HelpURL.editingFinished.connect(self.on_comment_changed)
+
+    def on_comment_changed(self):
+        self.voc_entry.comment = self.textEdit_Comment.toPlainText()
+
+    def on_url_changed(self):
+        self.voc_entry.help_url = self.textEdit_HelpURL.text()
 
 #textEdit_AnnotationBody
 

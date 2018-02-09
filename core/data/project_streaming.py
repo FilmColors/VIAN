@@ -8,6 +8,7 @@ from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, QThread, Qt
 
 STREAM_DATA_IPROJECT_CONTAINER = 0
 STREAM_DATA_ARBITRARY = 1
+NUMPY_NO_OVERWRITE = 2
 
 
 class ProjectStreamer(IProjectChangeNotify, QObject):
@@ -24,7 +25,7 @@ class ProjectStreamer(IProjectChangeNotify, QObject):
     def async_load(self, id: int, proceed_slot, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         pass
 
-    def sync_store(self,  id: int, data_dict,data_type = STREAM_DATA_IPROJECT_CONTAINER):
+    def sync_store(self,  id: int, data_dict, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         self.dump(id, data_dict, data_type)
 
     def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
@@ -49,7 +50,7 @@ class ProjectStreamer(IProjectChangeNotify, QObject):
     pass
 
 
-class ProjectStreamerSingals(QObject):
+class ProjectStreamerSignals(QObject):
     on_async_store = pyqtSignal(str, object, int, object, object)
     on_async_load = pyqtSignal(str, int, object, object)
 
@@ -67,7 +68,7 @@ class ProjectStreamerShelve(ProjectStreamer):
         self.store_dir = None
         self.container_db = None
         self.arbitrary_db = None
-        self.signals = ProjectStreamerSingals()
+        self.signals = ProjectStreamerSignals()
 
         self.async_stream_worker = AsyncShelveStream()
         self.signals.on_async_store.connect(self.async_stream_worker.store)
@@ -236,6 +237,11 @@ class NumpyDataManager(ProjectStreamer):
         temp_indic = "_temp"
         temp_file_path = self.project.data_dir + "/" +str(key) + temp_indic +".npz"
         dest_file_path = self.project.data_dir + "/" + str(key) + ".npz"
+
+        if data_type == NUMPY_NO_OVERWRITE and os.path.isfile(dest_file_path):
+            print("NUMPY No Overwrite")
+            return
+
         try:
             # Save the new data in a temporary file
             with open(temp_file_path, "wb") as f:
@@ -282,6 +288,7 @@ class NumpyDataManager(ProjectStreamer):
                 if n not in ids:
                     try:
                         os.remove(files[i])
+                        print("Cleanup: ", files[i])
                     except Exception as e:
                         print(str(e))
         except Exception as e:

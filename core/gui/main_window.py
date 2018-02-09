@@ -419,8 +419,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.setState(False)
         self.timeline.timeline.setState(False)
 
-        self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
 
+        self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
+        # self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
         self.update_vian(False)
 
     def print_time(self, segment):
@@ -433,10 +434,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.project.replace_ids()
 
     #region WidgetCreation
-
-    def export_template(self):
-        dialog = ExportTemplateDialog(self)
-        dialog.show()
 
     def show_welcome(self):
         open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
@@ -725,6 +722,10 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             self.settings.recent_files_path = []
             self.settings.recent_files_name = []
+
+    def export_template(self):
+        dialog = ExportTemplateDialog(self)
+        dialog.show()
 
     def eval_class(self, class_name):
         try:

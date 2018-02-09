@@ -9,6 +9,7 @@ import shutil
 def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
 
+
 class ScreenshotsExporter():
     def __init__(self, settings, project, naming):
         self.settings = settings
@@ -44,6 +45,7 @@ class ScreenshotsExporter():
                 cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
 
             print(file_name)
+
 
 class SegmentationExporter(IConcurrentJob):
     def __init__(self, file_path, export_ms, export_formated, export_text, export_frame, t_start, t_end, t_duration, fps):
@@ -117,6 +119,14 @@ class SegmentationExporter(IConcurrentJob):
             return True, None
         except Exception as e:
             return False, e
+
+
+class JsonExporter():
+    def segment2json(self, segment):
+        pass
+        # result = ""
+
+
 
 
 def build_file_name(naming, screenshot, movie_descriptor):

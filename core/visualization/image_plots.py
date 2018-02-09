@@ -345,7 +345,7 @@ class ImagePlotControls(QWidget):
 class ImagePlotTime(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None, title=""):
         self.x_scale = 0.001
-        self.y_scale = 10
+        self.y_scale = 50
         self.base_line = 1000
         self.x_end = 0
         self.lines = []

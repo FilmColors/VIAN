@@ -50,10 +50,9 @@ class IHasVocabulary():
         word.remove_connected_item(self)
 
 
-class IProjectContainer(IHasVocabulary, QObject):
+class IProjectContainer(QObject):
     def __init__(self):
         QObject.__init__(self)
-        IHasVocabulary.__init__(self)
         self.project = None
         self.outliner_expanded = False
         self.outliner_highlighted = False

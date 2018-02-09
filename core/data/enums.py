@@ -84,6 +84,7 @@ def get_enum_value(enum, name):
         if name == s.name:
             return s.value
 
+
 def get_enum(enum, name):
     for s in enum:
         if name == s.name:
@@ -105,4 +106,9 @@ class AspectRatio(Enum):
 class ImageType(Enum):
     JPG = 0
     PNG = 1
+
+class ProjectType(Enum):
+    DEFAULT = 0
+    SIMPLE_ANNOTATION = 1
+    FILM_COLORS = 2
 

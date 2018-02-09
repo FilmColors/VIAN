@@ -156,7 +156,7 @@ class NewProjectDialog(EDialogWidget):
 
     def on_browse_movie_path(self):
         path = QFileDialog.getOpenFileName()[0]
-        self.project.movie_descriptor.movie_path = path
+        # self.project.movie_descriptor.movie_path = path
         self.lineEdit_MoviePath.setText(path)
         self.path_set_from_dialog = True
 
@@ -206,7 +206,7 @@ class NewProjectDialog(EDialogWidget):
 
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
-
+        self.project.movie_descriptor.movie_path = self.lineEdit_MoviePath.text()
         print(self.project.folder, "\n",
               self.project.path, "\n",
               self.settings.DIR_PROJECT)

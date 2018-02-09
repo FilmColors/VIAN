@@ -1,5 +1,6 @@
 import sys
 import time
+import requests
 
 import cv2
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -536,12 +537,28 @@ class Player_VLC(VideoPlayer):
         path = project.movie_descriptor.movie_path
         self.media_descriptor = project.movie_descriptor
 
-        if path is "" or not os.path.isfile(path):
-            QMessageBox.information(self.main_window, "Could not find movie",
-                                    "Could not find movie: " + str(path) +
-                                    "\nPlease set it manually after clicking \"OK\".")
-            path = QtWidgets.QFileDialog.getOpenFileName(self)[0]
-            project.movie_descriptor.movie_path = path
+        # Check if the file exists locally
+        if not os.path.isfile(path):
+            exists = False
+
+            if path is "":
+                exists = False
+            else:
+                # Check if the File exists as URL
+                try:
+                    request = requests.get(path)
+                    if request.status_code == 200:
+                        exists = True
+                except Exception as e:
+                    print("URL Could not be opened", str(e), path)
+
+
+            if not exists:
+                QMessageBox.information(self.main_window, "Could not find movie",
+                                        "Could not find movie: " + str(path) +
+                                        "\nPlease set it manually after clicking \"OK\".")
+                path = QtWidgets.QFileDialog.getOpenFileName(self)[0]
+                project.movie_descriptor.movie_path = path
 
         self.open_movie(path)
         self.media_descriptor.set_duration(self.get_media_duration())

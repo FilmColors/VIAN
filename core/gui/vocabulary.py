@@ -37,7 +37,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.project = main_window.project
 
 
-        self.treeView = VocabularyTreeView(self)
+        self.treeView = VocabularyTreeView(self, self)
         self.inner.layout().addWidget(self.treeView)
 
         self.vocabulary_model = QStandardItemModel(self.treeView)
@@ -95,9 +95,10 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
 
 class VocabularyTreeView(QTreeView):
-    def __init__(self, parent):
+    def __init__(self, parent, vocabulary_manager: VocabularyManager):
         super(VocabularyTreeView, self).__init__(parent)
         self.is_editing = False
+        self.vocabulary_manager = vocabulary_manager
 
 
     def mousePressEvent(self, QMouseEvent):
@@ -106,13 +107,22 @@ class VocabularyTreeView(QTreeView):
         else:
             super(VocabularyTreeView, self).mousePressEvent(QMouseEvent)
 
+    def currentChanged(self, QModelIndex, QModelIndex_1):
+        super(VocabularyTreeView, self).currentChanged(QModelIndex, QModelIndex_1)
+        if self.vocabulary_manager.vocabulary_model is not None:
+            current_item = self.vocabulary_manager.vocabulary_model.itemFromIndex(self.currentIndex())
+            if current_item is not None:
+                obj = current_item.voc_object
+                if obj is not None:
+                    self.vocabulary_manager.main_window.project.set_selected(sender=None, selected=[obj])
+
     def open_context_menu(self, QMouseEvent):
         pos = self.mapToGlobal(QMouseEvent.pos())
         try:
             obj = self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object
         except:
             obj = None
-        cm = VocabularyContextMenu(self.parent().parent().main_window, pos, obj)
+        cm = VocabularyContextMenu(self.vocabulary_manager.main_window, pos, obj)
 
     def apply_name_changed(self):
         current_word = self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object
@@ -257,7 +267,6 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
         self.recreate_widget()
         self.set_stick_to_type(False)
 
-
     def on_changed(self, project, item):
         if item is not None:
             if item.get_type() == VOCABULARY or item.get_type() == VOCABULARY_WORD:
@@ -269,11 +278,12 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
         self.recreate_widget()
 
     def on_selected(self, sender, selected):
-        if self.stick_to_type:
-            if selected[0].get_type() == self.stick_type:
+        if len(selected) > 0:
+            if self.stick_to_type:
+                if selected[0].get_type() == self.stick_type:
+                    self.update_widget()
+            else:
                 self.update_widget()
-        else:
-            self.update_widget()
 
     def set_stick_to_type(self, enabled, type = None):
         if enabled:
@@ -353,7 +363,9 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
                 cb = QCheckBox(w.name, frame)
                 cb.stateChanged.connect(self.on_cb_change)
                 cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
-                if len(self.project().selected) > 0 and self.project().selected[0].has_word(w):
+                if len(self.project().selected) > 0 \
+                        and isinstance(self.project().selected[0], IHasVocabulary) \
+                        and self.project().selected[0].has_word(w):
                     cb.setChecked(True)
                 hbox.addWidget(cb)
                 col_count += 1
@@ -450,17 +462,4 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
 
     def resizeEvent(self, *args, **kwargs):
         super(VocabularyMatrix, self).resizeEvent(*args, **kwargs)
-
 #endregion
-
-
-
-
-
-
-
-
-
-
-
-""
