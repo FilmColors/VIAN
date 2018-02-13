@@ -45,6 +45,7 @@ def store_project_concurrent(args, sign_progress):
     analyzes = []
     screenshot_groups = []
     scripts = []
+    experiments = []
 
     vocabularies = []
 
@@ -75,6 +76,9 @@ def store_project_concurrent(args, sign_progress):
     for f in project.node_scripts:
         scripts.append(f.serialize())
 
+    for g in project.experiments:
+        experiments.append(g.serialize())
+
     data = dict(
         path=project.path,
         name=project.name,
@@ -93,7 +97,8 @@ def store_project_concurrent(args, sign_progress):
         version=project.main_window.version,
         screenshot_groups=screenshot_groups,
         scripts = scripts,
-        vocabularies=vocabularies
+        vocabularies=vocabularies,
+        experiments = experiments
 
     )
     sign_progress(0.6)

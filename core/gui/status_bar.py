@@ -245,7 +245,7 @@ class MessageLogWindow(QMainWindow):
         self.view.append(header)
         for i, msg in enumerate(self.messages):
             self.view.setTextColor(QColor(msg[1]))
-            self.view.append(str(i) + ".  " + msg[0])
+            self.view.append(str(i) + ".  " + str(msg[0]))
 
 
 

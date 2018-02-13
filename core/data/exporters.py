@@ -127,8 +127,6 @@ class JsonExporter():
         # result = ""
 
 
-
-
 def build_file_name(naming, screenshot, movie_descriptor):
     file_name = "/"
 

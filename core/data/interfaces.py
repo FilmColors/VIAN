@@ -73,7 +73,8 @@ class IProjectContainer(QObject):
             self.project = project
             if self.unique_id == -1:
                 self.unique_id = self.project.create_unique_id()
-            self.project.add_to_id_list(self, self.unique_id)
+            if self.project.get_by_id(self.unique_id) is None:
+                self.project.add_to_id_list(self, self.unique_id)
 
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is not None:

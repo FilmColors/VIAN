@@ -8,6 +8,8 @@ import glob
 import cv2
 from core.concurrent.worker import Worker
 import time
+import inspect
+import sys
 
 import importlib
 from functools import partial
@@ -38,6 +40,7 @@ from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
 from core.gui.player_vlc import Player_VLC, PlayerDockWidget
+from core.gui.experiment_editor import ExperimentEditor, ExperimentEditorDock
 # from core.gui.shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
@@ -159,6 +162,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_matrix = None
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
+        self.experiment_editor = None
+        self.experiment_editor_dock = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -211,7 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_matrix()
 
         self.create_analysis_results_widget()
-
+        self.create_experiment_editor()
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -282,6 +287,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTimeline.triggered.connect(self.create_timeline)
         self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
+        self.actionExperiment_Editor.triggered.connect(self.create_experiment_editor)
 
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
@@ -295,6 +301,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
         self.actionAdd_Annotation_Layer.triggered.connect(self.on_new_annotation_layer)
         self.actionAdd_Segmentation.triggered.connect(self.on_new_segmentation)
+        self.actionCreateExperiment.triggered.connect(self.on_new_experiment)
 
         self.actionScreenshot.triggered.connect(self.on_screenshot)
         self.actionAdd_Key.triggered.connect(self.on_key_annotation)
@@ -334,7 +341,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.vocabulary_matrix,
                                     self.numpy_data_manager,
                                     self.project_streamer,
-                                    self.analysis_results_widget
+                                    self.analysis_results_widget,
+                                    self.experiment_editor
                                           ]
 
 
@@ -377,9 +385,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.menuAnalysis.addMenu("Extensions")
 
-        self.analyzes_list =[
-            # HilbertHistogramProc(0)
-        ]
+        self.analysis_list = []
 
         self.is_selecting_analyzes = False
 
@@ -421,7 +427,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.setState(False)
         self.timeline.timeline.setState(False)
 
-
+        self.create_analysis_list()
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
         # self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
         self.update_vian(False)
@@ -430,6 +436,11 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
+        import sys, inspect
+        for name, obj in inspect.getmembers(sys.modules[__name__]):
+            if inspect.isclass(obj):
+                if issubclass(obj, IAnalysisJob):
+                    print(obj)
         print(self.player.get_subtitles())
         # self.project.print_all(ANALYSIS_JOB_ANALYSIS)
         #
@@ -477,6 +488,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.statusBar().addPermanentWidget(self.elan_status)
             self.statusBar().setFixedHeight(45)
+
+    def create_experiment_editor(self):
+        if self.experiment_editor_dock is None:
+            self.experiment_editor = ExperimentEditor(self)
+            self.experiment_editor_dock = ExperimentEditorDock(self, self.experiment_editor)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.experiment_editor_dock)
+        else:
+            self.experiment_editor_dock.activateWindow()
 
     def create_widget_video_player(self):
         if self.player_dock_widget is None:
@@ -977,6 +996,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         job = CreateScreenshotJob([frame_pos, self.project.movie_descriptor.movie_path, annotation_dicts, time])
         self.run_job_concurrent(job)
+
+    def on_new_experiment(self):
+        self.project.create_experiment()
 
     def get_frame(self, time):
         if time <= 0:
@@ -1601,6 +1623,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
         self.update_overlay()
 
+    def create_analysis_list(self):
+        self.analysis_list = []
+        for name, obj in inspect.getmembers(sys.modules[__name__]):
+            if inspect.isclass(obj):
+                if issubclass(obj, IAnalysisJob):
+                    if not obj.__name__ == IAnalysisJob.__name__:
+                        self.analysis_list.append(obj)
 
     # def set_darwin_player_visibility(self, visibility):
     #     if self.is_darwin:

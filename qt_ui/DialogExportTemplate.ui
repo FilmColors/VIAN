@@ -92,6 +92,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="cB_Experiments">
+         <property name="text">
+          <string>Experiments</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>

@@ -22,6 +22,7 @@ QWidget:item:hover
 QWidget:item:selected
 {
     background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
+    border: 1px;
 }
 
 QToolTip
@@ -692,16 +693,30 @@ QStatusBar::item {
 
 
 QTreeWidget{
-    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #323232, stop: 0.5 #242424, stop:1 #323232);
+    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #262626, stop: 0.5 #242424, stop:1 #262626);
 }
 
 QTreeView{
     margin: 2px;
     spacing: 2px;
-    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #323232, stop: 0.5 #242424, stop:1 #323232);
+    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #262626, stop: 0.5 #242424, stop:1 #262626);
     border: 1px solid #252525;
 }
 
+QListWidget{
+    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #262626, stop: 0.5 #242424, stop:1 #262626);
+    border: 1px solid #252525;
+}
+
+QListView{
+    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #262626, stop: 0.5 #242424, stop:1 #262626);
+    border: 1px solid #252525;
+}
+
+QGraphicsView{
+    /*background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #323232, stop: 0.5 #242424, stop:1 #323232);*/
+    border: 1px solid #252525;
+}
 
 QHBoxLayout{
     spacing: 2px;

@@ -62,6 +62,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.analysis = []
         self.screenshot_groups = []
         self.vocabularies = []
+        self.experiments = []
 
         self.current_script = None
         self.node_scripts = []
@@ -696,6 +697,13 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                     if node is not None:
                         node.operation.result = res
 
+        try:
+            for g in my_dict['experiments']:
+                new = Experiment().deserialize(g, self)
+                # self.add_experiment(new)
+        except Exception as e:
+            # raise e
+            print(e)
 
         # Migrating the Project to the new FileSystem
         if move_project_to_directory_project:
@@ -722,11 +730,12 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.sort_screenshots()
         self.undo_manager.clear()
 
-    def get_template(self, segm, voc, ann, scripts):
+    def get_template(self, segm, voc, ann, scripts, experiment):
         segmentations = []
         vocabularies = []
         layers = []
         node_scripts = []
+        experiments = []
         if segm:
             for s in self.segmentation:
                 segmentations.append(s.get_name())
@@ -740,18 +749,24 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
 
+        if experiment:
+            for e in self.experiments:
+                experiments.append(e.serialize())
+
         template = dict(
             segmentations = segmentations,
             vocabularies = vocabularies,
             layers = layers,
-            node_scripts=node_scripts
+            node_scripts=node_scripts,
+            experiments = experiments
+
         )
         return template
 
     def apply_template(self, template_path):
 
         try:
-            with open(template_path, "rb") as f:
+            with open(template_path, "r") as f:
                 template = json.load(f)
         except:
             print("Importing Template Failed")
@@ -770,6 +785,9 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
+
+        for e in template['experiments']:
+            new = Experiment().deserialize(e, self)
 
     #region Vocabularies
     def create_vocabulary(self, name="New Vocabulary"):
@@ -830,6 +848,27 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def import_vocabulary(self, path):
         new_voc = Vocabulary("New").import_vocabulary(path, self)
         self.add_vocabulary(new_voc)
+
+    #endregion
+
+    #region Experiments
+    def create_experiment(self):
+        new = Experiment()
+        self.add_experiment(new)
+
+    def add_experiment(self, experiment):
+        experiment.set_project(self)
+        self.experiments.append(experiment)
+        self.undo_manager.to_undo((self.add_experiment, [experiment]),
+                                  (self.remove_experiment, [experiment]))
+        self.dispatch_changed(item=experiment)
+
+    def remove_experiment(self, experiment):
+        if experiment in self.experiments:
+            self.experiments.remove(experiment)
+            self.undo_manager.to_undo((self.remove_experiment, [experiment]),
+                                      (self.add_experiment, [experiment]))
+            self.dispatch_changed(item=experiment)
 
     #endregion
 
@@ -2931,6 +2970,7 @@ class Vocabulary(IProjectContainer, IHasName):
     def set_name(self, name):
         self.name = name
 
+
 class VocabularyWord(IProjectContainer, IHasName):
     def __init__(self, name, vocabulary, parent = None, is_checkable = False):
         IProjectContainer.__init__(self)
@@ -2986,4 +3026,144 @@ def get_default_vocabulary():
     return voc
 #endregion
 
-pass
+#region Experiment
+class Experiment(IProjectContainer, IHasName):
+    """
+    An Experiment defines a specific set of rules, with which the user wants to perform a classification of a film. 
+    
+    Example: 
+        A User wants to analyze the Color Features of a Film. To do so, he wants to segment Films into temporal Segments
+        each one is a Scene. 
+        He then wants to classify the Foreground and the Background Color for each Segment based on his homemade 
+        Vocabulary called "ColorVocabulary". At the end, he also wants to generate some automated ColorFeature Extractions
+        based on this Segmentation.
+    
+    """
+
+    def __init__(self, name="New Experiment"):
+        IProjectContainer.__init__(self)
+
+        self.name = name
+        self.classification_sources = []
+        self.classification_objects = []
+        self.analyses_templates = []
+
+    def remove_class_object(self, classification_target):
+        if classification_target in self.classification_objects:
+            self.classification_objects.remove(classification_target)
+            self.project.remove_from_id_list(classification_target)
+
+    def add_class_object(self, classification_object):
+        self.classification_objects.append(classification_object)
+        classification_object.set_project(self.project)
+        classification_object.parent = self
+
+    def get_type(self):
+        return EXPERIMENT
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+        self.dispatch_on_changed(item = self)
+
+    def serialize(self):
+
+        serializations = []
+        for cls in self.classification_objects:
+            plain = []
+            cls.get_children_plain(plain)
+            for c in plain:
+                serializations.append(c.serialize())
+
+
+        serialization = dict(
+            name = self.name,
+            unique_id = self.unique_id,
+            classification_objects = serializations,
+            classification_sources = self.classification_sources,
+            analyses_templates = self.analyses_templates,
+
+        )
+        return serialization
+
+    def deserialize(self, serialization, project):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.classification_sources = serialization['classification_sources']
+        self.analyses_templates = serialization['analyses_templates']
+
+        project.add_experiment(self)
+
+        for obj in serialization['classification_objects']:
+            ClassificationTarget("NONAME").deserialize(obj, project)
+
+        return self
+
+    def delete(self):
+        self.project.remove_experiment(self)
+        self.dispatch_on_changed()
+
+class ClassificationTarget(IProjectContainer):
+    """
+    A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
+    Several ClassificationTargets may form a Tree. 
+    
+    Example: Say one wants to analyse the Foreground and Background Color of a given Film using his homemade 
+    Vocabulary called "ColorVocabulary". 
+    
+    The ClassificationTargets would therefore be "Foreground" and "Background", both will have "ColorVocabulary". 
+    """
+    def __init__(self, name, parent = None):
+        IProjectContainer.__init__(self)
+
+        self.name = name
+        self.parent = parent
+        self.children = []
+        self.classification_vocabularies = []
+
+        self.experiment_editor_expanded = False
+
+    def add_child(self, classification_target):
+        classification_target.parent = self
+        classification_target.set_project(self.project)
+        self.children.append(classification_target)
+
+    def remove_child(self, classification_target):
+        if classification_target in self.children:
+            self.children.remove(classification_target)
+            self.project.remove_from_id_list(classification_target)
+        else:
+            print("NOT FOUND")
+
+    def get_children_plain(self, list):
+        list.append(self)
+        if len(self.children) > 0:
+            for c in self.children:
+                c.get_children_plain(list)
+
+    def serialize(self):
+        serialization = dict(
+            name=self.name,
+            unique_id = self.unique_id,
+            parent = self.parent.unique_id,
+            children = [c.unique_id for c in self.children],
+            classification_vocabularies = [v.unique_id for v in self.classification_vocabularies]
+        )
+        return serialization
+
+    def deserialize(self, serialization, project):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        p = project.get_by_id(serialization['parent'])
+
+        if isinstance(p, ClassificationTarget):
+            p.add_child(self)
+        else:
+            p.add_class_object(self)
+
+        self.classification_vocabularies = [project.get_by_id(uid) for uid in serialization['classification_vocabularies']]
+
+        return self
+#endregion

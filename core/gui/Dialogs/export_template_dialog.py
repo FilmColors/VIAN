@@ -22,12 +22,15 @@ class ExportTemplateDialog(EDialogWidget):
         vocabulary = self.cB_Vocabulary.isChecked()
         annotation_layers = self.cB_AnnotationLayers.isChecked()
         node_scripts = self.cB_NodeScripts.isChecked()
+        experiments = self.cB_Experiments.isChecked()
 
-        template = self.main_window.project.get_template(segmentation, vocabulary, annotation_layers, node_scripts)
+        template = self.main_window.project.get_template(segmentation, vocabulary,
+                                                         annotation_layers, node_scripts,
+                                                         experiments)
 
         path = self.settings.DIR_TEMPLATES + name + ".viant"
         try:
-            with open(path, "wb") as f:
+            with open(path, "w") as f:
                 json.dump(template, f)
         except Exception as e:
             self.main_window.print_message("Template Export Failed:", "Red")

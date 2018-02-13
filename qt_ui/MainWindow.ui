@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1092</width>
-    <height>887</height>
+    <width>1065</width>
+    <height>860</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1092</width>
+     <width>1065</width>
      <height>21</height>
     </rect>
    </property>
@@ -95,6 +95,7 @@
     <addaction name="actionAdd_Annotation_Layer"/>
     <addaction name="actionAdd_Segmentation"/>
     <addaction name="separator"/>
+    <addaction name="actionCreateExperiment"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -142,6 +143,7 @@
     <addaction name="separator"/>
     <addaction name="actionScreenshot_Manager"/>
     <addaction name="actionVocabularyManager"/>
+    <addaction name="actionExperiment_Editor"/>
     <addaction name="separator"/>
     <addaction name="menuPerspectives"/>
     <addaction name="separator"/>
@@ -637,6 +639,16 @@
   <action name="actionImportCSVVocabulary">
    <property name="text">
     <string>CSV Vocabulary</string>
+   </property>
+  </action>
+  <action name="actionExperiment_Editor">
+   <property name="text">
+    <string>Experiment Editor</string>
+   </property>
+  </action>
+  <action name="actionCreateExperiment">
+   <property name="text">
+    <string>Create Experiment</string>
    </property>
   </action>
  </widget>

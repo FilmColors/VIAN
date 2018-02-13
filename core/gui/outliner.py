@@ -102,6 +102,11 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 node_item = NodeScriptsNodeItem(script_item, j, n)
                 self.item_list.append(node_item)
 
+        self.experiment_group = ExperimentRootItem(self.project_item, 5)
+        for i, exp in enumerate(self.main_window.project.experiments):
+            experiment_item = ExperimentItem(self.experiment_group, i, exp)
+            self.item_list.append(experiment_item)
+
         if not first_time:
             self.project_item.setExpanded(exp_p_item)
             for i in range(self.project_item.childCount()):
@@ -118,10 +123,15 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.on_selected(None, self.project().get_selected())
 
     def update_tree(self, item):
+        found = False
         for itm in self.item_list:
             if itm.get_container() == item:
                 itm.update_item()
+                found = True
                 break
+        # TODO this should be item sensitive
+        if not found:
+            self.recreate_tree()
 
     def add_segmentation(self, segmentation):
         for i, st in enumerate(segmentation):
@@ -387,26 +397,6 @@ class AbstractOutlinerItem(QTreeWidgetItem):
             list.append(self)
 
 
-# class AnnotationOutlinerItem(AbstractOutlinerItem):
-#     def __init__(self, parent, index, annotation):
-#         super(AnnotationOutlinerItem, self).__init__(parent, index)
-#         self.is_editable = True
-#         self.has_item = True
-#         self.annotation = annotation
-#
-#     def get_container(self):
-#         return self.annotation
-#
-#     def set_name(self, name):
-#         self.annotation.set_name(name)
-#
-#     def get_name(self):
-#         self.annotation.get_name()
-#
-#     def update_item(self):
-#         self.setText(0, self.annotation.get_name())
-
-
 class SegmentationOutlinerRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(SegmentationOutlinerRootItem, self).__init__(parent, index)
@@ -506,7 +496,6 @@ class AnnotationLayerOutlinerItem(AbstractOutlinerItem):
             self.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_hidden.png"))
         else:
             self.setIcon(0, QIcon())
-
 
 
 class AnnotationOutlinerItem(AbstractOutlinerItem):
@@ -707,6 +696,43 @@ class NodeScriptsNodeItem(AbstractOutlinerItem):
 
     def update_item(self):
         self.setText(0, self.item.get_name())
+
+
+class ExperimentRootItem(AbstractOutlinerItem):
+    def __init__(self, parent, index):
+        super(ExperimentRootItem, self).__init__(parent, index)
+        self.update_item()
+
+    def set_name(self, name):
+        pass
+        "Not implemented"
+
+    def update_item(self):
+        self.setText(0, "Experiments")
+
+        self.setForeground(0, QtGui.QColor(106,165,255))
+
+
+class ExperimentItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, script):
+        super(ExperimentItem, self).__init__(parent, index)
+        self.has_item = True
+        self.is_editable = True
+        self.item = script
+        self.update_item()
+
+    def get_container(self):
+        return self.item
+
+    def set_name(self, name):
+        self.item.set_name(name)
+
+    def get_name(self):
+        return self.item.get_name()
+
+    def update_item(self):
+        self.setText(0, self.item.get_name())
+
 
 pageend = None
 #endregion
