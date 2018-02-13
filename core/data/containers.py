@@ -143,7 +143,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         if not os.path.isdir(self.export_dir):
             os.mkdir(self.export_dir)
 
-
     def get_all_containers(self):
         result = []
         for itm in self.id_list:
@@ -397,7 +396,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                 result.append(a)
         return result
     #endregion
-
 
     # Getters for easier changes later in the project
     def set_selected(self,sender, selected = []):
@@ -777,6 +775,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def create_vocabulary(self, name="New Vocabulary"):
         voc = Vocabulary(name)
         self.add_vocabulary(voc)
+        return voc
 
     def add_vocabulary(self, voc):
 

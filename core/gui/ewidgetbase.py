@@ -101,8 +101,8 @@ class EDialogWidget(QDialog):
         # self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Dialog)
         self.setWindowFlags(Qt.Dialog)
         self.main_window = main_window
-        if main_window is not None:
 
+        if main_window is not None:
             self.overlay_was_visible = main_window.drawing_overlay.isVisible()
             self.main_window.set_overlay_visibility(False)
 

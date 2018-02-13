@@ -7,7 +7,7 @@ from xml.dom.minidom import parse
 
 import numpy as np
 
-from core.data.containers import Segment, Segmentation, ElanExtensionProject, IAnalysisJobAnalysis
+from core.data.containers import *
 from core.data.interfaces import IConcurrentJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import *
 
@@ -327,6 +327,96 @@ class FileMakerVocImporter():
         print("  Added: ", added)
 
 
+class CSVImporter():
+    def get_fields(self, path):
+        try:
+            with open(path, 'r') as csvfile:
+                reader = csv.reader(csvfile, delimiter=';')
+                for row in reader:
+                    return True, row
+        except Exception as e:
+            print(e)
+            return False, []
+
+
+class VocabularyCSVImporter(CSVImporter):
+    def __init__(self):
+        super(VocabularyCSVImporter, self).__init__()
+
+    def import_voc(self, path, project: ElanExtensionProject, field_category, field_name, field_parent, field_comment = "", field_help = ""):
+        project.inhibit_dispatch = True
+
+        with open(path, 'r') as csvfile:
+
+            # We do not want to dispatch until the end of the import
+
+            reader = csv.reader(csvfile, delimiter=';')
+
+            counter = 0
+
+            vocabularies = []
+            index_list = [] # To Index Parent Objects, and item is as follows: [name:str, voc:Vocabulary, word:Word or None]
+
+            import_help = False
+            import_comment = False
+
+            for row in reader:
+
+                # If this is the first Line, find the Header Fields
+                if counter == 0:
+                    idx_parent = row.index(field_parent)
+                    idx_cat = row.index(field_category)
+                    idx_word = row.index(field_name)
+                    if field_comment != "":
+                        idx_comment = row.index(field_comment)
+                        import_comment = True
+                    if field_help != "":
+                        idx_help = row.index(field_help)
+                        import_help = True
+
+
+                else:
+                    # Import this row as word
+                    cat = row[idx_cat]
+                    parent_name = row[idx_parent]
+                    w_name = row[idx_word]
+
+                    # Check if the parent exists in the index list,  (this could either be a word or a vocabulary)
+                    # if not, assume the parent is a not yet created vocabulary
+                    if parent_name not in [v[0] for v in index_list]:
+                        new_voc = project.create_vocabulary(parent_name)
+                        new_voc.category = cat
+                        vocabularies.append(new_voc)
+                        index_list.append([parent_name, new_voc, None])
+
+                        if w_name != parent_name:
+                            new_word = new_voc.create_word(w_name)
+                            index_list.append([w_name, new_voc, new_word])
+
+                    else:
+                        # Find the Parent in the index list and add the new Child Word
+                        for v in index_list:
+                            if v[0] == parent_name:
+
+                                # if the parent is a Word
+                                if v[2] is not None:
+                                    new_word = v[1].create_word(w_name, parent_word = v[2])
+                                else:
+                                    new_word = v[1].create_word(w_name)
+
+                                index_list.append([w_name, v[1], new_word])
+
+                                if import_help:
+                                    new_word.info_url = row[idx_help]
+                                if import_comment:
+                                    new_word.comment = row[idx_comment]
+                                break
+
+                counter += 1
+
+
+        project.inhibit_dispatch = False
+        project.dispatch_changed()
 # OLD CODE
 # def import_elan_segmentation(path, name, id_identifier, prevent_overlapping = False): #, additional_identifiers):
 #     """

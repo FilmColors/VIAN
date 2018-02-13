@@ -14,7 +14,7 @@ from functools import partial
 
 from core.concurrent.worker_functions import *
 from core.data.enums import *
-from core.data.importers import ELANProjectImporter, FilmColorsPipelineImporter, FileMakerVocImporter
+from core.data.importers import *
 from core.data.masterfile import MasterFile
 from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
@@ -26,6 +26,7 @@ from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
+from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.welcome_dialog import WelcomeDialog
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.concurrent_tasks import ConcurrentTaskDock
@@ -255,6 +256,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportVocabulary.triggered.connect(self.import_vocabulary)
         self.actionImportFilmColorsPipeline.triggered.connect(self.import_pipeline)
         self.actionImportFilmColorsFilemaker.triggered.connect(self.import_filemaker)
+        self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
 
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
         self.actionExportTemplate.triggered.connect(self.export_template)
@@ -1125,6 +1127,10 @@ class MainWindow(QtWidgets.QMainWindow):
         importer = FileMakerVocImporter()
         importer.import_filemaker(path, self.project)
 
+    def import_csv_vocabulary(self):
+        dialog = CSVVocabularyImportDialog(self, self.project)
+        dialog.show()
+
     def export_segmentation(self):
         # path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
         dialog = ExportSegmentationDialog(self)
@@ -1799,7 +1805,6 @@ class DialogFirstStart(QtWidgets.QDialog):
         self.lineEdit_UserName.editingFinished.connect(self.on_name_changed)
 
         self.show()
-
 
     def on_name_changed(self):
         name = self.lineEdit_UserName.text()

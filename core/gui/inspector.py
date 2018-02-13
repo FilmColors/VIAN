@@ -131,7 +131,6 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.add_attribute_widget(w)
 
         if self.item is not None and isinstance(self.item, IHasVocabulary):
-            print("TEST, SHOWING")
             self.widget_vocabulary_section.show()
         else:
             self.widget_vocabulary_section.hide()
