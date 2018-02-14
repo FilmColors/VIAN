@@ -45,7 +45,7 @@ from core.gui.experiment_editor import ExperimentEditor, ExperimentEditorDock
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
-from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, VocabularyMatrix
+from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, ClassificationWindow
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
@@ -647,7 +647,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_vocabulary_matrix(self):
         if self.vocabulary_matrix is None:
-            self.vocabulary_matrix = VocabularyMatrix(self)
+            self.vocabulary_matrix = ClassificationWindow(self)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_matrix, QtCore.Qt.Vertical)
         else:
             self.vocabulary_matrix.show()

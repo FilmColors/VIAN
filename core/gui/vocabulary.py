@@ -8,6 +8,14 @@ from core.data.enums import get_type_as_string
 import os
 from functools import partial
 from core.data.enums import *
+from random import shuffle
+#region --DEFINITIONS--
+MATRIX_ORDER_PER_SEGMENT = 0
+MATRIX_ORDER_PER_TYPE = 1
+MATRIX_ORDER_RANDOM = 2
+MATRIX_ORDERS = ["By Time", "By Type", "Random"]
+#endregion
+
 
 class VocabularyManager(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
@@ -222,30 +230,37 @@ class VocabularyExportDialog(EDialogWidget):
             self.close()
 
 
-class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
+class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
-        super(VocabularyMatrix, self).__init__(main_window,limit_size=False)
+        super(ClassificationWindow, self).__init__(main_window, limit_size=False)
         self.main_window = main_window
         self.n_per_row = 20
-        self.setWindowTitle("Vocabulary Matrix")
+        self.setWindowTitle("Classification Window")
         self.all_boxes = []
-        self.current_segment = 0
 
         self.stick_to_type = False
         self.stick_type = None
         self.lbl_stick_type = QLabel("Updating on Selection of any Type",self)
 
+        self.main_segmentation_only = True
+
         self.tabs_list = []
         self.voc_categories = []
+        self.current_experiment = None
+        self.ordered_containers = []
+        self.current_container = None
+        self.current_position = 0
+        self.order_method = MATRIX_ORDER_PER_SEGMENT
 
         # Header Segment Selection Buttons
+
         self.segment_selection = QWidget(self)
         self.segment_selection.setLayout(QHBoxLayout(self.segment_selection))
-        self.btn_previous = QPushButton("Previous Segment", self.segment_selection)
+        self.btn_previous = QPushButton("Previous Item", self.segment_selection)
         self.btn_previous.clicked.connect(self.on_button_previous)
         self.btn_previous.setMinimumHeight(30)
-        self.lbl_current = QLabel(str(self.current_segment), self.segment_selection)
-        self.btn_next = QPushButton("Next Segment", self.segment_selection)
+        self.lbl_current = QLabel(str(self.current_position), self.segment_selection)
+        self.btn_next = QPushButton("Next Item", self.segment_selection)
         self.btn_next.clicked.connect(self.on_button_next)
         self.btn_next.setMinimumHeight(30)
         self.segment_selection.layout().addWidget(self.btn_previous)
@@ -254,25 +269,78 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
         self.segment_selection.layout().addItem(QSpacerItem(10, 2, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.segment_selection.layout().addWidget(self.btn_next)
 
+        self.btn_abort = QPushButton("Stop Classification")
+        self.btn_abort.clicked.connect(self.on_stop_classification)
+        self.progress_view = QProgressBar(self)
+        self.progress_view.setTextVisible(True)
+
+        self.lower_w = QWidget(self)
+        self.lower_w.setLayout(QHBoxLayout(self.lower_w))
+        self.lower_w.layout().addWidget(self.progress_view)
+        self.lower_w.layout().addWidget(self.btn_abort)
+
         self.central = QWidget(self)
         self.central.setLayout(QVBoxLayout(self.central))
 
         self.tabs = QTabWidget(self)
 
+        # self.central.layout().addWidget(self.experiment_selection)
         self.central.layout().addWidget(self.segment_selection)
         self.central.layout().addWidget(self.tabs)
-        self.central.layout().addWidget(self.lbl_stick_type)
+        # self.central.layout().addWidget(self.lbl_stick_type)
+        self.central.layout().addWidget(self.lower_w)
+
+
+        self.start_widget = QWidget(self)
+        self.start_widget.setLayout(QVBoxLayout(self.start_widget))
+
+        self.w_ordering = QWidget(self.start_widget)
+        self.w_ordering.setLayout(QHBoxLayout(self.w_ordering))
+        lbl2 = QLabel("Ordering:")
+        lbl2.setAlignment(Qt.AlignRight)
+        self.cb_ordering = QComboBox(self.start_widget)
+        self.cb_ordering.currentIndexChanged.connect(self.on_order_changed)
+        self.cb_ordering.addItems(MATRIX_ORDERS)
+
+        self.w_ordering.layout().addWidget(lbl2)
+        self.w_ordering.layout().addWidget(self.cb_ordering)
+
+        self.experiment_selection = QWidget(self)
+        self.experiment_selection.setLayout(QHBoxLayout(self.experiment_selection))
+
+        lbl1 = QLabel("Experiment:")
+        lbl1.setAlignment(Qt.AlignRight)
+        self.cb_experiment = QComboBox(self.experiment_selection)
+        self.cb_experiment.currentIndexChanged.connect(self.on_experiment_changed)
+        self.experiment_selection.layout().addWidget(lbl1)
+        self.experiment_selection.layout().addWidget(self.cb_experiment)
+
+        self.start_button = QPushButton("Start Classification", self.start_widget)
+        self.start_button.setStyleSheet("QPushButton{color: green; font-size: 14pt;}")
+        self.start_button.setFixedHeight(100)
+        self.start_button.clicked.connect(self.on_start_classification)
+        self.start_widget.layout().addItem(QSpacerItem(0,0,QSizePolicy.Preferred, QSizePolicy.Expanding))
+        self.start_widget.layout().addWidget(self.experiment_selection)
+        self.start_widget.layout().addWidget(self.w_ordering)
+        self.start_widget.layout().addWidget(self.start_button)
+        self.start_widget.layout().addItem(QSpacerItem(0, 0, QSizePolicy.Preferred, QSizePolicy.Expanding))
+
+        self.stack = QStackedWidget(self)
+        self.stack.addWidget(self.central)
+        self.stack.addWidget(self.start_widget)
+        self.stack.setCurrentIndex(1)
         # self.setLayout(QHBoxLayout(self))
-        self.setWidget(self.central)
+        self.setWidget(self.stack)
         self.recreate_widget()
         self.set_stick_to_type(False)
 
     def on_changed(self, project, item):
         if item is not None:
-            if item.get_type() == VOCABULARY or item.get_type() == VOCABULARY_WORD:
+            if item.get_type() == VOCABULARY or item.get_type() == VOCABULARY_WORD or item.get_type() == EXPERIMENT:
                 self.recreate_widget()
-            else:
-                self.update_widget()
+        else:
+            self.update_widget()
+        self.update_experiment_list()
 
     def on_loaded(self, project):
         self.recreate_widget()
@@ -284,6 +352,20 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
                     self.update_widget()
             else:
                 self.update_widget()
+
+    def on_start_classification(self):
+        self.recreate_widget()
+        self.stack.setCurrentIndex(0)
+        self.cb_experiment.currentIndexChanged.disconnect()
+        self.cb_ordering.currentIndexChanged.disconnect()
+
+    def on_stop_classification(self):
+        self.stack.setCurrentIndex(1)
+        self.cb_experiment.currentIndexChanged.connect(self.on_experiment_changed)
+        self.cb_ordering.currentIndexChanged.connect(self.on_order_changed)
+
+    def on_order_changed(self):
+        self.order_method = self.cb_ordering.currentIndex()
 
     def set_stick_to_type(self, enabled, type = None):
         if enabled:
@@ -299,6 +381,34 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
             self.lbl_stick_type.setStyleSheet("QLabel{color: White;}")
             self.lbl_stick_type.setText("Updating on Selection of any Type.")
 
+    def update_container_order(self):
+        to_classify = []
+        if self.current_experiment is not None:
+            c_types = self.current_experiment.classification_sources
+            for c in self.project().get_all_containers():
+                if c.get_type() in c_types:
+                    to_classify.append(c)
+
+        if self.main_segmentation_only and self.project().get_main_segmentation() is not None:
+            main_segm = self.project().get_main_segmentation().segments
+
+            excluded = []
+            for c in to_classify:
+                if not(c.get_type() == SEGMENT and c not in main_segm):
+                    excluded.append(c)
+
+            to_classify = excluded
+
+        if self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_SEGMENT:
+            ordered = sorted(to_classify, key=lambda x:x.get_start())
+        elif self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_TYPE:
+            ordered = sorted(to_classify, key=lambda x: x.get_type())
+        else:
+            shuffle(to_classify)
+            ordered = to_classify
+
+        self.ordered_containers = ordered
+
     def update_widget(self):
         if len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
             for itm in self.all_boxes:
@@ -308,28 +418,48 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
             for itm in self.all_boxes:
                 itm[0].setEnabled(False)
 
+    def update_experiment_list(self):
+        last_selected = self.cb_experiment.currentText()
+        self.cb_experiment.clear()
+        new = []
+        for exp in self.project().experiments:
+            self.cb_experiment.addItem(exp.get_name())
+            new.append(exp.get_name())
+
+        if last_selected in new:
+            self.cb_experiment.setCurrentText(last_selected)
+
+        elif len(self.project().experiments) > 0:
+            self.current_experiment = self.project().experiments[0]
+
     def recreate_widget(self):
         self.tabs.clear()
         self.voc_categories = []
         self.tabs_list = []
 
-        for voc in self.project().vocabularies:
+        self.update_container_order()
+
+        if self.current_experiment is not None:
+            vocabularies = self.current_experiment.get_vocabulary_list()
+        else:
+            vocabularies = self.project().vocabularies
+
+        print(vocabularies)
+        # Creating the TABS
+        for voc in vocabularies:
             if voc.category not in self.voc_categories:
                 self.voc_categories.append(voc.category)
                 area = QScrollArea(self.tabs)
                 area.setWidgetResizable(True)
                 t = QWidget(None)
-                # t.setMinimumSize(200,200)
-                # t.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
                 l = QVBoxLayout(t)
                 t.setLayout(l)
-                # l.setSizeConstraint(l.SetMinAndMaxSize)
 
                 area.setWidget(t)
                 self.tabs.addTab(area, voc.category)
                 self.tabs_list.append(t)
 
-        for voc in self.project().vocabularies:
+        for voc in vocabularies:
             tab_idx = self.voc_categories.index(voc.category)
             tab = self.tabs_list[tab_idx]
             # l = QVBoxLayout(tab)
@@ -360,7 +490,7 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
 
             voc_list = sorted(voc_list, key=lambda x:x.name.lower())
             for w in voc_list:
-                cb = QCheckBox(w.name, frame)
+                cb = WordCheckBox(frame, w)
                 cb.stateChanged.connect(self.on_cb_change)
                 cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
                 if len(self.project().selected) > 0 \
@@ -422,44 +552,70 @@ class VocabularyMatrix(EDockWidget, IProjectChangeNotify):
 
             # self.tabs.addTab(tab, voc.name)
 
+    def on_experiment_changed(self):
+        idx = self.cb_experiment.currentIndex()
+        if len(self.project().experiments) > idx:
+            self.current_experiment = self.project().experiments[idx]
+        self.recreate_widget()
+
     def on_cb_change(self):
         sender = self.sender()
         state = sender.isChecked()
         name = sender.text()
-        word = self.project().get_word_object_from_name(name)
+        word = sender.word
 
-        for itm in self.project().selected:
-            if isinstance(itm, IHasVocabulary):
-                if state:
-                    itm.add_word(word)
-                else:
-                    itm.remove_word(word)
-                    sender.setStyleSheet("QCheckBox{color: #b1b1b1;}")
+        if self.current_container is None:
+            return
+
+        # for itm in self.project().selected:
+        if isinstance(self.current_container, IHasVocabulary):
+            if state:
+                self.current_container.add_word(word)
+            else:
+                self.current_container.remove_word(word)
+                sender.setStyleSheet("QCheckBox{color: #b1b1b1;}")
 
     def on_button_previous(self):
-        segm = self.project().get_main_segmentation()
-        if segm is None:
+        if self.ordered_containers is None:
             return
-        if self.current_segment > 0:
-            self.current_segment -= 1
-        self.frame_segment(segm)
 
-    def frame_segment(self, segmentation):
-        if self.current_segment - 1 < len(segmentation.segments):
-            s = segmentation.segments[self.current_segment]
-            self.main_window.timeline.timeline.frame_time_range(s.get_start() + 1000, s.get_end())
-            self.lbl_current.setText(str(s.ID).zfill(3))
-            self.main_window.player.set_media_time(s.get_start() + 1000)
-            self.project().set_selected(None, [s])
+        if self.current_position > 0:
+            self.current_position -= 1
+
+            if self.current_position < len(self.ordered_containers):
+                cont = self.ordered_containers[self.current_position]
+                self.frame_container(cont)
+
+    def frame_container(self, container):
+
+        start = container.get_start()
+        end = container.get_end()
+
+        self.main_window.timeline.timeline.frame_time_range(start + 5000, end - 5000)
+        self.lbl_current.setText(str(container.get_name()).zfill(3))
+        self.main_window.player.set_media_time(start + 5000)
+        self.current_container = container
+        self.project().set_selected(None, [container])
 
     def on_button_next(self):
-        segm = self.project().get_main_segmentation()
-        if segm is None:
+        if self.ordered_containers is None:
             return
-        if self.current_segment + 1 < len(segm.segments):
-            self.current_segment += 1
-        self.frame_segment(segm)
+
+        if self.current_position + 1 < len(self.ordered_containers):
+            self.current_position += 1
+
+            cont = self.ordered_containers[self.current_position]
+            self.frame_container(cont)
+
+            self.progress_view.setValue(int((self.current_position / len(self.ordered_containers)) * 100))
 
     def resizeEvent(self, *args, **kwargs):
-        super(VocabularyMatrix, self).resizeEvent(*args, **kwargs)
+        super(ClassificationWindow, self).resizeEvent(*args, **kwargs)
+
+
+class WordCheckBox(QCheckBox):
+    def __init__(self, parent, word):
+        super(WordCheckBox, self).__init__(parent)
+        self.word = word
+        self.setText(word.get_name())
 #endregion

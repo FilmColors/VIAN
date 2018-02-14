@@ -408,7 +408,7 @@ class SegmentationOutlinerRootItem(AbstractOutlinerItem):
     def update_item(self):
         super(SegmentationOutlinerRootItem, self).update_item()
         self.setText(0, "Segmentations")
-        self.setForeground(0, QtGui.QColor(0, 113, 122))
+        self.setForeground(0, QtGui.QColor(0, 167, 179)) #0, 113, 122
 
 
 class SegmentationOutlinerItem(AbstractOutlinerItem):
@@ -465,7 +465,7 @@ class AnnotationLayerOutlinerRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(AnnotationLayerOutlinerRootItem, self).__init__(parent, index)
         self.setText(0, "Annotation Layers")
-        self.setForeground(0, QtGui.QColor(133,42,42))
+        self.setForeground(0, QtGui.QColor(174, 55, 55)) #133,42,42
 
 
 class AnnotationLayerOutlinerItem(AbstractOutlinerItem):
@@ -525,7 +525,7 @@ class ScreenshotRootOutlinerItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(ScreenshotRootOutlinerItem, self).__init__(parent, index)
         self.setText(0, "Screenshots")
-        self.setForeground(0, QtGui.QColor(116,73,146))
+        self.setForeground(0, QtGui.QColor(135, 85, 170)) #116,73,146
 
 
 class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
@@ -609,7 +609,7 @@ class MovieDescriptorOutlinerItem(AbstractOutlinerItem):
     def update_item(self):
         super(MovieDescriptorOutlinerItem, self).update_item()
         self.setText(0, self.movie_descriptor.movie_name)
-        self.setForeground(0, QtGui.QColor(182,128,10))
+        self.setForeground(0, QtGui.QColor(242, 170, 13)) #182,128,10
 
 
 class AnalyzesOutlinerRootItem(AbstractOutlinerItem):
@@ -622,7 +622,7 @@ class AnalyzesOutlinerRootItem(AbstractOutlinerItem):
 
     def update_item(self):
         self.setText(0, "Analyzes")
-        self.setForeground(0, QtGui.QColor(7,133,47))
+        self.setForeground(0, QtGui.QColor(9, 170, 60)) #7,133,47
 
 
 class AnalyzesOutlinerItem(AbstractOutlinerItem):
@@ -653,7 +653,7 @@ class NodeScriptsRootItem(AbstractOutlinerItem):
     def update_item(self):
         self.setText(0, "Node Scripts")
 
-        self.setForeground(0, QtGui.QColor(81,109,90))
+        self.setForeground(0, QtGui.QColor(108, 147, 120)) #81,109,90
 
 
 class NodeScriptsItem(AbstractOutlinerItem):

@@ -10,6 +10,7 @@ class ExperimentEditorDock(EDockWidget):
     def __init__(self, main_window, editor):
         super(ExperimentEditorDock, self).__init__(main_window, limit_size=False)
         self.setWidget(editor)
+        self.setWindowTitle("Experiment Overview")
 
 class ExperimentEditor(QWidget, IProjectChangeNotify):
     def __init__(self, main_window):
@@ -62,11 +63,12 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         if self.selected_class_object is not None:
             # self.listView_Vocabularies = QListWidget()
             for voc in self.main_window.project.vocabularies:
-                itm = VocabularyListItem(self.listView_Vocabularies, voc)
-                self.listView_Vocabularies.addItem(itm)
-                if voc in self.selected_class_object.obj.classification_vocabularies:
-                    itm.setCheckState(Qt.Checked)
-                self.voc_items.append(itm)
+                if voc.derived_vocabulary is False:
+                    itm = VocabularyListItem(self.listView_Vocabularies, voc)
+                    self.listView_Vocabularies.addItem(itm)
+                    if voc in self.selected_class_object.obj.get_base_vocabularies():
+                        itm.setCheckState(Qt.Checked)
+                    self.voc_items.append(itm)
 
     def update_classification_object_tree(self):
         self.treeWidget_Objects.clear()
@@ -106,17 +108,18 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         name = self.lineEdit_ObjectName.text()
         if name == "":
             return
+
         if self.selected_class_object is not None:
-            self.selected_class_object.obj.add_child(ClassificationTarget(name))
+            self.current_experiment.create_class_object(name, self.selected_class_object.obj)
         else:
-            self.current_experiment.add_class_object(ClassificationTarget(name))
+            self.current_experiment.create_class_object(name, self.current_experiment)
 
         self.lineEdit_ObjectName.clear()
         self.update_classification_object_tree()
 
     def remove_class_object(self):
         if self.selected_class_object is not None:
-            if isinstance(self.selected_class_object.obj.parent, ClassificationTarget):
+            if isinstance(self.selected_class_object.obj.parent, ClassificationObjects):
                 self.selected_class_object.obj.parent.remove_child(self.selected_class_object.obj)
             else:
                 self.current_experiment.remove_class_object(self.selected_class_object.obj)
@@ -152,11 +155,12 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             return
         for itm in self.voc_items:
             if itm.checkState() == Qt.Checked:
-                if itm.voc not in self.selected_class_object.obj.classification_vocabularies:
-                    self.selected_class_object.obj.classification_vocabularies.append(itm.voc)
+                if itm.voc not in self.selected_class_object.obj.get_base_vocabularies():
+                    self.selected_class_object.obj.add_vocabulary(itm.voc)
             else:
-                if itm.voc in self.selected_class_object.obj.classification_vocabularies:
-                    self.selected_class_object.obj.classification_vocabularies.remove(itm.voc)
+                for v in self.selected_class_object.obj.classification_vocabularies:
+                    if v.base_vocabulary == itm.voc:
+                        self.selected_class_object.obj.remove_vocabulary(v)
 
     def update_analysis_list(self):
         self.listWidget_Analyses.clear()

@@ -1,7 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QTextEdit, QSpacerItem, QSizePolicy, QMenu
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QColor
 from functools import partial
 
@@ -114,6 +114,11 @@ class OutputLine(QtWidgets.QWidget):
     def on_timeout(self):
         self.text_time.stop()
         if len(self.message_queue) > 0:
+            if len(self.message_queue) > 10:
+                self.text_time.setInterval(10)
+            else:
+                self.text_time.setInterval(5000)
+
             curr_msg = self.message_queue[0]
             self.message_queue.remove(curr_msg)
 
@@ -229,8 +234,15 @@ class MessageLogWindow(QMainWindow):
         super(MessageLogWindow, self).__init__(parent)
         self.message_bar = parent
         self.view = QTextEdit(self)
+        self.widget = QWidget(self)
+        self.widget.setLayout(QVBoxLayout(self.widget))
+        self.widget.layout().addWidget(self.view)
+        self.input_line = QLineEdit(self)
+        self.widget.layout().addWidget(self.input_line)
+        self.input_line.returnPressed.connect(self.parse_command)
+
         self.setWindowTitle("Message Log")
-        self.setCentralWidget(self.view)
+        self.setCentralWidget(self.widget)
         self.main_window = self.message_bar.main_window
         self.resize(600,400)
 
@@ -248,5 +260,23 @@ class MessageLogWindow(QMainWindow):
             self.view.append(str(i) + ".  " + str(msg[0]))
 
 
+    def parse_command(self):
+        cmd = self.input_line.text()
+        try:
 
+            if cmd == "list_containers":
+                self.main_window.project.print_object_list()
 
+            elif cmd == "help":
+                print("list_containers -- Listing all Container Objects of the Project")
+
+            else:
+                cmd = cmd.replace("print", "self.main_window.print_message")
+                cmd = cmd.replace("project", "self.main_window.project")
+
+                eval(cmd)
+
+        except Exception as e:
+            print (e)
+
+        self.input_line.clear()

@@ -76,8 +76,11 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.notes = ""
 
         self.add_vocabulary(get_default_vocabulary())
+        self.create_default_experiment()
+
         self.inhibit_dispatch = False
         self.selected = []
+
 
     def highlight_types(self, types):
 
@@ -158,7 +161,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def print_all(self, type = None):
         for c in self.get_all_containers():
             if type is not None and type == c.get_type():
-                print(c.unique_id, c)
+                print(str(c.unique_id).ljust(20), c)
 
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):
@@ -488,6 +491,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def remove_script(self, script):
         if script in self.node_scripts:
             self.node_scripts.remove(script)
+            self.remove_from_id_list(script)
         self.dispatch_changed()
 
     def set_current_script(self, script, dispatch = True):
@@ -497,6 +501,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             self.dispatch_changed()
     #endregion
 
+    #region IO
     def store_project(self, settings, global_settings, path = None):
         """
         DEPRECATED
@@ -583,6 +588,11 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
 
         with open(path) as f:
             my_dict = json.load(f)
+
+        # remove the default Experiment
+        print(self.experiments)
+        self.remove_experiment(self.experiments[0])
+        print(self.experiments)
 
         self.path = my_dict['path']
         self.path = path
@@ -789,6 +799,8 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         for e in template['experiments']:
             new = Experiment().deserialize(e, self)
 
+    #endregion
+
     #region Vocabularies
     def create_vocabulary(self, name="New Vocabulary"):
         voc = Vocabulary(name)
@@ -796,7 +808,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         return voc
 
     def add_vocabulary(self, voc):
-
         not_ok = True
         counter = 0
         name = voc.name
@@ -820,12 +831,22 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def remove_vocabulary(self, voc):
         if voc in self.vocabularies:
             self.vocabularies.remove(voc)
+            self.remove_from_id_list(voc)
         self.dispatch_changed()
 
-    def copy_vocabulary(self, voc):
+    def copy_vocabulary(self, voc, add_to_global = True):
+        """
+        Copies an existing Vocabulary
+        :param voc: the Vocabulary to copy
+        :param add_to_global: If True, the Copied Vocabualry is added to the Projects List
+        :return: A Copy of an existing Vocabulary
+        """
+        self.inhibit_dispatch = True
         voc.export_vocabulary(self.data_dir + "/temp_voc.json")
-        self.import_vocabulary(self.data_dir + "/temp_voc.json")
+        new = self.import_vocabulary(self.data_dir + "/temp_voc.json", add_to_global)
         os.remove(self.data_dir + "/temp_voc.json")
+        self.inhibit_dispatch = False
+        return new
 
     def get_auto_completer_model(self):
         """
@@ -839,15 +860,29 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             model.appendRow(QStandardItem(w.name))
         return model
 
-    def get_word_object_from_name(self, name):
-        for v in self.vocabularies:
+    def get_word_object_from_name(self, name, experiment = None):
+
+        if experiment is not None:
+            vocabularies = experiment.get_vocabulary_list()
+        else:
+            vocabularies = self.vocabularies
+
+        for v in vocabularies:
             for w in v.words_plain:
                 if w.name == name:
                     return w
 
-    def import_vocabulary(self, path):
+    def import_vocabulary(self, path, add_to_global = True):
+        """
+        Importing a Vocabulary from json
+        :param path: Path to the Vocabulary Json
+        :param add_to_global: if True, the Vocabulary is added to the Projects Vocabulary List
+        :return: An imported Vocabulary Object
+        """
         new_voc = Vocabulary("New").import_vocabulary(path, self)
-        self.add_vocabulary(new_voc)
+        if add_to_global:
+            self.add_vocabulary(new_voc)
+        return new_voc
 
     #endregion
 
@@ -855,6 +890,7 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def create_experiment(self):
         new = Experiment()
         self.add_experiment(new)
+        return new
 
     def add_experiment(self, experiment):
         experiment.set_project(self)
@@ -866,9 +902,15 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
     def remove_experiment(self, experiment):
         if experiment in self.experiments:
             self.experiments.remove(experiment)
+            self.remove_from_id_list(experiment)
             self.undo_manager.to_undo((self.remove_experiment, [experiment]),
                                       (self.add_experiment, [experiment]))
-            self.dispatch_changed(item=experiment)
+            self.dispatch_changed()
+
+    def create_default_experiment(self):
+        default = self.create_experiment()
+        default.set_name("Default Experiment")
+        default.create_class_object("Global")
 
     #endregion
 
@@ -921,6 +963,12 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                 old = itm[0]
                 itm[0] = itm[1].unique_id
                 print("Updated ", old, " --> ", itm[1].unique_id, itm[1])
+
+    def get_object_list(self):
+        string = ""
+        for ids in self.id_list:
+            string += str(ids[0]).ljust(20) + str(ids[1]) + "\n"
+        return string
 
     def get_by_id(self, item_id):
         """
@@ -1318,6 +1366,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def get_name(self):
+        return str(self.ID)
         return str(self.additional_identifiers[0])
 
     def set_name(self, name):
@@ -2794,6 +2843,10 @@ class Vocabulary(IProjectContainer, IHasName):
         self.was_expanded = False
         self.category = "default"
 
+        self.derived_vocabulary = False
+        self.experiment = None
+        self.base_vocabulary = None
+
     def create_word(self, name, parent_word = None, unique_id = -1):
         word = VocabularyWord(name, vocabulary=self)
         word.unique_id = unique_id
@@ -2825,7 +2878,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
         self.dispatch_on_changed(item=self)
 
-    def remove_word(self, word):
+    def remove_word(self, word, dispatch = True):
         children = []
         word.get_children_plain(children)
 
@@ -2846,7 +2899,10 @@ class Vocabulary(IProjectContainer, IHasName):
         if word in self.words_plain:
             self.words_plain.remove(word)
 
-        self.dispatch_on_changed()
+        self.project.remove_from_id_list(word)
+
+        if dispatch:
+            self.dispatch_on_changed()
 
     def get_word_by_name(self, name):
         for w in self.words_plain:
@@ -2881,11 +2937,18 @@ class Vocabulary(IProjectContainer, IHasName):
             )
             words_data.append(data)
 
+        if self.base_vocabulary is not None:
+            base = self.base_vocabulary.unique_id
+        else:
+            base = -1
+
         voc_data = dict(
             name = self.name,
             category = self.category,
             unique_id = self.unique_id,
-            words = words_data
+            words = words_data,
+            derived = self.derived_vocabulary,
+            base = base
         )
 
         return voc_data
@@ -2904,6 +2967,12 @@ class Vocabulary(IProjectContainer, IHasName):
             else:
                 self.create_word(w['name'], parent, unique_id=w['unique_id'])
 
+        try:
+            self.derived_vocabulary = serialization['derived']
+            self.base_vocabulary = project.get_by_id(serialization['base'])
+        except:
+            self.derived_vocabulary = False
+            self.base_vocabulary = None
         return self
 
     def export_vocabulary(self, path):
@@ -2961,6 +3030,11 @@ class Vocabulary(IProjectContainer, IHasName):
 
         return self
 
+    def set_experiment(self, experiment, base_vocabulary):
+        self.experiment = experiment
+        self.base_vocabulary = base_vocabulary
+        self.derived_vocabulary = True
+
     def get_type(self):
         return VOCABULARY
 
@@ -2970,6 +3044,10 @@ class Vocabulary(IProjectContainer, IHasName):
     def set_name(self, name):
         self.name = name
 
+    def delete(self):
+        for w in self.words_plain:
+            self.remove_word(w, dispatch=False)
+        self.project.remove_vocabulary(self)
 
 class VocabularyWord(IProjectContainer, IHasName):
     def __init__(self, name, vocabulary, parent = None, is_checkable = False):
@@ -3015,6 +3093,13 @@ class VocabularyWord(IProjectContainer, IHasName):
     def get_type(self):
         return VOCABULARY_WORD
 
+    def get_name(self):
+        return self.name
+
+    def delete(self):
+        self.project.remove_from_id_list(self)
+        self.vocabulary.remove_word(self)
+
 def get_default_vocabulary():
     voc = Vocabulary("Scene Locations")
     voc.create_word("House")
@@ -3048,10 +3133,21 @@ class Experiment(IProjectContainer, IHasName):
         self.classification_objects = []
         self.analyses_templates = []
 
+        self.classified_containers = []
+
     def remove_class_object(self, classification_target):
         if classification_target in self.classification_objects:
             self.classification_objects.remove(classification_target)
             self.project.remove_from_id_list(classification_target)
+
+    def create_class_object(self, name, parent = None):
+        new = ClassificationObjects(name, experiment=self)
+
+        if parent == self or parent is None:
+            self.add_class_object(new)
+        else:
+            parent.add_child(new)
+        return new
 
     def add_class_object(self, classification_object):
         self.classification_objects.append(classification_object)
@@ -3097,15 +3193,22 @@ class Experiment(IProjectContainer, IHasName):
         project.add_experiment(self)
 
         for obj in serialization['classification_objects']:
-            ClassificationTarget("NONAME").deserialize(obj, project)
+            ClassificationObjects("NONAME", self).deserialize(obj, project)
 
         return self
+
+    def get_vocabulary_list(self):
+        result = []
+        for obj in self.classification_objects:
+            for voc in obj.classification_vocabularies:
+                result.append(voc)
+        return result
 
     def delete(self):
         self.project.remove_experiment(self)
         self.dispatch_on_changed()
 
-class ClassificationTarget(IProjectContainer):
+class ClassificationObjects(IProjectContainer):
     """
     A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
     Several ClassificationTargets may form a Tree. 
@@ -3115,25 +3218,48 @@ class ClassificationTarget(IProjectContainer):
     
     The ClassificationTargets would therefore be "Foreground" and "Background", both will have "ColorVocabulary". 
     """
-    def __init__(self, name, parent = None):
+    def __init__(self, name, experiment, parent = None):
         IProjectContainer.__init__(self)
 
         self.name = name
+        self.experiment = experiment
         self.parent = parent
         self.children = []
         self.classification_vocabularies = []
 
-        self.experiment_editor_expanded = False
+    def add_vocabulary(self, voc: Vocabulary):
+        new_voc = self.project.copy_vocabulary(voc, add_to_global=False)
+        new_voc.set_name(self.name + ":" + new_voc.get_name())
+        self.project.add_vocabulary(new_voc)
+        new_voc.set_experiment(self.experiment, voc)
+        self.classification_vocabularies.append(new_voc)
+        self.dispatch_on_changed()
 
-    def add_child(self, classification_target):
-        classification_target.parent = self
-        classification_target.set_project(self.project)
-        self.children.append(classification_target)
+    def remove_vocabulary(self, voc):
+        self.classification_vocabularies.remove(voc)
+        self.project.remove_vocabulary(voc)
 
-    def remove_child(self, classification_target):
-        if classification_target in self.children:
-            self.children.remove(classification_target)
-            self.project.remove_from_id_list(classification_target)
+
+    def get_base_vocabularies(self):
+        """
+        Returns a list of all Base Vocabularies used in this Object
+        :param voc: The Base Vocabulary
+        :return: list of all Base Vocabularies
+        """
+        result = []
+        for v in self.classification_vocabularies:
+            result.append(v.base_vocabulary)
+        return result
+
+    def add_child(self, classification_object):
+        classification_object.parent = self
+        classification_object.set_project(self.project)
+        self.children.append(classification_object)
+
+    def remove_child(self, classification_object):
+        if classification_object in self.children:
+            self.children.remove(classification_object)
+            self.project.remove_from_id_list(classification_object)
         else:
             print("NOT FOUND")
 
@@ -3142,6 +3268,9 @@ class ClassificationTarget(IProjectContainer):
         if len(self.children) > 0:
             for c in self.children:
                 c.get_children_plain(list)
+
+    def get_type(self):
+        return CLASSIFICATIONOBJECT
 
     def serialize(self):
         serialization = dict(
@@ -3158,7 +3287,7 @@ class ClassificationTarget(IProjectContainer):
         self.unique_id = serialization['unique_id']
         p = project.get_by_id(serialization['parent'])
 
-        if isinstance(p, ClassificationTarget):
+        if isinstance(p, ClassificationObjects):
             p.add_child(self)
         else:
             p.add_class_object(self)
