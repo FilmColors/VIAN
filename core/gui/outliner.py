@@ -177,8 +177,12 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             self.recreate_tree()
 
     def on_loaded(self, project):
+        self.setDisabled(False)
         self.tree.project = project
         self.recreate_tree()
+
+    def on_closed(self):
+        self.setDisabled(True)
 
     def on_selected(self, sender, selected):
         if sender is self or selected is None:

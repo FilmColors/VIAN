@@ -17,6 +17,7 @@ else:
 # from matplotlib.figure import Figure
 import webbrowser
 
+
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
@@ -91,6 +92,9 @@ class EDockWidget(QDockWidget):
             print(self.__class__.__name__, ".main_window attributed of ", self, \
                 " doesn't seem to be from derived from class MainWindow")
 
+    def set_ui_enabled(self, state):
+        self.setDisabled(not state)
+
 
 class EDialogWidget(QDialog):
     def __init__(self,  parent = None,  main_window = None, help_path = None):
@@ -118,96 +122,6 @@ class EDialogWidget(QDialog):
     def on_help(self):
         if self.help_path is not None:
             webbrowser.open("file://" + os.path.abspath(self.help_path))
-
-
-class EVisualizationDialog(EDialogWidget):
-    def __init__(self, parent, visualization_widget):
-        super(EVisualizationDialog, self).__init__(parent)
-        self.vis_widget = visualization_widget
-        self.setLayout(QVBoxLayout(self))
-        self.layout().addWidget(self.vis_widget)
-        self.show()
-
-    def closeEvent(self, QCloseEvent):
-        self.parent().layout().addWidget(self.vis_widget)
-        super(EVisualizationDialog, self).closeEvent(QCloseEvent)
-
-
-class EAnalyseVisualization(QWidget):
-    def __init__(self, parent, analyze):
-        super(EAnalyseVisualization, self).__init__(parent)
-        self.setLayout(QVBoxLayout(self))
-        self.lbl = QLabel("<b>Visualization:", self)
-        self.btn_expand = QPushButton("Expand", self)
-        self.layout().addWidget(self.lbl)
-        self.layout().addWidget(self.btn_expand)
-        self.btn_expand.clicked.connect(self.on_expand)
-        self.analyze = analyze
-        self.figure = None
-
-        self.show()
-
-    def plot(self):
-        print("plot() not implemented in:", self)
-
-    def on_expand(self):
-        if self.figure is not None:
-            dialog = EVisualizationDialog(self, self.figure)
-
-
-class EMatplotLibVis(EAnalyseVisualization):
-    def __init__(self, parent, analyze):
-        super(EMatplotLibVis, self).__init__(parent, analyze)
-
-        # a figure instance to plot on
-        # self.figure = MatplotlibFigure(self, self.analyze)
-
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
-
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-
-        self.layout().addWidget(self.figure)
-
-    def plot(self):
-        self.figure.plot()
-
-
-# class MatplotlibFigure(FigureCanvas):
-#     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-#
-#     def __init__(self, parent=None, analysis=None, width=5, height=4, dpi=300):
-#         self.background = (50.0/255, 50.0/255, 50.0/255)
-#         fig = Figure(figsize=(width, height), dpi=dpi, facecolor=self.background)
-#         self.analysis = analysis
-#         self.axes = fig.add_subplot(111)
-#         self.axes.set_facecolor(self.background)
-#
-#         self.plot()
-#
-#         FigureCanvas.__init__(self, fig)
-#         self.setParent(parent)
-#
-#         FigureCanvas.setSizePolicy(self,
-#                                    QSizePolicy.Expanding,
-#                                    QSizePolicy.Expanding)
-#         FigureCanvas.updateGeometry(self)
-#
-#     def plot(self):
-#         print("plot not  implemented in", self)
-
-class GraphicsViewDockWidget(EDockWidget):
-    def __init__(self, main_window, pixmap = None):
-        super(GraphicsViewDockWidget, self).__init__(main_window, False)
-        self.view = EGraphicsView(self, auto_frame=False)
-
-        self.setWidget(self.view)
-        if pixmap is not None:
-            self.set_pixmap(pixmap)
-
-    def set_pixmap(self, pixmap):
-        self.view.set_image(pixmap)
 
 
 class EGraphicsView(QGraphicsView):
@@ -362,4 +276,73 @@ class EToolBar(QToolBar):
     def show_indicator(self, visibility):
         self.show_indicator_frame = visibility
         self.update()
+
+
+#region -- OLD CODE --
+# class EVisualizationDialog(EDialogWidget):
+#     def __init__(self, parent, visualization_widget):
+#         super(EVisualizationDialog, self).__init__(parent)
+#         self.vis_widget = visualization_widget
+#         self.setLayout(QVBoxLayout(self))
+#         self.layout().addWidget(self.vis_widget)
+#         self.show()
+#
+#     def closeEvent(self, QCloseEvent):
+#         self.parent().layout().addWidget(self.vis_widget)
+#         super(EVisualizationDialog, self).closeEvent(QCloseEvent)
+
+
+# class EAnalyseVisualization(QWidget):
+#     def __init__(self, parent, analyze):
+#         super(EAnalyseVisualization, self).__init__(parent)
+#         self.setLayout(QVBoxLayout(self))
+#         self.lbl = QLabel("<b>Visualization:", self)
+#         self.btn_expand = QPushButton("Expand", self)
+#         self.layout().addWidget(self.lbl)
+#         self.layout().addWidget(self.btn_expand)
+#         self.btn_expand.clicked.connect(self.on_expand)
+#         self.analyze = analyze
+#         self.figure = None
+#
+#         self.show()
+#
+#     def plot(self):
+#         print("plot() not implemented in:", self)
+#
+#     def on_expand(self):
+#         if self.figure is not None:
+#             dialog = EVisualizationDialog(self, self.figure)
+
+#
+# class EMatplotLibVis(EAnalyseVisualization):
+#     def __init__(self, parent, analyze):
+#         super(EMatplotLibVis, self).__init__(parent, analyze)
+#
+#         # a figure instance to plot on
+#         # self.figure = MatplotlibFigure(self, self.analyze)
+#
+#         # this is the Canvas Widget that displays the `figure`
+#         # it takes the `figure` instance as a parameter to __init__
+#
+#         # this is the Navigation widget
+#         # it takes the Canvas widget and a parent
+#
+#         self.layout().addWidget(self.figure)
+#
+#     def plot(self):
+#         self.figure.plot()
+#
+# class GraphicsViewDockWidget(EDockWidget):
+#     def __init__(self, main_window, pixmap = None):
+#         super(GraphicsViewDockWidget, self).__init__(main_window, False)
+#         self.view = EGraphicsView(self, auto_frame=False)
+#
+#         self.setWidget(self.view)
+#         if pixmap is not None:
+#             self.set_pixmap(pixmap)
+#
+#     def set_pixmap(self, pixmap):
+#         self.view.set_image(pixmap)
+
+#endregion
 

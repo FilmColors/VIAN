@@ -172,6 +172,10 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             if self.current_experiment is not None:
                 if analysis.__name__ in self.current_experiment.analyses_templates:
                     itm.setCheckState(Qt.Checked)
+                if self.main_window.project.has_analysis(analysis.__name__):
+                    itm.setForeground(QColor(0, 204, 0))
+                else:
+                    itm.setForeground(QColor(204, 0, 0))
 
     def update_analysis_list_in_experiment(self):
         for itm in self.analysis_items:
@@ -191,6 +195,12 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         else:
             self.set_enabled(False)
         self.inhibit_ui_signals = False
+
+    def on_loaded(self, project):
+        self.update_ui()
+
+    def on_closed(self):
+        self.update_ui()
 
 class ClassificationObjectItem(QTreeWidgetItem):
     def __init__(self, parent, obj):

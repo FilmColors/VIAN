@@ -345,6 +345,15 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.experiment_editor
                                           ]
 
+        self.menus_list = [
+            self.menuFile,
+            self.menuHelp,
+            self.menuEdit,
+            self.menuWindows,
+            self.menuPlayer,
+            self.menuAnalyze,
+            self.menuAnalysis,
+        ]
 
         # self.actionElanConnection.triggered.connect(self.create_widget_elan_status)
         # self.actionShots.triggered.connect(self.create_widget_shots_window)
@@ -380,6 +389,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drawing_overlay.onSourceChanged.connect(self.source_status.on_source_changed)
         self.onOpenCVFrameVisibilityChanged.connect(self.on_frame_source_changed)
         self.dispatch_on_changed()
+
 
         self.screenshot_blocked = False
 
@@ -425,12 +435,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show_first_start()
 
         self.player_controls.setState(False)
-        self.timeline.timeline.setState(False)
 
         self.create_analysis_list()
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
         # self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
         self.update_vian(False)
+
+        self.project.undo_manager.clear()
+        self.close_project()
 
     def print_time(self, segment):
         print(segment)
@@ -859,17 +871,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.abortAllConcurrentThreads.emit()
         self.project.cleanup()
         self.project = ElanExtensionProject(self, name="No Project")
-        print(len(self.project.screenshots))
 
-        #self.project_streamer.release_project()
-
-
-        #self.project_streamer.set_project(self.project)
         self.player_controls.setState(False)
-        self.timeline.timeline.setState(False)
-
+        self.project = None
         self.dispatch_on_closed()
-        self.dispatch_on_changed()
 
     def load_project(self, path):
 
@@ -926,7 +931,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.on_save_project(True)
 
     def on_exit(self):
-        if self.project.undo_manager.has_modifications():
+        if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
             if answer == QMessageBox.Yes:
                 self.on_save_project(sync=True)
@@ -1631,11 +1636,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     if not obj.__name__ == IAnalysisJob.__name__:
                         self.analysis_list.append(obj)
 
-    # def set_darwin_player_visibility(self, visibility):
-    #     if self.is_darwin:
-    #             self.player_container.setVisible(visibility)
-    #             self.player_container.synchronize()
-
     def signal_timestep_update(self):
         if self.time_counter < self.clock_synchronize_step:
             self.time += self.time_update_interval + 5
@@ -1648,6 +1648,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.dispatch_on_timestep_update(t)
 
     #endregion
+
+    def set_ui_enabled(self, state):
+        for i in range(2, len(self.menus_list)): # The First two should also be active if no project is opened
+            m = self.menus_list[i]
+            for e in m.actions():
+                e.setDisabled(not state)
+        self.actionSave.setDisabled(not state)
+        self.actionSaveAs.setDisabled(not state)
+        self.actionBackup.setDisabled(not state)
+        self.actionClose_Project.setDisabled(not state)
+        self.menuExport.setDisabled(not state)
 
     def get_version_as_string(self):
 
@@ -1670,6 +1681,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def dispatch_on_loaded(self):
         # self.set_darwin_player_visibility(True)
         self.autosave_timer.start()
+        self.set_ui_enabled(True)
 
         screenshot_position = []
         screenshot_annotation_dicts = []
@@ -1703,7 +1715,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("LOADED")
 
     def dispatch_on_changed(self, receiver = None, item = None):
-        if not self.allow_dispatch_on_change:
+        if self.project is None or not self.allow_dispatch_on_change:
             return
 
         if receiver is not None:
@@ -1720,12 +1732,18 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.outliner.on_changed(self.project)
 
     def dispatch_on_selected(self, sender, selected):
+        if self.project is None:
+            return
+
         self.elan_status.set_selection(selected)
         for o in self.i_project_notify_reciever:
                 o.on_selected(sender, selected)
 
     def dispatch_on_timestep_update(self, time):
         # self.timeline.timeline.on_timestep_update(time)
+        if self.project is None:
+            return
+
         frame = self.player.get_frame_pos_by_time(time)
         self.onTimeStep.emit(time)
         QCoreApplication.removePostedEvents(self.frame_update_worker)
@@ -1797,6 +1815,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def dispatch_on_closed(self):
         self.autosave_timer.stop()
+        self.set_ui_enabled(False)
 
         for o in self.i_project_notify_reciever:
             o.on_closed()

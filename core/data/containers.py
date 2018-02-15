@@ -81,7 +81,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         self.inhibit_dispatch = False
         self.selected = []
 
-
     def highlight_types(self, types):
 
         for s in self.segmentation:
@@ -399,6 +398,12 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
             if isinstance(a, IAnalysisJobAnalysis):
                 result.append(a)
         return result
+
+    def has_analysis(self, class_name):
+        for a in self.analysis:
+            if a.analysis_job_class == class_name:
+                return True
+        return False
     #endregion
 
     # Getters for easier changes later in the project

@@ -437,7 +437,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_bar.raise_()
 
     def on_loaded(self, project):
-        self.setState(True)
+        self.setDisabled(False)
 
         self.clear()
         self.time_bar.close()
@@ -496,6 +496,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         if self.selected is not None:
             self.select(item=self.selected, dispatch=False)
+
+    def on_closed(self):
+        self.setDisabled(True)
 
     def select(self, control = None, item = None, dispatch = True):
         #TODO This deselectes all items in multiple selection except the last one
@@ -664,11 +667,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.selector_context.new_segmentation.connect(self.create_segmentation)
             self.selector_context.new_segment.connect(self.create_segment)
             self.selector_context.new_layer.connect(self.create_layer)
-
-    def setState(self, state):
-        for c in self.children():
-            if isinstance(c, QWidget):
-                c.setEnabled(state)
 
     # CONTEXT MENU BINDINGS
     def new_segment(self):

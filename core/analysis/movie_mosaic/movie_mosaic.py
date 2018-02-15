@@ -2,7 +2,7 @@ from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 from core.data.containers import *
 from core.analysis.colorimetry.hilbert import *
 from core.analysis.colorimetry.computation import *
-from core.gui.ewidgetbase import EGraphicsView, GraphicsViewDockWidget
+from core.gui.ewidgetbase import EGraphicsView #, GraphicsViewDockWidget
 
 import numpy as np
 from typing import List

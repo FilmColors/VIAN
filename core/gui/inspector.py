@@ -130,15 +130,22 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         for w in widgets:
             self.add_attribute_widget(w)
 
-        if self.item is not None and isinstance(self.item, IHasVocabulary):
-            self.widget_vocabulary_section.show()
-        else:
-            self.widget_vocabulary_section.hide()
+        # TODO VOcabularies should be removed completely from the Inspector
+        # if self.item is not None and isinstance(self.item, IHasVocabulary):
+        #     self.widget_vocabulary_section.show()
+        # else:
+        #     self.widget_vocabulary_section.hide()
+
+        self.widget_vocabulary_section.hide()
 
         self.allow_change = True
 
     def on_loaded(self, project):
+        self.setDisabled(False)
         self.cleanup()
+
+    def on_closed(self):
+        self.setDisabled(True)
 
     def cleanup(self):
         for w in self.current_att_widgets:
@@ -341,7 +348,6 @@ class AttributesVocabulary(QWidget):
         self.voc_entry.help_url = self.textEdit_HelpURL.text()
 
 #textEdit_AnnotationBody
-
 class AttributesSegment(QWidget):
     def __init__(self, parent, descriptor):
         super(AttributesSegment, self).__init__(parent)
