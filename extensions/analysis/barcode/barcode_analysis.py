@@ -28,7 +28,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
         super(BarcodeAnalysisJob, self).__init__("Barcode", [SEGMENTATION], author="Gaudenz Halter", version="1.0.0", multiple_result=True)
 
-    def prepare(self, project: ElanExtensionProject, targets: List[Segmentation], parameters, fps):
+    def prepare(self, project: VIANProject, targets: List[Segmentation], parameters, fps):
         """
         This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
         and gather all data we need.
@@ -114,7 +114,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         sign_progress(1.0)
         return analysis
 
-    def modify_project(self, project: ElanExtensionProject, result: IAnalysisJobAnalysis):
+    def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis):
         """
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.

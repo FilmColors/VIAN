@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import *
 from collections import namedtuple
 
 from core.data.computation import *
-from core.data.containers import Screenshot, ElanExtensionProject
+from core.data.containers import Screenshot, VIANProject
 from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter

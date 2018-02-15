@@ -238,10 +238,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.setWindowTitle("Classification Window")
         self.all_boxes = []
 
-        self.stick_to_type = False
-        self.stick_type = None
-        self.lbl_stick_type = QLabel("Updating on Selection of any Type",self)
-
         self.main_segmentation_only = True
 
         self.tabs_list = []
@@ -284,10 +280,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         self.tabs = QTabWidget(self)
 
-        # self.central.layout().addWidget(self.experiment_selection)
         self.central.layout().addWidget(self.segment_selection)
         self.central.layout().addWidget(self.tabs)
-        # self.central.layout().addWidget(self.lbl_stick_type)
         self.central.layout().addWidget(self.lower_w)
 
 
@@ -332,7 +326,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         # self.setLayout(QHBoxLayout(self))
         self.setWidget(self.stack)
         self.recreate_widget()
-        self.set_stick_to_type(False)
+        # self.set_stick_to_type(False)
 
     def on_changed(self, project, item):
         if item is not None:
@@ -347,11 +341,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
     def on_selected(self, sender, selected):
         if len(selected) > 0:
-            if self.stick_to_type:
-                if selected[0].get_type() == self.stick_type:
-                    self.update_widget()
-            else:
-                self.update_widget()
+            self.update_widget()
 
     def on_start_classification(self):
         self.recreate_widget()
@@ -366,20 +356,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
     def on_order_changed(self):
         self.order_method = self.cb_ordering.currentIndex()
-
-    def set_stick_to_type(self, enabled, type = None):
-        if enabled:
-            self.segment_selection.show()
-            self.stick_to_type = True
-            self.stick_type = type
-            self.lbl_stick_type.setText("Only change when " + get_type_as_string(type) + " are selected.")
-            self.lbl_stick_type.setStyleSheet("QLabel{color: Green;}")
-        else:
-            self.segment_selection.hide()
-            self.stick_type = False
-            self.stick_type = None
-            self.lbl_stick_type.setStyleSheet("QLabel{color: White;}")
-            self.lbl_stick_type.setText("Updating on Selection of any Type.")
 
     def update_container_order(self):
         to_classify = []

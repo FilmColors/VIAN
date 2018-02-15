@@ -55,7 +55,7 @@ class ELANProjectImporter():
 
 
         project_path = directory + filename
-        project = ElanExtensionProject(self.main_window, project_path, filename)
+        project = VIANProject(self.main_window, project_path, filename)
         project.movie_descriptor.movie_path = movie_path
 
         for i in segmentations:
@@ -204,7 +204,7 @@ class ScreenshotImporter(IConcurrentJob):
 
 
 class FilmColorsPipelineImporter():
-    def import_pipeline(self, path, project: ElanExtensionProject):
+    def import_pipeline(self, path, project: VIANProject):
 
         try:
             with open(path, "rb") as file:
@@ -239,7 +239,7 @@ class FilmColorsPipelineImporter():
 
 
 class FileMakerVocImporter():
-    def import_filemaker(self, path, project: ElanExtensionProject):
+    def import_filemaker(self, path, project: VIANProject):
         with open(path, "r") as file:
             film_id = project.movie_descriptor.movie_id
             reader = csv.reader(file, delimiter=';')
@@ -281,7 +281,7 @@ class FileMakerVocImporter():
         return header_words
 
 
-    def apply_vocabulary(self, table, project: ElanExtensionProject, print_failed = False):
+    def apply_vocabulary(self, table, project: VIANProject, print_failed = False):
         if table is None:
             return
 
@@ -343,7 +343,7 @@ class VocabularyCSVImporter(CSVImporter):
     def __init__(self):
         super(VocabularyCSVImporter, self).__init__()
 
-    def import_voc(self, path, project: ElanExtensionProject, field_category, field_name, field_parent, field_comment = "", field_help = ""):
+    def import_voc(self, path, project: VIANProject, field_category, field_name, field_parent, field_comment ="", field_help =""):
         project.inhibit_dispatch = True
 
         with open(path, 'r') as csvfile:
@@ -417,6 +417,23 @@ class VocabularyCSVImporter(CSVImporter):
 
         project.inhibit_dispatch = False
         project.dispatch_changed()
+
+
+class ExperimentImporter():
+    def import_experiment(self, path, project:VIANProject):
+        with open(path, "r") as f:
+            data = json.load(f)
+
+        base_vocs_ser = data['base_vocs']
+        experiment_ser = data['experiment']
+
+        base_vocs = []
+        for s in base_vocs_ser:
+            base_vocs.append(Vocabulary("New").deserialize(s, None))
+
+
+
+
 # OLD CODE
 # def import_elan_segmentation(path, name, id_identifier, prevent_overlapping = False): #, additional_identifiers):
 #     """

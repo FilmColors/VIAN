@@ -358,7 +358,7 @@ class AnnotationContextMenu(ContextMenu):
 
 
 class ScreenshotContextMenu(ContextMenu):
-    def __init__(self, parent, pos, screenshots, project: ElanExtensionProject):
+    def __init__(self, parent, pos, screenshots, project: VIANProject):
         super(ScreenshotContextMenu, self).__init__(parent, pos)
         self.screenshots = screenshots
         self.project = project

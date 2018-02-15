@@ -54,7 +54,7 @@ class FilmColorsPipelineAnalysis(IAnalysisJob):
                                                   version="0.0.1",
                                                   multiple_result=False)
 
-    def prepare(self, project: ElanExtensionProject, targets: List[ITimeRange], parameters, fps):
+    def prepare(self, project: VIANProject, targets: List[ITimeRange], parameters, fps):
         path = project.movie_descriptor.movie_path
         resolution = parameters['resolution']
         color_space = cv2.COLOR_BGR2Lab
@@ -141,7 +141,7 @@ class FilmColorsPipelineAnalysis(IAnalysisJob):
 
     #endregion
 
-    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:ElanExtensionProject, main_window: QMainWindow):
+    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:VIANProject, main_window: QMainWindow):
         data = analysis.data
 
         cs_plots = ColorSpaceVis(None, data)

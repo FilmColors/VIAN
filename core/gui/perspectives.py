@@ -25,7 +25,6 @@ class PerspectiveManager(EDockWidget):
         self.main_window.switch_perspective(self.comboBox_Perspective.currentText())
 
 
-
 class Perspective(Enum):
         VideoPlayer = 1
         Segmentation = 2
@@ -33,7 +32,9 @@ class Perspective(Enum):
         ScreenshotsManager = 4
         Analyses = 5
         Results = 6
-        Categorize = 7
+        Classification = 7
+        ExperimentSetup = 8
+
 
 
 

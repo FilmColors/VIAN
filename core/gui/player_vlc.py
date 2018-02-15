@@ -14,30 +14,6 @@ from core.vlc import vlc
 import os
 
 
-#TODO REMOVE
-class MacPlayerContainer(QtWidgets.QMainWindow):
-    def __init__(self, parent, player):
-        super(MacPlayerContainer, self).__init__()
-        self.player = player
-        self.main_window = parent
-        self.layout = QtWidgets.QHBoxLayout()
-        self.layout.addWidget(self.player.videoframe)
-        self.player.videoframe.setParent(self)
-        self.setLayout(self.layout)
-        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)
-        self.setAttribute(Qt.WA_AlwaysStackOnTop, True)
-        self.show()
-
-    def synchronize(self):
-        target = self.main_window.player_placeholder
-        location = target.mapToGlobal(QtCore.QPoint(0, 0))
-        self.move(location)
-        self.resize(target.size())
-        self.player.videoframe.resize(target.size())
-
-
 class PlayerDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
@@ -584,5 +560,30 @@ class Player_VLC(VideoPlayer):
     def on_selected(self,sender, selected):
         pass
 
+
+#region -- OLD Code --
+# #TODO REMOVE
+# class MacPlayerContainer(QtWidgets.QMainWindow):
+#     def __init__(self, parent, player):
+#         super(MacPlayerContainer, self).__init__()
+#         self.player = player
+#         self.main_window = parent
+#         self.layout = QtWidgets.QHBoxLayout()
+#         self.layout.addWidget(self.player.videoframe)
+#         self.player.videoframe.setParent(self)
+#         self.setLayout(self.layout)
+#         self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+#
+#         self.setAttribute(Qt.WA_TransparentForMouseEvents)
+#         self.setAttribute(Qt.WA_AlwaysStackOnTop, True)
+#         self.show()
+#
+#     def synchronize(self):
+#         target = self.main_window.player_placeholder
+#         location = target.mapToGlobal(QtCore.QPoint(0, 0))
+#         self.move(location)
+#         self.resize(target.size())
+#         self.player.videoframe.resize(target.size())
+#endregion
 
 

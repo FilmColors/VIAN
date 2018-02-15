@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1065</width>
-    <height>860</height>
+    <width>1167</width>
+    <height>940</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1065</width>
+     <width>1167</width>
      <height>21</height>
     </rect>
    </property>
@@ -123,6 +123,7 @@
      </property>
      <addaction name="actionPerspectivesToggle"/>
      <addaction name="separator"/>
+     <addaction name="actionExperimentSetupPersp"/>
      <addaction name="actionPlayerPersp"/>
      <addaction name="actionSegmentationPersp"/>
      <addaction name="actionAnnotationPersp"/>
@@ -649,6 +650,14 @@
   <action name="actionCreateExperiment">
    <property name="text">
     <string>Create Experiment</string>
+   </property>
+  </action>
+  <action name="actionExperimentSetupPersp">
+   <property name="text">
+    <string>Experiment Setup</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+0</string>
    </property>
   </action>
  </widget>

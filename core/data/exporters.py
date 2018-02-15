@@ -3,6 +3,7 @@ import numpy as np
 from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
+from core.data.containers import *
 import os
 import shutil
 
@@ -125,6 +126,27 @@ class JsonExporter():
     def segment2json(self, segment):
         pass
         # result = ""
+
+
+class ExperimentExporter():
+    def export(self, path, experiment: Experiment):
+        base_vocs = []
+        # Collecting all used Base Vocabularies
+        for v in experiment.get_vocabulary_list():
+            base = v.base_vocabulary
+            if base not in base_vocs:
+                base_vocs.append(base)
+
+        serialization_exp = experiment.serialize()
+        serialization_vocs = [v.serialize() for v in base_vocs]
+
+        result = dict(
+            experiment=serialization_exp,
+            base_vocs = serialization_vocs
+        )
+
+        with open(path, "w") as f:
+            json.dump(result, f)
 
 
 def build_file_name(naming, screenshot, movie_descriptor):

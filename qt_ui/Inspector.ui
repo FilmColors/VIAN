@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>479</width>
-    <height>664</height>
+    <width>477</width>
+    <height>662</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -107,8 +107,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>457</width>
-         <height>532</height>
+         <width>459</width>
+         <height>550</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -148,13 +148,6 @@
          </spacer>
         </item>
         <item>
-         <widget class="Line" name="line_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QWidget" name="widget_vocabulary_section" native="true">
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <property name="leftMargin">
@@ -166,6 +159,13 @@
            <property name="rightMargin">
             <number>0</number>
            </property>
+           <item>
+            <widget class="Line" name="line_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QLabel" name="label_3">
              <property name="text">

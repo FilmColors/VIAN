@@ -4,7 +4,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QCheckBox, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
 
-from core.data.containers import ElanExtensionProject
+from core.data.containers import VIANProject
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
 
@@ -30,7 +30,7 @@ class NewProjectDialog(EDialogWidget):
                 path += mp[i] + "/"
             self.project_dir = path
 
-        self.project = ElanExtensionProject(parent, path = "", name="")
+        self.project = VIANProject(parent, path ="", name="")
 
         self.path_set_from_dialog = False
 

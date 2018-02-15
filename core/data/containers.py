@@ -35,7 +35,7 @@ from PyQt5.QtCore import QPoint, QRect, QSize
 # NODE_SCRIPT = 9
 
 
-class ElanExtensionProject(IHasName, IHasVocabulary):
+class VIANProject(IHasName, IHasVocabulary):
     def __init__(self, main_window, path = "", name = "", folder=""):
         IHasVocabulary.__init__(self)
         self.undo_manager = UndoRedoManager()
@@ -866,7 +866,6 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
         return model
 
     def get_word_object_from_name(self, name, experiment = None):
-
         if experiment is not None:
             vocabularies = experiment.get_vocabulary_list()
         else:
@@ -877,17 +876,21 @@ class ElanExtensionProject(IHasName, IHasVocabulary):
                 if w.name == name:
                     return w
 
-    def import_vocabulary(self, path, add_to_global = True):
+    def import_vocabulary(self, path, add_to_global = True, serialization = None, return_id_table = False):
         """
         Importing a Vocabulary from json
         :param path: Path to the Vocabulary Json
         :param add_to_global: if True, the Vocabulary is added to the Projects Vocabulary List
         :return: An imported Vocabulary Object
         """
-        new_voc = Vocabulary("New").import_vocabulary(path, self)
+        new_voc, id_table = Vocabulary("New").import_vocabulary(path, self, serialization)
         if add_to_global:
             self.add_vocabulary(new_voc)
-        return new_voc
+
+        if return_id_table:
+            return new_voc, id_table
+        else:
+            return new_voc
 
     #endregion
 
@@ -2985,9 +2988,10 @@ class Vocabulary(IProjectContainer, IHasName):
         with open(path, "w") as f:
             json.dump(data, f)
 
-    def import_vocabulary(self, path, project):
-        with open(path, "r") as f:
-            serialization = json.load(f)
+    def import_vocabulary(self, path = None, project = None, serialization = None):
+        if serialization is None:
+            with open(path, "r") as f:
+                serialization = json.load(f)
 
         id_replacing_table = []
 
@@ -3033,7 +3037,7 @@ class Vocabulary(IProjectContainer, IHasName):
             else:
                 self.create_word(w['name'], parent, unique_id=new_id)
 
-        return self
+        return self, id_replacing_table
 
     def set_experiment(self, experiment, base_vocabulary):
         self.experiment = experiment
@@ -3243,7 +3247,6 @@ class ClassificationObjects(IProjectContainer):
     def remove_vocabulary(self, voc):
         self.classification_vocabularies.remove(voc)
         self.project.remove_vocabulary(voc)
-
 
     def get_base_vocabularies(self):
         """

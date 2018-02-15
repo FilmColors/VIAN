@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from core.data.containers import ElanExtensionProject, SEGMENT
+from core.data.containers import VIANProject, SEGMENT
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QBrush,QPainter
@@ -10,7 +10,7 @@ from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QRect
 from core.data.computation import *
 
 class FeaturePlot(QGraphicsView):
-    def __init__(self, parent, project: ElanExtensionProject, title = ""):
+    def __init__(self, parent, project: VIANProject, title =""):
         super(FeaturePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
 

@@ -70,6 +70,7 @@ __status__ = "Development, (BETA)"
 
 PROFILE = False
 
+
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
     onUpdateFrame = pyqtSignal(int, int)
@@ -182,7 +183,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.USE_ELAN:
             self.server.start()
 
-        self.project = ElanExtensionProject(self, "","Default Project")
+        self.project = VIANProject(self, "", "Default Project")
 
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread(self)
@@ -289,13 +290,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
         self.actionExperiment_Editor.triggered.connect(self.create_experiment_editor)
 
+        self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup.name))
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
         self.actionScreenshotsPersp.triggered.connect(partial(self.switch_perspective, Perspective.ScreenshotsManager.name))
         self.actionNodeEditorPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses.name))
         self.actionSegmentationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Segmentation.name))
         self.actionResultsPersp.triggered.connect(partial(self.switch_perspective, Perspective.Results.name))
-        self.actionVocabularyPersp.triggered.connect(partial(self.switch_perspective, Perspective.Categorize.name))
+        self.actionVocabularyPersp.triggered.connect(partial(self.switch_perspective, Perspective.Classification.name))
 
         self.actionHistory.triggered.connect(self.create_history_view)
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
@@ -870,7 +872,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.stop()
         self.abortAllConcurrentThreads.emit()
         self.project.cleanup()
-        self.project = ElanExtensionProject(self, name="No Project")
+        self.project = VIANProject(self, name="No Project")
 
         self.player_controls.setState(False)
         self.project = None
@@ -882,7 +884,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message("Not Loaded, Path was Empty")
             return
 
-        new = ElanExtensionProject(self)
+        new = VIANProject(self)
         print("Loading Project Path", path)
         new.inhibit_dispatch = True
         new.load_project(self.settings ,path)
@@ -1219,99 +1221,42 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.centralWidget().setParent(None)
         self.statusBar().show()
-        self.vocabulary_matrix.set_stick_to_type(False)
 
         self.default_dock_locations()
+
+        central = QWidget(self)
+        central.setFixedWidth(0)
+
         if self.is_darwin:
             self.screenshot_toolbar.show()
             self.annotation_toolbar.show()
 
         if perspective == Perspective.VideoPlayer.name:
             self.current_perspective = Perspective.VideoPlayer
-            # central = self.player
-
-            central = QWidget(self)
-            central.setFixedWidth(0)
-
-            self.annotation_toolbar.hide()
-            self.screenshot_toolbar.hide()
-
-            self.create_widget_video_player()
-            self.drawing_overlay.hide()
-            self.outliner.hide()
-            self.timeline.hide()
-            self.player_controls.hide()
-            self.perspective_manager.hide()
-            self.inspector.hide()
-            self.history_view.hide()
-            self.concurrent_task_viewer.hide()
-            self.node_editor_dock.hide()
-            self.node_editor_results.hide()
-            self.screenshots_manager_dock.hide()
-            self.vocabulary_manager.hide()
-            self.vocabulary_matrix.hide()
-            self.analysis_results_widget_dock.hide()
+            self.hide_all_widgets()
+            self.player_dock_widget.show()
 
         elif perspective == Perspective.Segmentation.name:
             self.current_perspective = Perspective.Segmentation
-            # central = self.player
-
-            central = QWidget(self)
-            central.setFixedWidth(0)
-
-            if self.annotation_toolbar.isVisible():
-                self.annotation_toolbar.hide()
-            if self.screenshot_toolbar.isVisible():
-                self.screenshot_toolbar.hide()
-
-            self.create_widget_video_player()
-            self.drawing_overlay.hide()
-            self.outliner.hide()
-            self.perspective_manager.hide()
-            self.inspector.hide()
-            self.history_view.hide()
-            self.concurrent_task_viewer.hide()
-            self.node_editor_dock.hide()
-            self.node_editor_results.hide()
-            self.vocabulary_manager.hide()
-            self.vocabulary_matrix.hide()
-            self.analysis_results_widget_dock.hide()
+            self.hide_all_widgets()
 
             self.timeline.show()
             self.player_controls.show()
             self.screenshots_manager_dock.show()
+            self.player_dock_widget.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
         elif perspective == Perspective.Annotation.name:
             self.current_perspective = Perspective.Annotation
-            # central = self.player
-            central = QWidget(self)
-            central.setFixedWidth(0)
 
-            self.create_widget_video_player()
-
-            if not self.annotation_toolbar.isVisible():
-                self.annotation_toolbar.show()
-            if self.screenshot_toolbar.isVisible():
-                self.screenshot_toolbar.hide()
-
-            self.drawing_overlay.show()
-            self.history_view.hide()
-            self.perspective_manager.hide()
-            self.player_controls.hide()
-            self.screenshots_manager_dock.set_manager(self.screenshots_manager)
-            self.screenshots_manager_dock.hide()
-            self.node_editor_dock.hide()
-            self.vocabulary_manager.hide()
-            self.node_editor_results.hide()
-            self.vocabulary_matrix.hide()
-            self.analysis_results_widget_dock.hide()
+            self.hide_all_widgets()
 
             self.outliner.show()
             self.timeline.show()
             self.inspector.show()
+            self.player_dock_widget.show()
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
@@ -1322,27 +1267,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.current_perspective = Perspective.ScreenshotsManager
             self.screenshots_manager.update_manager()
 
-            # central = self.screenshots_manager
-            # central.center_images()
-            central = QWidget(self)
-            central.setFixedWidth(0)
-
-            if self.annotation_toolbar.isVisible():
-                self.annotation_toolbar.hide()
-            if not self.screenshot_toolbar.isVisible():
-                self.screenshot_toolbar.show()
-
-            self.player_dock_widget.hide()
-            self.drawing_overlay.hide()
-            self.timeline.hide()
-            self.player_controls.hide()
-            self.history_view.hide()
-            self.screenshots_manager.center_images()
-            self.node_editor_dock.hide()
-            self.node_editor_results.hide()
-            self.vocabulary_manager.hide()
-            self.vocabulary_matrix.hide()
-            self.analysis_results_widget_dock.hide()
+            self.hide_all_widgets()
 
             self.screenshots_manager_dock.show()
             self.inspector.show()
@@ -1355,27 +1280,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif perspective == Perspective.Analyses.name:
             self.current_perspective = Perspective.Analyses
 
-            # if self.is_darwin:
-            #     self.player_container.hide()
-
-            # central = self.analyses_widget
-            central = QWidget(self)
-            central.setFixedWidth(0)
-
-            if self.annotation_toolbar.isVisible():
-                self.annotation_toolbar.hide()
-            if self.screenshot_toolbar.isVisible():
-                self.screenshot_toolbar.hide()
-
-            self.player_dock_widget.hide()
-            self.drawing_overlay.hide()
-            self.timeline.hide()
-            self.player_controls.hide()
-            self.history_view.hide()
-            self.screenshots_manager_dock.hide()
-            self.vocabulary_manager.hide()
-            self.vocabulary_matrix.hide()
-            self.analysis_results_widget_dock.hide()
+            self.hide_all_widgets()
 
             self.inspector.show()
             self.outliner.show()
@@ -1389,25 +1294,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif perspective == Perspective.Results.name:
             self.current_perspective = Perspective.Results
 
-            central = QWidget(self)
-            central.setFixedWidth(0)
-
-            if self.annotation_toolbar.isVisible():
-                self.annotation_toolbar.hide()
-            if self.screenshot_toolbar.isVisible():
-                self.screenshot_toolbar.hide()
-
-            self.player_dock_widget.hide()
-            self.drawing_overlay.hide()
-            self.timeline.hide()
-            self.player_controls.hide()
-            self.history_view.hide()
-            self.node_editor_dock.hide()
-            self.screenshots_manager_dock.hide()
-            self.node_editor_results.hide()
-            self.vocabulary_manager.hide()
-            self.vocabulary_matrix.hide()
-            self.analysis_results_widget_dock.hide()
+            self.hide_all_widgets()
 
             self.inspector.show()
             self.outliner.show()
@@ -1418,43 +1305,38 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Horizontal)
             self.splitDockWidget(self.outliner, self.inspector, Qt.Vertical)
 
-        elif perspective == Perspective.Categorize.name:
-            self.current_perspective = Perspective.Categorize
-            # central = self.player
+        elif perspective == Perspective.Classification.name:
+            self.current_perspective = Perspective.Classification
 
-            central = QWidget(self)
-            central.setFixedWidth(0)
-
-            if self.annotation_toolbar.isVisible():
-                self.annotation_toolbar.hide()
-            if self.screenshot_toolbar.isVisible():
-                self.screenshot_toolbar.hide()
-
-            self.create_widget_video_player()
-            self.drawing_overlay.hide()
-            self.outliner.hide()
-
-            self.player_controls.hide()
-            self.perspective_manager.hide()
-            self.inspector.hide()
-            self.history_view.hide()
-            self.concurrent_task_viewer.hide()
-            self.node_editor_dock.hide()
-            self.node_editor_results.hide()
-            self.vocabulary_manager.hide()
-            self.analysis_results_widget_dock.hide()
+            self.hide_all_widgets()
 
             self.timeline.show()
             self.screenshots_manager_dock.show()
             self.vocabulary_matrix.show()
-            self.vocabulary_matrix.set_stick_to_type(True, SEGMENT)
+
             self.addDockWidget(Qt.LeftDockWidgetArea, self.screenshots_manager_dock, Qt.Vertical)
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.addDockWidget(Qt.RightDockWidgetArea, self.timeline, Qt.Vertical)
 
             self.statusBar().hide()
-            # self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
-            # self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+
+        elif perspective == Perspective.ExperimentSetup.name:
+
+
+
+            self.hide_all_widgets()
+
+            self.outliner.show()
+            self.vocabulary_manager.show()
+            self.inspector.show()
+            self.experiment_editor_dock.show()
+
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Vertical)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_editor_dock)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+
+
 
         self.setCentralWidget(central)
         self.centralWidget().show()
@@ -1465,6 +1347,33 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.set_default_dock_sizes(self.current_perspective)
 
+    def hide_all_widgets(self):
+        if self.annotation_toolbar.isVisible():
+            self.annotation_toolbar.hide()
+        if self.screenshot_toolbar.isVisible():
+            self.screenshot_toolbar.hide()
+
+        self.create_widget_video_player()
+        self.drawing_overlay.hide()
+        self.outliner.hide()
+        self.perspective_manager.hide()
+        self.inspector.hide()
+        self.history_view.hide()
+        self.concurrent_task_viewer.hide()
+        self.node_editor_dock.hide()
+        self.node_editor_results.hide()
+        self.vocabulary_manager.hide()
+        self.vocabulary_matrix.hide()
+        self.analysis_results_widget_dock.hide()
+        self.timeline.hide()
+        self.player_controls.hide()
+        self.screenshots_manager_dock.hide()
+        self.player_dock_widget.hide()
+        self.experiment_editor_dock.hide()
+
+
+
+
     def set_default_dock_sizes(self, perspective):
         if perspective == Perspective.Segmentation:
             self.timeline.resize_dock(h=300)
@@ -1473,7 +1382,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif perspective == Perspective.Annotation:
             self.timeline.resize_dock(h=300)
 
-        elif perspective == Perspective.Categorize:
+        elif perspective == Perspective.Classification:
             self.timeline.resize_dock(h=100)
             self.player_dock_widget.resize_dock(w=800, h=400)
             self.screenshots_manager_dock.resize_dock(h=self.height() / 2)

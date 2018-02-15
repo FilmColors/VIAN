@@ -24,7 +24,7 @@ class ColometricsAnalysis(IAnalysisJob):
                                                   version="0.0.1",
                                                   multiple_result=True)
 
-    def prepare(self, project: ElanExtensionProject, targets: List[ITimeRange], parameters, fps):
+    def prepare(self, project: VIANProject, targets: List[ITimeRange], parameters, fps):
         path = project.movie_descriptor.movie_path
         resolution = parameters['resolution']
         color_space = cv2.COLOR_BGR2Lab
@@ -184,7 +184,7 @@ class ColometricsAnalysis(IAnalysisJob):
               np.amax(analysis.data['avg_colors'][:, 2]))
         return win
 
-    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:ElanExtensionProject, main_window: QMainWindow):
+    def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:VIANProject, main_window: QMainWindow):
 
         p_graphs = self.create_graph_plot(analysis)
 
