@@ -21,10 +21,11 @@ class GAPlugin(object):
         self.main_window = main_window
         self.windowtype = windowtype
 
-    def get_window(self):
+    def get_window(self, parent):
         """
         This function should be overwritten shows your Plugin-Window. This can either be an EDockWidget or a WMainWindow. 
         (Specified accordingly to the GAplugin.windowtype)
+        :param parent: 
         
         """
         wnd = QMainWindow(self.main_window)

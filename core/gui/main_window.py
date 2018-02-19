@@ -101,7 +101,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # self.setAttribute(Qt.WA_MacNormalSize)
 
-        self.menuWindows.addMenu(self.extension_list.get_plugin_menu(self.menuWindows))
+        self.plugin_menu = self.extension_list.get_plugin_menu(self.menuWindows)
+        self.menuBar().addMenu(self.plugin_menu)
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
 
         self.settings = UserSettings()
@@ -1371,9 +1372,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget.hide()
         self.experiment_editor_dock.hide()
 
-
-
-
     def set_default_dock_sizes(self, perspective):
         if perspective == Perspective.Segmentation:
             self.timeline.resize_dock(h=300)
@@ -1568,6 +1566,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionBackup.setDisabled(not state)
         self.actionClose_Project.setDisabled(not state)
         self.menuExport.setDisabled(not state)
+        self.plugin_menu.setDisabled(False)
+        self.menuWindows.setDisabled(False)
 
     def get_version_as_string(self):
 

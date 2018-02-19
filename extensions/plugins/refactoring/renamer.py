@@ -13,7 +13,7 @@ class RenamerExtension(GAPlugin):
         self.plugin_name = "File Renamer"
         self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
 
-    def get_window(self):
+    def get_window(self, parent):
         wnd = RenamerWindow(self.main_window)
         wnd.show()
 

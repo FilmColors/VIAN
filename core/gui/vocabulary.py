@@ -284,7 +284,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.central.layout().addWidget(self.tabs)
         self.central.layout().addWidget(self.lower_w)
 
-
         self.start_widget = QWidget(self)
         self.start_widget.setLayout(QVBoxLayout(self.start_widget))
 
@@ -343,6 +342,11 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         if len(selected) > 0:
             self.update_widget()
 
+    def on_closed(self):
+        self.current_container = None
+        self.current_experiment = None
+        self.recreate_widget()
+
     def on_start_classification(self):
         self.recreate_widget()
         self.stack.setCurrentIndex(0)
@@ -359,6 +363,9 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
     def update_container_order(self):
         to_classify = []
+        if self.project() is None:
+            return
+
         if self.current_experiment is not None:
             c_types = self.current_experiment.classification_sources
             for c in self.project().get_all_containers():
@@ -375,18 +382,23 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
             to_classify = excluded
 
-        if self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_SEGMENT:
-            ordered = sorted(to_classify, key=lambda x:x.get_start())
-        elif self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_TYPE:
-            ordered = sorted(to_classify, key=lambda x: x.get_type())
-        else:
-            shuffle(to_classify)
-            ordered = to_classify
+        if len(to_classify) > 0:
+            if self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_SEGMENT:
+                ordered = sorted(to_classify, key=lambda x:x.get_start())
+            elif self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_TYPE:
+                ordered = sorted(to_classify, key=lambda x: x.get_type())
+            else:
+                shuffle(to_classify)
+                ordered = to_classify
 
-        self.ordered_containers = ordered
+            self.ordered_containers = ordered
 
     def update_widget(self):
-        if len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
+        if self.project() is None:
+            for itm in self.all_boxes:
+                itm[0].setEnabled(False)
+
+        elif len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
             for itm in self.all_boxes:
                 itm[0].setEnabled(True)
                 itm[0].setChecked(self.project().selected[0].has_word(itm[1]))
@@ -412,6 +424,9 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.tabs.clear()
         self.voc_categories = []
         self.tabs_list = []
+
+        if self.project() is None:
+            return
 
         self.update_container_order()
 

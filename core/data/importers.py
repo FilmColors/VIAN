@@ -200,7 +200,8 @@ class ScreenshotImporter(IConcurrentJob):
         super(ScreenshotImporter, self).__init__(args=args)
 
     def run_concurrent(self, args, sign_progress):
-        pass
+        paths = args[0]
+        # match = np.argmin(np.sum((segment - frame[..., np.newaxis]) ** 2, axis=[0, 1, 2]))
 
 
 class FilmColorsPipelineImporter():

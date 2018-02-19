@@ -122,7 +122,7 @@ class ExtensionList:
 
         for p in self.plugins:
             action = result.addAction(p.plugin_name)
-            action.triggered.connect(p.get_window)
+            action.triggered.connect(partial(p.get_window, self.main_window))
         print("## Done ##")
         return result
 

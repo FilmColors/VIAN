@@ -1105,7 +1105,7 @@ class FiwiParserExtension(GAPlugin):
         self.plugin_name = "FIWI Parser"
         self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
 
-    def get_window(self):
+    def get_window(self, parent):
         wnd = FIWIParserWindow(self.main_window)
         wnd.show()
 
