@@ -204,20 +204,21 @@ class Player_VLC(VideoPlayer):
         self.setLayout(self.vboxlayout)
 
         if sys.platform == "darwin":  # for MacOS
-            self.videoframe = QtWidgets.QMacCocoaViewContainer(0, self)
+            self.videoframe = QtWidgets.QMacCocoaViewContainer(0, None)
         else:
             self.videoframe = QtWidgets.QFrame()
+
 
         self.videoframe.setParent(self)
         self.palette = self.videoframe.palette()
         self.palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
         self.videoframe.setPalette(self.palette)
         self.videoframe.setAutoFillBackground(True)
-        self.videoframe.setEnabled(False)
+        # self.videoframe.setEnabled(True)
 
         self.vboxlayout.addWidget(self.videoframe)
 
-        self.init_vlc()
+        # self.init_vlc()
 
         self.pause_timer = QtCore.QTimer()
         self.pause_timer.setInterval(1000)
@@ -258,7 +259,6 @@ class Player_VLC(VideoPlayer):
         # this is platform specific!
         # you have to give the id of the QFrame (or similar object) to
         # vlc, different platforms have different functions for this
-
         if sys.platform.startswith('linux'):  # for Linux using the X Server
             self.media_player.set_xwindow(self.videoframe.winId())
         elif sys.platform == "win32":  # for Windows
@@ -268,11 +268,11 @@ class Player_VLC(VideoPlayer):
             # self.videoframe.setCocoaView(self.media_player.get_nsobject())
 
             self.videoframe.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-            self.videoframe.setAttribute(Qt.WA_NativeWindow, True)
+            # self.videoframe.setAttribute(Qt.WA_NativeWindow, True)
             # self.setAttribute(Qt.WA_DontCreateNativeAncestors, True)
 
 
-            self.setWindowFlags(Qt.ForeignWindow)
+            # self.setWindowFlags(Qt.ForeignWindow)
 
     def get_size(self):
         return self.media_player.video_get_size()

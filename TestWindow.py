@@ -5,8 +5,10 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
-from core.node_editor.node_editor_2 import NodeEditor
+import pyqtgraph as pg
 
+
+impo
 
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):

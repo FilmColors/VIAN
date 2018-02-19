@@ -1354,7 +1354,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.screenshot_toolbar.isVisible():
             self.screenshot_toolbar.hide()
 
-        self.create_widget_video_player()
+        # self.create_widget_video_player()
         self.drawing_overlay.hide()
         self.outliner.hide()
         self.perspective_manager.hide()

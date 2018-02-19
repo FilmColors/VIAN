@@ -201,6 +201,37 @@ class ScreenshotImporter(IConcurrentJob):
 
     def run_concurrent(self, args, sign_progress):
         paths = args[0]
+        movie_path = args[1]
+
+
+        imgs = []
+        for scr_p in paths:
+            imgs.append(cv2.imread(scr_p))
+
+        cap = cv2.VideoCapture(movie_path)
+        width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+        for img in imgs:
+            img = cv2.resize(img, (width, height), interpolation=cv2.INTER_CUBIC)
+
+        segm_length = 200
+        scr_positions = np.zeros(len(imgs), dtype=np.uint16)
+
+        ret = True
+        while(ret):
+            segm = np.zeros(shape=(height,width,3), dtype=np.float32)
+            for i in range(segm_length):
+                ret, frame = cap.read()
+
+            match = np.argmin(np.sum((segm - frame[..., np.newaxis]) ** 2, axis=[1, 2, 3]))
+            print(match)
+
+
+
+
+
+
         # match = np.argmin(np.sum((segment - frame[..., np.newaxis]) ** 2, axis=[0, 1, 2]))
 
 

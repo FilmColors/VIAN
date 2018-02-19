@@ -350,12 +350,27 @@ class ImagePlotTime(ImagePlot):
         self.x_end = 0
         self.lines = []
 
+        self.pixel_size_x = 1500
+        self.pixel_size_y = 800
+
         self.border = 10000
 
         self.labels = []
 
         super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
         self.font_size = 60
+
+    def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
+        self.pixel_size_x = pixel_size_x
+        self.pixel_size_y = pixel_size_y
+
+        self.x_scale = self.pixel_size_x / x_max
+        self.y_scale = self.pixel_size_y / y_max
+        self.base_line = y_max
+
+        self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
+        print("Scene Rect:", self.sceneRect())
+
 
     def add_image(self, x, y, img, convert=True):
         if convert:
@@ -366,8 +381,9 @@ class ImagePlotTime(ImagePlot):
                                          hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
         self.scene().addItem(itm)
 
-        itm.setPos(x * self.x_scale, (self.base_line * self.y_scale) - ((y * self.y_scale) * self.y_scale))
+        itm.setPos(x * self.x_scale, (self.base_line * self.y_scale) - (y * self.y_scale))
 
+        print(x * self.x_scale, (self.base_line * self.y_scale) - (y * self.y_scale))
         self.images.append(itm)
 
         if self.x_end < x * self.x_scale:
@@ -391,16 +407,16 @@ class ImagePlotTime(ImagePlot):
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
         rect = self.scene().addRect(-self.border, - self.border, self.x_end + (2 * self.border), self.base_line * self.y_scale + (4 * self.border), QColor(100,200,30,200))
-        for y in range(self.base_line * self.y_scale):
-            if y % (100 * self.y_scale) == 0:
+        for y in range(int(self.base_line)):
+            if y % 10 == 0:
                 lbl = self.scene().addText(str(((self.base_line - (y / self.y_scale)) / self.y_scale)).rjust(4), font)
                 lbl.setDefaultTextColor(QColor(200,200,200,200))
                 lbl.setPos(-100, y)
                 self.labels.append(lbl)
 
-        self.setSceneRect(rect.boundingRect())
-
-        self.fitInView(rect, Qt.KeepAspectRatio)
+        # self.setSceneRect(rect.boundingRect())
+        #
+        # self.fitInView(rect, Qt.KeepAspectRatio)
 
     def update_grid(self):
         self.lines = []

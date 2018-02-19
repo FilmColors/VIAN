@@ -1,4 +1,3 @@
-import networkx as nx
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -131,26 +130,23 @@ class ColorDTWidget(QWidget):
 
     def update_view(self, data):
 
-        indices = range(0, len(data['sat_glob']) * 1000, 1000)
+        indices = range(len(data['sat_glob']))
 
         self.plot(self.gl_view, np.array(indices), np.array(data['sat_glob']), data['img_glob'])
         self.plot(self.fg_view, np.array(indices), np.array(data['sat_fg']), data['img_fg'])
         self.plot(self.bg_view, np.array(indices), np.array(data['sat_bg']), data['img_bg'])
 
 
-    def plot(self,view, time, channel, imgs, is_liminance=True):
+    def plot(self,view, time, channel, imgs, is_liminance=True, y_max = None):
         view.clear_view()
-        view.x_scale = 0.02
-        view.y_scale = 1
-        # indices = np.arange(0, channel.shape[0], self.nth_frame)
-        # time = np.array(time)[indices]
-        # channel = np.array(channel)[indices]
-        # imgs = np.array(imgs)[indices]
-        # if is_liminance:
-        #     channel = np.multiply(np.divide(channel.astype(np.float32), 255), 100)
+        # view.x_scale = 1.0
+        # view.y_scale = 1.0
+
+        view.create_scene(len(imgs), 100, pixel_size_x=4000, pixel_size_y=1000)
+        print(np.amax(channel))
 
         for i, img in enumerate(imgs):
-            view.add_image(time[i], channel[i] * 100, img, convert=False)
+            view.add_image(time[i], channel[i], img, convert=False)
 
         view.update_grid()
         view.sort_images()

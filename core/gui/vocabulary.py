@@ -544,6 +544,9 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             # self.tabs.addTab(tab, voc.name)
 
     def on_experiment_changed(self):
+        if len(self.project().experiments) == 0:
+            return
+
         idx = self.cb_experiment.currentIndex()
         if len(self.project().experiments) > idx:
             self.current_experiment = self.project().experiments[idx]

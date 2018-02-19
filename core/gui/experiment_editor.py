@@ -190,7 +190,10 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.inhibit_ui_signals = True
         if len(selected) > 0:
             if selected[0].get_type() == EXPERIMENT:
+                self.set_enabled(True)
                 self.current_experiment = selected[0]
+            else:
+                self.set_enabled(False)
             self.update_ui()
         else:
             self.set_enabled(False)
