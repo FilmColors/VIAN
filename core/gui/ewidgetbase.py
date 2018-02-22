@@ -125,7 +125,7 @@ class EDialogWidget(QDialog):
 
 
 class EGraphicsView(QGraphicsView):
-    def __init__(self, parent, auto_frame = True, main_window = None):
+    def __init__(self, parent, auto_frame = True, main_window = None, has_context_menu=True):
         super(EGraphicsView, self).__init__(parent)
         self.gscene = QGraphicsScene()
         self.setScene(self.gscene)
@@ -134,6 +134,7 @@ class EGraphicsView(QGraphicsView):
         self.ctrl_is_pressed = False
         self.curr_scale = 1.0
         self.main_window = main_window
+        self.has_context_menu = has_context_menu
 
     def set_image(self, pixmap, clear = True):
         if clear:
@@ -149,13 +150,20 @@ class EGraphicsView(QGraphicsView):
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.RightButton:
-            self.create_context_menu(event.pos())
+            if self.has_context_menu:
+                self.create_context_menu(event.pos())
+        else:
+            super(EGraphicsView, self).mousePressEvent(event)
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
             self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
             self.ctrl_is_pressed = True
             event.ignore()
+
+        elif event.key() == Qt.Key_F:
+            self.setSceneRect(QRectF())
+            self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
         else:
             event.ignore()
 
@@ -183,15 +191,15 @@ class EGraphicsView(QGraphicsView):
             h_factor = 1.1
             l_factor = 0.9
 
-            viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
-            self.curr_scale = round(self.pixmap.pixmap().width() / (viewport_size.x()), 4)
+            # viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
+            # self.curr_scale = round(self.pixmap.pixmap().width() / (viewport_size.x()), 4)
 
             if event.angleDelta().y() > 0.0 and self.curr_scale < 10:
                 self.scale(h_factor, h_factor)
-                self.curr_scale *= h_factor
+                # self.curr_scale *= h_factor
 
             elif event.angleDelta().y() < 0.0 and self.curr_scale > 0.01:
-                self.curr_scale *= l_factor
+                # self.curr_scale *= l_factor
                 self.scale(l_factor, l_factor)
 
             cursor_pos = self.mapToScene(event.pos()) - old_pos
@@ -270,8 +278,6 @@ class EToolBar(QToolBar):
             qp.drawRect(self.rect())
 
         qp.end()
-
-
 
     def show_indicator(self, visibility):
         self.show_indicator_frame = visibility

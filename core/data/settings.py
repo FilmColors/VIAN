@@ -56,6 +56,7 @@ class UserSettings():
         self.DIR_USER = "user/"
         self.DIR_SCREENSHOTS = "shots/"
         self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
+        self.DIR_PLUGINS = self.DIR_PROJECT + "/plugins/"
         self.store_path = self.DIR_PROJECT + path
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
@@ -107,13 +108,14 @@ class UserSettings():
         self.DIR_USER = "user/"
         self.DIR_SCREENSHOTS = "shots/"
         self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
+        self.DIR_PLUGINS = self.DIR_PROJECT + "/plugins/"
         self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
         self.store_path = self.DIR_PROJECT + "settings.json"
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
 
 
-        for d in [self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_BACKUPS]:
+        for d in [self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS]:
             if not os.path.isdir(d):
                 os.mkdir(d)
                 print(d + "\t Directory created.")
@@ -126,7 +128,7 @@ class UserSettings():
         """
 
         integer = True
-        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_PROJECT, self.DIR_TEMPLATES]:
+        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_PLUGINS]:
             if not os.path.isdir(dir):
                 self.generate_dir_paths()
                 integer = False

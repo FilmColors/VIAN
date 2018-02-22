@@ -116,6 +116,9 @@ class VocabularyTreeView(QTreeView):
             super(VocabularyTreeView, self).mousePressEvent(QMouseEvent)
 
     def currentChanged(self, QModelIndex, QModelIndex_1):
+        if self.vocabulary_manager.main_window.project is None:
+            return
+
         super(VocabularyTreeView, self).currentChanged(QModelIndex, QModelIndex_1)
         if self.vocabulary_manager.vocabulary_model is not None:
             current_item = self.vocabulary_manager.vocabulary_model.itemFromIndex(self.currentIndex())

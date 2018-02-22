@@ -14,47 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLineEdit" name="lineEdit_Query"/>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btn_Search">
-        <property name="text">
-         <string>Search</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QListWidget" name="listWidget">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>300</width>
-          <height>0</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="central" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_2"/>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
+   <layout class="QVBoxLayout" name="verticalLayout"/>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -71,12 +31,30 @@
     </property>
     <addaction name="actionOpen_Database"/>
    </widget>
+   <widget class="QMenu" name="menuWindows">
+    <property name="title">
+     <string>Windows</string>
+    </property>
+    <addaction name="actionQuery_Window"/>
+    <addaction name="actionFilm_List"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuWindows"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_Database">
    <property name="text">
     <string>Open Database</string>
+   </property>
+  </action>
+  <action name="actionQuery_Window">
+   <property name="text">
+    <string>Query Window</string>
+   </property>
+  </action>
+  <action name="actionFilm_List">
+   <property name="text">
+    <string>Film List</string>
    </property>
   </action>
  </widget>

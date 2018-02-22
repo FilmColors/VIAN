@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QDockWidget, QMainWindow
-
+import json
 GAPLUGIN_WNDTYPE_MAINWINDOW = 0
 GAPLUGIN_WNDTYPE_DOCKWIDGET = 1
 
@@ -35,3 +35,14 @@ class GAPlugin(object):
     def get_project(self):
         return self.main_window.project
 
+
+    def store_plugin_settings(self, plugin_dict):
+        with open(self.main_window.settings.DIR_PLUGINS + self.plugin_name.replace(" ", "_") + ".json", "w") as file:
+            json.dump(plugin_dict, file)
+
+    def load_plugin_settings(self):
+        try:
+            with open(self.main_window.settings.DIR_PLUGINS + self.plugin_name.replace(" ", "_") + ".json", "r") as file:
+                return json.load(file)
+        except:
+            return None

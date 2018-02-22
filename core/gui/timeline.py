@@ -338,7 +338,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         return None
 
     def clear(self):
-        # self.time_bar.close()
         for i in self.items:
             ctrl = i[0]
             bars = i[1]
@@ -498,6 +497,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.select(item=self.selected, dispatch=False)
 
     def on_closed(self):
+        self.clear()
         self.setDisabled(True)
 
     def select(self, control = None, item = None, dispatch = True):

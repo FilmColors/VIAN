@@ -266,8 +266,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 else:
                     s.setPixmap(numpy_to_pixmap(s.screenshot_obj.img_movie))
                     s.screenshot_obj.annotation_is_visible = False
-
-
         pass
 
     def update_manager(self):
@@ -339,6 +337,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.scene.removeItem(img)
         for cap in self.captions:
             self.scene.removeItem(cap)
+
+        if self.loading_icon is not None:
+            self.scene.removeItem(self.loading_icon)
+        if self.loading_text is not None:
+            self.scene.removeItem(self.loading_text)
 
         self.images_plain = []
         self.captions = []
@@ -558,6 +561,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.current_segment_frame = None
 
     def on_loaded(self, project):
+        self.setEnabled(True)
         self.project = project
         self.update_manager()
 
@@ -570,6 +574,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.frame_segment(self.current_segment_index)
         else:
             self.center_images()
+
+    def on_closed(self):
+        self.clear_manager()
+        self.setEnabled(False)
 
     def on_selected(self, sender, selected):
         if selected is None:

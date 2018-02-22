@@ -2,7 +2,8 @@ from PyQt5.QtCore import QRunnable, QObject, Qt, QThread
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from random import randint
 import traceback, sys
-
+import cv2
+from core.data.computation import numpy_to_pixmap
 
 class WorkerSignals(QObject):
     sign_finished = pyqtSignal(tuple)
@@ -139,6 +140,7 @@ class CurrentSegmentEvaluater(QRunnable):
 class MinimalThreadWorker(QObject):
 
     finished = pyqtSignal()
+    callback = pyqtSignal(object)
     error = pyqtSignal(str)
 
     def __init__(self, func):
@@ -168,6 +170,75 @@ class LiveWidgetThreadWorker(MinimalThreadWorker):
             self.error.emit(e)
 
 
+class ImageLoaderThreadWorker(MinimalThreadWorker):
+    def __init__(self, paths, callback):
+        super(ImageLoaderThreadWorker, self).__init__(None)
+        self.paths = paths
+        print(self.paths)
+        self.cb_func = callback
+
+    @pyqtSlot()
+    def process(self):
+        try:
+            for i, p in enumerate(self.paths):
+                try:
+                    print(i)
+                    img = cv2.imread(p)
+                    # qpixmap = numpy_to_pixmap(img, cvt=None)
+                    self.callback.emit([i, img])
+                except Exception as e:
+                    print(e)
+                    continue
+
+        except Exception as e:
+            print(e)
+            self.error.emit(e)
+
+
+
+
+
+class SimpleWorker(QRunnable):
+
+    def __init__(self, function, result_cb, sign_progress, sign_error = None, args = None):
+        super(SimpleWorker, self).__init__()
+        self.function = function
+        self.args = args
+        self.setAutoDelete(True)
+        self.task_id = randint(100000,999999)
+        self.result_cb = result_cb
+        self.signals = WorkerSignals()
+        self.signals.sign_progress.connect(sign_progress, Qt.AutoConnection)
+
+        if sign_error is not None:
+            self.signals.sign_error.connect(sign_error, Qt.AutoConnection)
+
+        if result_cb is not None:
+            self.signals.sign_result.connect(result_cb, Qt.AutoConnection)
+
+    @pyqtSlot()
+    def run(self):
+        try:
+            if self.args is None:
+                result = self.function(self.on_progress)
+            else:
+                result = self.function(self.args, self.on_progress)
+
+            if self.result_cb is not None:
+                self.signals.sign_result.emit(result)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.sign_error.emit((exctype, value, traceback.format_exc()))
+        finally:
+
+            self.signals.sign_finished.emit((self.task_id, "Finished"))  # Done
+
+    def on_progress(self, float_value):
+        self.signals.sign_progress.emit((float_value * 100, 0))
+
+
+
 
 def run_minimal_worker(worker: MinimalThreadWorker, finish_func = None):
     thread = QThread()
@@ -175,3 +246,5 @@ def run_minimal_worker(worker: MinimalThreadWorker, finish_func = None):
     if finish_func is not None:
         worker.finished.connect(finish_func)
     thread.start()
+    worker.process()
+    return thread

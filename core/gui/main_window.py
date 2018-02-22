@@ -63,7 +63,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.4.7"
+__version__ = "0.4.10"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -811,11 +811,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.set_darwin_player_visibility(False)
         self.update()
 
-        if self.project.undo_manager.has_modifications():
+        if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
             if answer == QMessageBox.Yes:
                 self.on_save_project()
-
 
         vocabularies = []
         built_in = glob.glob("user/vocabularies/*.txt")
@@ -850,7 +849,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_loaded()
 
     def on_load_project(self):
-        if self.project.undo_manager.has_modifications():
+        if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
             if answer == QMessageBox.Yes:
                 self.on_save_project()
@@ -865,15 +864,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.load_project(path)
 
     def close_project(self):
-        if self.project.undo_manager.has_modifications():
-            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.Yes:
-                self.on_save_project()
+        if self.project is not None:
+            if self.project.undo_manager.has_modifications():
+                answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+                if answer == QMessageBox.Yes:
+                    self.on_save_project()
 
-        self.player.stop()
-        self.abortAllConcurrentThreads.emit()
-        self.project.cleanup()
-        self.project = VIANProject(self, name="No Project")
+            self.player.stop()
+            self.abortAllConcurrentThreads.emit()
+            self.project.cleanup()
 
         self.player_controls.setState(False)
         self.project = None

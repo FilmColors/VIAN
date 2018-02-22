@@ -1,10 +1,10 @@
 import numpy as np
 import cv2
-
+import typing
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent
+from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF
 
 from core.data.computation import *
 
@@ -22,6 +22,7 @@ class ImagePlot(QGraphicsView):
             range_y = [-128, 128]
 
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
+        self.pos_scale = 1.0
 
         self.setBackgroundBrush(QColor(30, 30, 30))
         self.setScene(QGraphicsScene(self))
@@ -70,11 +71,23 @@ class ImagePlot(QGraphicsView):
         self.controls_itm = self.scene().addWidget(ctrl)
         self.controls_itm.show()
 
+    def set_image_scale(self, scale):
+        for img in self.images:
+            img.setScale(img.scale() + scale)
+
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
+
+        elif event.key() == Qt.Key_Plus:
+            self.set_image_scale(0.1)
+        elif event.key() == Qt.Key_Minus:
+            self.set_image_scale(-0.1)
+
         else:
+
+
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
@@ -82,6 +95,19 @@ class ImagePlot(QGraphicsView):
             self.ctrl_is_pressed = False
         else:
             event.ignore()
+
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
+        if event.button() == Qt.RightButton:
+            menu = QMenu(self)
+            a_export = menu.addAction("Export")
+            a_export.triggered.connect(self.export)
+            menu.popup(self.mapToGlobal(event.pos()))
+
+    def scale_pos(self, scale_inc):
+        for img in self.images:
+            if isinstance(img, VIANPixmapGraphicsItem):
+                img.scale_pos(self.pos_scale + scale_inc)
+        self.pos_scale += scale_inc
 
     def wheelEvent(self, event: QWheelEvent):
         # bbox = self.sceneRect()
@@ -122,6 +148,35 @@ class ImagePlot(QGraphicsView):
         self.images.clear()
         self.luminances.clear()
 
+    def frame_default(self):
+        self.setSceneRect(self.scene().itemsBoundingRect())
+        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+
+    def export(self, return_image = False, width = 4096, height = 4096):
+        """
+        Renders the scene content to an image, alternatively if return iamge is set to True, 
+        the QImage is returned and not stored to disc
+        :param return_image: 
+        :return: 
+        """
+
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
+
+        t_size = self.sceneRect().size().toSize()
+        image = QImage(QSize(width, height), QImage.Format_ARGB32)
+        image.fill(Qt.transparent)
+
+        painter = QPainter()
+        painter.begin(image)
+        self.scene().render(painter)
+        painter.end()
+
+        if return_image:
+            return image
+        else:
+            path = QFileDialog.getSaveFileName()[0]
+            image.save(path)
+
     @pyqtSlot(int)
     def on_high_cut(self, value):
         for tpl in self.luminances:
@@ -141,9 +196,27 @@ class ImagePlot(QGraphicsView):
 
 
 class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
-    def __init__(self, pixmap, hover_text):
+    onItemSelection = pyqtSignal(object)
+
+    def __init__(self, pixmap, hover_text = None):
         super(VIANPixmapGraphicsItem, self).__init__(pixmap)
-        self.setToolTip(hover_text)
+        if hover_text != None:
+            self.setToolTip(hover_text)
+        self.abs_pos = None
+        self.pos_scale = 1.0
+
+    def scale_pos(self, scale):
+        self.pos_scale = scale
+        super(VIANPixmapGraphicsItem, self).setPos(self.abs_pos * self.pos_scale)
+
+    def setPos(self, x, y):
+        pos = QPointF(x, y)
+        super(VIANPixmapGraphicsItem, self).setPos(pos)
+        self.abs_pos = pos
+
+    def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
+        super(VIANPixmapGraphicsItem, self).mousePressEvent(event)
+        self.onItemSelection.emit(self)
 
 
 class ImagePlotCircular(ImagePlot):
@@ -155,20 +228,28 @@ class ImagePlotCircular(ImagePlot):
         #                (range_x[1] - range_x[0]) * self.magnification / 14,
         #                (range_y[1] - range_y[0]) * self.magnification / 14, Qt.KeepAspectRatio)
 
-    def add_image(self, x, y, img, convert = True, luminance = None):
+    def add_image(self, x, y, img, convert = True, luminance = None, to_float = False):
         try:
             if convert:
-                itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
+                # itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
+                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img))
             else:
-                itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None,  with_alpha = True))
+                # itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None,  with_alpha = True))
+                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=None, with_alpha=True))
             self.scene().addItem(itm)
-            itm.setPos((x -128) * self.magnification, (y -128) * self.magnification)
+
+            if to_float:
+                itm.setPos((x -128) * self.magnification, (y -128) * self.magnification)
+            else:
+                itm.setPos(x * self.magnification, y * self.magnification)
+
             self.images.append(itm)
 
             if luminance is not None:
                 self.luminances.append([luminance, itm])
 
             itm.show()
+            self.setSceneRect(QRectF())
         except Exception as e:
             print(e)
 
@@ -189,9 +270,9 @@ class ImagePlotCircular(ImagePlot):
 
             q = -(128/6 * i)
             self.circle0.setPos(q * self.magnification, q * self.magnification)
-            text = self.scene().addText(str(round(i *(128/6),0)), font)
-            text.setPos(0,(-i *(128/6) * self.magnification)- self.font_size *self.magnification)
-            text.setDefaultTextColor(QColor(200,200,200,200))
+            # text = self.scene().addText(str(round(i *(128/6),0)), font)
+            # text.setPos(0,(-i *(128/6) * self.magnification)- self.font_size *self.magnification)
+            # text.setDefaultTextColor(QColor(200,200,200,200))
 
         for i in range(self.n_grid):
             x = 128 * self.magnification * np.cos(i * (2 * np.pi / self.n_grid))
@@ -206,9 +287,9 @@ class ImagePlotPlane(ImagePlot):
 
     def add_image(self, x, y, img, convert = True):
         if convert:
-            itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img))
         else:
-            itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None, with_alpha=True))
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=None, with_alpha=True))
         self.scene().addItem(itm)
 
         itm.setPos(x * self.magnification, self.range_y[1] * self.magnification - y * self.magnification)
