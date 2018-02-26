@@ -10,6 +10,7 @@ class WorkerSignals(QObject):
     sign_error = pyqtSignal(tuple)
     sign_result = pyqtSignal(object)
     sign_progress = pyqtSignal(tuple)
+    sign_aborted = pyqtSignal(int)
 
 
 class Worker(QRunnable):
@@ -50,7 +51,10 @@ class Worker(QRunnable):
             exctype, value = sys.exc_info()[:2]
             self.signals.sign_error.emit((exctype, value, traceback.format_exc()))
         else:
-            if self.concurrent_job is None and self.i_analysis_job is None:
+            if result == "aborted":
+                self.signals.sign_aborted.emit(self.task_id)
+
+            elif self.concurrent_job is None and self.i_analysis_job is None:
                 self.signals.sign_result.emit(result)  # Return the result of the processing
             elif self.i_analysis_job is not None:
                 self.signals.sign_result.emit([result, self.i_analysis_job])
@@ -195,9 +199,6 @@ class ImageLoaderThreadWorker(MinimalThreadWorker):
             self.error.emit(e)
 
 
-
-
-
 class SimpleWorker(QRunnable):
 
     def __init__(self, function, result_cb, sign_progress, sign_error = None, args = None):
@@ -223,6 +224,9 @@ class SimpleWorker(QRunnable):
                 result = self.function(self.on_progress)
             else:
                 result = self.function(self.args, self.on_progress)
+
+            if result == "aborted":
+                self.signals.sign_aborted.emit(self.task_id)
 
             if self.result_cb is not None:
                 self.signals.sign_result.emit(result)

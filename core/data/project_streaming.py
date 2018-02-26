@@ -121,7 +121,7 @@ class ProjectStreamerShelve(ProjectStreamer):
             os.remove(self.container_db)
             os.remove(self.arbitrary_db)
         except Exception as e:
-            print(e)
+            print("Exception in ProjectStreamerShelve.clean_up()", str(e))
 
     #region IProjectChangeNotify
     def on_loaded(self, project):
@@ -223,23 +223,16 @@ class NumpyDataManager(ProjectStreamer):
     def __init__(self, main_window):
         super(NumpyDataManager, self).__init__(main_window)
 
-    # def dump(self, key, data_dict, data_type):
-    #
-    #     if os.path.isfile(self.project.data_dir + "/" + str(key) + ".npz"):
-    #         os.remove(self.project.data_dir + "/" + str(key) + ".npz")
-    #     try:
-    #         with open(self.project.data_dir + "/" +str(key) + ".npz", "wb") as f:
-    #             np.savez(f, **data_dict)
-    #     except Exception as e:
-    #         print("Error in NumpyDataManager.dump: ", str(e))
-
     def dump(self, key, data_dict, data_type):
         temp_indic = "_temp"
         temp_file_path = self.project.data_dir + "/" +str(key) + temp_indic +".npz"
         dest_file_path = self.project.data_dir + "/" + str(key) + ".npz"
 
+        if data_dict is None:
+            print("NumpyDataManager.dump(): Input Data was None, skipped")
+
         if data_type == NUMPY_NO_OVERWRITE and os.path.isfile(dest_file_path):
-            print("NUMPY No Overwrite")
+            print("NumpyDataManager.dump(): No Overwrite, file already exists")
             return
 
         try:
@@ -259,7 +252,6 @@ class NumpyDataManager(ProjectStreamer):
 
         except Exception as e:
             print("Error in NumpyDataManager.dump: ", str(e))
-
 
     def load(self, key, data_type):
         try:
@@ -324,7 +316,17 @@ class IStreamableContainer():
         else:
             obj = self.project.main_window.project_streamer.sync_load(id=self.unique_id,
                                                                  data_type=STREAM_DATA_IPROJECT_CONTAINER)
-            self.on_data_loaded(obj, [callback, args])
+            if obj is None:
+                print("Shelve Loading Failed, try Numpy")
+                obj = self.project.main_window.numpy_data_manager.load(self.unique_id, STREAM_DATA_IPROJECT_CONTAINER)
+                if obj is not None:
+                    print("Success")
+                else:
+                    print("Failed")
+
+
+            if obj is not None:
+                self.on_data_loaded(obj, [callback, args])
 
     def unload_container(self, data = None, sync = False):
         if sync:

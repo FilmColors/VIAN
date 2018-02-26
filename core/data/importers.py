@@ -53,7 +53,6 @@ class ELANProjectImporter():
                 #TODO
                 pass
 
-
         project_path = directory + filename
         project = VIANProject(self.main_window, project_path, filename)
         project.movie_descriptor.movie_path = movie_path
@@ -66,13 +65,11 @@ class ELANProjectImporter():
                 value = j[0]
                 t_start = j[1]
                 t_stop = j[2]
-                segm = segmentation.create_segment(start = t_start, stop = t_stop, dispatch=False)# , additional_identifiers=[value])
-                segm.annotation_body = value
-
+                segm = segmentation.create_segment(start = t_start, stop = t_stop,
+                                                   dispatch=False, annotation_body = value)
 
         for s in project.segmentation:
             s.update_segment_ids()
-
 
         QMessageBox.information(self.main_window,
                                 "Choose the File Path",
@@ -200,39 +197,89 @@ class ScreenshotImporter(IConcurrentJob):
         super(ScreenshotImporter, self).__init__(args=args)
 
     def run_concurrent(self, args, sign_progress):
-        paths = args[0]
-        movie_path = args[1]
 
-
-        imgs = []
-        for scr_p in paths:
-            imgs.append(cv2.imread(scr_p))
+        movie_path = args[0]
+        scr_paths = args[1]
 
         cap = cv2.VideoCapture(movie_path)
+        length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
-        for img in imgs:
-            img = cv2.resize(img, (width, height), interpolation=cv2.INTER_CUBIC)
+        segm_length = 5000
+        resolution = 10
+        quality = 0.3
 
-        segm_length = 200
-        scr_positions = np.zeros(len(imgs), dtype=np.uint16)
+        width = int(width * quality)
+        height = int(height * quality)
 
-        ret = True
-        while(ret):
-            segm = np.zeros(shape=(height,width,3), dtype=np.float32)
-            for i in range(segm_length):
+        scrs = []
+        scr_names = []
+        for p in scr_paths:
+            scr_names.append(os.path.split(p)[1].split(".")[0])
+            img = cv2.imread(p)
+            scrs.append(img)
+
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        frame_counter = -1
+        n_segments = int(np.ceil(length / segm_length))
+
+        match_table = np.zeros(shape=(n_segments, len(scrs), 2))
+
+        new_scr = []
+        for scr in scrs:
+            new_scr.append(cv2.resize(scr, (int(width), int(height)), interpolation=cv2.INTER_CUBIC))
+        scrs = np.array(new_scr, dtype=np.float32)
+
+        for i in range(n_segments):
+            frames = []
+            frame_idxs = []
+            for j in range(segm_length):
+                if self.aborted:
+                    return "aborted"
+                if j % 20 == 0:
+                    sign_progress(round((((i * segm_length) + j) / length), 2))
                 ret, frame = cap.read()
+                frame_counter += 1
+                if j % resolution != 0:
+                    continue
 
-            match = np.argmin(np.sum((segm - frame[..., np.newaxis]) ** 2, axis=[1, 2, 3]))
-            print(match)
+                if ret:
+                    frame = cv2.resize(frame, (int(width), int(height)), interpolation=cv2.INTER_CUBIC)
+                    frames.append(frame)
+                    frame_idxs.append(frame_counter)
 
+                else:
+                    break
 
+            frames = np.array(frames, dtype=np.float32)
+            for j in range(scrs.shape[0]):
+                match, rate = find_closest(scrs[j], frames)
+                match = (match * resolution) + (segm_length * i)
+                match_table[i, j] = [match, rate]
 
+        result = []
+        for i in range(scrs.shape[0]):
+            best_value = np.amin(match_table[:, i, 1])
+            best_idx = np.argmin(match_table[:, i, 1])
+            frame_idx = match_table[best_idx, i, 0]
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+            ret, frame = cap.read()
 
+            result.append([frame_idx, frame, scr_names[i]])
 
+        return result
 
-        # match = np.argmin(np.sum((segment - frame[..., np.newaxis]) ** 2, axis=[0, 1, 2]))
+    def modify_project(self, project:VIANProject, result, sign_progress = None):
+        project.inhibit_dispatch=True
+        for r in result:
+            frame_pos = r[0]
+            frame = r[1]
+            name = r[2]
+            time_stamp = frame2ms(frame_pos, fps = project.main_window.player.get_fps())
+            project.add_screenshot(Screenshot(title=name, image=frame, frame_pos=int(frame_pos), timestamp=time_stamp))
+        project.sort_screenshots()
+        project.inhibit_dispatch = False
 
 
 class FilmColorsPipelineImporter():

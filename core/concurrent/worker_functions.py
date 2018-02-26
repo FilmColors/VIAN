@@ -264,6 +264,9 @@ class ImportScreenshotsJob(IConcurrentJob):
             result_time = []
             result = []
             for i in range(length):
+                if self.aborted:
+                    return "aborted"
+
                 if i % 100 == 0:
                     sign_progress(float(i) / length)
 

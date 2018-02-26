@@ -41,6 +41,7 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
 
 
 def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
+
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)
 
@@ -261,3 +262,10 @@ def open_web_browser(file_path):
     if sys.platform == "darwin":  # check if on OSX
         file_path = "file:///" + file_path
     webbrowser.get().open(file_path)
+
+
+def find_closest(frame, segment):
+    a = np.sum((segment - frame[np.newaxis, ...]) ** 2, axis=(1, 2, 3))
+    match = np.argmin(a)
+    rate = np.amin(a)
+    return match, rate

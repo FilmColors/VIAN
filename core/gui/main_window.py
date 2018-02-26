@@ -63,13 +63,12 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.4.10"
+__version__ = "0.4.14"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
 
 PROFILE = False
-
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
@@ -264,6 +263,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportFilmColorsPipeline.triggered.connect(self.import_pipeline)
         self.actionImportFilmColorsFilemaker.triggered.connect(self.import_filemaker)
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
+        self.actionImportScreenshots.triggered.connect(self.import_screenshots)
 
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
         self.actionExportTemplate.triggered.connect(self.export_template)
@@ -354,7 +354,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.menuEdit,
             self.menuWindows,
             self.menuPlayer,
-            self.menuAnalyze,
+            self.menuCreate,
             self.menuAnalysis,
         ]
 
@@ -1054,6 +1054,11 @@ class MainWindow(QtWidgets.QMainWindow):
         total = self.concurrent_task_viewer.update_progress(tpl[0],tpl[1])
         self.progress_bar.set_progress(float(total)/100)
 
+    def worker_abort(self, int):
+        self.concurrent_task_viewer.remove_task(int)
+        self.print_message("Task:" + str(int) + " aborted.", "orange")
+        self.progress_bar.on_finished()
+
     def run_job_concurrent(self, job):
         job.prepare()
         worker = Worker(job.run_concurrent, self, self.on_job_concurrent_result, job.args, msg_finished="Screenshots Loaded", concurrent_job=job)
@@ -1123,6 +1128,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.dispatch_loaded()
             self.print_message("Import Successfull", "Green")
         except Exception as e:
+            raise(e)
             self.print_message("Import Failed", "Red")
             self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
             self.print_message(str(e), "Red")
@@ -1168,6 +1174,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def export_vocabulary(self):
         dialog = VocabularyExportDialog(self)
         dialog.show()
+
+    def import_screenshots(self):
+        paths = QFileDialog.getOpenFileNames()[0]
+        args = [self.project.movie_descriptor.movie_path, paths]
+        importer = ScreenshotImporter(args)
+        self.run_job_concurrent(importer)
 
     def on_zip_project(self):
         try:
@@ -1455,7 +1467,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.restoreState(setting.value("windowState"))
 
     def start_worker(self, worker, name = "New Task"):
-        self.concurrent_task_viewer.add_task(worker.task_id, name, worker)
+        job = worker.concurrent_job
+        if job is None:
+            job = worker.i_analysis_job
+        self.concurrent_task_viewer.add_task(worker.task_id, name, worker, job)
         self.thread_pool.start(worker)
 
     def toggle_fullscreen(self):
@@ -1482,7 +1497,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_player_size(self):
         self.player.update()
-    # endregion
+
 
     def open_documentation(self):
         webbrowser.open("file://" + os.path.abspath("_docs/build/html/index.html"))
@@ -1502,6 +1517,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def decrease_playrate(self):
         self.player.set_rate(self.player.get_rate() - 0.1)
         self.player_controls.update_rate()
+
+    # endregion
 
     #region MISC
     def update_autosave_timer(self, do_start = True):
@@ -1556,10 +1573,6 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     def set_ui_enabled(self, state):
-        for i in range(2, len(self.menus_list)): # The First two should also be active if no project is opened
-            m = self.menus_list[i]
-            for e in m.actions():
-                e.setDisabled(not state)
         self.actionSave.setDisabled(not state)
         self.actionSaveAs.setDisabled(not state)
         self.actionBackup.setDisabled(not state)
@@ -1567,6 +1580,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuExport.setDisabled(not state)
         self.plugin_menu.setDisabled(False)
         self.menuWindows.setDisabled(False)
+        self.actionImportELANSegmentation.setDisabled(not state)
+        self.actionImportVocabulary.setDisabled(not state)
+        self.actionImportCSVVocabulary.setDisabled(not state)
+        self.actionImportFilmColorsPipeline.setDisabled(not state)
+        self.actionImportFilmColorsFilemaker.setDisabled(not state)
+
+        for i in range(2, len(self.menus_list)): # The First two should also be active if no project is opened
+            m = self.menus_list[i]
+            for e in m.actions():
+                e.setDisabled(not state)
+
 
     def get_version_as_string(self):
 
@@ -1585,7 +1609,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return result
 
+
     #region IProjectChangedNotify
+
     def dispatch_on_loaded(self):
         # self.set_darwin_player_visibility(True)
         self.autosave_timer.start()
@@ -1727,6 +1753,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for o in self.i_project_notify_reciever:
             o.on_closed()
+
+    #endregion
+    pass
 
 
 class LoadingScreen(QtWidgets.QMainWindow):

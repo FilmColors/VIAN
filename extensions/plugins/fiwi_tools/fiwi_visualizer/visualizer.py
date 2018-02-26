@@ -140,7 +140,7 @@ class FiwiVisualizer(QMainWindow):
         self.central.setCurrentIndex(idx)
         self.info_dock.inner.setCurrentIndex(idx)
 
-    def on_load_database(self, sqlite_path = None, root_path = None):
+    def sync_on_load_database(self, sqlite_path = None, root_path = None):
         try:
             if sqlite_path is None:
                 QMessageBox.information(self, "Open Database", "After clicking \'OK\',\nPlease select the database File, "
@@ -180,8 +180,72 @@ class FiwiVisualizer(QMainWindow):
             print(e)
             QMessageBox.warning(self,"Could Not Open File", "Sorry, there has gone something wrong with the file opening")
 
+    def on_load_database(self, sqlite_path = None, root_path = None):
+        if sqlite_path is None:
+            QMessageBox.information(self, "Open Database",
+                                    "After clicking \'OK\',\nPlease select the database File, "
+                                    "this is usually named <DATE>_FilmColors_Database.db")
+            sqlite_path = QFileDialog.getOpenFileName(filter=DATABASE_FILE_EXT)[0]
 
+        if root_path is None:
+            QMessageBox.information(self, "Open Root",
+                                    "After clicking \'OK\',\nPlease select the Root File, "
+                                    "this is usually named FilmColors_Database_Root.vian_db"
+                                    "and located in /server/fiwi_datenbank/")
+            root_path = QFileDialog.getOpenFileName(filter=ROOT_FILE_EXT)[0]
+
+        args = [sqlite_path, root_path]
+        worker = SimpleWorker(self.async_load_database, self.on_load_finished, self.on_progress, args = args)
+        self.thread_pool.start(worker)
+
+    def async_load_database(self, args, on_progress):
+
+        sqlite_path = args[0]
+        root_path = args[1]
+
+        on_progress(0.0)
+        database = FilmColorsDatabase()
+        database.connect("sqlite:///" + sqlite_path)
+        unique_keywords, segm_table_names, segm_table_words = database.get_filters()
+
+        on_progress(0.2)
+        print(root_path)
+        with open(root_path, "r") as f:
+            if "root" in f.readline():
+                root_dir = os.path.split(root_path)[0] + "/"
+
+        on_progress(0.5)
+        node_matrix = np.loadtxt(root_dir + "node_matrix.csv", delimiter=";")
+
+        on_progress(0.9)
+        labels = [k.to_string() for k in unique_keywords]
+
+        on_progress(1.0)
+        return [root_dir,
+                unique_keywords,
+                node_matrix,
+                labels,
+                sqlite_path,
+                root_path
+                ]
+
+    def on_load_finished(self, result):
+        self.root_dir = result[0]
+        self.unique_keywords = result[1]
+        self.node_matrix = result[2]
+        self.node_graph.create_graph(self.node_matrix, result[3], self.unique_keywords)
+        self.query_dock.create_filter_menu(self.unique_keywords)
+        self.database_file = result[4]
+        self.store_settings(result[4], result[5])
+        self.progress_bar.setValue(0)
+        self.progress_bar.hide()
+
+    #region Query
     def on_start_query(self):
+        if self.is_querying:
+            return
+
+        self.query_dock.setEnabled(False)
         worker = SimpleWorker(self.on_query, self.on_query_finished,
                               self.on_progress,
                               args=[self.query_dock.current_filters,
@@ -223,7 +287,7 @@ class FiwiVisualizer(QMainWindow):
         # Query the current filemaker ID
         # if self.query_dock.lineEdit_fm_id.text() != "":
         if fm_id != "":
-            res.extend([database.get_segments("Global:Literal", dict(FileMaker_ID=self.query_dock.lineEdit_fm_id.text()))])
+            res.extend([database.get_segments("Global:Literal", dict(Item_ID=self.query_dock.lineEdit_fm_id.text()))])
 
         # Query the current Year Range
         res.extend([database.get_segments("Global:Literal", dict(Filmdaten_FilmsColors_2_Year=self.query_dock.years))])
@@ -234,6 +298,7 @@ class FiwiVisualizer(QMainWindow):
             print("Querying", queries_tables[i])
             d = dict(zip(queries_words[i], [1] * len(queries_words[i])))
             res.extend([database.get_segments(queries_tables[i], d)])
+
 
         # Merge the results, only pick those segments that are present in all tables
         ids = []
@@ -258,7 +323,7 @@ class FiwiVisualizer(QMainWindow):
         segments = []
         for i in range(int(np.clip(int(len(result_ids) / 500), 1, None))):
             segments.extend(database.get_segments("Global:Literal", dict(id=result_ids[i*500:i*500+500])))
-        r_segments = [DBSegment(s['FileMaker_ID'], s['Segment_ID']) for s in segments]
+        r_segments = [DBSegment(s['Item_ID'], s['Segment_ID']) for s in segments]
 
         current_stills = []
         current_segments = r_segments
@@ -277,36 +342,43 @@ class FiwiVisualizer(QMainWindow):
             shuffle(r_stills_loc)
             r_stills_loc = r_stills_loc[:n_stills_max]
 
-
             for st in r_stills_loc:
                 paths.append(root_dir + "db_stills/" + st.rel_path)
 
             current_stills.extend(r_stills_loc)
 
-        # self.threads_worker.append(run_minimal_worker(ImageLoaderThreadWorker(paths, self.on_image_loaded)))
         for i, s in enumerate(current_stills):
             stdout.write("\r" + str(i))
+            print(paths[i])
             try:
                 img = cv2.imread(paths[i])
+                if s.t_type in [TB_STILL_FG, TB_STILL_BG]:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+                    indices = np.where(img[:, :, :3] == [0, 0, 0])
+                    img[indices[0], indices[1]] = [0, 0, 0, 0]
+                else:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 s.pixmap = img
-            except:
-                print("Failed")
+            except Exception as e:
+                print("Failed", e)
                 s.pixmap = np.zeros(shape =(5,5,3), dtype=np.uint8)
 
         return [current_stills, current_segments]
 
-
     def on_query_finished(self, result):
+        self.is_querying = False
+        self.query_dock.setEnabled(True)
         self.current_stills = result[0]
         self.current_segments = result[1]
         self.progress_bar.setValue(0)
         self.progress_bar.hide()
         self.update_plots()
 
+    #endregion
+
     def on_progress(self, float):
         integer = int(float[0])
         self.progress_bar.setValue(integer)
-
 
     @pyqtSlot(object)
     def on_image_loaded(self, object):
@@ -346,6 +418,7 @@ class FiwiVisualizer(QMainWindow):
         elif a0.key() == Qt.Key_Down:
             self.onImagePosScaleChanged.emit(-0.1)
 
+    #region Widget Creation
     def create_query_dock(self):
         if self.query_dock is None:
             self.query_dock = QueryDock(self)
@@ -369,8 +442,9 @@ class FiwiVisualizer(QMainWindow):
         else:
             self.addDockWidget(Qt.RightDockWidgetArea, self.info_dock, Qt.Vertical)
             self.movie_list_dock.show()
+    #endregion
 
-
+    #region IO
     def store_settings(self, db_path, root_path):
         data = dict(db_path = db_path, root_path=root_path)
         self.plugin.store_plugin_settings(data)
@@ -381,7 +455,8 @@ class FiwiVisualizer(QMainWindow):
             return None, None
 
         return data["db_path"], data['root_path']
-
+    #endregion
+    pass
 
 class InfoDock(QDockWidget):
     def __init__(self, parent, visualizer):

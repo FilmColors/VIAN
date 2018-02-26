@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
 from PyQt5 import uic
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
-from core.data.interfaces import IProjectChangeNotify, IHasVocabulary
+from core.data.interfaces import IProjectChangeNotify, IHasVocabulary, ITimeRange
 from core.data.enums import get_type_as_string
 import os
 from functools import partial
@@ -381,7 +381,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             excluded = []
             for c in to_classify:
                 if not(c.get_type() == SEGMENT and c not in main_segm):
-                    excluded.append(c)
+                    if isinstance(c, ITimeRange):
+                        excluded.append(c)
 
             to_classify = excluded
 

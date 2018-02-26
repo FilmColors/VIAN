@@ -9,7 +9,7 @@ from functools import partial
 import numpy as np
 import networkx as nx
 
-from core.gui.ewidgetbase import EGraphicsView
+from core.gui.ewidgetbase import EGraphicsView, line_separator
 
 
 DATA_SET = "../../results/result_fm_db_parser.pickle"
@@ -169,6 +169,7 @@ class VocabularyGraph(QWidget):
         self.layout().addWidget(self.view)
         self.node_matrix = None
         self.node_labels = None
+        self.context_objects = None
 
         self.text_size = 15
         self.node_threshold = 400
@@ -177,10 +178,12 @@ class VocabularyGraph(QWidget):
 
         self.nodes = []
         self.edges = []
+        self.labels = []
 
         self.node_words_model = QStandardItemModel()
         self.current_labels = []
         self.controls = None
+        self.current_selection = None
 
 
     def on_selection(self, obj):
@@ -189,6 +192,8 @@ class VocabularyGraph(QWidget):
 
         for n in self.edges:
             n.set_selected(False)
+
+        self.current_selection = obj
 
         if obj is not None:
             self.view.setRenderHint(QPainter.Antialiasing, True)
@@ -227,14 +232,19 @@ class VocabularyGraph(QWidget):
         for e in self.edges:
             self.view.scene().removeItem(e)
 
+        for lbl in self.labels:
+            self.view.scene().removeItem(lbl)
+
         self.nodes = []
         self.edges = []
+        self.labels = []
 
     def create_graph(self, node_matrix, labels = None, context_objects = None, dot_size = 20, edge_threshold = 1):
         self.clear_view()
 
         self.node_matrix = node_matrix
         self.node_labels = labels
+        self.context_objects = context_objects
 
         if labels is None:
             labels = [""] * node_matrix.shape[0]
@@ -274,8 +284,6 @@ class VocabularyGraph(QWidget):
                         ny = valid_node_mapping[valid_node_indices.index(my)]
                         info[3].append([ndx, ny, m[mx, my]])
 
-        # for x in range(m.shape[0]):
-        #     g.add_node(x)
         print("Creating Graph Layout")
         for x in range(len(node_infos)):
             g.add_node(x)
@@ -285,14 +293,6 @@ class VocabularyGraph(QWidget):
                 edges_n_occurences.append([eg[2]])
                 g.add_edge(eg[0], eg[1], attr_dict=dict(weight = eg[2] / m_max))
                 edges.append([eg[0], eg[1]])
-
-        # for x in range(m.shape[0]):
-        #     if np.amax(m[x]) >= edge_threshold:
-        #         for y in range(m.shape[1]):
-        #             if m[x, y] > 0:
-        #                 edges_n_occurences.append(m[x, y])
-        #                 g.add_edge(x, y, attr_dict=dict(weight = m[x, y] / m_max))
-        #                 edges.append([x, y])
 
         print("N-Edges:", len(edges), "N-Nodes:", len(g.nodes))
         lt = nx.spring_layout(g)
@@ -348,10 +348,12 @@ class VocabularyGraph(QWidget):
                 s = node_infos[counter][5]
                 name = node_infos[counter][1] #node_names[counter]
                 self.current_labels.append(name)
+
                 lbl = self.view.scene().addText(name,font)
                 lbl.setPos(itm[0] * scale + (dot_size * s / 2) - lbl.textWidth(),
                            itm[1] * scale + (dot_size * s / 2))
                 lbl.setDefaultTextColor(QColor(200,200,200))
+                self.labels.append(lbl)
                 self.nodes[counter].label = lbl
                 counter += 1
 
@@ -365,6 +367,7 @@ class VocabularyGraph(QWidget):
             lbl = self.view.scene().addText(str(e.n_occurence), font)
             lbl.setPos(p_center)
             lbl.setDefaultTextColor(QColor(200, 200, 200))
+            self.labels.append(lbl)
             e.label = lbl
 
             try:
@@ -426,7 +429,7 @@ class VocabularyGraph(QWidget):
 
 
 class GraphControls(QWidget):
-    def __init__(self, graph_widget):
+    def __init__(self, graph_widget:VocabularyGraph):
         super(GraphControls, self).__init__(None)
         self.setLayout(QVBoxLayout(self))
 
@@ -434,43 +437,68 @@ class GraphControls(QWidget):
 
         self.node_query_ctrl = QWidget(self)
         self.node_query_ctrl.setLayout(QHBoxLayout(self.node_query_ctrl))
-        self.node_query_ctrl.layout().addWidget(QLabel("Node Name:"))
+        self.node_query_ctrl.layout().addWidget(QLabel("Search Name:"))
         self.node_query_line = QLineEdit(self.node_query_ctrl)
         self.node_query_line.returnPressed.connect(self.on_query)
         self.node_query_ctrl.layout().addWidget(self.node_query_line)
-
 
         self.n_depth_ctrl = QWidget(self)
         self.n_depth_ctrl.setLayout(QHBoxLayout(self.n_depth_ctrl))
         self.n_depth_ctrl.layout().addWidget(QLabel("Graph Depth:"))
         self.sB_depth = QSpinBox(self.n_depth_ctrl)
         self.sB_depth.setRange(1, 10)
-        self.sB_depth.setValue(3)
-        self.n_depth_ctrl.layout().addWidget(self.n_depth_ctrl)
+        self.sB_depth.setValue(self.graph_widget.selection_graph_depth)
+        self.n_depth_ctrl.layout().addWidget(self.sB_depth)
+        self.sB_depth.valueChanged.connect(self.on_depth_changed)
 
         self.thresholds_nodes_ctrl = QWidget(self)
         self.thresholds_nodes_ctrl.setLayout(QHBoxLayout(self.thresholds_nodes_ctrl))
         self.thresholds_nodes_ctrl.layout().addWidget(QLabel("Node Threshold:"))
         self.sl_threshold_nodes = QSpinBox(self.thresholds_nodes_ctrl)
         self.sl_threshold_nodes.setRange(0, 100000)
-        self.sl_threshold_nodes.setValue(0)
+        self.sl_threshold_nodes.setValue(self.graph_widget.node_threshold)
         self.thresholds_nodes_ctrl.layout().addWidget(self.sl_threshold_nodes)
+        self.sl_threshold_nodes.valueChanged.connect(self.on_node_threshold_changed)
 
         self.thresholds_edges_ctrl = QWidget(self)
         self.thresholds_edges_ctrl.setLayout(QHBoxLayout(self.thresholds_edges_ctrl))
         self.thresholds_edges_ctrl.layout().addWidget(QLabel("Edge Threshold:"))
         self.sB_threshold_edge = QSpinBox(self.thresholds_edges_ctrl)
         self.sB_threshold_edge.setRange(0, 100000)
-        self.sB_threshold_edge.setValue(0)
+        self.sB_threshold_edge.setValue(self.graph_widget.edge_threshold)
         self.thresholds_edges_ctrl.layout().addWidget(self.sB_threshold_edge)
+        self.sB_threshold_edge.valueChanged.connect(self.on_edge_threshold_changed)
+
+        self.btn_reload = QPushButton("Reload Graph")
+        self.layout().addWidget(self.btn_reload)
+        self.btn_reload.clicked.connect(self.on_reload_graph)
 
         self.layout().addWidget(self.node_query_ctrl)
         self.layout().addWidget(self.n_depth_ctrl)
+        self.layout().addWidget(line_separator(Qt.Horizontal))
         self.layout().addWidget(self.thresholds_nodes_ctrl)
         self.layout().addWidget(self.thresholds_edges_ctrl)
+        self.layout().addWidget(self.btn_reload)
+        self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Fixed, QSizePolicy.Expanding))
 
     def on_query(self):
         self.node_query_line.completer().complete()
         text = self.node_query_line.text()
         self.graph_widget.on_query_by_label(text)
+
+    def on_depth_changed(self):
+        self.graph_widget.selection_graph_depth = self.sB_depth.value()
+        self.graph_widget.on_selection(self.graph_widget.current_selection)
+
+    def on_edge_threshold_changed(self):
+        self.graph_widget.edge_threshold = self.sl_threshold_nodes.value()
+
+    def on_node_threshold_changed(self):
+        self.graph_widget.node_threshold = self.sB_threshold_edge.value()
+
+    def on_reload_graph(self):
+        self.graph_widget.create_graph(self.graph_widget.node_matrix,
+                                       self.graph_widget.node_labels,
+                                       self.graph_widget.context_objects)
+
 #endregion

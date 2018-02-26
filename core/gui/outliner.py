@@ -625,7 +625,7 @@ class AnalyzesOutlinerRootItem(AbstractOutlinerItem):
         "Not implemented"
 
     def update_item(self):
-        self.setText(0, "Analyzes")
+        self.setText(0, "Analyses")
         self.setForeground(0, QtGui.QColor(9, 170, 60)) #7,133,47
 
 

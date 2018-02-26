@@ -47,13 +47,13 @@ class ColorDTWidget(QWidget):
 
     def plot(self, view, time, channel, imgs, is_liminance=True, y_max = None):
         view.clear_view()
-        # view.x_scale = 1.0
-        # view.y_scale = 1.0
 
         view.create_scene(len(imgs), 100, pixel_size_x=4000, pixel_size_y=1000)
         print(np.amax(channel))
 
         for i, img in enumerate(imgs):
+            if img is None:
+                continue
             view.add_image(time[i], channel[i], img, convert=False)
 
         view.update_grid()
@@ -90,13 +90,19 @@ class ColorSpacePlots(QWidget):
         self.fg_view.add_grid()
 
         for still in stills_glob:
-            self.gl_view.add_image(still.col[1],still.col[2], still.pixmap)
+            if still is None:
+                continue
+            self.gl_view.add_image(still.col[1],still.col[2], still.pixmap, convert=False)
 
         for still in still_fg:
-            self.fg_view.add_image(still.col[1],still.col[2], still.pixmap)
+            if still is None:
+                continue
+            self.fg_view.add_image(still.col[1],still.col[2], still.pixmap, convert=False)
 
         for still in still_bg:
-            self.bg_view.add_image(still.col[1], still.col[2], still.pixmap)
+            if still is None:
+                continue
+            self.bg_view.add_image(still.col[1], still.col[2], still.pixmap, convert=False)
 
         self.bg_view.frame_default()
         self.fg_view.frame_default()
@@ -133,13 +139,19 @@ class ColorSpaceLPlanePlots(QWidget):
         self.fg_view.add_grid()
 
         for still in stills_glob:
-            self.gl_view.add_image(still.col[1],still.col[0], still.pixmap)
+            if still is None:
+                continue
+            self.gl_view.add_image(still.col[1],still.col[0], still.pixmap, convert=False)
 
         for still in still_fg:
-            self.fg_view.add_image(still.col[1],still.col[0], still.pixmap)
+            if still is None:
+                continue
+            self.fg_view.add_image(still.col[1],still.col[0], still.pixmap, convert=False)
 
         for still in still_bg:
-            self.bg_view.add_image(still.col[1], still.col[0], still.pixmap)
+            if still is None:
+                continue
+            self.bg_view.add_image(still.col[1], still.col[0], still.pixmap, convert=False)
 
         self.bg_view.frame_default()
         self.fg_view.frame_default()

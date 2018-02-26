@@ -1049,7 +1049,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return s
         return None
 
-    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False, inhibit_overlap = True,  dispatch = True):
+    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False,
+                       inhibit_overlap = True,  dispatch = True, annotation_body = ""):
 
 
         # Are we fast segmenting?
@@ -1128,7 +1129,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if next is not None and next.start < stop:
             return
 
-        new_seg = Segment(ID = ID, start = start, end = stop, additional_identifiers=[str(ID)], segmentation = self)
+        new_seg = Segment(ID = ID, start = start, end = stop, additional_identifiers=[str(ID)],
+                          segmentation = self, annotation_body=annotation_body)
         new_seg.set_project(self.project)
 
         self.add_segment(new_seg, dispatch)
@@ -1318,7 +1320,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         return ""
 
 class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary):
-    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, additional_identifiers = None, segmentation=None):
+    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, additional_identifiers = None, segmentation=None, annotation_body = ""):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
         IHasVocabulary.__init__(self)
@@ -1331,7 +1333,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         if additional_identifiers is None:
             additional_identifiers = []
         self.additional_identifiers = additional_identifiers
-        self.annotation_body = ""
+        self.annotation_body = annotation_body
         self.timeline_visibility = True
         self.segmentation = segmentation
         self.notes = ""
@@ -2599,6 +2601,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
             data_json.append([node_id, node_result, result_dtypes])
 
         # We want to store the analysis container if it is not already stored
+
         self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
 
         data = dict(
@@ -2670,7 +2673,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
                                                                                              self.project.data_dir,
                                                                                              self.project,
                                                                                              self.project.main_window)
-
         except Exception as e:
             print("Exception in get_visualization()", e)
             QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
@@ -2680,12 +2682,13 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         return ANALYSIS_JOB_ANALYSIS
 
     def serialize(self):
-        data_json = []
-        data_dtypes = []
 
         self.data = self.project.main_window.project_streamer.sync_load(self.unique_id)
-        # Store the data as numpy if it does not already exist (since it is imutable)
-        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data, data_type=NUMPY_NO_OVERWRITE)
+        # Store the data as numpy if it does not already exist (since it is immutable)
+        # TODO sync_load may fail from time to time (Not yet known why), so we want to make sure that
+        # TODO the file is not overwritten if the loaded data is None
+        if self.data is not None:
+            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data, data_type=NUMPY_NO_OVERWRITE)
 
         data = dict(
             name=self.name,
@@ -2706,8 +2709,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.unique_id = serialization['unique_id']
         self.analysis_job_class = serialization['analysis_job_class']
         self.notes = serialization['notes']
-
-        # result_dtypes = serialization['data_dtypes']
 
         self.data = []
         self.data = streamer.sync_load(self.unique_id)

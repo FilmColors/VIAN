@@ -48,9 +48,9 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.set_enabled(True)
 
             self.cB_ClassSegment.setChecked(SEGMENT in self.current_experiment.classification_sources)
-            self.cB_ClassSegmentation.setChecked(SEGMENTATION in self.current_experiment.classification_sources)
+            # self.cB_ClassSegmentation.setChecked(SEGMENTATION in self.current_experiment.classification_sources)
             self.cB_ClassAnnotation.setChecked(ANNOTATION in self.current_experiment.classification_sources)
-            self.cB_ClassAnnotationLayer.setChecked(ANNOTATION_LAYER in self.current_experiment.classification_sources)
+            # self.cB_ClassAnnotationLayer.setChecked(ANNOTATION_LAYER in self.current_experiment.classification_sources)
 
             self.lineEdit_ExperimentName.setText(self.current_experiment.name)
             self.update_classification_object_tree()
@@ -133,10 +133,10 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             sources.append(SEGMENT)
         if self.cB_ClassAnnotation.isChecked():
             sources.append(ANNOTATION)
-        if self.cB_ClassSegmentation.isChecked():
-            sources.append(SEGMENTATION)
-        if self.cB_ClassAnnotationLayer.isChecked():
-            sources.append(ANNOTATION_LAYER)
+        # if self.cB_ClassSegmentation.isChecked():
+        #     sources.append(SEGMENTATION)
+        # if self.cB_ClassAnnotationLayer.isChecked():
+        #     sources.append(ANNOTATION_LAYER)
 
         self.current_experiment.classification_sources = sources
 

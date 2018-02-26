@@ -47,6 +47,7 @@
      <addaction name="action_importELAN_Project"/>
      <addaction name="actionImportVocabulary"/>
      <addaction name="actionImportCSVVocabulary"/>
+     <addaction name="actionImportScreenshots"/>
      <addaction name="separator"/>
      <addaction name="actionImportFilmColorsPipeline"/>
      <addaction name="actionImportFilmColorsFilemaker"/>
@@ -80,9 +81,9 @@
     <addaction name="menuRecently_Opened"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuAnalyze">
+   <widget class="QMenu" name="menuCreate">
     <property name="title">
-     <string>Tools</string>
+     <string>Create</string>
     </property>
     <addaction name="separator"/>
     <addaction name="actionScreenshot"/>
@@ -189,9 +190,9 @@
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuCreate"/>
    <addaction name="menuWindows"/>
    <addaction name="menuPlayer"/>
-   <addaction name="menuAnalyze"/>
    <addaction name="menuAnalysis"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -658,6 +659,11 @@
    </property>
    <property name="shortcut">
     <string>Alt+0</string>
+   </property>
+  </action>
+  <action name="actionImportScreenshots">
+   <property name="text">
+    <string>Screenshots</string>
    </property>
   </action>
  </widget>

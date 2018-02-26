@@ -17,6 +17,16 @@ else:
 # from matplotlib.figure import Figure
 import webbrowser
 
+def line_separator(Orientation):
+    frame = QFrame()
+    frame.setStyleSheet("QFrame{border: 1px solid black;}")
+    frame.setFrameStyle(QFrame.Box)
+    if Orientation == Qt.Horizontal:
+        frame.setFixedHeight(1)
+    else:
+        frame.setFixedWidth(1)
+
+    return frame
 
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):

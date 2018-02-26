@@ -34,6 +34,7 @@ class QueryDock(QDockWidget):
         self.fm_id_controls.setLayout(QHBoxLayout(self))
         self.fm_id_controls.layout().addWidget(QLabel("FileMaker ID:"))
         self.lineEdit_fm_id = QLineEdit(self)
+        self.lineEdit_fm_id.setPlaceholderText("z.B. 2_1_1")
         self.fm_id_controls.layout().addWidget(self.lineEdit_fm_id)
 
         self.year_controls = QWidget(self)
