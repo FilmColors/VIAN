@@ -285,6 +285,8 @@ class IAnalysisJob(ILiveWidgetExposing):
     def get_source_types(self):
         return self.source_types
 
+    def abort(self):
+        pass
 
 class ParameterWidget(QWidget):
     """

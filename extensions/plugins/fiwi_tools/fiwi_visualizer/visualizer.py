@@ -315,7 +315,6 @@ class FiwiVisualizer(QMainWindow):
             for d in ids:
                 if id not in d:
                     in_all = False
-
             if in_all:
                 result_ids.append(id)
 
@@ -338,6 +337,7 @@ class FiwiVisualizer(QMainWindow):
                 stills = database.get_stills(dict(FM_ID=r.fm_id, SEGM_ID=r.segm_id), type=type)
                 for rs in stills:
                     r_stills_loc.append(DBStill(rs, type))
+                    # print(rs)
 
             shuffle(r_stills_loc)
             r_stills_loc = r_stills_loc[:n_stills_max]

@@ -1377,7 +1377,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def get_name(self):
         return str(self.ID)
-        return str(self.additional_identifiers[0])
 
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.additional_identifiers[0]]))
@@ -2185,7 +2184,6 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable, IHasVocabulary):
 #endregion
 
 #region NodeScripts
-
 class NodeScript(IProjectContainer, IHasName, ISelectable):
     def __init__(self, name = ""):
         IProjectContainer.__init__(self)
@@ -2299,6 +2297,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
 
     def delete(self):
         self.project.remove_script(self)
+
 
 class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
     def __init__(self, operation = None, pos = (0, 0), unique_id = -1):

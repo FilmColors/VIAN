@@ -462,7 +462,7 @@ class SegmentOutlinerItem(AbstractOutlinerItem):
 
     def update_item(self):
         super(SegmentOutlinerItem, self).update_item()
-        self.setText(0, str(str(self.segment.ID)))# + "\t" +self.segment.additional_identifiers[0]))
+        self.setText(0, str(str(self.segment.ID)))
 
 
 class AnnotationLayerOutlinerRootItem(AbstractOutlinerItem):
