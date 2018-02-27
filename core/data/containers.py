@@ -1129,7 +1129,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if next is not None and next.start < stop:
             return
 
-        new_seg = Segment(ID = ID, start = start, end = stop, additional_identifiers=[str(ID)],
+        new_seg = Segment(ID = ID, start = start, end = stop, name=str(ID),
                           segmentation = self, annotation_body=annotation_body)
         new_seg.set_project(self.project)
 
@@ -1320,7 +1320,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         return ""
 
 class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary):
-    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, additional_identifiers = None, segmentation=None, annotation_body = ""):
+    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None, annotation_body = "", name = "New Segment"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
         IHasVocabulary.__init__(self)
@@ -1328,11 +1328,9 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.ID = ID
         self.start = start
         self.end = end
+        self.name = name
 
         self.duration = duration
-        if additional_identifiers is None:
-            additional_identifiers = []
-        self.additional_identifiers = additional_identifiers
         self.annotation_body = annotation_body
         self.timeline_visibility = True
         self.segmentation = segmentation
@@ -1379,8 +1377,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         return str(self.ID)
 
     def set_name(self, name):
-        self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.additional_identifiers[0]]))
-        self.additional_identifiers[0] = name
+        self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.name]))
+        self.name = name
         self.dispatch_on_changed(item=self)
 
     def set_annotation_body(self, annotation):
@@ -1390,10 +1388,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def get_annotation_body(self):
         return self.annotation_body
-
-    def set_additional_identifiers(self, additional):
-        self.additional_identifiers = additional
-        self.dispatch_on_changed(item=self)
 
     def serialize(self):
         words = []
@@ -1406,7 +1400,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
              start = self.start,
              end = self.end,
              duration = self.duration,
-             additional_identifiers = self.additional_identifiers,
+             name = self.name,
             annotation_body = self.annotation_body,
             notes = self.notes,
             locked = self.locked,
@@ -1421,8 +1415,14 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.start = serialization["start"]
         self.end = serialization["end"]
         self.duration = serialization["duration"]
-        self.additional_identifiers = serialization["additional_identifiers"]
+
         self.notes = serialization['notes']
+
+        # Name has been introduced in 0.4.14
+        try:
+            self.name = serialization['name']
+        except:
+            self.name = str(self.ID)
 
         try:
             self.locked = serialization['locked']
@@ -1457,7 +1457,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def delete(self):
         self.segmentation.remove_segment(self)
-
 
 #endregion
 

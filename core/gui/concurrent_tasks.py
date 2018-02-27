@@ -95,3 +95,5 @@ class ConcurrentTaskEntry(QWidget):
 
     def abort(self):
         pass
+
+
