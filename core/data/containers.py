@@ -3197,7 +3197,6 @@ class Experiment(IProjectContainer, IHasName):
         self.unique_id = serialization['unique_id']
         self.classification_sources = serialization['classification_sources']
         self.analyses_templates = serialization['analyses_templates']
-
         project.add_experiment(self)
 
         for obj in serialization['classification_objects']:

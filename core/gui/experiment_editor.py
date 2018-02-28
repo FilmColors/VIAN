@@ -200,6 +200,11 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.inhibit_ui_signals = False
 
     def on_loaded(self, project):
+        if len(project.experiments) > 0:
+            self.current_experiment = project.experiments[0]
+        else:
+            self.current_experiment = None
+
         self.update_ui()
 
     def on_closed(self):
