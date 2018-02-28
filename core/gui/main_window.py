@@ -58,17 +58,19 @@ from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
+from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.4.15"
+__version__ = "0.4.16"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
 
 PROFILE = False
+
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
@@ -316,11 +318,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionColorimetry.triggered.connect(partial(self.analysis_triggered, ColometricsAnalysis()))
         self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
+        self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
-
 
         self.actionUpdate.triggered.connect(self.update_vian)
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
@@ -328,7 +330,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
 
         self.actionClearRecent.triggered.connect(self.clear_recent)
-
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,

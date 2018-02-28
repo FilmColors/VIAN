@@ -402,7 +402,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             for itm in self.all_boxes:
                 itm[0].setEnabled(False)
 
-        elif len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
+        elif self.project().selected is not None and len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
             for itm in self.all_boxes:
                 itm[0].setEnabled(True)
                 itm[0].setChecked(self.project().selected[0].has_word(itm[1]))
