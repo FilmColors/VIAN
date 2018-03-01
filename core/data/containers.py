@@ -3302,3 +3302,36 @@ class ClassificationObjects(IProjectContainer):
 
         return self
 #endregion
+
+#region MediaObject
+class MediaObject(IProjectContainer, IHasName):
+    def __init__(self, name, file_path):
+        IProjectContainer.__init__(self)
+        self.name = name
+        self.file_path = file_path
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+
+    def serialize(self):
+        data = dict(
+            name = self.name,
+            file_path = self.file,
+            unique_id = self.unique_id
+        )
+        return data
+
+    def deserialize(self, serialization):
+        self.name = serialization['name']
+        self.file_path = serialization['file_path']
+        self.unique_id = serialization['unique_id']
+
+
+#endregion
+
+
+
+

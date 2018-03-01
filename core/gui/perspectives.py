@@ -34,6 +34,7 @@ class Perspective(Enum):
         Results = 6
         Classification = 7
         ExperimentSetup = 8
+        QuickAnnotation = 9
 
 
 

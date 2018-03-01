@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1167</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -132,6 +132,7 @@
      <addaction name="actionVocabularyPersp"/>
      <addaction name="actionResultsPersp"/>
      <addaction name="actionNodeEditorPerspective"/>
+     <addaction name="actionQuick_Annotation"/>
      <addaction name="separator"/>
      <addaction name="actionSave_Perspective"/>
      <addaction name="actionLoad_Perspective"/>
@@ -670,6 +671,11 @@
   <action name="actionMovie_Barcode">
    <property name="text">
     <string>Movie Barcode</string>
+   </property>
+  </action>
+  <action name="actionQuick_Annotation">
+   <property name="text">
+    <string>Quick Annotation</string>
    </property>
   </action>
  </widget>

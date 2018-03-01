@@ -47,6 +47,7 @@ from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, Status
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, ClassificationWindow
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
+from core.gui.quick_annotation import QuickAnnotationWidget, QuickAnnotationDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from core.remote.corpus.client import CorpusClient
@@ -167,6 +168,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_results_widget_dock = None
         self.experiment_editor = None
         self.experiment_editor_dock = None
+        self.quick_annotation_dock = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -220,6 +222,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.create_analysis_results_widget()
         self.create_experiment_editor()
+        self.create_quick_annotation_dock()
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -301,6 +304,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSegmentationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Segmentation.name))
         self.actionResultsPersp.triggered.connect(partial(self.switch_perspective, Perspective.Results.name))
         self.actionVocabularyPersp.triggered.connect(partial(self.switch_perspective, Perspective.Classification.name))
+        self.actionQuick_Annotation.triggered.connect(partial(self.switch_perspective, Perspective.QuickAnnotation.name))
 
         self.actionHistory.triggered.connect(self.create_history_view)
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
@@ -683,6 +687,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.analysis_results_widget.show()
                 self.analysis_results_widget.raise_()
                 self.analysis_results_widget.activateWindow()
+
+    def create_quick_annotation_dock(self):
+        if self.quick_annotation_dock is None:
+            self.quick_annotation_dock = QuickAnnotationDock(self)
+            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.quick_annotation_dock, Qt.Vertical)
+        else:
+            if self.quick_annotation_dock.isVisible():
+                self.quick_annotation_dock.hide()
+            else:
+                self.quick_annotation_dock.show()
     #endregion
 
     #region QEvent Overrides
@@ -1349,6 +1363,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_editor_dock)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
+        elif perspective == Perspective.QuickAnnotation.name:
+            self.hide_all_widgets()
+            self.player_dock_widget.show()
+            self.quick_annotation_dock.show()
+
+            self.addDockWidget(Qt.LeftDockWidgetArea,self.player_dock_widget)
+            self.addDockWidget(Qt.BottomDockWidgetArea, self.quick_annotation_dock)
 
 
         self.setCentralWidget(central)
@@ -1383,6 +1404,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
         self.experiment_editor_dock.hide()
+        self.quick_annotation_dock.hide()
 
     def set_default_dock_sizes(self, perspective):
         if perspective == Perspective.Segmentation:
@@ -1498,7 +1520,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_player_size(self):
         self.player.update()
-
 
     def open_documentation(self):
         webbrowser.open("file://" + os.path.abspath("_docs/build/html/index.html"))
