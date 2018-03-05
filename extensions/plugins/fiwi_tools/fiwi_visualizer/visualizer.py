@@ -20,7 +20,7 @@ from core.visualization.graph_plots import *
 
 from core.data.plugin import *
 from core.concurrent.worker import SimpleWorker
-
+from core.data.computation import create_icon
 
 #region -- Definitions --
 VOC_PATH = "C:\\Users\\Gaudenz Halter\\Desktop\\Glossar_DB_exp_11022018_2.CSV"
@@ -53,9 +53,12 @@ class FiwiVisualizer(QMainWindow):
         self.database = FilmColorsDatabase()
         self.database_file = None
 
+        self.all_movies = []
         self.root_dir = None
         self.node_matrix = None
 
+        self.corporas = []
+        self.current_corpora = None
         self.current_segments = []
         self.current_stills = []
 
@@ -93,12 +96,6 @@ class FiwiVisualizer(QMainWindow):
         self.mode = None
         self.files = []
 
-        self.vis_toolbar = self.addToolBar("Visualizations")
-        self.a_node_graph = self.vis_toolbar.addAction("Node-Graph")
-        self.a_colordt = self.vis_toolbar.addAction("Color-DT Plots")
-        self.a_color_ab = self.vis_toolbar.addAction("AB-Plane Plots")
-        self.a_color_la = self.vis_toolbar.addAction("LA-Plane Plots")
-
         self.ctrl_node_graph = self.node_graph.get_controls()
 
         self.info_dock.inner.addWidget(self.ctrl_node_graph)
@@ -106,11 +103,11 @@ class FiwiVisualizer(QMainWindow):
         self.info_dock.inner.addWidget(QWidget())
         self.info_dock.inner.addWidget(QWidget())
 
-        self.a_node_graph.triggered.connect(partial(self.central.setCurrentIndex, 0))
-        self.a_colordt.triggered.connect(partial(self.central.setCurrentIndex, 1))
-        self.a_color_ab.triggered.connect(partial(self.central.setCurrentIndex, 2))
-        self.a_color_la.triggered.connect(partial(self.central.setCurrentIndex, 3))
+        self.vis_toolbar = VisualizationToolbar(self)
 
+        self.level_toolbar = LevelToolbar(self)
+        self.addToolBar(Qt.LeftToolBarArea, self.level_toolbar)
+        self.addToolBar(Qt.LeftToolBarArea, self.vis_toolbar)
 
         self.unique_keywords = []
         self.thread_pool = QThreadPool(self)
@@ -220,13 +217,16 @@ class FiwiVisualizer(QMainWindow):
         on_progress(0.9)
         labels = [k.to_string() for k in unique_keywords]
 
+        all_movies = database.get_movies_objs()
+
         on_progress(1.0)
         return [root_dir,
                 unique_keywords,
                 node_matrix,
                 labels,
                 sqlite_path,
-                root_path
+                root_path,
+                all_movies
                 ]
 
     def on_load_finished(self, result):
@@ -239,6 +239,9 @@ class FiwiVisualizer(QMainWindow):
         self.store_settings(result[4], result[5])
         self.progress_bar.setValue(0)
         self.progress_bar.hide()
+
+        self.all_movies = result[6]
+        self.movie_list_dock.list_files(self.all_movies)
 
     #region Query
     def on_start_query(self):
@@ -418,6 +421,14 @@ class FiwiVisualizer(QMainWindow):
         elif a0.key() == Qt.Key_Down:
             self.onImagePosScaleChanged.emit(-0.1)
 
+    def set_current_corpus(self, idx):
+        try:
+            self.current_corpora = self.corporas[idx]
+        except:
+            pass
+
+    def current_corpus(self):
+        return self.current_corpora
     #region Widget Creation
     def create_query_dock(self):
         if self.query_dock is None:
@@ -455,8 +466,47 @@ class FiwiVisualizer(QMainWindow):
             return None, None
 
         return data["db_path"], data['root_path']
+
+    def save_corpora(self):
+        pass
+
+    def load_corpora(self):
+        pass
+
+
     #endregion
     pass
+
+
+class VisualizationToolbar(QToolBar):
+    def __init__(self, visualizer):
+        super(VisualizationToolbar, self).__init__(visualizer)
+        self.visualizer = visualizer
+        # self.a_node_graph = self.addAction("Node-Graph")
+        # self.a_colordt = self.addAction("Color-DT Plots")
+        # self.a_color_ab = self.addAction("AB-Plane Plots")
+        # self.a_color_la = self.addAction("LA-Plane Plots")
+        self.setIconSize(QSize(64,64))
+        self.a_node_graph = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_node_vis.png"), "")
+        self.a_colordt = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_dt.png"), "")
+        self.a_color_ab = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_ab.png"), "")
+        self.a_color_la = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_la.png"), "")
+
+        self.a_node_graph.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 0))
+        self.a_colordt.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 1))
+        self.a_color_ab.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 2))
+        self.a_color_la.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 3))
+
+class LevelToolbar(QToolBar):
+    def __init__(self, visualizer):
+        super(LevelToolbar, self).__init__(visualizer)
+        self.visualizer = visualizer
+        self.setIconSize(QSize(64, 64))
+        self.a_corpus = self.addAction(
+            create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_corpus_level.png"), "")
+        self.a_film = self.addAction(
+            create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_film_level.png"), "")
+
 
 class InfoDock(QDockWidget):
     def __init__(self, parent, visualizer):

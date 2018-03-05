@@ -1239,13 +1239,6 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def switch_perspective(self, perspective):
-        # DARWIN
-        # if self.is_darwin:
-        #     central = self.player_placeholder
-        # else:
-
-        # central = self.player
-
         self.centralWidget().setParent(None)
         self.statusBar().show()
 
@@ -1274,6 +1267,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.elan_status.stage_selector.set_stage(0, False)
 
         elif perspective == Perspective.Annotation.name:
             self.current_perspective = Perspective.Annotation
@@ -1287,6 +1281,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
+            self.elan_status.stage_selector.set_stage(1, False)
             # self.concurrent_task_viewer.show()
             # self.history_view.show()
 
@@ -1330,6 +1325,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Horizontal)
+            self.elan_status.stage_selector.set_stage(4, False)
             self.splitDockWidget(self.outliner, self.inspector, Qt.Vertical)
 
         elif perspective == Perspective.Classification.name:
@@ -1345,12 +1341,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.addDockWidget(Qt.RightDockWidgetArea, self.timeline, Qt.Vertical)
 
-            self.statusBar().hide()
+            self.elan_status.stage_selector.set_stage(3, False)
+            # self.statusBar().hide()
 
         elif perspective == Perspective.ExperimentSetup.name:
-
-
-
             self.hide_all_widgets()
 
             self.outliner.show()
@@ -1358,6 +1352,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.inspector.show()
             self.experiment_editor_dock.show()
 
+            self.elan_status.stage_selector.set_stage(2, False)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Vertical)
             self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_editor_dock)

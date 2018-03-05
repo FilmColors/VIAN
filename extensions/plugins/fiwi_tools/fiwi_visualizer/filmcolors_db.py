@@ -15,6 +15,53 @@ TB_KEYWORDS = "keywords"
 TB_MOVIES = "movies"
 
 
+class DBMovie():
+    def __init__(self, name, fm_id, movie_id_db, year):
+        self.name = name
+        self.fm_id = fm_id
+        self.movie_id_db = movie_id_db
+
+        try:
+            self.year = int(year)
+        except:
+            print(year)
+            self.year = 0
+
+
+    def __str__(self):
+        return self.fm_id + " " + self.name + " " + str(self.year)
+
+
+class Corpus():
+    def __init__(self, name):
+        self.name = name
+        self.movies = []
+
+    def serialize(self):
+        fm_ids = []
+        for m in self.movies:
+            fm_ids.append(m.fm_id)
+        data = dict(
+            fm_ids = fm_ids
+        )
+        return data
+
+    def deserialize(self, serialization, all_movies):
+        for fm_id in serialization['fm_ids']:
+            for m in all_movies:
+                if m.fm_id == fm_id:
+                    self.movies.append(m)
+                    break
+
+    def add_movie(self, movie: DBMovie):
+        if movie not in self.movies:
+            self.movies.append(movie)
+
+    def remove_movie(self, movie: DBMovie):
+        if movie in self.movies:
+            self.movies.remove(movie)
+
+
 class DBSegment():
     def __init__(self, fm_id, segm_id):
         self.fm_id = fm_id
@@ -25,17 +72,6 @@ class DBSegment():
             variation = " ".join(re.findall("[a-zA-Z]+", segm_id))
             self.segm_id = int(segm_id.strip(variation))
             self.variation = variation.lower()
-
-
-class DBMovie():
-    def __init__(self, name, fm_id, movie_id_db, year):
-        self.name = name
-        self.fm_id = fm_id
-        self.movie_id_db = movie_id_db
-        self.year = year
-
-    def __str__(self):
-        return self.fm_id + " " + self.name + " " + self.year
 
 
 class UniqueKeyword():
@@ -76,6 +112,7 @@ class FilmColorsDatabase():
         self.segm_tables_filters = []
 
     def connect(self, path):
+
         self.path = path
         self.db = ds.connect(path)
 
