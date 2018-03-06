@@ -264,6 +264,9 @@ class VIANProject(IHasName, IHasVocabulary):
     # endregion
 
     # region Screenshots
+    def create_screenshot(self, name, image, time_ms):
+        new = Screenshot(name,image,timestamp=time_ms)
+        self.add_screenshot(new)
 
     def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)

@@ -197,9 +197,42 @@ class ScreenshotImporter(IConcurrentJob):
         super(ScreenshotImporter, self).__init__(args=args)
 
     def run_concurrent(self, args, sign_progress):
+        mode = args[0]
+        movie_path = args[1]
+        scr_paths = args[2]
+        segmentation = args[3]
+        scr_ranges = args[4]
+        timestamps = args[5]
 
-        movie_path = args[0]
-        scr_paths = args[1]
+
+        if mode == 0:
+
+            return self.mode_time(movie_path, timestamps)
+
+
+        elif mode == 1:
+            result = []
+
+            for r in scr_ranges:
+
+
+            return None
+
+        else:
+            return self.mode_complete(movie_path, scr_paths, sign_progress)
+
+    def mode_time(self, movie_path, timestamps, scr_names, sign_progress):
+        cap = cv2.VideoCapture(movie_path)
+        result = []
+        for i, t in enumerate(timestamps):
+            cap.set(cv2.CAP_PROP_POS_FRAMES, t)
+            ret, frame = cap.read()
+            if ret:
+                result.append([t, frame, scr_names[i]])
+
+        return result
+
+    def mode_complete(self, movie_path, scr_paths, sign_progress):
 
         cap = cv2.VideoCapture(movie_path)
         length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -267,8 +300,6 @@ class ScreenshotImporter(IConcurrentJob):
             ret, frame = cap.read()
 
             result.append([frame_idx, frame, scr_names[i]])
-
-        return result
 
     def modify_project(self, project:VIANProject, result, sign_progress = None):
         project.inhibit_dispatch=True

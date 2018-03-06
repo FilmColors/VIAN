@@ -116,7 +116,7 @@ class MovieList(QDockWidget):
 
         for idx in self.listWidget.selectedIndexes():
             self.visualizer.current_corpus().add_movie(self.items[idx.row()])
-
+        self.visualizer.onCorporasChange.emit(self.visualizer.corporas)
         self.update_corpus_list()
 
     def remove_from_corpus(self):
@@ -125,8 +125,8 @@ class MovieList(QDockWidget):
 
         for idx in self.currentCorpusList.selectedIndexes():
             try:
-                print(idx.row(), len(self.visualizer.current_corpus().movies))
                 self.visualizer.current_corpus().remove_movie(self.visualizer.current_corpus().movies[idx.row()])
+                self.visualizer.onCorporasChange.emit(self.visualizer.corporas)
             except:
                 pass
 

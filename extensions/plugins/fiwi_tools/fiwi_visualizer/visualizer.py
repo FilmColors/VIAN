@@ -42,6 +42,8 @@ class FiwiVisualizerExtension(GAPlugin):
 
 class FiwiVisualizer(QMainWindow):
     onImagePosScaleChanged = pyqtSignal(float)
+    onCurrentCorpusChanged = pyqtSignal(object)
+    onCorporasChange = pyqtSignal(object)
 
     def __init__(self, parent, plugin: GAPlugin):
         super(FiwiVisualizer, self).__init__(parent)
@@ -116,6 +118,9 @@ class FiwiVisualizer(QMainWindow):
 
         self.progress_bar = QProgressBar(self)
         self.statusBar().addWidget(self.progress_bar)
+
+        self.onCorporasChange.connect(self.query_dock.update_corpora_list)
+
 
         self.showMaximized()
         # E:\Programming\Datasets\FilmColors\database_root\database_root
@@ -424,6 +429,7 @@ class FiwiVisualizer(QMainWindow):
     def set_current_corpus(self, idx):
         try:
             self.current_corpora = self.corporas[idx]
+            self.onCurrentCorpusChanged.emit(self.current_corpora)
         except:
             pass
 
@@ -482,10 +488,7 @@ class VisualizationToolbar(QToolBar):
     def __init__(self, visualizer):
         super(VisualizationToolbar, self).__init__(visualizer)
         self.visualizer = visualizer
-        # self.a_node_graph = self.addAction("Node-Graph")
-        # self.a_colordt = self.addAction("Color-DT Plots")
-        # self.a_color_ab = self.addAction("AB-Plane Plots")
-        # self.a_color_la = self.addAction("LA-Plane Plots")
+
         self.setIconSize(QSize(64,64))
         self.a_node_graph = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_node_vis.png"), "")
         self.a_colordt = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_dt.png"), "")

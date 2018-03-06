@@ -491,6 +491,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.fitInView(rect, Qt.KeepAspectRatio)
         self.curr_scale = self.sceneRect().width() / rect.width()
 
+    def frame_screenshot(self, scr_item):
+        for s in self.images_plain:
+            if isinstance(s, ScreenshotManagerPixmapItems) and s.screenshot_obj == scr_item:
+                rect = s.sceneBoundingRect()
+                self.fitInView(rect, Qt.KeepAspectRatio)
+                self.curr_scale = self.sceneRect().width() / rect.width()
+                break
+
+
     def frame_segment(self, segment_index, center = True):
         self.current_segment_index = segment_index
         self.arrange_images()

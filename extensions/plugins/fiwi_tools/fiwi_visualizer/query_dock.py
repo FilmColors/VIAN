@@ -24,6 +24,9 @@ class QueryDock(QDockWidget):
         self.controls.setLayout(QVBoxLayout())
         self.inner.layout().addWidget(self.controls)
 
+        self.cb_Corporas = QComboBox(self)
+        self.controls.layout().addWidget(self.cb_Corporas)
+
         self.filter_controls = QWidget(self)
         self.filter_controls.setLayout(QHBoxLayout())
         self.btn_reset = QPushButton("Reset Filters")
@@ -84,6 +87,12 @@ class QueryDock(QDockWidget):
         self.years = list(range(1900, 2018))
 
         self.current_filters = []
+
+    def update_corpora_list(self, corporas):
+        self.cb_Corporas.clear()
+        for c in corporas:
+            self.cb_Corporas.addItem(c)
+        self.cb_Corporas.addItem("FilmColors Complete")
 
     def create_filter_menu(self, filters:List[UniqueKeyword]):
         for f in self.filters:

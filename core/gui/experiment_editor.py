@@ -27,9 +27,11 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.inhibit_ui_signals = False
 
         self.cB_ClassSegment.stateChanged.connect(self.source_changed)
-        self.cB_ClassSegmentation.stateChanged.connect(self.source_changed)
         self.cB_ClassAnnotation.stateChanged.connect(self.source_changed)
-        self.cB_ClassAnnotationLayer.stateChanged.connect(self.source_changed)
+        self.cB_ClassScreenshots.stateChanged.connect(self.source_changed)
+
+        # self.cB_ClassSegmentation.stateChanged.connect(self.source_changed)
+        # self.cB_ClassAnnotationLayer.stateChanged.connect(self.source_changed)
 
         self.lineEdit_ExperimentName.textChanged.connect(self.name_changed)
         self.lineEdit_ObjectName.returnPressed.connect(self.add_class_object)
@@ -47,9 +49,11 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         else:
             self.set_enabled(True)
 
+            print(self.current_experiment.classification_sources)
             self.cB_ClassSegment.setChecked(SEGMENT in self.current_experiment.classification_sources)
             # self.cB_ClassSegmentation.setChecked(SEGMENTATION in self.current_experiment.classification_sources)
             self.cB_ClassAnnotation.setChecked(ANNOTATION in self.current_experiment.classification_sources)
+            self.cB_ClassScreenshots.setChecked(SCREENSHOT in self.current_experiment.classification_sources)
             # self.cB_ClassAnnotationLayer.setChecked(ANNOTATION_LAYER in self.current_experiment.classification_sources)
 
             self.lineEdit_ExperimentName.setText(self.current_experiment.name)
@@ -133,11 +137,13 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             sources.append(SEGMENT)
         if self.cB_ClassAnnotation.isChecked():
             sources.append(ANNOTATION)
+        if self.cB_ClassScreenshots.isChecked():
+            sources.append(SCREENSHOT)
         # if self.cB_ClassSegmentation.isChecked():
         #     sources.append(SEGMENTATION)
         # if self.cB_ClassAnnotationLayer.isChecked():
         #     sources.append(ANNOTATION_LAYER)
-
+        print("Source Changed Sources", sources)
         self.current_experiment.classification_sources = sources
 
     def name_changed(self):
