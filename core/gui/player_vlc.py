@@ -296,6 +296,7 @@ class Player_VLC(VideoPlayer):
         #if fps != 0:
         #    self.fps = capture.get(cv2.CAP_PROP_FPS)
         self.fps = capture.get(cv2.CAP_PROP_FPS)
+        self.main_window.project.movie_descriptor.fps = self.fps
 
         self.user_fps = self.fps
 

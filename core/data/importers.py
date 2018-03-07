@@ -197,49 +197,70 @@ class ScreenshotImporter(IConcurrentJob):
         super(ScreenshotImporter, self).__init__(args=args)
 
     def run_concurrent(self, args, sign_progress):
-        mode = args[0]
-        movie_path = args[1]
-        scr_paths = args[2]
-        segmentation = args[3]
-        scr_ranges = args[4]
-        timestamps = args[5]
+        mode = args['mode']
+        movie_path = args['movie_path']
+        scr_paths = args['scr_paths']
+        segment_ids = args['segment_ids']
+        segment_ranges = args['segment_ranges']
+        timestamps = args['timestamps']
 
 
         if mode == 0:
-
-            return self.mode_time(movie_path, timestamps)
-
+            return self.mode_time(movie_path, timestamps, scr_paths, sign_progress)
 
         elif mode == 1:
             result = []
+            for u in np.unique(np.array(segment_ids)).tolist():
+                indices = np.where(np.array(segment_ids) == u)[0]
+                p_paths = []
+                for i, p in enumerate(scr_paths):
+                    if i in indices:
+                        p_paths.append(p)
 
-            for r in scr_ranges:
+                print(indices, segment_ranges[u], p_paths)
+                result.extend(self.mode_complete(movie_path,
+                                                 p_paths,
+                                            sign_progress,
+                                            segment_ranges[u][0],
+                                            segment_ranges[u][1]))
 
 
-            return None
+            return result
 
         else:
             return self.mode_complete(movie_path, scr_paths, sign_progress)
 
     def mode_time(self, movie_path, timestamps, scr_names, sign_progress):
         cap = cv2.VideoCapture(movie_path)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+
         result = []
         for i, t in enumerate(timestamps):
-            cap.set(cv2.CAP_PROP_POS_FRAMES, t)
+            frame_pos = ms_to_frames(t, fps)
+            sign_progress(i / len(timestamps))
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
             ret, frame = cap.read()
             if ret:
-                result.append([t, frame, scr_names[i]])
+                result.append([frame_pos, frame, scr_names[i]])
 
         return result
 
-    def mode_complete(self, movie_path, scr_paths, sign_progress):
+    def mode_complete(self, movie_path, scr_paths, sign_progress, start = None, end = None):
 
         cap = cv2.VideoCapture(movie_path)
         length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
+        if start is not None and end is not None:
+            length = end - start
+        else:
+            start = 0
+
         segm_length = 5000
+        if length < segm_length:
+            segm_length = length
+
         resolution = 10
         quality = 0.3
 
@@ -253,7 +274,7 @@ class ScreenshotImporter(IConcurrentJob):
             img = cv2.imread(p)
             scrs.append(img)
 
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start)
         frame_counter = -1
         n_segments = int(np.ceil(length / segm_length))
 
@@ -262,11 +283,12 @@ class ScreenshotImporter(IConcurrentJob):
         new_scr = []
         for scr in scrs:
             new_scr.append(cv2.resize(scr, (int(width), int(height)), interpolation=cv2.INTER_CUBIC))
+
         scrs = np.array(new_scr, dtype=np.float32)
 
         for i in range(n_segments):
             frames = []
-            frame_idxs = []
+            # frame_idxs = []
             for j in range(segm_length):
                 if self.aborted:
                     return "aborted"
@@ -277,10 +299,9 @@ class ScreenshotImporter(IConcurrentJob):
                 if j % resolution != 0:
                     continue
 
-                if ret:
+                if ret and frame_counter < length:
                     frame = cv2.resize(frame, (int(width), int(height)), interpolation=cv2.INTER_CUBIC)
                     frames.append(frame)
-                    frame_idxs.append(frame_counter)
 
                 else:
                     break
@@ -293,13 +314,18 @@ class ScreenshotImporter(IConcurrentJob):
 
         result = []
         for i in range(scrs.shape[0]):
-            best_value = np.amin(match_table[:, i, 1])
+            # best_value = np.amin(match_table[:, i, 1])
             best_idx = np.argmin(match_table[:, i, 1])
             frame_idx = match_table[best_idx, i, 0]
+            print("RESULT, ", frame_idx, frame_idx + start)
+            frame_idx = frame_idx + start
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
             ret, frame = cap.read()
 
             result.append([frame_idx, frame, scr_names[i]])
+
+        return result
+
 
     def modify_project(self, project:VIANProject, result, sign_progress = None):
         project.inhibit_dispatch=True
@@ -311,6 +337,7 @@ class ScreenshotImporter(IConcurrentJob):
             project.add_screenshot(Screenshot(title=name, image=frame, frame_pos=int(frame_pos), timestamp=time_stamp))
         project.sort_screenshots()
         project.inhibit_dispatch = False
+        project.dispatch_changed()
 
 
 class FilmColorsPipelineImporter():

@@ -29,6 +29,7 @@ from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
+from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
 from core.gui.Dialogs.welcome_dialog import WelcomeDialog
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.concurrent_tasks import ConcurrentTaskDock
@@ -1143,7 +1144,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.dispatch_loaded()
             self.print_message("Import Successfull", "Green")
         except Exception as e:
-            raise(e)
             self.print_message("Import Failed", "Red")
             self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
             self.print_message(str(e), "Red")
@@ -1191,10 +1191,12 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def import_screenshots(self):
-        paths = QFileDialog.getOpenFileNames()[0]
-        args = [self.project.movie_descriptor.movie_path, paths]
-        importer = ScreenshotImporter(args)
-        self.run_job_concurrent(importer)
+        # paths = QFileDialog.getOpenFileNames()[0]
+        # args = [self.project.movie_descriptor.movie_path, paths]
+        # importer = ScreenshotImporter(args)
+        # self.run_job_concurrent(importer)
+        dialog = DialogScreenshotImport(self)
+        dialog.show()
 
     def on_zip_project(self):
         try:

@@ -106,7 +106,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_Delimiter"/>
+      <widget class="QLineEdit" name="lineEdit_Delimiter">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -132,7 +136,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sB_PositionSegment"/>
+      <widget class="QSpinBox" name="sB_PositionSegment">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -158,16 +166,32 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sB_PositionTimeH"/>
+      <widget class="QSpinBox" name="sB_PositionTimeH">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sB_PositionTimeM"/>
+      <widget class="QSpinBox" name="sB_PositionTimeM">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sB_PositionTimeS"/>
+      <widget class="QSpinBox" name="sB_PositionTimeS">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sB_PositionTimeMS"/>
+      <widget class="QSpinBox" name="sB_PositionTimeMS">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
