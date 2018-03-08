@@ -112,7 +112,6 @@ class BarcodeAnalysisJob(IAnalysisJob):
 
                 if i % resolution != 0:
                     continue
-                print(i)
 
                 if frame is None:
                     break

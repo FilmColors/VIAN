@@ -22,6 +22,7 @@ from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
 from core.data.exporters import zip_project
+from core.data.tools import *
 # from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -91,6 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.profiler = cProfile.Profile()
             self.profiler.enable()
         loading_screen = LoadingScreen()
+        self.setAcceptDrops(True)
         self.has_open_project = False
         self.version = __version__
 
@@ -320,6 +322,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
+
+        #TOOLS
+        self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
 
         self.actionColorimetry.triggered.connect(partial(self.analysis_triggered, ColometricsAnalysis()))
         self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
@@ -729,6 +734,25 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
             # self.timeline.timeline.is_multi_selecting = False
 
+    def dragEnterEvent(self, event):
+        event.acceptProposedAction()
+        print(event.mimeData().hasUrls())
+
+    def dropEvent(self, event):
+        print("Hello")
+        if event.mimeData().hasUrls():
+            file_extension = str(event.mimeData().urls()[0]).split(".").pop()
+            files = event.mimeData().urls()
+            if "eaf" in file_extension:
+                print("Importing ELAN Project")
+                self.import_elan_project(str(event.mimeData().urls()[0]))
+            elif "png" in file_extension or "jpg" in file_extension:
+                res_files = []
+                for f in files:
+                    if "png" in str(f).split(".").pop() or "jpg" in str(f).split(".").pop():
+                        res_files.append(f.path())
+                self.import_screenshots(res_files)
+
     def mousePressEvent(self, event):
         self.close_drawing_editor()
         self.update()
@@ -748,6 +772,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+
     def open_recent(self, index):
         path = self.settings.recent_files_path[index]
         if os.path.isfile(path):
@@ -1122,15 +1147,16 @@ class MainWindow(QtWidgets.QMainWindow):
         curr_time = self.player.get_media_time()
         self.project.create_annotation_layer("New Layer", curr_time, curr_time + 10000)
 
-    def import_segmentation(self):
+    def import_segmentation(self, path = None):
         QMessageBox.warning(self, "Deprecated", "The Segmentation Importer is deprecated and therefore removed from VIAN.\n "
                                           "For ELAN Projects use the \"ELAN Project Importer\". \n "
                                           "A new Version for importing arbitary Segmentations is planned but not yet included.")
         # SegmentationImporterDialog(self, self.project, self)
 
-    def import_elan_project(self):
+    def import_elan_project(self, path = None):
         try:
-            path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
+            if path is None:
+                path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
             #path = path.replace("file:///", "")
             #path = path.replace("file:", "")
 
@@ -1148,8 +1174,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
             self.print_message(str(e), "Red")
 
-    def import_vocabulary(self):
-        paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
+    def import_vocabulary(self, paths = None):
+        if paths is None:
+            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
         # path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
         try:
             self.project.inhibit_dispatch = True
@@ -1190,12 +1217,12 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = VocabularyExportDialog(self)
         dialog.show()
 
-    def import_screenshots(self):
+    def import_screenshots(self, paths = None):
         # paths = QFileDialog.getOpenFileNames()[0]
         # args = [self.project.movie_descriptor.movie_path, paths]
         # importer = ScreenshotImporter(args)
         # self.run_job_concurrent(importer)
-        dialog = DialogScreenshotImport(self)
+        dialog = DialogScreenshotImport(self, paths)
         dialog.show()
 
     def on_zip_project(self):
@@ -1536,6 +1563,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def decrease_playrate(self):
         self.player.set_rate(self.player.get_rate() - 0.1)
         self.player_controls.update_rate()
+    # endregion
+
+    #region Tools
+    def on_auto_segmentation(self):
+        auto_segmentation(self.project,mode = AUTO_SEGM_EVEN, n_segment=10)
 
     # endregion
 

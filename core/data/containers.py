@@ -2718,6 +2718,19 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         return self
 
 
+class ColormetryAnalysis(AnalysisContainer):
+    def __init__(self, results = None):
+        super(ColormetryAnalysis, self).__init__(name = "Colormetry", results = results)
+        self.histograms = None
+        self.palettes = None
+
+    def get_histogram(self, time_ms):
+        pass
+
+    def get_palette(self, time_ms):
+        pass
+
+
 class AnalysisParameters():
     def __init__(self, target_items):
         self.target_items = []

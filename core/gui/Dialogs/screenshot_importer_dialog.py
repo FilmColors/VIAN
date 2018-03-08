@@ -12,11 +12,13 @@ from core.data.containers import VIANProject
 
 
 class DialogScreenshotImport(EDialogWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, paths = None):
         super(DialogScreenshotImport, self).__init__(parent, parent, "_docs/build/html/step_by_step/screenshots/export_screenshots.html")
         path = os.path.abspath("qt_ui/DialogImportScreenshots.ui")
         uic.loadUi(path, self)
         self.files = []
+        if paths is not None:
+            self.files = paths
 
         self.lineEdit_Delimiter.setText("_")
         self.checkBox_UseLocation.stateChanged.connect(self.set_timestamp_enabled)
