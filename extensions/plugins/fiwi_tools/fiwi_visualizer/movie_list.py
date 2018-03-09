@@ -29,6 +29,7 @@ class ListEntry(QListWidgetItem):
 class MovieList(QDockWidget):
     def __init__(self, parent):
         super(MovieList, self).__init__(parent)
+        self.setWindowTitle("Corpus Manager")
         self.visualizer = parent
         self.listWidget = QTableWidget(self)
 

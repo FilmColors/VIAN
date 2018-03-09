@@ -334,7 +334,7 @@ class FeaturePlotWidget(QWidget):
         self.project = project
 
         self.setLayout(QHBoxLayout(self))
-        self.plot = FeaturePlot(self, project)
+        self.plot = VIANFeaturePlot(self, project)
         self.layout().addWidget(self.plot)
 
     @pyqtSlot(list)

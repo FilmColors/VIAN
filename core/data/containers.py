@@ -75,6 +75,8 @@ class VIANProject(IHasName, IHasVocabulary):
         self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
+        self.colormetry_analysis = None
+
         self.add_vocabulary(get_default_vocabulary())
         self.create_default_experiment()
 
@@ -407,6 +409,13 @@ class VIANProject(IHasName, IHasVocabulary):
             if a.analysis_job_class == class_name:
                 return True
         return False
+
+    def create_colormetry(self):
+        colormetry = ColormetryAnalysis()
+        self.add_analysis(colormetry)
+        self.colormetry_analysis = colormetry
+        return colormetry
+
     #endregion
 
     # Getters for easier changes later in the project
@@ -2528,7 +2537,6 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.notes = ""
         self.data = data
 
-
     def unload_container(self, data=None, sync=False):
         super(AnalysisContainer, self).unload_container(self.data, sync=sync)
         self.data = None
@@ -2720,9 +2728,23 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
 
 class ColormetryAnalysis(AnalysisContainer):
     def __init__(self, results = None):
-        super(ColormetryAnalysis, self).__init__(name = "Colormetry", results = results)
-        self.histograms = None
-        self.palettes = None
+        super(ColormetryAnalysis, self).__init__(name = "Colormetry", data = results)
+        self.curr_location = 0
+        self.time_ms = []
+        self.frame_pos = []
+        self.histograms = []
+        self.avg_colors = []
+        self.palettes = []
+        self.resolution = 30
+        self.has_finished = False
+
+        self.linear_colors = []
+        for x in range(16):
+            for y in range(16):
+                for z in range(16):
+                    self.linear_colors.append([x * 16, y * 16, z * 16])
+        self.linear_colors = np.array([self.linear_colors] * 2, dtype=np.uint8)
+        self.linear_colors = cv2.cvtColor(self.linear_colors, cv2.COLOR_LAB2RGB)[0]
 
     def get_histogram(self, time_ms):
         pass
@@ -2730,6 +2752,31 @@ class ColormetryAnalysis(AnalysisContainer):
     def get_palette(self, time_ms):
         pass
 
+    def append_data(self, data):
+        self.time_ms.append(data['time_ms'])
+        self.histograms.append(data['hist'])
+        self.frame_pos.append(data['frame_pos'])
+        self.avg_colors.append(data['avg_color'])
+
+    def get_update(self, time_ms):
+        try:
+            frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
+            if len(self.histograms) > 0:
+                hist_data =self.histograms[frame_idx]
+
+                hist_data_pal = np.resize(hist_data, new_shape=(hist_data.shape[0] ** 3))
+                pal_indices = np.argsort(hist_data_pal)[-6:]
+                pal_cols = self.linear_colors[pal_indices]
+                palette_values = hist_data_pal[pal_indices]
+
+                return dict(hist=hist_data, palette = dict(val=palette_values, col=pal_cols))
+
+        except Exception as e:
+            print(e)
+            pass
+
+    def set_finished(self, obj):
+        self.has_finished = True
 
 class AnalysisParameters():
     def __init__(self, target_items):

@@ -140,38 +140,40 @@ class Worker(QRunnable):
 #     def set_segments(self, segments):
 #         self.segments = segments
 
-
-class MinimalThreadWorker(QObject):
-
-    finished = pyqtSignal()
+class MinimalWorkerSignals(QObject):
+    finished = pyqtSignal(object)
     callback = pyqtSignal(object)
     error = pyqtSignal(str)
 
+
+class MinimalThreadWorker(QRunnable):
     def __init__(self, func, args = None, use_callback = False):
         super(MinimalThreadWorker, self).__init__()
         self.function = func
         self.args = args
         self.use_callback = use_callback
+        self.signals = MinimalWorkerSignals()
 
     @pyqtSlot()
-    def process(self):
+    def run(self):
         try:
             if self.use_callback:
                 if self.args is None:
-                    result = self.function(self.callback)
-                    self.finished.emit(result)
+                    result = self.function(self.signals.callback)
+                    self.signals.finished.emit(result)
                 else:
-                    result = self.function(self.args, self.callback)
-                    self.finished.emit(result)
+                    result = self.function(self.args, self.signals.callback)
+                    self.signals.finished.emit(result)
             else:
                 if self.args is None:
                     result = self.function()
-                    self.finished.emit(result)
+                    self.signals.finished.emit(result)
                 else:
                     result = self.function(self.args)
-                    self.finished.emit(result)
+                    self.signals.finished.emit(result)
         except Exception as e:
-            self.error.emit(e)
+            raise e
+            self.signals.error.emit(e)
 
 
 class LiveWidgetThreadWorker(MinimalThreadWorker):

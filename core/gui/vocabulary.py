@@ -439,7 +439,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         else:
             vocabularies = self.project().vocabularies
 
-        print(vocabularies)
+        # print(vocabularies)
         # Creating the TABS
         for voc in vocabularies:
             if voc.category not in self.voc_categories:

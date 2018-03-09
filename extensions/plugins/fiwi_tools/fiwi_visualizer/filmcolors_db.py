@@ -61,10 +61,17 @@ class Corpus():
         if movie in self.movies:
             self.movies.remove(movie)
 
+    def to_fm_ids(self):
+        result = []
+        for m in self.movies:
+            result.append(m.movie_id_db)
+        return result
+
 
 class DBSegment():
-    def __init__(self, fm_id, segm_id):
+    def __init__(self, fm_id, segm_id, t_start = 0, t_end = 100):
         self.fm_id = fm_id
+
         try:
             self.segm_id = int(segm_id)
             self.variation = "a"
@@ -72,6 +79,13 @@ class DBSegment():
             variation = " ".join(re.findall("[a-zA-Z]+", segm_id))
             self.segm_id = int(segm_id.strip(variation))
             self.variation = variation.lower()
+        try:
+            self.t_start = int(t_start)
+            self.t_end = int(t_end)
+        except:
+            self.t_start = 0
+            self.t_end = 0
+        
 
 
 class UniqueKeyword():

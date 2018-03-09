@@ -27,7 +27,8 @@ VOC_PATH = "C:\\Users\\Gaudenz Halter\\Desktop\\Glossar_DB_exp_11022018_2.CSV"
 ROOT_FILE_EXT = "*.vian_db"
 DATABASE_FILE_EXT = "*.db"
 
-MODE_FOREGROUND = 0
+MODE_MOVIE = 0
+MODE_CORPUS = 1
 
 class FiwiVisualizerExtension(GAPlugin):
     def __init__(self, main_window):
@@ -44,6 +45,7 @@ class FiwiVisualizer(QMainWindow):
     onImagePosScaleChanged = pyqtSignal(float)
     onCurrentCorpusChanged = pyqtSignal(object)
     onCorporasChange = pyqtSignal(object)
+    onModeChanged = pyqtSignal(int)
 
     def __init__(self, parent, plugin: GAPlugin):
         super(FiwiVisualizer, self).__init__(parent)
@@ -75,11 +77,13 @@ class FiwiVisualizer(QMainWindow):
         self.color_space_plots = ColorSpacePlots(self.central, self)
         self.color_space_plane = ColorSpaceLPlanePlots(self.central, self)
         self.node_graph = VocabularyGraph(self)
+        self.feature_plot = FeaturePlot(self)
 
         self.central.addWidget(self.node_graph)
         self.central.addWidget(self.color_dt_plots)
         self.central.addWidget(self.color_space_plots)
         self.central.addWidget(self.color_space_plane)
+        self.central.addWidget(self.feature_plot)
 
         self.central.setCurrentIndex(0)
 
@@ -95,7 +99,7 @@ class FiwiVisualizer(QMainWindow):
         self.actionQuery_Window.triggered.connect(self.create_query_dock)
         self.actionFilm_List.triggered.connect(self.create_movie_list)
 
-        self.mode = None
+        self.mode = MODE_CORPUS
         self.files = []
 
         self.ctrl_node_graph = self.node_graph.get_controls()
@@ -106,6 +110,7 @@ class FiwiVisualizer(QMainWindow):
         self.info_dock.inner.addWidget(QWidget())
 
         self.vis_toolbar = VisualizationToolbar(self)
+        self.onModeChanged.connect(self.vis_toolbar.mode_changed)
 
         self.level_toolbar = LevelToolbar(self)
         self.addToolBar(Qt.LeftToolBarArea, self.level_toolbar)
@@ -120,7 +125,6 @@ class FiwiVisualizer(QMainWindow):
         self.statusBar().addWidget(self.progress_bar)
 
         self.onCorporasChange.connect(self.query_dock.update_corpora_list)
-
 
         self.showMaximized()
         # E:\Programming\Datasets\FilmColors\database_root\database_root
@@ -254,13 +258,18 @@ class FiwiVisualizer(QMainWindow):
             return
 
         self.query_dock.setEnabled(False)
+        curr_corpus = None
+        if self.current_corpora is not None:
+            curr_corpus = self.current_corpus().to_fm_ids()
+
         worker = SimpleWorker(self.on_query, self.on_query_finished,
                               self.on_progress,
                               args=[self.query_dock.current_filters,
                                     self.root_dir,
                                     self.query_dock.lineEdit_fm_id.text(),
                                     self.database_file,
-                                    self.n_stills_max
+                                    self.n_stills_max,
+                                    curr_corpus
                                     ])
         self.thread_pool.start(worker)
         self.progress_bar.show()
@@ -273,6 +282,9 @@ class FiwiVisualizer(QMainWindow):
         fm_id = args[2]
         database_path = args[3]
         n_stills_max = args[4]
+        corpus = args[5]
+
+        print(corpus)
 
         database = FilmColorsDatabase()
         database.connect("sqlite:///" + database_path)
@@ -283,6 +295,7 @@ class FiwiVisualizer(QMainWindow):
         queries_tables = []
         queries_words = []
         on_progress(0.01)
+        print("Query Segments")
         for i, t in enumerate(tables):
             on_progress(0.01 + (i/len(tables) * 0.2))
             if t not in queries_tables:
@@ -296,6 +309,9 @@ class FiwiVisualizer(QMainWindow):
         # if self.query_dock.lineEdit_fm_id.text() != "":
         if fm_id != "":
             res.extend([database.get_segments("Global:Literal", dict(Item_ID=self.query_dock.lineEdit_fm_id.text()))])
+
+        elif corpus is not None:
+            res.extend([database.get_segments("Global:Literal", dict(Item_ID=corpus))])
 
         # Query the current Year Range
         res.extend([database.get_segments("Global:Literal", dict(Filmdaten_FilmsColors_2_Year=self.query_dock.years))])
@@ -330,22 +346,35 @@ class FiwiVisualizer(QMainWindow):
         segments = []
         for i in range(int(np.clip(int(len(result_ids) / 500), 1, None))):
             segments.extend(database.get_segments("Global:Literal", dict(id=result_ids[i*500:i*500+500])))
-        r_segments = [DBSegment(s['Item_ID'], s['Segment_ID']) for s in segments]
+        r_segments = [DBSegment(s['Item_ID'], s['Segment_ID'], s["Sequence_Start"], s['Sequence_End']) for s in segments]
 
         current_stills = []
         current_segments = r_segments
         paths = []
+
+        if len(r_segments) <= 0:
+            return
+
+        grouped_segments = []
+        r_segments = sorted(r_segments, key = lambda x: x.fm_id)
+        curr_group = [r_segments[0].fm_id, []]
+        for r in r_segments:
+            if r.fm_id == curr_group[0]:
+                curr_group[1].append(r.segm_id)
+            else:
+                grouped_segments.append(curr_group)
+                curr_group = [r.fm_id, [r.segm_id]]
+        grouped_segments.append(curr_group)
+
+        print("Query Stills")
         for type in [TB_STILL_GLOB, TB_STILL_FG, TB_STILL_BG]:
 
             r_stills_loc = []
-            for i, r in enumerate(r_segments):
-                on_progress(0.6 + (i / len(r_segments) * 0.4))
-                if i % 10 == 0:
-                    stdout.write("\r" + str(round(i / len(r_segments) * 100, 2)))
-                stills = database.get_stills(dict(FM_ID=r.fm_id, SEGM_ID=r.segm_id), type=type)
+            for i, r in enumerate(grouped_segments):
+                on_progress(0.6 + (i / len(grouped_segments) * 0.4))
+                stills = database.get_stills(dict(FM_ID=r[0], SEGM_ID=r[1]), type=type)
                 for rs in stills:
                     r_stills_loc.append(DBStill(rs, type))
-                    # print(rs)
 
             shuffle(r_stills_loc)
             r_stills_loc = r_stills_loc[:n_stills_max]
@@ -355,9 +384,10 @@ class FiwiVisualizer(QMainWindow):
 
             current_stills.extend(r_stills_loc)
 
+        print("Loading Stills")
         for i, s in enumerate(current_stills):
             stdout.write("\r" + str(i))
-            print(paths[i])
+
             try:
                 img = cv2.imread(paths[i])
                 if s.t_type in [TB_STILL_FG, TB_STILL_BG]:
@@ -431,10 +461,16 @@ class FiwiVisualizer(QMainWindow):
             self.current_corpora = self.corporas[idx]
             self.onCurrentCorpusChanged.emit(self.current_corpora)
         except:
+            self.current_corpora = None
             pass
 
     def current_corpus(self):
         return self.current_corpora
+
+    def set_mode(self, mode):
+        self.mode = mode
+        self.onModeChanged.emit(mode)
+
     #region Widget Creation
     def create_query_dock(self):
         if self.query_dock is None:
@@ -485,23 +521,35 @@ class FiwiVisualizer(QMainWindow):
 
 
 class VisualizationToolbar(QToolBar):
-    def __init__(self, visualizer):
+    def __init__(self, visualizer: FiwiVisualizer):
         super(VisualizationToolbar, self).__init__(visualizer)
         self.visualizer = visualizer
 
         self.setIconSize(QSize(64,64))
         self.a_node_graph = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_node_vis.png"), "")
-        self.a_colordt = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_dt.png"), "")
         self.a_color_ab = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_ab.png"), "")
         self.a_color_la = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_la.png"), "")
+        self.a_colordt = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_color_dt.png"), "")
+        self.a_features = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_features.png"), "")
+
 
         self.a_node_graph.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 0))
         self.a_colordt.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 1))
         self.a_color_ab.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 2))
         self.a_color_la.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 3))
+        self.a_features.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 4))
+
+    @pyqtSlot(int)
+    def mode_changed(self, mode):
+        if mode == MODE_CORPUS:
+            self.a_colordt.setVisible(False)
+            self.a_features.setVisible(False)
+        else:
+            self.a_colordt.setVisible(True)
+            self.a_features.setVisible(True)
 
 class LevelToolbar(QToolBar):
-    def __init__(self, visualizer):
+    def __init__(self, visualizer: FiwiVisualizer):
         super(LevelToolbar, self).__init__(visualizer)
         self.visualizer = visualizer
         self.setIconSize(QSize(64, 64))
@@ -509,6 +557,9 @@ class LevelToolbar(QToolBar):
             create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_corpus_level.png"), "")
         self.a_film = self.addAction(
             create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_film_level.png"), "")
+
+        self.a_corpus.triggered.connect(partial(self.visualizer.set_mode, MODE_CORPUS))
+        self.a_film.triggered.connect(partial(self.visualizer.set_mode, MODE_MOVIE))
 
 
 class InfoDock(QDockWidget):

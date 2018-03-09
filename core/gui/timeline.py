@@ -331,6 +331,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         b = TimelineBar(self.frame_Bars, self)
         return b
 
+    def set_colormetry_progress(self, percentage):
+        self.time_bar.colormetry_progress = percentage
+        self.time_bar.update()
+
+
     def get_current_bar(self):
         for itm in self.item_segments:
             if itm[0].item == self.selected:
@@ -1378,6 +1383,8 @@ class TimebarDrawing(QtWidgets.QWidget):
         self.background_color = QtGui.QColor(50,50,50,230)
         self.scale_image = None
 
+        self.colormetry_progress = 0
+
         self.is_hovered = False
         self.was_playing = False
         self.a = 50
@@ -1495,6 +1502,14 @@ class TimebarDrawing(QtWidgets.QWidget):
                     b = QtCore.QPoint(pos, 30)
                     qp.drawLine(a, b)
 
+        # Draw the colormetry progress Bar
+        if  0.0 < self.colormetry_progress < 1.0:
+            pen.setColor(QtGui.QColor(35,165,103))
+            pen.setWidth(3)
+            t_progress = (self.timeline.duration * self.colormetry_progress)
+            qp.setPen(pen)
+            qp.drawLine(QPoint(0, self.height() - 2),
+                        QPoint((t_progress - (self.pos().x()) * self.timeline.scale) /self.timeline.scale, self.height() - 2))
         qp.end()
 
     def mouseReleaseEvent(self, QMouseEvent):

@@ -15,7 +15,7 @@ FilterTuple = namedtuple("FilterTuple", ["table_name", "keyword_name"])
 class QueryDock(QDockWidget):
     def __init__(self, parent):
         super(QueryDock, self).__init__(parent)
-
+        self.setWindowTitle("Query")
         self.visualizer = parent
         self.inner = QWidget(self)
         self.inner.setLayout(QVBoxLayout(self.inner))
@@ -26,6 +26,7 @@ class QueryDock(QDockWidget):
 
         self.cb_Corporas = QComboBox(self)
         self.controls.layout().addWidget(self.cb_Corporas)
+        self.cb_Corporas.currentIndexChanged.connect(self.visualizer.set_current_corpus)
 
         self.filter_controls = QWidget(self)
         self.filter_controls.setLayout(QHBoxLayout())
@@ -91,7 +92,7 @@ class QueryDock(QDockWidget):
     def update_corpora_list(self, corporas):
         self.cb_Corporas.clear()
         for c in corporas:
-            self.cb_Corporas.addItem(c)
+            self.cb_Corporas.addItem(c.name)
         self.cb_Corporas.addItem("FilmColors Complete")
 
     def create_filter_menu(self, filters:List[UniqueKeyword]):

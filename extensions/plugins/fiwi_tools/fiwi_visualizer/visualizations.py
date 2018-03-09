@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 from core.visualization.image_plots import ImagePlotTime, ImagePlotPlane, ImagePlotCircular
+from core.visualization.feature_plot import GenericFeaturePlot, SegmentTuple, FeatureTuple
+
 import numpy as np
 
 class ColorDTWidget(QWidget):
@@ -167,3 +169,18 @@ class ColorSpaceLPlanePlots(QWidget):
         self.fg_view.show()
         self.bg_view.show()
         self.gl_view.show()
+
+
+class FeaturePlot(QWidget):
+    def __init__(self, parent):
+        super(FeaturePlot, self).__init__(parent)
+        self.fg_view = GenericFeaturePlot(self)
+
+
+    def update_view(self, features):
+        pass
+
+
+    def plot(self, segments):
+        self.fg_view.create_timeline()
+

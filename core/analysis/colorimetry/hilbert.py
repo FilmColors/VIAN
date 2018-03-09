@@ -164,9 +164,7 @@ def create_hilbert_color_pattern(s = 16, multiplier = 16, color_space = cv2.COLO
         grad_img = np.array([grad_hilbert] * 500).astype(dtype=np.uint8)
         grad_in_bgr = cv2.cvtColor(grad_img, color_space)
         cv2.imwrite("documents/color_gradient_2" + filename + str(s) + ".png", grad_in_bgr)
-
-    grad_bokeh = None #TODO pyqtGraph
-    return grad_bokeh, grad_in_bgr[0]
+    return grad_in_bgr[0]
 
 
 def create_hilbert_3d_to_2d_coordinates(n):

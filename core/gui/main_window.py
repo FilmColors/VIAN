@@ -15,6 +15,7 @@ import importlib
 from functools import partial
 
 from core.concurrent.worker_functions import *
+from core.concurrent.worker import MinimalThreadWorker
 from core.data.enums import *
 from core.data.importers import *
 from core.data.masterfile import MasterFile
@@ -43,6 +44,8 @@ from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
 from core.gui.player_vlc import Player_VLC, PlayerDockWidget
 from core.gui.experiment_editor import ExperimentEditor, ExperimentEditorDock
+from core.gui.colormetry_widget import *
+from core.analysis.colorimetry.colormetry2 import ColormetryJob2
 # from core.gui.shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
@@ -172,6 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.experiment_editor = None
         self.experiment_editor_dock = None
         self.quick_annotation_dock = None
+        self.colorimetry_live = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -196,6 +200,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_thread = QThread(self)
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
+
+
         # self.frame_update_thread.started.connect(self.frame_update_worker.run)
         self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
@@ -226,6 +232,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_analysis_results_widget()
         self.create_experiment_editor()
         self.create_quick_annotation_dock()
+
+        self.create_colorimetry_live()
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -399,11 +407,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
         self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
+        self.player.started.connect(partial(self.frame_update_worker.set_colormetry_update, True))
+        self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, False))
 
         self.drawing_overlay.onSourceChanged.connect(self.source_status.on_source_changed)
         self.onOpenCVFrameVisibilityChanged.connect(self.on_frame_source_changed)
         self.dispatch_on_changed()
 
+        self.frame_update_worker.signals.onColormetryUpdate.connect(self.colorimetry_live.update_timestep)
 
         self.screenshot_blocked = False
 
@@ -462,16 +473,16 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        import sys, inspect
-        for name, obj in inspect.getmembers(sys.modules[__name__]):
-            if inspect.isclass(obj):
-                if issubclass(obj, IAnalysisJob):
-                    print(obj)
-        print(self.player.get_subtitles())
-        # self.project.print_all(ANALYSIS_JOB_ANALYSIS)
-        #
-        # self.project.replace_ids()
+        job = ColormetryJob2(30, self)
+        args = job.prepare(self.project)
+        worker = MinimalThreadWorker(job.run_concurrent, args, True)
+        worker.signals.callback.connect(self.on_colormetry_push_back)
+        worker.signals.finished.connect(job.colormetry_analysis.set_finished)
+        self.thread_pool.start(worker)
 
+    def on_colormetry_push_back(self, data):
+        self.project.colormetry_analysis.append_data(data[0])
+        self.timeline.timeline.set_colormetry_progress(data[1])
     #region WidgetCreation
 
     def show_welcome(self):
@@ -703,6 +714,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.quick_annotation_dock.hide()
             else:
                 self.quick_annotation_dock.show()
+
+    def create_colorimetry_live(self):
+        if self.colorimetry_live is None:
+            self.colorimetry_live = ColorimetryLiveWidget(self)
+            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.colorimetry_live, Qt.Vertical)
+        else:
+            if self.colorimetry_live.isVisible():
+                self.colorimetry_live.hide()
+            else:
+                self.colorimetry_live.show()
+
     #endregion
 
     #region QEvent Overrides
@@ -735,8 +757,10 @@ class MainWindow(QtWidgets.QMainWindow):
             # self.timeline.timeline.is_multi_selecting = False
 
     def dragEnterEvent(self, event):
-        event.acceptProposedAction()
-        print(event.mimeData().hasUrls())
+        if event.mimeData().hasUrls():
+            file_extension = str(event.mimeData().urls()[0].toLocalFile()).split(".").pop()
+            if file_extension in ["eaf", "png", "jpg"]:
+                event.acceptProposedAction()
 
     def dropEvent(self, event):
         print("Hello")
@@ -750,7 +774,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 res_files = []
                 for f in files:
                     if "png" in str(f).split(".").pop() or "jpg" in str(f).split(".").pop():
-                        res_files.append(f.path())
+                        res_files.append(f.toLocalFile())
                 self.import_screenshots(res_files)
 
     def mousePressEvent(self, event):
@@ -1642,7 +1666,6 @@ class MainWindow(QtWidgets.QMainWindow):
             for e in m.actions():
                 e.setDisabled(not state)
 
-
     def get_version_as_string(self):
 
         result = "VIAN - Visual Movie Annotation\n"
@@ -1659,7 +1682,6 @@ class MainWindow(QtWidgets.QMainWindow):
         result += "Status: ".ljust(15) + __status__ + "\n"
 
         return result
-
 
     #region IProjectChangedNotify
 
@@ -1690,6 +1712,7 @@ class MainWindow(QtWidgets.QMainWindow):
             screenshot_annotation_dicts.append(a_dicts)
 
         self.frame_update_worker.set_movie_path(self.project.movie_descriptor.movie_path)
+        self.frame_update_worker.set_project(self.project)
 
         self.screenshots_manager.set_loading(True)
         job = LoadScreenshotsJob([self.project.movie_descriptor.movie_path, screenshot_position, screenshot_annotation_dicts])

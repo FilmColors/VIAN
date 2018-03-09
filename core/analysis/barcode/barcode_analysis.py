@@ -58,8 +58,6 @@ class BarcodeAnalysisJob(IAnalysisJob):
 
                     segments.append([start, end])
 
-
-
             else:
                 duration = project.movie_descriptor.duration
                 slice_size = parameters['slize_size']
@@ -100,17 +98,17 @@ class BarcodeAnalysisJob(IAnalysisJob):
             end   = segm[1]
 
             duration = end - start
-            print(duration)
 
             video_capture.set(cv2.CAP_PROP_POS_FRAMES, start)
             segm_colors = []
-
+            print(idx, len(segments), duration)
             # Looping over all Frames of the Segment and
             # Calculate the Average Color
             for i in range(duration):
-                ret, frame = video_capture.read()
-
-                if i % resolution != 0:
+                if i % resolution == 0:
+                    video_capture.set(cv2.CAP_PROP_POS_FRAMES, i + start)
+                    ret, frame = video_capture.read()
+                else:
                     continue
 
                 if frame is None:
@@ -119,7 +117,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
                 # segm_colors[i] = np.mean(frame, axis=(0,1))
                 segm_colors.append(np.mean(frame, axis=(0,1)))
 
-            barcode[idx] = np.mean(np.array(segm_colors), axis=(0))
+            barcode[idx] = np.mean(np.array(segm_colors), axis=0)
 
         # Creating an IAnalysisJobAnalysis Object that will be handed back to the Main-Thread
         analysis = IAnalysisJobAnalysis(name="Barcode_" + name,
