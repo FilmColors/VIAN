@@ -15,6 +15,7 @@ class ColormetryJob2(QObject):
         self.colormetry_analysis = None
         self.main_window = main_window
         self.duration =  None
+        self.aborted = False
 
     def prepare(self, project:VIANProject):
         if project.colormetry_analysis is None:
@@ -70,6 +71,10 @@ class ColormetryJob2(QObject):
             # AVG Color
             avg_color = np.mean(frame_lab, axis=(0, 1))
 
+            if self.aborted:
+                print("Aborted")
+                break
+
             yielded_result = dict(frame_pos=i, time_ms=frame2ms(i, fps), hist=hist, avg_color=avg_color)
             callback.emit([yielded_result, i / end])
 
@@ -82,6 +87,9 @@ class ColormetryJob2(QObject):
         self.colormetry_analysis.append_data(yielded_result)
         self.main_window.timeline.timeline.set_colormetry_progress(yielded_result.time_ms / self.duration)
 
+    @pyqtSlot()
+    def abort(self):
+        self.aborted = True
 
 
 

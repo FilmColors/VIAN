@@ -224,7 +224,7 @@ class GenericFeaturePlot(QGraphicsView):
 
         self.font_family = "Consolas"
         self.text_color = QColor(255,255,255,200)
-        self.font_size = 20
+        self.font_size = 40
         self.title = title
 
         self.font = QFont(self.font_family, self.font_size)
@@ -346,6 +346,13 @@ class GenericFeaturePlot(QGraphicsView):
     def clear_view(self):
         self.scene().clear()
         self.images.clear()
+        self.segments.clear()
+        self.features.clear()
+        self.segment_items.clear()
+        self.segment_label.clear()
+        self.feature_items.clear()
+        self.feature_labels.clear()
+
 
 
 class FeatureRectItem(QGraphicsRectItem):

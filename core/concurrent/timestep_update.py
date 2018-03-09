@@ -25,7 +25,7 @@ class TimestepUpdateWorkerSingle(QObject):
         self.video_capture = None
 
         self.opencv_frame = False
-        self.update_colormetry = False
+        self.update_colormetry = True
 
     @pyqtSlot()
     def set_movie_path(self, movie_path):

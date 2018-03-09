@@ -241,6 +241,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tabifyDockWidget(self.inspector, self.history_view)
         self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
 
+
         self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
 
         self.annotation_toolbar.raise_()
@@ -407,8 +408,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
         self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
-        self.player.started.connect(partial(self.frame_update_worker.set_colormetry_update, True))
-        self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, False))
+        # self.player.started.connect(partial(self.frame_update_worker.set_colormetry_update, True))
+        # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, False))
 
         self.drawing_overlay.onSourceChanged.connect(self.source_status.on_source_changed)
         self.onOpenCVFrameVisibilityChanged.connect(self.on_frame_source_changed)
@@ -473,16 +474,21 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
+        pass
+
+    def start_colormetry(self):
         job = ColormetryJob2(30, self)
         args = job.prepare(self.project)
         worker = MinimalThreadWorker(job.run_concurrent, args, True)
         worker.signals.callback.connect(self.on_colormetry_push_back)
         worker.signals.finished.connect(job.colormetry_analysis.set_finished)
+        self.abortAllConcurrentThreads.connect(job.abort)
         self.thread_pool.start(worker)
 
     def on_colormetry_push_back(self, data):
-        self.project.colormetry_analysis.append_data(data[0])
-        self.timeline.timeline.set_colormetry_progress(data[1])
+        if self.project is not None:
+            self.project.colormetry_analysis.append_data(data[0])
+            self.timeline.timeline.set_colormetry_progress(data[1])
     #region WidgetCreation
 
     def show_welcome(self):
@@ -1317,9 +1323,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_controls.show()
             self.screenshots_manager_dock.show()
             self.player_dock_widget.show()
+            self.colorimetry_live.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
+
+            self.screenshots_manager_dock.raise_()
             self.elan_status.stage_selector.set_stage(0, False)
 
         elif perspective == Perspective.Annotation.name:
@@ -1335,6 +1345,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
             self.elan_status.stage_selector.set_stage(1, False)
+            self.screenshots_manager_dock.raise_()
             # self.concurrent_task_viewer.show()
             # self.history_view.show()
 
@@ -1421,6 +1432,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.setCentralWidget(central)
+
         self.centralWidget().show()
         # self.centralWidget().setBaseSize(size_central)
 
@@ -1453,6 +1465,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget.hide()
         self.experiment_editor_dock.hide()
         self.quick_annotation_dock.hide()
+        self.colorimetry_live.hide()
 
     def set_default_dock_sizes(self, perspective):
         if perspective == Perspective.Segmentation:
@@ -1562,6 +1575,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.current_perspective == Perspective.Annotation):
                 self.set_overlay_visibility(True)
 
+
         else:
             if self.current_perspective == Perspective.Segmentation:
                 self.set_overlay_visibility(False)
@@ -1591,7 +1605,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #region Tools
     def on_auto_segmentation(self):
-        auto_segmentation(self.project,mode = AUTO_SEGM_EVEN, n_segment=10)
+        auto_segmentation(self.project,mode = AUTO_SEGM_CHIST, n_segment=10)
 
     # endregion
 
@@ -1720,6 +1734,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
+        self.start_colormetry()
         print("LOADED")
 
     def dispatch_on_changed(self, receiver = None, item = None):

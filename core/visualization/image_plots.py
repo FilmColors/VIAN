@@ -36,6 +36,9 @@ class ImagePlot(QGraphicsView):
         self.font_size = 4
         self.title = title
 
+        self.left_button_pressed = False
+        self.last_mouse_pos = QPoint()
+
         self.luminances = []
 
         self.n_grid = 12
@@ -103,6 +106,17 @@ class ImagePlot(QGraphicsView):
             a_export.triggered.connect(self.export)
             menu.popup(self.mapToGlobal(event.pos()))
 
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent):
+        if self.ctrl_is_pressed:
+            delta = event.pos() - self.last_mouse_pos
+            self.set_magnification(delta.x(),delta.y())
+            self.last_mouse_pos = event.pos()
+
+
+    def set_magnification(self, x, y):
+        pass
+
+
     def scale_pos(self, scale_inc):
         for img in self.images:
             if isinstance(img, VIANPixmapGraphicsItem):
@@ -151,6 +165,7 @@ class ImagePlot(QGraphicsView):
     def frame_default(self):
         self.setSceneRect(self.scene().itemsBoundingRect())
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+        self.show()
 
     def export(self, return_image = False, width = 4096, height = 4096):
         """
@@ -452,7 +467,6 @@ class ImagePlotTime(ImagePlot):
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
         print("Scene Rect:", self.sceneRect())
 
-
     def add_image(self, x, y, img, convert=True):
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
@@ -462,9 +476,8 @@ class ImagePlotTime(ImagePlot):
                                          hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
         self.scene().addItem(itm)
 
-        itm.setPos(x * self.x_scale, (self.base_line * self.y_scale) - (y * self.y_scale))
+        itm.setPos(x * self.x_scale, (self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height())
 
-        print(x * self.x_scale, (self.base_line * self.y_scale) - (y * self.y_scale))
         self.images.append(itm)
 
         if self.x_end < x * self.x_scale:
@@ -488,12 +501,13 @@ class ImagePlotTime(ImagePlot):
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
         rect = self.scene().addRect(-self.border, - self.border, self.x_end + (2 * self.border), self.base_line * self.y_scale + (4 * self.border), QColor(100,200,30,200))
-        for y in range(int(self.base_line)):
-            if y % 10 == 0:
-                lbl = self.scene().addText(str(((self.base_line - (y / self.y_scale)) / self.y_scale)).rjust(4), font)
-                lbl.setDefaultTextColor(QColor(200,200,200,200))
-                lbl.setPos(-100, y)
-                self.labels.append(lbl)
+
+        # for y in range(int(self.base_line)):
+        #     if y % 10 == 0:
+        #         lbl = self.scene().addText(str(((self.base_line - (y / self.y_scale)) / self.y_scale)).rjust(4), font)
+        #         lbl.setDefaultTextColor(QColor(200,200,200,200))
+        #         lbl.setPos(-100, y)
+        #         self.labels.append(lbl)
 
         # self.setSceneRect(rect.boundingRect())
         #
@@ -502,6 +516,5 @@ class ImagePlotTime(ImagePlot):
     def update_grid(self):
         self.lines = []
         self.add_grid()
-
 
 

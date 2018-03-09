@@ -53,8 +53,7 @@ class ColorDTWidget(QWidget):
     def plot(self, view, time, channel, imgs, is_liminance=True, y_max = None):
         view.clear_view()
 
-        view.create_scene(len(imgs), 100, pixel_size_x=4000, pixel_size_y=1000)
-        print(np.amax(channel))
+        view.create_scene(len(imgs), 100, pixel_size_x=8000, pixel_size_y=3000)
 
         for i, img in enumerate(imgs):
             if img is None:
@@ -112,10 +111,6 @@ class ColorSpacePlots(QWidget):
         self.bg_view.frame_default()
         self.fg_view.frame_default()
         self.gl_view.frame_default()
-
-        self.fg_view.show()
-        self.bg_view.show()
-        self.gl_view.show()
 
 
 class ColorSpaceLPlanePlots(QWidget):
@@ -175,12 +170,17 @@ class FeaturePlot(QWidget):
     def __init__(self, parent):
         super(FeaturePlot, self).__init__(parent)
         self.fg_view = GenericFeaturePlot(self)
+        self.setLayout(QVBoxLayout(self))
+        self.layout().addWidget(self.fg_view)
 
 
     def update_view(self, features):
         pass
 
 
-    def plot(self, segments):
-        self.fg_view.create_timeline()
+    def plot(self, segments, features):
+        self.fg_view.clear_view()
+        self.fg_view.create_timeline(segments)
+        for f in features:
+            self.fg_view.create_feature(f)
 

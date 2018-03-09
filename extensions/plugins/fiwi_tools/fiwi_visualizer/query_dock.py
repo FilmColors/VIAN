@@ -33,6 +33,7 @@ class QueryDock(QDockWidget):
         self.btn_reset = QPushButton("Reset Filters")
         self.btn_query = QPushButton("Query")
         self.btn_query.clicked.connect(self.visualizer.on_start_query)
+        self.btn_reset.clicked.connect(self.select_all_filter)
 
         self.fm_id_controls = QWidget(self)
         self.fm_id_controls.setLayout(QHBoxLayout(self))
@@ -88,6 +89,10 @@ class QueryDock(QDockWidget):
         self.years = list(range(1900, 2018))
 
         self.current_filters = []
+
+    def select_all_filter(self):
+        for itm in self.filters:
+            itm.setChecked(True)
 
     def update_corpora_list(self, corporas):
         self.cb_Corporas.clear()

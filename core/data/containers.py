@@ -679,9 +679,10 @@ class VIANProject(IHasName, IHasVocabulary):
             self.add_segmentation(new)
 
         for d in my_dict['analyzes']:
-            new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
-            self.add_analysis(new)
-            print(new.unique_id)
+            if d is not None:
+                new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
+                self.add_analysis(new)
+
 
         try:
             old = self.screenshot_groups
@@ -2777,6 +2778,12 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self, obj):
         self.has_finished = True
+
+    def serialize(self):
+        pass
+
+    def deserialize(self, serialization, streamer):
+        pass
 
 class AnalysisParameters():
     def __init__(self, target_items):

@@ -16,7 +16,7 @@ class SubCorpus():
     def get_corpus_fm_ids(self):
         item_ids = []
         for m in self.movies:
-            item_ids.append(m.movie_id_db)
+            item_ids.append(m.fm_id)
         return item_ids
 
 

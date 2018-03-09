@@ -153,6 +153,7 @@ class MinimalThreadWorker(QRunnable):
         self.args = args
         self.use_callback = use_callback
         self.signals = MinimalWorkerSignals()
+        self.aborted = False
 
     @pyqtSlot()
     def run(self):
@@ -175,6 +176,9 @@ class MinimalThreadWorker(QRunnable):
             raise e
             self.signals.error.emit(e)
 
+    @pyqtSlot()
+    def abort(self):
+        self.aborted = True
 
 class LiveWidgetThreadWorker(MinimalThreadWorker):
     def __init__(self, frame, data, func):

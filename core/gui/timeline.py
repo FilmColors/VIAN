@@ -157,6 +157,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.interval_segmentation_marker = None
 
         self.selector_context = None
+        self.selector = None
 
         self.lay_controls = QtWidgets.QVBoxLayout()
         self.lay_bars = QtWidgets.QVBoxLayout()

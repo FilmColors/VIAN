@@ -1,9 +1,11 @@
 from core.data.computation import *
 from core.data.containers import *
 from core.data.interfaces import IConcurrentJob
+from sklearn.cluster.hierarchical import AgglomerativeClustering
 from core.gui.main_window import *
 from collections import namedtuple
 from PyQt5 import QtGui
+from core.analysis.colorimetry.computation import calculate_histogram
 from PyQt5.QtCore import QRect, Qt
 import json
 
@@ -404,3 +406,111 @@ class ScreenshotStreamingJob(IConcurrentJob):
 
     def modify_project(self, project, result, sign_progress = None):
        pass
+
+
+class AutoSegmentingJob(IConcurrentJob):
+    def run_concurrent(self, args, sign_progress):
+        idx = 0
+        movie_path = args[0]
+        resolution = args[1]
+
+        cluster_sizes = [2, 4, 8, 16, 32, 64, 128]
+        histograms = []
+        frames = []
+        indices = []
+        print(movie_path)
+        cap = cv2.VideoCapture(movie_path)
+        length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        ret = True
+        while(ret):
+            ret, frame = cap.read()
+            if idx % resolution == 0:
+                sign_progress(idx / length)
+                lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+                hist = calculate_histogram(lab, 16)
+                hist = np.resize(hist, new_shape=16**3)
+                histograms.append(hist)
+                frames.append(cv2.resize(frame, None, None, 0.1, 0.1, cv2.INTER_CUBIC))
+                indices.append(idx)
+            idx += 1
+
+
+        connectivity = np.zeros(shape=(len(histograms), len(histograms)), dtype=np.uint8)
+        for i in range(1, len(histograms) - 1, 1):
+            connectivity[i][i - 1] = 1
+            connectivity[i][i] = 1
+            connectivity[i][i + 1] = 1
+
+
+        clusterings = []
+        for n_cluster in cluster_sizes:
+            model = AgglomerativeClustering(linkage="ward",
+                                            connectivity=connectivity,
+                                            n_clusters=n_cluster, compute_full_tree=True)
+            model.fit(histograms)
+            clusterings.append(model.labels_)
+
+        return [clusterings, frames, indices]
+
+
+    def modify_project(self, project, result, sign_progress = None):
+        widget = self.get_widget(project.main_window, result)
+        widget.show()
+
+    def get_widget(self, parent, result):
+        return ApplySegmentationWindow(parent, result[0], result[1], result[2])
+
+
+
+
+
+
+
+class ApplySegmentationWindow(QMainWindow):
+    def __init__(self, parent, clusterings, frames, indices):
+        super(ApplySegmentationWindow, self).__init__(parent)
+        self.setWindowTitle("Apply Segmentation")
+        self.clusterings = clusterings
+        self.frames = frames
+        self.indices = indices
+
+        self.w = QWidget(self)
+        self.setCentralWidget(self.w)
+        self.w.setLayout(QVBoxLayout(self.w))
+        self.view = QGraphicsView()
+        self.view.setScene(QGraphicsScene())
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setRange(0, 7)
+        self.slider.valueChanged.connect(self.on_slider_changed)
+        self.btn_ok = QPushButton("Apply Segmentation")
+        self.w.layout().addWidget(self.view)
+        self.w.layout().addWidget(self.slider)
+        self.w.layout().addWidget(self.btn_ok)
+
+    def on_slider_changed(self):
+        index = int(self.slider.value())
+
+        images = []
+        segm_imgs = []
+        curr_lbl = -1
+        for i, c in enumerate(self.clusterings[index]):
+            if c == curr_lbl:
+                segm_imgs.append(numpy_to_pixmap(self.frames[i]))
+            else:
+                images.append(segm_imgs)
+                segm_imgs = []
+                segm_imgs.append(numpy_to_pixmap(self.frames[i]))
+                curr_lbl = c
+
+        self.view.scene().clear()
+        y = 0
+        img_h = 150
+        for group in images:
+            x = 0
+            y += img_h
+            for img in group:
+                img = QPixmap()
+                itm = self.view.scene().addPixmap(img)
+                itm.setPos(x, y)
+                x += 300
+

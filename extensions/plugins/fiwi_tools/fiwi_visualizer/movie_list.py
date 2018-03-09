@@ -96,10 +96,10 @@ class MovieList(QDockWidget):
         self.listWidget.setHorizontalHeaderLabels(["DB-ID", "Name", "Year", "FileMaker ID"])
         for i, m in enumerate(all_movies):
             self.listWidget.insertRow(self.listWidget.rowCount())
-            self.listWidget.setItem(i, 0, QTableWidgetItem(m.fm_id))
+            self.listWidget.setItem(i, 0, QTableWidgetItem(m.database_id))
             self.listWidget.setItem(i, 1, QTableWidgetItem(m.name))
             self.listWidget.setItem(i, 2, QTableWidgetItem(str(m.year)))
-            self.listWidget.setItem(i, 3, QTableWidgetItem(m.movie_id_db))
+            self.listWidget.setItem(i, 3, QTableWidgetItem(m.fm_id))
             self.items.append(m)
 
     def create_corpus(self):
@@ -145,17 +145,15 @@ class MovieList(QDockWidget):
 
         for i, m in enumerate(self.visualizer.current_corpus().movies):
             self.currentCorpusList.insertRow(self.currentCorpusList.rowCount())
-            self.currentCorpusList.setItem(i, 0, QTableWidgetItem(m.fm_id))
+            self.currentCorpusList.setItem(i, 0, QTableWidgetItem(m.database_id))
             self.currentCorpusList.setItem(i, 1, QTableWidgetItem(m.name))
             self.currentCorpusList.setItem(i, 2, QTableWidgetItem(str(m.year)))
-            self.currentCorpusList.setItem(i, 3, QTableWidgetItem(m.movie_id_db))
+            self.currentCorpusList.setItem(i, 3, QTableWidgetItem(m.fm_id))
 
     def set_corpus(self):
         self.visualizer.set_current_corpus(self.combo_box_CurrentSubCorpus.currentIndex())
         self.update_corpus_list()
         self.line_edit_corpus_name.setText(self.visualizer.current_corpus().name)
-        # if self.listWidget.count() > 0:
-        #     self.on_item_change(self.items[0])
 
 
     def update_combobox(self):
@@ -169,11 +167,4 @@ class MovieList(QDockWidget):
             self.visualizer.current_corpus().name = self.line_edit_corpus_name.text()
             self.update_combobox()
 
-    # def on_item_change(self, item):
-    #     self.visualizer.create_plot(item.path)
-    #     # if self.visualizer.mode == MODE_FOREGROUND:
-    #     widget = ColorDTWidget(self)
-    #     self.visualizer.set_central(widget)
-    #     with open(item.path, "rb") as f:
-    #         data = pickle.load(f)
-    #         widget.update_view(data)
+

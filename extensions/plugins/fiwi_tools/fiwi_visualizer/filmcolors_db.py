@@ -16,10 +16,10 @@ TB_MOVIES = "movies"
 
 
 class DBMovie():
-    def __init__(self, name, fm_id, movie_id_db, year):
+    def __init__(self, name, database_id, filemaker_id, year):
         self.name = name
-        self.fm_id = fm_id
-        self.movie_id_db = movie_id_db
+        self.database_id = database_id
+        self.fm_id = filemaker_id
 
         try:
             self.year = int(year)
@@ -29,7 +29,7 @@ class DBMovie():
 
 
     def __str__(self):
-        return self.fm_id + " " + self.name + " " + str(self.year)
+        return self.database_id + " " + self.name + " " + str(self.year)
 
 
 class Corpus():
@@ -64,7 +64,7 @@ class Corpus():
     def to_fm_ids(self):
         result = []
         for m in self.movies:
-            result.append(m.movie_id_db)
+            result.append(m.fm_id)
         return result
 
 
@@ -86,7 +86,6 @@ class DBSegment():
             self.t_start = 0
             self.t_end = 0
         
-
 
 class UniqueKeyword():
     def __init__(self, voc, word, class_name, gloss_id = 0):

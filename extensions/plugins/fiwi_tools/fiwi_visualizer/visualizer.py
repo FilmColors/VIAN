@@ -53,6 +53,7 @@ class FiwiVisualizer(QMainWindow):
         uic.loadUi(path, self)
         self.plugin = plugin
         self.actionOpen_Database.triggered.connect(partial(self.on_load_database, None, None))
+        self.actionCorpus_Manager.triggered.connect(self.create_movie_list)
 
         self.database = FilmColorsDatabase()
         self.database_file = None
@@ -65,6 +66,7 @@ class FiwiVisualizer(QMainWindow):
         self.current_corpora = None
         self.current_segments = []
         self.current_stills = []
+        self.current_movie = None
 
         self.n_stills_max = 50
         self.threads_worker = []
@@ -254,25 +256,28 @@ class FiwiVisualizer(QMainWindow):
 
     #region Query
     def on_start_query(self):
-        if self.is_querying:
-            return
+        if self.mode == MODE_CORPUS:
+            if self.is_querying:
+                return
 
-        self.query_dock.setEnabled(False)
-        curr_corpus = None
-        if self.current_corpora is not None:
-            curr_corpus = self.current_corpus().to_fm_ids()
+            self.query_dock.setEnabled(False)
+            curr_corpus = None
+            if self.current_corpora is not None:
+                curr_corpus = self.current_corpus().to_fm_ids()
 
-        worker = SimpleWorker(self.on_query, self.on_query_finished,
-                              self.on_progress,
-                              args=[self.query_dock.current_filters,
-                                    self.root_dir,
-                                    self.query_dock.lineEdit_fm_id.text(),
-                                    self.database_file,
-                                    self.n_stills_max,
-                                    curr_corpus
-                                    ])
-        self.thread_pool.start(worker)
-        self.progress_bar.show()
+            worker = SimpleWorker(self.on_query, self.on_query_finished,
+                                  self.on_progress,
+                                  args=[self.query_dock.current_filters,
+                                        self.root_dir,
+                                        self.query_dock.lineEdit_fm_id.text(),
+                                        self.database_file,
+                                        self.n_stills_max,
+                                        curr_corpus
+                                        ])
+            self.thread_pool.start(worker)
+            self.progress_bar.show()
+        else:
+            self.on_start_movie_query()
 
     def on_query(self, args, on_progress):
         # filters = self.query_dock.current_filters
@@ -283,8 +288,6 @@ class FiwiVisualizer(QMainWindow):
         database_path = args[3]
         n_stills_max = args[4]
         corpus = args[5]
-
-        print(corpus)
 
         database = FilmColorsDatabase()
         database.connect("sqlite:///" + database_path)
@@ -401,6 +404,7 @@ class FiwiVisualizer(QMainWindow):
                 print("Failed", e)
                 s.pixmap = np.zeros(shape =(5,5,3), dtype=np.uint8)
 
+
         return [current_stills, current_segments]
 
     def on_query_finished(self, result):
@@ -412,7 +416,84 @@ class FiwiVisualizer(QMainWindow):
         self.progress_bar.hide()
         self.update_plots()
 
+    def on_start_movie_query(self):
+
+        print("Querying Movie Database")
+        # if self.current_movie is None:
+        #     return
+
+        for m in self.all_movies:
+            if self.query_dock.lineEdit_fm_id.text() in m.fm_id:
+                self.current_movie = m
+                break
+
+
+        worker = SimpleWorker(self.query_movie, self.on_movie_query_finished,
+                              self.on_progress,
+                              args=[
+                                  self.current_movie,
+                                  self.query_dock.current_filters,
+                                  self.database_file
+                              ])
+        self.thread_pool.start(worker)
+        self.progress_bar.show()
+
+    def on_movie_query_finished(self, result):
+        dbsegments = result[0]
+        feature_segments = [SegmentTuple(x.segm_id, x.t_start, x.t_end) for x in dbsegments]
+        self.feature_plot.plot(feature_segments, result[1])
+        self.progress_bar.setValue(0)
+        self.progress_bar.hide()
+
+    def query_movie(self, args, on_progress):
+        on_progress(0.1)
+        movie = args[0]
+        filters = args[1]
+        database_path = args[2]
+
+        database = FilmColorsDatabase()
+        database.connect("sqlite:///" + database_path)
+
+
+        print(dict(Item_ID=movie.fm_id))
+        qsegments = database.get_segments("Global:Literal", dict(Item_ID=movie.fm_id))
+
+        all_segments = []
+        qsegm_db_ids = []
+        for s in qsegments:
+            all_segments.append(DBSegment(s['Item_ID'], s['Segment_ID'], s["Sequence_Start"], s['Sequence_End']))
+            qsegm_db_ids.append(s['id'])
+
+
+
+
+
+
+        on_progress(0.5)
+        features = []
+        # Query each table individually
+        print(filters)
+        for f in filters:
+
+            d = dict(zip(["id", f[1]], [qsegm_db_ids, 1]))
+            print(f[0], d)
+            res = database.get_segments(f[0], d)
+            ids = []
+            for r in res:
+                try:
+                    ids.append(all_segments[qsegm_db_ids.index(r['id'])].segm_id)
+                except:
+                    print("not Found")
+                    continue
+
+            if len(ids) > 0:
+                features.append(FeatureTuple(name = str(f[0]) + ":" + str(f[1]), segment_ids = ids))
+
+        return [all_segments, features]
     #endregion
+
+    def set_current_movie(self, movie: DBMovie):
+        self.current_movie = DBMovie
 
     def on_progress(self, float):
         integer = int(float[0])
@@ -547,6 +628,7 @@ class VisualizationToolbar(QToolBar):
         else:
             self.a_colordt.setVisible(True)
             self.a_features.setVisible(True)
+
 
 class LevelToolbar(QToolBar):
     def __init__(self, visualizer: FiwiVisualizer):
