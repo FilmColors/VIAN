@@ -5,21 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5f86adad-e443-47bd-a2df-ab0eb0627df8" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/sub_corpus.py" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/app.iml" afterPath="$PROJECT_DIR$/.idea/app.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/drawing_widget.py" afterPath="$PROJECT_DIR$/core/gui/drawing_widget.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/main_window.py" afterPath="$PROJECT_DIR$/core/gui/main_window.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/screenshot_manager.py" afterPath="$PROJECT_DIR$/core/gui/screenshot_manager.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/status_bar.py" afterPath="$PROJECT_DIR$/core/gui/status_bar.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/timeline.py" afterPath="$PROJECT_DIR$/core/gui/timeline.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/visualization/image_plots.py" afterPath="$PROJECT_DIR$/core/visualization/image_plots.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizations.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizations.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/qt_ui/MainWindow.ui" afterPath="$PROJECT_DIR$/qt_ui/MainWindow.ui" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/user/master_file.ems" afterPath="$PROJECT_DIR$/user/master_file.ems" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -32,6 +21,7 @@
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="app" />
   </component>
@@ -40,13 +30,12 @@
       <file leaf-file-name="visualizer.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1767">
-              <caret line="412" column="42" lean-forward="true" selection-start-line="412" selection-start-column="42" selection-end-line="412" selection-end-column="42" />
+            <state relative-caret-position="4389">
+              <caret line="412" column="42" lean-forward="false" selection-start-line="412" selection-start-column="42" selection-end-line="412" selection-end-column="42" />
               <folding>
                 <element signature="e#948#1252#0" expanded="false" />
                 <element signature="e#989#1155#0" expanded="false" />
                 <element signature="e#1199#1252#0" expanded="false" />
-                <element signature="e#1522#4931#0" expanded="false" />
                 <element signature="e#4516#4580#0" expanded="false" />
                 <element signature="e#4976#5216#0" expanded="false" />
                 <element signature="e#5024#5118#0" expanded="false" />
@@ -98,13 +87,11 @@
                 <element signature="e#19808#19886#0" expanded="false" />
                 <element signature="e#19933#20055#0" expanded="false" />
                 <element signature="e#19973#20055#0" expanded="false" />
-                <element signature="e#20114#20140#0" expanded="false" />
                 <element signature="e#20184#20251#0" expanded="false" />
                 <element signature="e#20322#20454#0" expanded="false" />
                 <element signature="e#20492#21049#0" expanded="false" />
                 <element signature="e#20678#20862#0" expanded="false" />
                 <element signature="e#21092#21096#0" expanded="false" />
-                <element signature="e#21150#21384#0" expanded="false" />
                 <element signature="e#21433#21671#0" expanded="false" />
                 <element signature="e#21450#21598#0" expanded="false" />
                 <element signature="e#21627#21671#0" expanded="false" />
@@ -125,13 +112,19 @@
                 <element signature="e#23070#23217#0" expanded="false" />
                 <element signature="e#23255#23259#0" expanded="false" />
                 <element signature="e#23297#23301#0" expanded="false" />
-                <element signature="e#23372#24973#0" expanded="false" />
-                <element signature="e#23428#24693#0" expanded="false" />
                 <element signature="e#24756#24973#0" expanded="false" />
                 <element signature="e#24792#24870#0" expanded="false" />
                 <element signature="e#24897#24973#0" expanded="false" />
                 <element signature="e#26351#26593#0" expanded="false" />
                 <element signature="e#26399#26593#0" expanded="false" />
+                <marker date="1520863178984" expanded="true" signature="1289:4931" ph="..." />
+                <marker date="1520863178984" expanded="true" signature="1502:1511" ph="..." />
+                <marker date="1520863178984" expanded="true" signature="20095:20103" ph="..." />
+                <marker date="1520863178984" expanded="true" signature="21129:21139" ph="..." />
+                <marker date="1520863178984" expanded="true" signature="23367:24693" ph="..." />
+                <marker date="1520863178984" expanded="true" signature="23402:23417" ph="..." />
+                <marker date="1520863178984" expanded="true" signature="25005:25643" ph="..." />
+                <marker date="1520863178984" expanded="true" signature="25040:25055" ph="..." />
               </folding>
             </state>
           </provider>
@@ -140,9 +133,12 @@
       <file leaf-file-name="query_dock.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="414">
-              <caret line="97" column="0" lean-forward="true" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="1848">
+              <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+              <folding>
+                <marker date="1520863178972" expanded="true" signature="402:5592" ph="..." />
+                <marker date="1520863178972" expanded="true" signature="4911:4930" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -150,8 +146,8 @@
       <file leaf-file-name="visualizations.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizations.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="114">
-              <caret line="13" column="32" lean-forward="true" selection-start-line="13" selection-start-column="32" selection-end-line="13" selection-end-column="32" />
+            <state relative-caret-position="126">
+              <caret line="13" column="32" lean-forward="false" selection-start-line="13" selection-start-column="32" selection-end-line="13" selection-end-column="32" />
               <folding>
                 <element signature="e#959#1208#0" expanded="false" />
                 <element signature="e#1256#1498#0" expanded="false" />
@@ -168,7 +164,7 @@
       <file leaf-file-name="image_plots.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/visualization/image_plots.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="912">
+            <state relative-caret-position="1008">
               <caret line="56" column="66" lean-forward="false" selection-start-line="56" selection-start-column="66" selection-end-line="56" selection-end-column="66" />
               <folding>
                 <element signature="e#2305#2309#0" expanded="false" />
@@ -177,12 +173,8 @@
                 <element signature="e#2483#2822#0" expanded="false" />
                 <element signature="e#2866#2947#0" expanded="false" />
                 <element signature="e#2995#3064#0" expanded="false" />
-                <element signature="e#3121#3498#0" expanded="false" />
                 <element signature="e#3167#3221#0" expanded="false" />
-                <element signature="e#3557#3672#0" expanded="false" />
-                <element signature="e#3739#3960#0" expanded="false" />
                 <element signature="e#3788#3960#0" expanded="false" />
-                <element signature="e#4026#4206#0" expanded="false" />
                 <element signature="e#4063#4206#0" expanded="false" />
                 <element signature="e#4256#4260#0" expanded="false" />
                 <element signature="e#4307#4480#0" expanded="false" />
@@ -202,7 +194,6 @@
                 <element signature="e#7518#7698#0" expanded="false" />
                 <element signature="e#7740#7844#0" expanded="false" />
                 <element signature="e#7882#7984#0" expanded="false" />
-                <element signature="e#8060#8158#0" expanded="false" />
                 <element signature="e#8269#8334#0" expanded="false" />
                 <element signature="e#8479#8595#0" expanded="false" />
                 <element signature="e#8630#8803#0" expanded="false" />
@@ -223,7 +214,6 @@
                 <element signature="e#15478#15582#0" expanded="false" />
                 <element signature="e#15618#15743#0" expanded="false" />
                 <element signature="e#15780#15906#0" expanded="false" />
-                <element signature="e#15972#16097#0" expanded="false" />
                 <element signature="e#16663#16998#0" expanded="false" />
                 <element signature="e#17058#17792#0" expanded="false" />
                 <element signature="e#17082#17227#0" expanded="false" />
@@ -231,16 +221,24 @@
                 <element signature="e#17828#17890#0" expanded="false" />
                 <element signature="e#17924#18361#0" expanded="false" />
                 <element signature="e#18398#18437#0" expanded="false" />
+                <marker date="1520863178712" expanded="true" signature="449:3498" ph="..." />
+                <marker date="1520863178712" expanded="true" signature="3100:3110" ph="..." />
+                <marker date="1520863178712" expanded="true" signature="3536:3546" ph="..." />
+                <marker date="1520863178712" expanded="true" signature="3710:3728" ph="..." />
+                <marker date="1520863178712" expanded="true" signature="3997:4015" ph="..." />
+                <marker date="1520863178712" expanded="true" signature="4513:4525" ph="..." />
+                <marker date="1520863178712" expanded="true" signature="8022:8049" ph="..." />
+                <marker date="1520863178712" expanded="true" signature="15937:15951" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="timeline.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="timeline.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/gui/timeline.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3221">
-              <caret line="112" column="71" lean-forward="true" selection-start-line="112" selection-start-column="71" selection-end-line="112" selection-end-column="71" />
+            <state relative-caret-position="336">
+              <caret line="139" column="71" lean-forward="true" selection-start-line="139" selection-start-column="71" selection-end-line="139" selection-end-column="71" />
               <folding>
                 <element signature="e#849#880#0" expanded="false" />
                 <element signature="e#1989#2058#0" expanded="false" />
@@ -385,8 +383,6 @@
                 <element signature="e#39536#40585#0" expanded="false" />
                 <element signature="e#39879#40334#0" expanded="false" />
                 <element signature="e#39906#40105#0" expanded="false" />
-                <element signature="e#40631#52201#0" expanded="false" />
-                <element signature="e#40695#41632#0" expanded="false" />
                 <element signature="e#41681#43434#0" expanded="false" />
                 <element signature="e#41915#42404#0" expanded="false" />
                 <element signature="e#42035#42202#0" expanded="false" />
@@ -460,10 +456,7 @@
                 <element signature="e#58011#58292#0" expanded="false" />
                 <element signature="e#58122#58164#0" expanded="false" />
                 <element signature="e#58341#58880#0" expanded="false" />
-                <element signature="e#58930#59746#0" expanded="false" />
                 <element signature="e#58998#59230#0" expanded="false" />
-                <element signature="e#59289#59617#0" expanded="false" />
-                <element signature="e#59666#59746#0" expanded="false" />
                 <element signature="e#59794#67483#0" expanded="false" />
                 <element signature="e#59839#60223#0" expanded="false" />
                 <element signature="e#60272#65045#0" expanded="false" />
@@ -523,10 +516,37 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="import_screenshots.rst" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="315">
+              <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="import_screenshots.jpg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.jpg">
+          <provider selected="true" editor-type-id="images">
+            <state />
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="export_screenshots.rst" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/export_screenshots.rst">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="189">
+              <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="14" selection-end-column="60" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="screenshot_manager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/gui/screenshot_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
+            <state relative-caret-position="252">
               <caret line="12" column="26" lean-forward="false" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
               <folding />
             </state>
@@ -536,7 +556,7 @@
       <file leaf-file-name="filmcolors_db.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1030">
+            <state relative-caret-position="2310">
               <caret line="336" column="0" lean-forward="false" selection-start-line="336" selection-start-column="0" selection-end-line="336" selection-end-column="0" />
               <folding>
                 <element signature="e#762#917#0" expanded="false" />
@@ -601,9 +621,11 @@
                 <element signature="e#9938#9973#0" expanded="false" />
                 <element signature="e#10020#10063#0" expanded="false" />
                 <element signature="e#10114#10150#0" expanded="false" />
-                <marker date="1520850240000" expanded="true" signature="647:1273" ph="..." />
-                <marker date="1520850240000" expanded="true" signature="1188:1196" ph="..." />
-                <marker date="1520850240000" expanded="true" signature="1308:1316" ph="..." />
+                <marker date="1520863178938" expanded="true" signature="647:1273" ph="..." />
+                <marker date="1520863178938" expanded="true" signature="1188:1196" ph="..." />
+                <marker date="1520863178938" expanded="true" signature="1308:1316" ph="..." />
+                <marker date="1520863178938" expanded="true" signature="2959:10550" ph="..." />
+                <marker date="1520863178938" expanded="true" signature="10192:10199" ph="..." />
               </folding>
             </state>
           </provider>
@@ -700,7 +722,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/core/data/exporters.py" />
         <option value="$PROJECT_DIR$/extensions/extension_list.py" />
         <option value="$PROJECT_DIR$/core/data/settings.py" />
         <option value="$PROJECT_DIR$/core/data/plugin.py" />
@@ -751,14 +772,15 @@
         <option value="$PROJECT_DIR$/core/visualization/image_plots.py" />
         <option value="$PROJECT_DIR$/core/gui/screenshot_manager.py" />
         <option value="$PROJECT_DIR$/core/gui/timeline.py" />
+        <option value="$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1936" />
-    <option name="height" value="1056" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-9" />
+    <option name="y" value="-9" />
+    <option name="width" value="1938" />
+    <option name="height" value="1048" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -776,34 +798,106 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
-          <expand>
-            <path>
-              <item name="VIAN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="VIAN" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="VIAN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="VIAN" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="VIAN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="VIAN" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-              <item name="gui" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="_docs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="_docs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="source" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="_docs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="source" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="step_by_step" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VIAN" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="_docs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="source" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="step_by_step" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="screenshots" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="reference.idesettings.debugger.python" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../vlc" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
   </component>
@@ -811,19 +905,19 @@
     <option name="myPyQtBackend" value="PyQt5" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\Programming\Git\visual-movie-annotator" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\install\env" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\extensions\plugins\fiwi_tools\fiwi_visualizer" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\extensions\plugins\fiwi_tools" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\step_by_step\player" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Programming\Git\visual-movie-annotator\install\env" />
       <recent name="E:\Programming\Git\visual-movie-annotator\install" />
       <recent name="E:\Programming\Git\visual-movie-annotator\core\analysis\barcode" />
       <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\_0_4_2" />
       <recent name="E:\Programming\Git\visual-movie-annotator\core\analysis\clab_space_plot" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Gaudenz\Desktop\VIAN\_docs\source\step_by_step\screenshots" />
+      <recent name="E:\Programming\Git\visual-movie-annotator" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\install\env" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\extensions\plugins\fiwi_tools\fiwi_visualizer" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\extensions\plugins\fiwi_tools" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -839,7 +933,75 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.main">
-    <configuration name="TestWindow" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration default="false" name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="app" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="python_sandbox" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="app" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python_sandbox.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="main_window" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/core/gui" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="app" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/core/gui/main_window.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="visualizer" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="app" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="TestWindow" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -854,7 +1016,7 @@
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TestWindow.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
     </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -871,7 +1033,6 @@
       <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
       <method />
     </configuration>
     <configuration default="true" type="Tox" factoryName="Tox">
@@ -920,6 +1081,25 @@
       <option name="docutils_open_in_browser" value="false" />
       <method />
     </configuration>
+    <configuration default="true" type="tests" factoryName="Attests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="app" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -949,44 +1129,18 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="app" />
-      <option name="_new_regexPattern" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;.&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="app" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;.&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method />
-    </configuration>
-    <configuration default="true" type="tests" factoryName="py.test">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="app" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;.&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method />
-    </configuration>
-    <configuration default="true" type="tests" factoryName="Attests">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -1003,75 +1157,34 @@
       <option name="TEST_TYPE" value="TEST_SCRIPT" />
       <option name="PATTERN" value="" />
       <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="false" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
       <method />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration default="true" type="tests" factoryName="py.test">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
+      <envs />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="app" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="main_window" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/core/gui" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="app" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/core/gui/main_window.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="python_sandbox" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="app" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python_sandbox.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="visualizer" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="app" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="testToRun" value="" />
+      <option name="keywords" value="" />
+      <option name="params" value="" />
+      <option name="USE_PARAM" value="false" />
+      <option name="USE_KEYWORD" value="false" />
+      <method />
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.main" />
@@ -1122,21 +1235,19 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="2560" height="1337" extended-state="6" />
+    <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13939634" sideWeight="0.8694158" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21840297" sideWeight="0.8694158" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3281075" sideWeight="0.4952343" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36553946" sideWeight="0.16203336" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31964573" sideWeight="0.47815728" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36553946" sideWeight="0.8379666" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3647059" sideWeight="0.16552089" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930756" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20531401" sideWeight="0.49205717" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3647059" sideWeight="0.8344791" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2531983" sideWeight="0.48659793" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43236715" sideWeight="0.4936034" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42686892" sideWeight="0.48933902" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26226014" sideWeight="0.1305842" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24786781" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42686892" sideWeight="0.48933902" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1144,7 +1255,9 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31964573" sideWeight="0.47815728" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24786781" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3281075" sideWeight="0.4952343" order="6" side_tool="false" content_ui="tabs" />
@@ -1216,57 +1329,10 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/gui/outliner.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="93">
-          <caret line="231" column="47" lean-forward="false" selection-start-line="231" selection-start-column="47" selection-end-line="231" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/Dialogs/screenshot_importer_dialog.py" />
-    <entry file="file://$PROJECT_DIR$/core/gui/analysis_results.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="486">
-          <caret line="70" column="51" lean-forward="false" selection-start-line="70" selection-start-column="51" selection-end-line="70" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/data/importers.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="185">
           <caret line="284" column="0" lean-forward="false" selection-start-line="284" selection-start-column="0" selection-end-line="284" selection-end-column="0" />
-          <folding>
-            <element signature="e#311#7533#0" expanded="false" />
-            <element signature="e#424#648#0" expanded="false" />
-            <element signature="e#694#3797#0" expanded="false" />
-            <element signature="e#999#1386#0" expanded="false" />
-            <element signature="e#1282#1386#0" expanded="false" />
-            <element signature="e#1436#1713#0" expanded="false" />
-            <element signature="e#1553#1627#0" expanded="false" />
-            <element signature="e#1687#1713#0" expanded="false" />
-            <element signature="e#1933#2340#0" expanded="false" />
-            <element signature="e#2092#2340#0" expanded="false" />
-            <element signature="e#2752#3154#0" expanded="false" />
-            <element signature="e#2910#3110#0" expanded="false" />
-            <element signature="e#3183#3314#0" expanded="false" />
-            <element signature="e#3855#3932#0" expanded="false" />
-            <element signature="e#3883#3932#0" expanded="false" />
-            <element signature="e#4012#4136#0" expanded="false" />
-            <element signature="e#4046#4136#0" expanded="false" />
-            <element signature="e#4080#4136#0" expanded="false" />
-            <element signature="e#4189#7533#0" expanded="false" />
-            <element signature="e#4558#4710#0" expanded="false" />
-            <element signature="e#4833#6416#0" expanded="false" />
-            <element signature="e#5023#6364#0" expanded="false" />
-            <element signature="e#5155#5750#0" expanded="false" />
-            <element signature="e#5793#6364#0" expanded="false" />
-            <element signature="e#6482#6576#0" expanded="false" />
-            <element signature="e#6513#6576#0" expanded="false" />
-            <element signature="e#6641#7491#0" expanded="false" />
-            <element signature="e#6735#7386#0" expanded="false" />
-            <element signature="e#6802#6858#0" expanded="false" />
-            <element signature="e#6993#7026#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1314,9 +1380,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="720">
           <caret line="49" column="36" lean-forward="false" selection-start-line="49" selection-start-column="36" selection-end-line="49" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#10#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1338,7 +1401,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="475">
           <caret line="27" column="37" lean-forward="false" selection-start-line="27" selection-start-column="37" selection-end-line="27" selection-end-column="37" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1374,7 +1436,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="186">
           <caret line="175" column="0" lean-forward="false" selection-start-line="175" selection-start-column="0" selection-end-line="175" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1382,7 +1443,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="177">
           <caret line="180" column="54" lean-forward="true" selection-start-line="180" selection-start-column="54" selection-end-line="180" selection-end-column="54" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1419,9 +1479,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
           <caret line="10" column="30" lean-forward="true" selection-start-line="9" selection-start-column="7" selection-end-line="10" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#126#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1960,10 +2017,8 @@
             <element signature="e#108223#108395#0" expanded="false" />
             <element signature="e#108295#108373#0" expanded="false" />
             <element signature="e#108427#108498#0" expanded="false" />
-            <element signature="e#108552#111673#0" expanded="false" />
             <element signature="e#108552#108985#1" expanded="false" />
             <element signature="e#109051#109248#0" expanded="false" />
-            <element signature="e#109305#109622#0" expanded="false" />
             <element signature="e#109670#109758#0" expanded="false" />
             <element signature="e#109805#110113#0" expanded="false" />
             <element signature="e#109805#109975#1" expanded="false" />
@@ -1990,24 +2045,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4086">
           <caret line="227" column="47" lean-forward="true" selection-start-line="227" selection-start-column="47" selection-end-line="227" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#64#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/sub_corpus.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/sub_corpus.py" />
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="399">
           <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -2023,59 +2068,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3116">
           <caret line="175" column="33" lean-forward="false" selection-start-line="175" selection-start-column="33" selection-end-line="175" selection-end-column="33" />
-          <folding>
-            <marker date="1520843097000" expanded="true" signature="771:2093" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="1938:1965" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="3248:3854" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="3699:3726" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="4942:13263" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="5019:5713" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="5748:6343" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="5942:6263" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6383:6702" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6412:6542" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6572:6702" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6737:6899" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6926:7225" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="7341:12988" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="8195:8498" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="8247:8498" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="8531:8960" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="8719:8960" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="8772:8960" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="8821:8960" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="9100:9308" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="9131:9308" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="9639:10280" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="9668:10280" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="9743:9804" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="10507:10930" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="10587:10644" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="11015:11710" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="11055:11710" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="11102:11167" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="11819:12410" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="12121:12337" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="12357:12410" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="12487:12988" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13037:13136" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13066:13136" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13171:13183" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13292:13365" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13407:13443" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13485:13521" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13570:13613" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13654:13789" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13683:13789" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13730:13789" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13822:16619" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13859:13874" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="16644:16789" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="16822:16970" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="17012:17087" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="17129:17203" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="17235:17449" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2083,44 +2075,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1710">
           <caret line="214" column="36" lean-forward="false" selection-start-line="214" selection-start-column="36" selection-end-line="214" selection-end-column="36" />
-          <folding>
-            <element signature="e#1638#1642#0" expanded="false" />
-            <element signature="e#1704#2239#0" expanded="false" />
-            <element signature="e#1735#1943#0" expanded="false" />
-            <element signature="e#1801#1878#0" expanded="false" />
-            <element signature="e#1838#1878#0" expanded="false" />
-            <element signature="e#2020#2146#0" expanded="false" />
-            <element signature="e#2070#2146#0" expanded="false" />
-            <element signature="e#2288#2545#0" expanded="false" />
-            <element signature="e#2591#3886#0" expanded="false" />
-            <element signature="e#2756#3262#0" expanded="false" />
-            <element signature="e#2802#3262#0" expanded="false" />
-            <element signature="e#3303#3886#0" expanded="false" />
-            <element signature="e#3932#4338#0" expanded="false" />
-            <element signature="e#4130#4338#0" expanded="false" />
-            <element signature="e#4379#5819#0" expanded="false" />
-            <element signature="e#4426#4701#0" expanded="false" />
-            <element signature="e#4939#5819#0" expanded="false" />
-            <element signature="e#5857#6196#0" expanded="false" />
-            <element signature="e#6299#6353#0" expanded="false" />
-            <element signature="e#6624#6649#0" expanded="false" />
-            <element signature="e#6751#7700#0" expanded="false" />
-            <element signature="e#7247#7321#0" expanded="false" />
-            <element signature="e#7414#7488#0" expanded="false" />
-            <element signature="e#7808#7856#0" expanded="false" />
-            <marker date="1520843097000" expanded="true" signature="475:1604" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="515:538" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6232:6242" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6432:6442" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="6601:6613" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="7899:9242" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="7942:9236" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13086:13344" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13389:13938" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13437:13711" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13749:13776" ph="..." />
-            <marker date="1520843097000" expanded="true" signature="13977:14004" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2128,10 +2082,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2090">
           <caret line="124" column="55" lean-forward="false" selection-start-line="124" selection-start-column="55" selection-end-line="124" selection-end-column="55" />
-          <folding>
-            <element signature="e#0#9#0" expanded="false" />
-            <marker date="1520843097000" expanded="true" signature="3307:4830" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2139,7 +2089,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="19">
           <caret line="1" column="19" lean-forward="false" selection-start-line="1" selection-start-column="19" selection-end-line="1" selection-end-column="19" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -2147,7 +2096,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-482">
           <caret line="38" column="29" lean-forward="false" selection-start-line="38" selection-start-column="13" selection-end-line="38" selection-end-column="29" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -2155,9 +2103,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-13">
           <caret line="180" column="49" lean-forward="true" selection-start-line="180" selection-start-column="49" selection-end-line="180" selection-end-column="49" />
-          <folding>
-            <element signature="e#0#24#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2386,14 +2331,14 @@
           <caret line="205" column="0" lean-forward="false" selection-start-line="205" selection-start-column="0" selection-end-line="205" selection-end-column="80" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
-            <element signature="e#89#106#0" expanded="true" />
+            <element signature="e#89#106#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1030">
+        <state relative-caret-position="2310">
           <caret line="336" column="0" lean-forward="false" selection-start-line="336" selection-start-column="0" selection-end-line="336" selection-end-column="0" />
           <folding>
             <element signature="e#762#917#0" expanded="false" />
@@ -2458,17 +2403,19 @@
             <element signature="e#9938#9973#0" expanded="false" />
             <element signature="e#10020#10063#0" expanded="false" />
             <element signature="e#10114#10150#0" expanded="false" />
-            <marker date="1520850240000" expanded="true" signature="647:1273" ph="..." />
-            <marker date="1520850240000" expanded="true" signature="1188:1196" ph="..." />
-            <marker date="1520850240000" expanded="true" signature="1308:1316" ph="..." />
+            <marker date="1520863178938" expanded="true" signature="647:1273" ph="..." />
+            <marker date="1520863178938" expanded="true" signature="1188:1196" ph="..." />
+            <marker date="1520863178938" expanded="true" signature="1308:1316" ph="..." />
+            <marker date="1520863178938" expanded="true" signature="2959:10550" ph="..." />
+            <marker date="1520863178938" expanded="true" signature="10192:10199" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizations.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="114">
-          <caret line="13" column="32" lean-forward="true" selection-start-line="13" selection-start-column="32" selection-end-line="13" selection-end-column="32" />
+        <state relative-caret-position="126">
+          <caret line="13" column="32" lean-forward="false" selection-start-line="13" selection-start-column="32" selection-end-line="13" selection-end-column="32" />
           <folding>
             <element signature="e#959#1208#0" expanded="false" />
             <element signature="e#1256#1498#0" expanded="false" />
@@ -2483,29 +2430,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="97" column="0" lean-forward="true" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="1848">
+          <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+          <folding>
+            <marker date="1520863178972" expanded="true" signature="402:5592" ph="..." />
+            <marker date="1520863178972" expanded="true" signature="4911:4930" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/anaconda/envs/vian_dev/lib/python3.5/site-packages/sqlalchemy/engine/default.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="254">
-          <caret line="462" column="0" lean-forward="false" selection-start-line="462" selection-start-column="0" selection-end-line="462" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/anaconda/envs/vian_dev/lib/python3.5/site-packages/sqlalchemy/engine/default.py" />
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1767">
-          <caret line="412" column="42" lean-forward="true" selection-start-line="412" selection-start-column="42" selection-end-line="412" selection-end-column="42" />
+        <state relative-caret-position="4389">
+          <caret line="412" column="42" lean-forward="false" selection-start-line="412" selection-start-column="42" selection-end-line="412" selection-end-column="42" />
           <folding>
             <element signature="e#948#1252#0" expanded="false" />
             <element signature="e#989#1155#0" expanded="false" />
             <element signature="e#1199#1252#0" expanded="false" />
-            <element signature="e#1522#4931#0" expanded="false" />
             <element signature="e#4516#4580#0" expanded="false" />
             <element signature="e#4976#5216#0" expanded="false" />
             <element signature="e#5024#5118#0" expanded="false" />
@@ -2557,13 +2499,11 @@
             <element signature="e#19808#19886#0" expanded="false" />
             <element signature="e#19933#20055#0" expanded="false" />
             <element signature="e#19973#20055#0" expanded="false" />
-            <element signature="e#20114#20140#0" expanded="false" />
             <element signature="e#20184#20251#0" expanded="false" />
             <element signature="e#20322#20454#0" expanded="false" />
             <element signature="e#20492#21049#0" expanded="false" />
             <element signature="e#20678#20862#0" expanded="false" />
             <element signature="e#21092#21096#0" expanded="false" />
-            <element signature="e#21150#21384#0" expanded="false" />
             <element signature="e#21433#21671#0" expanded="false" />
             <element signature="e#21450#21598#0" expanded="false" />
             <element signature="e#21627#21671#0" expanded="false" />
@@ -2584,20 +2524,26 @@
             <element signature="e#23070#23217#0" expanded="false" />
             <element signature="e#23255#23259#0" expanded="false" />
             <element signature="e#23297#23301#0" expanded="false" />
-            <element signature="e#23372#24973#0" expanded="false" />
-            <element signature="e#23428#24693#0" expanded="false" />
             <element signature="e#24756#24973#0" expanded="false" />
             <element signature="e#24792#24870#0" expanded="false" />
             <element signature="e#24897#24973#0" expanded="false" />
             <element signature="e#26351#26593#0" expanded="false" />
             <element signature="e#26399#26593#0" expanded="false" />
+            <marker date="1520863178984" expanded="true" signature="1289:4931" ph="..." />
+            <marker date="1520863178984" expanded="true" signature="1502:1511" ph="..." />
+            <marker date="1520863178984" expanded="true" signature="20095:20103" ph="..." />
+            <marker date="1520863178984" expanded="true" signature="21129:21139" ph="..." />
+            <marker date="1520863178984" expanded="true" signature="23367:24693" ph="..." />
+            <marker date="1520863178984" expanded="true" signature="23402:23417" ph="..." />
+            <marker date="1520863178984" expanded="true" signature="25005:25643" ph="..." />
+            <marker date="1520863178984" expanded="true" signature="25040:25055" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/gui/screenshot_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
+        <state relative-caret-position="252">
           <caret line="12" column="26" lean-forward="false" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
           <folding />
         </state>
@@ -2605,7 +2551,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/core/visualization/image_plots.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="912">
+        <state relative-caret-position="1008">
           <caret line="56" column="66" lean-forward="false" selection-start-line="56" selection-start-column="66" selection-end-line="56" selection-end-column="66" />
           <folding>
             <element signature="e#2305#2309#0" expanded="false" />
@@ -2614,12 +2560,8 @@
             <element signature="e#2483#2822#0" expanded="false" />
             <element signature="e#2866#2947#0" expanded="false" />
             <element signature="e#2995#3064#0" expanded="false" />
-            <element signature="e#3121#3498#0" expanded="false" />
             <element signature="e#3167#3221#0" expanded="false" />
-            <element signature="e#3557#3672#0" expanded="false" />
-            <element signature="e#3739#3960#0" expanded="false" />
             <element signature="e#3788#3960#0" expanded="false" />
-            <element signature="e#4026#4206#0" expanded="false" />
             <element signature="e#4063#4206#0" expanded="false" />
             <element signature="e#4256#4260#0" expanded="false" />
             <element signature="e#4307#4480#0" expanded="false" />
@@ -2639,7 +2581,6 @@
             <element signature="e#7518#7698#0" expanded="false" />
             <element signature="e#7740#7844#0" expanded="false" />
             <element signature="e#7882#7984#0" expanded="false" />
-            <element signature="e#8060#8158#0" expanded="false" />
             <element signature="e#8269#8334#0" expanded="false" />
             <element signature="e#8479#8595#0" expanded="false" />
             <element signature="e#8630#8803#0" expanded="false" />
@@ -2660,7 +2601,6 @@
             <element signature="e#15478#15582#0" expanded="false" />
             <element signature="e#15618#15743#0" expanded="false" />
             <element signature="e#15780#15906#0" expanded="false" />
-            <element signature="e#15972#16097#0" expanded="false" />
             <element signature="e#16663#16998#0" expanded="false" />
             <element signature="e#17058#17792#0" expanded="false" />
             <element signature="e#17082#17227#0" expanded="false" />
@@ -2668,14 +2608,22 @@
             <element signature="e#17828#17890#0" expanded="false" />
             <element signature="e#17924#18361#0" expanded="false" />
             <element signature="e#18398#18437#0" expanded="false" />
+            <marker date="1520863178712" expanded="true" signature="449:3498" ph="..." />
+            <marker date="1520863178712" expanded="true" signature="3100:3110" ph="..." />
+            <marker date="1520863178712" expanded="true" signature="3536:3546" ph="..." />
+            <marker date="1520863178712" expanded="true" signature="3710:3728" ph="..." />
+            <marker date="1520863178712" expanded="true" signature="3997:4015" ph="..." />
+            <marker date="1520863178712" expanded="true" signature="4513:4525" ph="..." />
+            <marker date="1520863178712" expanded="true" signature="8022:8049" ph="..." />
+            <marker date="1520863178712" expanded="true" signature="15937:15951" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/gui/timeline.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3221">
-          <caret line="112" column="71" lean-forward="true" selection-start-line="112" selection-start-column="71" selection-end-line="112" selection-end-column="71" />
+        <state relative-caret-position="336">
+          <caret line="139" column="71" lean-forward="true" selection-start-line="139" selection-start-column="71" selection-end-line="139" selection-end-column="71" />
           <folding>
             <element signature="e#849#880#0" expanded="false" />
             <element signature="e#1989#2058#0" expanded="false" />
@@ -2820,8 +2768,6 @@
             <element signature="e#39536#40585#0" expanded="false" />
             <element signature="e#39879#40334#0" expanded="false" />
             <element signature="e#39906#40105#0" expanded="false" />
-            <element signature="e#40631#52201#0" expanded="false" />
-            <element signature="e#40695#41632#0" expanded="false" />
             <element signature="e#41681#43434#0" expanded="false" />
             <element signature="e#41915#42404#0" expanded="false" />
             <element signature="e#42035#42202#0" expanded="false" />
@@ -2895,10 +2841,7 @@
             <element signature="e#58011#58292#0" expanded="false" />
             <element signature="e#58122#58164#0" expanded="false" />
             <element signature="e#58341#58880#0" expanded="false" />
-            <element signature="e#58930#59746#0" expanded="false" />
             <element signature="e#58998#59230#0" expanded="false" />
-            <element signature="e#59289#59617#0" expanded="false" />
-            <element signature="e#59666#59746#0" expanded="false" />
             <element signature="e#59794#67483#0" expanded="false" />
             <element signature="e#59839#60223#0" expanded="false" />
             <element signature="e#60272#65045#0" expanded="false" />
@@ -2954,6 +2897,27 @@
             <element signature="e#71518#71600#0" expanded="false" />
             <element signature="e#71653#71829#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/export_screenshots.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="14" selection-end-column="60" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
