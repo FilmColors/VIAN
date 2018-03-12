@@ -46,7 +46,7 @@ def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10
 
 class DialogAutoSegmentation(EDialogWidget):
     def __init__(self, parent, project):
-        super(DialogAutoSegmentation, self).__init__(parent, parent, None)
+        super(DialogAutoSegmentation, self).__init__(parent, parent, "_docs/build/html/step_by_step/segmentation/auto_segmentation.html")
         path = os.path.abspath("qt_ui/DialogAutoSegmentation.ui")
         uic.loadUi(path, self)
 

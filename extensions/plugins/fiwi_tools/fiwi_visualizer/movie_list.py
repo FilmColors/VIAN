@@ -117,6 +117,7 @@ class MovieList(QDockWidget):
 
         for idx in self.listWidget.selectedIndexes():
             self.visualizer.current_corpus().add_movie(self.items[idx.row()])
+
         self.visualizer.onCorporasChange.emit(self.visualizer.corporas)
         self.update_corpus_list()
 
@@ -127,10 +128,9 @@ class MovieList(QDockWidget):
         for idx in self.currentCorpusList.selectedIndexes():
             try:
                 self.visualizer.current_corpus().remove_movie(self.visualizer.current_corpus().movies[idx.row()])
-                self.visualizer.onCorporasChange.emit(self.visualizer.corporas)
             except:
                 pass
-
+        self.visualizer.onCorporasChange.emit(self.visualizer.corporas)
         self.update_corpus_list()
 
     def update_corpus_list(self):
@@ -140,7 +140,6 @@ class MovieList(QDockWidget):
         self.currentCorpusList.setHorizontalHeaderLabels(["DB-ID", "Name", "Year", "FileMaker ID"])
 
         if self.visualizer.current_corpus() is None:
-            print("TEST, Current Corpus is None")
             return
 
         for i, m in enumerate(self.visualizer.current_corpus().movies):

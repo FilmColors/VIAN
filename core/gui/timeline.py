@@ -136,12 +136,15 @@ class TimelineToolbar(QToolBar):
         super(TimelineToolbar, self).__init__(parent)
         self.timeline = timeline
 
-        self.a_move = self.addAction("Move")
+        self.a_move = self.addAction(create_icon("qt_ui/icons/icon_move.png"), "")
         self.a_move.triggered.connect(self.timeline.activate_move_tool)
-        self.a_cut = self.addAction("Cut")
+        self.a_move.setToolTip("Move Tool")
+        self.a_cut = self.addAction(create_icon("qt_ui/icons/icon_cut.png"),"Cut")
         self.a_cut.triggered.connect(self.timeline.activate_cutting_tool)
-        self.a_merge = self.addAction("Merge")
+        self.a_cut.setToolTip("Cut Tool")
+        self.a_merge = self.addAction(create_icon("qt_ui/icons/icon_merge.png"),"Merge")
         self.a_merge.triggered.connect(self.timeline.activate_merge_tool)
+        self.a_merge.setToolTip("Merge Tool")
 
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):

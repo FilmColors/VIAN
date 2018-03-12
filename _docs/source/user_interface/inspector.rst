@@ -7,11 +7,10 @@ The Inspector is one of the most important Widgets of VIAN. The Inspector is con
 adapts to the current selection. Most of the modifications to a specific item (i.e. a Segmentation, Segment,
 Annotation, Screenshot, etc.) can be performed using the Inspector.
 
-The Inspector consists of four distinct parts, which are separated by black lines:
+The Inspector consists of three distinct parts, which are separated by black lines:
 
 * Title and Name
 * Item specific Attributes
-* Vocabulary Section
 * Notes Section
 
 

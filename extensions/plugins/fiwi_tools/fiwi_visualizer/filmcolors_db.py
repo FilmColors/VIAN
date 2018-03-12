@@ -42,16 +42,19 @@ class Corpus():
         for m in self.movies:
             fm_ids.append(m.fm_id)
         data = dict(
+            name = self.name,
             fm_ids = fm_ids
         )
         return data
 
     def deserialize(self, serialization, all_movies):
+        self.name = serialization['name']
         for fm_id in serialization['fm_ids']:
             for m in all_movies:
                 if m.fm_id == fm_id:
                     self.movies.append(m)
                     break
+        return self
 
     def add_movie(self, movie: DBMovie):
         if movie not in self.movies:

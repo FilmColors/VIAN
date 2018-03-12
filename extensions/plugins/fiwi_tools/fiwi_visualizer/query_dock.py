@@ -105,6 +105,7 @@ class QueryDock(QDockWidget):
 
         self.filters = []
         self.categories = []
+        self.dispatch = False
 
         self.years = list(range(1900, 2018))
 
@@ -120,9 +121,15 @@ class QueryDock(QDockWidget):
 
 
     def update_corpora_list(self, corporas):
+        self.cb_Corporas.currentIndexChanged.disconnect(self.visualizer.set_current_corpus)
+        self.cb_movie.currentIndexChanged.disconnect(self.on_movie_changed)
+
         self.cb_Corporas.clear()
         for c in corporas:
             self.cb_Corporas.addItem(c.name)
+
+        self.cb_Corporas.currentIndexChanged.connect(self.visualizer.set_current_corpus)
+        self.cb_movie.currentIndexChanged.connect(self.on_movie_changed)
 
     def create_filter_menu(self, filters:List[UniqueKeyword]):
         for f in self.filters:
@@ -181,9 +188,13 @@ class QueryDock(QDockWidget):
             self.cb_movie.addItem(m.name)
 
     def on_movie_changed(self):
-        idx = self.cb_movie.currentIndex()
-        self.visualizer.set_current_movie(self.visualizer.current_corpus().movies[idx])
-        print(str(self.visualizer.current_movie))
+        try:
+            idx = self.cb_movie.currentIndex()
+            self.visualizer.set_current_movie(self.visualizer.current_corpus().movies[idx])
+            print(str(self.visualizer.current_movie))
+        except:
+            pass
+        
 
 class FilterCategory(QFrame):
     def __init__(self, parent, name, query_dock):

@@ -117,9 +117,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/merging_segments.html">Merging Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/auto_segmentation.html">Auto Segmentation</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
@@ -127,6 +129,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/import_screenshots.html">Importing Screenshots</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
 </ul>
 </li>
@@ -159,13 +162,23 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/latest.html">VIAN 0.4.5 - 0.4.6</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#analyses-visualization">Analyses - Visualization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#backups">Backups</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/latest.html">VIAN 0.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#extensive-list">Extensive List</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-visualization">Analyses - Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#backups">Backups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#hot-fixes">Hot-Fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
@@ -249,6 +262,8 @@
 <span class="c1"># from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER</span>
 <span class="n">VisualizationTab</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;VisualizationTab&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;widget&quot;</span><span class="p">,</span> <span class="s2">&quot;use_filter&quot;</span><span class="p">,</span> <span class="s2">&quot;controls&quot;</span><span class="p">])</span>
 
+
+
 <span class="k">class</span> <span class="nc">IProjectChangeNotify</span><span class="p">():</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dummy</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">dummy</span> <span class="o">=</span> <span class="n">dummy</span>
@@ -293,10 +308,9 @@
         <span class="n">word</span><span class="o">.</span><span class="n">remove_connected_item</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">IProjectContainer</span><span class="p">(</span><span class="n">IHasVocabulary</span><span class="p">,</span> <span class="n">QObject</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IProjectContainer</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">QObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">IHasVocabulary</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outliner_expanded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outliner_highlighted</span> <span class="o">=</span> <span class="kc">False</span>
@@ -317,7 +331,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">create_unique_id</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">add_to_id_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">add_to_id_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">dispatch_on_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receiver</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">item</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -524,8 +539,10 @@
         <span class="k">pass</span></div>
 
     <span class="k">def</span> <span class="nf">get_source_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_types</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_types</span>
 
+    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
 <span class="k">class</span> <span class="nc">ParameterWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -563,7 +580,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">10000000</span><span class="p">,</span> <span class="mi">99999999</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">aborted</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span>
 
     <span class="k">def</span> <span class="nf">run_concurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>

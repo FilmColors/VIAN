@@ -10,6 +10,7 @@ from typing import List
 from functools import partial
 from glob import glob
 import cv2
+import json
 from sys import stdout
 from random import shuffle
 
@@ -130,6 +131,8 @@ class FiwiVisualizer(QMainWindow):
         self.statusBar().addWidget(self.progress_bar)
 
         self.onCorporasChange.connect(self.query_dock.update_corpora_list)
+        self.actionSave_Corpora.triggered.connect(self.save_corpora)
+        self.actionLoad_Corpora.triggered.connect(self.load_corpora)
 
         self.showMaximized()
         # E:\Programming\Datasets\FilmColors\database_root\database_root
@@ -582,7 +585,6 @@ class FiwiVisualizer(QMainWindow):
     def set_current_corpus(self, idx):
         try:
             self.current_corpora = self.corporas[idx]
-            print(self.current_corpora)
             self.onCurrentCorpusChanged.emit(self.current_corpora)
         except:
             self.current_corpora = None
@@ -635,12 +637,18 @@ class FiwiVisualizer(QMainWindow):
         return data["db_path"], data['root_path']
 
     def save_corpora(self):
-        pass
+        path = QFileDialog.getExistingDirectory()
+        print(path, self.corporas)
+        for c in self.corporas:
+            with open(path + "/" + c.name + ".vian_corpus", "w") as f:
+                json.dump(c.serialize(), f)
 
     def load_corpora(self):
-        pass
-
-
+        paths = QFileDialog.getOpenFileNames(filter="*.vian_corpus")[0]
+        for p in paths:
+            with open(p, "r") as f:
+                self.corporas.append(Corpus("").deserialize(json.load(f), self.all_movies))
+        self.onCorporasChange.emit(self.corporas)
     #endregion
     pass
 

@@ -22,7 +22,7 @@
      <x>0</x>
      <y>0</y>
      <width>990</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -30,6 +30,8 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen_Database"/>
+    <addaction name="actionSave_Corpora"/>
+    <addaction name="actionLoad_Corpora"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
@@ -61,6 +63,16 @@
   <action name="actionCorpus_Manager">
    <property name="text">
     <string>Corpus Manager</string>
+   </property>
+  </action>
+  <action name="actionSave_Corpora">
+   <property name="text">
+    <string>Save Corpora</string>
+   </property>
+  </action>
+  <action name="actionLoad_Corpora">
+   <property name="text">
+    <string>Load Corpora</string>
    </property>
   </action>
  </widget>

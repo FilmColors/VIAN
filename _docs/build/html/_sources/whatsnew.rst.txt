@@ -13,6 +13,7 @@ In this section, all release notes are collected since 0.4.1.
     :maxdepth: 4
 
     whats_new/latest
+    whats_new/0_4_5/0_4_5.rst
     whats_new/0_4_2/0_4_2.rst
 
 

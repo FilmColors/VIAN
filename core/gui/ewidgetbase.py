@@ -120,8 +120,6 @@ class EDialogWidget(QDialog):
             self.overlay_was_visible = main_window.drawing_overlay.isVisible()
             self.main_window.set_overlay_visibility(False)
 
-
-
     def closeEvent(self, QCloseEvent):
         if self.main_window is not None:
             # self.main_window.set_darwin_player_visibility(True)

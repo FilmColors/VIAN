@@ -352,6 +352,7 @@ class GenericFeaturePlot(QGraphicsView):
             super(QGraphicsView, self).wheelEvent(event)
 
         self.on_h_scroll()
+    
     def clear_view(self):
         self.scene().clear()
         self.images.clear()

@@ -117,9 +117,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/merging_segments.html">Merging Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/auto_segmentation.html">Auto Segmentation</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
@@ -127,6 +129,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/import_screenshots.html">Importing Screenshots</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
 </ul>
 </li>
@@ -159,13 +162,23 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/latest.html">VIAN 0.4.5 - 0.4.6</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#analyses-visualization">Analyses - Visualization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#backups">Backups</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/latest.html">VIAN 0.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#extensive-list">Extensive List</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-visualization">Analyses - Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#backups">Backups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#hot-fixes">Hot-Fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
@@ -242,7 +255,7 @@
             
   <h1>Source code for core.data.plugin</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="k">import</span> <span class="n">QDockWidget</span><span class="p">,</span> <span class="n">QMainWindow</span>
-
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="n">GAPLUGIN_WNDTYPE_MAINWINDOW</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">GAPLUGIN_WNDTYPE_DOCKWIDGET</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -264,10 +277,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span> <span class="o">=</span> <span class="n">main_window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">windowtype</span> <span class="o">=</span> <span class="n">windowtype</span></div>
 
-<div class="viewcode-block" id="GAPlugin.get_window"><a class="viewcode-back" href="../../../dev_guide/plugins.html#core.data.plugin.GAPlugin.get_window">[docs]</a>    <span class="k">def</span> <span class="nf">get_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GAPlugin.get_window"><a class="viewcode-back" href="../../../dev_guide/plugins.html#core.data.plugin.GAPlugin.get_window">[docs]</a>    <span class="k">def</span> <span class="nf">get_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function should be overwritten shows your Plugin-Window. This can either be an EDockWidget or a WMainWindow. </span>
 <span class="sd">        (Specified accordingly to the GAplugin.windowtype)</span>
+<span class="sd">        :param parent: </span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wnd</span> <span class="o">=</span> <span class="n">QMainWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
@@ -275,8 +289,19 @@
         <span class="n">wnd</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">get_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">project</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">project</span>
 
+
+    <span class="k">def</span> <span class="nf">store_plugin_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin_dict</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DIR_PLUGINS</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">plugin_dict</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">load_plugin_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DIR_PLUGINS</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 </pre></div>
 
            </div>
