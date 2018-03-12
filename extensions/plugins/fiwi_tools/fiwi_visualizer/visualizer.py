@@ -408,7 +408,7 @@ class FiwiVisualizer(QMainWindow):
         print("Loading Stills")
         for i, s in enumerate(current_stills):
             stdout.write("\r" + str(i))
-
+            on_progress(i / len(current_stills))
             try:
                 img = cv2.imread(paths[i])
                 if s.t_type in [TB_STILL_FG, TB_STILL_BG]:
@@ -508,7 +508,7 @@ class FiwiVisualizer(QMainWindow):
         for group in still_objs:
             for i, s in enumerate(group):
                 stdout.write("\r" + str(root_dir + s.rel_path))
-
+                on_progress(i / len(group))
                 try:
                     img = cv2.imread(root_dir + "db_stills/" + s.rel_path)
                     if s.t_type in [TB_STILL_FG, TB_STILL_BG]:
@@ -680,12 +680,25 @@ class LevelToolbar(QToolBar):
         self.visualizer = visualizer
         self.setIconSize(QSize(64, 64))
         self.a_corpus = self.addAction(
-            create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_corpus_level.png"), "")
+            create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_corpus_level_active.png"), "")
+
         self.a_film = self.addAction(
             create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_film_level.png"), "")
 
-        self.a_corpus.triggered.connect(partial(self.visualizer.set_mode, MODE_CORPUS))
-        self.a_film.triggered.connect(partial(self.visualizer.set_mode, MODE_MOVIE))
+        self.a_corpus.triggered.connect(partial(self.on_set_mode, MODE_CORPUS))
+        self.a_film.triggered.connect(partial(self.on_set_mode, MODE_MOVIE))
+
+    def on_set_mode(self, mode):
+        self.visualizer.set_mode(mode)
+        if mode == MODE_CORPUS:
+            self.a_corpus.setIcon(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_corpus_level_active.png"))
+            self.a_film.setIcon(
+                create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_film_level.png"))
+        else:
+            self.a_corpus.setIcon(
+                create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_corpus_level.png"))
+            self.a_film.setIcon(
+                create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_film_level_active.png"))
 
 
 class InfoDock(QDockWidget):

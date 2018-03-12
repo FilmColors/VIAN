@@ -86,13 +86,15 @@ class QueryDock(QDockWidget):
         self.n_images.layout().addWidget(self.sl_n_images)
         self.n_images.layout().addWidget(self.lbl_n_images)
 
-        self.controls.layout().addWidget(self.filter_controls)
         self.w_corpus_level.layout().addWidget(self.fm_id_controls)
         self.w_corpus_level.layout().addWidget(self.year_controls)
+
         self.controls.layout().addWidget(self.w_corpus_level)
         self.controls.layout().addWidget(self.w_movie_level)
         self.w_movie_level.hide()
         self.controls.layout().addWidget(self.n_images)
+        self.controls.layout().addWidget(self.filter_controls)
+        self.controls.layout().addWidget(QLabel("Filter:"))
 
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidget(QWidget(self.scroll_area))
@@ -121,7 +123,6 @@ class QueryDock(QDockWidget):
         self.cb_Corporas.clear()
         for c in corporas:
             self.cb_Corporas.addItem(c.name)
-        self.cb_Corporas.addItem("FilmColors Complete")
 
     def create_filter_menu(self, filters:List[UniqueKeyword]):
         for f in self.filters:
@@ -165,9 +166,13 @@ class QueryDock(QDockWidget):
         if mode == 0:
             self.w_movie_level.show()
             self.w_corpus_level.hide()
+
         else:
             self.w_movie_level.hide()
             self.w_corpus_level.show()
+
+
+
 
     @pyqtSlot(object)
     def on_corpus_changed(self, corpus):

@@ -178,7 +178,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.only_show_current_segment = False
 
         self.font = QFont("Consolas")
-        self.font_size = 128
+        self.font_size = 20
         self.font_size_segments = 120
         self.font.setPointSize(self.font_size)
         self.color = QColor(225,225,225)
@@ -245,7 +245,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.loading_text.setPos(100, 786)
             self.scene.removeItem(self.current_segment_frame)
 
-            rect = QRectF(0.0 ,0.0 , 1280 , 1024)
+            rect = QRectF(0.0, 0.0, 1280, 1024)
             self.fitInView(rect, QtCore.Qt.KeepAspectRatio)
         else:
             if self.loading_icon is not None:
@@ -320,6 +320,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font)
                 scr_lbl.setPos(item_image.pos() + QPoint(10, qpixmap.height()))
                 scr_lbl.setDefaultTextColor(self.color)
+                # scr_lbl.setFlag(QGraphicsItem.ItemIgnoresTransformations)
                 current_sm_object.scr_captions.append(scr_lbl)
                 current_sm_object.scr_caption_offset = QPoint(10, qpixmap.height())
                 self.scr_captions.append(scr_lbl)
@@ -438,6 +439,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         caption = self.scene.addText(str(text), self.font)
         caption.setDefaultTextColor(self.color)
         caption.setPos(QtCore.QPointF(x, y))
+        caption.setFlag(QGraphicsItem.ItemIgnoresTransformations)
         self.captions.append(caption)
         return caption
 

@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1167</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -169,7 +169,6 @@
     <property name="title">
      <string>Analysis</string>
     </property>
-    <addaction name="actionColorimetry"/>
     <addaction name="actionMovie_Barcode"/>
     <addaction name="actionMovie_Mosaic"/>
     <addaction name="separator"/>

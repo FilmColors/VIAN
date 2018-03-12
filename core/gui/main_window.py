@@ -336,7 +336,6 @@ class MainWindow(QtWidgets.QMainWindow):
         #TOOLS
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
 
-        self.actionColorimetry.triggered.connect(partial(self.analysis_triggered, ColometricsAnalysis()))
         self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
         self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
 
@@ -377,6 +376,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.menuPlayer,
             self.menuCreate,
             self.menuAnalysis,
+            self.menuTools
         ]
 
         # self.actionElanConnection.triggered.connect(self.create_widget_elan_status)
@@ -412,6 +412,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.player.started.connect(partial(self.frame_update_worker.set_colormetry_update, True))
         # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, False))
 
+        self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, False))
+        self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, True))
+
         self.drawing_overlay.onSourceChanged.connect(self.source_status.on_source_changed)
         self.onOpenCVFrameVisibilityChanged.connect(self.on_frame_source_changed)
         self.dispatch_on_changed()
@@ -429,6 +432,7 @@ class MainWindow(QtWidgets.QMainWindow):
         loading_screen.hide()
 
         self.update_recent_menu()
+
 
         # self.load_project("projects/ratatouille/Ratatouille.eext")
 
@@ -1343,12 +1347,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.inspector.show()
             self.player_dock_widget.show()
 
+            self.annotation_toolbar.show()
+
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
             self.elan_status.stage_selector.set_stage(1, False)
             self.screenshots_manager_dock.raise_()
-            # self.concurrent_task_viewer.show()
-            # self.history_view.show()
+
 
         elif perspective == Perspective.ScreenshotsManager.name:
             self.current_perspective = Perspective.ScreenshotsManager
@@ -1360,6 +1365,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.inspector.show()
             self.outliner.show()
 
+            self.screenshot_toolbar.show()
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
@@ -1439,6 +1445,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if perspective != (Perspective.Annotation.name or Perspective.Segmentation.name):
             self.set_overlay_visibility(False)
+        else:
+            self.set_overlay_visibility(True)
 
         self.set_default_dock_sizes(self.current_perspective)
 
@@ -1520,7 +1528,8 @@ class MainWindow(QtWidgets.QMainWindow):
         targets = from_dialog['targets']
         parameters = from_dialog['parameters']
         fps = self.player.get_fps()
-        args = analysis.prepare()
+
+        args = analysis.prepare(self.project, targets, parameters, fps)
 
         if analysis.multiple_result:
             for arg in args:
@@ -1575,7 +1584,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if (self.current_perspective == Perspective.Segmentation or
                     self.current_perspective == Perspective.Annotation):
                 self.set_overlay_visibility(True)
-
 
         else:
             if self.current_perspective == Perspective.Segmentation:

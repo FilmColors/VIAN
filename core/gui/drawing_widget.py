@@ -151,15 +151,14 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.show()
 
         self.main_window.onTimeStep.connect(self.on_timestep_update)
-        self.main_window.player.started.connect(partial(self.on_opencv_frame_visibilty_changed, False))
+        # self.main_window.player.started.connect(partial(self.on_opencv_frame_visibilty_changed, False))
         self.main_window.onOpenCVFrameVisibilityChanged.connect(self.on_opencv_frame_visibilty_changed)
         self.main_window.frame_update_worker.signals.onOpenCVFrameUpdate.connect(self.assign_opencv_image)
-
-
 
     def on_loaded(self, project):
         self.cleanup()
         self.project = project
+
         # try:
         #     if self.videoCap:
         #         self.videoCap.release()
@@ -541,6 +540,12 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.end()
 
     def on_opencv_frame_visibilty_changed(self, visibility):
+        """
+        Turns the visibility of the opencv image loaded from the film on or off.
+        This does not affect the Visibility of the overlay itself
+        :param visibility:
+        :return:
+        """
         if visibility:
             if not self.settings.OPENCV_PER_FRAME == ALWAYS_VLC:
                 if self.opencv_image_visible == False:

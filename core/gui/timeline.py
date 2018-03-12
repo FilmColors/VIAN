@@ -35,6 +35,11 @@ class TimelineContainer(EDockWidget):
         self.a_cut_segment.triggered.connect(self.on_cut_tools)
         self.a_merge_segment = self.menu_tools.addAction("Merge Segments")
         self.a_merge_segment.triggered.connect(self.on_merge_tool)
+        self.menu_tools.addSeparator()
+        self.a_tools_toolbar = self.menu_tools.addAction("Show Toolbar")
+        self.a_tools_toolbar.triggered.connect(self.show_toolbar)
+        self.a_tools_toolbar.setCheckable(True)
+        self.a_tools_toolbar.setChecked(True)
         # self.a_merge_segments = self.menu_tools.addAction("Merge Segments")
         # self.a_merge_segments.triggered.connect(self.on_cut_tools)
 
@@ -82,7 +87,8 @@ class TimelineContainer(EDockWidget):
         self.a_show_name.triggered.connect(self.update_settings)
         self.a_show_text.triggered.connect(self.update_settings)
 
-
+        self.toolbar = TimelineToolbar(self, self.timeline)
+        self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
 
 
         # self.inner.addToolBar(self.toolbar)
@@ -96,6 +102,19 @@ class TimelineContainer(EDockWidget):
 
     def on_merge_tool(self):
         self.timeline.activate_merge_tool()
+
+    def show_toolbar(self):
+        if self.a_tools_toolbar.isChecked():
+            if self.toolbar is None:
+                self.toolbar = TimelineToolbar(self, self.timeline)
+                self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
+
+            else:
+                self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
+            self.toolbar.show()
+        else:
+            self.toolbar.hide()
+
 
     def update_settings(self):
         self.timeline.show_id = self.a_show_id.isChecked()
@@ -111,6 +130,18 @@ class TimelineContainer(EDockWidget):
 
         self.timeline.on_timeline_settings_update()
 
+
+class TimelineToolbar(QToolBar):
+    def __init__(self, parent, timeline):
+        super(TimelineToolbar, self).__init__(parent)
+        self.timeline = timeline
+
+        self.a_move = self.addAction("Move")
+        self.a_move.triggered.connect(self.timeline.activate_move_tool)
+        self.a_cut = self.addAction("Cut")
+        self.a_cut.triggered.connect(self.timeline.activate_cutting_tool)
+        self.a_merge = self.addAction("Merge")
+        self.a_merge.triggered.connect(self.timeline.activate_merge_tool)
 
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
@@ -611,6 +642,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         scale = (t_end - t_start) / (self.width() - self.controls_width) + 3
         self.zoom_timeline(QPoint(0,0), abs_scale=scale, force = True)
         self.scrollArea.horizontalScrollBar().setValue(t_start / self.scale - (self.scale/2))
+
+    def activate_move_tool(self):
+        self.abort_cutting()
+        self.abort_merge_tool()
 
     #region CuttingTool
     def activate_cutting_tool(self):

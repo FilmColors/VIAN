@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QColor
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5 import uic
 from functools import partial
 import os
@@ -162,6 +163,8 @@ class StatusVideoSource(QtWidgets.QWidget):
         self.layout.addWidget(self.lbl_source)
         self.setStyleSheet("QWiget{background: transparent;}")
 
+
+    @pyqtSlot(str)
     def on_source_changed(self, source):
         if source == "VLC":
             self.lbl_source.setText("VLC")
@@ -201,8 +204,10 @@ class StatusVideoSource(QtWidgets.QWidget):
         try:
             if idx == 0:
                 self.main_window.onOpenCVFrameVisibilityChanged.emit(False)
+
             elif idx == 1 and not self.main_window.player.is_playing():
                 self.main_window.onOpenCVFrameVisibilityChanged.emit(True)
+
             elif (idx == 2 and not self.main_window.player.is_playing()
                   and self.main_window.timeline.timeline.scale < self.main_window.timeline.timeline.opencv_frame_scale_threshold):
                 self.main_window.onOpenCVFrameVisibilityChanged.emit(True)

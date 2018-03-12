@@ -45,10 +45,9 @@ class ColorDTWidget(QWidget):
             imgs = [s.pixmap for s in stills_bg]
             self.plot(self.bg_view, np.array(indices), np.array(sat), imgs)
 
-        self.fg_view.show()
-        self.bg_view.show()
-        self.gl_view.show()
-
+        self.bg_view.frame_default()
+        self.fg_view.frame_default()
+        self.gl_view.frame_default()
 
     def plot(self, view, time, channel, imgs, is_liminance=True, y_max = None):
         view.clear_view()
@@ -62,6 +61,8 @@ class ColorDTWidget(QWidget):
 
         view.update_grid()
         view.sort_images()
+
+
 
 
 class ColorSpacePlots(QWidget):
@@ -161,9 +162,6 @@ class ColorSpaceLPlanePlots(QWidget):
         self.fg_view.frame_default()
         self.gl_view.frame_default()
 
-        self.fg_view.show()
-        self.bg_view.show()
-        self.gl_view.show()
 
 
 class FeaturePlot(QWidget):
