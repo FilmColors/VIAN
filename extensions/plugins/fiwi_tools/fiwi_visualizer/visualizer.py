@@ -98,6 +98,9 @@ class FiwiVisualizer(QMainWindow):
         self.movie_list_dock.hide()
         self.create_info_dock()
 
+        self.onModeChanged.connect(self.query_dock.on_mode_changed)
+        self.onCurrentCorpusChanged.connect(self.query_dock.on_corpus_changed)
+
         self.actionQuery_Window.triggered.connect(self.create_query_dock)
         self.actionFilm_List.triggered.connect(self.create_movie_list)
 
@@ -252,32 +255,47 @@ class FiwiVisualizer(QMainWindow):
         self.progress_bar.hide()
 
         self.all_movies = result[6]
+
+        default_corpus = Corpus("Complete Database")
+        for m in self.all_movies:
+            default_corpus.add_movie(m)
+        self.add_corpus(default_corpus)
+        self.set_current_corpus(0)
+
         self.movie_list_dock.list_files(self.all_movies)
 
     #region Query
     def on_start_query(self):
         if self.mode == MODE_CORPUS:
-            if self.is_querying:
-                return
-
-            self.query_dock.setEnabled(False)
-            curr_corpus = None
-            if self.current_corpora is not None:
-                curr_corpus = self.current_corpus().to_fm_ids()
-
-            worker = SimpleWorker(self.on_query, self.on_query_finished,
-                                  self.on_progress,
-                                  args=[self.query_dock.current_filters,
-                                        self.root_dir,
-                                        self.query_dock.lineEdit_fm_id.text(),
-                                        self.database_file,
-                                        self.n_stills_max,
-                                        curr_corpus
-                                        ])
-            self.thread_pool.start(worker)
-            self.progress_bar.show()
+            self.on_start_corpus_query()
         else:
             self.on_start_movie_query()
+
+    def on_start_corpus_query(self):
+        if self.is_querying:
+            return
+
+        self.query_dock.setEnabled(False)
+        curr_corpus = None
+        if self.current_corpora is not None:
+            curr_corpus = self.current_corpus().to_fm_ids()
+
+        if self.mode == MODE_MOVIE and self.current_movie is not None:
+            fm_id = self.current_movie.fm_id
+        else:
+            fm_id = self.query_dock.lineEdit_fm_id.text()
+
+        worker = SimpleWorker(self.on_query, self.on_query_finished,
+                              self.on_progress,
+                              args=[self.query_dock.current_filters,
+                                    self.root_dir,
+                                    fm_id,
+                                    self.database_file,
+                                    self.n_stills_max,
+                                    curr_corpus
+                                    ])
+        self.thread_pool.start(worker)
+        self.progress_bar.show()
 
     def on_query(self, args, on_progress):
         # filters = self.query_dock.current_filters
@@ -417,23 +435,23 @@ class FiwiVisualizer(QMainWindow):
         self.update_plots()
 
     def on_start_movie_query(self):
-
-        print("Querying Movie Database")
         # if self.current_movie is None:
         #     return
 
-        for m in self.all_movies:
-            if self.query_dock.lineEdit_fm_id.text() in m.fm_id:
-                self.current_movie = m
-                break
+        if self.current_movie is None:
+            for m in self.all_movies:
+                if self.query_dock.lineEdit_fm_id.text() in m.fm_id:
+                    self.current_movie = m
+                    break
 
-
+        print("Querying Movie Database: ", self.current_movie.name)
         worker = SimpleWorker(self.query_movie, self.on_movie_query_finished,
                               self.on_progress,
                               args=[
                                   self.current_movie,
                                   self.query_dock.current_filters,
-                                  self.database_file
+                                  self.database_file,
+                                  self.root_dir
                               ])
         self.thread_pool.start(worker)
         self.progress_bar.show()
@@ -444,18 +462,19 @@ class FiwiVisualizer(QMainWindow):
         self.feature_plot.plot(feature_segments, result[1])
         self.progress_bar.setValue(0)
         self.progress_bar.hide()
+        self.current_stills = result[2]
+        self.update_plots()
 
     def query_movie(self, args, on_progress):
         on_progress(0.1)
         movie = args[0]
         filters = args[1]
         database_path = args[2]
+        root_dir = args[3]
 
         database = FilmColorsDatabase()
         database.connect("sqlite:///" + database_path)
 
-
-        print(dict(Item_ID=movie.fm_id))
         qsegments = database.get_segments("Global:Literal", dict(Item_ID=movie.fm_id))
 
         all_segments = []
@@ -464,24 +483,19 @@ class FiwiVisualizer(QMainWindow):
             all_segments.append(DBSegment(s['Item_ID'], s['Segment_ID'], s["Sequence_Start"], s['Sequence_End']))
             qsegm_db_ids.append(s['id'])
 
-
-
-
-
-
         on_progress(0.5)
         features = []
         # Query each table individually
-        print(filters)
-        for f in filters:
 
+        for f in filters:
             d = dict(zip(["id", f[1]], [qsegm_db_ids, 1]))
-            print(f[0], d)
+            # print(f[0], d)
             res = database.get_segments(f[0], d)
             ids = []
             for r in res:
                 try:
                     ids.append(all_segments[qsegm_db_ids.index(r['id'])].segm_id)
+                    print(r['id'])
                 except:
                     print("not Found")
                     continue
@@ -489,11 +503,39 @@ class FiwiVisualizer(QMainWindow):
             if len(ids) > 0:
                 features.append(FeatureTuple(name = str(f[0]) + ":" + str(f[1]), segment_ids = ids))
 
-        return [all_segments, features]
+        still_objs = database.get_stills_of_movie(movie)
+        result_stills = []
+        for group in still_objs:
+            for i, s in enumerate(group):
+                stdout.write("\r" + str(root_dir + s.rel_path))
+
+                try:
+                    img = cv2.imread(root_dir + "db_stills/" + s.rel_path)
+                    if s.t_type in [TB_STILL_FG, TB_STILL_BG]:
+                        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+                        indices = np.where(img[:, :, :3] == [0, 0, 0])
+                        img[indices[0], indices[1]] = [0, 0, 0, 0]
+                    else:
+                        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    s.pixmap = img
+                except Exception as e:
+                    print("Failed", e)
+                    s.pixmap = np.zeros(shape=(5, 5, 3), dtype=np.uint8)
+                result_stills.append(s)
+        return [all_segments, features, result_stills]
     #endregion
 
+    def add_corpus(self, corpus):
+        self.corporas.append(corpus)
+        self.onCorporasChange.emit(self.corporas)
+
+    def remove_corpus(self, corpus):
+        if corpus in self.corporas:
+            self.corporas.remove(corpus)
+            self.onCorporasChange.emit(self.corporas)
+
     def set_current_movie(self, movie: DBMovie):
-        self.current_movie = DBMovie
+        self.current_movie = movie
 
     def on_progress(self, float):
         integer = int(float[0])
@@ -540,6 +582,7 @@ class FiwiVisualizer(QMainWindow):
     def set_current_corpus(self, idx):
         try:
             self.current_corpora = self.corporas[idx]
+            print(self.current_corpora)
             self.onCurrentCorpusChanged.emit(self.current_corpora)
         except:
             self.current_corpora = None
@@ -551,6 +594,7 @@ class FiwiVisualizer(QMainWindow):
     def set_mode(self, mode):
         self.mode = mode
         self.onModeChanged.emit(mode)
+
 
     #region Widget Creation
     def create_query_dock(self):

@@ -24,6 +24,7 @@ from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
 from core.data.exporters import zip_project
 from core.data.tools import *
+from core.concurrent.auto_segmentation import *
 # from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -1131,7 +1132,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_bar.on_finished()
 
     def run_job_concurrent(self, job):
-        job.prepare()
+        job.prepare(self.project)
         worker = Worker(job.run_concurrent, self, self.on_job_concurrent_result, job.args, msg_finished="Screenshots Loaded", concurrent_job=job)
         self.abortAllConcurrentThreads.connect(job.abort)
         self.start_worker(worker, "Job")
@@ -1519,7 +1520,7 @@ class MainWindow(QtWidgets.QMainWindow):
         targets = from_dialog['targets']
         parameters = from_dialog['parameters']
         fps = self.player.get_fps()
-        args = analysis.prepare(self.project, targets, parameters, fps)
+        args = analysis.prepare()
 
         if analysis.multiple_result:
             for arg in args:
@@ -1605,7 +1606,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #region Tools
     def on_auto_segmentation(self):
-        auto_segmentation(self.project,mode = AUTO_SEGM_CHIST, n_segment=10)
+        dialog = DialogAutoSegmentation(self, self.project)
+        dialog.show()
+        # auto_segmentation(self.project,mode = AUTO_SEGM_CHIST, n_segment=10)
 
     # endregion
 
@@ -1734,7 +1737,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
-        self.start_colormetry()
+
+        ready, col = self.project.get_colormetry()
+        if not ready:
+            self.start_colormetry()
+        else:
+            print("SetColormetry")
+            self.timeline.timeline.set_colormetry_progress(1.0)
         print("LOADED")
 
     def dispatch_on_changed(self, receiver = None, item = None):

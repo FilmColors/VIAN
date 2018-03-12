@@ -22,6 +22,7 @@ class ColormetryJob2(QObject):
             self.colormetry_analysis = project.create_colormetry()
             start = 0
         else:
+            self.colormetry_analysis = project.colormetry_analysis
             start = self.colormetry_analysis.curr_location
         self.duration = project.movie_descriptor.duration
         frame_duration = ms_to_frames(self.duration, project.movie_descriptor.fps)

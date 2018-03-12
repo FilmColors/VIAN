@@ -251,6 +251,13 @@ class GenericFeaturePlot(QGraphicsView):
 
         self.fitInView(QRectF(0, 0, 80, 80), Qt.KeepAspectRatio)
 
+        self.horizontalScrollBar().valueChanged.connect(self.on_h_scroll)
+
+    def on_h_scroll(self):
+        pos = self.mapToScene(QPoint(0,0))
+        for t in self.feature_labels:
+            t.setPos(pos.x(), t.pos().y())
+
     def remove_feature(self, feature):
         pass
 
@@ -282,7 +289,8 @@ class GenericFeaturePlot(QGraphicsView):
 
         label = self.scene().addText(feature.name.rjust(50), self.font)
         label.setDefaultTextColor(self.text_color)
-        label.setPos(- self.font_size * 50 * 0.8, y + self.feature_height / 4)
+        label.setPos(- self.font_size * 50 * 0.8, y - (self.feature_height * 3 / 4))
+        self.feature_labels.append(label)
 
         self.features.append(feature)
         self.feature_items.append(itms)
@@ -343,6 +351,7 @@ class GenericFeaturePlot(QGraphicsView):
         else:
             super(QGraphicsView, self).wheelEvent(event)
 
+        self.on_h_scroll()
     def clear_view(self):
         self.scene().clear()
         self.images.clear()

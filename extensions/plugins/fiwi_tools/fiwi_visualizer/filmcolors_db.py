@@ -317,6 +317,14 @@ class FilmColorsDatabase():
     def get_stills(self, filters, type):
         return self.db[type].find(**filters)
 
+    def get_stills_of_movie(self, movie:DBMovie):
+        fg = [DBStill(rs, TB_STILL_FG) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_FG)]
+        bg = [DBStill(rs, TB_STILL_BG) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_FG)]
+        glob = [DBStill(rs, TB_STILL_GLOB) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_FG)]
+
+        return[fg, bg, glob]
+
+
     def get_tables(self):
         return self.db.tables
 

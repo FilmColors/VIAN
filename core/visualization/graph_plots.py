@@ -172,8 +172,8 @@ class VocabularyGraph(QWidget):
         self.context_objects = None
 
         self.text_size = 15
-        self.node_threshold = 400
-        self.edge_threshold = 200
+        self.node_threshold = 1000
+        self.edge_threshold = 800
         self.selection_graph_depth = 2
 
         self.nodes = []
