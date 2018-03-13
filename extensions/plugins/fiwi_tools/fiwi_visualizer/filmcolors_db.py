@@ -324,7 +324,6 @@ class FilmColorsDatabase():
 
         return[fg, bg, glob]
 
-
     def get_tables(self):
         return self.db.tables
 

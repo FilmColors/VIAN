@@ -37,37 +37,42 @@ class NewProjectDialog(EDialogWidget):
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
 
-        self.vocabulary_inner = QWidget(self)
-        self.vocabulary_inner.setLayout(QHBoxLayout(self))
-        self.vocabulary_scroll = QScrollArea(self)
-        self.vocabulary_scroll.setWidget(self.vocabulary_inner)
-        self.frame_Vocabularies.layout().addWidget(self.vocabulary_scroll)
-        self.vocabulary_inner.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        #region VOCABULARIES DEPRECATED
 
-        n_per_col = int(len(self.vocabularies) / 3)
-        self.voc_cbs = []
-        vbox = QVBoxLayout(self.vocabulary_inner)
-        counter = 0
+        # self.vocabulary_inner = QWidget(self)
+        # self.vocabulary_inner.setLayout(QHBoxLayout(self))
+        # self.vocabulary_scroll = QScrollArea(self)
+        # self.vocabulary_scroll.setWidget(self.vocabulary_inner)
+        # self.frame_Vocabularies.layout().addWidget(self.vocabulary_scroll)
+        # self.vocabulary_inner.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        #
+        # n_per_col = int(len(self.vocabularies) / 3)
+        # self.voc_cbs = []
+        # vbox = QVBoxLayout(self.vocabulary_inner)
+        # counter = 0
 
-        for voc in self.vocabularies:
-            cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.vocabulary_inner)
-            cb.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
-            cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
-            cb.setChecked(True)
-            vbox.addWidget(cb)
-            self.voc_cbs.append([cb, voc])
-            counter += 1
-            if counter == n_per_col:
-                vbox.setSpacing(10)
-                self.vocabulary_inner.layout().addItem(vbox)
-                vbox = QVBoxLayout(self.vocabulary_inner)
-                counter = 0
-        if counter != 0:
-            vbox.addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
-            self.vocabulary_inner.layout().addItem(vbox)
 
-        self.vocabulary_inner.resize(self.vocabulary_inner.sizeHint())
+        # for voc in self.vocabularies:
+        #     cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.vocabulary_inner)
+        #     cb.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
+        #     cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
+        #     cb.setChecked(True)
+        #     vbox.addWidget(cb)
+        #     self.voc_cbs.append([cb, voc])
+        #     counter += 1
+        #     if counter == n_per_col:
+        #         vbox.setSpacing(10)
+        #         self.vocabulary_inner.layout().addItem(vbox)
+        #         vbox = QVBoxLayout(self.vocabulary_inner)
+        #         counter = 0
+        # if counter != 0:
+        #     vbox.addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        #     self.vocabulary_inner.layout().addItem(vbox)
+        #
+        # self.vocabulary_inner.resize(self.vocabulary_inner.sizeHint())
+        #endregion
 
+        self.frame_Vocabularies.hide()
         self.find_templates()
 
         self.cB_AutomaticNaming.stateChanged.connect(self.on_automatic_naming_changed)
@@ -76,8 +81,14 @@ class NewProjectDialog(EDialogWidget):
         self.btn_BrowseProject.clicked.connect(self.on_browse_project_path)
 
         self.lineEdit_Name.editingFinished.connect(self.on_desc_name_changed)
-        self.lineEdit_ID.editingFinished.connect(self.on_desc_id_changed)
-        self.lineEdit_Year.editingFinished.connect(self.on_desc_year_changed)
+        # self.lineEdit_ID.editingFinished.connect(self.on_desc_id_changed)
+
+        self.spinBox_ID_0.valueChanged.connect(self.on_desc_id_changed)
+        self.spinBox_ID_1.valueChanged.connect(self.on_desc_id_changed)
+        self.spinBox_ID_2.valueChanged.connect(self.on_desc_id_changed)
+
+        # self.lineEdit_Year.editingFinished.connect(self.on_desc_year_changed)
+        self.spinBox_Year.valueChanged.connect(self.on_desc_year_changed)
         self.comboBox_Source.currentIndexChanged.connect(self.on_desc_ource_changed)
         self.btn_BrowseMovie.clicked.connect(self.on_browse_movie_path)
 
@@ -121,9 +132,9 @@ class NewProjectDialog(EDialogWidget):
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
 
         if self.auto_naming:
-            self.project_name = self.lineEdit_ID.text() + "_" + \
+            self.project_name = self.get_movie_id() + "_" + \
                                 self.lineEdit_Name.text().replace(" ", "_") + "_" + \
-                                self.lineEdit_Year.text() + "_" + \
+                                str(self.spinBox_Year.value()) + "_" + \
                                 self.comboBox_Source.currentText()
             self.lineEdit_ProjectName.setText(self.project_name)
             # self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
@@ -164,12 +175,16 @@ class NewProjectDialog(EDialogWidget):
         self.project.movie_descriptor.movie_name = self.lineEdit_Name.text()
         self.set_project_path()
 
+    def get_movie_id(self):
+        return str(self.spinBox_ID_0.value()) + "_" + str(self.spinBox_ID_1.value()) + "_" + str(self.spinBox_ID_2.value())
+
     def on_desc_id_changed(self):
-        self.project.movie_descriptor.movie_id = self.lineEdit_ID.text()
+        id_m = self.get_movie_id()
+        self.project.movie_descriptor.movie_id = id_m
         self.set_project_path()
 
     def on_desc_year_changed(self):
-        self.project.movie_descriptor.year = self.lineEdit_Year.text()
+        self.project.movie_descriptor.year = self.spinBox_Year.value()
         self.set_project_path()
 
     def on_desc_ource_changed(self):
@@ -211,10 +226,11 @@ class NewProjectDialog(EDialogWidget):
               self.project.path, "\n",
               self.settings.DIR_PROJECT)
 
-        vocabularies = []
-        for c in self.voc_cbs:
-            if c[0].isChecked:
-                vocabularies.append(c[1])
+        # vocabularies = []
+        # for c in self.voc_cbs:
+        #     if c[0].isChecked:
+        #         vocabularies.append(c[1])
 
-        self.main_window.new_project(self.project, template, vocabularies)
+        # self.main_window.new_project(self.project, template, vocabularies)
+        self.main_window.new_project(self.project, template)
         self.close()

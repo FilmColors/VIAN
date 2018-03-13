@@ -779,7 +779,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_Control:
-            print("Control")
             self.screenshots_manager.ctrl_is_pressed = False
             self.timeline.timeline.is_scaling = False
         elif event.key() == Qt.Key_Shift:
@@ -1445,9 +1444,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.project.create_file_structure()
         # Importing all Vocabularies
-        for i, v in enumerate(vocabularies):
-            print("Importing: " + str(i) + " " + v + "\r")
-            self.project.import_vocabulary(v)
+        if vocabularies is not None:
+            for i, v in enumerate(vocabularies):
+                print("Importing: " + str(i) + " " + v + "\r")
+                self.project.import_vocabulary(v)
 
         # self.player.open_movie(project.movie_descriptor.movie_path)
         self.master_file.add_project(project)
