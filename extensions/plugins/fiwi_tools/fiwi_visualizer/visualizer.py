@@ -181,7 +181,6 @@ class FiwiVisualizer(QMainWindow):
 
             self.node_matrix = np.loadtxt(self.root_dir + "node_matrix.csv", delimiter=";")
 
-            print(len(self.unique_keywords), self.node_matrix.shape)
             labels = [k.to_string() for k in self.unique_keywords]
 
             self.node_graph.create_graph(self.node_matrix, labels, self.unique_keywords)

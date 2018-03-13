@@ -137,12 +137,21 @@ class ExperimentExporter():
             if base not in base_vocs:
                 base_vocs.append(base)
 
+        id_mapping = []
+
+        for obj in experiment.classification_objects:
+            mapping = [obj.unique_id, []]
+            for voc in obj.classification_vocabularies:
+                mapping[1].append(voc.base_vocabulary.unique_id)
+            id_mapping.append(mapping)
+
         serialization_exp = experiment.serialize()
         serialization_vocs = [v.serialize() for v in base_vocs]
 
         result = dict(
-            experiment=serialization_exp,
-            base_vocs = serialization_vocs
+            experiment = serialization_exp,
+            base_vocs = serialization_vocs,
+            id_mapping = id_mapping
         )
 
         with open(path, "w") as f:

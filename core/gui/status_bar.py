@@ -34,31 +34,34 @@ class StatusBar(QtWidgets.QWidget):
         self.layout.addWidget(self.label_selection_length)
         self.layout.addItem(QSpacerItem(20,20))
 
-        self.label_server = QtWidgets.QLabel(self)
-        self.label_server.setText("ELAN: ")
-        self.label_server.setStyleSheet("QLabel{background: transparent;}")
-        self.lbl_connection_status = QtWidgets.QLabel(self)
-        self.lbl_connection_status.setStyleSheet("QLabel{background: transparent;}")
-        self.layout.addWidget(self.label_server)
-        self.layout.addWidget(self.lbl_connection_status)
-        self.layout.addItem(QSpacerItem(20, 20))
+        #region CORPUS and ELAN Deprecated
+        # self.label_server = QtWidgets.QLabel(self)
+        # self.label_server.setText("ELAN: ")
+        # self.label_server.setStyleSheet("QLabel{background: transparent;}")
+        # self.lbl_connection_status = QtWidgets.QLabel(self)
+        # self.lbl_connection_status.setStyleSheet("QLabel{background: transparent;}")
+        # self.layout.addWidget(self.label_server)
+        # self.layout.addWidget(self.lbl_connection_status)
+        # self.layout.addItem(QSpacerItem(20, 20))
 
-        self.label_corpus = QtWidgets.QLabel(self)
-        self.label_corpus.setText("Corpus: ")
-        self.label_corpus.setStyleSheet("QLabel{background: transparent;}")
-        self.lbl_corpus_status = QtWidgets.QLabel(self)
-        self.lbl_corpus_status.setStyleSheet("QLabel{background: transparent;}")
-        self.layout.addWidget(self.label_corpus)
-        self.layout.addWidget(self.lbl_corpus_status)
-        self.layout.addItem(QSpacerItem(20, 20))
+        # self.label_corpus = QtWidgets.QLabel(self)
+        # self.label_corpus.setText("Corpus: ")
+        # self.label_corpus.setStyleSheet("QLabel{background: transparent;}")
+        # self.lbl_corpus_status = QtWidgets.QLabel(self)
+        # self.lbl_corpus_status.setStyleSheet("QLabel{background: transparent;}")
+        # self.layout.addWidget(self.label_corpus)
+        # self.layout.addWidget(self.lbl_corpus_status)
+        # self.layout.addItem(QSpacerItem(20, 20))
 
-        self.update_timer = QtCore.QTimer(self)
-        self.update_timer.setInterval(1000)
-        self.update_timer.timeout.connect(self.check_server_info)
-        self.update_timer.start()
-        self.check_server_info()
+        # self.update_timer = QtCore.QTimer(self)
+        # self.update_timer.setInterval(1000)
+        # self.update_timer.timeout.connect(self.check_server_info)
+        # self.update_timer.start()
+        # self.check_server_info()
 
-        self.label_server.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        # self.label_server.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        #endregion D
+
         self.show()
 
     def closeEvent(self, QCloseEvent):
@@ -72,13 +75,6 @@ class StatusBar(QtWidgets.QWidget):
         else:
             self.lbl_connection_status.setText("Offline")
             self.lbl_connection_status.setStyleSheet("QLabel {color : red; background: transparent;}")
-
-        if self.main_window.corpus_client.is_connected == True:
-            self.lbl_corpus_status.setText("Online")
-            self.lbl_corpus_status.setStyleSheet("QLabel {color : green; background: transparent;}")
-        else:
-            self.lbl_corpus_status.setText("Offline")
-            self.lbl_corpus_status.setStyleSheet("QLabel {color : red; background: transparent;}")
 
     def set_selection(self, selection):
         self.label_selection_length.setText(str(len(selection)) + " Items")

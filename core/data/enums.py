@@ -19,6 +19,11 @@ ANALYSIS_JOB_ANALYSIS = 13
 EXPERIMENT = 14
 CLASSIFICATIONOBJECT = 15
 
+
+FILE_EXT_PROJECT = ".eext"
+FILE_EXT_EXPERIMENT = ".vian_experiment"
+
+
 def get_type_as_string(type):
     if type == PROJECT:
         return "PROJECT"

@@ -216,8 +216,6 @@ class ScreenshotImporter(IConcurrentJob):
                 for i, p in enumerate(scr_paths):
                     if i in indices:
                         p_paths.append(p)
-
-                print(indices, segment_ranges[u], p_paths)
                 result.extend(self.mode_complete(movie_path,
                                                  p_paths,
                                             sign_progress,
@@ -352,9 +350,6 @@ class FilmColorsPipelineImporter():
                                             analysis_job_class=FilmColorsPipelineAnalysis().__class__,
                                             parameters= FilmColorsPipelinePreferences().get_parameters())
 
-            print(np.mean(data['frame_lab_fg'], axis = 0))
-            print(np.mean(data['frame_lab_bg'], axis=0))
-            print(np.mean(np.divide(np.add(data['frame_lab_bg'].astype(np.float32),data['frame_lab_fg']), 2), axis=0))
 
             # thumb_fg = []
             # for img in data["thumbnails_fg"]:
@@ -563,10 +558,46 @@ class ExperimentImporter():
 
         base_vocs_ser = data['base_vocs']
         experiment_ser = data['experiment']
+        id_mapping = data['id_mapping']
 
-        base_vocs = []
+        # We first need to import the Vocabularies into the Base Vocabularies,
+        # and then derive one for each of the Classification Objects.
+
+        # Adding all Vocabularies that are no duplicates
+        base_voc_id_mapping_old = []
+        base_voc_id_mapping_new = []
         for s in base_vocs_ser:
-            base_vocs.append(Vocabulary("New").deserialize(s, None))
+            duplicate = project.add_vocabulary(Vocabulary("New").deserialize(s, project), dispatch = False)
+            if duplicate is not None:
+                base_voc_id_mapping_old.append(s['unique_id'])
+                base_voc_id_mapping_new.append(duplicate.unique_id)
+            else:
+                base_voc_id_mapping_old.append(s['unique_id'])
+                base_voc_id_mapping_new.append(s['unique_id'])
+
+        experiment = project.create_experiment(dispatch=False)
+        experiment.name = experiment_ser['name']
+        experiment.unique_id = experiment_ser['unique_id']
+        experiment.classification_sources = experiment_ser['classification_sources']
+        experiment.analyses_templates = experiment_ser['analyses_templates']
+
+        old_ids = [experiment_ser['unique_id']]
+        new_ids = [experiment.unique_id]
+
+        for obj in experiment_ser['classification_objects']:
+            parent_id_old = obj['parent']
+            parent_new_id = new_ids[old_ids.index(parent_id_old)]
+            class_obj = experiment.create_class_object(obj['name'], project.get_by_id(parent_new_id))
+
+            for mapping in id_mapping:
+                if mapping[0] == obj['unique_id']:
+                    for voc_id in mapping[1]:
+                        new_voc_id = base_voc_id_mapping_new[base_voc_id_mapping_old.index(voc_id)]
+                        class_obj.add_vocabulary(project.get_by_id(new_voc_id))
+
+
+
+
 
 
 

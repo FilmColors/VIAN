@@ -45,7 +45,10 @@
      </property>
      <addaction name="actionImportELANSegmentation"/>
      <addaction name="action_importELAN_Project"/>
+     <addaction name="separator"/>
      <addaction name="actionImportVocabulary"/>
+     <addaction name="actionImportVIANExperiment"/>
+     <addaction name="separator"/>
      <addaction name="actionImportCSVVocabulary"/>
      <addaction name="actionImportScreenshots"/>
      <addaction name="separator"/>
@@ -56,9 +59,11 @@
      <property name="title">
       <string>Export</string>
      </property>
-     <addaction name="action_ExportSegmentation"/>
      <addaction name="actionExportTemplate"/>
+     <addaction name="actionExportExperiment"/>
      <addaction name="actionExportVocabulary"/>
+     <addaction name="separator"/>
+     <addaction name="action_ExportSegmentation"/>
      <addaction name="actionZip_Project"/>
     </widget>
     <widget class="QMenu" name="menuRecently_Opened">
@@ -693,6 +698,16 @@
   <action name="actionColormetry">
    <property name="text">
     <string>Colormetry</string>
+   </property>
+  </action>
+  <action name="actionExportExperiment">
+   <property name="text">
+    <string>VIAN Experiment</string>
+   </property>
+  </action>
+  <action name="actionImportVIANExperiment">
+   <property name="text">
+    <string>VIAN Experiment</string>
    </property>
   </action>
  </widget>

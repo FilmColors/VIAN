@@ -138,6 +138,7 @@ if __name__ == '__main__':
         set_attributes(app)
         set_style_sheet(app, settings.THEME_PATH)
         splash = QSplashScreen(QPixmap("qt_ui/images/loading_screen.png"))
+        splash.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.SplashScreen)
         splash.show()
         app.processEvents()
 

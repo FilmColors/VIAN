@@ -614,9 +614,9 @@ class VIANProject(IHasName, IHasVocabulary):
             my_dict = json.load(f)
 
         # remove the default Experiment
-        print(self.experiments)
+
         self.remove_experiment(self.experiments[0])
-        print(self.experiments)
+
 
         self.path = my_dict['path']
         self.path = path
@@ -834,26 +834,43 @@ class VIANProject(IHasName, IHasVocabulary):
         self.add_vocabulary(voc)
         return voc
 
-    def add_vocabulary(self, voc):
+    def add_vocabulary(self, voc, dispatch = True):
         not_ok = True
         counter = 0
         name = voc.name
+        duplicate = None
+
         while(not_ok):
             has_duplicate = False
             for v in self.vocabularies:
-                if v.name == name:
+                if v.name == name and v.derived_vocabulary == False:
                     name = voc.name + "_" + str(counter).zfill(2)
                     has_duplicate = True
                     counter += 1
+                    duplicate = v
                     break
             if not has_duplicate:
                 not_ok = False
                 break
+            else:
+                # If the Vocabulares are duplicates, we might want to replace the IDS in the Caller,
+                # Therefore we create a replacement table
+                x = [w.name for w in voc.words_plain]
+                y = [w.name for w in duplicate.words_plain]
+
+                if set(x) == set(y):
+                    return duplicate
+
+
         voc.name = name
         voc.set_project(self)
 
         self.vocabularies.append(voc)
-        self.dispatch_changed()
+
+        if dispatch:
+            self.dispatch_changed()
+
+        return None
 
     def remove_vocabulary(self, voc):
         if voc in self.vocabularies:
@@ -917,17 +934,20 @@ class VIANProject(IHasName, IHasVocabulary):
     #endregion
 
     #region Experiments
-    def create_experiment(self):
+    def create_experiment(self, dispatch = True):
         new = Experiment()
-        self.add_experiment(new)
+        self.add_experiment(new, dispatch)
         return new
 
-    def add_experiment(self, experiment):
+    def add_experiment(self, experiment, dispatch = True):
         experiment.set_project(self)
         self.experiments.append(experiment)
+
         self.undo_manager.to_undo((self.add_experiment, [experiment]),
                                   (self.remove_experiment, [experiment]))
-        self.dispatch_changed(item=experiment)
+
+        if dispatch:
+            self.dispatch_changed(item=experiment)
 
     def remove_experiment(self, experiment):
         if experiment in self.experiments:

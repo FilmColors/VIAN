@@ -413,7 +413,7 @@ QToolBar
 {
     background: #323232;
     /* background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #161616, stop: 0.5 #151515, stop: 0.6 #212121, stop:1 #343434);*/
-    border: 1px solid #6c6c6c;
+    border: 1px solid #202020;
     color: white;
 }
 
@@ -422,6 +422,7 @@ QToolBar::handle
 {
      spacing: 3px; /* spacing between items in the tool bar */
      background: url(:/images/handle.png);
+     color:black;
 }
 
 QMenu::separator

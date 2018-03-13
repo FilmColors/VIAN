@@ -50,3 +50,12 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
             self.histogram.update_plot(hist_d)
             self.palette.plot(data['palette']['val'], data['palette']['col'])
+
+    def on_selected(self, sender, selected):
+        pass
+    def on_closed(self):
+        pass
+    def on_changed(self, project, item):
+        pass
+    def on_loaded(self, project):
+        pass

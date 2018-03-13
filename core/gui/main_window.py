@@ -22,7 +22,7 @@ from core.data.masterfile import MasterFile
 from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
-from core.data.exporters import zip_project
+from core.data.exporters import *
 from core.data.tools import *
 from core.concurrent.auto_segmentation import *
 # from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
@@ -87,11 +87,14 @@ class MainWindow(QtWidgets.QMainWindow):
     abortAllConcurrentThreads = pyqtSignal()
     onOpenCVFrameVisibilityChanged = pyqtSignal(bool)
 
-    def __init__(self, loading_screen):
+    def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
 
+        loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 18pt;}")
+
+        loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(250,250,250,200))
         if PROFILE:
             self.profiler = cProfile.Profile()
             self.profiler.enable()
@@ -121,10 +124,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.master_file.load()
         self.icons = IconContainer()
 
-        self.corpus_client = CorpusClient(self.settings.USER_NAME)
-        self.corpus_client.send_connect(self.settings.USER_NAME)
-        if self.settings.USE_CORPUS:
-            self.corpus_client.start()
+        loading_screen.showMessage("Loading, Please Wait... Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(250, 250, 250, 200))
 
 
         self.updater = VianUpdater(self, self.version)
@@ -139,6 +140,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.thread_pool = QThreadPool()
         self.thread_pool.setMaxThreadCount(8)
+
+        loading_screen.showMessage("Loading, Please Wait... Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(250, 250, 250, 200))
 
         self.numpy_data_manager = NumpyDataManager(self)
         self.project_streamer = ProjectStreamerShelve(self)
@@ -196,6 +200,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.server.start()
 
         self.project = VIANProject(self, "", "Default Project")
+
+        loading_screen.showMessage("Loading, Please Wait... Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(250, 250, 250, 200))
 
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread(self)
@@ -269,6 +276,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ## Action Slots ##
         # Tab File
+
+        loading_screen.showMessage("Loading, Please Wait... Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(250, 250, 250, 100))
         self.actionNew.triggered.connect(self.action_new_project)
         self.actionLoad.triggered.connect(self.on_load_project)
         self.actionSave.triggered.connect(self.on_save_project)
@@ -282,10 +292,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportFilmColorsFilemaker.triggered.connect(self.import_filemaker)
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
+        self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
 
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
         self.actionExportTemplate.triggered.connect(self.export_template)
         self.actionExportVocabulary.triggered.connect(self.export_vocabulary)
+        self.actionExportExperiment.triggered.connect(self.export_experiment)
         self.actionClose_Project.triggered.connect(self.close_project)
         self.actionZip_Project.triggered.connect(self.on_zip_project)
         self.actionExit.triggered.connect(self.on_exit)
@@ -430,8 +442,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.is_selecting_analyzes = False
 
-        loading_screen.hide()
 
+        loading_screen.showMessage("Loading, Please Wait... Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(250, 250, 250, 200))
         self.update_recent_menu()
 
 
@@ -445,8 +458,20 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.current_segment_evaluator.signals.segmentChanged.connect(self.currentSegmentChanged.emit)
         # self.thread_pool.start(self.current_segment_evaluator)
         self.switch_perspective(Perspective.Segmentation.name)
-        self.show()
 
+        self.player_controls.setState(False)
+
+        self.create_analysis_list()
+        self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
+        # self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
+        self.update_vian(False)
+
+        self.project.undo_manager.clear()
+        self.close_project()
+
+
+        self.show()
+        loading_screen.hide()
         self.setWindowState(Qt.WindowMaximized)
 
         # This can be used for a oneshot forced command.
@@ -466,15 +491,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.USER_NAME == "":
             self.show_first_start()
 
-        self.player_controls.setState(False)
 
-        self.create_analysis_list()
-        self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
-        # self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
-        self.update_vian(False)
 
-        self.project.undo_manager.clear()
-        self.close_project()
 
     def print_time(self, segment):
         print(segment)
@@ -836,10 +854,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.settings.recent_files_path = []
             self.settings.recent_files_name = []
 
-    def export_template(self):
-        dialog = ExportTemplateDialog(self)
-        dialog.show()
-
     def eval_class(self, class_name):
         try:
             return eval(class_name)
@@ -881,135 +895,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.show()
         self.player_controls.on_play()
 
-    def action_new_project(self):
-        self.on_new_project()
-
-    def on_new_project(self, movie_path = ""):
-        # self.set_darwin_player_visibility(False)
-        self.update()
-
-        if self.project is not None and self.project.undo_manager.has_modifications():
-            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.Yes:
-                self.on_save_project()
-
-        vocabularies = []
-        built_in = glob.glob("user/vocabularies/*.txt")
-        vocabularies = built_in
-
-        dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
-        dialog.show()
-
-    def new_project(self, project, template_path = None, vocabularies = None):
-        if self.project is not None:
-            self.close_project()
-
-        self.project = project
-        self.settings.add_to_recent_files(self.project)
-        self.update_recent_menu()
-
-        self.project.inhibit_dispatch = True
-        if template_path is not None:
-            self.project.apply_template(template_path)
-
-        self.project.create_file_structure()
-        # Importing all Vocabularies
-        for i, v in enumerate(vocabularies):
-            print("Importing: " + str(i) + " " + v + "\r")
-            self.project.import_vocabulary(v)
-
-        # self.player.open_movie(project.movie_descriptor.movie_path)
-        self.master_file.add_project(project)
-        self.project.store_project(self.settings, self.master_file)
-
-        self.project.inhibit_dispatch = False
-        self.dispatch_on_loaded()
-
-    def on_load_project(self):
-        if self.project is not None and self.project.undo_manager.has_modifications():
-            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.Yes:
-                self.on_save_project()
-
-        self.set_overlay_visibility(False)
-        path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
-
-        if self.current_perspective == (Perspective.Segmentation.name or Perspective.Annotation.name):
-            self.set_overlay_visibility(True)
-        path = path[0]
-        self.close_project()
-        self.load_project(path)
-
-    def close_project(self):
-        if self.project is not None:
-            if self.project.undo_manager.has_modifications():
-                answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-                if answer == QMessageBox.Yes:
-                    self.on_save_project()
-
-            self.player.stop()
-            self.abortAllConcurrentThreads.emit()
-            self.project.cleanup()
-
-        self.player_controls.setState(False)
-        self.project = None
-        self.dispatch_on_closed()
-
-    def load_project(self, path):
-
-        if path == "" or path is None:
-            self.print_message("Not Loaded, Path was Empty")
-            return
-
-        new = VIANProject(self)
-        print("Loading Project Path", path)
-        new.inhibit_dispatch = True
-        new.load_project(self.settings ,path)
-
-        self.project = new
-        self.settings.add_to_recent_files(self.project)
-        self.update_recent_menu()
-
-        new.inhibit_dispatch = False
-        #self.project_streamer.set_project(new)
-        self.dispatch_on_loaded()
-
-    def on_save_project(self, open_dialog=False, sync = False):
-        if open_dialog is True or self.project.path is "" or self.project.name is "":
-
-            path = QFileDialog.getSaveFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION)
-
-            path = path[0].replace(self.settings.PROJECT_FILE_EXTENSION, "")
-            path = path.replace("\\", "/")
-            split = path.split("/")
-            path = ""
-            for s in split[0:len(split)-1]:
-                path += s + "/"
-            name = split[len(split)-1]
-            self.project.path = path + name
-            self.project.name = name
-            self.project.movie_descriptor.movie_path = self.player.movie_path
-
-            path = self.project.path
-            args = [self.project, path, self.settings, self.master_file]
-        else:
-            args = [self.project, self.project.path, self.settings, self.master_file]
-
-        if sync:
-            store_project_concurrent(args, self.dummy_func)
-        else:
-            worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
-            self.start_worker(worker, "Saving Project")
-
-            self.corpus_client.send_update_project(ProjectData().from_EEXTProject(self.project))
-
-        self.project.undo_manager.no_changes = True
-
-        return
-
-    def on_save_project_as(self):
-        self.on_save_project(True)
-
     def on_exit(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
@@ -1024,9 +909,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.store()
 
         self.frame_update_thread.quit()
-
-        # self.drawing_overlay.close()
-        self.corpus_client.send_disconnect(self.settings.USER_NAME)
 
         if PROFILE:
             self.profiler.disable()
@@ -1183,91 +1065,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_new_annotation_layer(self):
         curr_time = self.player.get_media_time()
         self.project.create_annotation_layer("New Layer", curr_time, curr_time + 10000)
-
-    def import_segmentation(self, path = None):
-        QMessageBox.warning(self, "Deprecated", "The Segmentation Importer is deprecated and therefore removed from VIAN.\n "
-                                          "For ELAN Projects use the \"ELAN Project Importer\". \n "
-                                          "A new Version for importing arbitary Segmentations is planned but not yet included.")
-        # SegmentationImporterDialog(self, self.project, self)
-
-    def import_elan_project(self, path = None):
-        try:
-            if path is None:
-                path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
-            #path = path.replace("file:///", "")
-            #path = path.replace("file:", "")
-
-            path = parse_file_path(path)
-
-            importer = ELANProjectImporter(self, remote_movie=True, import_screenshots=True)
-            self.project = importer.import_project(path)
-            self.on_save_project(False)
-
-            self.project.main_window = self
-            self.project.dispatch_loaded()
-            self.print_message("Import Successfull", "Green")
-        except Exception as e:
-            self.print_message("Import Failed", "Red")
-            self.print_message("This is a serious Bug, please report this message, together with your project to Gaudenz Halter", "Red")
-            self.print_message(str(e), "Red")
-
-    def import_vocabulary(self, paths = None):
-        if paths is None:
-            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
-        # path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
-        try:
-            self.project.inhibit_dispatch = True
-            for p in paths:
-                self.project.import_vocabulary(p)
-            self.project.inhibit_dispatch = False
-            self.project.dispatch_changed()
-        except Exception as e:
-            self.print_message("Vocabulary Import Failed", "Red")
-            self.print_message(str(e), "Red")
-
-    def import_pipeline(self):
-        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
-        if not os.path.isfile(path):
-            self.print_message("Could not Open File", "Red")
-            return
-        importer = FilmColorsPipelineImporter()
-        importer.import_pipeline(path, self.project)
-
-    def import_filemaker(self):
-        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
-        if not os.path.isfile(path):
-            self.print_message("Could not Open File", "Red")
-            return
-        importer = FileMakerVocImporter()
-        importer.import_filemaker(path, self.project)
-
-    def import_csv_vocabulary(self):
-        dialog = CSVVocabularyImportDialog(self, self.project)
-        dialog.show()
-
-    def export_segmentation(self):
-        # path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
-        dialog = ExportSegmentationDialog(self)
-        dialog.show()
-
-    def export_vocabulary(self):
-        dialog = VocabularyExportDialog(self)
-        dialog.show()
-
-    def import_screenshots(self, paths = None):
-        # paths = QFileDialog.getOpenFileNames()[0]
-        # args = [self.project.movie_descriptor.movie_path, paths]
-        # importer = ScreenshotImporter(args)
-        # self.run_job_concurrent(importer)
-        dialog = DialogScreenshotImport(self, paths)
-        dialog.show()
-
-    def on_zip_project(self):
-        try:
-            zip_project(self.project.export_dir + "/" + self.project.name, self.project.folder)
-        except Exception as e:
-            self.print_message("Zipping Project Failed", "Red")
-            self.print_message(str(e), "Red")
 
     def on_backup(self):
         answer = QMessageBox.question(self, "Backup", "Do you want to store the Backup into the default Directory?",
@@ -1614,6 +1411,135 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.update_rate()
     # endregion
 
+    #region Project Management
+    def action_new_project(self):
+        self.on_new_project()
+
+    def on_new_project(self, movie_path = ""):
+        # self.set_darwin_player_visibility(False)
+        self.update()
+
+        if self.project is not None and self.project.undo_manager.has_modifications():
+            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+            if answer == QMessageBox.Yes:
+                self.on_save_project()
+
+        vocabularies = []
+        built_in = glob.glob("user/vocabularies/*.txt")
+        vocabularies = built_in
+
+        dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
+        dialog.show()
+
+    def new_project(self, project, template_path = None, vocabularies = None):
+        if self.project is not None:
+            self.close_project()
+
+        self.project = project
+        self.settings.add_to_recent_files(self.project)
+        self.update_recent_menu()
+
+        self.project.inhibit_dispatch = True
+        if template_path is not None:
+            self.project.apply_template(template_path)
+
+        self.project.create_file_structure()
+        # Importing all Vocabularies
+        for i, v in enumerate(vocabularies):
+            print("Importing: " + str(i) + " " + v + "\r")
+            self.project.import_vocabulary(v)
+
+        # self.player.open_movie(project.movie_descriptor.movie_path)
+        self.master_file.add_project(project)
+        self.project.store_project(self.settings, self.master_file)
+
+        self.project.inhibit_dispatch = False
+        self.dispatch_on_loaded()
+
+    def on_load_project(self):
+        if self.project is not None and self.project.undo_manager.has_modifications():
+            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+            if answer == QMessageBox.Yes:
+                self.on_save_project()
+
+        self.set_overlay_visibility(False)
+        path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
+
+        if self.current_perspective == (Perspective.Segmentation.name or Perspective.Annotation.name):
+            self.set_overlay_visibility(True)
+        path = path[0]
+        self.close_project()
+        self.load_project(path)
+
+    def close_project(self):
+        if self.project is not None:
+            if self.project.undo_manager.has_modifications():
+                answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
+                if answer == QMessageBox.Yes:
+                    self.on_save_project()
+
+            self.player.stop()
+            self.abortAllConcurrentThreads.emit()
+            self.project.cleanup()
+
+        self.player_controls.setState(False)
+        self.project = None
+        self.dispatch_on_closed()
+
+    def load_project(self, path):
+
+        if path == "" or path is None:
+            self.print_message("Not Loaded, Path was Empty")
+            return
+
+        new = VIANProject(self)
+        print("Loading Project Path", path)
+        new.inhibit_dispatch = True
+        new.load_project(self.settings ,path)
+
+        self.project = new
+        self.settings.add_to_recent_files(self.project)
+        self.update_recent_menu()
+
+        new.inhibit_dispatch = False
+        #self.project_streamer.set_project(new)
+        self.dispatch_on_loaded()
+
+    def on_save_project(self, open_dialog=False, sync = False):
+        if open_dialog is True or self.project.path is "" or self.project.name is "":
+
+            path = QFileDialog.getSaveFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION)
+
+            path = path[0].replace(self.settings.PROJECT_FILE_EXTENSION, "")
+            path = path.replace("\\", "/")
+            split = path.split("/")
+            path = ""
+            for s in split[0:len(split)-1]:
+                path += s + "/"
+            name = split[len(split)-1]
+            self.project.path = path + name
+            self.project.name = name
+            self.project.movie_descriptor.movie_path = self.player.movie_path
+
+            path = self.project.path
+            args = [self.project, path, self.settings, self.master_file]
+        else:
+            args = [self.project, self.project.path, self.settings, self.master_file]
+
+        if sync:
+            store_project_concurrent(args, self.dummy_func)
+        else:
+            worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
+            self.start_worker(worker, "Saving Project")
+
+        self.project.undo_manager.no_changes = True
+
+        return
+
+    def on_save_project_as(self):
+        self.on_save_project(True)
+    #endregion
+
     #region Tools
     def on_auto_segmentation(self):
         dialog = DialogAutoSegmentation(self, self.project)
@@ -1671,6 +1597,132 @@ class MainWindow(QtWidgets.QMainWindow):
         t = self.time
         if t > 0:
             self.dispatch_on_timestep_update(t)
+
+    #endregion
+
+    #region Import / Export
+
+    def import_experiment(self):
+        paths = QFileDialog.getOpenFileNames(filter="*" + FILE_EXT_EXPERIMENT)[0]
+        importer = ExperimentImporter()
+        for p in paths:
+            if os.path.isfile(p):
+                try:
+                    importer.import_experiment(p, self.project)
+                except Exception as e:
+                    print("Error in import_experiment()", str(e))
+
+    def export_experiment(self):
+        to_export = []
+        for sel in self.project.selected:
+            if sel.get_type() == EXPERIMENT:
+                to_export.append(sel)
+
+        dir = QFileDialog.getExistingDirectory(self, directory=self.project.export_dir)
+
+        if not os.path.isdir(dir):
+            self.print_message(str(dir) + " is not a valid Directory", "Red")
+
+        exporter = ExperimentExporter()
+        for exp in to_export:
+            try:
+                exporter.export(dir + "/" + exp.get_name().replace(" ", "_") + FILE_EXT_EXPERIMENT, experiment=exp)
+            except Exception as e:
+                print("Error in export_experiment()", str(e))
+
+        QMessageBox.information(self, "Export Finished", "The Experiments have been exported to " + str(dir))
+
+    def export_template(self):
+        dialog = ExportTemplateDialog(self)
+        dialog.show()
+
+    def import_elan_project(self, path=None):
+        try:
+            if path is None:
+                path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
+            # path = path.replace("file:///", "")
+            # path = path.replace("file:", "")
+
+            path = parse_file_path(path)
+
+            importer = ELANProjectImporter(self, remote_movie=True, import_screenshots=True)
+            self.project = importer.import_project(path)
+            self.on_save_project(False)
+
+            self.project.main_window = self
+            self.project.dispatch_loaded()
+            self.print_message("Import Successfull", "Green")
+        except Exception as e:
+            self.print_message("Import Failed", "Red")
+            self.print_message(
+                "This is a serious Bug, please report this message, together with your project to Gaudenz Halter",
+                "Red")
+            self.print_message(str(e), "Red")
+
+    def import_pipeline(self):
+        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
+        if not os.path.isfile(path):
+            self.print_message("Could not Open File", "Red")
+            return
+        importer = FilmColorsPipelineImporter()
+        importer.import_pipeline(path, self.project)
+
+    def import_filemaker(self):
+        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
+        if not os.path.isfile(path):
+            self.print_message("Could not Open File", "Red")
+            return
+        importer = FileMakerVocImporter()
+        importer.import_filemaker(path, self.project)
+
+    def import_csv_vocabulary(self):
+        dialog = CSVVocabularyImportDialog(self, self.project)
+        dialog.show()
+
+    def import_segmentation(self, path=None):
+        QMessageBox.warning(self, "Deprecated",
+                            "The Segmentation Importer is deprecated and therefore removed from VIAN.\n "
+                            "For ELAN Projects use the \"ELAN Project Importer\". \n "
+                            "A new Version for importing arbitary Segmentations is planned but not yet included.")
+        # SegmentationImporterDialog(self, self.project, self)
+
+    def export_segmentation(self):
+        # path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
+        dialog = ExportSegmentationDialog(self)
+        dialog.show()
+
+    def import_vocabulary(self, paths=None):
+        if paths is None:
+            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
+        # path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
+        try:
+            self.project.inhibit_dispatch = True
+            for p in paths:
+                self.project.import_vocabulary(p)
+            self.project.inhibit_dispatch = False
+            self.project.dispatch_changed()
+        except Exception as e:
+            self.print_message("Vocabulary Import Failed", "Red")
+            self.print_message(str(e), "Red")
+
+    def export_vocabulary(self):
+        dialog = VocabularyExportDialog(self)
+        dialog.show()
+
+    def import_screenshots(self, paths=None):
+        # paths = QFileDialog.getOpenFileNames()[0]
+        # args = [self.project.movie_descriptor.movie_path, paths]
+        # importer = ScreenshotImporter(args)
+        # self.run_job_concurrent(importer)
+        dialog = DialogScreenshotImport(self, paths)
+        dialog.show()
+
+    def on_zip_project(self):
+        try:
+            zip_project(self.project.export_dir + "/" + self.project.name, self.project.folder)
+        except Exception as e:
+            self.print_message("Zipping Project Failed", "Red")
+            self.print_message(str(e), "Red")
 
     #endregion
 
@@ -1748,17 +1800,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
 
-        run_colormetry = False
-        if self.settings.AUTO_START_COLORMETRY:
-            run_colormetry = True
-        else:
-            answer = QMessageBox.question(self, "Colormetry",
-                                          "Do you want to start the Colormetry Analysis now?"
-                                          "\n\n"
-                                          "Hint: The Colormetry will be needed for several Tools in VIAN,\n"
-                                          "but will need quite some resources of your computer.")
-            if answer == QMessageBox.Yes:
+        ready, coloremtry = self.project.get_colormetry()
+        if not ready:
+            run_colormetry = False
+            if self.settings.AUTO_START_COLORMETRY:
                 run_colormetry = True
+            else:
+                answer = QMessageBox.question(self, "Colormetry",
+                                              "Do you want to start the Colormetry Analysis now?"
+                                              "\n\n"
+                                              "Hint: The Colormetry will be needed for several Tools in VIAN,\n"
+                                              "but will need quite some resources of your computer.")
+                if answer == QMessageBox.Yes:
+                    run_colormetry = True
+        else:
+            run_colormetry = ready
 
         if run_colormetry:
             ready, col = self.project.get_colormetry()
@@ -1883,6 +1939,8 @@ class MainWindow(QtWidgets.QMainWindow):
 #     def __init__(self):
 #         super(LoadingScreen, self).__init__(None)
 #         self.lbl = QLabel(self)
+#         self.setPixmap(QPixmap(os.path.abspath("qt_ui/images/loading_screen.png")))
+#         self.set
 #         self.setFixedWidth(800)
 #         self.setFixedHeight(400)
 #         self.lbl.setText("Welcome")

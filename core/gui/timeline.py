@@ -976,7 +976,6 @@ class TimelineBar(QtWidgets.QFrame):
 
     def add_slice(self, item):
         slice = TimebarSlice(self, item, self.timeline)
-        print(item.get_start(), item.get_end())
         slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
         slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
         self.slices.append(slice)

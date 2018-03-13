@@ -196,7 +196,6 @@ class FilmColorsDatabase():
             with open(csv_file, "r") as f:
                 reader = csv.reader(f, delimiter=";")
                 for i, row in enumerate(reader):
-                    print(row)
                     if i == 0:
                         keywords = row
                         idx_voc = row.index("voc")

@@ -253,7 +253,6 @@ class EToolBar(QToolBar):
     def __init__(self, main_window, title = "Toolbar Title"):
         super(EToolBar, self).__init__(main_window)
         self.main_window = main_window
-        self.setStyleSheet("QToolBar{background-color: gray;}")
         self.setWindowTitle(title)
 
         self.show_indicator_frame = False
@@ -279,7 +278,7 @@ class EToolBar(QToolBar):
 
         qp.setPen(pen)
 
-        qp.fillRect(self.rect(), QColor(50, 50, 50))
+        # qp.fillRect(self.rect(), QColor(50, 50, 50))
 
         if self.show_indicator_frame:
 

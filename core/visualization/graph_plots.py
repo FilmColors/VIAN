@@ -329,7 +329,6 @@ class VocabularyGraph(QWidget):
         for key, itm in lt.items():
             # s = node_sums[counter]
             if counter >= len(node_infos):
-                print("1 OUPS")
                 continue
             s = node_infos[counter][5]
             n_itm = GraphNode(None, self, pen, brush)
@@ -343,7 +342,6 @@ class VocabularyGraph(QWidget):
         if labels is not None:
             for key, itm in lt.items():
                 if counter >= len(node_infos):
-                    print("2 OUPS")
                     continue
                 s = node_infos[counter][5]
                 name = node_infos[counter][1] #node_names[counter]
