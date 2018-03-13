@@ -8,6 +8,7 @@ Analyses
 
    running_analyses
    viewing_analyses
+   colormetry
    analyses_list
 
 

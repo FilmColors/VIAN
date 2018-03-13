@@ -5,129 +5,58 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5f86adad-e443-47bd-a2df-ab0eb0627df8" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/import_screenshots.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/auto_segmentation.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/merging_segments.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/icon_cut.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/icon_merge.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/qt_ui/icons/icon_move.png" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/source/whats_new/cutting_segments_02.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/source/whats_new/mosaic.jpg" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/DevelopersGuide.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/DevelopersGuide.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/UserGuide.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/UserGuide.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses.doctree" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/source/step_by_step/analyses/colormetry.rst" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/core/vlc/v3_0_0/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/core/vlc/v3_0_0/vlc.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses_example.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses_example.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/nodes.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/nodes.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/plugins.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/plugins.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/environment.pickle" afterPath="$PROJECT_DIR$/_docs/build/doctrees/environment.pickle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/index.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/index.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/analyses.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/analyses.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/analyses_list.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/analyses_list.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/running_analyses.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/running_analyses.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/viewing_analyses.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/viewing_analyses.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/annotation/annotation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/annotation/annotation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/player/changing_subtitles.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/player/changing_subtitles.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/player/player.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/player/player.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/backups.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/backups.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/changing_movie_paths.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/changing_movie_paths.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/create_project.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/create_project.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/import_elan_projects.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/import_elan_projects.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_management.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_management.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_templates.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_templates.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/create_screenshot.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/create_screenshot.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/export_screenshots.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/export_screenshots.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/screenshots.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/screenshots.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/changing_main_segmentation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/changing_main_segmentation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segment.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segment.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segmentation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segmentation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/cutting_segments.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/cutting_segments.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/exporting_segmentations.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/exporting_segmentations.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/locking_segmentations.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/locking_segmentations.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/segmentation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/segmentation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/step_by_step.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/step_by_step.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/inspector.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/inspector.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/outliner.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/outliner.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/perspectives.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/perspectives.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/timeline.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/timeline.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/user_interface.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/user_interface.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/0_4_2/0_4_2.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/0_4_2/0_4_2.doctree" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/auto_segmentation.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/auto_segmentation.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/latest.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/latest.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whatsnew.doctree" afterPath="$PROJECT_DIR$/_docs/build/doctrees/whatsnew.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/objects.inv" afterPath="$PROJECT_DIR$/_docs/build/html/objects.inv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_film_level_active.png" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_film_level_active.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/app.iml" afterPath="$PROJECT_DIR$/.idea/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/qt_ui/images/loading_screen.png" afterPath="$PROJECT_DIR$/qt_ui/images/loading_screen.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/DevelopersGuide.html" afterPath="$PROJECT_DIR$/_docs/build/html/DevelopersGuide.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/UserGuide.html" afterPath="$PROJECT_DIR$/_docs/build/html/UserGuide.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/interfaces.html" afterPath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/interfaces.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/plugin.html" afterPath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/plugin.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/index.html" afterPath="$PROJECT_DIR$/_docs/build/html/_modules/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/screenshots/screenshots.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/screenshots/screenshots.rst.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/segmentation.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/segmentation.rst.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/inspector.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/inspector.rst.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/timeline.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/timeline.rst.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/whats_new/latest.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/whats_new/latest.rst.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/whatsnew.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/whatsnew.rst.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/analyses/analyses.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/analyses/analyses.rst.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/auto_segmentation.rst.txt" afterPath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/auto_segmentation.rst.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses_example.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses_example.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/nodes.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/nodes.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/plugins.html" afterPath="$PROJECT_DIR$/_docs/build/html/dev_guide/plugins.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/genindex.html" afterPath="$PROJECT_DIR$/_docs/build/html/genindex.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/index.html" afterPath="$PROJECT_DIR$/_docs/build/html/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/search.html" afterPath="$PROJECT_DIR$/_docs/build/html/search.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/searchindex.js" afterPath="$PROJECT_DIR$/_docs/build/html/searchindex.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/analyses.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/analyses.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/analyses_list.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/analyses_list.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/running_analyses.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/running_analyses.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/viewing_analyses.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/viewing_analyses.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/annotation/annotation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/annotation/annotation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/player/changing_subtitles.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/player/changing_subtitles.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/player/player.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/player/player.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/backups.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/backups.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/changing_movie_paths.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/changing_movie_paths.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/create_project.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/create_project.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/import_elan_projects.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/import_elan_projects.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_management.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_management.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_templates.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_templates.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/create_screenshot.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/create_screenshot.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/export_screenshots.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/export_screenshots.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/screenshots.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/screenshots.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/changing_main_segmentation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/changing_main_segmentation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segment.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segment.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segmentation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segmentation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/cutting_segments.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/cutting_segments.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/exporting_segmentations.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/exporting_segmentations.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/locking_segmentations.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/locking_segmentations.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/auto_segmentation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/auto_segmentation.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/segmentation.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/segmentation.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/step_by_step.html" afterPath="$PROJECT_DIR$/_docs/build/html/step_by_step/step_by_step.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/inspector.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/inspector.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/outliner.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/outliner.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/perspectives.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/perspectives.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/timeline.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/timeline.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/user_interface.html" afterPath="$PROJECT_DIR$/_docs/build/html/user_interface/user_interface.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/whats_new/0_4_2/0_4_2.html" afterPath="$PROJECT_DIR$/_docs/build/html/whats_new/0_4_2/0_4_2.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/whats_new/latest.html" afterPath="$PROJECT_DIR$/_docs/build/html/whats_new/latest.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/build/html/whatsnew.html" afterPath="$PROJECT_DIR$/_docs/build/html/whatsnew.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst" afterPath="$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/step_by_step/screenshots/screenshots.rst" afterPath="$PROJECT_DIR$/_docs/source/step_by_step/screenshots/screenshots.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/segmentation.rst" afterPath="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/segmentation.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/user_interface/inspector.rst" afterPath="$PROJECT_DIR$/_docs/source/user_interface/inspector.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/user_interface/timeline.rst" afterPath="$PROJECT_DIR$/_docs/source/user_interface/timeline.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/whats_new/latest.rst" afterPath="$PROJECT_DIR$/_docs/source/whats_new/latest.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/whatsnew.rst" afterPath="$PROJECT_DIR$/_docs/source/whatsnew.rst" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/step_by_step/analyses/analyses.rst" afterPath="$PROJECT_DIR$/_docs/source/step_by_step/analyses/analyses.rst" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/auto_segmentation.rst" afterPath="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/auto_segmentation.rst" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py" afterPath="$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/analysis/filmcolors_pipeline/filmcolors_pipeline.py" afterPath="$PROJECT_DIR$/core/analysis/filmcolors_pipeline/filmcolors_pipeline.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/concurrent/auto_segmentation.py" afterPath="$PROJECT_DIR$/core/concurrent/auto_segmentation.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/ewidgetbase.py" afterPath="$PROJECT_DIR$/core/gui/ewidgetbase.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/containers.py" afterPath="$PROJECT_DIR$/core/data/containers.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/settings.py" afterPath="$PROJECT_DIR$/core/data/settings.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/undo_redo_manager.py" afterPath="$PROJECT_DIR$/core/data/undo_redo_manager.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/vian_updater.py" afterPath="$PROJECT_DIR$/core/data/vian_updater.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/Dialogs/preferences_dialog.py" afterPath="$PROJECT_DIR$/core/gui/Dialogs/preferences_dialog.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/experiment_editor.py" afterPath="$PROJECT_DIR$/core/gui/experiment_editor.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/main_window.py" afterPath="$PROJECT_DIR$/core/gui/main_window.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/timeline.py" afterPath="$PROJECT_DIR$/core/gui/timeline.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/player_vlc.py" afterPath="$PROJECT_DIR$/core/gui/player_vlc.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/screenshot_manager.py" afterPath="$PROJECT_DIR$/core/gui/screenshot_manager.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/visualization/feature_plot.py" afterPath="$PROJECT_DIR$/core/visualization/feature_plot.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/visualization/image_plots.py" afterPath="$PROJECT_DIR$/core/visualization/image_plots.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/WindowFiwiDatabase.ui" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/WindowFiwiDatabase.ui" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/qt_ui/DialogAutoSegmentation.ui" afterPath="$PROJECT_DIR$/qt_ui/DialogAutoSegmentation.ui" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/qt_ui/DialogPreferences.ui" afterPath="$PROJECT_DIR$/qt_ui/DialogPreferences.ui" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/qt_ui/MainWindow.ui" afterPath="$PROJECT_DIR$/qt_ui/MainWindow.ui" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/user/master_file.ems" afterPath="$PROJECT_DIR$/user/master_file.ems" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vian_version.txt" afterPath="$PROJECT_DIR$/vian_version.txt" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -145,219 +74,447 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="timeline.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/gui/timeline.py">
+      <file leaf-file-name="preferences_dialog.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/gui/Dialogs/preferences_dialog.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="160" column="6" lean-forward="false" selection-start-line="160" selection-start-column="6" selection-end-line="160" selection-end-column="6" />
+            <state relative-caret-position="616">
+              <caret line="106" column="20" lean-forward="false" selection-start-line="106" selection-start-column="20" selection-end-line="106" selection-end-column="20" />
               <folding>
-                <element signature="e#849#880#0" expanded="false" />
+                <element signature="e#0#21#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="visualizer.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py">
+      <file leaf-file-name="main_window.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="649" column="55" lean-forward="false" selection-start-line="649" selection-start-column="55" selection-end-line="649" selection-end-column="55" />
+            <state relative-caret-position="259">
+              <caret line="1890" column="86" lean-forward="false" selection-start-line="1890" selection-start-column="53" selection-end-line="1890" selection-end-column="86" />
               <folding>
-                <element signature="e#0#27#0" expanded="true" />
-                <element signature="e#960#1264#0" expanded="false" />
-                <element signature="e#1001#1167#0" expanded="false" />
-                <element signature="e#1211#1264#0" expanded="false" />
-                <element signature="e#4666#4730#0" expanded="false" />
-                <element signature="e#5126#5366#0" expanded="false" />
-                <element signature="e#5174#5268#0" expanded="false" />
-                <element signature="e#5413#5496#0" expanded="false" />
-                <element signature="e#5581#7445#0" expanded="false" />
-                <element signature="e#5598#7269#0" expanded="false" />
-                <element signature="e#5638#5949#0" expanded="false" />
-                <element signature="e#5685#5861#0" expanded="false" />
-                <element signature="e#6297#6696#0" expanded="false" />
-                <element signature="e#6380#6613#0" expanded="false" />
-                <element signature="e#6758#6854#0" expanded="false" />
-                <element signature="e#7314#7445#0" expanded="false" />
-                <element signature="e#7525#8493#0" expanded="false" />
-                <element signature="e#7561#7877#0" expanded="false" />
-                <element signature="e#7644#7793#0" expanded="false" />
-                <element signature="e#7921#8303#0" expanded="false" />
-                <element signature="e#8000#8225#0" expanded="false" />
-                <element signature="e#8558#9478#0" expanded="false" />
-                <element signature="e#8915#9002#0" expanded="false" />
-                <element signature="e#9281#9478#0" expanded="false" />
-                <element signature="e#9528#10242#0" expanded="false" />
-                <element signature="e#10248#10261#0" expanded="false" />
-                <element signature="e#10300#10423#0" expanded="false" />
-                <element signature="e#10470#11424#0" expanded="false" />
-                <element signature="e#11027#11351#0" expanded="false" />
-                <element signature="e#11477#16088#0" expanded="false" />
-                <element signature="e#12030#12291#0" expanded="false" />
-                <element signature="e#12128#12201#0" expanded="false" />
-                <element signature="e#12318#12350#0" expanded="false" />
-                <element signature="e#12934#13168#0" expanded="false" />
-                <element signature="e#13307#13397#0" expanded="false" />
-                <element signature="e#13508#13685#0" expanded="false" />
-                <element signature="e#13564#13614#0" expanded="false" />
-                <element signature="e#14386#14584#0" expanded="false" />
-                <element signature="e#14497#14584#0" expanded="false" />
-                <element signature="e#14736#15300#0" expanded="false" />
-                <element signature="e#14823#15056#0" expanded="false" />
-                <element signature="e#15393#16036#0" expanded="false" />
-                <element signature="e#15503#15898#0" expanded="false" />
-                <element signature="e#15609#15782#0" expanded="false" />
-                <element signature="e#15950#16036#0" expanded="false" />
-                <element signature="e#16139#16385#0" expanded="false" />
-                <element signature="e#16431#17260#0" expanded="false" />
-                <element signature="e#16431#16463#0" expanded="false" />
-                <element signature="e#16537#16700#0" expanded="false" />
-                <element signature="e#16579#16700#0" expanded="false" />
-                <element signature="e#16652#16700#0" expanded="false" />
-                <element signature="e#16931#17187#0" expanded="false" />
-                <element signature="e#17317#17631#0" expanded="false" />
-                <element signature="e#17687#19899#0" expanded="false" />
-                <element signature="e#18090#18232#0" expanded="false" />
-                <element signature="e#18360#18892#0" expanded="false" />
-                <element signature="e#18548#18761#0" expanded="false" />
-                <element signature="e#18573#18669#0" expanded="false" />
-                <element signature="e#18714#18761#0" expanded="false" />
-                <element signature="e#19023#19844#0" expanded="false" />
-                <element signature="e#19069#19844#0" expanded="false" />
-                <element signature="e#19202#19653#0" expanded="false" />
-                <element signature="e#19344#19525#0" expanded="false" />
-                <element signature="e#19713#19804#0" expanded="false" />
-                <element signature="e#19958#20036#0" expanded="false" />
-                <element signature="e#20083#20205#0" expanded="false" />
-                <element signature="e#20123#20205#0" expanded="false" />
-                <element signature="e#20264#20290#0" expanded="false" />
-                <element signature="e#20334#20401#0" expanded="false" />
-                <element signature="e#20472#20604#0" expanded="false" />
-                <element signature="e#20642#21199#0" expanded="false" />
-                <element signature="e#20828#21012#0" expanded="false" />
-                <element signature="e#21242#21246#0" expanded="false" />
-                <element signature="e#21300#21534#0" expanded="false" />
-                <element signature="e#21821#21848#0" expanded="false" />
-                <element signature="e#21888#21942#0" expanded="false" />
-                <element signature="e#21949#21972#0" expanded="false" />
-                <element signature="e#22014#22280#0" expanded="false" />
-                <element signature="e#22054#22159#0" expanded="false" />
-                <element signature="e#22186#22280#0" expanded="false" />
-                <element signature="e#22323#22612#0" expanded="false" />
-                <element signature="e#22368#22482#0" expanded="false" />
-                <element signature="e#22509#22612#0" expanded="false" />
-                <element signature="e#22654#22957#0" expanded="false" />
-                <element signature="e#22693#22814#0" expanded="false" />
-                <element signature="e#22841#22952#0" expanded="false" />
-                <element signature="e#23042#23141#0" expanded="false" />
-                <element signature="e#23180#23327#0" expanded="false" />
-                <element signature="e#23960#25561#0" expanded="false" />
-                <element signature="e#24016#25281#0" expanded="false" />
-                <element signature="e#25344#25561#0" expanded="false" />
-                <element signature="e#25380#25458#0" expanded="false" />
-                <element signature="e#25485#25561#0" expanded="false" />
-                <element signature="e#25598#26903#0" expanded="false" />
-                <element signature="e#25654#26231#0" expanded="false" />
-                <element signature="e#26274#26903#0" expanded="false" />
-                <element signature="e#26349#26604#0" expanded="false" />
-                <element signature="e#26631#26903#0" expanded="false" />
-                <element signature="e#26939#27181#0" expanded="false" />
-                <element signature="e#26987#27181#0" expanded="false" />
+                <element signature="n#!!doc" expanded="false" />
+                <element signature="e#4338#4407#0" expanded="false" />
+                <element signature="e#4660#4903#0" expanded="false" />
+                <element signature="e#4805#4849#0" expanded="false" />
+                <element signature="e#7211#7276#0" expanded="false" />
+                <element signature="e#9840#9909#0" expanded="false" />
+                <element signature="e#10283#10321#0" expanded="false" />
+                <element signature="e#16511#17405#0" expanded="false" />
+                <element signature="e#17433#17671#0" expanded="false" />
+                <element signature="e#17681#17758#0" expanded="false" />
+                <element signature="e#18996#19088#0" expanded="false" />
+                <element signature="e#19964#20024#0" expanded="false" />
+                <element signature="e#20828#21053#0" expanded="false" />
+                <element signature="e#20849#20993#0" expanded="false" />
+                <element signature="e#21601#21615#0" expanded="false" />
+                <element signature="e#21654#21691#0" expanded="false" />
+                <element signature="e#21733#22118#0" expanded="false" />
+                <element signature="e#22173#22340#0" expanded="false" />
+                <element signature="e#22214#22335#0" expanded="false" />
+                <element signature="e#22340#22362#0" expanded="false" />
+                <element signature="e#22400#22548#0" expanded="false" />
+                <element signature="e#22590#22645#0" expanded="false" />
+                <element signature="e#22689#22824#0" expanded="false" />
+                <element signature="e#22879#23334#0" expanded="false" />
+                <element signature="e#22924#23065#0" expanded="false" />
+                <element signature="e#23092#23334#0" expanded="false" />
+                <element signature="e#23207#23334#0" expanded="false" />
+                <element signature="e#23385#23933#0" expanded="false" />
+                <element signature="e#23426#23933#0" expanded="false" />
+                <element signature="e#23983#24329#0" expanded="false" />
+                <element signature="e#24035#24258#0" expanded="false" />
+                <element signature="e#24381#25019#0" expanded="false" />
+                <element signature="e#24429#24890#0" expanded="false" />
+                <element signature="e#24644#24655#0" expanded="false" />
+                <element signature="e#24917#25007#0" expanded="false" />
+                <element signature="e#25070#25386#0" expanded="false" />
+                <element signature="e#25118#25329#0" expanded="false" />
+                <element signature="e#25437#25679#0" expanded="false" />
+                <element signature="e#25721#26124#0" expanded="false" />
+                <element signature="e#25760#25885#0" expanded="false" />
+                <element signature="e#25912#26124#0" expanded="false" />
+                <element signature="e#26015#26124#0" expanded="false" />
+                <element signature="e#26179#26680#0" expanded="false" />
+                <element signature="e#26231#26376#0" expanded="false" />
+                <element signature="e#26403#26680#0" expanded="false" />
+                <element signature="e#26532#26680#0" expanded="false" />
+                <element signature="e#26725#27045#0" expanded="false" />
+                <element signature="e#26767#26885#0" expanded="false" />
+                <element signature="e#26912#27045#0" expanded="false" />
+                <element signature="e#27097#27417#0" expanded="false" />
+                <element signature="e#27145#27360#0" expanded="false" />
+                <element signature="e#27470#27876#0" expanded="false" />
+                <element signature="e#27519#27718#0" expanded="false" />
+                <element signature="e#27745#27876#0" expanded="false" />
+                <element signature="e#27917#28295#0" expanded="false" />
+                <element signature="e#27955#28061#0" expanded="false" />
+                <element signature="e#28088#28295#0" expanded="false" />
+                <element signature="e#28189#28295#0" expanded="false" />
+                <element signature="e#28336#28783#0" expanded="false" />
+                <element signature="e#28374#28549#0" expanded="false" />
+                <element signature="e#28576#28783#0" expanded="false" />
+                <element signature="e#28677#28783#0" expanded="false" />
+                <element signature="e#28846#29458#0" expanded="false" />
+                <element signature="e#28900#29199#0" expanded="false" />
+                <element signature="e#29226#29458#0" expanded="false" />
+                <element signature="e#29359#29458#0" expanded="false" />
+                <element signature="e#29502#29805#0" expanded="false" />
+                <element signature="e#29548#29699#0" expanded="false" />
+                <element signature="e#29726#29805#0" expanded="false" />
+                <element signature="e#29857#30176#0" expanded="false" />
+                <element signature="e#29906#30064#0" expanded="false" />
+                <element signature="e#30091#30176#0" expanded="false" />
+                <element signature="e#30227#30540#0" expanded="false" />
+                <element signature="e#30275#30430#0" expanded="false" />
+                <element signature="e#30457#30540#0" expanded="false" />
+                <element signature="e#30590#30945#0" expanded="false" />
+                <element signature="e#30637#30793#0" expanded="false" />
+                <element signature="e#30820#30945#0" expanded="false" />
+                <element signature="e#31001#31736#0" expanded="false" />
+                <element signature="e#31054#31427#0" expanded="false" />
+                <element signature="e#31454#31736#0" expanded="false" />
+                <element signature="e#31585#31736#0" expanded="false" />
+                <element signature="e#31790#32186#0" expanded="false" />
+                <element signature="e#31841#31999#0" expanded="false" />
+                <element signature="e#32026#32186#0" expanded="false" />
+                <element signature="e#32235#32609#0" expanded="false" />
+                <element signature="e#32281#32431#0" expanded="false" />
+                <element signature="e#32458#32609#0" expanded="false" />
+                <element signature="e#32625#32649#0" expanded="false" />
+                <element signature="e#32700#32776#0" expanded="false" />
+                <element signature="e#32829#32843#0" expanded="false" />
+                <element signature="e#32897#32975#0" expanded="false" />
+                <element signature="e#33021#33289#0" expanded="false" />
+                <element signature="e#33067#33167#0" expanded="false" />
+                <element signature="e#33222#33289#0" expanded="false" />
+                <element signature="e#33337#33637#0" expanded="false" />
+                <element signature="e#33383#33514#0" expanded="false" />
+                <element signature="e#33569#33637#0" expanded="false" />
+                <element signature="e#33684#33907#0" expanded="false" />
+                <element signature="e#33727#33907#0" expanded="false" />
+                <element signature="e#33949#34620#0" expanded="false" />
+                <element signature="e#34015#34620#0" expanded="false" />
+                <element signature="e#34181#34286#0" expanded="false" />
+                <element signature="e#34372#34620#0" expanded="false" />
+                <element signature="e#34439#34569#0" expanded="false" />
+                <element signature="e#34668#34717#0" expanded="false" />
+                <element signature="e#34770#34821#0" expanded="false" />
+                <element signature="e#34862#35131#0" expanded="false" />
+                <element signature="e#34911#34933#0" expanded="false" />
+                <element signature="e#35152#35185#0" expanded="false" />
+                <element signature="e#35229#35577#0" expanded="false" />
+                <element signature="e#35370#35577#0" expanded="false" />
+                <element signature="e#35391#35477#0" expanded="false" />
+                <element signature="e#35615#35730#0" expanded="false" />
+                <element signature="e#35774#36145#0" expanded="false" />
+                <element signature="e#35832#36031#0" expanded="false" />
+                <element signature="e#35909#36031#0" expanded="false" />
+                <element signature="e#36060#36145#0" expanded="false" />
+                <element signature="e#36186#36243#0" expanded="false" />
+                <element signature="e#36291#36712#0" expanded="false" />
+                <element signature="e#36360#36712#0" expanded="false" />
+                <element signature="e#36381#36652#0" expanded="false" />
+                <element signature="e#36449#36652#0" expanded="false" />
+                <element signature="e#36496#36652#0" expanded="false" />
+                <element signature="e#36769#37581#0" expanded="false" />
+                <element signature="e#36896#37298#0" expanded="false" />
+                <element signature="e#37325#37581#0" expanded="false" />
+                <element signature="e#37623#37677#0" expanded="false" />
+                <element signature="e#37718#37937#0" expanded="false" />
+                <element signature="e#37796#37898#0" expanded="false" />
+                <element signature="e#37981#38002#0" expanded="false" />
+                <element signature="e#38059#38619#0" expanded="false" />
+                <element signature="e#38224#38400#0" expanded="false" />
+                <element signature="e#38708#39529#0" expanded="false" />
+                <element signature="e#39171#39263#0" expanded="false" />
+                <element signature="e#39570#40246#0" expanded="false" />
+                <element signature="e#39661#39837#0" expanded="false" />
+                <element signature="e#40285#40801#0" expanded="false" />
+                <element signature="e#40326#40693#0" expanded="false" />
+                <element signature="e#40392#40576#0" expanded="false" />
+                <element signature="e#40846#41353#0" expanded="false" />
+                <element signature="e#40889#40956#0" expanded="false" />
+                <element signature="e#41427#42684#0" expanded="false" />
+                <element signature="e#41518#42167#0" expanded="false" />
+                <element signature="e#42372#42615#0" expanded="false" />
+                <element signature="e#42728#42754#0" expanded="false" />
+                <element signature="e#42787#43525#0" expanded="false" />
+                <element signature="e#42878#43168#0" expanded="false" />
+                <element signature="e#43416#43492#0" expanded="false" />
+                <element signature="e#43558#43590#0" expanded="false" />
+                <element signature="e#43623#43655#0" expanded="false" />
+                <element signature="e#43690#43847#0" expanded="false" />
+                <element signature="e#43749#43795#0" expanded="false" />
+                <element signature="e#43887#44002#0" expanded="false" />
+                <element signature="e#44042#44085#0" expanded="false" />
+                <element signature="e#44124#45036#0" expanded="false" />
+                <element signature="e#44124#44173#0" expanded="false" />
+                <element signature="e#44519#44595#0" expanded="false" />
+                <element signature="e#44734#44885#0" expanded="false" />
+                <element signature="e#44767#44885#0" expanded="false" />
+                <element signature="e#44811#44885#0" expanded="false" />
+                <element signature="e#45079#45111#0" expanded="false" />
+                <element signature="e#45152#45465#0" expanded="false" />
+                <element signature="e#45519#46305#0" expanded="false" />
+                <element signature="e#45536#45889#0" expanded="false" />
+                <element signature="e#45588#45753#0" expanded="false" />
+                <element signature="e#46151#46205#0" expanded="false" />
+                <element signature="e#46351#46482#0" expanded="false" />
+                <element signature="e#46527#46649#0" expanded="false" />
+                <element signature="e#46695#46866#0" expanded="false" />
+                <element signature="e#46909#47064#0" expanded="false" />
+                <element signature="e#47113#47383#0" expanded="false" />
+                <element signature="e#47441#48006#0" expanded="false" />
+                <element signature="e#47536#47553#0" expanded="false" />
+                <element signature="e#48062#48162#0" expanded="false" />
+                <element signature="e#48205#48317#0" expanded="false" />
+                <element signature="e#48360#48600#0" expanded="false" />
+                <element signature="e#48645#48693#0" expanded="false" />
+                <element signature="e#48742#48870#0" expanded="false" />
+                <element signature="e#48928#49338#0" expanded="false" />
+                <element signature="e#48968#49274#0" expanded="false" />
+                <element signature="e#49396#50252#0" expanded="false" />
+                <element signature="e#49413#49983#0" expanded="false" />
+                <element signature="e#49518#49554#0" expanded="false" />
+                <element signature="e#50027#50252#0" expanded="false" />
+                <element signature="e#50309#50887#0" expanded="false" />
+                <element signature="e#50536#50744#0" expanded="false" />
+                <element signature="e#50788#50887#0" expanded="false" />
+                <element signature="e#50928#51218#0" expanded="false" />
+                <element signature="e#51050#51117#0" expanded="false" />
+                <element signature="e#51260#51545#0" expanded="false" />
+                <element signature="e#51382#51449#0" expanded="false" />
+                <element signature="e#51592#51668#0" expanded="false" />
+                <element signature="e#51713#51866#0" expanded="false" />
+                <element signature="e#51909#51968#0" expanded="false" />
+                <element signature="e#52026#52301#0" expanded="false" />
+                <element signature="e#52026#52069#0" expanded="false" />
+                <element signature="e#52341#52582#0" expanded="false" />
+                <element signature="e#52485#52582#0" expanded="false" />
+                <element signature="e#52617#53715#0" expanded="false" />
+                <element signature="e#53136#53257#0" expanded="false" />
+                <element signature="e#53398#53583#0" expanded="false" />
+                <element signature="e#53627#53715#0" expanded="false" />
+                <element signature="e#53776#53818#0" expanded="false" />
+                <element signature="e#53866#54245#0" expanded="false" />
+                <element signature="e#54288#54292#0" expanded="false" />
+                <element signature="e#54349#59907#0" expanded="false" />
+                <element signature="e#54563#54636#0" expanded="false" />
+                <element signature="e#54706#54835#0" expanded="false" />
+                <element signature="e#54908#55562#0" expanded="false" />
+                <element signature="e#55633#56171#0" expanded="false" />
+                <element signature="e#56251#56724#0" expanded="false" />
+                <element signature="e#56793#57274#0" expanded="false" />
+                <element signature="e#57342#57863#0" expanded="false" />
+                <element signature="e#57938#58517#0" expanded="false" />
+                <element signature="e#58593#59160#0" expanded="false" />
+                <element signature="e#59236#59511#0" expanded="false" />
+                <element signature="e#59949#60852#0" expanded="false" />
+                <element signature="e#60913#61505#0" expanded="false" />
+                <element signature="e#60969#61075#0" expanded="false" />
+                <element signature="e#61243#61505#0" expanded="false" />
+                <element signature="e#61549#62042#0" expanded="false" />
+                <element signature="e#61605#61990#0" expanded="false" />
+                <element signature="e#61705#61791#0" expanded="false" />
+                <element signature="e#61826#61990#0" expanded="false" />
+                <element signature="e#61901#61990#0" expanded="false" />
+                <element signature="e#62098#62408#0" expanded="false" />
+                <element signature="e#62170#62408#0" expanded="false" />
+                <element signature="e#62202#62288#0" expanded="false" />
+                <element signature="e#62323#62408#0" expanded="false" />
+                <element signature="e#62463#62746#0" expanded="false" />
+                <element signature="e#62530#62609#0" expanded="false" />
+                <element signature="e#62802#63595#0" expanded="false" />
+                <element signature="e#63084#63360#0" expanded="false" />
+                <element signature="e#63117#63360#0" expanded="false" />
+                <element signature="e#63387#63595#0" expanded="false" />
+                <element signature="e#63644#63865#0" expanded="false" />
+                <element signature="e#63917#64082#0" expanded="false" />
+                <element signature="e#64134#64295#0" expanded="false" />
+                <element signature="e#64360#64570#0" expanded="false" />
+                <element signature="e#64613#64717#0" expanded="false" />
+                <element signature="e#64759#64877#0" expanded="false" />
+                <element signature="e#64938#65282#0" expanded="false" />
+                <element signature="e#64965#65147#0" expanded="false" />
+                <element signature="e#65175#65282#0" expanded="false" />
+                <element signature="e#65326#65346#0" expanded="false" />
+                <element signature="e#65390#65465#0" expanded="false" />
+                <element signature="e#65499#65800#0" expanded="false" />
+                <element signature="e#65843#65936#0" expanded="false" />
+                <element signature="e#65979#66072#0" expanded="false" />
+                <element signature="e#66094#66107#0" expanded="false" />
+                <element signature="e#66152#66304#0" expanded="false" />
+                <element signature="e#66327#66339#0" expanded="false" />
+                <element signature="e#66402#66638#0" expanded="false" />
+                <element signature="e#66476#66638#0" expanded="false" />
+                <element signature="e#66697#66911#0" expanded="false" />
+                <element signature="e#66957#67072#0" expanded="false" />
+                <element signature="e#67006#67072#0" expanded="false" />
+                <element signature="e#67132#67361#0" expanded="false" />
+                <element signature="e#67407#67706#0" expanded="false" />
+                <element signature="e#67511#67706#0" expanded="false" />
+                <element signature="e#67552#67706#0" expanded="false" />
+                <element signature="e#67606#67706#0" expanded="false" />
+                <element signature="e#67754#68090#0" expanded="false" />
+                <element signature="e#67818#67895#0" expanded="false" />
+                <element signature="e#67922#67996#0" expanded="false" />
+                <element signature="e#68147#69017#0" expanded="false" />
+                <element signature="e#68920#69017#0" expanded="false" />
+                <element signature="e#69065#69763#0" expanded="false" />
+                <element signature="e#69769#69798#0" expanded="false" />
+                <element signature="e#69842#72075#0" expanded="false" />
+                <element signature="e#70246#70655#0" expanded="false" />
+                <element signature="e#70377#70598#0" expanded="false" />
+                <element signature="e#70432#70598#0" expanded="false" />
+                <element signature="e#71278#71757#0" expanded="false" />
+                <element signature="e#71370#71676#0" expanded="false" />
+                <element signature="e#71798#72031#0" expanded="false" />
+                <element signature="e#71941#72031#0" expanded="false" />
+                <element signature="e#72150#72788#0" expanded="false" />
+                <element signature="e#72277#72344#0" expanded="false" />
+                <element signature="e#72371#72788#0" expanded="false" />
+                <element signature="e#72428#72788#0" expanded="false" />
+                <element signature="e#72469#72507#0" expanded="false" />
+                <element signature="e#72852#73042#0" expanded="false" />
+                <element signature="e#73101#75778#0" expanded="false" />
+                <element signature="e#73420#73473#0" expanded="false" />
+                <element signature="e#73591#73900#0" expanded="false" />
+                <element signature="e#73787#73900#0" expanded="false" />
+                <element signature="e#73937#74100#0" expanded="false" />
+                <element signature="e#73994#74100#0" expanded="false" />
+                <element signature="e#74038#74100#0" expanded="false" />
+                <element signature="e#74129#75778#0" expanded="false" />
+                <element signature="e#74186#75778#0" expanded="false" />
+                <element signature="e#74223#75778#0" expanded="false" />
+                <element signature="e#74271#75778#0" expanded="false" />
+                <element signature="e#74340#74522#0" expanded="false" />
+                <element signature="e#74397#74522#0" expanded="false" />
+                <element signature="e#74581#75778#0" expanded="false" />
+                <element signature="e#74638#75778#0" expanded="false" />
+                <element signature="e#74730#74777#0" expanded="false" />
+                <element signature="e#75822#75965#0" expanded="false" />
+                <element signature="e#76516#76648#0" expanded="false" />
+                <element signature="e#76544#76648#0" expanded="false" />
+                <element signature="e#76698#77672#0" expanded="false" />
+                <element signature="e#76739#77146#0" expanded="false" />
+                <element signature="e#77187#77262#0" expanded="false" />
+                <element signature="e#77305#77374#0" expanded="false" />
+                <element signature="e#77405#77672#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="movie_list.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py">
+      <file leaf-file-name="undo_redo_manager.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/data/undo_redo_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="237">
-              <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+            <state relative-caret-position="360">
+              <caret line="68" column="0" lean-forward="false" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="filmcolors_db.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py">
+      <file leaf-file-name="auto_segmentation.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/concurrent/auto_segmentation.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1296">
-              <caret line="341" column="26" lean-forward="false" selection-start-line="341" selection-start-column="26" selection-end-line="341" selection-end-column="26" />
+            <state relative-caret-position="1422">
+              <caret line="170" column="0" lean-forward="false" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
               <folding>
-                <element signature="e#1181#1228#0" expanded="false" />
-                <element signature="e#1419#1481#0" expanded="false" />
-                <element signature="e#1516#1614#0" expanded="false" />
-                <element signature="e#1640#2163#0" expanded="false" />
-                <element signature="e#1710#2163#0" expanded="false" />
-                <element signature="e#1755#1815#0" expanded="false" />
-                <element signature="e#1844#2002#0" expanded="false" />
-                <element signature="e#2028#2091#0" expanded="false" />
-                <element signature="e#2120#2163#0" expanded="false" />
-                <element signature="e#2201#2614#0" expanded="false" />
-                <element signature="e#2266#2406#0" expanded="false" />
-                <element signature="e#2440#2522#0" expanded="false" />
-                <element signature="e#2557#2614#0" expanded="false" />
-                <element signature="e#2638#3021#0" expanded="false" />
-                <element signature="e#3056#10838#0" expanded="false" />
-                <element signature="e#3084#3192#0" expanded="false" />
-                <element signature="e#3232#3283#0" expanded="false" />
-                <element signature="e#3325#3698#0" expanded="false" />
-                <element signature="e#3354#3412#0" expanded="false" />
-                <element signature="e#3439#3698#0" expanded="false" />
-                <element signature="e#3478#3643#0" expanded="false" />
-                <element signature="e#3523#3643#0" expanded="false" />
-                <element signature="e#3766#5676#0" expanded="false" />
-                <element signature="e#3844#5537#0" expanded="false" />
-                <element signature="e#3891#5508#0" expanded="false" />
-                <element signature="e#4028#5508#0" expanded="false" />
-                <element signature="e#4133#5038#0" expanded="false" />
-                <element signature="e#4450#4639#0" expanded="false" />
-                <element signature="e#4520#4639#0" expanded="false" />
-                <element signature="e#4567#4639#0" expanded="false" />
-                <element signature="e#4895#5038#0" expanded="false" />
-                <element signature="e#5090#5508#0" expanded="false" />
-                <element signature="e#5162#5508#0" expanded="false" />
-                <element signature="e#5162#5200#0" expanded="false" />
-                <element signature="e#5581#5676#0" expanded="false" />
-                <element signature="e#5731#7538#0" expanded="false" />
-                <element signature="e#5897#7364#0" expanded="false" />
-                <element signature="e#5944#6617#0" expanded="false" />
-                <element signature="e#6051#6617#0" expanded="false" />
-                <element signature="e#6117#6348#0" expanded="false" />
-                <element signature="e#6399#6617#0" expanded="false" />
-                <element signature="e#6859#7189#0" expanded="false" />
-                <element signature="e#6940#7123#0" expanded="false" />
-                <element signature="e#7248#7318#0" expanded="false" />
-                <element signature="e#7409#7472#0" expanded="false" />
-                <element signature="e#7611#8160#0" expanded="false" />
-                <element signature="e#8121#8160#0" expanded="false" />
-                <element signature="e#8213#8757#0" expanded="false" />
-                <element signature="e#8323#8674#0" expanded="false" />
-                <element signature="e#8370#8645#0" expanded="false" />
-                <element signature="e#8477#8645#0" expanded="false" />
-                <element signature="e#8577#8645#0" expanded="false" />
-                <element signature="e#8718#8757#0" expanded="false" />
-                <element signature="e#8794#9730#0" expanded="false" />
-                <element signature="e#9006#9319#0" expanded="false" />
-                <element signature="e#9363#9669#0" expanded="false" />
-                <element signature="e#9440#9611#0" expanded="false" />
-                <element signature="e#9771#9978#0" expanded="false" />
-                <element signature="e#10030#10065#0" expanded="false" />
-                <element signature="e#10112#10155#0" expanded="false" />
-                <element signature="e#10206#10242#0" expanded="false" />
-                <marker date="1520884974449" expanded="true" signature="256:286" ph="..." />
+                <element signature="e#631#1015#0" expanded="false" />
+                <element signature="e#1059#1452#0" expanded="false" />
+                <element signature="e#1150#1399#0" expanded="false" />
+                <element signature="e#4496#6913#0" expanded="false" />
+                <element signature="e#4551#6566#0" expanded="false" />
+                <element signature="e#5172#5727#0" expanded="false" />
+                <element signature="e#5269#5727#0" expanded="false" />
+                <element signature="e#5356#5570#0" expanded="false" />
+                <element signature="e#5883#5983#0" expanded="false" />
+                <element signature="e#6076#6479#0" expanded="false" />
+                <element signature="e#6175#6479#0" expanded="false" />
+                <element signature="e#6643#6757#0" expanded="false" />
+                <element signature="e#6678#6757#0" expanded="false" />
+                <element signature="e#6809#6913#0" expanded="false" />
+                <element signature="e#6964#11202#0" expanded="false" />
+                <element signature="e#7068#8905#0" expanded="false" />
+                <element signature="e#8948#10096#0" expanded="false" />
+                <element signature="e#9204#9598#0" expanded="false" />
+                <element signature="e#9255#9598#0" expanded="false" />
+                <element signature="e#9436#9598#0" expanded="false" />
+                <element signature="e#9709#9880#0" expanded="false" />
+                <element signature="e#9784#9880#0" expanded="false" />
+                <element signature="e#10140#11202#0" expanded="false" />
+                <element signature="e#10365#10734#0" expanded="false" />
+                <element signature="e#10392#10433#0" expanded="false" />
+                <element signature="e#10531#10734#0" expanded="false" />
+                <element signature="e#10956#11161#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="query_dock.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py">
+      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="125" column="0" lean-forward="false" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
+            <state relative-caret-position="355">
+              <caret line="143" column="32" lean-forward="false" selection-start-line="143" selection-start-column="32" selection-end-line="143" selection-end-column="32" />
               <folding>
-                <marker date="1520884497855" expanded="true" signature="434:3594" ph="..." />
+                <element signature="e#146#155#0" expanded="true" />
+                <element signature="e#2026#3766#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vian_updater.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/data/vian_updater.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="355">
+              <caret line="135" column="20" lean-forward="true" selection-start-line="135" selection-start-column="20" selection-end-line="135" selection-end-column="20" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vlc.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/vlc/v3_0_0/vlc.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-270">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="player_vlc.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/core/gui/player_vlc.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="216">
+              <caret line="12" column="15" lean-forward="true" selection-start-line="12" selection-start-column="15" selection-end-line="12" selection-end-column="15" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/data/settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="373">
+              <caret line="72" column="34" lean-forward="false" selection-start-line="72" selection-start-column="13" selection-end-line="72" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="screenshot_manager.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/gui/screenshot_manager.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="169">
+              <caret line="262" column="44" lean-forward="false" selection-start-line="262" selection-start-column="44" selection-end-line="262" selection-end-column="44" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -375,22 +532,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>def prep</find>
-      <find>def prepa</find>
-      <find>def prepare</find>
-      <find>auto_segm</find>
-      <find>auto</find>
-      <find>has no job()</find>
-      <find>set_media_time</find>
-      <find>colormetry</find>
-      <find>print(</find>
-      <find>add_segmentation</find>
-      <find>is_fast_selecting</find>
-      <find>on</find>
-      <find>onCur</find>
-      <find>onCurrentCo</find>
-      <find>onCurrentCor</find>
-      <find>onCurrentCorp</find>
       <find>onCurrentCorpu</find>
       <find>E</find>
       <find>EGraph</find>
@@ -405,6 +546,22 @@
       <find>lbl</find>
       <find>addText</find>
       <find>onCorporasChange</find>
+      <find>abortAllConcurrentThreads</find>
+      <find>abort</find>
+      <find>setF</find>
+      <find>colormetry</find>
+      <find>l</find>
+      <find>load_proje</find>
+      <find>load_projec</find>
+      <find>start_colormetry</find>
+      <find>answer</find>
+      <find>exit</find>
+      <find>close_pro</find>
+      <find>load_project</find>
+      <find>p</find>
+      <find>print</find>
+      <find>co</find>
+      <find>loading</find>
     </findStrings>
     <replaceStrings>
       <replace>self.project()</replace>
@@ -434,7 +591,6 @@
       <dir>C:\Users\Gaudenz Halter\OneDrive\ELAN Extension\app\extensions\plugins</dir>
       <dir>C:\Users\Gaudenz Halter\OneDrive\ELAN Extension\app\extensions\fiwi_tools</dir>
       <dir>C:\Users\Gaudenz Halter\OneDrive\ELAN Extension\app</dir>
-      <dir>E:\Programming\Git\visual-movie-annotator\core</dir>
       <dir>E:\Programming\Git\visual-movie-annotator\core\node_editor</dir>
       <dir>E:\Programming\Git\visual-movie-annotator\core\gui</dir>
       <dir>$PROJECT_DIR$</dir>
@@ -446,6 +602,8 @@
       <dir>E:\Programming\Git\visual-movie-annotator\install</dir>
       <dir>E:\Programming\Git\visual-movie-annotator\core\analysis</dir>
       <dir>E:\Programming\Git\visual-movie-annotator</dir>
+      <dir>E:\Programming\Git\visual-movie-annotator\core</dir>
+      <dir>E:\Programming\Git\visual-movie-annotator\extensions\plugins\fiwi_tools\fiwi_visualizer</dir>
     </dirStrings>
   </component>
   <component name="Git.Settings">
@@ -454,13 +612,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/core/gui/perspectives.py" />
-        <option value="$PROJECT_DIR$/core/gui/quick_annotation.py" />
-        <option value="$PROJECT_DIR$/qt_ui/themes/qt_stylesheet_dark.css" />
-        <option value="$PROJECT_DIR$/core/gui/experiment_editor.py" />
-        <option value="$PROJECT_DIR$/core/gui/vocabulary.py" />
-        <option value="$PROJECT_DIR$/core/data/computation.py" />
-        <option value="$PROJECT_DIR$/core/gui/player_vlc.py" />
         <option value="$PROJECT_DIR$/core/data/importers.py" />
         <option value="$PROJECT_DIR$/core/data/enums.py" />
         <option value="$PROJECT_DIR$/core/analysis/colorimetry/colorimetry.py" />
@@ -477,20 +628,13 @@
         <option value="$PROJECT_DIR$/core/concurrent/worker_functions.py" />
         <option value="$PROJECT_DIR$/core/data/interfaces.py" />
         <option value="$PROJECT_DIR$/core/data/tools.py" />
-        <option value="$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py" />
-        <option value="$PROJECT_DIR$/core/data/containers.py" />
         <option value="$PROJECT_DIR$/core/visualization/graph_plots.py" />
-        <option value="$PROJECT_DIR$/core/data/vian_updater.py" />
         <option value="$PROJECT_DIR$/core/gui/status_bar.py" />
         <option value="$PROJECT_DIR$/core/gui/drawing_widget.py" />
         <option value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizations.py" />
         <option value="$PROJECT_DIR$/core/visualization/image_plots.py" />
-        <option value="$PROJECT_DIR$/core/gui/screenshot_manager.py" />
         <option value="$PROJECT_DIR$/core/visualization/feature_plot.py" />
-        <option value="$PROJECT_DIR$/vian_version.txt" />
         <option value="$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst" />
-        <option value="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/auto_segmentation.rst" />
-        <option value="$PROJECT_DIR$/core/concurrent/auto_segmentation.py" />
         <option value="$PROJECT_DIR$/core/gui/ewidgetbase.py" />
         <option value="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/segmentation.rst" />
         <option value="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/merging_segments.rst" />
@@ -504,15 +648,29 @@
         <option value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py" />
         <option value="$PROJECT_DIR$/_docs/source/whats_new/latest.rst" />
         <option value="$PROJECT_DIR$/_docs/source/whatsnew.rst" />
+        <option value="$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py" />
+        <option value="$PROJECT_DIR$/core/data/containers.py" />
+        <option value="$PROJECT_DIR$/vian_version.txt" />
+        <option value="$PROJECT_DIR$/core/gui/screenshot_manager.py" />
+        <option value="$PROJECT_DIR$/core/data/settings.py" />
+        <option value="$PROJECT_DIR$/core/gui/Dialogs/preferences_dialog.py" />
+        <option value="$PROJECT_DIR$/_docs/source/step_by_step/segmentation/auto_segmentation.rst" />
+        <option value="$PROJECT_DIR$/_docs/source/step_by_step/analyses/colormetry.rst" />
+        <option value="$PROJECT_DIR$/_docs/source/step_by_step/analyses/analyses.rst" />
+        <option value="$PROJECT_DIR$/core/data/undo_redo_manager.py" />
+        <option value="$PROJECT_DIR$/core/concurrent/auto_segmentation.py" />
         <option value="$PROJECT_DIR$/core/gui/main_window.py" />
+        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/core/data/vian_updater.py" />
+        <option value="$PROJECT_DIR$/core/gui/player_vlc.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1912" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1696" />
-    <option name="height" value="1026" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -570,6 +728,46 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="vlc" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="visual-movie-annotator" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="visual-movie-annotator" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="core" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="vlc" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="v3_0_0" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="visual-movie-annotator" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="visual-movie-annotator" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="core" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="gui" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -585,23 +783,20 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../vlc" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
   </component>
-  <component name="PyDebuggerOptionsProvider">
-    <option name="myPyQtBackend" value="PyQt5" />
-  </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\0_4_5" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\step_by_step\segmentation" />
-      <recent name="C:\Users\Gaudenz\Desktop\VIAN\_docs\source\step_by_step\screenshots" />
-      <recent name="E:\Programming\Git\visual-movie-annotator" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\install\env" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\0_4_5" />
       <recent name="E:\Programming\Git\visual-movie-annotator\install\env" />
       <recent name="E:\Programming\Git\visual-movie-annotator\install" />
       <recent name="E:\Programming\Git\visual-movie-annotator\core\analysis\barcode" />
       <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\_0_4_2" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Programming\Git\visual-movie-annotator\core\vlc\3_0_0" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\step_by_step\analyses" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\0_4_5" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\step_by_step\segmentation" />
+      <recent name="C:\Users\Gaudenz\Desktop\VIAN\_docs\source\step_by_step\screenshots" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -905,20 +1100,20 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="1912" y="-8" width="1696" height="1026" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25305623" sideWeight="0.8694158" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22068231" sideWeight="0.8694158" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3281075" sideWeight="0.4952343" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.44680852" sideWeight="0.5110024" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31960997" sideWeight="0.4760128" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36403033" sideWeight="0.1881663" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31960997" sideWeight="0.4717484" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930756" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20531401" sideWeight="0.49205717" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36403033" sideWeight="0.82462686" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36403033" sideWeight="0.8118337" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2531983" sideWeight="0.48659793" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.44680852" sideWeight="0.48899755" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43228602" sideWeight="0.48720682" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26226014" sideWeight="0.1305842" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42686892" sideWeight="0.48933902" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42686892" sideWeight="0.48720682" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24786781" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -975,8 +1170,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/core/gui/main_window.py</url>
-          <line>1271</line>
+          <line>1273</line>
           <option name="timeStamp" value="779" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>14</line>
+          <option name="timeStamp" value="805" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -989,7 +1189,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="803" />
+      <option name="time" value="806" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -999,59 +1199,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/concurrent/timestep_update.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="27" column="37" lean-forward="false" selection-start-line="27" selection-start-column="37" selection-end-line="27" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda/envs/vian_dev/lib/python3.5/threading.py" />
-    <entry file="file://$USER_HOME$/anaconda/envs/vian_dev/lib/python3.5/site-packages/sqlalchemy/pool.py" />
-    <entry file="file://$USER_HOME$/anaconda/envs/vian_dev/lib/python3.5/site-packages/sklearn/utils/validation.py" />
-    <entry file="file://$PROJECT_DIR$/core/concurrent/worker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="256">
-          <caret line="47" column="0" lean-forward="false" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/experiment_editor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="180" column="54" lean-forward="true" selection-start-line="180" selection-start-column="54" selection-end-line="180" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/data/tools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/concurrent/worker_functions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-479">
-          <caret line="72" column="28" lean-forward="false" selection-start-line="72" selection-start-column="28" selection-end-line="72" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qt_ui/themes/qt_stylesheet_dark.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="23" column="82" lean-forward="false" selection-start-line="23" selection-start-column="75" selection-end-line="23" selection-end-column="82" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="25" column="58" lean-forward="true" selection-start-line="25" selection-start-column="58" selection-end-line="25" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/gui/Dialogs/elan_opened_movie.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -1063,13 +1210,267 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="222">
           <caret line="82" column="37" lean-forward="true" selection-start-line="82" selection-start-column="37" selection-end-line="82" selection-end-column="37" />
+          <folding>
+            <element signature="e#5183#5199#0" expanded="false" />
+            <element signature="e#5267#5955#0" expanded="false" />
+            <element signature="e#6009#6703#0" expanded="false" />
+            <element signature="e#6760#7135#0" expanded="false" />
+            <element signature="e#7181#7438#0" expanded="false" />
+            <element signature="e#7537#8675#0" expanded="false" />
+            <element signature="e#8722#9291#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/sub_corpus.py" />
+    <entry file="file://$PROJECT_DIR$/core/visualization/graph_plots.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-336">
+          <caret line="175" column="33" lean-forward="false" selection-start-line="175" selection-start-column="33" selection-end-line="175" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/status_bar.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-13">
+          <caret line="180" column="49" lean-forward="true" selection-start-line="180" selection-start-column="49" selection-end-line="180" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/drawing_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="874">
+          <caret line="154" column="8" lean-forward="true" selection-start-line="154" selection-start-column="8" selection-end-line="154" selection-end-column="8" />
+          <folding>
+            <element signature="e#884#4256#0" expanded="false" />
+            <element signature="e#941#3164#0" expanded="false" />
+            <element signature="e#3171#3185#0" expanded="false" />
+            <element signature="e#3232#3258#0" expanded="false" />
+            <element signature="e#3304#3356#0" expanded="false" />
+            <element signature="e#3394#3486#0" expanded="false" />
+            <element signature="e#3522#3612#0" expanded="false" />
+            <element signature="e#3645#3803#0" expanded="false" />
+            <element signature="e#3836#3840#0" expanded="false" />
+            <element signature="e#3874#4026#0" expanded="false" />
+            <element signature="e#4063#4165#0" expanded="false" />
+            <element signature="e#4199#4231#0" expanded="false" />
+            <element signature="e#4350#4397#1" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="169" column="27" lean-forward="false" selection-start-line="169" selection-start-column="27" selection-end-line="169" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda/envs/vian_dev/lib/python3.5/site-packages/sqlalchemy/engine/default.py" />
+    <entry file="file://$PROJECT_DIR$/core/visualization/image_plots.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1008">
+          <caret line="56" column="66" lean-forward="false" selection-start-line="56" selection-start-column="66" selection-end-line="56" selection-end-column="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/visualization/feature_plot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="314" column="26" lean-forward="true" selection-start-line="314" selection-start-column="26" selection-end-line="314" selection-end-column="26" />
+          <folding>
+            <element signature="e#549#1604#0" expanded="false" />
+            <element signature="e#1638#1642#0" expanded="false" />
+            <element signature="e#1704#2239#0" expanded="false" />
+            <element signature="e#1735#1943#0" expanded="false" />
+            <element signature="e#1801#1878#0" expanded="false" />
+            <element signature="e#1838#1878#0" expanded="false" />
+            <element signature="e#2020#2146#0" expanded="false" />
+            <element signature="e#2070#2146#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/export_screenshots.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="441">
+          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="29" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2017.1/system/python_stubs/-1397256791/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="274">
+          <caret line="5249" column="8" lean-forward="false" selection-start-line="5249" selection-start-column="8" selection-end-line="5249" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/ewidgetbase.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="382">
+          <caret line="121" column="0" lean-forward="false" selection-start-line="121" selection-start-column="0" selection-end-line="121" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/concurrent/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="36" column="0" lean-forward="false" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/segmentation/segmentation.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="11" column="19" lean-forward="false" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/data/computation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4230">
+          <caret line="244" column="4" lean-forward="false" selection-start-line="244" selection-start-column="4" selection-end-line="244" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/segmentation/auto_segmentation_even.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/segmentation/merging_segments.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/user_interface/outliner.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/user_interface/timeline.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/whats_new/0_4_5/0_4_5.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/dev/Anaconda3/envs/vian_dev/Lib/json/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="178" column="0" lean-forward="false" selection-start-line="178" selection-start-column="0" selection-end-line="178" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/timeline.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="160" column="6" lean-forward="false" selection-start-line="160" selection-start-column="6" selection-end-line="160" selection-end-column="6" />
+          <folding>
+            <element signature="e#849#880#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1296">
+          <caret line="341" column="26" lean-forward="false" selection-start-line="341" selection-start-column="26" selection-end-line="341" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="237">
+          <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="649" column="55" lean-forward="false" selection-start-line="649" selection-start-column="55" selection-end-line="649" selection-end-column="55" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/screenshots.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="12" lean-forward="false" selection-start-line="6" selection-start-column="12" selection-end-line="6" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/whats_new/latest.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1044">
+          <caret line="58" column="12" lean-forward="false" selection-start-line="58" selection-start-column="12" selection-end-line="58" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/whatsnew.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="7" column="10" lean-forward="true" selection-start-line="7" selection-start-column="10" selection-end-line="7" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/user_interface/inspector.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="129" column="0" lean-forward="true" selection-start-line="129" selection-start-column="0" selection-end-line="129" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/data/containers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="794">
-          <caret line="1217" column="50" lean-forward="true" selection-start-line="1217" selection-start-column="50" selection-end-line="1217" selection-end-column="50" />
+        <state relative-caret-position="177">
+          <caret line="413" column="8" lean-forward="false" selection-start-line="413" selection-start-column="8" selection-end-line="413" selection-end-column="8" />
           <folding>
             <element signature="e#785#786#0" expanded="false" />
             <element signature="e#2537#3909#0" expanded="false" />
@@ -1137,7 +1538,6 @@
             <element signature="e#13452#13602#0" expanded="false" />
             <element signature="e#13508#13580#0" expanded="false" />
             <element signature="e#13652#13835#0" expanded="false" />
-            <element signature="e#14082#14225#0" expanded="false" />
             <element signature="e#14355#14821#0" expanded="false" />
             <element signature="e#14562#14707#0" expanded="false" />
             <element signature="e#14873#15098#0" expanded="false" />
@@ -1513,540 +1913,578 @@
             <element signature="e#88691#88769#0" expanded="false" />
             <element signature="e#89358#89384#0" expanded="false" />
             <element signature="e#90714#90718#0" expanded="false" />
-            <element signature="e#93690#93751#0" expanded="false" />
-            <element signature="e#93812#93893#0" expanded="false" />
-            <element signature="e#94110#94213#0" expanded="false" />
-            <element signature="e#94216#94241#0" expanded="false" />
-            <element signature="e#96912#96930#0" expanded="false" />
-            <element signature="e#96982#103460#0" expanded="false" />
-            <element signature="e#97016#97356#0" expanded="false" />
-            <element signature="e#97435#97575#0" expanded="false" />
-            <element signature="e#97635#98408#0" expanded="false" />
-            <element signature="e#97635#97798#1" expanded="false" />
-            <element signature="e#97843#97982#0" expanded="false" />
-            <element signature="e#98009#98363#0" expanded="false" />
-            <element signature="e#98208#98363#0" expanded="false" />
-            <element signature="e#98468#99109#0" expanded="false" />
-            <element signature="e#98640#98743#0" expanded="false" />
-            <element signature="e#98838#98920#0" expanded="false" />
-            <element signature="e#99157#99259#0" expanded="false" />
-            <element signature="e#99196#99239#0" expanded="false" />
-            <element signature="e#99310#99430#0" expanded="false" />
-            <element signature="e#99478#99581#0" expanded="false" />
-            <element signature="e#99616#100401#0" expanded="false" />
-            <element signature="e#99757#99997#0" expanded="false" />
-            <element signature="e#100462#101268#0" expanded="false" />
-            <element signature="e#100682#100995#0" expanded="false" />
-            <element signature="e#101022#101148#0" expanded="false" />
-            <element signature="e#101177#101248#0" expanded="false" />
-            <element signature="e#101317#101406#0" expanded="false" />
-            <element signature="e#101500#102969#0" expanded="false" />
-            <element signature="e#101538#101609#0" expanded="false" />
-            <element signature="e#102036#102156#0" expanded="false" />
-            <element signature="e#102211#102928#0" expanded="false" />
-            <element signature="e#102324#102414#0" expanded="false" />
-            <element signature="e#102369#102414#0" expanded="false" />
-            <element signature="e#102535#102617#0" expanded="false" />
-            <element signature="e#102576#102617#0" expanded="false" />
-            <element signature="e#103038#103152#0" expanded="false" />
-            <element signature="e#103186#103203#0" expanded="false" />
-            <element signature="e#103237#103253#0" expanded="false" />
-            <element signature="e#103293#103309#0" expanded="false" />
-            <element signature="e#103341#103460#0" expanded="false" />
-            <element signature="e#103517#104996#0" expanded="false" />
-            <element signature="e#103600#103912#0" expanded="false" />
-            <element signature="e#103962#103995#0" expanded="false" />
-            <element signature="e#104048#104126#0" expanded="false" />
-            <element signature="e#104174#104364#0" expanded="false" />
-            <element signature="e#104217#104307#0" expanded="false" />
-            <element signature="e#104252#104307#0" expanded="false" />
-            <element signature="e#104415#104597#0" expanded="false" />
-            <element signature="e#104537#104597#0" expanded="false" />
-            <element signature="e#104647#104778#0" expanded="false" />
-            <element signature="e#104712#104778#0" expanded="false" />
-            <element signature="e#104812#104834#0" expanded="false" />
-            <element signature="e#104868#104884#0" expanded="false" />
-            <element signature="e#104916#104996#0" expanded="false" />
-            <element signature="e#105032#105232#0" expanded="false" />
-            <element signature="e#105245#105263#0" expanded="false" />
-            <element signature="e#105315#108498#0" expanded="false" />
-            <element signature="e#105315#105891#1" expanded="false" />
-            <element signature="e#105948#106166#0" expanded="false" />
-            <element signature="e#106234#106428#0" expanded="false" />
-            <element signature="e#106303#106428#0" expanded="false" />
-            <element signature="e#106494#106696#0" expanded="false" />
-            <element signature="e#106761#106918#0" expanded="false" />
-            <element signature="e#106952#106969#0" expanded="false" />
-            <element signature="e#107003#107019#0" expanded="false" />
-            <element signature="e#107059#107121#0" expanded="false" />
-            <element signature="e#107157#107689#0" expanded="false" />
-            <element signature="e#107237#107370#0" expanded="false" />
-            <element signature="e#107750#108178#0" expanded="false" />
-            <element signature="e#108223#108395#0" expanded="false" />
-            <element signature="e#108295#108373#0" expanded="false" />
-            <element signature="e#108427#108498#0" expanded="false" />
-            <element signature="e#108552#108985#1" expanded="false" />
-            <element signature="e#109051#109248#0" expanded="false" />
-            <element signature="e#109670#109758#0" expanded="false" />
-            <element signature="e#109805#110113#0" expanded="false" />
-            <element signature="e#109805#109975#1" expanded="false" />
-            <element signature="e#110171#110314#0" expanded="false" />
-            <element signature="e#110375#110586#0" expanded="false" />
-            <element signature="e#110430#110541#0" expanded="false" />
-            <element signature="e#110636#110767#0" expanded="false" />
-            <element signature="e#110701#110767#0" expanded="false" />
-            <element signature="e#110801#110828#0" expanded="false" />
-            <element signature="e#110863#111194#0" expanded="false" />
-            <element signature="e#111255#111672#0" expanded="false" />
-            <element signature="e#111685#111704#0" expanded="false" />
-            <element signature="e#111757#112373#0" expanded="false" />
-            <element signature="e#111802#111894#0" expanded="false" />
-            <element signature="e#111928#111944#0" expanded="false" />
-            <element signature="e#111984#112000#0" expanded="false" />
-            <element signature="e#112035#112181#0" expanded="false" />
-            <element signature="e#112233#112370#0" expanded="false" />
+            <element signature="e#93801#93862#0" expanded="false" />
+            <element signature="e#93923#94004#0" expanded="false" />
+            <element signature="e#94221#94324#0" expanded="false" />
+            <element signature="e#94327#94352#0" expanded="false" />
+            <element signature="e#97023#97041#0" expanded="false" />
+            <element signature="e#97093#103571#0" expanded="false" />
+            <element signature="e#97127#97467#0" expanded="false" />
+            <element signature="e#97546#97686#0" expanded="false" />
+            <element signature="e#97746#98519#0" expanded="false" />
+            <element signature="e#97746#97909#1" expanded="false" />
+            <element signature="e#97954#98093#0" expanded="false" />
+            <element signature="e#98120#98474#0" expanded="false" />
+            <element signature="e#98319#98474#0" expanded="false" />
+            <element signature="e#98579#99220#0" expanded="false" />
+            <element signature="e#98751#98854#0" expanded="false" />
+            <element signature="e#98949#99031#0" expanded="false" />
+            <element signature="e#99268#99370#0" expanded="false" />
+            <element signature="e#99307#99350#0" expanded="false" />
+            <element signature="e#99421#99541#0" expanded="false" />
+            <element signature="e#99589#99692#0" expanded="false" />
+            <element signature="e#99727#100512#0" expanded="false" />
+            <element signature="e#99868#100108#0" expanded="false" />
+            <element signature="e#100573#101379#0" expanded="false" />
+            <element signature="e#100793#101106#0" expanded="false" />
+            <element signature="e#101133#101259#0" expanded="false" />
+            <element signature="e#101288#101359#0" expanded="false" />
+            <element signature="e#101428#101517#0" expanded="false" />
+            <element signature="e#101611#103080#0" expanded="false" />
+            <element signature="e#101649#101720#0" expanded="false" />
+            <element signature="e#102147#102267#0" expanded="false" />
+            <element signature="e#102322#103039#0" expanded="false" />
+            <element signature="e#102435#102525#0" expanded="false" />
+            <element signature="e#102480#102525#0" expanded="false" />
+            <element signature="e#102646#102728#0" expanded="false" />
+            <element signature="e#102687#102728#0" expanded="false" />
+            <element signature="e#103149#103263#0" expanded="false" />
+            <element signature="e#103297#103314#0" expanded="false" />
+            <element signature="e#103348#103364#0" expanded="false" />
+            <element signature="e#103404#103420#0" expanded="false" />
+            <element signature="e#103452#103571#0" expanded="false" />
+            <element signature="e#103628#105107#0" expanded="false" />
+            <element signature="e#103711#104023#0" expanded="false" />
+            <element signature="e#104073#104106#0" expanded="false" />
+            <element signature="e#104159#104237#0" expanded="false" />
+            <element signature="e#104285#104475#0" expanded="false" />
+            <element signature="e#104328#104418#0" expanded="false" />
+            <element signature="e#104363#104418#0" expanded="false" />
+            <element signature="e#104526#104708#0" expanded="false" />
+            <element signature="e#104648#104708#0" expanded="false" />
+            <element signature="e#104758#104889#0" expanded="false" />
+            <element signature="e#104823#104889#0" expanded="false" />
+            <element signature="e#104923#104945#0" expanded="false" />
+            <element signature="e#104979#104995#0" expanded="false" />
+            <element signature="e#105027#105107#0" expanded="false" />
+            <element signature="e#105143#105343#0" expanded="false" />
+            <element signature="e#105356#105374#0" expanded="false" />
+            <element signature="e#105426#108609#0" expanded="false" />
+            <element signature="e#105426#106002#1" expanded="false" />
+            <element signature="e#106059#106277#0" expanded="false" />
+            <element signature="e#106345#106539#0" expanded="false" />
+            <element signature="e#106414#106539#0" expanded="false" />
+            <element signature="e#106605#106807#0" expanded="false" />
+            <element signature="e#106872#107029#0" expanded="false" />
+            <element signature="e#107063#107080#0" expanded="false" />
+            <element signature="e#107114#107130#0" expanded="false" />
+            <element signature="e#107170#107232#0" expanded="false" />
+            <element signature="e#107268#107800#0" expanded="false" />
+            <element signature="e#107348#107481#0" expanded="false" />
+            <element signature="e#107861#108289#0" expanded="false" />
+            <element signature="e#108334#108506#0" expanded="false" />
+            <element signature="e#108406#108484#0" expanded="false" />
+            <element signature="e#108538#108609#0" expanded="false" />
+            <element signature="e#108663#109096#1" expanded="false" />
+            <element signature="e#109162#109359#0" expanded="false" />
+            <element signature="e#109781#109869#0" expanded="false" />
+            <element signature="e#109916#110224#0" expanded="false" />
+            <element signature="e#109916#110086#1" expanded="false" />
+            <element signature="e#110282#110425#0" expanded="false" />
+            <element signature="e#110486#110697#0" expanded="false" />
+            <element signature="e#110541#110652#0" expanded="false" />
+            <element signature="e#110747#110878#0" expanded="false" />
+            <element signature="e#110812#110878#0" expanded="false" />
+            <element signature="e#110912#110939#0" expanded="false" />
+            <element signature="e#110974#111305#0" expanded="false" />
+            <element signature="e#111366#111783#0" expanded="false" />
+            <element signature="e#111796#111815#0" expanded="false" />
+            <element signature="e#111868#112484#0" expanded="false" />
+            <element signature="e#111913#112005#0" expanded="false" />
+            <element signature="e#112039#112055#0" expanded="false" />
+            <element signature="e#112095#112111#0" expanded="false" />
+            <element signature="e#112146#112292#0" expanded="false" />
+            <element signature="e#112344#112481#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/sub_corpus.py" />
-    <entry file="file://$PROJECT_DIR$/core/visualization/graph_plots.py">
+    <entry file="file://$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-336">
-          <caret line="175" column="33" lean-forward="false" selection-start-line="175" selection-start-column="33" selection-end-line="175" selection-end-column="33" />
+        <state relative-caret-position="-810">
+          <caret line="28" column="40" lean-forward="true" selection-start-line="28" selection-start-column="40" selection-end-line="28" selection-end-column="40" />
+          <folding />
         </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/data/vian_updater.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="123" column="59" lean-forward="false" selection-start-line="123" selection-start-column="59" selection-end-line="123" selection-end-column="59" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/data/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-482">
-          <caret line="38" column="29" lean-forward="false" selection-start-line="38" selection-start-column="13" selection-end-line="38" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/status_bar.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-13">
-          <caret line="180" column="49" lean-forward="true" selection-start-line="180" selection-start-column="49" selection-end-line="180" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/drawing_widget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="874">
-          <caret line="154" column="8" lean-forward="true" selection-start-line="154" selection-start-column="8" selection-end-line="154" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizations.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="169" column="27" lean-forward="false" selection-start-line="169" selection-start-column="27" selection-end-line="169" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda/envs/vian_dev/lib/python3.5/site-packages/sqlalchemy/engine/default.py" />
-    <entry file="file://$PROJECT_DIR$/core/gui/screenshot_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="12" column="26" lean-forward="false" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/visualization/image_plots.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1008">
-          <caret line="56" column="66" lean-forward="false" selection-start-line="56" selection-start-column="66" selection-end-line="56" selection-end-column="66" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.jpg">
-      <provider selected="true" editor-type-id="images">
-        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vian_version.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="18">
-          <caret line="1" column="18" lean-forward="true" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
+          <caret line="1" column="18" lean-forward="false" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/visualization/feature_plot.py">
+    <entry file="file://$PROJECT_DIR$/core/data/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="314" column="26" lean-forward="true" selection-start-line="314" selection-start-column="26" selection-end-line="314" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/export_screenshots.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="441">
-          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="29" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharmCE2017.1/system/python_stubs/-1397256791/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="5249" column="8" lean-forward="false" selection-start-line="5249" selection-start-column="8" selection-end-line="5249" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/concurrent/auto_segmentation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="193">
-          <caret line="48" column="49" lean-forward="true" selection-start-line="48" selection-start-column="49" selection-end-line="48" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/ewidgetbase.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="382">
-          <caret line="121" column="0" lean-forward="false" selection-start-line="121" selection-start-column="0" selection-end-line="121" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/concurrent/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/import_screenshots.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="36" column="0" lean-forward="false" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+        <state relative-caret-position="373">
+          <caret line="72" column="34" lean-forward="false" selection-start-line="72" selection-start-column="13" selection-end-line="72" selection-end-column="34" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/segmentation/auto_segmentation.rst">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="13" column="45" lean-forward="true" selection-start-line="13" selection-start-column="45" selection-end-line="13" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/segmentation/segmentation.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="11" column="19" lean-forward="false" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/data/computation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4230">
-          <caret line="244" column="4" lean-forward="false" selection-start-line="244" selection-start-column="4" selection-end-line="244" selection-end-column="4" />
+        <state relative-caret-position="180">
+          <caret line="10" column="28" lean-forward="true" selection-start-line="10" selection-start-column="28" selection-end-line="10" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/segmentation/auto_segmentation_even.jpg">
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/analyses/analyses_list.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="4" lean-forward="false" selection-start-line="0" selection-start-column="4" selection-end-line="0" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/analyses/colormetry.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/analyses/analyses.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/Dialogs/preferences_dialog.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="616">
+          <caret line="106" column="20" lean-forward="false" selection-start-line="106" selection-start-column="20" selection-end-line="106" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/data/undo_redo_manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="68" column="0" lean-forward="false" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/concurrent/auto_segmentation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1422">
+          <caret line="170" column="0" lean-forward="false" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
+          <folding>
+            <element signature="e#631#1015#0" expanded="false" />
+            <element signature="e#1059#1452#0" expanded="false" />
+            <element signature="e#1150#1399#0" expanded="false" />
+            <element signature="e#4496#6913#0" expanded="false" />
+            <element signature="e#4551#6566#0" expanded="false" />
+            <element signature="e#5172#5727#0" expanded="false" />
+            <element signature="e#5269#5727#0" expanded="false" />
+            <element signature="e#5356#5570#0" expanded="false" />
+            <element signature="e#5883#5983#0" expanded="false" />
+            <element signature="e#6076#6479#0" expanded="false" />
+            <element signature="e#6175#6479#0" expanded="false" />
+            <element signature="e#6643#6757#0" expanded="false" />
+            <element signature="e#6678#6757#0" expanded="false" />
+            <element signature="e#6809#6913#0" expanded="false" />
+            <element signature="e#6964#11202#0" expanded="false" />
+            <element signature="e#7068#8905#0" expanded="false" />
+            <element signature="e#8948#10096#0" expanded="false" />
+            <element signature="e#9204#9598#0" expanded="false" />
+            <element signature="e#9255#9598#0" expanded="false" />
+            <element signature="e#9436#9598#0" expanded="false" />
+            <element signature="e#9709#9880#0" expanded="false" />
+            <element signature="e#9784#9880#0" expanded="false" />
+            <element signature="e#10140#11202#0" expanded="false" />
+            <element signature="e#10365#10734#0" expanded="false" />
+            <element signature="e#10392#10433#0" expanded="false" />
+            <element signature="e#10531#10734#0" expanded="false" />
+            <element signature="e#10956#11161#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qt_ui/images/loading_screen_noa.png">
       <provider selected="true" editor-type-id="images">
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/segmentation/merging_segments.rst">
+    <entry file="file://$PROJECT_DIR$/core/gui/screenshot_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/user_interface/outliner.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/user_interface/timeline.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/whats_new/0_4_5/0_4_5.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/dev/Anaconda3/envs/vian_dev/Lib/json/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="178" column="0" lean-forward="false" selection-start-line="178" selection-start-column="0" selection-end-line="178" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/timeline.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="160" column="6" lean-forward="false" selection-start-line="160" selection-start-column="6" selection-end-line="160" selection-end-column="6" />
+        <state relative-caret-position="169">
+          <caret line="262" column="44" lean-forward="false" selection-start-line="262" selection-start-column="44" selection-end-line="262" selection-end-column="44" />
           <folding>
-            <element signature="e#849#880#0" expanded="false" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/filmcolors_db.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1296">
-          <caret line="341" column="26" lean-forward="false" selection-start-line="341" selection-start-column="26" selection-end-line="341" selection-end-column="26" />
-          <folding>
-            <element signature="e#1181#1228#0" expanded="false" />
-            <element signature="e#1419#1481#0" expanded="false" />
-            <element signature="e#1516#1614#0" expanded="false" />
-            <element signature="e#1640#2163#0" expanded="false" />
-            <element signature="e#1710#2163#0" expanded="false" />
-            <element signature="e#1755#1815#0" expanded="false" />
-            <element signature="e#1844#2002#0" expanded="false" />
-            <element signature="e#2028#2091#0" expanded="false" />
-            <element signature="e#2120#2163#0" expanded="false" />
-            <element signature="e#2201#2614#0" expanded="false" />
-            <element signature="e#2266#2406#0" expanded="false" />
-            <element signature="e#2440#2522#0" expanded="false" />
-            <element signature="e#2557#2614#0" expanded="false" />
-            <element signature="e#2638#3021#0" expanded="false" />
-            <element signature="e#3056#10838#0" expanded="false" />
-            <element signature="e#3084#3192#0" expanded="false" />
-            <element signature="e#3232#3283#0" expanded="false" />
-            <element signature="e#3325#3698#0" expanded="false" />
-            <element signature="e#3354#3412#0" expanded="false" />
-            <element signature="e#3439#3698#0" expanded="false" />
-            <element signature="e#3478#3643#0" expanded="false" />
-            <element signature="e#3523#3643#0" expanded="false" />
-            <element signature="e#3766#5676#0" expanded="false" />
-            <element signature="e#3844#5537#0" expanded="false" />
-            <element signature="e#3891#5508#0" expanded="false" />
-            <element signature="e#4028#5508#0" expanded="false" />
-            <element signature="e#4133#5038#0" expanded="false" />
-            <element signature="e#4450#4639#0" expanded="false" />
-            <element signature="e#4520#4639#0" expanded="false" />
-            <element signature="e#4567#4639#0" expanded="false" />
-            <element signature="e#4895#5038#0" expanded="false" />
-            <element signature="e#5090#5508#0" expanded="false" />
-            <element signature="e#5162#5508#0" expanded="false" />
-            <element signature="e#5162#5200#0" expanded="false" />
-            <element signature="e#5581#5676#0" expanded="false" />
-            <element signature="e#5731#7538#0" expanded="false" />
-            <element signature="e#5897#7364#0" expanded="false" />
-            <element signature="e#5944#6617#0" expanded="false" />
-            <element signature="e#6051#6617#0" expanded="false" />
-            <element signature="e#6117#6348#0" expanded="false" />
-            <element signature="e#6399#6617#0" expanded="false" />
-            <element signature="e#6859#7189#0" expanded="false" />
-            <element signature="e#6940#7123#0" expanded="false" />
-            <element signature="e#7248#7318#0" expanded="false" />
-            <element signature="e#7409#7472#0" expanded="false" />
-            <element signature="e#7611#8160#0" expanded="false" />
-            <element signature="e#8121#8160#0" expanded="false" />
-            <element signature="e#8213#8757#0" expanded="false" />
-            <element signature="e#8323#8674#0" expanded="false" />
-            <element signature="e#8370#8645#0" expanded="false" />
-            <element signature="e#8477#8645#0" expanded="false" />
-            <element signature="e#8577#8645#0" expanded="false" />
-            <element signature="e#8718#8757#0" expanded="false" />
-            <element signature="e#8794#9730#0" expanded="false" />
-            <element signature="e#9006#9319#0" expanded="false" />
-            <element signature="e#9363#9669#0" expanded="false" />
-            <element signature="e#9440#9611#0" expanded="false" />
-            <element signature="e#9771#9978#0" expanded="false" />
-            <element signature="e#10030#10065#0" expanded="false" />
-            <element signature="e#10112#10155#0" expanded="false" />
-            <element signature="e#10206#10242#0" expanded="false" />
-            <marker date="1520884974449" expanded="true" signature="256:286" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="649" column="55" lean-forward="false" selection-start-line="649" selection-start-column="55" selection-end-line="649" selection-end-column="55" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-            <element signature="e#960#1264#0" expanded="false" />
-            <element signature="e#1001#1167#0" expanded="false" />
-            <element signature="e#1211#1264#0" expanded="false" />
-            <element signature="e#4666#4730#0" expanded="false" />
-            <element signature="e#5126#5366#0" expanded="false" />
-            <element signature="e#5174#5268#0" expanded="false" />
-            <element signature="e#5413#5496#0" expanded="false" />
-            <element signature="e#5581#7445#0" expanded="false" />
-            <element signature="e#5598#7269#0" expanded="false" />
-            <element signature="e#5638#5949#0" expanded="false" />
-            <element signature="e#5685#5861#0" expanded="false" />
-            <element signature="e#6297#6696#0" expanded="false" />
-            <element signature="e#6380#6613#0" expanded="false" />
-            <element signature="e#6758#6854#0" expanded="false" />
-            <element signature="e#7314#7445#0" expanded="false" />
-            <element signature="e#7525#8493#0" expanded="false" />
-            <element signature="e#7561#7877#0" expanded="false" />
-            <element signature="e#7644#7793#0" expanded="false" />
-            <element signature="e#7921#8303#0" expanded="false" />
-            <element signature="e#8000#8225#0" expanded="false" />
-            <element signature="e#8558#9478#0" expanded="false" />
-            <element signature="e#8915#9002#0" expanded="false" />
-            <element signature="e#9281#9478#0" expanded="false" />
-            <element signature="e#9528#10242#0" expanded="false" />
-            <element signature="e#10248#10261#0" expanded="false" />
-            <element signature="e#10300#10423#0" expanded="false" />
-            <element signature="e#10470#11424#0" expanded="false" />
-            <element signature="e#11027#11351#0" expanded="false" />
-            <element signature="e#11477#16088#0" expanded="false" />
-            <element signature="e#12030#12291#0" expanded="false" />
-            <element signature="e#12128#12201#0" expanded="false" />
-            <element signature="e#12318#12350#0" expanded="false" />
-            <element signature="e#12934#13168#0" expanded="false" />
-            <element signature="e#13307#13397#0" expanded="false" />
-            <element signature="e#13508#13685#0" expanded="false" />
-            <element signature="e#13564#13614#0" expanded="false" />
-            <element signature="e#14386#14584#0" expanded="false" />
-            <element signature="e#14497#14584#0" expanded="false" />
-            <element signature="e#14736#15300#0" expanded="false" />
-            <element signature="e#14823#15056#0" expanded="false" />
-            <element signature="e#15393#16036#0" expanded="false" />
-            <element signature="e#15503#15898#0" expanded="false" />
-            <element signature="e#15609#15782#0" expanded="false" />
-            <element signature="e#15950#16036#0" expanded="false" />
-            <element signature="e#16139#16385#0" expanded="false" />
-            <element signature="e#16431#17260#0" expanded="false" />
-            <element signature="e#16431#16463#0" expanded="false" />
-            <element signature="e#16537#16700#0" expanded="false" />
-            <element signature="e#16579#16700#0" expanded="false" />
-            <element signature="e#16652#16700#0" expanded="false" />
-            <element signature="e#16931#17187#0" expanded="false" />
-            <element signature="e#17317#17631#0" expanded="false" />
-            <element signature="e#17687#19899#0" expanded="false" />
-            <element signature="e#18090#18232#0" expanded="false" />
-            <element signature="e#18360#18892#0" expanded="false" />
-            <element signature="e#18548#18761#0" expanded="false" />
-            <element signature="e#18573#18669#0" expanded="false" />
-            <element signature="e#18714#18761#0" expanded="false" />
-            <element signature="e#19023#19844#0" expanded="false" />
-            <element signature="e#19069#19844#0" expanded="false" />
-            <element signature="e#19202#19653#0" expanded="false" />
-            <element signature="e#19344#19525#0" expanded="false" />
-            <element signature="e#19713#19804#0" expanded="false" />
-            <element signature="e#19958#20036#0" expanded="false" />
-            <element signature="e#20083#20205#0" expanded="false" />
-            <element signature="e#20123#20205#0" expanded="false" />
-            <element signature="e#20264#20290#0" expanded="false" />
-            <element signature="e#20334#20401#0" expanded="false" />
-            <element signature="e#20472#20604#0" expanded="false" />
-            <element signature="e#20642#21199#0" expanded="false" />
-            <element signature="e#20828#21012#0" expanded="false" />
-            <element signature="e#21242#21246#0" expanded="false" />
-            <element signature="e#21300#21534#0" expanded="false" />
-            <element signature="e#21821#21848#0" expanded="false" />
-            <element signature="e#21888#21942#0" expanded="false" />
-            <element signature="e#21949#21972#0" expanded="false" />
-            <element signature="e#22014#22280#0" expanded="false" />
-            <element signature="e#22054#22159#0" expanded="false" />
-            <element signature="e#22186#22280#0" expanded="false" />
-            <element signature="e#22323#22612#0" expanded="false" />
-            <element signature="e#22368#22482#0" expanded="false" />
-            <element signature="e#22509#22612#0" expanded="false" />
-            <element signature="e#22654#22957#0" expanded="false" />
-            <element signature="e#22693#22814#0" expanded="false" />
-            <element signature="e#22841#22952#0" expanded="false" />
-            <element signature="e#23042#23141#0" expanded="false" />
-            <element signature="e#23180#23327#0" expanded="false" />
-            <element signature="e#23960#25561#0" expanded="false" />
-            <element signature="e#24016#25281#0" expanded="false" />
-            <element signature="e#25344#25561#0" expanded="false" />
-            <element signature="e#25380#25458#0" expanded="false" />
-            <element signature="e#25485#25561#0" expanded="false" />
-            <element signature="e#25598#26903#0" expanded="false" />
-            <element signature="e#25654#26231#0" expanded="false" />
-            <element signature="e#26274#26903#0" expanded="false" />
-            <element signature="e#26349#26604#0" expanded="false" />
-            <element signature="e#26631#26903#0" expanded="false" />
-            <element signature="e#26939#27181#0" expanded="false" />
-            <element signature="e#26987#27181#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/screenshots.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="6" column="12" lean-forward="false" selection-start-line="6" selection-start-column="12" selection-end-line="6" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/whats_new/latest.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1044">
-          <caret line="58" column="12" lean-forward="false" selection-start-line="58" selection-start-column="12" selection-end-line="58" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/whatsnew.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="10" lean-forward="true" selection-start-line="7" selection-start-column="10" selection-end-line="7" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="73" column="20" lean-forward="false" selection-start-line="73" selection-start-column="20" selection-end-line="73" selection-end-column="20" />
+        <state relative-caret-position="259">
+          <caret line="1890" column="86" lean-forward="false" selection-start-line="1890" selection-start-column="53" selection-end-line="1890" selection-end-column="86" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
-            <element signature="e#89#106#0" expanded="true" />
-            <element signature="e#4322#4391#0" expanded="false" />
-            <element signature="e#4684#4927#0" expanded="false" />
-            <element signature="e#4829#4873#0" expanded="false" />
-            <element signature="e#7235#7300#0" expanded="false" />
+            <element signature="e#4338#4407#0" expanded="false" />
+            <element signature="e#4660#4903#0" expanded="false" />
+            <element signature="e#4805#4849#0" expanded="false" />
+            <element signature="e#7211#7276#0" expanded="false" />
+            <element signature="e#9840#9909#0" expanded="false" />
+            <element signature="e#10283#10321#0" expanded="false" />
+            <element signature="e#16511#17405#0" expanded="false" />
+            <element signature="e#17433#17671#0" expanded="false" />
+            <element signature="e#17681#17758#0" expanded="false" />
+            <element signature="e#18996#19088#0" expanded="false" />
+            <element signature="e#19964#20024#0" expanded="false" />
+            <element signature="e#20828#21053#0" expanded="false" />
+            <element signature="e#20849#20993#0" expanded="false" />
+            <element signature="e#21601#21615#0" expanded="false" />
+            <element signature="e#21654#21691#0" expanded="false" />
+            <element signature="e#21733#22118#0" expanded="false" />
+            <element signature="e#22173#22340#0" expanded="false" />
+            <element signature="e#22214#22335#0" expanded="false" />
+            <element signature="e#22340#22362#0" expanded="false" />
+            <element signature="e#22400#22548#0" expanded="false" />
+            <element signature="e#22590#22645#0" expanded="false" />
+            <element signature="e#22689#22824#0" expanded="false" />
+            <element signature="e#22879#23334#0" expanded="false" />
+            <element signature="e#22924#23065#0" expanded="false" />
+            <element signature="e#23092#23334#0" expanded="false" />
+            <element signature="e#23207#23334#0" expanded="false" />
+            <element signature="e#23385#23933#0" expanded="false" />
+            <element signature="e#23426#23933#0" expanded="false" />
+            <element signature="e#23983#24329#0" expanded="false" />
+            <element signature="e#24035#24258#0" expanded="false" />
+            <element signature="e#24381#25019#0" expanded="false" />
+            <element signature="e#24429#24890#0" expanded="false" />
+            <element signature="e#24644#24655#0" expanded="false" />
+            <element signature="e#24917#25007#0" expanded="false" />
+            <element signature="e#25070#25386#0" expanded="false" />
+            <element signature="e#25118#25329#0" expanded="false" />
+            <element signature="e#25437#25679#0" expanded="false" />
+            <element signature="e#25721#26124#0" expanded="false" />
+            <element signature="e#25760#25885#0" expanded="false" />
+            <element signature="e#25912#26124#0" expanded="false" />
+            <element signature="e#26015#26124#0" expanded="false" />
+            <element signature="e#26179#26680#0" expanded="false" />
+            <element signature="e#26231#26376#0" expanded="false" />
+            <element signature="e#26403#26680#0" expanded="false" />
+            <element signature="e#26532#26680#0" expanded="false" />
+            <element signature="e#26725#27045#0" expanded="false" />
+            <element signature="e#26767#26885#0" expanded="false" />
+            <element signature="e#26912#27045#0" expanded="false" />
+            <element signature="e#27097#27417#0" expanded="false" />
+            <element signature="e#27145#27360#0" expanded="false" />
+            <element signature="e#27470#27876#0" expanded="false" />
+            <element signature="e#27519#27718#0" expanded="false" />
+            <element signature="e#27745#27876#0" expanded="false" />
+            <element signature="e#27917#28295#0" expanded="false" />
+            <element signature="e#27955#28061#0" expanded="false" />
+            <element signature="e#28088#28295#0" expanded="false" />
+            <element signature="e#28189#28295#0" expanded="false" />
+            <element signature="e#28336#28783#0" expanded="false" />
+            <element signature="e#28374#28549#0" expanded="false" />
+            <element signature="e#28576#28783#0" expanded="false" />
+            <element signature="e#28677#28783#0" expanded="false" />
+            <element signature="e#28846#29458#0" expanded="false" />
+            <element signature="e#28900#29199#0" expanded="false" />
+            <element signature="e#29226#29458#0" expanded="false" />
+            <element signature="e#29359#29458#0" expanded="false" />
+            <element signature="e#29502#29805#0" expanded="false" />
+            <element signature="e#29548#29699#0" expanded="false" />
+            <element signature="e#29726#29805#0" expanded="false" />
+            <element signature="e#29857#30176#0" expanded="false" />
+            <element signature="e#29906#30064#0" expanded="false" />
+            <element signature="e#30091#30176#0" expanded="false" />
+            <element signature="e#30227#30540#0" expanded="false" />
+            <element signature="e#30275#30430#0" expanded="false" />
+            <element signature="e#30457#30540#0" expanded="false" />
+            <element signature="e#30590#30945#0" expanded="false" />
+            <element signature="e#30637#30793#0" expanded="false" />
+            <element signature="e#30820#30945#0" expanded="false" />
+            <element signature="e#31001#31736#0" expanded="false" />
+            <element signature="e#31054#31427#0" expanded="false" />
+            <element signature="e#31454#31736#0" expanded="false" />
+            <element signature="e#31585#31736#0" expanded="false" />
+            <element signature="e#31790#32186#0" expanded="false" />
+            <element signature="e#31841#31999#0" expanded="false" />
+            <element signature="e#32026#32186#0" expanded="false" />
+            <element signature="e#32235#32609#0" expanded="false" />
+            <element signature="e#32281#32431#0" expanded="false" />
+            <element signature="e#32458#32609#0" expanded="false" />
+            <element signature="e#32625#32649#0" expanded="false" />
+            <element signature="e#32700#32776#0" expanded="false" />
+            <element signature="e#32829#32843#0" expanded="false" />
+            <element signature="e#32897#32975#0" expanded="false" />
+            <element signature="e#33021#33289#0" expanded="false" />
+            <element signature="e#33067#33167#0" expanded="false" />
+            <element signature="e#33222#33289#0" expanded="false" />
+            <element signature="e#33337#33637#0" expanded="false" />
+            <element signature="e#33383#33514#0" expanded="false" />
+            <element signature="e#33569#33637#0" expanded="false" />
+            <element signature="e#33684#33907#0" expanded="false" />
+            <element signature="e#33727#33907#0" expanded="false" />
+            <element signature="e#33949#34620#0" expanded="false" />
+            <element signature="e#34015#34620#0" expanded="false" />
+            <element signature="e#34181#34286#0" expanded="false" />
+            <element signature="e#34372#34620#0" expanded="false" />
+            <element signature="e#34439#34569#0" expanded="false" />
+            <element signature="e#34668#34717#0" expanded="false" />
+            <element signature="e#34770#34821#0" expanded="false" />
+            <element signature="e#34862#35131#0" expanded="false" />
+            <element signature="e#34911#34933#0" expanded="false" />
+            <element signature="e#35152#35185#0" expanded="false" />
+            <element signature="e#35229#35577#0" expanded="false" />
+            <element signature="e#35370#35577#0" expanded="false" />
+            <element signature="e#35391#35477#0" expanded="false" />
+            <element signature="e#35615#35730#0" expanded="false" />
+            <element signature="e#35774#36145#0" expanded="false" />
+            <element signature="e#35832#36031#0" expanded="false" />
+            <element signature="e#35909#36031#0" expanded="false" />
+            <element signature="e#36060#36145#0" expanded="false" />
+            <element signature="e#36186#36243#0" expanded="false" />
+            <element signature="e#36291#36712#0" expanded="false" />
+            <element signature="e#36360#36712#0" expanded="false" />
+            <element signature="e#36381#36652#0" expanded="false" />
+            <element signature="e#36449#36652#0" expanded="false" />
+            <element signature="e#36496#36652#0" expanded="false" />
+            <element signature="e#36769#37581#0" expanded="false" />
+            <element signature="e#36896#37298#0" expanded="false" />
+            <element signature="e#37325#37581#0" expanded="false" />
+            <element signature="e#37623#37677#0" expanded="false" />
+            <element signature="e#37718#37937#0" expanded="false" />
+            <element signature="e#37796#37898#0" expanded="false" />
+            <element signature="e#37981#38002#0" expanded="false" />
+            <element signature="e#38059#38619#0" expanded="false" />
+            <element signature="e#38224#38400#0" expanded="false" />
+            <element signature="e#38708#39529#0" expanded="false" />
+            <element signature="e#39171#39263#0" expanded="false" />
+            <element signature="e#39570#40246#0" expanded="false" />
+            <element signature="e#39661#39837#0" expanded="false" />
+            <element signature="e#40285#40801#0" expanded="false" />
+            <element signature="e#40326#40693#0" expanded="false" />
+            <element signature="e#40392#40576#0" expanded="false" />
+            <element signature="e#40846#41353#0" expanded="false" />
+            <element signature="e#40889#40956#0" expanded="false" />
+            <element signature="e#41427#42684#0" expanded="false" />
+            <element signature="e#41518#42167#0" expanded="false" />
+            <element signature="e#42372#42615#0" expanded="false" />
+            <element signature="e#42728#42754#0" expanded="false" />
+            <element signature="e#42787#43525#0" expanded="false" />
+            <element signature="e#42878#43168#0" expanded="false" />
+            <element signature="e#43416#43492#0" expanded="false" />
+            <element signature="e#43558#43590#0" expanded="false" />
+            <element signature="e#43623#43655#0" expanded="false" />
+            <element signature="e#43690#43847#0" expanded="false" />
+            <element signature="e#43749#43795#0" expanded="false" />
+            <element signature="e#43887#44002#0" expanded="false" />
+            <element signature="e#44042#44085#0" expanded="false" />
+            <element signature="e#44124#45036#0" expanded="false" />
+            <element signature="e#44124#44173#0" expanded="false" />
+            <element signature="e#44519#44595#0" expanded="false" />
+            <element signature="e#44734#44885#0" expanded="false" />
+            <element signature="e#44767#44885#0" expanded="false" />
+            <element signature="e#44811#44885#0" expanded="false" />
+            <element signature="e#45079#45111#0" expanded="false" />
+            <element signature="e#45152#45465#0" expanded="false" />
+            <element signature="e#45519#46305#0" expanded="false" />
+            <element signature="e#45536#45889#0" expanded="false" />
+            <element signature="e#45588#45753#0" expanded="false" />
+            <element signature="e#46151#46205#0" expanded="false" />
+            <element signature="e#46351#46482#0" expanded="false" />
+            <element signature="e#46527#46649#0" expanded="false" />
+            <element signature="e#46695#46866#0" expanded="false" />
+            <element signature="e#46909#47064#0" expanded="false" />
+            <element signature="e#47113#47383#0" expanded="false" />
+            <element signature="e#47441#48006#0" expanded="false" />
+            <element signature="e#47536#47553#0" expanded="false" />
+            <element signature="e#48062#48162#0" expanded="false" />
+            <element signature="e#48205#48317#0" expanded="false" />
+            <element signature="e#48360#48600#0" expanded="false" />
+            <element signature="e#48645#48693#0" expanded="false" />
+            <element signature="e#48742#48870#0" expanded="false" />
+            <element signature="e#48928#49338#0" expanded="false" />
+            <element signature="e#48968#49274#0" expanded="false" />
+            <element signature="e#49396#50252#0" expanded="false" />
+            <element signature="e#49413#49983#0" expanded="false" />
+            <element signature="e#49518#49554#0" expanded="false" />
+            <element signature="e#50027#50252#0" expanded="false" />
+            <element signature="e#50309#50887#0" expanded="false" />
+            <element signature="e#50536#50744#0" expanded="false" />
+            <element signature="e#50788#50887#0" expanded="false" />
+            <element signature="e#50928#51218#0" expanded="false" />
+            <element signature="e#51050#51117#0" expanded="false" />
+            <element signature="e#51260#51545#0" expanded="false" />
+            <element signature="e#51382#51449#0" expanded="false" />
+            <element signature="e#51592#51668#0" expanded="false" />
+            <element signature="e#51713#51866#0" expanded="false" />
+            <element signature="e#51909#51968#0" expanded="false" />
+            <element signature="e#52026#52301#0" expanded="false" />
+            <element signature="e#52026#52069#0" expanded="false" />
+            <element signature="e#52341#52582#0" expanded="false" />
+            <element signature="e#52485#52582#0" expanded="false" />
+            <element signature="e#52617#53715#0" expanded="false" />
+            <element signature="e#53136#53257#0" expanded="false" />
+            <element signature="e#53398#53583#0" expanded="false" />
+            <element signature="e#53627#53715#0" expanded="false" />
+            <element signature="e#53776#53818#0" expanded="false" />
+            <element signature="e#53866#54245#0" expanded="false" />
+            <element signature="e#54288#54292#0" expanded="false" />
+            <element signature="e#54349#59907#0" expanded="false" />
+            <element signature="e#54563#54636#0" expanded="false" />
+            <element signature="e#54706#54835#0" expanded="false" />
+            <element signature="e#54908#55562#0" expanded="false" />
+            <element signature="e#55633#56171#0" expanded="false" />
+            <element signature="e#56251#56724#0" expanded="false" />
+            <element signature="e#56793#57274#0" expanded="false" />
+            <element signature="e#57342#57863#0" expanded="false" />
+            <element signature="e#57938#58517#0" expanded="false" />
+            <element signature="e#58593#59160#0" expanded="false" />
+            <element signature="e#59236#59511#0" expanded="false" />
+            <element signature="e#59949#60852#0" expanded="false" />
+            <element signature="e#60913#61505#0" expanded="false" />
+            <element signature="e#60969#61075#0" expanded="false" />
+            <element signature="e#61243#61505#0" expanded="false" />
+            <element signature="e#61549#62042#0" expanded="false" />
+            <element signature="e#61605#61990#0" expanded="false" />
+            <element signature="e#61705#61791#0" expanded="false" />
+            <element signature="e#61826#61990#0" expanded="false" />
+            <element signature="e#61901#61990#0" expanded="false" />
+            <element signature="e#62098#62408#0" expanded="false" />
+            <element signature="e#62170#62408#0" expanded="false" />
+            <element signature="e#62202#62288#0" expanded="false" />
+            <element signature="e#62323#62408#0" expanded="false" />
+            <element signature="e#62463#62746#0" expanded="false" />
+            <element signature="e#62530#62609#0" expanded="false" />
+            <element signature="e#62802#63595#0" expanded="false" />
+            <element signature="e#63084#63360#0" expanded="false" />
+            <element signature="e#63117#63360#0" expanded="false" />
+            <element signature="e#63387#63595#0" expanded="false" />
+            <element signature="e#63644#63865#0" expanded="false" />
+            <element signature="e#63917#64082#0" expanded="false" />
+            <element signature="e#64134#64295#0" expanded="false" />
+            <element signature="e#64360#64570#0" expanded="false" />
+            <element signature="e#64613#64717#0" expanded="false" />
+            <element signature="e#64759#64877#0" expanded="false" />
+            <element signature="e#64938#65282#0" expanded="false" />
+            <element signature="e#64965#65147#0" expanded="false" />
+            <element signature="e#65175#65282#0" expanded="false" />
+            <element signature="e#65326#65346#0" expanded="false" />
+            <element signature="e#65390#65465#0" expanded="false" />
+            <element signature="e#65499#65800#0" expanded="false" />
+            <element signature="e#65843#65936#0" expanded="false" />
+            <element signature="e#65979#66072#0" expanded="false" />
+            <element signature="e#66094#66107#0" expanded="false" />
+            <element signature="e#66152#66304#0" expanded="false" />
+            <element signature="e#66327#66339#0" expanded="false" />
+            <element signature="e#66402#66638#0" expanded="false" />
+            <element signature="e#66476#66638#0" expanded="false" />
+            <element signature="e#66697#66911#0" expanded="false" />
+            <element signature="e#66957#67072#0" expanded="false" />
+            <element signature="e#67006#67072#0" expanded="false" />
+            <element signature="e#67132#67361#0" expanded="false" />
+            <element signature="e#67407#67706#0" expanded="false" />
+            <element signature="e#67511#67706#0" expanded="false" />
+            <element signature="e#67552#67706#0" expanded="false" />
+            <element signature="e#67606#67706#0" expanded="false" />
+            <element signature="e#67754#68090#0" expanded="false" />
+            <element signature="e#67818#67895#0" expanded="false" />
+            <element signature="e#67922#67996#0" expanded="false" />
+            <element signature="e#68147#69017#0" expanded="false" />
+            <element signature="e#68920#69017#0" expanded="false" />
+            <element signature="e#69065#69763#0" expanded="false" />
+            <element signature="e#69769#69798#0" expanded="false" />
+            <element signature="e#69842#72075#0" expanded="false" />
+            <element signature="e#70246#70655#0" expanded="false" />
+            <element signature="e#70377#70598#0" expanded="false" />
+            <element signature="e#70432#70598#0" expanded="false" />
+            <element signature="e#71278#71757#0" expanded="false" />
+            <element signature="e#71370#71676#0" expanded="false" />
+            <element signature="e#71798#72031#0" expanded="false" />
+            <element signature="e#71941#72031#0" expanded="false" />
+            <element signature="e#72150#72788#0" expanded="false" />
+            <element signature="e#72277#72344#0" expanded="false" />
+            <element signature="e#72371#72788#0" expanded="false" />
+            <element signature="e#72428#72788#0" expanded="false" />
+            <element signature="e#72469#72507#0" expanded="false" />
+            <element signature="e#72852#73042#0" expanded="false" />
+            <element signature="e#73101#75778#0" expanded="false" />
+            <element signature="e#73420#73473#0" expanded="false" />
+            <element signature="e#73591#73900#0" expanded="false" />
+            <element signature="e#73787#73900#0" expanded="false" />
+            <element signature="e#73937#74100#0" expanded="false" />
+            <element signature="e#73994#74100#0" expanded="false" />
+            <element signature="e#74038#74100#0" expanded="false" />
+            <element signature="e#74129#75778#0" expanded="false" />
+            <element signature="e#74186#75778#0" expanded="false" />
+            <element signature="e#74223#75778#0" expanded="false" />
+            <element signature="e#74271#75778#0" expanded="false" />
+            <element signature="e#74340#74522#0" expanded="false" />
+            <element signature="e#74397#74522#0" expanded="false" />
+            <element signature="e#74581#75778#0" expanded="false" />
+            <element signature="e#74638#75778#0" expanded="false" />
+            <element signature="e#74730#74777#0" expanded="false" />
+            <element signature="e#75822#75965#0" expanded="false" />
+            <element signature="e#76516#76648#0" expanded="false" />
+            <element signature="e#76544#76648#0" expanded="false" />
+            <element signature="e#76698#77672#0" expanded="false" />
+            <element signature="e#76739#77146#0" expanded="false" />
+            <element signature="e#77187#77262#0" expanded="false" />
+            <element signature="e#77305#77374#0" expanded="false" />
+            <element signature="e#77405#77672#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/user_interface/inspector.rst">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+        <state relative-caret-position="355">
+          <caret line="143" column="32" lean-forward="false" selection-start-line="143" selection-start-column="32" selection-end-line="143" selection-end-column="32" />
+          <folding>
+            <element signature="e#146#155#0" expanded="true" />
+            <element signature="e#2026#3766#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/data/vian_updater.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="355">
+          <caret line="135" column="20" lean-forward="true" selection-start-line="135" selection-start-column="20" selection-end-line="135" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/vlc/v3_0_0/vlc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-270">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py">
+    <entry file="file://$PROJECT_DIR$/core/gui/player_vlc.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="125" column="0" lean-forward="false" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
-          <folding>
-            <marker date="1520884497855" expanded="true" signature="434:3594" ph="..." />
-          </folding>
+        <state relative-caret-position="216">
+          <caret line="12" column="15" lean-forward="true" selection-start-line="12" selection-start-column="15" selection-end-line="12" selection-end-column="15" />
+          <folding />
         </state>
       </provider>
     </entry>

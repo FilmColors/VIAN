@@ -178,7 +178,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.only_show_current_segment = False
 
         self.font = QFont("Consolas")
-        self.font_size = 20
+        self.font_size = 68
         self.font_size_segments = 120
         self.font.setPointSize(self.font_size)
         self.color = QColor(225,225,225)
@@ -439,7 +439,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         caption = self.scene.addText(str(text), self.font)
         caption.setDefaultTextColor(self.color)
         caption.setPos(QtCore.QPointF(x, y))
-        caption.setFlag(QGraphicsItem.ItemIgnoresTransformations)
+        # caption.setFlag(QGraphicsItem.ItemIgnoresTransformations)
         self.captions.append(caption)
         return caption
 

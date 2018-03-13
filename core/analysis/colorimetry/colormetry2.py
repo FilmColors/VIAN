@@ -11,6 +11,7 @@ YieldedResult = namedtuple("YieldedResult", ["frame_pos", "time_ms", "hist", "av
 
 class ColormetryJob2(QObject):
     def __init__(self, resolution, main_window):
+        super(ColormetryJob2, self).__init__()
         self.resolution = resolution
         self.colormetry_analysis = None
         self.main_window = main_window
@@ -73,8 +74,7 @@ class ColormetryJob2(QObject):
             avg_color = np.mean(frame_lab, axis=(0, 1))
 
             if self.aborted:
-                print("Aborted")
-                break
+                return
 
             yielded_result = dict(frame_pos=i, time_ms=frame2ms(i, fps), hist=hist, avg_color=avg_color)
             callback.emit([yielded_result, i / end])

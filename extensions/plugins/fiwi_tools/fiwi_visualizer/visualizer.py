@@ -223,7 +223,6 @@ class FiwiVisualizer(QMainWindow):
         unique_keywords, segm_table_names, segm_table_words = database.get_filters()
 
         on_progress(0.2)
-        print(root_path)
         with open(root_path, "r") as f:
             if "root" in f.readline():
                 root_dir = os.path.split(root_path)[0] + "/"
@@ -343,7 +342,6 @@ class FiwiVisualizer(QMainWindow):
         # Query each table individually
         for i, q in enumerate(queries_tables):
             on_progress(0.2 + (i / len(tables) * 0.2))
-            print("Querying", queries_tables[i])
             d = dict(zip(queries_words[i], [1] * len(queries_words[i])))
             res.extend([database.get_segments(queries_tables[i], d)])
 
@@ -498,9 +496,7 @@ class FiwiVisualizer(QMainWindow):
             for r in res:
                 try:
                     ids.append(all_segments[qsegm_db_ids.index(r['id'])].segm_id)
-                    print(r['id'])
                 except:
-                    print("not Found")
                     continue
 
             if len(ids) > 0:
@@ -549,7 +545,7 @@ class FiwiVisualizer(QMainWindow):
         idx = object[0]
         img = object[1]
         self.current_stills[idx].pixmap = img
-        print(self.current_stills[idx].pixmap)
+
 
     def update_plots(self):
         print("UPDATING")

@@ -5,6 +5,11 @@
 Auto Segmentation
 *****************
 
+.. note:: **Colormetry**
+   Auto Segmentation depends on the **Colormetry** Analysis, which has to be run and finished before
+   the Auto Segmentation can be used. The Auto Segmentation Dialog will inform you about this and gives
+   you the Option to run it.
+
 VIAN allows you to automatically create Segmentations based on either even distribution or Color-Histograms.
 To create a Segmentation automatically, do the following:
 

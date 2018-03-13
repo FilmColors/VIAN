@@ -71,7 +71,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -87,7 +87,7 @@ class MainWindow(QtWidgets.QMainWindow):
     abortAllConcurrentThreads = pyqtSignal()
     onOpenCVFrameVisibilityChanged = pyqtSignal(bool)
 
-    def __init__(self):
+    def __init__(self, loading_screen):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
@@ -95,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if PROFILE:
             self.profiler = cProfile.Profile()
             self.profiler.enable()
-        loading_screen = LoadingScreen()
+
         self.setAcceptDrops(True)
         self.has_open_project = False
         self.version = __version__
@@ -336,6 +336,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #TOOLS
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
 
+        self.actionColormetry.triggered.connect(self.start_colormetry)
         self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
         self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
 
@@ -479,7 +480,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        pass
+        self.abortAllConcurrentThreads.emit()
 
     def start_colormetry(self):
         job = ColormetryJob2(30, self)
@@ -1002,6 +1003,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.corpus_client.send_update_project(ProjectData().from_EEXTProject(self.project))
 
+        self.project.undo_manager.no_changes = True
 
         return
 
@@ -1746,13 +1748,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
 
-        ready, col = self.project.get_colormetry()
-        if not ready:
-            self.start_colormetry()
+        run_colormetry = False
+        if self.settings.AUTO_START_COLORMETRY:
+            run_colormetry = True
         else:
-            print("SetColormetry")
-            self.timeline.timeline.set_colormetry_progress(1.0)
-        print("LOADED")
+            answer = QMessageBox.question(self, "Colormetry",
+                                          "Do you want to start the Colormetry Analysis now?"
+                                          "\n\n"
+                                          "Hint: The Colormetry will be needed for several Tools in VIAN,\n"
+                                          "but will need quite some resources of your computer.")
+            if answer == QMessageBox.Yes:
+                run_colormetry = True
+
+        if run_colormetry:
+            ready, col = self.project.get_colormetry()
+            if not ready:
+                self.start_colormetry()
+            else:
+                print("SetColormetry")
+                self.timeline.timeline.set_colormetry_progress(1.0)
+        print("LOADED:", self.project.name)
 
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is None or not self.allow_dispatch_on_change:
@@ -1864,16 +1879,18 @@ class MainWindow(QtWidgets.QMainWindow):
     pass
 
 
-class LoadingScreen(QtWidgets.QMainWindow):
-    def __init__(self):
-        super(LoadingScreen, self).__init__(None)
-        self.lbl = QLabel(self)
-        self.setFixedWidth(800)
-        self.setFixedHeight(400)
-        self.lbl.setPixmap(QPixmap(os.path.abspath("/qt_ui/images/loading_screen.png")))
-        self.setCentralWidget(self.lbl)
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.show()
+# class LoadingScreen(QtWidgets.QSplashScreen):
+#     def __init__(self):
+#         super(LoadingScreen, self).__init__(None)
+#         self.lbl = QLabel(self)
+#         self.setFixedWidth(800)
+#         self.setFixedHeight(400)
+#         self.lbl.setText("Welcome")
+#         self.setLayout(QHBoxLayout(self))
+#         self.layout().addWidget(self.lbl)
+#         self.lbl.setPixmap(QPixmap(os.path.abspath("qt_ui/images/loading_screen.png")))
+#         self.setWindowFlags(Qt.FramelessWindowHint)
+
 
 
 class IconContainer():

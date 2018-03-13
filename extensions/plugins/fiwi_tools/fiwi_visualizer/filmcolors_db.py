@@ -24,7 +24,6 @@ class DBMovie():
         try:
             self.year = int(year)
         except:
-            print(year)
             self.year = 0
 
 
@@ -184,8 +183,6 @@ class FilmColorsDatabase():
             self.db.commit()
         except Exception as e:
             print(e)
-            print(table_mapping[j])
-            raise e
             self.db.rollback()
 
     def import_keywords_csv(self, csv_file):

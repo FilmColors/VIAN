@@ -482,7 +482,7 @@ class ImagePlotTime(ImagePlot):
         self.base_line = y_max
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
-        print("Scene Rect:", self.sceneRect())
+
 
     def add_image(self, x, y, img, convert=True):
         if convert:

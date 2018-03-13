@@ -2778,10 +2778,13 @@ class ColormetryAnalysis(AnalysisContainer):
         pass
 
     def append_data(self, data):
-        self.time_ms.append(data['time_ms'])
-        self.histograms.append(data['hist'])
-        self.frame_pos.append(data['frame_pos'])
-        self.avg_colors.append(data['avg_color'])
+        try:
+            self.time_ms.append(data['time_ms'])
+            self.histograms.append(data['hist'])
+            self.frame_pos.append(data['frame_pos'])
+            self.avg_colors.append(data['avg_color'])
+        except Exception as e:
+            print("append_data() raised ", str(e))
 
     def get_update(self, time_ms):
         try:

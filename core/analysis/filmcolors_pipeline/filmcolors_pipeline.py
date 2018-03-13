@@ -395,7 +395,6 @@ class ChannelTimeVis(QWidget):
 
     @pyqtSlot(int)
     def on_channel_changed(self, idx):
-        print(idx)
         self.curr_channel = idx
         self.on_source_changed(self.current_source)
 

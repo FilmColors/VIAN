@@ -77,7 +77,6 @@ class VIANFeaturePlot(QGraphicsView):
         self.update_segment_lines()
 
     def remove_feature(self, feature):
-        print("Removed", feature[0].name)
         for rect in feature[1]:
             self.scene().removeItem(rect)
         self.scene().removeItem(feature[2])

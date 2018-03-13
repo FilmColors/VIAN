@@ -191,7 +191,6 @@ class QueryDock(QDockWidget):
         try:
             idx = self.cb_movie.currentIndex()
             self.visualizer.set_current_movie(self.visualizer.current_corpus().movies[idx])
-            print(str(self.visualizer.current_movie))
         except:
             pass
         

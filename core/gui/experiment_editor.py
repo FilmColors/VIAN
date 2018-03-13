@@ -49,7 +49,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         else:
             self.set_enabled(True)
 
-            print(self.current_experiment.classification_sources)
             self.cB_ClassSegment.setChecked(SEGMENT in self.current_experiment.classification_sources)
             # self.cB_ClassSegmentation.setChecked(SEGMENTATION in self.current_experiment.classification_sources)
             self.cB_ClassAnnotation.setChecked(ANNOTATION in self.current_experiment.classification_sources)
@@ -143,7 +142,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         #     sources.append(SEGMENTATION)
         # if self.cB_ClassAnnotationLayer.isChecked():
         #     sources.append(ANNOTATION_LAYER)
-        print("Source Changed Sources", sources)
+
         self.current_experiment.classification_sources = sources
 
     def name_changed(self):

@@ -38,7 +38,7 @@ class DialogPreferences(EDialogWidget):
         self.comboBox_Source.currentIndexChanged.connect(self.set_opencv_per_frame)
 
         # AUTOSAVE
-        print(self.settings.AUTOSAVE)
+
         self.checkBox_Autosave.setChecked(self.settings.AUTOSAVE)
         self.checkBox_Autosave.stateChanged.connect(self.set_autosave)
         self.spinBox_AutosaveTime.valueChanged.connect(self.set_autosave_time)
@@ -57,8 +57,7 @@ class DialogPreferences(EDialogWidget):
         self.lineEdit_UpdateSource.setText(self.settings.UPDATE_SOURCE)
         self.spinBox_AutosaveTime.setValue(self.settings.AUTOSAVE_TIME)
 
-
-
+        self.checkBox_AutoColormetry.setChecked(self.settings.AUTO_START_COLORMETRY)
         self.spinBox_GridSize.setValue(self.settings.GRID_SIZE)
 
         self.lineEdit_UserName.setText(self.settings.USER_NAME)
@@ -102,7 +101,7 @@ class DialogPreferences(EDialogWidget):
         self.settings.CORPUS_IP = self.lineEdit_CorpusIP.text()
         self.settings.COPRUS_PORT = self.lineEdit_CorpusPort.text()
         self.settings.COPRUS_PW = self.lineEdit_CorpusPW.text()
-
+        self.settings.AUTO_START_COLORMETRY = self.checkBox_AutoColormetry.isChecked()
         self.settings.UPDATE_SOURCE = self.lineEdit_UpdateSource.text()
 
     def on_ok(self):

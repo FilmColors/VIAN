@@ -9,16 +9,19 @@ class UndoRedoManager(QObject):
         self.redo_stack = []
         self.is_undoing = False
         self.is_redoing = False
+        self.has_changes = False
 
     def has_modifications(self):
-        if len(self.undo_stack) > 0:
-            return True
-        elif len(self.redo_stack) > 0:
-            return True
-        else:
-            return False
+        return self.has_changes
+        # if len(self.undo_stack) > 0:
+        #     return True
+        # elif len(self.redo_stack) > 0:
+        #     return True
+        # else:
+        #     return False
 
     def to_undo(self, redo, undo):
+        self.has_changes = True
         if self.is_undoing:
             self.is_undoing = False
         elif self.is_redoing:
@@ -58,6 +61,7 @@ class UndoRedoManager(QObject):
         self.on_changed.emit()
 
     def clear(self):
+        self.has_changes = False
         self.undo_stack = []
         self.redo_stack = []
 

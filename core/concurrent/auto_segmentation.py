@@ -16,7 +16,6 @@ AUTO_SEGM_CHIST = 1
 def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100):
     duration = project.movie_descriptor.duration
 
-    print(mode)
 
     if mode == AUTO_SEGM_EVEN:
         if n_segment < 0:
@@ -52,11 +51,23 @@ class DialogAutoSegmentation(EDialogWidget):
 
         self.project = project
         self.comboBox_Mode.currentIndexChanged.connect(self.on_mode_changed)
+
+        self.not_finished_text = "The Colormetry has not finished yet,\n" \
+                                 "please wait until it is finished and try again.\n\n" \
+                                 "The progress is indicated by the green line on the Timeline."
+        self.not_run_text = "The Colormetry has not been started yet.\n" \
+                            "please run the Colormetry First,\n " \
+                            "since the results will be used for the Auto Segmentation"
+
         self.lbl_not_ready = QLabel("The Colormetry has not finished yet,\n"
                                     "please wait until it is finished and try again.\n\n"
                                     "The progress is indicated by the green line on the Timeline.")
         self.lbl_not_ready.setStyleSheet("QLabel{foreground: red;}")
+        self.btn_start_colormetry = QPushButton("Start Colormetry")
+        self.btn_start_colormetry.clicked.connect(self.main_window.start_colormetry)
+
         self.widget_colorhist.layout().addWidget(self.lbl_not_ready)
+        self.widget_colorhist.layout().addWidget(self.btn_start_colormetry)
         self.btn_Run.clicked.connect(self.on_ok)
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_Cancel.clicked.connect(self.close)
@@ -66,6 +77,12 @@ class DialogAutoSegmentation(EDialogWidget):
         ret, c =  self.project.get_colormetry()
         if ret is False and idx == 1:
             self.lbl_not_ready.show()
+            if c is None:
+                self.lbl_not_ready.setText(self.not_run_text)
+                self.btn_start_colormetry.show()
+            else:
+                self.lbl_not_ready.setText(self.not_finished_text)
+                self.btn_start_colormetry.hide()
             self.btn_Run.setEnabled(False)
         else:
             self.lbl_not_ready.hide()
