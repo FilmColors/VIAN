@@ -92,9 +92,9 @@ class MainWindow(QtWidgets.QMainWindow):
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
 
-        loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 18pt;}")
-
-        loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(250,250,250,200))
+        loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
+        loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,100))
+        
         if PROFILE:
             self.profiler = cProfile.Profile()
             self.profiler.enable()
@@ -124,8 +124,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.master_file.load()
         self.icons = IconContainer()
 
-        loading_screen.showMessage("Loading, Please Wait... Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(250, 250, 250, 200))
+        loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(200,200,200,100))
 
 
         self.updater = VianUpdater(self, self.version)
@@ -141,8 +141,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread_pool = QThreadPool()
         self.thread_pool.setMaxThreadCount(8)
 
-        loading_screen.showMessage("Loading, Please Wait... Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(250, 250, 250, 200))
+        loading_screen.showMessage("Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(200,200,200,100))
 
         self.numpy_data_manager = NumpyDataManager(self)
         self.project_streamer = ProjectStreamerShelve(self)
@@ -201,8 +201,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.project = VIANProject(self, "", "Default Project")
 
-        loading_screen.showMessage("Loading, Please Wait... Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(250, 250, 250, 200))
+        loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(200,200,200,100))
 
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread(self)
@@ -277,7 +277,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ## Action Slots ##
         # Tab File
 
-        loading_screen.showMessage("Loading, Please Wait... Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
+        loading_screen.showMessage("Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(250, 250, 250, 100))
         self.actionNew.triggered.connect(self.action_new_project)
         self.actionLoad.triggered.connect(self.on_load_project)
@@ -443,8 +443,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_selecting_analyzes = False
 
 
-        loading_screen.showMessage("Loading, Please Wait... Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(250, 250, 250, 200))
+        loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
+                                   QColor(200,200,200,100))
         self.update_recent_menu()
 
 
