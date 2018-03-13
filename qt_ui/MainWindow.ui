@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1167</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -169,7 +169,7 @@
     <property name="title">
      <string>Analysis</string>
     </property>
-    <addaction name="actionColorimetry"/>
+    <addaction name="actionColormetry"/>
     <addaction name="actionMovie_Barcode"/>
     <addaction name="actionMovie_Mosaic"/>
     <addaction name="separator"/>
@@ -190,10 +190,17 @@
     <addaction name="actionFrame_Backward"/>
     <addaction name="menuFrame_Rate"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionAuto_Segmentation"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuCreate"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuTools"/>
    <addaction name="menuPlayer"/>
    <addaction name="menuAnalysis"/>
    <addaction name="menuHelp"/>
@@ -676,6 +683,16 @@
   <action name="actionQuick_Annotation">
    <property name="text">
     <string>Quick Annotation</string>
+   </property>
+  </action>
+  <action name="actionAuto_Segmentation">
+   <property name="text">
+    <string>Auto Segmentation</string>
+   </property>
+  </action>
+  <action name="actionColormetry">
+   <property name="text">
+    <string>Colormetry</string>
    </property>
   </action>
  </widget>

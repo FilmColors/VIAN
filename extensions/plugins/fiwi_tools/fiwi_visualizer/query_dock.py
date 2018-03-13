@@ -15,7 +15,7 @@ FilterTuple = namedtuple("FilterTuple", ["table_name", "keyword_name"])
 class QueryDock(QDockWidget):
     def __init__(self, parent):
         super(QueryDock, self).__init__(parent)
-
+        self.setWindowTitle("Query")
         self.visualizer = parent
         self.inner = QWidget(self)
         self.inner.setLayout(QVBoxLayout(self.inner))
@@ -24,11 +24,30 @@ class QueryDock(QDockWidget):
         self.controls.setLayout(QVBoxLayout())
         self.inner.layout().addWidget(self.controls)
 
+        self.cb_Corporas = QComboBox(self)
+        self.controls.layout().addWidget(self.cb_Corporas)
+        self.cb_Corporas.currentIndexChanged.connect(self.visualizer.set_current_corpus)
+
         self.filter_controls = QWidget(self)
         self.filter_controls.setLayout(QHBoxLayout())
         self.btn_reset = QPushButton("Reset Filters")
         self.btn_query = QPushButton("Query")
         self.btn_query.clicked.connect(self.visualizer.on_start_query)
+        self.btn_reset.clicked.connect(self.deselect_all_filter)
+        self.btn_select_all = QPushButton("Select All")
+        self.btn_select_all.clicked.connect(self.select_all_filter)
+
+
+        self.w_corpus_level = QWidget(self)
+        self.w_corpus_level.setLayout(QVBoxLayout(self.w_corpus_level))
+
+        self.w_movie_level = QWidget(self)
+        self.w_movie_level.setLayout(QVBoxLayout(self.w_movie_level))
+
+        self.cb_movie = QComboBox(self.w_movie_level)
+        self.cb_movie.currentIndexChanged.connect(self.on_movie_changed)
+        self.w_movie_level.layout().addWidget(self.cb_movie)
+
 
         self.fm_id_controls = QWidget(self)
         self.fm_id_controls.setLayout(QHBoxLayout(self))
@@ -53,6 +72,7 @@ class QueryDock(QDockWidget):
         self.year_controls.layout().addWidget(self.sB_year_end)
 
         self.filter_controls.layout().addWidget(self.btn_reset)
+        self.filter_controls.layout().addWidget(self.btn_select_all)
         self.filter_controls.layout().addWidget(self.btn_query)
 
         self.n_images = QWidget(self)
@@ -66,10 +86,15 @@ class QueryDock(QDockWidget):
         self.n_images.layout().addWidget(self.sl_n_images)
         self.n_images.layout().addWidget(self.lbl_n_images)
 
-        self.controls.layout().addWidget(self.filter_controls)
-        self.controls.layout().addWidget(self.fm_id_controls)
-        self.controls.layout().addWidget(self.year_controls)
+        self.w_corpus_level.layout().addWidget(self.fm_id_controls)
+        self.w_corpus_level.layout().addWidget(self.year_controls)
+
+        self.controls.layout().addWidget(self.w_corpus_level)
+        self.controls.layout().addWidget(self.w_movie_level)
+        self.w_movie_level.hide()
         self.controls.layout().addWidget(self.n_images)
+        self.controls.layout().addWidget(self.filter_controls)
+        self.controls.layout().addWidget(QLabel("Filter:"))
 
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidget(QWidget(self.scroll_area))
@@ -80,10 +105,31 @@ class QueryDock(QDockWidget):
 
         self.filters = []
         self.categories = []
+        self.dispatch = False
 
         self.years = list(range(1900, 2018))
 
         self.current_filters = []
+
+    def select_all_filter(self):
+        for itm in self.filters:
+            itm.setChecked(True)
+
+    def deselect_all_filter(self):
+        for itm in self.filters:
+            itm.setChecked(False)
+
+
+    def update_corpora_list(self, corporas):
+        self.cb_Corporas.currentIndexChanged.disconnect(self.visualizer.set_current_corpus)
+        self.cb_movie.currentIndexChanged.disconnect(self.on_movie_changed)
+
+        self.cb_Corporas.clear()
+        for c in corporas:
+            self.cb_Corporas.addItem(c.name)
+
+        self.cb_Corporas.currentIndexChanged.connect(self.visualizer.set_current_corpus)
+        self.cb_movie.currentIndexChanged.connect(self.on_movie_changed)
 
     def create_filter_menu(self, filters:List[UniqueKeyword]):
         for f in self.filters:
@@ -113,17 +159,41 @@ class QueryDock(QDockWidget):
         else:
             self.current_filters.append([table_name, word_name])
 
-        print(self.current_filters)
-
     def on_year_changed(self):
         self.years = list(range(self.sB_year_start.value(), self.sB_year_end.value(), 1))
-        print(self.years)
 
     def on_n_images_changed(self):
         v = self.sl_n_images.value()
         self.lbl_n_images.setText(str(v))
         self.visualizer.n_stills_max = v
 
+
+    @pyqtSlot(int)
+    def on_mode_changed(self, mode):
+        if mode == 0:
+            self.w_movie_level.show()
+            self.w_corpus_level.hide()
+
+        else:
+            self.w_movie_level.hide()
+            self.w_corpus_level.show()
+
+
+
+
+    @pyqtSlot(object)
+    def on_corpus_changed(self, corpus):
+        self.cb_movie.clear()
+        for m in corpus.movies:
+            self.cb_movie.addItem(m.name)
+
+    def on_movie_changed(self):
+        try:
+            idx = self.cb_movie.currentIndex()
+            self.visualizer.set_current_movie(self.visualizer.current_corpus().movies[idx])
+        except:
+            pass
+        
 
 class FilterCategory(QFrame):
     def __init__(self, parent, name, query_dock):

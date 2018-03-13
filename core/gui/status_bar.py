@@ -3,7 +3,13 @@ from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QColor
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5 import uic
 from functools import partial
+import os
+
+from core.gui.perspectives import *
+
 
 class StatusBar(QtWidgets.QWidget):
     def __init__(self,main_window,server):
@@ -13,6 +19,10 @@ class StatusBar(QtWidgets.QWidget):
         self.server = server
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
+
+        self.stage_selector = StageSelector(self, main_window)
+        self.layout.addWidget(self.stage_selector)
+        self.layout.addItem(QSpacerItem(100, 20))
 
         self.label_selection = QtWidgets.QLabel(self)
         self.label_selection.setText("Selection: ")
@@ -153,6 +163,8 @@ class StatusVideoSource(QtWidgets.QWidget):
         self.layout.addWidget(self.lbl_source)
         self.setStyleSheet("QWiget{background: transparent;}")
 
+
+    @pyqtSlot(str)
     def on_source_changed(self, source):
         if source == "VLC":
             self.lbl_source.setText("VLC")
@@ -192,8 +204,10 @@ class StatusVideoSource(QtWidgets.QWidget):
         try:
             if idx == 0:
                 self.main_window.onOpenCVFrameVisibilityChanged.emit(False)
+
             elif idx == 1 and not self.main_window.player.is_playing():
                 self.main_window.onOpenCVFrameVisibilityChanged.emit(True)
+
             elif (idx == 2 and not self.main_window.player.is_playing()
                   and self.main_window.timeline.timeline.scale < self.main_window.timeline.timeline.opencv_frame_scale_threshold):
                 self.main_window.onOpenCVFrameVisibilityChanged.emit(True)
@@ -280,3 +294,46 @@ class MessageLogWindow(QMainWindow):
             print (e)
 
         self.input_line.clear()
+
+
+class StageSelector(QWidget):
+    def __init__(self, parent, main_window):
+        super(StageSelector, self).__init__(parent)
+        path = os.path.abspath("qt_ui/StageSelector.ui")
+        uic.loadUi(path, self)
+        self.main_window = main_window
+        self.setStyleSheet("QPushButton{background: transparent;} QWidget:focus{border: 0px solid #383838;}")
+
+        self.buttons = [
+            self.btn_Segmentation,
+            self.btn_Annotation,
+            self.btn_Experiment,
+            self.btn_Classification,
+            self.btn_Visualization
+        ]
+
+        self.btn_Segmentation.clicked.connect(partial(self.set_stage, 0))
+        self.btn_Annotation.clicked.connect(partial(self.set_stage, 1))
+        self.btn_Experiment.clicked.connect(partial(self.set_stage, 2))
+        self.btn_Classification.clicked.connect(partial(self.set_stage, 3))
+        self.btn_Visualization.clicked.connect(partial(self.set_stage, 4))
+
+
+    def set_stage(self, idx, dispatch = True):
+        for i, btn in enumerate(self.buttons):
+            if i == idx:
+                btn.setChecked(True)
+            else:
+                btn.setChecked(False)
+
+        if dispatch:
+            if idx == 0:
+                self.main_window.switch_perspective(Perspective.Segmentation.name)
+            elif idx == 1:
+                self.main_window.switch_perspective(Perspective.Annotation.name)
+            elif idx == 2:
+                self.main_window.switch_perspective(Perspective.ExperimentSetup.name)
+            elif idx == 3:
+                self.main_window.switch_perspective(Perspective.Classification.name)
+            elif idx == 4:
+                self.main_window.switch_perspective(Perspective.Results.name)

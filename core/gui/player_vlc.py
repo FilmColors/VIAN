@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from core.gui.ewidgetbase import EDockWidget
 from core.data.computation import parse_file_path
 from core.data.interfaces import IProjectChangeNotify
-from core.vlc import vlc
+from core.vlc.v3_0_0 import vlc
 import os
 
 
@@ -296,6 +296,7 @@ class Player_VLC(VideoPlayer):
         #if fps != 0:
         #    self.fps = capture.get(cv2.CAP_PROP_FPS)
         self.fps = capture.get(cv2.CAP_PROP_FPS)
+        self.main_window.project.movie_descriptor.fps = self.fps
 
         self.user_fps = self.fps
 

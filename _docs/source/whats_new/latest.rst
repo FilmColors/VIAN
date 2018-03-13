@@ -1,57 +1,62 @@
 
 
-VIAN 0.4.5 - 0.4.7
-==================
+VIAN 0.5.0
+==========
 
 **READ THIS**
 
+Automatic Segmentation
+**********************
 
-Analyses - Visualization
-************************
-The Analyses Visualizations have been implemented in their basic form.
-This mean: You can now run analyses, and view them.
-Read more about how to use them here: :ref:`running_analyses` and here: :ref:`viewing_analyses`.
-
-
-Analyses - Mosaic Vis
-*********************
-It is now possible to perform Mosaic Plots using VIAN Analysis Interface.
-Read more about Analyses and how to perform them here: :ref:`analyses`
-
-.. figure:: mosaic.jpg
-   :scale: 80 %
-   :align: center
-   :alt: map to buried treasure
+VIAN can now automatically generate Segmentations based on Color-Features, using Agglomerativ Clustering.
+For more information read here: :ref:`auto_segmentation`
 
 
-Backups
-*******
-VIAN now allows you to perform backups of a Project semi-automatically.
-Read more about creating and loading backups here: :ref:`backups`
-
-
-Cutting Segments
+Merging Segments
 ****************
-Segments can now be cutted in the Timeline using the **Cutting Tool**
-A Step-By-Step Tutorial can be found here: :ref:`cutting_segments`
+Cutting Segments has already been introduced in 0.4.7, by now,
+merging Segments can be performed in the Timeline as well.
+
+In combination with the **Automatic Segmentation**, the Segmentation Workflow can now be changed.
+Starting off with creating an automatically generated Segmentation, and manually correcting it using the
+**Merge** and **Cut** Tool.
+
+For more information, read here: :ref:`merging_segments`
 
 .. figure:: cutting_segments_02.jpg
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
 
+Importing Screenshots
+*********************
+Since VIAN uses the exact Frame Positions of Screenshots frequently, the import of Screenshots had been missing for quite a
+while due to the problems that arise from finding a Screenshot in a complete film.
+
+With 0.5.0 VIAN does now offer to import Screenshots into an existing Project. The Pixel-Size of the Screenshots does not
+have to match the Movie Size.
+
+
+Feature Plots
+*************
+The FilmColors Visualizer does now implement the **Feature Plot**, which might give useful insights about the
+distribution of Keywords in one film.
+
+.. figure:: feature_plot.jpg
+   :scale: 80 %
+   :align: center
+   :alt: map to buried treasure
+
+
+Sub Corpora
+***********
+It is now possible to create Sub Corpora in the FilmColors Visualizer, filter out the films which are not selected.
+You can find the CorpusManager in the FilmColors Visualizer in **Windows/CorpusManager**.
+
 
 Extensive List
 **************
-* Accuracy in Timeline increased, no borders should be visible now.
-* Increased stability during loading and closing of projects.
-* Moved the VLC player into it's own window, creating much more reliable Player Interface
-* Pipeline Import
-* Filemaker Data Import finished, the correct vocabularies have to be created though
-* Backups implemented
-* Cutting Segments (and Merging) implmeneted
-* Synchronous Save and Load of Stream
-* Subtitles can be chosen again
+* See Github
 
 Hot-Fixes
 *********

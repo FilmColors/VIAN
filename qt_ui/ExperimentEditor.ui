@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>723</width>
-    <height>685</height>
+    <width>969</width>
+    <height>806</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,16 +106,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="cB_ClassSegmentation">
+          <widget class="QCheckBox" name="cB_ClassScreenshots">
            <property name="text">
-            <string>Segmentation</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="cB_ClassAnnotationLayer">
-           <property name="text">
-            <string>Annotation Layer</string>
+            <string>Screenshots</string>
            </property>
           </widget>
          </item>

@@ -15,9 +15,65 @@ TB_KEYWORDS = "keywords"
 TB_MOVIES = "movies"
 
 
+class DBMovie():
+    def __init__(self, name, database_id, filemaker_id, year):
+        self.name = name
+        self.database_id = database_id
+        self.fm_id = filemaker_id
+
+        try:
+            self.year = int(year)
+        except:
+            self.year = 0
+
+
+    def __str__(self):
+        return self.database_id + " " + self.name + " " + str(self.year)
+
+
+class Corpus():
+    def __init__(self, name):
+        self.name = name
+        self.movies = []
+
+    def serialize(self):
+        fm_ids = []
+        for m in self.movies:
+            fm_ids.append(m.fm_id)
+        data = dict(
+            name = self.name,
+            fm_ids = fm_ids
+        )
+        return data
+
+    def deserialize(self, serialization, all_movies):
+        self.name = serialization['name']
+        for fm_id in serialization['fm_ids']:
+            for m in all_movies:
+                if m.fm_id == fm_id:
+                    self.movies.append(m)
+                    break
+        return self
+
+    def add_movie(self, movie: DBMovie):
+        if movie not in self.movies:
+            self.movies.append(movie)
+
+    def remove_movie(self, movie: DBMovie):
+        if movie in self.movies:
+            self.movies.remove(movie)
+
+    def to_fm_ids(self):
+        result = []
+        for m in self.movies:
+            result.append(m.fm_id)
+        return result
+
+
 class DBSegment():
-    def __init__(self, fm_id, segm_id):
+    def __init__(self, fm_id, segm_id, t_start = 0, t_end = 100):
         self.fm_id = fm_id
+
         try:
             self.segm_id = int(segm_id)
             self.variation = "a"
@@ -25,18 +81,13 @@ class DBSegment():
             variation = " ".join(re.findall("[a-zA-Z]+", segm_id))
             self.segm_id = int(segm_id.strip(variation))
             self.variation = variation.lower()
-
-
-class DBMovie():
-    def __init__(self, name, fm_id, movie_id_db, year):
-        self.name = name
-        self.fm_id = fm_id
-        self.movie_id_db = movie_id_db
-        self.year = year
-
-    def __str__(self):
-        return self.fm_id + " " + self.name + " " + self.year
-
+        try:
+            self.t_start = int(t_start)
+            self.t_end = int(t_end)
+        except:
+            self.t_start = 0
+            self.t_end = 0
+        
 
 class UniqueKeyword():
     def __init__(self, voc, word, class_name, gloss_id = 0):
@@ -76,6 +127,7 @@ class FilmColorsDatabase():
         self.segm_tables_filters = []
 
     def connect(self, path):
+
         self.path = path
         self.db = ds.connect(path)
 
@@ -131,8 +183,6 @@ class FilmColorsDatabase():
             self.db.commit()
         except Exception as e:
             print(e)
-            print(table_mapping[j])
-            raise e
             self.db.rollback()
 
     def import_keywords_csv(self, csv_file):
@@ -267,6 +317,15 @@ class FilmColorsDatabase():
     def get_stills(self, filters, type):
         return self.db[type].find(**filters)
 
+    def get_stills_of_movie(self, movie:DBMovie):
+
+        fg = [DBStill(rs, TB_STILL_FG) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_FG)]
+        bg = [DBStill(rs, TB_STILL_BG) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_BG)]
+        glob = [DBStill(rs, TB_STILL_GLOB) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_GLOB)]
+
+        return[fg, bg, glob]
+
+
     def get_tables(self):
         return self.db.tables
 
@@ -276,190 +335,6 @@ class FilmColorsDatabase():
     def get_stills_of_segment(self, voc, filters):
         pass
 
-
-# class FilmColorsDatabase():
-#     def __init__(self):
-#         self.path = None
-#         self.db = None
-#
-#         self.segm_tables = []
-#         self.segm_tables_filters = []
-#
-#     def connect(self, path):
-#         self.path = path
-#         self.db = ds.connect(path)
-#
-#     def clear(self, name = None):
-#         if name is None:
-#             for t in self.db.tables:
-#                 self.db[t].drop()
-#         else:
-#             if name == "segments":
-#                 for t in self.db.tables:
-#                     if t not in [TB_KEYWORDS, TB_STILL_GLOB, TB_STILL_BG, TB_STILL_FG]:
-#                         self.db[t].drop()
-#             else:
-#                 self.db[name].drop()
-#
-#     def import_segments_csv(self, csv_file, table_names):
-#         print("Importing: Segments")
-#         self.db.begin()
-#         try:
-#             with open(csv_file, "r") as f:
-#                 reader = csv.reader(f, delimiter=";")
-#                 keywords = []
-#                 for i, row in enumerate(reader):
-#                     if i % 100 == 0:
-#                         print(i)
-#                     if i == 0:
-#                         table_mapping = table_names
-#                         table_mapping_idx = []
-#                         print(table_mapping)
-#                         for z in range(len(table_names)):
-#                             table_mapping_idx.append([])
-#                         for j, r in enumerate(row):
-#                             for k, n in enumerate(table_mapping):
-#                                 if n in r:
-#                                     table_mapping_idx[k].append(j)
-#                                     break
-#                         for k in row:
-#                             keywords.append(k.split(":").pop())
-#
-#
-#                         # Printing all Tables and their Columns
-#                         for q in range(len(table_mapping)):
-#                             if "Global:Lit" in table_mapping[q]:
-#                                 print(table_mapping[q], np.array(keywords)[table_mapping_idx[q]].tolist())
-#
-#                     else:
-#                         for j, map in enumerate(table_mapping_idx):
-#                             # if "Global:Lit" in table_mapping[j]:
-#                             #     print(kword)
-#                             kword = np.array(keywords)[map].tolist()
-#                             values = np.array(row)[map].tolist()
-#                             segm = dict(zip(kword, values))
-#                             self.db[table_mapping[j]].insert(segm)
-#             self.db.commit()
-#         except Exception as e:
-#             print(e)
-#             print(table_mapping[j])
-#             raise e
-#             self.db.rollback()
-#
-#     def import_keywords_csv(self, csv_file):
-#         print("Importing: Keywords")
-#         table = self.db[TB_KEYWORDS]
-#         table.delete()
-#         self.db.begin()
-#
-#         keywords_list = []
-#         try:
-#             with open(csv_file, "r") as f:
-#                 reader = csv.reader(f, delimiter=";")
-#                 for i, row in enumerate(reader):
-#                     print(row)
-#                     if i == 0:
-#                         keywords = row
-#                         idx_voc = row.index("voc")
-#                         idx_class = row.index("class")
-#                         idx_word = row.index("word")
-#                         idx_gloss = row.index("gloss_id")
-#                     else:
-#                         d = dict(zip(keywords, row))
-#                         table.insert(d)
-#                         keywords_list.append(UniqueKeyword(row[idx_voc], row[idx_word], row[idx_class], row[idx_gloss]))
-#
-#             self.db.commit()
-#
-#             # Creating a Table for each Vocabulary-Class Tuple
-#             segm_table_names = []
-#             segm_table_words = []
-#             words = []
-#
-#             for keyw in keywords_list:
-#                 if keyw.class_name + ":" + keyw.voc not in segm_table_names:
-#                     segm_table_names.append(keyw.class_name + ":" + keyw.voc)
-#                     segm_table_words.append(words)
-#                     words = []
-#                     words.append(keyw.word)
-#                 else:
-#                     words.append(keyw.word)
-#
-#             for tpl in segm_table_names:
-#                 self.db.create_table(tpl)
-#                 self.segm_tables.append(tpl)
-#
-#             self.segm_tables_filters = words
-#
-#         except Exception as e:
-#             print(e)
-#             self.db.rollback()
-#             return None
-#
-#         return keywords_list, segm_table_names, segm_table_words
-#
-#     def import_stills_csv(self, csv_file, type = TB_STILL_GLOB):
-#         print("Importing Stills: " + type)
-#         table = self.db[type]
-#         self.db.begin()
-#
-#         try:
-#             with open(csv_file, "r") as f:
-#                 reader = csv.reader(f, delimiter=";")
-#                 for i, row in enumerate(reader):
-#                     if i == 0:
-#                         keywords = row
-#                     else:
-#                         d = dict(zip(keywords, row))
-#                         table.insert(d)
-#             self.db.commit()
-#         except Exception as e:
-#             self.db.rollback()
-#
-#     def get_filters(self):
-#         # Creating a Table for each Vocabulary-Class Tuple
-#         segm_table_names = []
-#         segm_table_words = []
-#         words = []
-#
-#         keywords = []
-#         for row in self.db[TB_KEYWORDS].all():
-#             keywords.append(UniqueKeyword(  voc=row['voc'],
-#                                             word = row['word'],
-#                                             class_name = row['class'],
-#                                             gloss_id = row['gloss_id']
-#                                             )
-#                             )
-#
-#         for keyw in keywords:
-#             if keyw.class_name + ":" + keyw.voc not in segm_table_names:
-#                 segm_table_names.append(keyw.class_name + ":" + keyw.voc)
-#                 segm_table_words.append(words)
-#                 words = []
-#                 words.append(keyw.word)
-#             else:
-#                 words.append(keyw.word)
-#
-#         return keywords, segm_table_names, segm_table_words
-#
-#     def get_segments(self, voc, filters):
-#         return self.db[voc].find(**filters)
-#
-#     def get_keywords(self, filters):
-#         return self.db[TB_KEYWORDS].find(**filters)
-#
-#     def get_stills(self, filters, type):
-#         return self.db[type].find(**filters)
-#
-#     def get_tables(self):
-#         return self.db.tables
-#
-#     def get_columns(self, table):
-#         return self.db[table].columns
-#
-#     def get_stills_of_segment(self, voc, filters):
-#         pass
-#
 
 if __name__ == '__main__':
     database = FilmColorsDatabase()

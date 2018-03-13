@@ -1,9 +1,9 @@
 from PyQt5.Qt import QApplication
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent, QWheelEvent, QKeyEvent, QCursor, QMouseEvent
+from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent, QWheelEvent, QKeyEvent, QCursor, QMouseEvent, QPixmap
 from PyQt5.QtWidgets import *
 
-from core.data.computation import pixmap_to_numpy
+from core.data.computation import pixmap_to_numpy, numpy_to_pixmap
 import cv2
 from PyQt5 import uic
 import os
@@ -119,8 +119,6 @@ class EDialogWidget(QDialog):
         if main_window is not None:
             self.overlay_was_visible = main_window.drawing_overlay.isVisible()
             self.main_window.set_overlay_visibility(False)
-
-
 
     def closeEvent(self, QCloseEvent):
         if self.main_window is not None:

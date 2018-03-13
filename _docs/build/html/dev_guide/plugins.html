@@ -119,9 +119,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/merging_segments.html">Merging Segments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/auto_segmentation.html">Auto Segmentation</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
@@ -129,6 +131,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/import_screenshots.html">Importing Screenshots</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
 </ul>
 </li>
@@ -136,6 +139,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/analyses/running_analyses.html">Running Analyses</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/analyses/viewing_analyses.html">Viewing Analyses</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../step_by_step/analyses/analyses_list.html">All Analyses of VIAN</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/player/player.html">VIAN’s Player</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/player/changing_subtitles.html">Changing Subtitles</a></li>
 </ul>
 </li>
 </ul>
@@ -157,12 +164,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../whats_new/latest.html">VIAN 0.4.5</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#analyses-visualization">Analyses - Visualization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#backups">Backups</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../whats_new/latest.html">VIAN 0.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
@@ -272,9 +281,10 @@ Access current Project by using GAPlugin.get_project().</p>
 
 <dl class="method">
 <dt id="core.data.plugin.GAPlugin.get_window">
-<code class="descname">get_window</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/plugin.html#GAPlugin.get_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.plugin.GAPlugin.get_window" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_window</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/plugin.html#GAPlugin.get_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.plugin.GAPlugin.get_window" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function should be overwritten shows your Plugin-Window. This can either be an EDockWidget or a WMainWindow. 
-(Specified accordingly to the GAplugin.windowtype)</p>
+(Specified accordingly to the GAplugin.windowtype)
+:param parent:</p>
 </dd></dl>
 
 </dd></dl>

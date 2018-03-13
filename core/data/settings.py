@@ -70,6 +70,7 @@ class UserSettings():
         if not os.path.isdir(self.DIR_TEMPLATES):
             os.mkdir(self.DIR_TEMPLATES)
 
+        self.AUTO_START_COLORMETRY = False
 
         # Annotation Viewer
         self.AUTO_COLLAPSE = True

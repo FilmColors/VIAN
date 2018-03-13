@@ -101,7 +101,8 @@ class MovieSource(Enum):
     VHS = 0,
     DVD = 1,
     BluRay = 2,
-    Web = 3
+    Web = 3,
+    Film = 4
 
 
 class AspectRatio(Enum):
@@ -112,6 +113,7 @@ class AspectRatio(Enum):
 class ImageType(Enum):
     JPG = 0
     PNG = 1
+
 
 class ProjectType(Enum):
     DEFAULT = 0

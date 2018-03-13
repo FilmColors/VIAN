@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 from core.visualization.image_plots import ImagePlotTime, ImagePlotPlane, ImagePlotCircular
+from core.visualization.feature_plot import GenericFeaturePlot, SegmentTuple, FeatureTuple
+
 import numpy as np
 
 class ColorDTWidget(QWidget):
@@ -43,16 +45,14 @@ class ColorDTWidget(QWidget):
             imgs = [s.pixmap for s in stills_bg]
             self.plot(self.bg_view, np.array(indices), np.array(sat), imgs)
 
-        self.fg_view.show()
-        self.bg_view.show()
-        self.gl_view.show()
-
+        self.bg_view.frame_default()
+        self.fg_view.frame_default()
+        self.gl_view.frame_default()
 
     def plot(self, view, time, channel, imgs, is_liminance=True, y_max = None):
         view.clear_view()
 
-        view.create_scene(len(imgs), 100, pixel_size_x=4000, pixel_size_y=1000)
-        print(np.amax(channel))
+        view.create_scene(len(imgs), 100, pixel_size_x=8000, pixel_size_y=3000)
 
         for i, img in enumerate(imgs):
             if img is None:
@@ -61,6 +61,8 @@ class ColorDTWidget(QWidget):
 
         view.update_grid()
         view.sort_images()
+
+
 
 
 class ColorSpacePlots(QWidget):
@@ -111,10 +113,6 @@ class ColorSpacePlots(QWidget):
         self.fg_view.frame_default()
         self.gl_view.frame_default()
 
-        self.fg_view.show()
-        self.bg_view.show()
-        self.gl_view.show()
-
 
 class ColorSpaceLPlanePlots(QWidget):
     def __init__(self, parent, visualizer):
@@ -164,6 +162,23 @@ class ColorSpaceLPlanePlots(QWidget):
         self.fg_view.frame_default()
         self.gl_view.frame_default()
 
-        self.fg_view.show()
-        self.bg_view.show()
-        self.gl_view.show()
+
+
+class FeaturePlot(QWidget):
+    def __init__(self, parent):
+        super(FeaturePlot, self).__init__(parent)
+        self.fg_view = GenericFeaturePlot(self)
+        self.setLayout(QVBoxLayout(self))
+        self.layout().addWidget(self.fg_view)
+
+
+    def update_view(self, features):
+        pass
+
+
+    def plot(self, segments, features):
+        self.fg_view.clear_view()
+        self.fg_view.create_timeline(segments)
+        for f in features:
+            self.fg_view.create_feature(f)
+

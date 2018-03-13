@@ -1,9 +1,11 @@
 from core.data.computation import *
 from core.data.containers import *
 from core.data.interfaces import IConcurrentJob
+from core.gui.ewidgetbase import EGraphicsView
 from core.gui.main_window import *
 from collections import namedtuple
 from PyQt5 import QtGui
+from core.analysis.colorimetry.computation import calculate_histogram
 from PyQt5.QtCore import QRect, Qt
 import json
 
@@ -404,3 +406,5 @@ class ScreenshotStreamingJob(IConcurrentJob):
 
     def modify_project(self, project, result, sign_progress = None):
        pass
+
+

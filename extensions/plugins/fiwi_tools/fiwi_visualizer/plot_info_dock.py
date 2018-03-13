@@ -15,6 +15,7 @@ FilterTuple = namedtuple("FilterTuple", ["table_name", "keyword_name"])
 class QueryDock(QDockWidget):
     def __init__(self, parent, visualizer):
         super(QueryDock, self).__init__(parent)
+
         self.visualizer = visualizer
 
         self.inner = QStackedWidget(self)

@@ -15,17 +15,21 @@ Visualization and MultimediaLab
 import os
 import platform
 import sys
+from time import sleep
 import cProfile
 import traceback
 from datetime import datetime
 from threading import Thread
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QSplashScreen
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 
 import core.vlc.vlc as vlc
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow
+
+
 
 
 
@@ -133,8 +137,11 @@ if __name__ == '__main__':
         app = QApplication(sys.argv)
         set_attributes(app)
         set_style_sheet(app, settings.THEME_PATH)
-        main = MainWindow()
+        splash = QSplashScreen(QPixmap("qt_ui/images/loading_screen.png"))
+        splash.show()
+        app.processEvents()
 
+        main = MainWindow(splash)
         sys.exit(app.exec_())
 
 

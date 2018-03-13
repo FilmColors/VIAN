@@ -36,6 +36,10 @@ class ImagePlot(QGraphicsView):
         self.font_size = 4
         self.title = title
 
+
+        self.left_button_pressed = False
+        self.last_mouse_pos = QPoint()
+
         self.luminances = []
 
         self.n_grid = 12
@@ -44,10 +48,17 @@ class ImagePlot(QGraphicsView):
         self.add_grid()
         self.create_title()
 
-        self.fitInView(   -range_x[0] * self.magnification / 12,
-                          -range_y[0] * self.magnification/ 12,
-                         (range_x[1] - range_x[0]) * self.magnification/ 12,
-                         (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
+        # self.tipp_label = self.scene().addText("Use F to Focus the complete Plot\nUse Ctrl/Cmd and Wheel to Zoom")
+        # self.tipp_label.setFlag(QGraphicsItem.ItemIgnoresTransformations)
+        # self.tipp_label.setDefaultTextColor(QColor(10,255,10))
+        # self.tipp_label.setPos(self.mapToScene(QPoint(0, self.height() - 50)))
+
+        self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        # self.fitInView(   -range_x[0] * self.magnification / 12,
+        #                   -range_y[0] * self.magnification/ 12,
+        #                  (range_x[1] - range_x[0]) * self.magnification/ 12,
+        #                  (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
+
 
     def add_image(self, x, y, img, convert = True, luminance = None):
         pass
@@ -80,6 +91,9 @@ class ImagePlot(QGraphicsView):
             self.ctrl_is_pressed = True
             event.ignore()
 
+        elif event.key() == Qt.Key_F:
+            self.frame_default()
+
         elif event.key() == Qt.Key_Plus:
             self.set_image_scale(0.1)
         elif event.key() == Qt.Key_Minus:
@@ -103,6 +117,17 @@ class ImagePlot(QGraphicsView):
             a_export.triggered.connect(self.export)
             menu.popup(self.mapToGlobal(event.pos()))
 
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent):
+        if self.ctrl_is_pressed:
+            delta = event.pos() - self.last_mouse_pos
+            self.set_magnification(delta.x(),delta.y())
+            self.last_mouse_pos = event.pos()
+
+
+    def set_magnification(self, x, y):
+        pass
+
+
     def scale_pos(self, scale_inc):
         for img in self.images:
             if isinstance(img, VIANPixmapGraphicsItem):
@@ -123,7 +148,7 @@ class ImagePlot(QGraphicsView):
             l_factor = 0.9
 
             viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
-            self.curr_scale = round(self.img_width / (viewport_size.x()), 4)
+            self.curr_scale = round(self.img_width / np.clip((viewport_size.x()), 0.001, None), 4)
 
             if event.angleDelta().y() > 0.0 and self.curr_scale < 100:
                 self.scale(h_factor, h_factor)
@@ -143,14 +168,21 @@ class ImagePlot(QGraphicsView):
         else:
             super(QGraphicsView, self).wheelEvent(event)
 
+        # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
+
+
     def clear_view(self):
         self.scene().clear()
         self.images.clear()
         self.luminances.clear()
 
     def frame_default(self):
+        # self.tipp_label.setPos(QPointF())
         self.setSceneRect(self.scene().itemsBoundingRect())
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+
+        # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
+
 
     def export(self, return_image = False, width = 4096, height = 4096):
         """
@@ -223,10 +255,7 @@ class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
 
-        # self.fitInView(-range_x[0] * self.magnification / 14,
-        #                -range_y[0] * self.magnification / 14,
-        #                (range_x[1] - range_x[0]) * self.magnification / 14,
-        #                (range_y[1] - range_y[0]) * self.magnification / 14, Qt.KeepAspectRatio)
+
 
     def add_image(self, x, y, img, convert = True, luminance = None, to_float = False):
         try:
@@ -239,9 +268,11 @@ class ImagePlotCircular(ImagePlot):
             self.scene().addItem(itm)
 
             if to_float:
-                itm.setPos((x -128) * self.magnification, (y -128) * self.magnification)
+                itm.setPos(np.nan_to_num((x -128) * self.magnification),np.nan_to_num((y -128) * self.magnification))
             else:
-                itm.setPos(x * self.magnification, y * self.magnification)
+                itm.setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(y * self.magnification))
+
+
 
             self.images.append(itm)
 
@@ -249,7 +280,7 @@ class ImagePlotCircular(ImagePlot):
                 self.luminances.append([luminance, itm])
 
             itm.show()
-            self.setSceneRect(QRectF())
+
         except Exception as e:
             print(e)
 
@@ -292,7 +323,7 @@ class ImagePlotPlane(ImagePlot):
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=None, with_alpha=True))
         self.scene().addItem(itm)
 
-        itm.setPos(x * self.magnification, self.range_y[1] * self.magnification - y * self.magnification)
+        itm.setPos(np.nan_to_num(x * self.magnification),np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification))
         self.images.append(itm)
 
         self.luminances.append([y, itm])
@@ -441,6 +472,7 @@ class ImagePlotTime(ImagePlot):
         super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
         self.font_size = 60
 
+
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
         self.pixel_size_y = pixel_size_y
@@ -450,7 +482,6 @@ class ImagePlotTime(ImagePlot):
         self.base_line = y_max
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
-        print("Scene Rect:", self.sceneRect())
 
 
     def add_image(self, x, y, img, convert=True):
@@ -462,9 +493,8 @@ class ImagePlotTime(ImagePlot):
                                          hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
         self.scene().addItem(itm)
 
-        itm.setPos(x * self.x_scale, (self.base_line * self.y_scale) - (y * self.y_scale))
+        itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
-        print(x * self.x_scale, (self.base_line * self.y_scale) - (y * self.y_scale))
         self.images.append(itm)
 
         if self.x_end < x * self.x_scale:
@@ -487,21 +517,11 @@ class ImagePlotTime(ImagePlot):
         font.setPointSize(self.font_size)
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
-        rect = self.scene().addRect(-self.border, - self.border, self.x_end + (2 * self.border), self.base_line * self.y_scale + (4 * self.border), QColor(100,200,30,200))
-        for y in range(int(self.base_line)):
-            if y % 10 == 0:
-                lbl = self.scene().addText(str(((self.base_line - (y / self.y_scale)) / self.y_scale)).rjust(4), font)
-                lbl.setDefaultTextColor(QColor(200,200,200,200))
-                lbl.setPos(-100, y)
-                self.labels.append(lbl)
 
-        # self.setSceneRect(rect.boundingRect())
-        #
-        # self.fitInView(rect, Qt.KeepAspectRatio)
+        self.setSceneRect(self.scene().itemsBoundingRect())
 
     def update_grid(self):
         self.lines = []
         self.add_grid()
-
 
 

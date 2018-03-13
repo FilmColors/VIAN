@@ -29,7 +29,10 @@ BARCODE_MODE_HORIZONTAL = 1
 
 class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
-        super(BarcodeAnalysisJob, self).__init__("Barcode", [SEGMENTATION], author="Gaudenz Halter", version="1.0.0", multiple_result=True)
+        super(BarcodeAnalysisJob, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION],
+                                                 author="Gaudenz Halter",
+                                                 version="1.0.0",
+                                                 multiple_result=True)
 
     def prepare(self, project: VIANProject, targets: List[Segmentation], parameters, fps):
         """
@@ -46,13 +49,21 @@ class BarcodeAnalysisJob(IAnalysisJob):
         for tgt in targets:
             name = tgt.get_name()
             # Collecting all Segment start and end point in Frame-Indices
+
             segments = []
-            for segm in tgt.segments:
-                start = ms_to_frames(segm.get_start(), fps)
-                end = ms_to_frames(segm.get_end(), fps)
+            if tgt.get_type() == SEGMENTATION:
+                for segm in tgt.segments:
+                    start = ms_to_frames(segm.get_start(), fps)
+                    end = ms_to_frames(segm.get_end(), fps)
 
-                segments.append([start, end])
+                    segments.append([start, end])
 
+            else:
+                duration = project.movie_descriptor.duration
+                slice_size = parameters['slize_size']
+                for i in range(int(duration / slice_size)):
+                    segments.append([ms_to_frames(i, fps) * slice_size,
+                                     ms_to_frames(i, fps) * slice_size + slice_size])
             args.append([segments, parameters, movie_path, name])
 
         return args
@@ -90,14 +101,15 @@ class BarcodeAnalysisJob(IAnalysisJob):
 
             video_capture.set(cv2.CAP_PROP_POS_FRAMES, start)
             segm_colors = []
-
+            print(idx, len(segments), duration)
             # Looping over all Frames of the Segment and
             # Calculate the Average Color
             for i in range(duration):
-                if i / resolution != 0:
+                if i % resolution == 0:
+                    video_capture.set(cv2.CAP_PROP_POS_FRAMES, i + start)
+                    ret, frame = video_capture.read()
+                else:
                     continue
-
-                ret, frame = video_capture.read()
 
                 if frame is None:
                     break
@@ -105,7 +117,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
                 # segm_colors[i] = np.mean(frame, axis=(0,1))
                 segm_colors.append(np.mean(frame, axis=(0,1)))
 
-            barcode[idx] = np.mean(np.array(segm_colors), axis=(0))
+            barcode[idx] = np.mean(np.array(segm_colors), axis=0)
 
         # Creating an IAnalysisJobAnalysis Object that will be handed back to the Main-Thread
         analysis = IAnalysisJobAnalysis(name="Barcode_" + name,
@@ -122,8 +134,8 @@ class BarcodeAnalysisJob(IAnalysisJob):
         Since this function is called within the Main-Thread, we can modify our project here.
         """
         # We want to create an Image Annotation with the Barcode in the upper part of the Display
-        barcode_colors = result.data[0]
-        image_width = result.data[1]
+        barcode_colors = result.data["barcode"]
+        image_width = result.data["width"]
 
         if result.parameters['interpolation'] == "Cubic":
             interpolation = cv2.INTER_CUBIC
@@ -135,7 +147,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
 
         # Storing the Image to Disc
         dir = project.results_dir
-        print(dir, result, result.get_name())
+
         path  = dir + "/" + result.get_name() + ".png"
         cv2.imwrite(path, image)
 
@@ -155,9 +167,8 @@ class BarcodeAnalysisJob(IAnalysisJob):
         else:
             interpolation = cv2.INTER_LINEAR
 
-        image = self.barcode_to_image(analysis.data[0], 400, image_height=50, interpolation=interpolation)
+        image = self.barcode_to_image(analysis.data['barcode'], 400, image_height=50, interpolation=interpolation)
         barcode_pixm = numpy_to_pixmap(image)
-        print(barcode_pixm.height(), barcode_pixm.width())
         view = QGraphicsView(QGraphicsScene())
         view.scene().addPixmap(barcode_pixm)
         return view
@@ -167,12 +178,10 @@ class BarcodeAnalysisJob(IAnalysisJob):
         This function should show the complete Visualization
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(analysis.results['barcode'])
-        return widget
+        widget.set_image(numpy_to_pixmap(self.barcode_to_image(analysis.data['barcode'])))
+        return [VisualizationTab(widget=widget,name="Barcode", use_filter=False,controls=None)]
 
-
-
-    def barcode_to_image(self, barcode_colors, image_width, image_height, interpolation):
+    def barcode_to_image(self, barcode_colors, image_width = 4096, image_height=1024, interpolation=cv2.INTER_CUBIC):
 
         # Creating an Image from the Color Array
         image = np.zeros(shape=(image_height, barcode_colors.shape[0], 3), dtype=np.uint8)
@@ -210,20 +219,31 @@ class BarcodeParameterWidget(ParameterWidget):
         l2 = QHBoxLayout(self)
         self.spin_frame = QSpinBox(self)
         self.spin_frame.setMinimum(1)
-        self.spin_frame.setMaximum(100)
-        self.spin_frame.setValue(1)
+        self.spin_frame.setMaximum(10000)
+        self.spin_frame.setValue(1000)
         l2.addWidget(QLabel("Frame Resolution".ljust(25)))
         l2.addWidget(self.spin_frame)
+
+        l3 = QHBoxLayout(self)
+        self.spin_slice = QSpinBox(self)
+        self.spin_slice.setMinimum(1)
+        self.spin_slice.setMaximum(10000)
+        self.spin_slice.setValue(1000)
+        l3.addWidget(QLabel("Slice Width".ljust(25)))
+        l3.addWidget(self.spin_slice)
 
 
         self.layout().addItem(l1)
         self.layout().addItem(l2)
+        self.layout().addItem(l3)
 
     def get_parameters(self):
         resolution = self.spin_frame.value()
         interpolation = self.interpolation.currentText()
+        slize_size = self.spin_slice.value()
         parameters = dict(
             resolution=resolution,
             interpolation=interpolation,
+            slize_size = slize_size
         )
         return parameters

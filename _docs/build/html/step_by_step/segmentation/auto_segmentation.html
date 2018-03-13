@@ -1,0 +1,418 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Auto Segmentation &mdash; VIAN 0.4.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Segmentation" href="segmentation.html"/>
+        <link rel="next" title="Annotations" href="../annotation/annotation.html"/>
+        <link rel="prev" title="Exporting Segmentations" href="exporting_segmentations.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> VIAN
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../UserGuide.html">User’s Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../user_interface/user_interface.html">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/inspector.html">Inspector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/outliner.html">Outliner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/perspectives.html">Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#player-perspective">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#id1">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#screenshots-perspective">Screenshots Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#node-scripting-perspective">Node Scripting Perspective</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/timeline.html">Timeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../step_by_step.html">Step-by-Step Guides</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../project_management/project_management.html">Vian Projects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/create_project.html">Creating new Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/project_templates.html">Project Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../project_management/backups.html">Backups</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="segmentation.html">Segmentation</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="create_segmentation.html">Creating Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="create_segment.html">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="merging_segments.html">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="changing_main_segmentation.html">Changing the Main Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="locking_segmentations.html">Locking Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Auto Segmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../annotation/annotation.html">Annotations</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../screenshots/screenshots.html">Screenshots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../screenshots/import_screenshots.html">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../screenshots/export_screenshots.html">Exporting Screenshots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../analyses/analyses.html">Analyses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analyses/running_analyses.html">Running Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analyses/viewing_analyses.html">Viewing Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analyses/colormetry.html">Colormetry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analyses/analyses_list.html">All Analyses of VIAN</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../player/player.html">VIAN’s Player</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../player/changing_subtitles.html">Changing Subtitles</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_guide/analyses.html">IAnalysisJob</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/analyses.html#functionality">Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/analyses.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_guide/nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_guide/plugins.html">Plug-Ins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/latest.html">VIAN 0.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#analyses-visualization">Analyses - Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#backups">Backups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#extensive-list">Extensive List</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">VIAN</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../UserGuide.html">User’s Guide</a> &raquo;</li>
+        
+          <li><a href="../step_by_step.html">Step-by-Step Guides</a> &raquo;</li>
+        
+          <li><a href="segmentation.html">Segmentation</a> &raquo;</li>
+        
+      <li>Auto Segmentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/step_by_step/segmentation/auto_segmentation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="auto-segmentation">
+<span id="id1"></span><h1>Auto Segmentation<a class="headerlink" href="#auto-segmentation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Colormetry</strong>
+Auto Segmentation depends on the <strong>Colormetry</strong> Analysis, which has to be run and finished before
+the Auto Segmentation can be used. The Auto Segmentation Dialog will inform you about this and gives
+you the Option to run it.</p>
+</div>
+<p>VIAN allows you to automatically create Segmentations based on either even distribution or Color-Histograms.
+To create a Segmentation automatically, do the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Go to <strong>Tools/Auto Segmentation</strong>.</li>
+<li>A new <strong>Auto Segmentation Dialog</strong> appears.</li>
+<li><strong>Fill out</strong> the Form.</li>
+<li>Press <strong>Run</strong> to start the computation.</li>
+<li>If you have chosen Color-Histogram a batch-process starts running and a new Dialog will open as soon as VIAN has finished computing.</li>
+<li>In the <strong>Auto Segmentation Result</strong> Dialog, use the slider to check the different Segmentations.</li>
+<li>Use <strong>Apply Segmentation</strong> to create a Segmentation, the Dialog will stay open, so you can create several Segmentations.</li>
+</ol>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p><strong>Options</strong></p>
+<ol class="last arabic">
+<li><p class="first"><strong>General</strong></p>
+<ul class="simple">
+<li><strong>Mode</strong> Select the Method to create the Segmentation.</li>
+</ul>
+</li>
+<li><p class="first"><strong>Mode: Even Distribution</strong></p>
+<ul class="simple">
+<li><strong>Mode</strong> This can either be <strong>Number of Segments</strong>, you then have to fill in the <strong>n-Segments</strong></li>
+</ul>
+<p>Parameter with the number of Segments you want to create, or <strong>Segment Length</strong>. In the later case you have to set
+the <strong>Segment Length</strong> Parameter to the Length of each Segment in <em>Frames</em>.</p>
+</li>
+<li><p class="first"><strong>Mode: Color Histogram</strong></p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt><strong>Display every n-th Frame</strong> is only a cosmetic Parameter, it defines how many frames should be displayed as preview in the Result Dialog</dt>
+<dd>and will only affect the performance of the Result Dialog. As such VIANs Colormetry is calculated every 30th Frame. Setting this value to 10
+would show every 300 Frame of a movie in the Result Dialog.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>Cluster Range</strong> controls how many different clusterings should be produced to later select from. While one can calculate a huge number of clusterings.</dt>
+<dd>it is good practice to give a “Good Guess” on how many Segments one would expect, reducing the computation time.
+i.e. Taking 30 to 60 Clusters gives results later in Segmentations with 30 up to 60 Segments from which can be chosen.</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../../_images/auto_segmentation_even.jpg"><img alt="map to buried treasure" src="../../_images/auto_segmentation_even.jpg" style="width: 500.8px; height: 207.20000000000002px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../../_images/auto_segmentation_hist.jpg"><img alt="map to buried treasure" src="../../_images/auto_segmentation_hist.jpg" style="width: 499.20000000000005px; height: 209.60000000000002px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../../_images/auto_segmentation_result.jpg"><img alt="map to buried treasure" src="../../_images/auto_segmentation_result.jpg" style="width: 839.2px; height: 689.6px;" /></a>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="../project_management/create_project.html#new-project"><span class="std std-ref">Creating new Project</span></a></li>
+<li><a class="reference internal" href="../project_management/import_elan_projects.html#import-elan-projects"><span class="std std-ref">Importing ELAN Projects</span></a></li>
+<li><a class="reference internal" href="../project_management/changing_movie_paths.html#changing-movie-paths"><span class="std std-ref">Changing Movie Paths</span></a></li>
+</ul>
+</div>
+<ul class="simple">
+<li><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../annotation/annotation.html" class="btn btn-neutral float-right" title="Annotations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="exporting_segmentations.html" class="btn btn-neutral" title="Exporting Segmentations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Gaudenz Halter.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.4.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

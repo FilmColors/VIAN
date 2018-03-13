@@ -33,6 +33,13 @@ class TimelineContainer(EDockWidget):
         self.menu_tools = self.inner.menuBar().addMenu("Tools")
         self.a_cut_segment = self.menu_tools.addAction("Cut Segments")
         self.a_cut_segment.triggered.connect(self.on_cut_tools)
+        self.a_merge_segment = self.menu_tools.addAction("Merge Segments")
+        self.a_merge_segment.triggered.connect(self.on_merge_tool)
+        self.menu_tools.addSeparator()
+        self.a_tools_toolbar = self.menu_tools.addAction("Show Toolbar")
+        self.a_tools_toolbar.triggered.connect(self.show_toolbar)
+        self.a_tools_toolbar.setCheckable(True)
+        self.a_tools_toolbar.setChecked(True)
         # self.a_merge_segments = self.menu_tools.addAction("Merge Segments")
         # self.a_merge_segments.triggered.connect(self.on_cut_tools)
 
@@ -80,7 +87,8 @@ class TimelineContainer(EDockWidget):
         self.a_show_name.triggered.connect(self.update_settings)
         self.a_show_text.triggered.connect(self.update_settings)
 
-
+        self.toolbar = TimelineToolbar(self, self.timeline)
+        self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
 
 
         # self.inner.addToolBar(self.toolbar)
@@ -91,6 +99,21 @@ class TimelineContainer(EDockWidget):
 
     def on_cut_tools(self):
         self.timeline.activate_cutting_tool()
+
+    def on_merge_tool(self):
+        self.timeline.activate_merge_tool()
+
+    def show_toolbar(self):
+        if self.a_tools_toolbar.isChecked():
+            if self.toolbar is None:
+                self.toolbar = TimelineToolbar(self, self.timeline)
+                self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
+
+            else:
+                self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
+            self.toolbar.show()
+        else:
+            self.toolbar.hide()
 
 
     def update_settings(self):
@@ -107,6 +130,21 @@ class TimelineContainer(EDockWidget):
 
         self.timeline.on_timeline_settings_update()
 
+
+class TimelineToolbar(QToolBar):
+    def __init__(self, parent, timeline):
+        super(TimelineToolbar, self).__init__(parent)
+        self.timeline = timeline
+
+        self.a_move = self.addAction(create_icon("qt_ui/icons/icon_move.png"), "")
+        self.a_move.triggered.connect(self.timeline.activate_move_tool)
+        self.a_move.setToolTip("Move Tool")
+        self.a_cut = self.addAction(create_icon("qt_ui/icons/icon_cut.png"),"Cut")
+        self.a_cut.triggered.connect(self.timeline.activate_cutting_tool)
+        self.a_cut.setToolTip("Cut Tool")
+        self.a_merge = self.addAction(create_icon("qt_ui/icons/icon_merge.png"),"Merge")
+        self.a_merge.triggered.connect(self.timeline.activate_merge_tool)
+        self.a_merge.setToolTip("Merge Tool")
 
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
@@ -127,9 +165,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.is_scaling = False
         self.is_selecting = False
-        self.is_fast_selecting = False
+        self.shift_pressed = False
         self.is_marquee_selecting = False
         self.is_cutting = False
+        self.is_merging = False
+
 
         self.item_segments = []
         self.item_screenshots = []
@@ -157,6 +197,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.interval_segmentation_marker = None
 
         self.selector_context = None
+        self.selector = None
 
         self.lay_controls = QtWidgets.QVBoxLayout()
         self.lay_bars = QtWidgets.QVBoxLayout()
@@ -179,6 +220,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.show_time_indicator = True
 
         self.cutting_indicator = None
+        self.merging_indicator = None
+        self.merge_containers = None
 
         self.update_time_bar()
         self.update_ui()
@@ -330,6 +373,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def add_bar(self):
         b = TimelineBar(self.frame_Bars, self)
         return b
+
+    def set_colormetry_progress(self, percentage):
+        self.time_bar.colormetry_progress = percentage
+        self.time_bar.update()
 
     def get_current_bar(self):
         for itm in self.item_segments:
@@ -544,7 +591,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.scrollArea.verticalScrollBar().setEnabled(False)
             self.main_window.keyPressEvent(QKeyEvent)
         elif QKeyEvent.key() == Qt.Key_Shift:
-            self.is_fast_selecting = True
+            self.shift_pressed = True
         else:
             QKeyEvent.ignore()
 
@@ -554,7 +601,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.scrollArea.verticalScrollBar().setEnabled(True)
             self.main_window.keyReleaseEvent(QKeyEvent)
         elif QKeyEvent.key() == Qt.Key_Shift:
-            self.is_fast_selecting = False
+            self.shift_pressed = False
         else:
             QKeyEvent.ignore()
 
@@ -599,24 +646,107 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.zoom_timeline(QPoint(0,0), abs_scale=scale, force = True)
         self.scrollArea.horizontalScrollBar().setValue(t_start / self.scale - (self.scale/2))
 
+    def activate_move_tool(self):
+        self.abort_cutting()
+        self.abort_merge_tool()
+
+    #region CuttingTool
     def activate_cutting_tool(self):
+        if self.is_cutting:
+            self.abort_cutting()
+        if self.is_merging:
+            self.abort_merge_tool()
+
+        self.time_scrubber.hide()
         self.is_cutting = True
         self.cutting_indicator = TimelineTimemark(self.frame_Bars, QColor(200,20,5,200))
         self.cutting_indicator.resize(1, self.height())
 
     def move_cutting_tool(self, pos):
         self.cutting_indicator.move(pos)
+        self.main_window.player.set_media_time(pos.x() * self.scale)
         self.cutting_indicator.raise_()
 
     def finish_cutting_tool(self, pos, segm_container):
         segm_container.segmentation.cut_segment(segm_container, pos.x() * self.scale)
-        self.is_cutting = False
-        self.cutting_indicator.deleteLater()
-        self.cutting_indicator = None
+        if not self.shift_pressed:
+            self.is_cutting = False
+            self.cutting_indicator.deleteLater()
+            self.cutting_indicator = None
+            self.time_scrubber.show()
+
+    def abort_cutting(self):
+        self.time_scrubber.show()
+        if self.is_cutting:
+            self.is_cutting = False
+            self.cutting_indicator.deleteLater()
+            self.cutting_indicator = None
+
+    #endregion
+
+    #region MergingTool
+    def activate_merge_tool(self):
+        if self.is_merging:
+            self.abort_merge_tool()
+        if self.is_cutting:
+            self.abort_cutting()
+
+        self.time_scrubber.hide()
+        self.is_merging = True
+        self.merging_indicator = TimelineTimemark(self.frame_Bars, QColor(50, 220, 50, 200))
+        self.merging_indicator.resize(5, self.height())
+
+    def move_merge_tool(self, pos):
+        self.merging_indicator.move(pos)
+        self.main_window.player.set_media_time(pos.x() * self.scale)
+        self.merging_indicator.raise_()
+
+    def set_merge_containers(self, a = None, b = None):
+        if self.merge_containers is not None and len(self.merge_containers) > 0:
+            if self.merge_containers[0] is not None:
+                self.merge_containers[0].merge_highlighted = False
+                self.merge_containers[0].update()
+            if self.merge_containers[1] is not None:
+                self.merge_containers[1].merge_highlighted = False
+                self.merge_containers[1].update()
+
+        if a is not None and b is not None:
+            self.merge_containers = [a, b]
+            self.merge_containers[0].merge_highlighted = True
+            self.merge_containers[1].merge_highlighted = True
+            self.merge_containers[0].update()
+            self.merge_containers[1].update()
+        else:
+            self.merge_containers = None
+
+    def finish_merge_tool(self):
+
+        if self.merge_containers is not None:
+            segmentation = self.merge_containers[0].item.segmentation
+            segmentation.merge_segments(self.merge_containers[0].item, self.merge_containers[1].item)
+            self.set_merge_containers()
+
+        if not self.shift_pressed:
+            self.time_scrubber.show()
+            self.is_merging = False
+            self.merging_indicator.deleteLater()
+
+            self.merging_indicator = None
+
+    def abort_merge_tool(self):
+        self.time_scrubber.show()
+        if self.is_merging:
+            self.is_merging = False
+            self.merging_indicator.deleteLater()
+            self.set_merge_containers()
+            self.merging_indicator = None
+
+
+    #endregion
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
-            if self.is_fast_selecting:
+            if self.shift_pressed:
                 if self.selector is None:
                     self.start_selector(self.time_scrubber.pos())
                     self.move_selector(QMouseEvent.pos())
@@ -624,7 +754,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                     self.move_selector(QMouseEvent.pos())
 
         if QMouseEvent.button() == Qt.RightButton:
-            self.start_selector(QMouseEvent.pos())
+            if self.is_cutting:
+                self.abort_cutting()
+            else:
+                self.start_selector(QMouseEvent.pos())
 
             # self.delta = QMouseEvent.pos() - self.frame_Bars.pos()
             # pos = QMouseEvent.pos() - self.frame_Bars.pos()
@@ -632,11 +765,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             # self.is_selecting = True
 
     def mouseReleaseEvent(self, QMouseEvent):
-        if self.is_selecting and not self.is_fast_selecting:
+        if self.is_selecting and not self.shift_pressed:
             self.end_selector()
 
     def mouseMoveEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.RightButton or self.is_fast_selecting:
+        if QMouseEvent.buttons() & Qt.RightButton or self.shift_pressed:
             pos = self.round_to_grid(QMouseEvent.pos() - self.frame_Bars.pos())
             self.move_selector(pos)
 
@@ -843,6 +976,7 @@ class TimelineBar(QtWidgets.QFrame):
 
     def add_slice(self, item):
         slice = TimebarSlice(self, item, self.timeline)
+        print(item.get_start(), item.get_end())
         slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
         slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
         self.slices.append(slice)
@@ -908,8 +1042,9 @@ class TimelineBar(QtWidgets.QFrame):
 
 
 class TimebarSlice(QtWidgets.QWidget):
-    def __init__(self, parent, item, timeline):
+    def __init__(self, parent:TimelineBar, item, timeline):
         super(TimebarSlice, self).__init__(parent)
+        self.bar = parent
         self.locked = False
         self.timeline = timeline
         self.item = item
@@ -919,6 +1054,7 @@ class TimebarSlice(QtWidgets.QWidget):
         self.border_width = 10
         self.offset = QtCore.QPoint(0,0)
         self.text = ""
+        self.curr_pos = self.pos()
 
         self.update_text()
 
@@ -934,6 +1070,8 @@ class TimebarSlice(QtWidgets.QWidget):
         self.is_hovered = False
         self.is_selected = False
 
+        self.merge_highlighted = False
+
         self.min_possible = 0
         self.max_possible = self.timeline.duration * self.timeline.scale
 
@@ -946,13 +1084,24 @@ class TimebarSlice(QtWidgets.QWidget):
             col = (self.color[0], self.color[1], self.color[2], 20)
 
         else:
-            if self.is_hovered:
-                col = (self.color[0], self.color[1], self.color[2], 80)
+            if self.merge_highlighted:
+                col = (255, 160, 47, 200)
+
+            elif self.is_hovered:
+                if self.timeline.is_cutting:
+                    col = (180,0,0, 200)
+                else:
+                    col = (self.color[0], self.color[1], self.color[2], 80)
+
+            elif self.is_selected:
+                col = (self.color[0], self.color[1], self.color[2], 100)
+
+
+
             else:
                 col = (self.color[0], self.color[1], self.color[2], 50)
 
-            if self.is_selected:
-                col = (self.color[0], self.color[1], self.color[2], 100)
+
 
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
@@ -978,6 +1127,7 @@ class TimebarSlice(QtWidgets.QWidget):
         qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
         qp.end()
 
+
     def update_text(self):
         self.text = ""
         if self.item.get_type() == SEGMENT:
@@ -999,30 +1149,39 @@ class TimebarSlice(QtWidgets.QWidget):
             if QMouseEvent.buttons() & Qt.LeftButton:
                 if self.timeline.is_cutting:
                     return
-                # Inhibiting Overlap by finding the surrounding Slices and get their boundaries
-                if self.timeline.inhibit_overlap:
-                    previous = self.parent().get_previous_slice(self)
-                    next = self.parent().get_next_slice(self)
 
-                    if previous is not None:
-                        self.min_possible = previous.pos().x() + previous.width()
-                    else:
-                        self.min_possible = 0
-                    if next is not None:
-                        self.max_possible = next.pos().x()
-                    else:
-                        self.max_possible = self.timeline.duration * self.timeline.scale
+                elif self.timeline.is_merging:
+                    self.timeline.finish_merge_tool()
 
+                else:
+                    # Inhibiting Overlap by finding the surrounding Slices and get their boundaries
+                    if self.timeline.inhibit_overlap:
+                        previous = self.parent().get_previous_slice(self)
+                        next = self.parent().get_next_slice(self)
 
-                self.is_selected = True
-                self.timeline.project().set_selected(None, self.item)
-                self.offset = self.mapToParent(QMouseEvent.pos())
-                self.curr_size = self.size()
-                self.curr_pos = self.pos()
+                        if previous is not None:
+                            self.min_possible = previous.pos().x() + previous.width()
+                        else:
+                            self.min_possible = 0
+                        if next is not None:
+                            self.max_possible = next.pos().x()
+                        else:
+                            self.max_possible = self.timeline.duration * self.timeline.scale
+
+                    self.is_selected = True
+                    self.timeline.project().set_selected(None, self.item)
+                    self.offset = self.mapToParent(QMouseEvent.pos())
+                    self.curr_size = self.size()
+                    self.curr_pos = self.pos()
                 self.update()
 
             if QMouseEvent.buttons() & Qt.RightButton:
-                open_context_menu(self.timeline.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
+                if self.timeline.is_cutting:
+                    self.timeline.abort_cutting()
+                elif self.timeline.is_merging:
+                    self.timeline.abort_merge_tool()
+                else:
+                    open_context_menu(self.timeline.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
 
     def mouseReleaseEvent(self, QMouseEvent):
         # if the the movement is smaller than the grid-size ignore it
@@ -1064,6 +1223,13 @@ class TimebarSlice(QtWidgets.QWidget):
         if not self.locked:
             if self.timeline.is_cutting:
                 self.timeline.move_cutting_tool(QPoint(self.mapToParent(QMouseEvent.pos()).x(), 0))
+            elif self.timeline.is_merging:
+                if QMouseEvent.pos().x() < self.width() / 2:
+                    self.timeline.set_merge_containers(self.bar.get_previous_slice(self), self)
+                else:
+                    self.timeline.set_merge_containers(self, self.bar.get_next_slice(self))
+
+                self.timeline.move_merge_tool(QPoint(self.mapToParent(QMouseEvent.pos()).x(), 0))
 
             elif QMouseEvent.buttons() & Qt.LeftButton:
                 pos = self.mapToParent(QMouseEvent.pos())
@@ -1378,6 +1544,8 @@ class TimebarDrawing(QtWidgets.QWidget):
         self.background_color = QtGui.QColor(50,50,50,230)
         self.scale_image = None
 
+        self.colormetry_progress = 0
+
         self.is_hovered = False
         self.was_playing = False
         self.a = 50
@@ -1495,6 +1663,14 @@ class TimebarDrawing(QtWidgets.QWidget):
                     b = QtCore.QPoint(pos, 30)
                     qp.drawLine(a, b)
 
+        # Draw the colormetry progress Bar
+        if  0.0 < self.colormetry_progress:
+            pen.setColor(QtGui.QColor(35,165,103))
+            pen.setWidth(3)
+            t_progress = (self.timeline.duration * self.colormetry_progress)
+            qp.setPen(pen)
+            qp.drawLine(QPoint(0, self.height() - 2),
+                        QPoint((t_progress - (self.pos().x()) * self.timeline.scale) /self.timeline.scale, self.height() - 2))
         qp.end()
 
     def mouseReleaseEvent(self, QMouseEvent):
@@ -1502,7 +1678,7 @@ class TimebarDrawing(QtWidgets.QWidget):
         if QMouseEvent.button() == Qt.LeftButton:
             if self.was_playing:
                 self.timeline.main_window.player.play()
-            if self.timeline.is_fast_selecting and self.timeline.selector is not None:
+            if self.timeline.shift_pressed and self.timeline.selector is not None:
                 self.timeline.end_selector()
 
 
@@ -1523,7 +1699,7 @@ class TimebarDrawing(QtWidgets.QWidget):
             # self.timeline.time_scrubber.move(pos, 0)
             # self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             self.timeline.move_scrubber(pos)
-            if self.timeline.is_fast_selecting:
+            if self.timeline.shift_pressed:
                 self.timeline.start_selector(old_pos)
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
 
@@ -1537,7 +1713,7 @@ class TimebarDrawing(QtWidgets.QWidget):
             self.timeline.move_scrubber(pos)
             # self.timeline.time_scrubber.move(pos, 0)
             # self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
-            if self.timeline.is_fast_selecting and self.timeline.selector is not None:
+            if self.timeline.shift_pressed and self.timeline.selector is not None:
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
 
         if QMouseEvent.buttons() & Qt.RightButton:

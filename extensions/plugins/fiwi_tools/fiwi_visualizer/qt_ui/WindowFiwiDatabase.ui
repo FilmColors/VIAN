@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>938</width>
-    <height>758</height>
+    <width>990</width>
+    <height>738</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>938</width>
+     <width>990</width>
      <height>21</height>
     </rect>
    </property>
@@ -30,11 +30,14 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen_Database"/>
+    <addaction name="actionSave_Corpora"/>
+    <addaction name="actionLoad_Corpora"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
      <string>Windows</string>
     </property>
+    <addaction name="actionCorpus_Manager"/>
     <addaction name="actionQuery_Window"/>
     <addaction name="actionFilm_List"/>
    </widget>
@@ -55,6 +58,21 @@
   <action name="actionFilm_List">
    <property name="text">
     <string>Film List</string>
+   </property>
+  </action>
+  <action name="actionCorpus_Manager">
+   <property name="text">
+    <string>Corpus Manager</string>
+   </property>
+  </action>
+  <action name="actionSave_Corpora">
+   <property name="text">
+    <string>Save Corpora</string>
+   </property>
+  </action>
+  <action name="actionLoad_Corpora">
+   <property name="text">
+    <string>Load Corpora</string>
    </property>
   </action>
  </widget>

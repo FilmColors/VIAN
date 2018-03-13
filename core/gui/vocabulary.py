@@ -439,7 +439,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         else:
             vocabularies = self.project().vocabularies
 
-        print(vocabularies)
+        # print(vocabularies)
         # Creating the TABS
         for voc in vocabularies:
             if voc.category not in self.voc_categories:
@@ -585,7 +585,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 self.frame_container(cont)
 
     def frame_container(self, container):
-
         start = container.get_start()
         end = container.get_end()
 
@@ -594,6 +593,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.main_window.player.set_media_time(start + 5000)
         self.current_container = container
         self.project().set_selected(None, [container])
+
+        # If the container is a Screenshot, we want to focus it
+        if container.get_type() == SCREENSHOT:
+            self.main_window.screenshots_manager.frame_screenshot(container)
 
     def on_button_next(self):
         if self.ordered_containers is None:

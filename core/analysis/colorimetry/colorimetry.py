@@ -126,7 +126,8 @@ class ColometricsAnalysis(IAnalysisJob):
             frame_pos=frame_pos
         )
 
-        analysis = IAnalysisJobAnalysis("Colormetrics", result, self.__class__, parameters)
+        analysis = ColometricsAnalysis(result, self.__class__, parameters)
+
         sign_progress(1.0)
         return analysis
 

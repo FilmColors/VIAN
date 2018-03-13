@@ -22,6 +22,13 @@ def ms_to_string(ms, include_ms = False):
         return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
 
 
+def ts_to_ms(hour=0, min=0, sec=0, ms=0):
+    time = hour * 60 * 60 * 1000
+    time += min * 60 * 1000
+    time += sec * 1000
+    time += ms
+    return time
+
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)

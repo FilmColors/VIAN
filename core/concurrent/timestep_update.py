@@ -4,6 +4,7 @@ from core.data.computation import *
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
+    onColormetryUpdate = pyqtSignal(object)
     onLocationUpdate = pyqtSignal(list)
     onError = pyqtSignal(list)
     onMessage = pyqtSignal(str)
@@ -12,6 +13,7 @@ class TimestepUpdateWorkerSingle(QObject):
     def __init__(self):
         super(TimestepUpdateWorkerSingle, self).__init__()
         self.signals = TimestepUpdateSignals()
+        self.project = None
 
         self.active = True
         self.wait = True
@@ -23,14 +25,21 @@ class TimestepUpdateWorkerSingle(QObject):
         self.video_capture = None
 
         self.opencv_frame = False
+        self.update_colormetry = True
 
     @pyqtSlot()
     def set_movie_path(self, movie_path):
         self.movie_path = movie_path
         self.video_capture = cv2.VideoCapture(movie_path)
 
+    def set_project(self, project):
+        self.project = project
+
     def set_opencv_frame(self, state):
         self.opencv_frame = state
+
+    def set_colormetry_update(self, state):
+        self.update_colormetry = state
 
     def setMSPosition(self, ms, frame):
         if self.position_frame == frame:
@@ -52,9 +61,13 @@ class TimestepUpdateWorkerSingle(QObject):
     def run(self):
         try:
             # Load the OpenCV Frame
-            frame_pixmap = self.get_opencv_frame(self.position_frame)
-            if frame_pixmap is not None:
-                self.signals.onOpenCVFrameUpdate.emit(frame_pixmap)
+            if self.opencv_frame:
+                frame_pixmap = self.get_opencv_frame(self.position_frame)
+                if frame_pixmap is not None:
+                    self.signals.onOpenCVFrameUpdate.emit(frame_pixmap)
+            if self.update_colormetry:
+                if self.project is not None:
+                    self.signals.onColormetryUpdate.emit(self.project.colormetry_analysis.get_update(self.position_ms))
 
         except Exception as e:
             self.signals.onError.emit([e])

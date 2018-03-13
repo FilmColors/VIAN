@@ -33,10 +33,10 @@ class Converter():
                 id_counter += 1
                 voc.add_word(word)
 
-            for v in vocabularies:
-                print(v.category.ljust(30), v.name)
-                print([w.name for w in v.get_vocabulary_as_list()])
-                print("")
+            # for v in vocabularies:
+            #     print(v.category.ljust(30), v.name)
+            #     print([w.name for w in v.get_vocabulary_as_list()])
+            #     print("")
 
             for v in vocabularies:
                 path = "E:\\Programming\\Git\\visual-movie-annotator\\user\\vocabularies\\" + v.name.replace(" ", "").replace("/","").replace("\\", "") + ".txt"

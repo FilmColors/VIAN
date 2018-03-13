@@ -75,6 +75,8 @@ class VIANProject(IHasName, IHasVocabulary):
         self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
+        self.colormetry_analysis = None
+
         self.add_vocabulary(get_default_vocabulary())
         self.create_default_experiment()
 
@@ -264,6 +266,9 @@ class VIANProject(IHasName, IHasVocabulary):
     # endregion
 
     # region Screenshots
+    def create_screenshot(self, name, image, time_ms):
+        new = Screenshot(name,image,timestamp=time_ms)
+        self.add_screenshot(new)
 
     def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)
@@ -401,9 +406,23 @@ class VIANProject(IHasName, IHasVocabulary):
 
     def has_analysis(self, class_name):
         for a in self.analysis:
-            if a.analysis_job_class == class_name:
-                return True
+            if isinstance(a, IAnalysisJobAnalysis):
+                if a.analysis_job_class == class_name:
+                    return True
         return False
+
+    def get_colormetry(self):
+        if self.colormetry_analysis is None:
+            return False, None
+        else:
+            return self.colormetry_analysis.has_finished, self.colormetry_analysis
+
+    def create_colormetry(self):
+        colormetry = ColormetryAnalysis()
+        self.add_analysis(colormetry)
+        self.colormetry_analysis = colormetry
+        return colormetry
+
     #endregion
 
     # Getters for easier changes later in the project
@@ -667,9 +686,12 @@ class VIANProject(IHasName, IHasVocabulary):
             self.add_segmentation(new)
 
         for d in my_dict['analyzes']:
-            new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
-            self.add_analysis(new)
-            print(new.unique_id)
+            if d is not None:
+                new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
+                self.add_analysis(new)
+                if isinstance(new, ColormetryAnalysis):
+                    self.colormetry_analysis = new
+
 
         try:
             old = self.screenshot_groups
@@ -1164,8 +1186,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
         self.update_segment_ids()
         self.project.sort_screenshots()
-        self.project.undo_manager.to_undo((self.remove_segment, [segment]), (self.add_segment, [segment]))
         if dispatch:
+            self.project.undo_manager.to_undo((self.remove_segment, [segment]), (self.add_segment, [segment]))
             self.dispatch_on_changed()
 
     def cut_segment(self, segm, time):
@@ -1177,14 +1199,28 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
     def merge_segments(self, a, b):
         if abs(a.ID - b.ID) <= 1:
-            if a.get_start() < b.get_start():
-                a.end = b.get_end()
-                self.remove_segment(b, dispatch=False)
+            if a.ID < b.ID:
+                start = a.get_start()
+                end = b.get_end()
+                # self.remove_segment(b, dispatch=False)
+                # a.end = int(b.get_end())
+                cut_t = b.get_start()
+                # segm = a
             else:
-                b.end = a.get_end()
-                self.remove_segment(a, dispatch=False)
-        self.dispatch_on_changed()
+                start = b.get_start()
+                end = a.get_end()
+                # self.remove_segment(a, dispatch=False)
+                # b.end = int(a.get_end())
+                cut_t = b.get_start()
+                # segm = b
 
+            self.remove_segment(b, dispatch=False)
+            self.remove_segment(a, dispatch=False)
+
+            segm = self.create_segment(start, end)
+
+            self.project.undo_manager.to_undo((self.merge_segments, [a, b]), (self.cut_segment, [segm, cut_t]))
+            self.dispatch_on_changed()
 
     def update_segment_ids(self):
         self.segments = sorted(self.segments, key=lambda x: x.start)
@@ -1350,6 +1386,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def set_end(self, end):
+        print("TEST, END SET")
         if end < self.start + self.MIN_SIZE :
             end = self.start + self.MIN_SIZE
 
@@ -2525,7 +2562,6 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.notes = ""
         self.data = data
 
-
     def unload_container(self, data=None, sync=False):
         super(AnalysisContainer, self).unload_container(self.data, sync=sync)
         self.data = None
@@ -2714,6 +2750,116 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
 
         return self
 
+
+class ColormetryAnalysis(AnalysisContainer):
+    def __init__(self, results = None):
+        super(ColormetryAnalysis, self).__init__(name = "Colormetry", data = results)
+        self.curr_location = 0
+        self.time_ms = []
+        self.frame_pos = []
+        self.histograms = []
+        self.avg_colors = []
+        self.palettes = []
+        self.resolution = 30
+        self.has_finished = False
+
+        self.linear_colors = []
+        for x in range(16):
+            for y in range(16):
+                for z in range(16):
+                    self.linear_colors.append([x * 16, y * 16, z * 16])
+        self.linear_colors = np.array([self.linear_colors] * 2, dtype=np.uint8)
+        self.linear_colors = cv2.cvtColor(self.linear_colors, cv2.COLOR_LAB2RGB)[0]
+
+    def get_histogram(self, time_ms):
+        pass
+
+    def get_palette(self, time_ms):
+        pass
+
+    def append_data(self, data):
+        try:
+            self.time_ms.append(data['time_ms'])
+            self.histograms.append(data['hist'])
+            self.frame_pos.append(data['frame_pos'])
+            self.avg_colors.append(data['avg_color'])
+        except Exception as e:
+            print("append_data() raised ", str(e))
+
+    def get_update(self, time_ms):
+        try:
+            frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
+            if len(self.histograms) > 0:
+                hist_data =self.histograms[frame_idx]
+
+                hist_data_pal = np.resize(hist_data, new_shape=(hist_data.shape[0] ** 3))
+                pal_indices = np.argsort(hist_data_pal)[-6:]
+                pal_cols = self.linear_colors[pal_indices]
+                palette_values = hist_data_pal[pal_indices]
+
+                return dict(hist=hist_data, palette = dict(val=palette_values, col=pal_cols))
+
+        except Exception as e:
+            print(e)
+            pass
+
+    def set_finished(self, obj):
+        self.has_finished = True
+
+    def serialize(self):
+        data = dict(
+            curr_location = self.curr_location,
+            time_ms = self.time_ms,
+            frame_pos=self.frame_pos,
+            histograms=self.histograms,
+            avg_colors=self.avg_colors,
+            palettes=self.palettes,
+            resolution=self.resolution,
+        )
+
+        if self.has_finished:
+            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_NO_OVERWRITE)
+
+        serialization = dict(
+            name=self.name,
+            unique_id=self.unique_id,
+            analysis_container_class=self.__class__.__name__,
+            notes=self.notes,
+            has_finished = self.has_finished
+        )
+        return serialization
+
+    def deserialize(self, serialization, streamer):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.notes = serialization['notes']
+
+
+        try:
+            self.has_finished = serialization['has_finished']
+            data = streamer.sync_load(self.unique_id)
+            if data is not None:
+                self.curr_location = data['curr_location']
+                self.time_ms = data['time_ms']
+                self.frame_pos =  data['frame_pos']
+                self.histograms =  data['histograms']
+                self.avg_colors =  data['avg_colors']
+                self.palettes =  data['palettes']
+                self.resolution =  data['resolution']
+            else:
+                self.curr_location = 0
+                self.time_ms = []
+                self.frame_pos = []
+                self.histograms = []
+                self.avg_colors = []
+                self.palettes = []
+                self.resolution = 30
+                self.has_finished = False
+        except Exception as e:
+            raise(e)
+
+
+        return self
 
 class AnalysisParameters():
     def __init__(self, target_items):

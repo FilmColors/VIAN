@@ -324,7 +324,7 @@ class IConcurrentJob():
         self.task_id = randint(10000000, 99999999)
         self.aborted = False
 
-    def prepare(self):
+    def prepare(self, project):
         self.args = self.args
 
     def run_concurrent(self, args, sign_progress):

@@ -61,7 +61,6 @@ dependencies:
 - icu=58.2=0
 - jasper=1.900.1=4
 - jpeg=9b=2
-- libgfortran=3.0.0=0
 - libiconv=1.15=0
 - libwebp=0.5.2=7
 - libxml2=2.9.5=2
@@ -70,6 +69,11 @@ dependencies:
 - pcre=8.39=0
 - pixman=0.34.0=1
 - x264=20131217=3
+- intel-openmp=2018.0.0=h8158457_8
+- libgfortran=3.0.1=h93005f0_2
+- mkl=2018.0.1=hfbd8650_4
+- scikit-learn=0.19.1=py35h2b554eb_0
+- scipy=1.0.0=py35h8b35106_0
 - pip:
   - alembic==0.9.8
   - banal==0.3.3
