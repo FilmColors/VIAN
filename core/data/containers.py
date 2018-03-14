@@ -1,6 +1,7 @@
 import datetime
 import json
 import cv2
+from shutil import copy2
 import os
 from random import randint
 import shelve
@@ -442,7 +443,6 @@ class VIANProject(IHasName, IHasVocabulary):
 
         if l is not None:
             self.current_annotation_layer = l
-
 
         self.dispatch_selected(sender)
 
@@ -964,6 +964,41 @@ class VIANProject(IHasName, IHasVocabulary):
 
     #endregion
 
+    #region MediaObjects
+    def create_media_object(self, name ,data, container: IHasMediaObject):
+        if ".pdf" in data:
+            o_type = MediaObjectType.PDF
+        elif ".png" in data or ".jpg" in data:
+            o_type = MediaObjectType.IMAGE
+        else:
+            o_type = MediaObjectType.EXTERNAL
+
+        if o_type in [MediaObjectType.HYPERLINK, MediaObjectType.SOURCE]:
+            new = DataMediaObject(name, data, container, o_type)
+
+        else:
+            fdir, fname = os.path.split(data)
+            is_file = True
+            counter = 0
+            while(is_file):
+                fdir, fname = os.path.split(data)
+                new_path = self.data_dir + "/" + str(counter) + "_" + fname
+                if not os.path.isfile(new_path):
+                    is_file = False
+
+            copy2(data, new_path)
+            new = FileMediaObject(fname, new_path, container, o_type)
+
+        self.add_media_object(new, container)
+
+
+    def add_media_object(self, media_object, container:IHasMediaObject, dispatch = True):
+        media_object.set_project(self)
+        container.add_media_object(media_object)
+        self.dispatch_changed(item = container)
+
+    #endregion
+
     # region Setters/Getters
     def cleanup(self):
         self.main_window.numpy_data_manager.clean_up([f[0] for f in self.id_list])
@@ -1234,11 +1269,14 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 cut_t = b.get_start()
                 # segm = b
 
+            media_objects = a.media_objects
+            media_objects.extend(b.media_objects)
+
             self.remove_segment(b, dispatch=False)
             self.remove_segment(a, dispatch=False)
 
             segm = self.create_segment(start, end)
-
+            segm.media_objects = media_objects
             self.project.undo_manager.to_undo((self.merge_segments, [a, b]), (self.cut_segment, [segm, cut_t]))
             self.dispatch_on_changed()
 
@@ -1375,11 +1413,13 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return "Invalid Property"
         return ""
 
-class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary):
+class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary, IHasMediaObject):
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None, annotation_body = "", name = "New Segment"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
         IHasVocabulary.__init__(self)
+        IHasMediaObject.__init__(self)
+
         self.MIN_SIZE = 10
         self.ID = ID
         self.start = start
@@ -1448,6 +1488,12 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def serialize(self):
         words = []
+
+        media_objects = []
+        for obj in self.media_objects:
+            media_objects.append(obj.serialize())
+
+
         for w in self.voc_list:
             words.append(w.unique_id)
 
@@ -1461,7 +1507,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             annotation_body = self.annotation_body,
             notes = self.notes,
             locked = self.locked,
-            words = words
+            words = words,
+            media_objects = media_objects
         )
         return r
 
@@ -1500,6 +1547,18 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         except Exception as e:
             print(e)
 
+        try:
+            for w in serialization["media_objects"]:
+                o_type = w['dtype']
+                if o_type in [MediaObjectType.HYPERLINK, MediaObjectType.SOURCE]:
+                    new = DataMediaObject(None, None, None, None).deserialize(w)
+
+                else:
+                    new = FileMediaObject(None, None, None, None).deserialize(w)
+                self.media_objects.append(new)
+        except Exception as e:
+            print(e)
+
         return self
 
     def get_type(self):
@@ -1527,12 +1586,14 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 #     FreeHand = 5
 #
 
-class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IHasVocabulary):
+class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IHasVocabulary, IHasMediaObject):
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
                  name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
         IHasVocabulary.__init__(self)
+        IHasMediaObject.__init__(self)
+
         self.name = name
         self.a_type = a_type
         self.t_start = t_start
@@ -1704,6 +1765,9 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 
     def serialize(self):
         words = []
+        media_objects = []
+        for obj in self.media_objects:
+            media_objects.append(obj.serialize())
 
         for w in self.voc_list:
             if w is not None:
@@ -1735,7 +1799,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             is_automated = self.is_automated,
             automated_source = self.automated_source,
             automate_property = self.automate_property,
-
+            media_objects = media_objects
 
         )
         return result
@@ -1793,6 +1857,18 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 
         except:
             pass
+
+        try:
+            for w in serialization["media_objects"]:
+                o_type = w['dtype']
+                if o_type in [MediaObjectType.HYPERLINK, MediaObjectType.SOURCE]:
+                    new = DataMediaObject(None, None, None, None).deserialize(w)
+
+                else:
+                    new = FileMediaObject(None, None, None, None).deserialize(w)
+                self.media_objects.append(new)
+        except Exception as e:
+            print(e)
 
         if len(self.keys)>0:
             self.has_key = True
@@ -3442,7 +3518,7 @@ class ClassificationObjects(IProjectContainer):
                 c.get_children_plain(list)
 
     def get_type(self):
-        return CLASSIFICATIONOBJECT
+        return CLASSIFICATION_OBJECT
 
     def serialize(self):
         serialization = dict(
@@ -3470,11 +3546,12 @@ class ClassificationObjects(IProjectContainer):
 #endregion
 
 #region MediaObject
-class MediaObject(IProjectContainer, IHasName):
-    def __init__(self, name, file_path):
+class AbstractMediaObject(IProjectContainer, IHasName):
+    def __init__(self, name, container:IHasMediaObject, dtype):
         IProjectContainer.__init__(self)
         self.name = name
-        self.file_path = file_path
+        self.container = container
+        self.dtype = dtype
 
     def get_name(self):
         return self.name
@@ -3482,11 +3559,37 @@ class MediaObject(IProjectContainer, IHasName):
     def set_name(self, name):
         self.name = name
 
+    def get_type(self):
+        return MEDIA_OBJECT
+
     def serialize(self):
         data = dict(
             name = self.name,
-            file_path = self.file,
-            unique_id = self.unique_id
+            unique_id = self.unique_id,
+            dtype = self.dtype.value
+        )
+        return data
+
+    def deserialize(self, serialization):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.dtype = MediaObjectType(serialization['dtype'])
+        return self
+
+    def preview(self):
+        pass
+
+class FileMediaObject(AbstractMediaObject):
+    def __init__(self, name, file_path, container, dtype):
+        super(FileMediaObject, self).__init__(name, container, dtype)
+        self.file_path = file_path
+
+    def serialize(self):
+        data = dict(
+            name = self.name,
+            file_path = self.file_path,
+            unique_id = self.unique_id,
+            dtype = self.dtype.value
         )
         return data
 
@@ -3494,7 +3597,36 @@ class MediaObject(IProjectContainer, IHasName):
         self.name = serialization['name']
         self.file_path = serialization['file_path']
         self.unique_id = serialization['unique_id']
+        self.dtype = MediaObjectType(serialization['dtype'])
+        return self
 
+    def preview(self):
+        try:
+            os.startfile(self.file_path)
+        except Exception as e:
+            print(e)
+
+
+class DataMediaObject(AbstractMediaObject):
+    def __init__(self, name, data, container, dtype):
+        super(DataMediaObject, self).__init__(name, container, dtype)
+        self.data = data
+
+    def serialize(self):
+        data = dict(
+            name = self.name,
+            data = self.data,
+            unique_id = self.unique_id,
+            dtype = self.dtype.value
+        )
+        return data
+
+    def deserialize(self, serialization):
+        self.name = serialization['name']
+        self.data = serialization['data']
+        self.unique_id = serialization['unique_id']
+        self.dtype = MediaObjectType(serialization['dtype'])
+        return self
 
 #endregion
 

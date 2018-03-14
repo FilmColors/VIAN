@@ -8,6 +8,7 @@ from core.data.enums import MovieSource
 from core.node_editor.node_editor import *
 from core.data.tracking import BasicTrackingJob
 from core.gui.perspectives import Perspective
+from core.gui.context_menu import open_context_menu
 
 class Inspector(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
@@ -65,7 +66,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.lineEdit_Vocabulary.setText("")
 
     def on_changed(self, project, item):
-        if item:
+        if item is not None and not isinstance(item, AbstractMediaObject):
             self.on_selected(None, [item])
 
     def on_selected(self,sender, selected):
@@ -126,6 +127,9 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         if s_type == VOCABULARY or s_type == VOCABULARY_WORD:
             self.lbl_Type.setText("Vocabulary")
             widgets = [AttributesVocabulary(self, target_item)]
+
+        if isinstance(target_item, IHasMediaObject):
+            widgets.append(AttributesMediaObject(self, target_item))
 
         for w in widgets:
             self.add_attribute_widget(w)
@@ -370,6 +374,61 @@ class AttributesSegment(QWidget):
 
         return super(AttributesSegment, self).eventFilter(QObject, QEvent)
 
+class AttributesMediaObject(QWidget):
+    def __init__(self, parent, descriptor:IHasMediaObject):
+        super(AttributesMediaObject, self).__init__(parent)
+        self.inspector = parent
+        path = os.path.abspath("qt_ui/AttributesMediaObject.ui")
+        uic.loadUi(path, self)
+        self.descriptor = descriptor
+        self.setAcceptDrops(True)
+
+        self.listWidget_AttachedMedia = MediaObjectsList(self, self)
+        self.layout().addWidget(self.listWidget_AttachedMedia)
+        self.update_list()
+
+    def update_list(self):
+        self.listWidget_AttachedMedia.clear()
+        self.listWidget_AttachedMedia.setToolTip("Drop Files you want to attach here.")
+        for obj in self.descriptor.media_objects:
+            self.listWidget_AttachedMedia.addItem(QListWidgetItem(obj.get_name()))
+
+    def context_menu(self, pos):
+        try:
+            media_object = self.descriptor.media_objects[self.listWidget_AttachedMedia.currentIndex().row()]
+            open_context_menu(self.inspector.main_window, pos, [media_object], media_object.project)
+        except Exception as e:
+            print(e)
+            pass
+
+
+    def keyPressEvent(self, a0: QtGui.QKeyEvent):
+        if a0.key() == Qt.Key_Delete:
+            idx = self.listWidget_AttachedMedia.currentIndex()
+            self.descriptor.remove_media_object(self.descriptor.media_objects[idx])
+            self.update_list()
+
+    def dragEnterEvent(self, a0: QtGui.QDragEnterEvent):
+        a0.acceptProposedAction()
+
+    def dropEvent(self, a0: QtGui.QDropEvent):
+        self.descriptor.project.create_media_object("New Object",
+                                                    a0.mimeData().urls()[0].toLocalFile(),
+                                                    self.descriptor)
+
+        self.update_list()
+
+class MediaObjectsList(QListWidget):
+    def __init__(self, parent, attr_widget):
+        super(MediaObjectsList, self).__init__(parent)
+        self.attr_widget = attr_widget
+
+    def mousePressEvent(self, e: QtGui.QMouseEvent):
+        if e.button() == Qt.RightButton:
+            self.attr_widget.context_menu(self.mapToGlobal(e.pos()))
+        else:
+            super(MediaObjectsList, self).mousePressEvent(e)
+
 
 class AttributesAnalysis(QWidget):
     def __init__(self, parent, descriptor):
@@ -560,3 +619,7 @@ class DefaultLiteral(AttributesNodeDefaultValues):
     def on_value_changed(self):
         self.slot.default_value = self.lineEdit.text()
         super(DefaultLiteral, self).on_value_changed()
+
+
+
+

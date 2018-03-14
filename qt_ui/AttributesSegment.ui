@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>482</width>
-    <height>339</height>
+    <width>635</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,54 +26,6 @@
       </item>
       <item>
        <widget class="QTextEdit" name="textEdit_AnnotationBody"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>&lt;b&gt;Attached Media:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QPushButton" name="btn_AddImage">
-          <property name="text">
-           <string>Image</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_AddPDF">
-          <property name="text">
-           <string>PDF</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_BibSource">
-          <property name="text">
-           <string>Source</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QListWidget" name="listWidget_AttachedMedia">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>10</height>
-         </size>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>

@@ -17,7 +17,9 @@ VOCABULARY_WORD = 11
 ANALYSIS_NODE_SCRIPT = 12
 ANALYSIS_JOB_ANALYSIS = 13
 EXPERIMENT = 14
-CLASSIFICATIONOBJECT = 15
+CLASSIFICATION_OBJECT = 15
+MEDIA_OBJECT = 16
+
 
 
 FILE_EXT_PROJECT = ".eext"
@@ -57,7 +59,7 @@ def get_type_as_string(type):
         return "ANALYSIS_JOB_ANALYSIS"
     elif type == EXPERIMENT:
         return "EXPERIMENT"
-    elif type == CLASSIFICATIONOBJECT:
+    elif type == CLASSIFICATION_OBJECT:
         return "CLASSIFICATION_OBJECT"
     else:
         return "Mehh, Whatever this should be"
@@ -125,3 +127,10 @@ class ProjectType(Enum):
     SIMPLE_ANNOTATION = 1
     FILM_COLORS = 2
 
+
+class MediaObjectType(Enum):
+    HYPERLINK = 0
+    PDF = 1
+    IMAGE = 2
+    SOURCE = 3
+    EXTERNAL = 4

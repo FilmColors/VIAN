@@ -89,6 +89,8 @@ class IProjectContainer(QObject):
         self.notes = notes
         # self.dispatch_on_changed(item=self)
 
+    def get_type(self):
+        return -1
 
 class ITimeRange():
 
@@ -139,6 +141,20 @@ class IHasName():
 
     def set_name(self, name):
         print("IHasName: Not Implemented by", self)
+
+
+class IHasMediaObject():
+    def __init__(self):
+        self.media_objects = []
+
+    def add_media_object(self, media_object):
+        if media_object not in self.media_objects:
+            self.media_objects.append(media_object)
+
+    def remove_media_object(self, media_object):
+        if media_object in self.media_objects:
+            self.media_objects.remove(media_object)
+        self.project.dispatch_changed()
 
 
 class ITimeStepDepending():
@@ -287,6 +303,7 @@ class IAnalysisJob(ILiveWidgetExposing):
 
     def abort(self):
         pass
+
 
 class ParameterWidget(QWidget):
     """

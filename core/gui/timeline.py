@@ -1069,6 +1069,22 @@ class TimebarSlice(QtWidgets.QWidget):
         self.is_hovered = False
         self.is_selected = False
 
+        self.media_object_items = []
+
+        if isinstance(item, IHasMediaObject):
+            self.setAcceptDrops(True)
+            x = self.width() - 30
+            for obj in self.item.media_objects:
+                    itm = MediaObjectWidget(self, obj)
+                    itm.resize(25,25)
+                    itm.move(x, 5)
+                    if x > 50:
+                        itm.show()
+                    else:
+                        itm.hide()
+                    self.media_object_items.append(itm)
+                    x -= 30
+
         self.merge_highlighted = False
 
         self.min_possible = 0
@@ -1090,12 +1106,13 @@ class TimebarSlice(QtWidgets.QWidget):
                 if self.timeline.is_cutting:
                     col = (180,0,0, 200)
                 else:
-                    col = (self.color[0], self.color[1], self.color[2], 80)
+                    if self.is_selected:
+                        col = (self.color[0], self.color[1], self.color[2], 150)
+                    else:
+                        col = (self.color[0], self.color[1], self.color[2], 80)
 
             elif self.is_selected:
-                col = (self.color[0], self.color[1], self.color[2], 100)
-
-
+                col = (self.color[0], self.color[1], self.color[2], 150)
 
             else:
                 col = (self.color[0], self.color[1], self.color[2], 50)
@@ -1124,8 +1141,18 @@ class TimebarSlice(QtWidgets.QWidget):
 
         pen.setColor(QtGui.QColor(255, 255, 255))
         qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
-        qp.end()
 
+        x = self.width() - 60
+        y = self.height() / 2 - (25 / 2)
+        for m in self.media_object_items:
+            m.move(x, int(y))
+            if x > 50:
+                m.show()
+            else:
+                m.hide()
+            x -= 30
+
+        qp.end()
 
     def update_text(self):
         self.text = ""
@@ -1172,7 +1199,7 @@ class TimebarSlice(QtWidgets.QWidget):
                     self.offset = self.mapToParent(QMouseEvent.pos())
                     self.curr_size = self.size()
                     self.curr_pos = self.pos()
-                self.update()
+                self.timeline.update()
 
             if QMouseEvent.buttons() & Qt.RightButton:
                 if self.timeline.is_cutting:
@@ -1209,6 +1236,15 @@ class TimebarSlice(QtWidgets.QWidget):
                 if self.mode == "right":
                     self.item.set_end(int(round(((self.pos().x() + self.width()) * self.timeline.scale),0)))
                     return
+
+    def dragEnterEvent(self, a0: QtGui.QDragEnterEvent):
+        a0.acceptProposedAction()
+
+    def dropEvent(self, a0: QtGui.QDropEvent):
+        self.item.project.create_media_object("New Object",
+                                                    a0.mimeData().urls()[0].toLocalFile(),
+                                                    self.item)
+
 
     def enterEvent(self, QEvent):
         if not self.locked:
@@ -1313,6 +1349,56 @@ class TimebarSlice(QtWidgets.QWidget):
     def update(self, *__args):
         super(TimebarSlice, self).update(*__args)
 
+
+class MediaObjectWidget(QWidget):
+    def __init__(self, parent, media_object):
+        super(MediaObjectWidget, self).__init__(parent)
+        self.media_object = media_object
+        self.hovered = False
+        self.setToolTip("Open: " + str(self.media_object.name))
+
+    def enterEvent(self, a0: QtCore.QEvent):
+        self.hovered = True
+
+    def leaveEvent(self, a0: QtCore.QEvent):
+        self.hovered = False
+
+    def paintEvent(self, QPaintEvent):
+
+        col = [5, 175, 242, 1]
+
+        qp = QtGui.QPainter()
+        pen = QtGui.QPen()
+
+        qp.begin(self)
+        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        pen.setColor(QtGui.QColor(255, 255, 255))
+        pen.setWidth(2)
+        qp.setPen(pen)
+
+        pen.setColor(QColor(col[0], col[1], col[2], 150))
+        if self.hovered:
+            qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), QColor(col[0], col[1], col[2], 200))
+        else:
+            qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), QColor(col[0], col[1], col[2], col[3]))
+
+        pen.setColor(QtGui.QColor(255, 255, 255))
+
+        if self.media_object.dtype == MediaObjectType.PDF:
+            qp.drawPixmap(QRect(0, 0, 25, 25), QPixmap("qt_ui/icons/icon_pdf.png"))
+        elif self.media_object.dtype == MediaObjectType.IMAGE:
+            qp.drawPixmap(QRect(0, 0, 25, 25), QPixmap("qt_ui/icons/icon_image_media.png"))
+        elif self.media_object.dtype == MediaObjectType.EXTERNAL:
+            qp.drawPixmap(QRect(0, 0, 25, 25), QPixmap("qt_ui/icons/icon_external_media.png"))
+
+        qp.end()
+
+    def mousePressEvent(self, a0: QtGui.QMouseEvent):
+        if a0.button() == Qt.LeftButton:
+            self.media_object.preview()
+        elif a0.button() == Qt.RightButton:
+            open_context_menu(self.parent().timeline.main_window, self.mapToGlobal(a0.pos()),
+                              [self.media_object], self.media_object.project)
 
 class TimebarKey(QtWidgets.QWidget):
     def __init__(self, parent, annotation, key_index):

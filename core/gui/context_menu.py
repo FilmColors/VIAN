@@ -61,6 +61,12 @@ def open_context_menu(main_window, pos, containers, project, screenshot_root = F
             scripts = containers
             cm = NodeScriptContextMenu(main_window, pos, scripts, project)
             return cm
+
+        if container_type == MEDIA_OBJECT:
+            media_objects = containers
+            cm = MediaObjectContextMenu(main_window, pos, project, media_objects)
+            return cm
+
         else:
             cm = ContextMenu(main_window, pos)
             return cm
@@ -555,3 +561,22 @@ class ScriptsRootContexMenu(ContextMenu):
 
     def on_new_script(self):
         self.project.create_script()
+
+
+class MediaObjectContextMenu(ContextMenu):
+    def __init__(self, parent, pos, project:VIANProject, media_object: AbstractMediaObject):
+        super(MediaObjectContextMenu, self).__init__(parent, pos)
+        self.project = project
+        self.media_object = media_object
+        self.a_preview = self.addAction("Preview")
+        self.a_delete = self.addAction("Delete Object")
+        self.a_preview.triggered.connect(self.on_preview)
+        self.a_delete.triggered.connect(self.on_delete)
+        self.popup(pos)
+
+    def on_preview(self):
+        pass
+
+    def on_delete(self):
+        for obj in self.media_object:
+            obj.container.remove_media_object(obj)
