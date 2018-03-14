@@ -228,7 +228,6 @@ class GenericFeaturePlot(QGraphicsView):
 
         self.font = QFont(self.font_family, self.font_size)
 
-
         self.images = []
         self.features = []
         self.segments = []

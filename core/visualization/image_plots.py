@@ -248,7 +248,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
     def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
         super(VIANPixmapGraphicsItem, self).mousePressEvent(event)
-        self.onItemSelection.emit(self)
+        # self.onItemSelection.emit(self)
 
 
 class ImagePlotCircular(ImagePlot):
