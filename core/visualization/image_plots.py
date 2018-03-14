@@ -59,7 +59,6 @@ class ImagePlot(QGraphicsView):
         #                  (range_x[1] - range_x[0]) * self.magnification/ 12,
         #                  (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
 
-
     def add_image(self, x, y, img, convert = True, luminance = None):
         pass
 
@@ -123,10 +122,8 @@ class ImagePlot(QGraphicsView):
             self.set_magnification(delta.x(),delta.y())
             self.last_mouse_pos = event.pos()
 
-
     def set_magnification(self, x, y):
         pass
-
 
     def scale_pos(self, scale_inc):
         for img in self.images:
@@ -170,7 +167,6 @@ class ImagePlot(QGraphicsView):
 
         # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
 
-
     def clear_view(self):
         self.scene().clear()
         self.images.clear()
@@ -182,7 +178,6 @@ class ImagePlot(QGraphicsView):
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
 
         # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
-
 
     def export(self, return_image = False, width = 4096, height = 4096):
         """

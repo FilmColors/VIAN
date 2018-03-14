@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>VIAN 0.5.0 &mdash; VIAN 0.4.0 documentation</title>
+  <title>VIAN 0.5.0 - 0.5.3 &mdash; VIAN 0.4.0 documentation</title>
   
 
   
@@ -165,14 +165,17 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="../whatsnew.html">What’s New</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">VIAN 0.5.0</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#automatic-segmentation">Automatic Segmentation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#merging-segments">Merging Segments</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#importing-screenshots">Importing Screenshots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#feature-plots">Feature Plots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sub-corpora">Sub Corpora</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#extensive-list">Extensive List</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#hot-fixes">Hot-Fixes</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">VIAN 0.5.0 - 0.5.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#attaching-files-to-annotations-and-segments">Attaching Files to Annotations and Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#merging-segments">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#feature-plots">Feature Plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sub-corpora">Sub Corpora</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#extensive-list">Extensive List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
@@ -239,7 +242,7 @@
         
           <li><a href="../whatsnew.html">What’s New</a> &raquo;</li>
         
-      <li>VIAN 0.5.0</li>
+      <li>VIAN 0.5.0 - 0.5.3</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -258,16 +261,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="vian-0-5-0">
-<h1>VIAN 0.5.0<a class="headerlink" href="#vian-0-5-0" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="vian-0-5-0-0-5-3">
+<h1>VIAN 0.5.0 - 0.5.3<a class="headerlink" href="#vian-0-5-0-0-5-3" title="Permalink to this headline">¶</a></h1>
 <p><strong>READ THIS</strong></p>
+<div class="section" id="attaching-files-to-annotations-and-segments">
+<h2>Attaching Files to Annotations and Segments<a class="headerlink" href="#attaching-files-to-annotations-and-segments" title="Permalink to this headline">¶</a></h2>
+<p>It is now possible to simply drag-and-drop any kind of File into VIAN Segments or Annotations in the Timeline</p>
 <div class="section" id="automatic-segmentation">
-<h2>Automatic Segmentation<a class="headerlink" href="#automatic-segmentation" title="Permalink to this headline">¶</a></h2>
+<h3>Automatic Segmentation<a class="headerlink" href="#automatic-segmentation" title="Permalink to this headline">¶</a></h3>
 <p>VIAN can now automatically generate Segmentations based on Color-Features, using Agglomerativ Clustering.
 For more information read here: <a class="reference internal" href="../step_by_step/segmentation/auto_segmentation.html#auto-segmentation"><span class="std std-ref">Auto Segmentation</span></a></p>
 </div>
 <div class="section" id="merging-segments">
-<h2>Merging Segments<a class="headerlink" href="#merging-segments" title="Permalink to this headline">¶</a></h2>
+<h3>Merging Segments<a class="headerlink" href="#merging-segments" title="Permalink to this headline">¶</a></h3>
 <p>Cutting Segments has already been introduced in 0.4.7, by now,
 merging Segments can be performed in the Timeline as well.</p>
 <p>In combination with the <strong>Automatic Segmentation</strong>, the Segmentation Workflow can now be changed.
@@ -279,14 +285,14 @@ Starting off with creating an automatically generated Segmentation, and manually
 </div>
 </div>
 <div class="section" id="importing-screenshots">
-<h2>Importing Screenshots<a class="headerlink" href="#importing-screenshots" title="Permalink to this headline">¶</a></h2>
+<h3>Importing Screenshots<a class="headerlink" href="#importing-screenshots" title="Permalink to this headline">¶</a></h3>
 <p>Since VIAN uses the exact Frame Positions of Screenshots frequently, the import of Screenshots had been missing for quite a
 while due to the problems that arise from finding a Screenshot in a complete film.</p>
 <p>With 0.5.0 VIAN does now offer to import Screenshots into an existing Project. The Pixel-Size of the Screenshots does not
 have to match the Movie Size.</p>
 </div>
 <div class="section" id="feature-plots">
-<h2>Feature Plots<a class="headerlink" href="#feature-plots" title="Permalink to this headline">¶</a></h2>
+<h3>Feature Plots<a class="headerlink" href="#feature-plots" title="Permalink to this headline">¶</a></h3>
 <p>The FilmColors Visualizer does now implement the <strong>Feature Plot</strong>, which might give useful insights about the
 distribution of Keywords in one film.</p>
 <div class="figure align-center">
@@ -294,25 +300,27 @@ distribution of Keywords in one film.</p>
 </div>
 </div>
 <div class="section" id="sub-corpora">
-<h2>Sub Corpora<a class="headerlink" href="#sub-corpora" title="Permalink to this headline">¶</a></h2>
+<h3>Sub Corpora<a class="headerlink" href="#sub-corpora" title="Permalink to this headline">¶</a></h3>
 <p>It is now possible to create Sub Corpora in the FilmColors Visualizer, filter out the films which are not selected.
 You can find the CorpusManager in the FilmColors Visualizer in <strong>Windows/CorpusManager</strong>.</p>
 </div>
 <div class="section" id="extensive-list">
-<h2>Extensive List<a class="headerlink" href="#extensive-list" title="Permalink to this headline">¶</a></h2>
+<h3>Extensive List<a class="headerlink" href="#extensive-list" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>See Github</li>
 </ul>
 </div>
 <div class="section" id="hot-fixes">
-<h2>Hot-Fixes<a class="headerlink" href="#hot-fixes" title="Permalink to this headline">¶</a></h2>
+<h3>Hot-Fixes<a class="headerlink" href="#hot-fixes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>OSX Error in Streaming solved (0.4.6)</li>
 <li>Checking Project integrity on Start-Up (0.4.7)</li>
+<li>FeaturePlot Export (0.5.3)</li>
 <li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
 <li><a class="reference internal" href="../search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
+</div>
 </div>
 </div>
 

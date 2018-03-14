@@ -1,9 +1,14 @@
 
 
-VIAN 0.5.0
-==========
+VIAN 0.5.0 - 0.5.3
+==================
 
 **READ THIS**
+
+Attaching Files to Annotations and Segments
+###########################################
+It is now possible to simply drag-and-drop any kind of File into VIAN Segments or Annotations in the Timeline
+
 
 Automatic Segmentation
 **********************
@@ -47,7 +52,6 @@ distribution of Keywords in one film.
    :align: center
    :alt: map to buried treasure
 
-
 Sub Corpora
 ***********
 It is now possible to create Sub Corpora in the FilmColors Visualizer, filter out the films which are not selected.
@@ -62,6 +66,8 @@ Hot-Fixes
 *********
 * OSX Error in Streaming solved (0.4.6)
 * Checking Project integrity on Start-Up (0.4.7)
+* FeaturePlot Export (0.5.3)
+
 
 * :ref:`genindex`
 * :ref:`modindex`

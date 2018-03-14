@@ -71,7 +71,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -1933,22 +1933,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #endregion
     pass
-
-
-# class LoadingScreen(QtWidgets.QSplashScreen):
-#     def __init__(self):
-#         super(LoadingScreen, self).__init__(None)
-#         self.lbl = QLabel(self)
-#         self.setPixmap(QPixmap(os.path.abspath("qt_ui/images/loading_screen.png")))
-#         self.set
-#         self.setFixedWidth(800)
-#         self.setFixedHeight(400)
-#         self.lbl.setText("Welcome")
-#         self.setLayout(QHBoxLayout(self))
-#         self.layout().addWidget(self.lbl)
-#         self.lbl.setPixmap(QPixmap(os.path.abspath("qt_ui/images/loading_screen.png")))
-#         self.setWindowFlags(Qt.FramelessWindowHint)
-
 
 
 class IconContainer():

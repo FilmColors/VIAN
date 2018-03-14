@@ -63,8 +63,6 @@ class ColorDTWidget(QWidget):
         view.sort_images()
 
 
-
-
 class ColorSpacePlots(QWidget):
     def __init__(self, parent, visualizer):
         super(ColorSpacePlots, self).__init__(parent)
@@ -161,7 +159,6 @@ class ColorSpaceLPlanePlots(QWidget):
         self.bg_view.frame_default()
         self.fg_view.frame_default()
         self.gl_view.frame_default()
-
 
 
 class FeaturePlot(QWidget):

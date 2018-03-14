@@ -318,6 +318,15 @@ class GenericFeaturePlot(QGraphicsView):
         else:
             event.ignore()
 
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
+        if event.button() == Qt.RightButton:
+            menu = QMenu(self)
+            a_export = menu.addAction("Export")
+            a_export.triggered.connect(self.export)
+            menu.popup(self.mapToGlobal(event.pos()))
+        else:
+            event.ignore()
+
     def wheelEvent(self, event: QWheelEvent):
         if self.ctrl_is_pressed:
             self.setTransformationAnchor(QGraphicsView.NoAnchor)
@@ -361,7 +370,30 @@ class GenericFeaturePlot(QGraphicsView):
         self.feature_items.clear()
         self.feature_labels.clear()
 
+    def export(self, return_image = False, width = 4096, height = 4096):
+        """
+        Renders the scene content to an image, alternatively if return iamge is set to True, 
+        the QImage is returned and not stored to disc
+        :param return_image: 
+        :return: 
+        """
 
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
+
+        t_size = self.sceneRect().size().toSize()
+        image = QImage(QSize(width, height), QImage.Format_ARGB32)
+        image.fill(Qt.transparent)
+
+        painter = QPainter()
+        painter.begin(image)
+        self.scene().render(painter)
+        painter.end()
+
+        if return_image:
+            return image
+        else:
+            path = QFileDialog.getSaveFileName()[0]
+            image.save(path)
 
 class FeatureRectItem(QGraphicsRectItem):
     def __init__(self, x, y, w, h, pen, brush):
