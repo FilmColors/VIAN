@@ -28,7 +28,7 @@ class SegmentationImporterDialog(EDialogWidget):
     def on_browse(self):
 
 
-        path = QFileDialog.getOpenFileName(filter="*.txt, *.csv")[0]
+        path = QFileDialog.getOpenFileName(filter="*.txt *.csv")[0]
         self.path = path
         self.check_file()
 
@@ -71,3 +71,4 @@ class SegmentationImporterDialog(EDialogWidget):
                                               self.comboBox_annotationField.currentText(),
                                               self.comboBox_tType.currentText())
 
+            self.close()

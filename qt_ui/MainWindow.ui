@@ -43,12 +43,12 @@
      <property name="title">
       <string>Import</string>
      </property>
-     <addaction name="actionImportELANSegmentation"/>
      <addaction name="action_importELAN_Project"/>
      <addaction name="separator"/>
      <addaction name="actionImportVocabulary"/>
      <addaction name="actionImportVIANExperiment"/>
      <addaction name="separator"/>
+     <addaction name="actionImportELANSegmentation"/>
      <addaction name="actionImportCSVVocabulary"/>
      <addaction name="actionImportScreenshots"/>
      <addaction name="separator"/>
@@ -285,7 +285,7 @@
   </action>
   <action name="actionImportELANSegmentation">
    <property name="text">
-    <string>ELAN Segmentation</string>
+    <string>CSV Segmentation</string>
    </property>
    <property name="toolTip">
     <string>Importing a new ELAN Segmentation</string>
