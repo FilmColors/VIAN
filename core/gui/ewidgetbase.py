@@ -1,6 +1,6 @@
 from PyQt5.Qt import QApplication
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QScreen, QColor, QPainter, QPen, QResizeEvent, QWheelEvent, QKeyEvent, QCursor, QMouseEvent, QPixmap
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from core.data.computation import pixmap_to_numpy, numpy_to_pixmap
@@ -217,13 +217,11 @@ class EGraphicsView(QGraphicsView):
         else:
             super(EGraphicsView, self).wheelEvent(event)
 
-
     def create_context_menu(self, pos):
         menu = QMenu(self.main_window)
         a_export = menu.addAction("Export Image")
         a_export.triggered.connect(self.on_export_image)
         menu.popup(self.mapToGlobal(pos))
-
 
     def on_export_image(self):
         img = pixmap_to_numpy(self.pixmap.pixmap())
@@ -290,6 +288,135 @@ class EToolBar(QToolBar):
         self.show_indicator_frame = visibility
         self.update()
 
+
+class ImagePreviewPopup(QMainWindow):
+    def __init__(self, parent, pixmap):
+        super(ImagePreviewPopup, self).__init__(parent)
+        self.view = EGraphicsView(self)
+        self.setCentralWidget(self.view)
+        self.view.set_image(pixmap)
+        self.setWindowFlags(Qt.Popup|Qt.FramelessWindowHint)
+        self.show()
+        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+
+
+class TextEditPopup(QMainWindow):
+    onFinished = pyqtSignal(str)
+
+
+    def __init__(self, parent, on_finished, pos = None, size = QSize(500,150), text = ""):
+        super(TextEditPopup, self).__init__(parent)
+        self.view = QPlainTextEdit(self)
+        self.view.setPlainText(text)
+        self.setCentralWidget(self.view)
+        self.setWindowFlags(Qt.Popup|Qt.FramelessWindowHint)
+        self.onFinished.connect(on_finished)
+
+        self.show()
+
+        if pos is None:
+            self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+        else:
+            self.move(pos)
+
+
+        self.resize(size)
+        self.view.setFocus()
+
+    def closeEvent(self, a0: QCloseEvent):
+        self.onFinished.emit(self.view.toPlainText())
+        super(TextEditPopup, self).closeEvent(a0)
+
+    def keyPressEvent(self, a0: QKeyEvent):
+        if a0.key() == Qt.Key_Enter:
+            self.close()
+
+
+
+
+
+
+
+
+#region POPUPS
+class CreateSegmentationPopup(QMainWindow):
+    def __init__(self, parent, project, name = "New Segmentation", callback = None):
+        super(CreateSegmentationPopup, self).__init__(parent)
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.line_name = QLineEdit(self)
+        self.line_name.setText(name)
+        self.project = project
+        self.callback = callback
+
+        self.btn_ok = QPushButton("Create Segmentation", self)
+        self.btn_ok.clicked.connect(self.on_ok)
+        self.setCentralWidget(QWidget(self))
+        self.centralWidget().setLayout(QHBoxLayout(self))
+        self.centralWidget().layout().addWidget(self.line_name)
+        self.centralWidget().layout().addWidget(self.btn_ok)
+        self.setMinimumWidth(300)
+        self.show()
+        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+
+    def on_ok(self):
+        segm = self.project.create_segmentation(self.line_name.text())
+        if self.callback is not None:
+            self.callback(segm)
+        self.close()
+
+
+class CreateAnnotationLayerPopup(QMainWindow):
+    def __init__(self, parent, project, name="New AnnotationLayer", callback = None):
+        super(CreateAnnotationLayerPopup, self).__init__(parent)
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.line_name = QLineEdit(self)
+        self.line_name.setText(name)
+        self.project = project
+        self.callback = callback
+
+        self.btn_ok = QPushButton("Create Annotation Layer", self)
+        self.btn_ok.clicked.connect(self.on_ok)
+        self.setCentralWidget(QWidget(self))
+        self.centralWidget().setLayout(QHBoxLayout(self))
+        self.centralWidget().layout().addWidget(self.line_name)
+        self.centralWidget().layout().addWidget(self.btn_ok)
+        self.setMinimumWidth(300)
+        self.show()
+        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+
+    def on_ok(self):
+        layer = self.project.create_annotation_layer(self.line_name.text(), 0, 1000)
+        if self.callback is not None:
+            self.callback(layer)
+        self.close()
+
+
+class CreateScreenshotGroupPopup(QMainWindow):
+    def __init__(self, parent, project, name="New ScreenshotGroup", callback=None):
+        super(CreateScreenshotGroupPopup, self).__init__(parent)
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.line_name = QLineEdit(self)
+        self.line_name.setText(name)
+        self.project = project
+        self.callback = callback
+
+        self.btn_ok = QPushButton("Create Screenshot Group", self)
+        self.btn_ok.clicked.connect(self.on_ok)
+        self.setCentralWidget(QWidget(self))
+        self.centralWidget().setLayout(QHBoxLayout(self))
+        self.centralWidget().layout().addWidget(self.line_name)
+        self.centralWidget().layout().addWidget(self.btn_ok)
+        self.setMinimumWidth(300)
+        self.show()
+        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+
+    def on_ok(self):
+        grp = self.project.add_screenshot_group(self.line_name.text())
+        if self.callback is not None:
+            self.callback(grp)
+        self.close()
+
+#endregion
 
 #region -- OLD CODE --
 # class EVisualizationDialog(EDialogWidget):

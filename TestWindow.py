@@ -12,19 +12,10 @@ from extensions.plugins.fiwi_tools.fiwi_visualizer.visualizer import FiwiVisuali
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = GenericFeaturePlot(self)
-        self.frame = QtWidgets.QFrame(self)
+        self.t = None
         self.setCentralWidget(self.t)
 
-        segments = [SegmentTuple(0,0,10000), SegmentTuple(1,10000,30000), SegmentTuple(2,30000,60000), SegmentTuple(3,60000,80000), SegmentTuple(4,80000,120000)]
-        feature_a = FeatureTuple("Children", [0,2])
-        feature_b = FeatureTuple("Something very Oddly Long", [0,1,4])
-        feature_c = FeatureTuple("Something very Oddly Long", [0,2, 3, 4])
 
-        self.t.create_timeline(segments)
-        self.t.create_feature(feature_a)
-        self.t.create_feature(feature_b)
-        self.t.create_feature(feature_c)
         self.resize(1200, 800)
 
 
@@ -47,6 +38,6 @@ if __name__ == '__main__':
     sys.excepthook = my_exception_hook
     app = QApplication(sys.argv)
     set_style_sheet(app)
-    main = FiwiVisualizer(None, None)
+    main = TWindow()
     sys.exit(app.exec_())
 

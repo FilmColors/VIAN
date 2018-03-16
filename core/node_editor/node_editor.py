@@ -585,8 +585,6 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             end = c.output_field.get_connection_location()
 
             path.moveTo(start)
-            # mid1 = QPoint(((c.end_point.x()) + c.start_point.x()) / 2, c.end_point.y())
-            # mid2 = QPoint(((c.end_point.x()) + c.start_point.x()) / 2, c.start_point.y())
             y_diff = ((end.x() - start.x()) * 0.2)
             mid1 = QPoint(start.x() + y_diff, end.y())
             mid2 = QPoint(end.x() - y_diff, start.y())
@@ -594,9 +592,6 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             pen.setColor(c.input_field.data_type.color)
             qp.setPen(pen)
             qp.drawPath(path)
-            # qp.drawPoint(mid1)
-            # qp.drawPoint(mid2)
-
         qp.end()
     #endregion
     pass

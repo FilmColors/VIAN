@@ -1,1 +1,0 @@
-{"unique_id": 705, "words": [{"children": [], "unique_id": 706, "name": "semi transparent", "parent": 705}, {"children": [], "unique_id": 775, "name": "sparkling", "parent": 705}], "category": "Materials", "name": "Surfaces Characters"}

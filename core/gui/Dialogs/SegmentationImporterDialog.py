@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox
 from PyQt5 import uic
-# from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
+from core.data.importers import SegmentationImporter
 from core.gui.ewidgetbase import EDialogWidget
+from core.data.containers import *
 import os
 
 class SegmentationImporterDialog(EDialogWidget):
@@ -9,129 +10,64 @@ class SegmentationImporterDialog(EDialogWidget):
     TODO
     The SegmentationImporter is deprecated and should be removed at some Point
     """
-    def __init__(self, parent, project, main_window):
+    def __init__(self, parent, project:VIANProject, main_window):
         super(SegmentationImporterDialog, self).__init__(main_window, parent)
-        path = os.path.abspath("qt_ui/DialogSegmentImporter.ui")
+        path = os.path.abspath("qt_ui/DialogSegmentationImport.ui")
         uic.loadUi(path, self)
         self.project = project
         self.main_window = main_window
         self.path = ""
-        self.identifiers = ["Select csv File first"]
+        self.importer = SegmentationImporter()
 
-        self.comboBox_ID.addItems(self.identifiers)
-        self.additional_comboboxes = []
+        self.btn_browse.clicked.connect(self.on_browse)
+        self.btn_ok.clicked.connect(self.on_import)
+        self.btn_help.clicked.connect(self.on_help)
+        self.comboBox_Seperator.currentIndexChanged.connect(self.check_file)
+        self.btn_cancel.clicked.connect(self.close)
 
-        self.btn_Browse.clicked.connect(self.update_identifiers)
-        self.btn_Import.clicked.connect(self.on_import)
-        self.btn_Cancel.clicked.connect(self.on_cancel)
-        self.btn_AddAdditional.clicked.connect(self.add_identifier)
-        self.btn_RemoveAdditional.clicked.connect(self.remove_identifier)
-        self.btn_AddAll.clicked.connect(self.add_all_identifiers)
-        self.btn_removeAll.clicked.connect(self.remove_all_identifiers)
-        self.lineEdit_Path.editingFinished.connect(self.update_path)
-
-        self.show()
+    def on_browse(self):
 
 
-    def update_identifiers(self):
-        path = QFileDialog.getOpenFileName()
-        self.path = path[0]
-        self.lineEdit_Path.setText(self.path)
-        self.identifiers = ["None"]
+        path = QFileDialog.getOpenFileName(filter="*.txt, *.csv")[0]
+        self.path = path
+        self.check_file()
 
-        res, ident = get_elan_segmentation_identifiers(self.path)
-        if res is False:
-            self.lineEdit_Path.setText("File Invalid: No identifiers found")
-            self.path = ""
-            return
+    def check_file(self):
+        path = self.path
+        if os.path.isfile(path):
+            print(path)
+            if self.comboBox_Seperator.currentIndex() == 0:
+                delimiter = ";"
+            else:
+                delimiter = "\t"
 
-        self.identifiers.extend(ident)
+            success, fields = self.importer.get_fields(path, delimiter=delimiter)
 
-        self.comboBox_ID.clear()
-        self.comboBox_ID.addItems(self.identifiers)
+            if success:
+                self.comboBox_startField.clear()
+                self.comboBox_endField.clear()
+                self.comboBox_annotationField.clear()
 
-        for cb in self.additional_comboboxes:
-            cb.clear()
-            cb.addItems(self.identifiers)
+                self.comboBox_startField.addItems(fields)
+                self.comboBox_endField.addItems(fields)
+                self.comboBox_annotationField.addItems(fields)
 
-        self.comboBox_ID.setCurrentIndex(1)
+                self.path = path
+                self.lineEdit_Path.setText(self.path)
+                return True
+            else:
+                self.path = ""
+                self.lineEdit_Path.setText("")
+                QMessageBox.warning(self, "Error", "Could not parse file. Is this really a tabular csv?")
+                return False
 
-    def update_path(self):
-        if not (".txt" or ".csv") in self.lineEdit_Path.text():
-            return
-        self.path = self.lineEdit_Path.text()
-
-        self.identifiers = ["None"]
-        self.identifiers.extend(get_elan_segmentation_identifiers(self.path)[1])
-
-        self.comboBox_ID.clear()
-        self.comboBox_ID.addItems(self.identifiers)
-
-        for cb in self.additional_comboboxes:
-            cb.clear()
-            cb.addItems(self.identifiers)
-
-    def add_identifier(self):
-        idx = self.formFrame_AdditionalIdentifiers.layout().count()/2
-        cb = QComboBox()
-        cb.addItems(self.identifiers)
-
-        self.additional_comboboxes.append(cb)
-        self.formFrame_AdditionalIdentifiers.layout().addRow("Additional " + str(idx), cb)
-        return cb
-
-    def remove_identifier(self):
-        last = self.formFrame_AdditionalIdentifiers.layout().count() - 1
-        if last < 0:
-            return
-        item1 = self.formFrame_AdditionalIdentifiers.layout().itemAt(last)
-        item2 = self.formFrame_AdditionalIdentifiers.layout().itemAt(last -1)
-
-        self.formFrame_AdditionalIdentifiers.layout().removeItem(item1)
-        self.formFrame_AdditionalIdentifiers.layout().removeItem(item2)
-
-        item1.widget().close()
-        item2.widget().close()
-
-        self.update()
-
-    def remove_all_identifiers(self):
-        for cb in self.additional_comboboxes:
-            self.remove_identifier()
-        self.additional_comboboxes = []
 
     def on_import(self):
-        prevent_overlap = self.checkBox_CleanBorders.isChecked()
-        id_identifiers = [self.comboBox_ID.currentText()]
-        for cb in self.additional_comboboxes:
-            id_identifiers.append(cb.currentText())
+        if self.path != "":
+            self.importer.import_segmentation(self.path, self.project, self.project.movie_descriptor.fps,
+                                              self.checkBox_HasHeader.isChecked(),
+                                              self.comboBox_startField.currentText(),
+                                              self.comboBox_endField.currentText(),
+                                              self.comboBox_annotationField.currentText(),
+                                              self.comboBox_tType.currentText())
 
-        segmentations = []
-        for a in id_identifiers:
-            res, segmentation = import_elan_segmentation(self.path, a, a, prevent_overlap)
-            segmentations.append(segmentation)
-
-            if res is False:
-                alert = QMessageBox(self)
-                alert.setWindowTitle("Import Failed")
-                alert.setText(segmentation)
-                alert.show()
-                return
-
-        for s in segmentations:
-            self.project.add_segmentation(s)
-        self.close()
-
-        for shot in self.project.get_screenshots():
-            shot.update_scene_id(self.project.get_main_segmentation())
-        # self.main_window.screenshots_editor.on_screenshot_changed()
-
-    def add_all_identifiers(self):
-        # Zero Element is "None" we don't want to add this
-        for i in range(1, len(self.identifiers), 1):
-            if self.comboBox_ID.currentIndex() != i:
-                cb = self.add_identifier()
-                cb.setCurrentIndex(i)
-
-    def on_cancel(self):
-        self.close()

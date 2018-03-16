@@ -1,1 +1,0 @@
-{"unique_id": 2, "words": [{"children": [], "unique_id": 3, "name": "Scene Description", "parent": 2}], "category": "ELAN Data", "name": "Scene Description"}

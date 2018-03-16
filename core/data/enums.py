@@ -123,9 +123,19 @@ class ImageType(Enum):
 
 
 class ProjectType(Enum):
-    DEFAULT = 0
-    SIMPLE_ANNOTATION = 1
-    FILM_COLORS = 2
+    FILM_PROJECT = 0
+    AUDIO_PROJECT = 1
+
+
+class TargetContainerType(Enum):
+    ALL = 0
+    ALL_SEGMENTS = 1
+    EXPLICIT_SEGMENTS = 2
+    ALL_ANNOTATIONS = 3
+    EXPLICIT_ANNOTATIONS = 4
+    ALL_SCREENSHOTS = 5
+    EXPLICIT_SCREENSHOTS = 6
+
 
 
 class MediaObjectType(Enum):

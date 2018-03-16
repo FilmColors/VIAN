@@ -131,7 +131,7 @@ class VianUpdaterJob(IConcurrentJob):
                         continue
 
         try:
-            shutil.rmtree(self.app_root + "/update/")
+            shutil.rmtree(self.app_root + "/update/", ignore_errors=True)
         except Exception as e:
             print(e)
         return [True]

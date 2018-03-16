@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType
+from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
 from core.data.containers import *
@@ -129,21 +129,14 @@ class JsonExporter():
 
 
 class ExperimentExporter():
-    def export(self, path, experiment: Experiment):
+    def export(self, path, experiment: Experiment, return_dict = False):
         base_vocs = []
         # Collecting all used Base Vocabularies
         for v in experiment.get_vocabulary_list():
             base = v.base_vocabulary
             if base not in base_vocs:
                 base_vocs.append(base)
-
-        id_mapping = []
-
-        for obj in experiment.classification_objects:
-            mapping = [obj.unique_id, []]
-            for voc in obj.classification_vocabularies:
-                mapping[1].append(voc.base_vocabulary.unique_id)
-            id_mapping.append(mapping)
+                print(base.name)
 
         serialization_exp = experiment.serialize()
         serialization_vocs = [v.serialize() for v in base_vocs]
@@ -151,12 +144,13 @@ class ExperimentExporter():
         result = dict(
             experiment = serialization_exp,
             base_vocs = serialization_vocs,
-            id_mapping = id_mapping
         )
 
-        with open(path, "w") as f:
-            json.dump(result, f)
-
+        if not return_dict:
+            with open(path, "w") as f:
+                json.dump(result, f)
+        else:
+            return result
 
 def build_file_name(naming, screenshot, movie_descriptor):
     file_name = "/"

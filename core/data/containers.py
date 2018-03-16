@@ -190,7 +190,6 @@ class VIANProject(IHasName, IHasVocabulary):
         self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
         self.dispatch_changed(item = new)
 
-
     def remove_segmentation(self, segmentation):
         if self.segmentation[self.main_segmentation_index] is segmentation:
             main_segmentation = self.segmentation[0]
@@ -198,6 +197,8 @@ class VIANProject(IHasName, IHasVocabulary):
             main_segmentation = self.segmentation[self.main_segmentation_index]
 
         self.segmentation.remove(segmentation)
+        for exp in self.experiments:
+            exp.clear_from_deleted_containers()
         self.undo_manager.to_undo((self.remove_segmentation, [segmentation]), (self.add_segmentation, [segmentation]))
 
 
@@ -348,6 +349,8 @@ class VIANProject(IHasName, IHasVocabulary):
     def remove_screenshot_group(self, grp):
         if grp is not self.screenshot_groups[0]:
             self.screenshot_groups.remove(grp)
+            for exp in self.experiments:
+                exp.clear_from_deleted_containers()
             self.dispatch_changed()
 
     def get_screenshots_of_segment(self, main_segm_id):
@@ -484,6 +487,8 @@ class VIANProject(IHasName, IHasVocabulary):
             layer.remove_annotation(a)
         self.annotation_layers.remove(layer)
 
+        for exp in self.experiments:
+            exp.clear_from_deleted_containers()
 
         if len(self.annotation_layers) > 0:
             self.current_annotation_layer = self.annotation_layers[0]
@@ -767,7 +772,7 @@ class VIANProject(IHasName, IHasVocabulary):
         self.sort_screenshots()
         self.undo_manager.clear()
 
-    def get_template(self, segm, voc, ann, scripts, experiment):
+    def get_template(self, segm, voc, ann, scripts, experiment, experiment_exporter):
         segmentations = []
         vocabularies = []
         layers = []
@@ -775,20 +780,20 @@ class VIANProject(IHasName, IHasVocabulary):
         experiments = []
         if segm:
             for s in self.segmentation:
-                segmentations.append(s.get_name())
+                segmentations.append([s.get_name(), s.unique_id])
         if voc:
             for v in self.vocabularies:
                 vocabularies.append(v.serialize())
         if ann:
             for l in self.annotation_layers:
-                layers.append([l.get_name(), l.get_start(), l.get_end()])
+                layers.append([l.get_name(), l.get_start(), l.get_end(), l.unique_id])
         if scripts:
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
 
         if experiment:
             for e in self.experiments:
-                experiments.append(e.serialize())
+                experiments.append(experiment_exporter.export(None, e, return_dict = True))
 
         template = dict(
             segmentations = segmentations,
@@ -800,7 +805,7 @@ class VIANProject(IHasName, IHasVocabulary):
         )
         return template
 
-    def apply_template(self, template_path):
+    def apply_template(self, template_path, experiment_importer):
 
         try:
             with open(template_path, "r") as f:
@@ -810,7 +815,9 @@ class VIANProject(IHasName, IHasVocabulary):
             return
 
         for s in template['segmentations']:
-            self.create_segmentation(s)
+            new = Segmentation(s[0])
+            new.unique_id = s[1]
+            self.add_segmentation(new, False)
 
         for v in template['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
@@ -824,7 +831,8 @@ class VIANProject(IHasName, IHasVocabulary):
             self.add_script(new)
 
         for e in template['experiments']:
-            new = Experiment().deserialize(e, self)
+            experiment_importer.import_experiment(None, self, e)
+
 
     #endregion
 
@@ -839,7 +847,6 @@ class VIANProject(IHasName, IHasVocabulary):
         counter = 0
         name = voc.name
         duplicate = None
-
         while(not_ok):
             has_duplicate = False
             for v in self.vocabularies:
@@ -859,8 +866,8 @@ class VIANProject(IHasName, IHasVocabulary):
                 y = [w.name for w in duplicate.words_plain]
 
                 if set(x) == set(y):
+                    print("RETURN")
                     return duplicate
-
 
         voc.name = name
         voc.set_project(self)
@@ -870,7 +877,7 @@ class VIANProject(IHasName, IHasVocabulary):
         if dispatch:
             self.dispatch_changed()
 
-        return None
+        return voc
 
     def remove_vocabulary(self, voc):
         if voc in self.vocabularies:
@@ -3096,13 +3103,13 @@ class Vocabulary(IProjectContainer, IHasName):
         self.experiment = None
         self.base_vocabulary = None
 
-    def create_word(self, name, parent_word = None, unique_id = -1):
+    def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
         word = VocabularyWord(name, vocabulary=self)
         word.unique_id = unique_id
-        self.add_word(word, parent_word)
+        self.add_word(word, parent_word, dispatch)
         return word
 
-    def add_word(self, word, parent_word = None):
+    def add_word(self, word, parent_word = None, dispatch = True):
         """
         
         :param word: the Word object to add
@@ -3125,7 +3132,8 @@ class Vocabulary(IProjectContainer, IHasName):
                 self.words_plain.append(word)
                 word.set_project(self.project)
 
-        self.dispatch_on_changed(item=self)
+        if dispatch:
+            self.dispatch_on_changed(item=self)
 
     def remove_word(self, word, dispatch = True):
         children = []
@@ -3211,10 +3219,10 @@ class Vocabulary(IProjectContainer, IHasName):
             parent = self.project.get_by_id(w['parent'])
             # If this is a root node in the Vocabulary
             if isinstance(parent, Vocabulary):
-                self.create_word(w['name'], unique_id=w['unique_id'])
+                self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
 
             else:
-                self.create_word(w['name'], parent, unique_id=w['unique_id'])
+                self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
 
         try:
             self.derived_vocabulary = serialization['derived']
@@ -3225,9 +3233,12 @@ class Vocabulary(IProjectContainer, IHasName):
         return self
 
     def export_vocabulary(self, path):
-        data = self.serialize()
-        with open(path, "w") as f:
-            json.dump(data, f)
+        try:
+            data = self.serialize()
+            with open(path, "w") as f:
+                json.dump(data, f)
+        except:
+            print("Export_Vocabulary() failed with:", path)
 
     def import_vocabulary(self, path = None, project = None, serialization = None):
         if serialization is None:
@@ -3279,6 +3290,16 @@ class Vocabulary(IProjectContainer, IHasName):
                 self.create_word(w['name'], parent, unique_id=new_id)
 
         return self, id_replacing_table
+
+    def get_vocabulary_id(self):
+        vid = self.name
+        for w in self.get_vocabulary_as_list():
+            try:
+                vid += w.name[0]
+            except:
+                continue
+        print("Vocabulary ID: ", vid)
+        return vid
 
     def set_experiment(self, experiment, base_vocabulary):
         self.experiment = experiment
@@ -3397,7 +3418,15 @@ class Experiment(IProjectContainer, IHasName):
             self.add_class_object(new)
         else:
             parent.add_child(new)
+
         return new
+
+    def clear_from_deleted_containers(self):
+        for root in self.classification_objects:
+            objects = []
+            root.get_children_plain(objects)
+            for obj in objects:
+                obj.clear_deleted_containers()
 
     def add_class_object(self, classification_object):
         self.classification_objects.append(classification_object)
@@ -3423,7 +3452,6 @@ class Experiment(IProjectContainer, IHasName):
             for c in plain:
                 serializations.append(c.serialize())
 
-
         serialization = dict(
             name = self.name,
             unique_id = self.unique_id,
@@ -3446,18 +3474,35 @@ class Experiment(IProjectContainer, IHasName):
 
         return self
 
-    def get_vocabulary_list(self):
+    def get_classification_objects_plain(self):
         result = []
-        for obj in self.classification_objects:
-            for voc in obj.classification_vocabularies:
-                result.append(voc)
+        for c in self.classification_objects:
+            r = [c]
+            c.get_children_plain(r)
+            result.extend(r)
+
         return result
+
+    def get_vocabulary_list(self, container = None):
+        if container is None:
+            result = []
+            for obj in self.get_classification_objects_plain():
+                for voc in obj.classification_vocabularies:
+                    result.append(voc)
+            return result
+        else:
+            result = []
+            for obj in self.get_classification_objects_plain():
+                if obj.has_container(container):
+                    for voc in obj.classification_vocabularies:
+                        result.append(voc)
+            return result
 
     def delete(self):
         self.project.remove_experiment(self)
         self.dispatch_on_changed()
 
-class ClassificationObjects(IProjectContainer):
+class ClassificationObjects(IProjectContainer, IHasName):
     """
     A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
     Several ClassificationTargets may form a Tree. 
@@ -3476,10 +3521,14 @@ class ClassificationObjects(IProjectContainer):
         self.children = []
         self.classification_vocabularies = []
 
-    def add_vocabulary(self, voc: Vocabulary):
+        self.target_container = []
+        self.target_containers_string = "All"
+        self.target_container_type = TargetContainerType.ALL
+
+    def add_vocabulary(self, voc: Vocabulary, dispatch = True):
         new_voc = self.project.copy_vocabulary(voc, add_to_global=False)
         new_voc.set_name(self.name + ":" + new_voc.get_name())
-        self.project.add_vocabulary(new_voc)
+        self.project.add_vocabulary(new_voc, dispatch)
         new_voc.set_experiment(self.experiment, voc)
         self.classification_vocabularies.append(new_voc)
         self.dispatch_on_changed()
@@ -3496,8 +3545,51 @@ class ClassificationObjects(IProjectContainer):
         """
         result = []
         for v in self.classification_vocabularies:
-            result.append(v.base_vocabulary)
+            if v is not None:
+                result.append(v.base_vocabulary)
         return result
+
+    def clear_deleted_containers(self):
+        for tgt in self.target_container:
+            if tgt not in self.project.segmentation and \
+                tgt not in self.project.annotation_layers and \
+                    tgt not in self.project.screenshot_groups:
+                self.target_container.remove(tgt)
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+
+    def has_container(self, container):
+        """
+        :param container: 
+        :return: returns True if the input container is target of this Classification Object
+        """
+        if self.target_container_type == TargetContainerType.EXPLICIT_ANNOTATIONS:
+            if container in self.target_container[0].annotations:
+                return True
+        elif self.target_container_type == TargetContainerType.EXPLICIT_SCREENSHOTS:
+            if container in self.target_container[0].screenshots:
+                return True
+
+        elif self.target_container_type == TargetContainerType.EXPLICIT_SEGMENTS:
+            if container in self.target_container[0].segments:
+                return True
+
+        elif self.target_container_type is TargetContainerType.ALL_SEGMENTS:
+            if container.get_type() == SEGMENT:
+                return True
+        elif self.target_container_type is TargetContainerType.ALL_SCREENSHOTS:
+            if container.get_type() == SCREENSHOT:
+                return True
+        elif self.target_container_type is TargetContainerType.ALL_ANNOTATIONS:
+            if container.get_type() == ANNOTATION:
+                return True
+        else:
+            return True
+        return False
 
     def add_child(self, classification_object):
         classification_object.parent = self
@@ -3510,6 +3602,19 @@ class ClassificationObjects(IProjectContainer):
             self.project.remove_from_id_list(classification_object)
         else:
             print("NOT FOUND")
+
+    def set_target_container(self, container: IProjectContainer, type = TargetContainerType.ALL):
+        if not isinstance(container, list):
+            container = [container]
+        if container == [None]:
+            self.target_container = []
+            self.target_containers_string = "All"
+        else:
+            self.target_container = container
+            self.target_containers_string = str(self.target_container)
+
+        self.target_container_type = type
+        self.dispatch_on_changed(item=self)
 
     def get_children_plain(self, list):
         list.append(self)
@@ -3526,7 +3631,11 @@ class ClassificationObjects(IProjectContainer):
             unique_id = self.unique_id,
             parent = self.parent.unique_id,
             children = [c.unique_id for c in self.children],
-            classification_vocabularies = [v.unique_id for v in self.classification_vocabularies]
+            classification_vocabularies = [v.unique_id for v in self.classification_vocabularies],
+            classification_vocabularies_vid = [v.base_vocabulary.get_vocabulary_id() for v in self.classification_vocabularies],
+            target_container = [c.unique_id for c in self.target_container],
+            target_container_type = self.target_container_type.value
+
         )
         return serialization
 
@@ -3541,6 +3650,12 @@ class ClassificationObjects(IProjectContainer):
             p.add_class_object(self)
 
         self.classification_vocabularies = [project.get_by_id(uid) for uid in serialization['classification_vocabularies']]
+        try:
+            self.target_container = [project.get_by_id(uid) for uid in serialization['target_container']]
+            self.target_container_type = TargetContainerType(serialization['target_container_type'])
+        except:
+            self.target_container = []
+            self.target_container_type = TargetContainerType.ALL
 
         return self
 #endregion
@@ -3602,7 +3717,7 @@ class FileMediaObject(AbstractMediaObject):
 
     def preview(self):
         try:
-            os.startfile(self.file_path)
+            open_file(self.file_path)
         except Exception as e:
             print(e)
 

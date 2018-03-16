@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
+import subprocess
 import cv2
 # import matplotlib.pyplot as plt
 import numpy as np
@@ -23,6 +24,11 @@ def ms_to_string(ms, include_ms = False):
 
 
 def ts_to_ms(hour=0, min=0, sec=0, ms=0):
+    hour = int(hour)
+    min = int(min)
+    sec = int(sec)
+    ms = int(ms)
+
     time = hour * 60 * 60 * 1000
     time += min * 60 * 1000
     time += sec * 1000
@@ -276,3 +282,14 @@ def find_closest(frame, segment):
     match = np.argmin(a)
     rate = np.amin(a)
     return match, rate
+
+
+def open_file(file_name):
+    try:
+        if sys.platform == "win32":
+            os.startfile(file_name)
+        else:
+            opener ="open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, file_name])
+    except Exception as e:
+        print(e)

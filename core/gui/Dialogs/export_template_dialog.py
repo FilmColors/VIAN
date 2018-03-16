@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout,
 from PyQt5 import uic
 from core.gui.ewidgetbase import EDialogWidget
 from core.gui.tools import DialogPrompt
+from core.data.exporters import ExperimentExporter
 import os
 import json
 
@@ -26,7 +27,7 @@ class ExportTemplateDialog(EDialogWidget):
 
         template = self.main_window.project.get_template(segmentation, vocabulary,
                                                          annotation_layers, node_scripts,
-                                                         experiments)
+                                                         experiments, ExperimentExporter())
 
         path = self.settings.DIR_TEMPLATES + name + ".viant"
         try:

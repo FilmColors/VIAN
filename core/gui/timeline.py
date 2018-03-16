@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QPushButton
 
 from core.data.computation import ms_to_string, numpy_to_qt_image
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
-from core.gui.ewidgetbase import EDockWidget, EToolBar
+from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup, TextEditPopup
 from core.data.containers import *
 from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
@@ -1245,7 +1245,6 @@ class TimebarSlice(QtWidgets.QWidget):
                                                     a0.mimeData().urls()[0].toLocalFile(),
                                                     self.item)
 
-
     def enterEvent(self, QEvent):
         if not self.locked:
             self.is_hovered = True
@@ -1346,6 +1345,10 @@ class TimebarSlice(QtWidgets.QWidget):
                 else:
                     self.setCursor(QtGui.QCursor(Qt.ArrowCursor))
 
+    def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
+        if self.item.get_type() == SEGMENT:
+            popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
+
     def update(self, *__args):
         super(TimebarSlice, self).update(*__args)
 
@@ -1399,6 +1402,7 @@ class MediaObjectWidget(QWidget):
         elif a0.button() == Qt.RightButton:
             open_context_menu(self.parent().timeline.main_window, self.mapToGlobal(a0.pos()),
                               [self.media_object], self.media_object.project)
+
 
 class TimebarKey(QtWidgets.QWidget):
     def __init__(self, parent, annotation, key_index):
@@ -1462,6 +1466,7 @@ class TimebarPicture(QtWidgets.QWidget):
         self.color = (123, 86, 32, 100)
         self.pic_height = height
         qimage, qpixmap = numpy_to_qt_image(screenshot.get_preview(scale=0.1))
+        self.pixmap = qpixmap
         self.qimage = qimage
         self.size = (screenshot.img_movie.shape[0], screenshot.img_movie.shape[1])
         width = self.size[1] * self.pic_height // self.size[0]
@@ -1499,9 +1504,15 @@ class TimebarPicture(QtWidgets.QWidget):
 
     def enterEvent(self, QEvent):
         self.is_hovered = True
+        self.raise_()
+
+    def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
+        preview = ImagePreviewPopup(self.timeline.main_window, numpy_to_pixmap(self.item.img_movie))
+        preview.show()
 
     def leaveEvent(self, QEvent):
         self.is_hovered = False
+        self.lower()
 
 
 class TimelineScrubber(QtWidgets.QWidget):

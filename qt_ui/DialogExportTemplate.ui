@@ -83,6 +83,9 @@
          <property name="text">
           <string>Annotation Layers</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -90,12 +93,18 @@
          <property name="text">
           <string>Node Scripts</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="cB_Experiments">
          <property name="text">
           <string>Experiments</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

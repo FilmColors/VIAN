@@ -25,7 +25,7 @@ from core.data.vian_updater import VianUpdater
 from core.data.exporters import *
 from core.data.tools import *
 from core.concurrent.auto_segmentation import *
-# from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
+from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
@@ -287,7 +287,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.action_importELAN_Project.triggered.connect(self.import_elan_project)
-        self.actionImportVocabulary.triggered.connect(self.import_vocabulary)
+        self.actionImportVocabulary.triggered.connect(partial(self.import_vocabulary, None))
         self.actionImportFilmColorsPipeline.triggered.connect(self.import_pipeline)
         self.actionImportFilmColorsFilemaker.triggered.connect(self.import_filemaker)
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
@@ -569,15 +569,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget = PlayerDockWidget(self)
             self.player_dock_widget.set_player(self.player)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
-            # # #DARWIN
-            # # if self.is_darwin:  # for MacOS
-            # #     self.player_container.show()
-            # #     self.setCentralWidget(self.player_placeholder)
-            # # else:
-            # self.setCentralWidget(self.player)
+
         else:
             self.player_dock_widget.set_player(self.player)
             self.player_dock_widget.show()
+        if self.drawing_overlay is not None:
+            self.set_overlay_visibility(True)
 
 
 #OLD CODE
@@ -1029,12 +1026,6 @@ class MainWindow(QtWidgets.QMainWindow):
         job = result[1]
         self.allow_dispatch_on_change = False
 
-        # progress = None
-        # if job.show_modify_progress:
-        #     progress = DialogProgress(self, "Modifying Project")
-        #
-        # worker = ProjectModifier(job.modify_project, res, self, self.project, progress)
-        # self.thread_pool.start(worker)
         if not job.aborted:
             job.modify_project(project=self.project,result=res)
 
@@ -1205,6 +1196,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.show()
             self.screenshots_manager_dock.show()
             self.vocabulary_matrix.show()
+            self.player_dock_widget.show()
+            self.drawing_overlay.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.screenshots_manager_dock, Qt.Vertical)
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
@@ -1241,10 +1234,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.centralWidget().show()
         # self.centralWidget().setBaseSize(size_central)
 
-        if perspective != (Perspective.Annotation.name or Perspective.Segmentation.name):
-            self.set_overlay_visibility(False)
-        else:
+        if self.player_dock_widget.isVisible():
             self.set_overlay_visibility(True)
+        else:
+            self.set_overlay_visibility(False)
 
         self.set_default_dock_sizes(self.current_perspective)
 
@@ -1440,7 +1433,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.project.inhibit_dispatch = True
         if template_path is not None:
-            self.project.apply_template(template_path)
+            self.project.apply_template(template_path, ExperimentImporter())
 
         self.project.create_file_structure()
         # Importing all Vocabularies
@@ -1628,6 +1621,7 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 exporter.export(dir + "/" + exp.get_name().replace(" ", "_") + FILE_EXT_EXPERIMENT, experiment=exp)
             except Exception as e:
+                raise(e)
                 print("Error in export_experiment()", str(e))
 
         QMessageBox.information(self, "Export Finished", "The Experiments have been exported to " + str(dir))
@@ -1680,10 +1674,12 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def import_segmentation(self, path=None):
-        QMessageBox.warning(self, "Deprecated",
-                            "The Segmentation Importer is deprecated and therefore removed from VIAN.\n "
-                            "For ELAN Projects use the \"ELAN Project Importer\". \n "
-                            "A new Version for importing arbitary Segmentations is planned but not yet included.")
+        dialog = SegmentationImporterDialog(self, self.project, self)
+        dialog.show()
+        # QMessageBox.warning(self, "Deprecated",
+        #                     "The Segmentation Importer is deprecated and therefore removed from VIAN.\n "
+        #                     "For ELAN Projects use the \"ELAN Project Importer\". \n "
+        #                     "A new Version for importing arbitary Segmentations is planned but not yet included.")
         # SegmentationImporterDialog(self, self.project, self)
 
     def export_segmentation(self):
@@ -1694,6 +1690,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def import_vocabulary(self, paths=None):
         if paths is None:
             paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
+
         # path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
         try:
             self.project.inhibit_dispatch = True
@@ -1702,6 +1699,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.inhibit_dispatch = False
             self.project.dispatch_changed()
         except Exception as e:
+            raise e
             self.print_message("Vocabulary Import Failed", "Red")
             self.print_message(str(e), "Red")
 

@@ -1,16 +1,28 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 
-from core.gui.ewidgetbase import EDockWidget
+from core.gui.ewidgetbase import EDockWidget, CreateSegmentationPopup, CreateAnnotationLayerPopup, CreateScreenshotGroupPopup
 from core.data.interfaces import IProjectChangeNotify
 from core.data.containers import *
-from core.data.enums import MovieSource
+from core.data.enums import MovieSource, TargetContainerType
+
+TGT_ENTRIES = [ 'All',
+                "All Segments",
+                "All Annotations" ,
+                "All Screenshots",
+                "All Segments of ",
+                "All Annotations of ",
+                "All Screenshots of ",
+                "All Segments of <Create Segmentation>",
+                "All Annotations of <Create Annotation Layer",
+                "All Screenshots of <Create Screenshots Group>"]
 
 class ExperimentEditorDock(EDockWidget):
     def __init__(self, main_window, editor):
         super(ExperimentEditorDock, self).__init__(main_window, limit_size=False)
         self.setWidget(editor)
         self.setWindowTitle("Experiment Overview")
+
 
 class ExperimentEditor(QWidget, IProjectChangeNotify):
     def __init__(self, main_window):
@@ -25,6 +37,12 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.voc_items = []
         self.analysis_items = []
         self.inhibit_ui_signals = False
+
+        self.cache_obj = None
+        self.cache_param = None
+
+        # This contains all current option of the ComboBox Target Container
+        self.target_container_options = []
 
         self.cB_ClassSegment.stateChanged.connect(self.source_changed)
         self.cB_ClassAnnotation.stateChanged.connect(self.source_changed)
@@ -42,6 +60,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
         self.btn_AddObject.clicked.connect(self.add_class_object)
         self.btn_RemoveObject.clicked.connect(self.remove_class_object)
+        self.comboBox_TargetContainers.currentIndexChanged.connect(self.on_target_container_changed)
 
     def update_ui(self):
         if self.current_experiment is None or self.main_window.project is None:
@@ -59,6 +78,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.update_classification_object_tree()
             self.update_vocabulary_view()
             self.update_analysis_list()
+            self.update_target_container_combobox()
 
     def update_vocabulary_view(self):
         self.listView_Vocabularies.clear()
@@ -97,12 +117,100 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 item_index_list.append([obj, itm])
         self.treeWidget_Objects.expandAll()
 
+    def update_target_container_combobox(self):
+        self.comboBox_TargetContainers.currentIndexChanged.disconnect(self.on_target_container_changed)
+
+        self.comboBox_TargetContainers.clear()
+        self.target_container_options.clear()
+        self.comboBox_TargetContainers.addItem(TGT_ENTRIES[0])
+        self.target_container_options.append(("All", None))
+
+        if SEGMENT in self.current_experiment.classification_sources:
+            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[1])
+            self.target_container_options.append((TGT_ENTRIES[1], None))
+
+            for segm in self.current_experiment.project.segmentation:
+                self.comboBox_TargetContainers.addItem(TGT_ENTRIES[4] + segm.get_name())
+                self.target_container_options.append((TGT_ENTRIES[4] + segm.get_name(), segm))
+
+            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[7])
+            self.target_container_options.append((TGT_ENTRIES[7], None))
+
+        if ANNOTATION in self.current_experiment.classification_sources:
+            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[2])
+            self.target_container_options.append((TGT_ENTRIES[1], None))
+
+            for ann in self.current_experiment.project.annotation_layers:
+                self.comboBox_TargetContainers.addItem(TGT_ENTRIES[5] + ann.get_name())
+                self.target_container_options.append((TGT_ENTRIES[5] + ann.get_name(), ann))
+
+            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[8])
+            self.target_container_options.append((TGT_ENTRIES[8], None))
+
+        if SCREENSHOT in self.current_experiment.classification_sources:
+            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[3])
+            self.target_container_options.append((TGT_ENTRIES[3], None))
+
+            for grp in self.current_experiment.project.screenshot_groups:
+                self.comboBox_TargetContainers.addItem(TGT_ENTRIES[6] + grp.get_name())
+                self.target_container_options.append((TGT_ENTRIES[6] + grp.get_name(), grp))
+
+            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[9])
+            self.target_container_options.append((TGT_ENTRIES[9], None))
+
+        self.comboBox_TargetContainers.currentIndexChanged.connect(self.on_target_container_changed)
+
+    def on_target_container_changed(self):
+        if self.selected_class_object is not None:
+            idx = self.comboBox_TargetContainers.currentIndex()
+            curr_tpl = self.target_container_options[idx]
+            obj = self.selected_class_object.obj
+
+            if curr_tpl[0] == "All Segments of <Create Segmentation>":
+                popup = CreateSegmentationPopup(self.main_window, self.main_window.project,
+                                                self.selected_class_object.obj.name, self.on_new_created_object)
+                self.cache_obj = obj
+                self.cache_param = TargetContainerType.EXPLICIT_SEGMENTS
+            elif curr_tpl[0] == "All Annotations of <Create Annotation Layer":
+                popup = CreateAnnotationLayerPopup(self.main_window, self.main_window.project,
+                                                   self.selected_class_object.obj.name, self.on_new_created_object)
+                self.cache_obj = obj
+                self.cache_param = TargetContainerType.EXPLICIT_ANNOTATIONS
+
+            elif curr_tpl[0] == "All Screenshots of <Create Screenshots Group>":
+                popup = CreateScreenshotGroupPopup(self.main_window, self.main_window.project,
+                                                   self.selected_class_object.obj.name, self.on_new_created_object)
+                self.cache_obj = obj
+                self.cache_param = TargetContainerType.EXPLICIT_SCREENSHOTS
+
+            elif "All Segments of" in curr_tpl[0] and curr_tpl[1] is not None:
+                obj.set_target_container(curr_tpl[1], TargetContainerType.EXPLICIT_SEGMENTS)
+            elif "All Annotations of" in curr_tpl[0] and curr_tpl[1] is not None:
+                obj.set_target_container(curr_tpl[1], TargetContainerType.EXPLICIT_ANNOTATIONS)
+            elif "All Screenshots of" in curr_tpl[0] and curr_tpl[1] is not None:
+                obj.set_target_container(curr_tpl[1], TargetContainerType.EXPLICIT_SCREENSHOTS)
+
+            elif "All Segments" in curr_tpl[0]:
+                obj.set_target_container(None, TargetContainerType.ALL_SEGMENTS)
+            elif "All Annotations" in curr_tpl[0]:
+                obj.set_target_container(None, TargetContainerType.ALL_ANNOTATIONS)
+            elif "All Screenshots" in curr_tpl[0]:
+                obj.set_target_container(None, TargetContainerType.ALL_SCREENSHOTS)
+
+            else:
+                obj.set_target_container(None)
+
+            self.update_classification_object_tree()
+
+    def on_new_created_object(self, returnvalue):
+        self.cache_obj.set_target_container(returnvalue, self.cache_param)
+
     def on_class_selection_changed(self):
         self.inhibit_ui_signals = True
         if len(self.treeWidget_Objects.selectedItems()) > 0:
             self.selected_class_object = self.treeWidget_Objects.selectedItems()[0]
+            self.lineEdit_ObjectNameDetails.setText(self.selected_class_object.obj.name)
             self.update_vocabulary_view()
-
         else:
             self.selected_class_object = None
         self.inhibit_ui_signals = False
@@ -144,6 +252,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         #     sources.append(ANNOTATION_LAYER)
 
         self.current_experiment.classification_sources = sources
+        self.update_target_container_combobox()
 
     def name_changed(self):
         if self.inhibit_ui_signals:
@@ -215,11 +324,23 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
     def on_closed(self):
         self.update_ui()
 
+    def on_changed(self, project, item):
+        if item is None:
+            return
+
+        if isinstance(item, IProjectContainer) and item.get_type() == EXPERIMENT or item.get_type() == CLASSIFICATION_OBJECT:
+            self.update_ui()
+
+
 class ClassificationObjectItem(QTreeWidgetItem):
     def __init__(self, parent, obj):
         super(ClassificationObjectItem, self).__init__(parent)
-        self.setText(0, obj.name)
+        if len(obj.target_container) > 0:
+            self.setText(0, obj.name + " " + str([t.get_name() for t in obj.target_container]))
+        else:
+            self.setText(0, obj.name + " [All]")
         self.obj = obj
+
 
 class VocabularyListItem(QListWidgetItem):
     def __init__(self, parent, voc):

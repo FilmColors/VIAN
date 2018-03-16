@@ -460,11 +460,16 @@ class FileMakerVocImporter():
 
 
 class CSVImporter():
-    def get_fields(self, path):
+    def __init__(self):
+        self.delimiter = ";"
+
+    def get_fields(self, path, delimiter = ";"):
         try:
             with open(path, 'r') as csvfile:
-                reader = csv.reader(csvfile, delimiter=';')
+                reader = csv.reader((line.replace('\0','') for line in csvfile) , delimiter=delimiter)
                 for row in reader:
+                    print(row)
+                    self.delimiter = delimiter
                     return True, row
         except Exception as e:
             print(e)
@@ -482,7 +487,7 @@ class VocabularyCSVImporter(CSVImporter):
 
             # We do not want to dispatch until the end of the import
 
-            reader = csv.reader(csvfile, delimiter=';')
+            reader = csv.reader((line.replace('\0','') for line in csvfile), delimiter=';')
 
             counter = 0
 
@@ -551,29 +556,88 @@ class VocabularyCSVImporter(CSVImporter):
         project.dispatch_changed()
 
 
+class SegmentationImporter(CSVImporter):
+    def __init__(self):
+        super(SegmentationImporter, self).__init__()
+
+    def import_segmentation(self, path, project:VIANProject, fps,has_header, f_start, f_end, f_body, t_type = "ms"):
+        with open(path, 'r') as csvfile:
+            segmentation = project.create_segmentation(name="Imported Segmentation", dispatch=False)
+            # We do not want to dispatch until the end of the import
+            reader = csv.reader((line.replace('\0','') for line in csvfile), delimiter=self.delimiter)
+            counter = -1
+            idx_f_start = -1
+            idx_f_end = -1
+            idx_f_body = -1
+
+            for row in reader:
+                counter += 1
+                if counter == 0:
+                    idx_f_start = row.index(f_start)
+                    idx_f_end = row.index(f_end)
+                    idx_f_body = row.index(f_body)
+
+                    if has_header:
+                        continue
+
+
+
+                try:
+                    t_start = row[idx_f_start]
+                    t_end = row[idx_f_end]
+                    body = row[idx_f_body]
+
+                    if t_type == "MS":
+                        pass
+                    elif t_type == "HH:MM:SS":
+                        sp = t_start.split(":")
+                        t_start = ts_to_ms(sp[0], sp[1], sp[2])
+                        sp = t_end.split(":")
+                        t_end = ts_to_ms(sp[0], sp[1], sp[2])
+                    elif t_type == "HH:MM:SS:MS":
+                        sp = t_start.split(":")
+                        t_start = ts_to_ms(sp[0], sp[1], sp[2], sp[3])
+                        sp = t_end.split(":")
+                        t_end = ts_to_ms(sp[0], sp[1], sp[2], sp[3])
+                    elif t_type == "FrameIDX":
+                        t_start = frame2ms(int(t_start), fps)
+                        t_end = frame2ms(int(t_end), fps)
+
+                    segmentation.create_segment(start=t_start, stop=t_end, annotation_body=str(body), dispatch=False)
+
+                except Exception as e:
+                    print("Error in Import Segmentation:", e)
+                    continue
+
+        project.dispatch_changed()
+
+
+
 class ExperimentImporter():
-    def import_experiment(self, path, project:VIANProject):
-        with open(path, "r") as f:
-            data = json.load(f)
+    def import_experiment(self, path, project:VIANProject, data = None):
+        if data is None:
+            with open(path, "r") as f:
+                data = json.load(f)
 
         base_vocs_ser = data['base_vocs']
         experiment_ser = data['experiment']
-        id_mapping = data['id_mapping']
 
         # We first need to import the Vocabularies into the Base Vocabularies,
         # and then derive one for each of the Classification Objects.
 
         # Adding all Vocabularies that are no duplicates
-        base_voc_id_mapping_old = []
-        base_voc_id_mapping_new = []
-        for s in base_vocs_ser:
-            duplicate = project.add_vocabulary(Vocabulary("New").deserialize(s, project), dispatch = False)
-            if duplicate is not None:
-                base_voc_id_mapping_old.append(s['unique_id'])
-                base_voc_id_mapping_new.append(duplicate.unique_id)
-            else:
-                base_voc_id_mapping_old.append(s['unique_id'])
-                base_voc_id_mapping_new.append(s['unique_id'])
+        print("Importing Vocabularies")
+        base_voc_voc_ids = []
+        base_voc_unique_ids = []
+
+        for i, s in enumerate(base_vocs_ser):
+
+            voc = project.add_vocabulary(Vocabulary("New").deserialize(s, project), dispatch = False)
+            base_voc_unique_ids.append(voc.unique_id)
+            base_voc_voc_ids.append(voc.get_vocabulary_id())
+
+        print(base_voc_voc_ids)
+        print(base_voc_unique_ids)
 
         experiment = project.create_experiment(dispatch=False)
         experiment.name = experiment_ser['name']
@@ -587,13 +651,14 @@ class ExperimentImporter():
         for obj in experiment_ser['classification_objects']:
             parent_id_old = obj['parent']
             parent_new_id = new_ids[old_ids.index(parent_id_old)]
-            class_obj = experiment.create_class_object(obj['name'], project.get_by_id(parent_new_id))
+            old_ids.append(obj['unique_id'])
 
-            for mapping in id_mapping:
-                if mapping[0] == obj['unique_id']:
-                    for voc_id in mapping[1]:
-                        new_voc_id = base_voc_id_mapping_new[base_voc_id_mapping_old.index(voc_id)]
-                        class_obj.add_vocabulary(project.get_by_id(new_voc_id))
+            class_obj = experiment.create_class_object(obj['name'], project.get_by_id(parent_new_id))
+            new_ids.append(class_obj.unique_id)
+            for vid in obj['classification_vocabularies_vid']:
+                print(vid)
+                v_unique_id = base_voc_unique_ids[base_voc_voc_ids.index(vid)]
+                class_obj.add_vocabulary(project.get_by_id(v_unique_id), dispatch = False)
 
 
 

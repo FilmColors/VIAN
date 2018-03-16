@@ -14,7 +14,7 @@ from core.data.containers import Screenshot, VIANProject
 from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
-from core.gui.ewidgetbase import EDockWidget, EToolBar
+from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
 
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1
@@ -699,7 +699,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def mouseDoubleClickEvent(self, *args, **kwargs):
         if len(self.selected) > 0:
-            self.frame_image(self.selected[0])
+            popup = ImagePreviewPopup(self, self.selected[0].pixmap())
+            # self.frame_image(self.selected[0])
         else:
             self.center_images()
 
@@ -716,6 +717,7 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         self.manager = manager
         self.screenshot_obj = obj
         self.selection_rect = selection_rect
+
 
     def mousePressEvent(self, *args, **kwargs):
         self.setSelected(True)
