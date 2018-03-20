@@ -335,6 +335,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         # self.set_stick_to_type(False)
 
     def on_changed(self, project, item):
+        return
+        #TODO
         if item is not None:
             if item.get_type() == VOCABULARY or item.get_type() == VOCABULARY_WORD or item.get_type() == EXPERIMENT:
                 self.recreate_widget()
@@ -343,14 +345,20 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.update_experiment_list()
 
     def on_loaded(self, project):
+        return
+        #TODO
         self.recreate_widget()
 
     def on_selected(self, sender, selected):
+        #TODO
+        return
         if len(selected) > 0:
             self.recreate_widget(selected[0])
             self.update_widget()
 
     def on_closed(self):
+        return
+        #TODO
         self.current_container = None
         self.current_experiment = None
         self.recreate_widget()
@@ -417,12 +425,14 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 itm[0].setEnabled(False)
 
     def update_experiment_list(self):
+        return
+        # TODO
         last_selected = self.cb_experiment.currentText()
         self.cb_experiment.clear()
         new = []
-        for exp in self.project().experiments:
-            self.cb_experiment.addItem(exp.get_name())
-            new.append(exp.get_name())
+        # for exp in self.project().experiments:
+        #     self.cb_experiment.addItem(exp.get_name())
+        #     new.append(exp.get_name())
 
         if last_selected in new:
             self.cb_experiment.setCurrentText(last_selected)

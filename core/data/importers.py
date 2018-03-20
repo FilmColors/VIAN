@@ -579,9 +579,6 @@ class SegmentationImporter(CSVImporter):
 
                     if has_header:
                         continue
-
-
-
                 try:
                     t_start = row[idx_f_start]
                     t_end = row[idx_f_end]
@@ -612,55 +609,55 @@ class SegmentationImporter(CSVImporter):
         project.dispatch_changed()
 
 
-
-class ExperimentImporter():
-    def import_experiment(self, path, project:VIANProject, data = None):
-        if data is None:
-            with open(path, "r") as f:
-                data = json.load(f)
-
-        base_vocs_ser = data['base_vocs']
-        experiment_ser = data['experiment']
-
-        # We first need to import the Vocabularies into the Base Vocabularies,
-        # and then derive one for each of the Classification Objects.
-
-        # Adding all Vocabularies that are no duplicates
-        print("Importing Vocabularies")
-        base_voc_voc_ids = []
-        base_voc_unique_ids = []
-
-        for i, s in enumerate(base_vocs_ser):
-
-            voc = project.add_vocabulary(Vocabulary("New").deserialize(s, project), dispatch = False)
-            base_voc_unique_ids.append(voc.unique_id)
-            base_voc_voc_ids.append(voc.get_vocabulary_id())
-
-        print(base_voc_voc_ids)
-        print(base_voc_unique_ids)
-
-        experiment = project.create_experiment(dispatch=False)
-        experiment.name = experiment_ser['name']
-        experiment.unique_id = experiment_ser['unique_id']
-        experiment.classification_sources = experiment_ser['classification_sources']
-        experiment.analyses_templates = experiment_ser['analyses_templates']
-
-        old_ids = [experiment_ser['unique_id']]
-        new_ids = [experiment.unique_id]
-
-        for obj in experiment_ser['classification_objects']:
-            parent_id_old = obj['parent']
-            parent_new_id = new_ids[old_ids.index(parent_id_old)]
-            old_ids.append(obj['unique_id'])
-
-            class_obj = experiment.create_class_object(obj['name'], project.get_by_id(parent_new_id))
-            new_ids.append(class_obj.unique_id)
-            for vid in obj['classification_vocabularies_vid']:
-                print(vid)
-                v_unique_id = base_voc_unique_ids[base_voc_voc_ids.index(vid)]
-                class_obj.add_vocabulary(project.get_by_id(v_unique_id), dispatch = False)
-
-
+#
+# class ExperimentImporter():
+#     def import_experiment(self, path, project:VIANProject, data = None):
+#         if data is None:
+#             with open(path, "r") as f:
+#                 data = json.load(f)
+#
+#         base_vocs_ser = data['base_vocs']
+#         experiment_ser = data['experiment']
+#
+#         # We first need to import the Vocabularies into the Base Vocabularies,
+#         # and then derive one for each of the Classification Objects.
+#
+#         # Adding all Vocabularies that are no duplicates
+#         print("Importing Vocabularies")
+#         base_voc_voc_ids = []
+#         base_voc_unique_ids = []
+#
+#         for i, s in enumerate(base_vocs_ser):
+#
+#             voc = project.add_vocabulary(Vocabulary("New").deserialize(s, project), dispatch = False)
+#             base_voc_unique_ids.append(voc.unique_id)
+#             base_voc_voc_ids.append(voc.get_vocabulary_id())
+#
+#         print(base_voc_voc_ids)
+#         print(base_voc_unique_ids)
+#
+#         experiment = project.create_experiment(dispatch=False)
+#         experiment.name = experiment_ser['name']
+#         experiment.unique_id = experiment_ser['unique_id']
+#         experiment.classification_sources = experiment_ser['classification_sources']
+#         experiment.analyses_templates = experiment_ser['analyses_templates']
+#
+#         old_ids = [experiment_ser['unique_id']]
+#         new_ids = [experiment.unique_id]
+#
+#         for obj in experiment_ser['classification_objects']:
+#             parent_id_old = obj['parent']
+#             parent_new_id = new_ids[old_ids.index(parent_id_old)]
+#             old_ids.append(obj['unique_id'])
+#
+#             class_obj = experiment.create_class_object(obj['name'], project.get_by_id(parent_new_id))
+#             new_ids.append(class_obj.unique_id)
+#             for vid in obj['classification_vocabularies_vid']:
+#                 print(vid)
+#                 v_unique_id = base_voc_unique_ids[base_voc_voc_ids.index(vid)]
+#                 class_obj.add_vocabulary(project.get_by_id(v_unique_id), dispatch = False)
+#
+#
 
 
 

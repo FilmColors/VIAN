@@ -16,7 +16,7 @@ VOCABULARY = 10
 VOCABULARY_WORD = 11
 ANALYSIS_NODE_SCRIPT = 12
 ANALYSIS_JOB_ANALYSIS = 13
-EXPERIMENT = 14
+# EXPERIMENT = 14
 CLASSIFICATION_OBJECT = 15
 MEDIA_OBJECT = 16
 
@@ -57,8 +57,8 @@ def get_type_as_string(type):
         return "ANALYSIS_NODE_SCRIPT"
     elif type == ANALYSIS_JOB_ANALYSIS:
         return "ANALYSIS_JOB_ANALYSIS"
-    elif type == EXPERIMENT:
-        return "EXPERIMENT"
+    # elif type == EXPERIMENT:
+    #     return "EXPERIMENT"
     elif type == CLASSIFICATION_OBJECT:
         return "CLASSIFICATION_OBJECT"
     else:

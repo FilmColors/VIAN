@@ -128,29 +128,29 @@ class JsonExporter():
         # result = ""
 
 
-class ExperimentExporter():
-    def export(self, path, experiment: Experiment, return_dict = False):
-        base_vocs = []
-        # Collecting all used Base Vocabularies
-        for v in experiment.get_vocabulary_list():
-            base = v.base_vocabulary
-            if base not in base_vocs:
-                base_vocs.append(base)
-                print(base.name)
-
-        serialization_exp = experiment.serialize()
-        serialization_vocs = [v.serialize() for v in base_vocs]
-
-        result = dict(
-            experiment = serialization_exp,
-            base_vocs = serialization_vocs,
-        )
-
-        if not return_dict:
-            with open(path, "w") as f:
-                json.dump(result, f)
-        else:
-            return result
+# class ExperimentExporter():
+#     def export(self, path, experiment: Experiment, return_dict = False):
+#         base_vocs = []
+#         # Collecting all used Base Vocabularies
+#         for v in experiment.get_vocabulary_list():
+#             base = v.base_vocabulary
+#             if base not in base_vocs:
+#                 base_vocs.append(base)
+#                 print(base.name)
+#
+#         serialization_exp = experiment.serialize()
+#         serialization_vocs = [v.serialize() for v in base_vocs]
+#
+#         result = dict(
+#             experiment = serialization_exp,
+#             base_vocs = serialization_vocs,
+#         )
+#
+#         if not return_dict:
+#             with open(path, "w") as f:
+#                 json.dump(result, f)
+#         else:
+#             return result
 
 def build_file_name(naming, screenshot, movie_descriptor):
     file_name = "/"
