@@ -6,13 +6,12 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
 import pyqtgraph as pg
-from core.visualization.feature_plot import GenericFeaturePlot, SegmentTuple, FeatureTuple
-from extensions.plugins.fiwi_tools.fiwi_visualizer.visualizer import FiwiVisualizer
+from extensions.plugins.imdb_finder.imdb_finder import IMDBFinder
 
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = None
+        self.t = IMDBFinder(None, None)
         self.setCentralWidget(self.t)
 
 

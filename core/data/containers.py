@@ -197,8 +197,8 @@ class VIANProject(IHasName, IHasVocabulary):
             main_segmentation = self.segmentation[self.main_segmentation_index]
 
         self.segmentation.remove(segmentation)
-        for exp in self.experiments:
-            exp.clear_from_deleted_containers()
+        # for exp in self.experiments:
+        #     exp.clear_from_deleted_containers()
         self.undo_manager.to_undo((self.remove_segmentation, [segmentation]), (self.add_segmentation, [segmentation]))
 
 
@@ -349,8 +349,6 @@ class VIANProject(IHasName, IHasVocabulary):
     def remove_screenshot_group(self, grp):
         if grp is not self.screenshot_groups[0]:
             self.screenshot_groups.remove(grp)
-            for exp in self.experiments:
-                exp.clear_from_deleted_containers()
             self.dispatch_changed()
 
     def get_screenshots_of_segment(self, main_segm_id):
@@ -486,9 +484,6 @@ class VIANProject(IHasName, IHasVocabulary):
         for a in layer.annotations:
             layer.remove_annotation(a)
         self.annotation_layers.remove(layer)
-
-        for exp in self.experiments:
-            exp.clear_from_deleted_containers()
 
         if len(self.annotation_layers) > 0:
             self.current_annotation_layer = self.annotation_layers[0]

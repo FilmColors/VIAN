@@ -67,6 +67,7 @@ class Worker(QRunnable):
     def on_progress(self, float_value):
         self.signals.sign_progress.emit((self.task_id, float_value))
 
+
 class MinimalWorkerSignals(QObject):
     finished = pyqtSignal(object)
     callback = pyqtSignal(object)
@@ -106,6 +107,7 @@ class MinimalThreadWorker(QRunnable):
     @pyqtSlot()
     def abort(self):
         self.aborted = True
+
 
 class LiveWidgetThreadWorker(MinimalThreadWorker):
     def __init__(self, frame, data, func):
