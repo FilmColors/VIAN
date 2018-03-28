@@ -78,6 +78,8 @@ dependencies:
   - alembic==0.9.8
   - banal==0.3.3
   - dataset==1.0.6
+  - imdbpy==6.4.1
+  - lxml==4.2.1
   - mako==1.0.7
   - markupsafe==1.0
   - normality==0.5.11

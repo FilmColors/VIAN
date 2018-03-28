@@ -6,232 +6,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5f86adad-e443-47bd-a2df-ab0eb0627df8" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/source/plugins/imdb_finder/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_docs/source/plugins/imdb_finder/imdb_finder.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/extensions/plugins/imdb_finder/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/extensions/plugins/imdb_finder/imdb_finder.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/DevelopersGuide.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/UserGuide.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/analyses_example.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/nodes.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/dev_guide/plugins.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/environment.pickle" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/index.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/analyses.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/analyses_list.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/colormetry.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/running_analyses.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/analyses/viewing_analyses.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/annotation/annotation.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/player/changing_subtitles.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/player/player.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/backups.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/changing_movie_paths.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/create_project.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/import_elan_projects.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_management.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/project_management/project_templates.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/create_screenshot.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/export_screenshots.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/import_screenshots.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/screenshots/screenshots.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/auto_segmentation.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/changing_main_segmentation.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segment.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/create_segmentation.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/cutting_segments.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/exporting_segmentations.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/locking_segmentations.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/merging_segments.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/segmentation/segmentation.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/step_by_step/step_by_step.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/inspector.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/outliner.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/perspectives.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/timeline.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/user_interface/user_interface.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/0_4_2/0_4_2.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/0_4_5/0_4_5.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whats_new/latest.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/doctrees/whatsnew.doctree" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/.buildinfo" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/DevelopersGuide.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/UserGuide.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/Outliner.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/analyses_dialog.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/analyses_result.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/analysis_preview.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/annotations.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/auto_segmentation_even.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/auto_segmentation_hist.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/auto_segmentation_result.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/change_main_segmentation.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/create_segment_01.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/create_segment_02.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/create_segment_03.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/create_segmentation.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/cutting_segments_01.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/cutting_segments_02.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/elan_project.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/export_screenshots.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/export_segmentations.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/feature_plot.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/ianalysisparameterwidget.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/import_screenshots.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/inspector_01.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/mosaic.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/new_project.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_annotation.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_node_editor.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_nodeditor.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_player.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_player1.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_screenshots.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_screenshots1.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/persp_segmentation.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/source_selection.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/sub_01.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/sub_02.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/template_export.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/timeline_01.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_images/user_interface.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/interfaces.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/core/data/plugin.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_modules/index.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/DevelopersGuide.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/UserGuide.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/dev_guide/analyses.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/dev_guide/analyses_example.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/dev_guide/nodes.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/dev_guide/plugins.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/index.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/analyses/analyses.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/analyses/analyses_list.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/analyses/colormetry.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/analyses/running_analyses.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/analyses/viewing_analyses.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/annotation/annotation.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/player/changing_subtitles.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/player/player.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/project_management/backups.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/project_management/changing_movie_paths.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/project_management/create_project.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/project_management/import_elan_projects.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/project_management/project_management.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/project_management/project_templates.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/screenshots/create_screenshot.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/screenshots/export_screenshots.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/screenshots/import_screenshots.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/screenshots/screenshots.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/auto_segmentation.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/changing_main_segmentation.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/create_segment.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/create_segmentation.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/cutting_segments.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/exporting_segmentations.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/locking_segmentations.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/merging_segments.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/segmentation/segmentation.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/inspector.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/outliner.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/perspectives.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/timeline.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/user_interface/user_interface.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/whats_new/0_4_2/0_4_2.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/whats_new/0_4_5/0_4_5.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/whats_new/latest.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/whatsnew.rst.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/ajax-loader.gif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/basic.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/comment-bright.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/comment-close.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/comment.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/css/badge_only.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/css/theme.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/doctools.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/down-pressed.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/down.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/file.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/Inconsolata-Bold.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/Inconsolata-Regular.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/Lato-Bold.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/Lato-Regular.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/RobotoSlab-Bold.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/RobotoSlab-Regular.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/fontawesome-webfont.eot" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/fontawesome-webfont.svg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/fontawesome-webfont.ttf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/fonts/fontawesome-webfont.woff" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/jquery-3.1.0.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/jquery.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/js/modernizr.min.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/js/theme.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/minus.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/plus.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/pygments.css" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/searchtools.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/underscore-1.3.1.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/underscore.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/up-pressed.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/up.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/_static/websupport.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/analyses_example.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/nodes.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/dev_guide/plugins.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/genindex.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/index.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/objects.inv" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/search.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/searchindex.js" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/analyses.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/analyses_list.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/colormetry.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/running_analyses.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/analyses/viewing_analyses.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/annotation/annotation.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/player/changing_subtitles.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/player/player.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/backups.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/changing_movie_paths.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/create_project.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/import_elan_projects.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_management.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/project_management/project_templates.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/create_screenshot.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/export_screenshots.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/import_screenshots.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/screenshots/screenshots.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/auto_segmentation.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/changing_main_segmentation.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segment.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/create_segmentation.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/cutting_segments.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/exporting_segmentations.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/locking_segmentations.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/merging_segments.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/segmentation/segmentation.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/step_by_step/step_by_step.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/inspector.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/outliner.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/perspectives.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/timeline.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/user_interface/user_interface.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/whats_new/0_4_2/0_4_2.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/whats_new/0_4_5/0_4_5.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/whats_new/latest.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/_docs/build/html/whatsnew.html" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TestWindow.py" afterPath="$PROJECT_DIR$/TestWindow.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/_docs/source/UserGuide.rst" afterPath="$PROJECT_DIR$/_docs/source/UserGuide.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/concurrent/worker.py" afterPath="$PROJECT_DIR$/core/concurrent/worker.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/containers.py" afterPath="$PROJECT_DIR$/core/data/containers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/install/env/env_win64.yml" afterPath="$PROJECT_DIR$/install/env/env_win64.yml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/user/master_file.ems" afterPath="$PROJECT_DIR$/user/master_file.ems" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/_docs/build/html/.nojekyll" afterPath="$PROJECT_DIR$/_docs/source/plugins/__init__.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/_docs/build/html/_sources/step_by_step/step_by_step.rst.txt" afterPath="$PROJECT_DIR$/_docs/source/plugins/plugins.rst" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/install/env/env_osx.yml" afterPath="$PROJECT_DIR$/install/env/vian_osx.yml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -252,7 +29,7 @@
       <file leaf-file-name="main_window.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="28890">
+            <state relative-caret-position="29988">
               <caret line="1670" column="53" lean-forward="false" selection-start-line="1670" selection-start-column="53" selection-end-line="1670" selection-end-column="53" />
               <folding>
                 <element signature="n#!!doc" expanded="false" />
@@ -263,11 +40,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="visualizer.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="visualizer.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="540">
-              <caret line="53" column="30" lean-forward="false" selection-start-line="52" selection-start-column="6" selection-end-line="53" selection-end-column="30" />
+            <state relative-caret-position="18">
+              <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
               <folding>
                 <element signature="e#0#27#0" expanded="true" />
                 <element signature="e#960#1264#0" expanded="false" />
@@ -378,63 +155,13 @@
       <file leaf-file-name="imdb_finder.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/extensions/plugins/imdb_finder/imdb_finder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="496">
-              <caret line="190" column="98" lean-forward="false" selection-start-line="190" selection-start-column="98" selection-end-line="190" selection-end-column="98" />
+            <state relative-caret-position="3024">
+              <caret line="168" column="12" lean-forward="false" selection-start-line="168" selection-start-column="12" selection-end-line="168" selection-end-column="12" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
                 <element signature="e#7273#7348#0" expanded="false" />
                 <element signature="e#8664#9439#0" expanded="false" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="plugins.rst" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/_docs/source/plugins/plugins.rst">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="126">
-              <caret line="7" column="14" lean-forward="false" selection-start-line="7" selection-start-column="14" selection-end-line="7" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="UserGuide.rst" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/_docs/source/UserGuide.rst">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="16" column="19" lean-forward="false" selection-start-line="16" selection-start-column="19" selection-end-line="16" selection-end-column="19" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="imdb_finder.rst" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/_docs/source/plugins/imdb_finder/imdb_finder.rst">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="changing_subtitles.rst" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/player/changing_subtitles.rst">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="9" selection-end-column="54" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="env_osx.yml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/install/env/env_osx.yml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1188">
-              <caret line="66" column="37" lean-forward="false" selection-start-line="66" selection-start-column="37" selection-end-line="66" selection-end-column="37" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -590,7 +317,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/_docs/source/user_interface/timeline.rst" />
         <option value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py" />
         <option value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/query_dock.py" />
         <option value="$PROJECT_DIR$/_docs/source/whatsnew.rst" />
@@ -641,6 +367,7 @@
         <option value="$PROJECT_DIR$/_docs/source/UserGuide.rst" />
         <option value="$PROJECT_DIR$/extensions/plugins/imdb_finder/imdb_finder.py" />
         <option value="$PROJECT_DIR$/_docs/source/plugins/imdb_finder/imdb_finder.rst" />
+        <option value="$USER_HOME$/AppData/Local/Temp/vian_osx.yml" />
       </list>
     </option>
   </component>
@@ -690,19 +417,19 @@
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\plugins\imdb_finder" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\plugins" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\core\vlc\3_0_0" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\step_by_step\analyses" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\0_4_5" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Programming\Git\visual-movie-annotator\install\env" />
       <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\0_4_5" />
       <recent name="E:\Programming\Git\visual-movie-annotator\install" />
       <recent name="E:\Programming\Git\visual-movie-annotator\core\analysis\barcode" />
       <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\_0_4_2" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\plugins\imdb_finder" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\plugins" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\core\vlc\3_0_0" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\step_by_step\analyses" />
+      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\whats_new\0_4_5" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -717,7 +444,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.TestWindow">
+  <component name="RunManager" selected="Python.main">
     <configuration default="false" name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -947,9 +674,9 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.TestWindow" />
-        <item index="1" class="java.lang.String" itemvalue="Python.imdb_finder" />
-        <item index="2" class="java.lang.String" itemvalue="Python.main" />
+        <item index="0" class="java.lang.String" itemvalue="Python.main" />
+        <item index="1" class="java.lang.String" itemvalue="Python.TestWindow" />
+        <item index="2" class="java.lang.String" itemvalue="Python.imdb_finder" />
         <item index="3" class="java.lang.String" itemvalue="Python.visualizer" />
         <item index="4" class="java.lang.String" itemvalue="Python.example" />
       </list>
@@ -1006,17 +733,16 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="0" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3219616" sideWeight="0.7427598" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32569295" sideWeight="0.7427598" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3281075" sideWeight="0.4952343" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36403033" sideWeight="0.26492536" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31960997" sideWeight="0.43123668" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34777898" sideWeight="0.73507464" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930756" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20476706" sideWeight="0.49205717" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2531983" sideWeight="0.48659793" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.43228602" sideWeight="0.48720682" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43228602" sideWeight="0.48720682" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42686892" sideWeight="0.7905117" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22921109" sideWeight="0.2572402" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24786781" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1027,6 +753,7 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31960997" sideWeight="0.43123668" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
@@ -1092,13 +819,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/gui/status_bar.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="292" column="0" lean-forward="true" selection-start-line="292" selection-start-column="0" selection-end-line="292" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/movie_list.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
@@ -1292,7 +1012,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="18">
           <caret line="1" column="18" lean-forward="false" selection-start-line="1" selection-start-column="18" selection-end-line="1" selection-end-column="18" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1307,88 +1026,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="990">
           <caret line="502" column="32" lean-forward="false" selection-start-line="502" selection-start-column="32" selection-end-line="502" selection-end-column="32" />
-          <folding>
-            <element signature="e#311#7533#0" expanded="false" />
-            <element signature="e#424#648#0" expanded="false" />
-            <element signature="e#694#3797#0" expanded="false" />
-            <element signature="e#999#1386#0" expanded="false" />
-            <element signature="e#1282#1386#0" expanded="false" />
-            <element signature="e#1436#1713#0" expanded="false" />
-            <element signature="e#1553#1627#0" expanded="false" />
-            <element signature="e#1687#1713#0" expanded="false" />
-            <element signature="e#1933#2340#0" expanded="false" />
-            <element signature="e#2092#2340#0" expanded="false" />
-            <element signature="e#2752#3154#0" expanded="false" />
-            <element signature="e#2910#3110#0" expanded="false" />
-            <element signature="e#3183#3314#0" expanded="false" />
-            <element signature="e#3855#3932#0" expanded="false" />
-            <element signature="e#3883#3932#0" expanded="false" />
-            <element signature="e#4012#4136#0" expanded="false" />
-            <element signature="e#4046#4136#0" expanded="false" />
-            <element signature="e#4080#4136#0" expanded="false" />
-            <element signature="e#4189#7533#0" expanded="false" />
-            <element signature="e#4558#4710#0" expanded="false" />
-            <element signature="e#4833#6416#0" expanded="false" />
-            <element signature="e#5023#6364#0" expanded="false" />
-            <element signature="e#5155#5750#0" expanded="false" />
-            <element signature="e#5793#6364#0" expanded="false" />
-            <element signature="e#6482#6576#0" expanded="false" />
-            <element signature="e#6513#6576#0" expanded="false" />
-            <element signature="e#6641#7491#0" expanded="false" />
-            <element signature="e#6735#7386#0" expanded="false" />
-            <element signature="e#6802#6858#0" expanded="false" />
-            <element signature="e#6993#7026#0" expanded="false" />
-            <element signature="e#7582#12592#0" expanded="false" />
-            <element signature="e#7616#7667#0" expanded="false" />
-            <element signature="e#7728#8830#0" expanded="false" />
-            <element signature="e#8101#8739#0" expanded="false" />
-            <element signature="e#8193#8711#0" expanded="false" />
-            <element signature="e#8342#8400#0" expanded="false" />
-            <element signature="e#8915#9344#0" expanded="false" />
-            <element signature="e#9066#9321#0" expanded="false" />
-            <element signature="e#9448#12048#0" expanded="false" />
-            <element signature="e#10056#10168#0" expanded="false" />
-            <element signature="e#10617#11546#0" expanded="false" />
-            <element signature="e#10716#11271#0" expanded="false" />
-            <element signature="e#11098#11222#0" expanded="false" />
-            <element signature="e#11388#11546#0" expanded="false" />
-            <element signature="e#11619#12025#0" expanded="false" />
-            <element signature="e#12140#12592#0" expanded="false" />
-            <element signature="e#12207#12481#0" expanded="false" />
-            <element signature="e#12635#13749#0" expanded="false" />
-            <element signature="e#12699#13749#0" expanded="false" />
-            <element signature="e#12716#13697#0" expanded="false" />
-            <element signature="e#12800#12832#0" expanded="false" />
-            <element signature="e#13181#13196#0" expanded="false" />
-            <element signature="e#13786#16892#0" expanded="false" />
-            <element signature="e#13850#14693#0" expanded="false" />
-            <element signature="e#13892#14693#0" expanded="false" />
-            <element signature="e#14061#14642#0" expanded="false" />
-            <element signature="e#14191#14642#0" expanded="false" />
-            <element signature="e#14243#14642#0" expanded="false" />
-            <element signature="e#14488#14592#0" expanded="false" />
-            <element signature="e#14739#15282#0" expanded="false" />
-            <element signature="e#14794#15254#0" expanded="false" />
-            <element signature="e#15376#16892#0" expanded="false" />
-            <element signature="e#15639#16384#0" expanded="false" />
-            <element signature="e#15711#16295#0" expanded="false" />
-            <element signature="e#15817#16295#0" expanded="false" />
-            <element signature="e#15944#16252#0" expanded="false" />
-            <element signature="e#15987#16252#0" expanded="false" />
-            <element signature="e#16185#16252#0" expanded="false" />
-            <element signature="e#16543#16782#0" expanded="false" />
-            <element signature="e#16639#16714#0" expanded="false" />
-            <element signature="e#17487#17532#0" expanded="false" />
-            <element signature="e#18527#18611#0" expanded="false" />
-            <element signature="e#18677#18752#0" expanded="false" />
-            <element signature="e#18797#20540#0" expanded="false" />
-            <element signature="e#18976#19070#0" expanded="false" />
-            <element signature="e#19245#19658#0" expanded="false" />
-            <element signature="e#19545#19658#0" expanded="false" />
-            <element signature="e#19710#20540#0" expanded="false" />
-            <element signature="e#19846#20540#0" expanded="false" />
-            <element signature="e#19903#20540#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1403,7 +1040,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="26244">
           <caret line="1467" column="0" lean-forward="false" selection-start-line="1467" selection-start-column="0" selection-end-line="1467" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1411,10 +1047,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="64998">
           <caret line="3645" column="0" lean-forward="false" selection-start-line="3645" selection-start-column="0" selection-end-line="3645" selection-end-column="0" />
-          <folding>
-            <element signature="e#810#811#0" expanded="false" />
-            <element signature="e#122170#122378#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1422,14 +1054,160 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4680">
           <caret line="269" column="0" lean-forward="false" selection-start-line="265" selection-start-column="7" selection-end-line="269" selection-end-column="0" />
-          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="29988">
+          <caret line="1670" column="53" lean-forward="false" selection-start-line="1670" selection-start-column="53" selection-end-line="1670" selection-end-column="53" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="e#89#106#0" expanded="true" />
+            <marker date="1521223704000" expanded="false" signature="52589:52703" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TestWindow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="20" column="19" lean-forward="false" selection-start-line="20" selection-start-column="19" selection-end-line="20" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/player/changing_subtitles.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="9" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/player/player.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/create_screenshot.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/export_screenshots.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/plugins/plugins.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="7" column="14" lean-forward="false" selection-start-line="7" selection-start-column="14" selection-end-line="7" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/plugins/imdb_finder/imdb_finder.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="9" column="70" lean-forward="false" selection-start-line="9" selection-start-column="70" selection-end-line="9" selection-end-column="70" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_docs/source/UserGuide.rst">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="16" column="19" lean-forward="false" selection-start-line="16" selection-start-column="19" selection-end-line="16" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/vian_osx.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/install/env/env_win64.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/install/env/env_osx.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1188">
+          <caret line="66" column="37" lean-forward="false" selection-start-line="66" selection-start-column="37" selection-end-line="66" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/concurrent/worker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="15" column="12" lean-forward="false" selection-start-line="15" selection-start-column="6" selection-end-line="15" selection-end-column="12" />
+          <folding>
+            <element signature="e#248#426#0" expanded="false" />
+            <element signature="e#459#2800#0" expanded="false" />
+            <element signature="e#629#1379#0" expanded="false" />
+            <element signature="e#1424#2690#0" expanded="false" />
+            <element signature="e#1441#1895#0" expanded="false" />
+            <element signature="e#1476#1684#0" expanded="false" />
+            <element signature="e#1719#1895#0" expanded="false" />
+            <element signature="e#1924#2076#0" expanded="false" />
+            <element signature="e#2103#2581#0" expanded="false" />
+            <element signature="e#2740#2800#0" expanded="false" />
+            <element signature="e#2844#2935#0" expanded="false" />
+            <element signature="e#3307#4035#0" expanded="false" />
+            <element signature="e#3324#3945#0" expanded="false" />
+            <element signature="e#3362#3658#0" expanded="false" />
+            <element signature="e#3404#3504#0" expanded="false" />
+            <element signature="e#3547#3658#0" expanded="false" />
+            <element signature="e#3693#3945#0" expanded="false" />
+            <element signature="e#3735#3814#0" expanded="false" />
+            <element signature="e#3857#3945#0" expanded="false" />
+            <element signature="e#3989#4035#0" expanded="false" />
+            <element signature="e#4082#4101#0" expanded="false" />
+            <element signature="e#4159#4504#0" expanded="false" />
+            <element signature="e#4563#5227#0" expanded="false" />
+            <element signature="e#4608#4744#0" expanded="false" />
+            <element signature="e#4793#5227#0" expanded="false" />
+            <element signature="e#4810#5143#0" expanded="false" />
+            <element signature="e#4861#5143#0" expanded="false" />
+            <element signature="e#4886#5046#0" expanded="false" />
+            <element signature="e#5106#5143#0" expanded="false" />
+            <element signature="e#5188#5227#0" expanded="false" />
+            <element signature="e#5362#5907#0" expanded="false" />
+            <element signature="e#6358#6510#0" expanded="false" />
+            <element signature="e#6716#6717#0" expanded="false" />
+            <element signature="e#7137#7322#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/extensions/plugins/imdb_finder/imdb_finder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3024">
+          <caret line="168" column="12" lean-forward="false" selection-start-line="168" selection-start-column="12" selection-end-line="168" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#26#0" expanded="true" />
+            <element signature="e#7273#7348#0" expanded="false" />
+            <element signature="e#8664#9439#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/fiwi_visualizer/visualizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="53" column="30" lean-forward="false" selection-start-line="52" selection-start-column="6" selection-end-line="53" selection-end-column="30" />
+        <state relative-caret-position="18">
+          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
             <element signature="e#960#1264#0" expanded="false" />
@@ -1533,155 +1311,6 @@
             <element signature="e#26674#26916#0" expanded="false" />
             <element signature="e#26722#26916#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="28890">
-          <caret line="1670" column="53" lean-forward="false" selection-start-line="1670" selection-start-column="53" selection-end-line="1670" selection-end-column="53" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-            <element signature="e#89#106#0" expanded="true" />
-            <marker date="1521223704000" expanded="false" signature="52589:52703" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/concurrent/worker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="15" column="12" lean-forward="false" selection-start-line="15" selection-start-column="6" selection-end-line="15" selection-end-column="12" />
-          <folding>
-            <element signature="e#248#426#0" expanded="false" />
-            <element signature="e#459#2800#0" expanded="false" />
-            <element signature="e#629#1379#0" expanded="false" />
-            <element signature="e#1424#2690#0" expanded="false" />
-            <element signature="e#1441#1895#0" expanded="false" />
-            <element signature="e#1476#1684#0" expanded="false" />
-            <element signature="e#1719#1895#0" expanded="false" />
-            <element signature="e#1924#2076#0" expanded="false" />
-            <element signature="e#2103#2581#0" expanded="false" />
-            <element signature="e#2740#2800#0" expanded="false" />
-            <element signature="e#2844#2935#0" expanded="false" />
-            <element signature="e#3307#4035#0" expanded="false" />
-            <element signature="e#3324#3945#0" expanded="false" />
-            <element signature="e#3362#3658#0" expanded="false" />
-            <element signature="e#3404#3504#0" expanded="false" />
-            <element signature="e#3547#3658#0" expanded="false" />
-            <element signature="e#3693#3945#0" expanded="false" />
-            <element signature="e#3735#3814#0" expanded="false" />
-            <element signature="e#3857#3945#0" expanded="false" />
-            <element signature="e#3989#4035#0" expanded="false" />
-            <element signature="e#4082#4101#0" expanded="false" />
-            <element signature="e#4159#4504#0" expanded="false" />
-            <element signature="e#4563#5227#0" expanded="false" />
-            <element signature="e#4608#4744#0" expanded="false" />
-            <element signature="e#4793#5227#0" expanded="false" />
-            <element signature="e#4810#5143#0" expanded="false" />
-            <element signature="e#4861#5143#0" expanded="false" />
-            <element signature="e#4886#5046#0" expanded="false" />
-            <element signature="e#5106#5143#0" expanded="false" />
-            <element signature="e#5188#5227#0" expanded="false" />
-            <element signature="e#5362#5907#0" expanded="false" />
-            <element signature="e#6358#6510#0" expanded="false" />
-            <element signature="e#6716#6717#0" expanded="false" />
-            <element signature="e#7137#7322#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/TestWindow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" column="19" lean-forward="false" selection-start-line="20" selection-start-column="19" selection-end-line="20" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/install/env/env_win64.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/install/env/env_osx.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1188">
-          <caret line="66" column="37" lean-forward="false" selection-start-line="66" selection-start-column="37" selection-end-line="66" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/player/changing_subtitles.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="9" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/player/player.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/create_screenshot.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/step_by_step/screenshots/export_screenshots.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/plugins/plugins.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="14" lean-forward="false" selection-start-line="7" selection-start-column="14" selection-end-line="7" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/UserGuide.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="16" column="19" lean-forward="false" selection-start-line="16" selection-start-column="19" selection-end-line="16" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/extensions/plugins/imdb_finder/imdb_finder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="496">
-          <caret line="190" column="98" lean-forward="false" selection-start-line="190" selection-start-column="98" selection-end-line="190" selection-end-column="98" />
-          <folding>
-            <element signature="e#0#26#0" expanded="true" />
-            <element signature="e#7273#7348#0" expanded="false" />
-            <element signature="e#8664#9439#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/_docs/source/plugins/imdb_finder/imdb_finder.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
