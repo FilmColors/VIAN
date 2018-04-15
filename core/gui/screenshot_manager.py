@@ -164,7 +164,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
     """
-    def __init__(self,main_window, key_event_handler, parent = None):
+    def __init__(self,main_window, parent = None):
         super(ScreenshotsManagerWidget, self).__init__(parent)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)

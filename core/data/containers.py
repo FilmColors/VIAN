@@ -526,7 +526,7 @@ class VIANProject(IHasName, IHasVocabulary):
     #endregion
 
     #region IO
-    def store_project(self, settings, global_settings, path = None):
+    def store_project(self, settings, path = None):
         """
         DEPRECATED
         :param settings: 
@@ -592,9 +592,6 @@ class VIANProject(IHasName, IHasVocabulary):
 
         if settings.SCREENSHOTS_STATIC_SAVE:
             np.savez(numpy_path, imgs = screenshots_img, annotations = screenshots_ann, empty=[True])
-
-
-        global_settings.add_project(self)
 
         try:
             with open(project_path, 'w') as f:

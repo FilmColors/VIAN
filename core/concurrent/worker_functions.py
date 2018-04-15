@@ -37,7 +37,6 @@ def store_project_concurrent(args, sign_progress):
     project = args[0]
     path = args[1]
     settings = args[2]
-    global_settings = args[3]
 
     a_layer = []
     screenshots = []
@@ -113,8 +112,6 @@ def store_project_concurrent(args, sign_progress):
 
     if settings.SCREENSHOTS_STATIC_SAVE:
         np.savez(numpy_path, imgs=screenshots_img, annotations=screenshots_ann, empty=[True])
-
-    global_settings.add_project(project)
 
     sign_progress(0.8)
     try:
