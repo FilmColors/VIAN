@@ -44,7 +44,7 @@ from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
 from core.gui.player_vlc import Player_VLC, PlayerDockWidget
-from core.gui.experiment_editor import ExperimentEditor, ExperimentEditorDock
+# from core.gui.experiment_editor import ExperimentEditor, ExperimentEditorDock
 from core.gui.colormetry_widget import *
 from core.analysis.colorimetry.colormetry2 import ColormetryJob2
 # from core.gui.shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
@@ -72,7 +72,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.5.3"
+__version__ = "0.5.4"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -178,8 +178,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_matrix = None
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
-        self.experiment_editor = None
-        self.experiment_editor_dock = None
+      #   self.experiment_editor = None
+       #  self.experiment_editor_dock = None
         self.quick_annotation_dock = None
         self.colorimetry_live = None
 
@@ -239,7 +239,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_matrix()
 
         self.create_analysis_results_widget()
-        self.create_experiment_editor()
+        # self.create_experiment_editor()
         self.create_quick_annotation_dock()
 
         self.create_colorimetry_live()
@@ -320,7 +320,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTimeline.triggered.connect(self.create_timeline)
         self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
-        self.actionExperiment_Editor.triggered.connect(self.create_experiment_editor)
+        # self.actionExperiment_Editor.triggered.connect(self.create_experiment_editor)
 
         self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup.name))
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
@@ -336,7 +336,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
         self.actionAdd_Annotation_Layer.triggered.connect(self.on_new_annotation_layer)
         self.actionAdd_Segmentation.triggered.connect(self.on_new_segmentation)
-        self.actionCreateExperiment.triggered.connect(self.on_new_experiment)
+#        self.actionCreateExperiment.triggered.connect(self.on_new_experiment)
 
         self.actionScreenshot.triggered.connect(self.on_screenshot)
         self.actionAdd_Key.triggered.connect(self.on_key_annotation)
@@ -379,7 +379,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.numpy_data_manager,
                                     self.project_streamer,
                                     self.analysis_results_widget,
-                                    self.experiment_editor
+                                    # self.experiment_editor
                                           ]
 
         self.menus_list = [
@@ -557,13 +557,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar().addPermanentWidget(self.elan_status)
             self.statusBar().setFixedHeight(45)
 
-    def create_experiment_editor(self):
-        if self.experiment_editor_dock is None:
-            self.experiment_editor = ExperimentEditor(self)
-            self.experiment_editor_dock = ExperimentEditorDock(self, self.experiment_editor)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.experiment_editor_dock)
-        else:
-            self.experiment_editor_dock.activateWindow()
+    # def create_experiment_editor(self):
+    #     if self.experiment_editor_dock is None:
+    #         self.experiment_editor = ExperimentEditor(self)
+    #         self.experiment_editor_dock = ExperimentEditorDock(self, self.experiment_editor)
+    #         self.addDockWidget(Qt.LeftDockWidgetArea, self.experiment_editor_dock)
+    #     else:
+    #         self.experiment_editor_dock.activateWindow()
 
     def create_widget_video_player(self):
         if self.player_dock_widget is None:
@@ -961,8 +961,8 @@ class MainWindow(QtWidgets.QMainWindow):
         job = CreateScreenshotJob([frame_pos, self.project.movie_descriptor.movie_path, annotation_dicts, time])
         self.run_job_concurrent(job)
 
-    def on_new_experiment(self):
-        self.project.create_experiment()
+    # def on_new_experiment(self):
+    #     self.project.create_experiment()
 
     def get_frame(self, time):
         if time <= 0:
@@ -1213,12 +1213,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner.show()
             self.vocabulary_manager.show()
             self.inspector.show()
-            self.experiment_editor_dock.show()
+            # self.experiment_editor_dock.show()
 
             self.elan_status.stage_selector.set_stage(2, False)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Vertical)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_editor_dock)
+            # self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_editor_dock)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
         elif perspective == Perspective.QuickAnnotation.name:
@@ -1264,7 +1264,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.hide()
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
-        self.experiment_editor_dock.hide()
+        # self.experiment_editor_dock.hide()
         self.quick_annotation_dock.hide()
         self.colorimetry_live.hide()
 

@@ -63,7 +63,7 @@ class VIANProject(IHasName, IHasVocabulary):
         self.analysis = []
         self.screenshot_groups = []
         self.vocabularies = []
-        self.experiments = []
+        # self.experiments = []
 
         self.current_script = None
         self.node_scripts = []
@@ -79,7 +79,7 @@ class VIANProject(IHasName, IHasVocabulary):
         self.colormetry_analysis = None
 
         self.add_vocabulary(get_default_vocabulary())
-        self.create_default_experiment()
+        # self.create_default_experiment()
 
         self.inhibit_dispatch = False
         self.selected = []
@@ -197,8 +197,8 @@ class VIANProject(IHasName, IHasVocabulary):
             main_segmentation = self.segmentation[self.main_segmentation_index]
 
         self.segmentation.remove(segmentation)
-        for exp in self.experiments:
-            exp.clear_from_deleted_containers()
+        # for exp in self.experiments:
+        #     exp.clear_from_deleted_containers()
         self.undo_manager.to_undo((self.remove_segmentation, [segmentation]), (self.add_segmentation, [segmentation]))
 
 
@@ -349,8 +349,6 @@ class VIANProject(IHasName, IHasVocabulary):
     def remove_screenshot_group(self, grp):
         if grp is not self.screenshot_groups[0]:
             self.screenshot_groups.remove(grp)
-            for exp in self.experiments:
-                exp.clear_from_deleted_containers()
             self.dispatch_changed()
 
     def get_screenshots_of_segment(self, main_segm_id):
@@ -487,9 +485,6 @@ class VIANProject(IHasName, IHasVocabulary):
             layer.remove_annotation(a)
         self.annotation_layers.remove(layer)
 
-        for exp in self.experiments:
-            exp.clear_from_deleted_containers()
-
         if len(self.annotation_layers) > 0:
             self.current_annotation_layer = self.annotation_layers[0]
 
@@ -620,7 +615,7 @@ class VIANProject(IHasName, IHasVocabulary):
 
         # remove the default Experiment
 
-        self.remove_experiment(self.experiments[0])
+        # self.remove_experiment(self.experiments[0])
 
 
         self.path = my_dict['path']
@@ -739,13 +734,13 @@ class VIANProject(IHasName, IHasVocabulary):
                     if node is not None:
                         node.operation.result = res
 
-        try:
-            for g in my_dict['experiments']:
-                new = Experiment().deserialize(g, self)
-                # self.add_experiment(new)
-        except Exception as e:
-            # raise e
-            print(e)
+        # try:
+        #     for g in my_dict['experiments']:
+        #         new = Experiment().deserialize(g, self)
+        #         # self.add_experiment(new)
+        # except Exception as e:
+        #     # raise e
+        #     print(e)
 
         # Migrating the Project to the new FileSystem
         if move_project_to_directory_project:
@@ -772,7 +767,7 @@ class VIANProject(IHasName, IHasVocabulary):
         self.sort_screenshots()
         self.undo_manager.clear()
 
-    def get_template(self, segm, voc, ann, scripts, experiment, experiment_exporter):
+    def get_template(self, segm, voc, ann, scripts): #, experiment, experiment_exporter):
         segmentations = []
         vocabularies = []
         layers = []
@@ -791,16 +786,16 @@ class VIANProject(IHasName, IHasVocabulary):
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
 
-        if experiment:
-            for e in self.experiments:
-                experiments.append(experiment_exporter.export(None, e, return_dict = True))
+        # if experiment:
+        #     for e in self.experiments:
+        #         experiments.append(experiment_exporter.export(None, e, return_dict = True))
 
         template = dict(
             segmentations = segmentations,
             vocabularies = vocabularies,
             layers = layers,
             node_scripts=node_scripts,
-            experiments = experiments
+            # experiments = experiments
 
         )
         return template
@@ -941,33 +936,33 @@ class VIANProject(IHasName, IHasVocabulary):
     #endregion
 
     #region Experiments
-    def create_experiment(self, dispatch = True):
-        new = Experiment()
-        self.add_experiment(new, dispatch)
-        return new
-
-    def add_experiment(self, experiment, dispatch = True):
-        experiment.set_project(self)
-        self.experiments.append(experiment)
-
-        self.undo_manager.to_undo((self.add_experiment, [experiment]),
-                                  (self.remove_experiment, [experiment]))
-
-        if dispatch:
-            self.dispatch_changed(item=experiment)
-
-    def remove_experiment(self, experiment):
-        if experiment in self.experiments:
-            self.experiments.remove(experiment)
-            self.remove_from_id_list(experiment)
-            self.undo_manager.to_undo((self.remove_experiment, [experiment]),
-                                      (self.add_experiment, [experiment]))
-            self.dispatch_changed()
-
-    def create_default_experiment(self):
-        default = self.create_experiment()
-        default.set_name("Default Experiment")
-        default.create_class_object("Global")
+    # def create_experiment(self, dispatch = True):
+    #     new = Experiment()
+    #     self.add_experiment(new, dispatch)
+    #     return new
+    #
+    # def add_experiment(self, experiment, dispatch = True):
+    #     experiment.set_project(self)
+    #     self.experiments.append(experiment)
+    #
+    #     self.undo_manager.to_undo((self.add_experiment, [experiment]),
+    #                               (self.remove_experiment, [experiment]))
+    #
+    #     if dispatch:
+    #         self.dispatch_changed(item=experiment)
+    #
+    # def remove_experiment(self, experiment):
+    #     if experiment in self.experiments:
+    #         self.experiments.remove(experiment)
+    #         self.remove_from_id_list(experiment)
+    #         self.undo_manager.to_undo((self.remove_experiment, [experiment]),
+    #                                   (self.add_experiment, [experiment]))
+    #         self.dispatch_changed()
+    #
+    # def create_default_experiment(self):
+    #     default = self.create_experiment()
+    #     default.set_name("Default Experiment")
+    #     default.create_class_object("Global")
 
     #endregion
 
@@ -3301,10 +3296,10 @@ class Vocabulary(IProjectContainer, IHasName):
         print("Vocabulary ID: ", vid)
         return vid
 
-    def set_experiment(self, experiment, base_vocabulary):
-        self.experiment = experiment
-        self.base_vocabulary = base_vocabulary
-        self.derived_vocabulary = True
+    # def set_experiment(self, experiment, base_vocabulary):
+    #     self.experiment = experiment
+    #     self.base_vocabulary = base_vocabulary
+    #     self.derived_vocabulary = True
 
     def get_type(self):
         return VOCABULARY
@@ -3383,124 +3378,124 @@ def get_default_vocabulary():
 #endregion
 
 #region Experiment
-class Experiment(IProjectContainer, IHasName):
-    """
-    An Experiment defines a specific set of rules, with which the user wants to perform a classification of a film. 
-    
-    Example: 
-        A User wants to analyze the Color Features of a Film. To do so, he wants to segment Films into temporal Segments
-        each one is a Scene. 
-        He then wants to classify the Foreground and the Background Color for each Segment based on his homemade 
-        Vocabulary called "ColorVocabulary". At the end, he also wants to generate some automated ColorFeature Extractions
-        based on this Segmentation.
-    
-    """
-
-    def __init__(self, name="New Experiment"):
-        IProjectContainer.__init__(self)
-
-        self.name = name
-        self.classification_sources = []
-        self.classification_objects = []
-        self.analyses_templates = []
-
-        self.classified_containers = []
-
-    def remove_class_object(self, classification_target):
-        if classification_target in self.classification_objects:
-            self.classification_objects.remove(classification_target)
-            self.project.remove_from_id_list(classification_target)
-
-    def create_class_object(self, name, parent = None):
-        new = ClassificationObjects(name, experiment=self)
-
-        if parent == self or parent is None:
-            self.add_class_object(new)
-        else:
-            parent.add_child(new)
-
-        return new
-
-    def clear_from_deleted_containers(self):
-        for root in self.classification_objects:
-            objects = []
-            root.get_children_plain(objects)
-            for obj in objects:
-                obj.clear_deleted_containers()
-
-    def add_class_object(self, classification_object):
-        self.classification_objects.append(classification_object)
-        classification_object.set_project(self.project)
-        classification_object.parent = self
-
-    def get_type(self):
-        return EXPERIMENT
-
-    def get_name(self):
-        return self.name
-
-    def set_name(self, name):
-        self.name = name
-        self.dispatch_on_changed(item = self)
-
-    def serialize(self):
-
-        serializations = []
-        for cls in self.classification_objects:
-            plain = []
-            cls.get_children_plain(plain)
-            for c in plain:
-                serializations.append(c.serialize())
-
-        serialization = dict(
-            name = self.name,
-            unique_id = self.unique_id,
-            classification_objects = serializations,
-            classification_sources = self.classification_sources,
-            analyses_templates = self.analyses_templates,
-
-        )
-        return serialization
-
-    def deserialize(self, serialization, project):
-        self.name = serialization['name']
-        self.unique_id = serialization['unique_id']
-        self.classification_sources = serialization['classification_sources']
-        self.analyses_templates = serialization['analyses_templates']
-        project.add_experiment(self)
-
-        for obj in serialization['classification_objects']:
-            ClassificationObjects("NONAME", self).deserialize(obj, project)
-
-        return self
-
-    def get_classification_objects_plain(self):
-        result = []
-        for c in self.classification_objects:
-            r = [c]
-            c.get_children_plain(r)
-            result.extend(r)
-
-        return result
-
-    def get_vocabulary_list(self, container = None):
-        if container is None:
-            result = []
-            for obj in self.get_classification_objects_plain():
-                for voc in obj.classification_vocabularies:
-                    result.append(voc)
-            return result
-        else:
-            result = []
-            for obj in self.get_classification_objects_plain():
-                if obj.has_container(container):
-                    for voc in obj.classification_vocabularies:
-                        result.append(voc)
-            return result
-
-    def delete(self):
-        self.project.remove_experiment(self)
-        self.dispatch_on_changed()
+# class Experiment(IProjectContainer, IHasName):
+#     """
+#     An Experiment defines a specific set of rules, with which the user wants to perform a classification of a film.
+#
+#     Example:
+#         A User wants to analyze the Color Features of a Film. To do so, he wants to segment Films into temporal Segments
+#         each one is a Scene.
+#         He then wants to classify the Foreground and the Background Color for each Segment based on his homemade
+#         Vocabulary called "ColorVocabulary". At the end, he also wants to generate some automated ColorFeature Extractions
+#         based on this Segmentation.
+#
+#     """
+#
+#     def __init__(self, name="New Experiment"):
+#         IProjectContainer.__init__(self)
+#
+#         self.name = name
+#         self.classification_sources = []
+#         self.classification_objects = []
+#         self.analyses_templates = []
+#
+#         self.classified_containers = []
+#
+#     def remove_class_object(self, classification_target):
+#         if classification_target in self.classification_objects:
+#             self.classification_objects.remove(classification_target)
+#             self.project.remove_from_id_list(classification_target)
+#
+#     def create_class_object(self, name, parent = None):
+#         new = ClassificationObjects(name, experiment=self)
+#
+#         if parent == self or parent is None:
+#             self.add_class_object(new)
+#         else:
+#             parent.add_child(new)
+#
+#         return new
+#
+#     def clear_from_deleted_containers(self):
+#         for root in self.classification_objects:
+#             objects = []
+#             root.get_children_plain(objects)
+#             for obj in objects:
+#                 obj.clear_deleted_containers()
+#
+#     def add_class_object(self, classification_object):
+#         self.classification_objects.append(classification_object)
+#         classification_object.set_project(self.project)
+#         classification_object.parent = self
+#
+#     def get_type(self):
+#         return EXPERIMENT
+#
+#     def get_name(self):
+#         return self.name
+#
+#     def set_name(self, name):
+#         self.name = name
+#         self.dispatch_on_changed(item = self)
+#
+#     def serialize(self):
+#
+#         serializations = []
+#         for cls in self.classification_objects:
+#             plain = []
+#             cls.get_children_plain(plain)
+#             for c in plain:
+#                 serializations.append(c.serialize())
+#
+#         serialization = dict(
+#             name = self.name,
+#             unique_id = self.unique_id,
+#             classification_objects = serializations,
+#             classification_sources = self.classification_sources,
+#             analyses_templates = self.analyses_templates,
+#
+#         )
+#         return serialization
+#
+#     def deserialize(self, serialization, project):
+#         self.name = serialization['name']
+#         self.unique_id = serialization['unique_id']
+#         self.classification_sources = serialization['classification_sources']
+#         self.analyses_templates = serialization['analyses_templates']
+#         project.add_experiment(self)
+#
+#         for obj in serialization['classification_objects']:
+#             ClassificationObjects("NONAME", self).deserialize(obj, project)
+#
+#         return self
+#
+#     def get_classification_objects_plain(self):
+#         result = []
+#         for c in self.classification_objects:
+#             r = [c]
+#             c.get_children_plain(r)
+#             result.extend(r)
+#
+#         return result
+#
+#     def get_vocabulary_list(self, container = None):
+#         if container is None:
+#             result = []
+#             for obj in self.get_classification_objects_plain():
+#                 for voc in obj.classification_vocabularies:
+#                     result.append(voc)
+#             return result
+#         else:
+#             result = []
+#             for obj in self.get_classification_objects_plain():
+#                 if obj.has_container(container):
+#                     for voc in obj.classification_vocabularies:
+#                         result.append(voc)
+#             return result
+#
+#     def delete(self):
+#         self.project.remove_experiment(self)
+#         self.dispatch_on_changed()
 
 class ClassificationObjects(IProjectContainer, IHasName):
     """

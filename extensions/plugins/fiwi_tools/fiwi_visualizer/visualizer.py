@@ -545,7 +545,6 @@ class FiwiVisualizer(QMainWindow):
         img = object[1]
         self.current_stills[idx].pixmap = img
 
-
     def update_plots(self):
         print("UPDATING")
         if len(self.current_stills) == 0:
@@ -591,7 +590,6 @@ class FiwiVisualizer(QMainWindow):
     def set_mode(self, mode):
         self.mode = mode
         self.onModeChanged.emit(mode)
-
 
     #region Widget Creation
     def create_query_dock(self):
