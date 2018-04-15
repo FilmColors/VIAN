@@ -218,9 +218,9 @@ class AttributesITimeRange(QWidget):
         uic.loadUi(path, self)
         self.descriptor = descriptor
 
-        self.lbl_start.setText(ms_to_string(descriptor.get_start()))
-        self.lbl_end.setText(ms_to_string(descriptor.get_end()))
-        self.lbl_duration.setText(ms_to_string(descriptor.get_end() - descriptor.get_start()))
+        self.lbl_start.setText(ms_to_string(descriptor.get_start(), include_ms=True))
+        self.lbl_end.setText(ms_to_string(descriptor.get_end(), include_ms=True))
+        self.lbl_duration.setText(ms_to_string(descriptor.get_end() - descriptor.get_start(), include_ms=True))
         self.show()
 
 
@@ -362,17 +362,16 @@ class AttributesSegment(QWidget):
 
         self.textEdit_AnnotationBody.installEventFilter(self)
 
-
     def on_body_changed(self):
         text = self.textEdit_AnnotationBody.toPlainText()
         self.descriptor.set_annotation_body(text)
-
 
     def eventFilter(self, QObject, QEvent):
         if QEvent.type() == QtCore.QEvent.FocusOut:
             self.on_body_changed()
 
         return super(AttributesSegment, self).eventFilter(QObject, QEvent)
+
 
 class AttributesMediaObject(QWidget):
     def __init__(self, parent, descriptor:IHasMediaObject):
@@ -417,6 +416,7 @@ class AttributesMediaObject(QWidget):
                                                     self.descriptor)
 
         self.update_list()
+
 
 class MediaObjectsList(QListWidget):
     def __init__(self, parent, attr_widget):

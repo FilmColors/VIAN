@@ -35,6 +35,7 @@ def ts_to_ms(hour=0, min=0, sec=0, ms=0):
     time += ms
     return time
 
+
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)

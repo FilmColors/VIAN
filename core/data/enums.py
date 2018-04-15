@@ -137,6 +137,14 @@ class TargetContainerType(Enum):
     EXPLICIT_SCREENSHOTS = 6
 
 
+class SegmentCreationMode(Enum):
+    """
+    Defines the Method hwo the Segment is created
+    """
+    BACKWARD = 0
+    FORWARD = 1
+    INTERVAL = 2
+
 
 class MediaObjectType(Enum):
     HYPERLINK = 0

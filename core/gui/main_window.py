@@ -11,6 +11,8 @@ import time
 import inspect
 import sys
 
+import threading
+
 import importlib
 from functools import partial
 
@@ -18,7 +20,6 @@ from core.concurrent.worker_functions import *
 from core.concurrent.worker import MinimalThreadWorker
 from core.data.enums import *
 from core.data.importers import *
-# from core.data.masterfile import MasterFile
 from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
@@ -26,14 +27,12 @@ from core.data.exporters import *
 from core.data.tools import *
 from core.concurrent.auto_segmentation import *
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
-# from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
-from core.gui.Dialogs.welcome_dialog import WelcomeDialog
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
@@ -43,10 +42,8 @@ from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
 from core.gui.player_vlc import Player_VLC, PlayerDockWidget
-# from core.gui.experiment_editor import ExperimentEditor, ExperimentEditorDock
 from core.gui.colormetry_widget import *
 from core.analysis.colorimetry.colormetry2 import ColormetryJob2
-# from core.gui.shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
@@ -57,7 +54,6 @@ from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
-
 
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
@@ -482,9 +478,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.progress_bar = StatusProgressBar(self)
 
             self.statusBar().addWidget(self.source_status)
+            self.statusBar().addPermanentWidget(self.output_line)
             self.statusBar().addPermanentWidget(self.progress_bar)
-            self.statusBar().addWidget(self.output_line)
-
             self.statusBar().addPermanentWidget(self.elan_status)
             self.statusBar().setFixedHeight(45)
 
@@ -881,9 +876,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         job = CreateScreenshotJob([frame_pos, self.project.movie_descriptor.movie_path, annotation_dicts, time])
         self.run_job_concurrent(job)
-
-    # def on_new_experiment(self):
-    #     self.project.create_experiment()
 
     def get_frame(self, time):
         if time <= 0:
@@ -1354,10 +1346,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_recent_menu()
 
         self.project.inhibit_dispatch = True
+
         if template_path is not None:
-            self.project.apply_template(template_path, ExperimentImporter())
+            self.project.apply_template(template_path)
 
         self.project.create_file_structure()
+
         # Importing all Vocabularies
         if vocabularies is not None:
             for i, v in enumerate(vocabularies):

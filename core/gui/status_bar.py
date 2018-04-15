@@ -9,7 +9,7 @@ from functools import partial
 import os
 
 from core.gui.perspectives import *
-
+import threading
 
 class StatusBar(QtWidgets.QWidget):
     def __init__(self,main_window):
@@ -67,7 +67,6 @@ class OutputLine(QtWidgets.QWidget):
         self.message_queue = []
         self.log_wnd = None
         self.print_message("Ready")
-
 
     def print_message(self, msg = "", color = "white"):
 
@@ -233,13 +232,15 @@ class MessageLogWindow(QMainWindow):
             self.view.setTextColor(QColor(msg[1]))
             self.view.append(str(i) + ".  " + str(msg[0]))
 
-
     def parse_command(self):
         cmd = self.input_line.text()
         try:
 
             if cmd == "list_containers":
                 self.main_window.project.print_object_list()
+
+            elif cmd == "list_threads":
+                print(threading.enumerate())
 
             elif cmd == "help":
                 print("list_containers -- Listing all Container Objects of the Project")

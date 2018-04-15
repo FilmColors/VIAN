@@ -207,8 +207,9 @@ class SimpleWorker(QRunnable):
 
 
 
-def run_minimal_worker(worker: MinimalThreadWorker, finish_func = None):
+def run_minimal_worker(worker: MinimalThreadWorker, finish_func = None, thread_name = "Default-Name"):
     thread = QThread()
+    thread.setObjectName(thread_name)
     worker.moveToThread(thread)
     if finish_func is not None:
         worker.finished.connect(finish_func)

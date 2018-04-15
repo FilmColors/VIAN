@@ -74,7 +74,6 @@ class AnnotationToolbar(EToolBar):
         self.current_color = (0, 0, 0)
         self.line_width = 5
 
-
         self.color_picker.on_selection.connect(self.on_color_change)
         self.spinBox_LineThickness.valueChanged.connect(self.on_line_width_change)
 
