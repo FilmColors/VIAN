@@ -65,8 +65,8 @@ class ELANProjectImporter():
                 value = j[0]
                 t_start = j[1]
                 t_stop = j[2]
-                segm = segmentation.create_segment(start = t_start, stop = t_stop,
-                                                   dispatch=False, annotation_body = value)
+                segm = segmentation.create_segment2(start = t_start, stop = t_stop, mode=SegmentCreationMode.INTERVAL,
+                                                   dispatch=False, body = value)
 
         for s in project.segmentation:
             s.update_segment_ids()
@@ -598,7 +598,12 @@ class SegmentationImporter(CSVImporter):
                         t_start = frame2ms(int(t_start), fps)
                         t_end = frame2ms(int(t_end), fps)
 
-                    segmentation.create_segment(start=t_start, stop=t_end, annotation_body=str(body), dispatch=False)
+                    mode = SegmentCreationMode.INTERVAL
+                    if t_start == t_end:
+                        mode = SegmentCreationMode.FORWARD
+
+                    segmentation.create_segment2(start=t_start, stop=t_end, mode=mode,
+                                                        dispatch=False, body=str(body), inhibit_overlap=False)
 
                 except Exception as e:
                     print("Error in Import Segmentation:", e)

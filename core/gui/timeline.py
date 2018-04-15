@@ -304,10 +304,14 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def on_interval_segment_end(self):
         if self.selected is not None and self.interval_segmentation_marker is not None:
             if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment(self.interval_segmentation_start,
-                                             self.curr_movie_time,
-                                             forward_segmenting=False,
-                                             inhibit_overlap=self.inhibit_overlap)
+                # self.selected.create_segment(self.interval_segmentation_start,
+                #                              self.curr_movie_time,
+                #                              forward_segmenting=False,
+                #                              inhibit_overlap=self.inhibit_overlap)
+                self.selected.create_segment2(self.interval_segmentation_start,
+                                              self.curr_movie_time,
+                                              mode=SegmentCreationMode.INTERVAL,
+                                              inhibit_overlap=self.inhibit_overlap)
             else:
                 self.main_window.print_message("No Segmentation Selected", "Orange")
 
@@ -805,7 +809,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def new_segment(self):
         if self.selector is not None and self.selected is not None:
             if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment(self.selector.start, self.selector.stop, forward_segmenting=False, inhibit_overlap=self.inhibit_overlap)
+                self.selected.create_segment2(self.selector.start,
+                                              self.selector.stop,
+                                              mode=SegmentCreationMode.INTERVAL,
+                                              inhibit_overlap=self.inhibit_overlap)
+                # self.selected.create_segment(self.selector.start, self.selector.stop, forward_segmenting=False, inhibit_overlap=self.inhibit_overlap)
 
     def close_selector(self):
         if self.selector is not None:
@@ -831,17 +839,21 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 for slice in bar.slices:
                     slice.update_text()
 
-    def create_segment(self, lst = None):
+    def create_segment(self, lst = None, mode=SegmentCreationMode.BACKWARD):
         # If Nothing is handed in, we're performing a fast-segmentation
         # which means, that the segment is created from the last segments end to the current movie-time
 
         forward = False
+
         if not lst:
                 lst = [self.curr_movie_time - 1, self.curr_movie_time]
-                forward = self.is_forward_segmenting
+                if self.is_forward_segmenting:
+                    mode = SegmentCreationMode.FORWARD
+
         if self.selected is not None:
             if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment(lst[0], lst[1], forward_segmenting = forward, inhibit_overlap=self.inhibit_overlap)
+                self.selected.create_segment2(lst[0], lst[1], mode, inhibit_overlap=self.inhibit_overlap)
+                # self.selected.create_segment(lst[0], lst[1], forward_segmenting = forward, inhibit_overlap=self.inhibit_overlap)
 
     def create_layer(self, lst):
         if len(lst) == 0:
@@ -1860,7 +1872,7 @@ class TimebarSelector(QtWidgets.QWidget):
 
 
 class SelectorContextMenu(QtWidgets.QMenu):
-    new_segment = pyqtSignal(list)
+    new_segment = pyqtSignal(list, object)
     new_segmentation = pyqtSignal()
     new_layer = pyqtSignal(list)
     def __init__(self, parent, pos, selector):
@@ -1907,7 +1919,7 @@ class SelectorContextMenu(QtWidgets.QMenu):
         self.popup(pos)
 
     def add_segment(self):
-        self.new_segment.emit([self.selector.start, self.true_end])
+        self.new_segment.emit([self.selector.start, self.true_end], SegmentCreationMode.INTERVAL)
         self.close()
 
     def on_add_segmentation(self):
