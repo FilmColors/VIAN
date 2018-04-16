@@ -35,7 +35,7 @@ from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportD
 from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.concurrent_tasks import ConcurrentTaskDock
-from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
+from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
 from core.gui.outliner import Outliner
@@ -142,6 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.source_status = None
         self.phonon_player = None
         self.annotation_toolbar = None
+        self.annotation_options = None
         self.drawing_overlay = None
         self.timeline = None
         self.output_line = None
@@ -159,6 +160,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_matrix = None
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
+
 
         self.quick_annotation_dock = None
         self.colorimetry_live = None
@@ -194,6 +196,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.create_analyses_widget()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
         self.create_annotation_toolbar()
+        self.create_annotation_dock()
+        self.annotation_options.optionsChanged.connect(self.annotation_toolbar.on_options_changed)
+        self.annotation_options.optionsChanged.connect(self.drawing_overlay.on_options_changed)
         self.create_screenshot_manager()
 
         self.create_node_editor_results()
@@ -202,6 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_outliner()
         self.create_screenshot_manager_dock_widget()
         self.create_inspector()
+
 
         self.create_timeline()
         self.create_widget_player_controls()
@@ -337,6 +343,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.numpy_data_manager,
                                     self.project_streamer,
                                     self.analysis_results_widget,
+                                    self.annotation_options
                                           ]
 
         self.menus_list = [
@@ -482,6 +489,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusBar().addPermanentWidget(self.progress_bar)
             self.statusBar().addPermanentWidget(self.elan_status)
             self.statusBar().setFixedHeight(45)
+
+    def create_annotation_dock(self):
+        if self.annotation_options is None:
+            self.annotation_options = AnnotationOptionsDock(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.annotation_options, Qt.Horizontal)
+        else:
+            if self.annotation_options.isVisible():
+                self.annotation_options.hide()
+            else:
+                self.annotation_options.show()
+                self.annotation_options.raise_()
+                self.annotation_options.activateWindow()
+
 
     def create_widget_video_player(self):
         if self.player_dock_widget is None:
@@ -1033,7 +1053,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget.show()
             self.colorimetry_live.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
 
@@ -1049,14 +1070,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.show()
             self.inspector.show()
             self.player_dock_widget.show()
+            self.annotation_options.show()
 
             self.annotation_toolbar.show()
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
+            self.tabifyDockWidget(self.inspector, self.annotation_options)
             self.elan_status.stage_selector.set_stage(1, False)
             self.screenshots_manager_dock.raise_()
-
 
         elif perspective == Perspective.ScreenshotsManager.name:
             self.current_perspective = Perspective.ScreenshotsManager
@@ -1177,6 +1199,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.hide()
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
+        self.annotation_options.hide()
+
         # self.experiment_editor_dock.hide()
         self.quick_annotation_dock.hide()
         self.colorimetry_live.hide()

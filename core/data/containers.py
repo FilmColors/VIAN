@@ -1768,7 +1768,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.dispatch_on_changed(item=self)
 
     def get_color(self):
-        return QtGui.QColor(self.color[0], self.color[1], self.color[1])
+        return QtGui.QColor(self.color[0], self.color[1], self.color[2])
 
     def add_path(self, path, color, width):
         self.free_hand_paths.append([path, color, width])

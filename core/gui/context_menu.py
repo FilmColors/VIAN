@@ -578,5 +578,8 @@ class MediaObjectContextMenu(ContextMenu):
         pass
 
     def on_delete(self):
-        for obj in self.media_object:
-            obj.container.remove_media_object(obj)
+        try:
+            for obj in self.media_object:
+                obj.container.remove_media_object(obj)
+        except:
+            pass
