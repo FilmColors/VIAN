@@ -109,6 +109,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.plugin_menu)
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
 
+        self.dock_widgets = []
         self.settings = UserSettings()
         self.settings.load()
 
@@ -171,8 +172,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drawing_editor = None
         self.concurrent_task_viewer = None
 
-        self.dock_widgets = []
-
         # self.player = Player_VLC(self)
         self.player = Player_VLC(self)
         self.player_dock_widget = None
@@ -222,6 +221,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_quick_annotation_dock()
 
         self.create_colorimetry_live()
+
+        self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -417,7 +418,7 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 os.remove(force_file_path)
                 self.settings.GRID_SIZE = 1
-                self.settings.store()
+                self.settings.store(self.dock_widgets)
                 self.show_welcome()
             except Exception as e:
                 print(e)
@@ -453,7 +454,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def show_welcome(self):
         open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
         self.settings.SHOW_WELCOME = False
-        self.settings.store()
+        self.settings.store(self.dock_widgets)
 
     def show_first_start(self):
         dialog = DialogFirstStart(self)
@@ -502,7 +503,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.annotation_options.raise_()
                 self.annotation_options.activateWindow()
 
-
     def create_widget_video_player(self):
         if self.player_dock_widget is None:
             self.player_dock_widget = PlayerDockWidget(self)
@@ -522,17 +522,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.annotation_toolbar is None:
             self.annotation_toolbar = AnnotationToolbar(self, self.drawing_overlay)
             self.addToolBar(self.annotation_toolbar)
-            # self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.annotation_toolbar)
         else:
             self.annotation_toolbar.show()
-
-    def create_screenshot_manager(self):
-        if self.screenshots_manager is None:
-            self.screenshots_manager = ScreenshotsManagerWidget(self, parent=None)
-        else:
-            self.screenshots_manager.activateWindow()
-
-#OLD CODE
 
     def create_inspector(self):
         if self.inspector is None:
@@ -611,11 +602,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.timeline.raise_()
                 self.timeline.activateWindow()
 
+    def create_screenshot_manager(self):
+        if self.screenshots_manager is None:
+            self.screenshots_manager = ScreenshotsManagerWidget(self, parent=None)
+        else:
+            self.screenshots_manager.activateWindow()
+
     def create_screenshot_manager_dock_widget(self):
         if self.screenshots_manager_dock is None:
             self.screenshots_manager_dock = ScreenshotsManagerDockWidget(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Horizontal)
-            # self.on_movie_updated()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
         else:
             if self.screenshots_manager_dock.isVisible():
@@ -839,7 +835,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
 
         self.dispatch_on_closed()
-        self.settings.store()
+        self.settings.store(self.dock_widgets)
 
         self.frame_update_thread.quit()
 
@@ -1805,7 +1801,7 @@ class DialogFirstStart(QtWidgets.QDialog):
 
     def on_ok(self):
         self.check_if_finished()
-        self.settings.store()
+        self.settings.store(self.main_window.dock_widgets)
         if self.may_proceed:
             self.close()
         else:

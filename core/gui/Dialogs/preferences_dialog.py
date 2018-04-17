@@ -106,9 +106,10 @@ class DialogPreferences(EDialogWidget):
 
     def on_ok(self):
         self.apply_settings()
-        self.settings.store()
+        self.settings.store(self.main_window.dock_widgets)
         self.close()
 
     def on_cancel(self):
         self.settings.load()
+        self.settings.apply_dock_widgets_settings(self.main_window.dock_widgets)
         self.close()

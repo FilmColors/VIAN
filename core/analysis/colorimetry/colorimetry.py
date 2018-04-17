@@ -117,8 +117,6 @@ class ColometricsAnalysis(IAnalysisJob):
         hist_stack = np.divide(hist_stack, (width * height))
         print(hist_stack.nbytes / 1000000, "MB")
 
-
-
         result = dict(
             fps = fps,
             hist_stack = hist_stack,
