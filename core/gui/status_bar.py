@@ -246,7 +246,7 @@ class MessageLogWindow(QMainWindow):
                 print("list_containers -- Listing all Container Objects of the Project")
 
             else:
-                cmd = cmd.replace("print", "self.main_window.print_message")
+                # cmd = cmd.replace("print", "self.main_window.print_message")
                 cmd = cmd.replace("project", "self.main_window.project")
 
                 eval(cmd)

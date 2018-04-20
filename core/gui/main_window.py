@@ -54,6 +54,7 @@ from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
+from core.gui.experiment_editor import ExperimentEditorDock
 
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
@@ -161,6 +162,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_matrix = None
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
+        self.experiment_dock = None
 
 
         self.quick_annotation_dock = None
@@ -191,6 +193,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_thread.start()
 
         self.create_widget_elan_status()
+        loading_screen.showMessage("Creating GUI: Player", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_widget_video_player()
         # self.create_analyses_widget()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
@@ -198,8 +202,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_annotation_dock()
         self.annotation_options.optionsChanged.connect(self.annotation_toolbar.on_options_changed)
         self.annotation_options.optionsChanged.connect(self.drawing_overlay.on_options_changed)
+
+        loading_screen.showMessage("Creating GUI: ScreenshotManager", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_screenshot_manager()
 
+        loading_screen.showMessage("Creating GUI: NodeEditor", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_node_editor_results()
         self.create_node_editor()
         self.create_screenshots_toolbar()
@@ -207,7 +216,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_screenshot_manager_dock_widget()
         self.create_inspector()
 
-
+        loading_screen.showMessage("Creating GUI: Timeline", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_timeline()
         self.create_widget_player_controls()
         self.create_perspectives_manager()
@@ -217,12 +227,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_manager()
         self.create_vocabulary_matrix()
 
+        loading_screen.showMessage("Creating GUI: Analysis", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_analysis_results_widget()
         self.create_quick_annotation_dock()
 
+        loading_screen.showMessage("Creating GUI: Colorimetry Live Widget", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_colorimetry_live()
 
+        loading_screen.showMessage("Creating GUI: Experiment Editor", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
+        self.create_experiment_editor()
+
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
+
+        loading_screen.showMessage("Creating GUI: Create Layout", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -307,6 +328,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionScreenshot.triggered.connect(self.on_screenshot)
         self.actionAdd_Key.triggered.connect(self.on_key_annotation)
         self.actionAdd_Segment.triggered.connect(self.on_new_segment)
+        self.actionCreateExperiment.triggered.connect(self.on_create_experiment)
         self.actionAbout.triggered.connect(self.on_about)
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
@@ -344,7 +366,9 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.numpy_data_manager,
                                     self.project_streamer,
                                     self.analysis_results_widget,
-                                    self.annotation_options
+                                    self.annotation_options,
+                                    self.experiment_dock.experiment_editor
+
                                           ]
 
         self.menus_list = [
@@ -643,6 +667,15 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.vocabulary_manager.show()
             self.vocabulary_manager.activateWindow()
+
+
+    def create_experiment_editor(self):
+        if self.experiment_dock is None:
+            self.experiment_dock = ExperimentEditorDock(self)
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.experiment_dock, QtCore.Qt.Vertical)
+        else:
+            self.experiment_dock.show()
+            self.experiment_dock.activateWindow()
 
     def create_vocabulary_matrix(self):
         if self.vocabulary_matrix is None:
@@ -1144,12 +1177,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner.show()
             self.vocabulary_manager.show()
             self.inspector.show()
-            # self.experiment_editor_dock.show()
+            self.experiment_dock.show()
 
             self.elan_status.stage_selector.set_stage(2, False)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Vertical)
-            # self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_editor_dock)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_dock)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
         elif perspective == Perspective.QuickAnnotation.name:
@@ -1197,7 +1230,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget.hide()
         self.annotation_options.hide()
 
-        # self.experiment_editor_dock.hide()
+        self.experiment_dock.hide()
         self.quick_annotation_dock.hide()
         self.colorimetry_live.hide()
 
@@ -1335,6 +1368,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def decrease_playrate(self):
         self.player.set_rate(self.player.get_rate() - 0.1)
         self.player_controls.update_rate()
+
+    def on_create_experiment(self):
+        if self.project is not None:
+            self.project.create_experiment()
+
     # endregion
 
     #region Project Management

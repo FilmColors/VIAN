@@ -102,10 +102,10 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 node_item = NodeScriptsNodeItem(script_item, j, n)
                 self.item_list.append(node_item)
 
-        # self.experiment_group = ExperimentRootItem(self.project_item, 5)
-        # for i, exp in enumerate(self.main_window.project.experiments):
-        #     experiment_item = ExperimentItem(self.experiment_group, i, exp)
-        #     self.item_list.append(experiment_item)
+        self.experiment_group = ExperimentRootItem(self.project_item, 5)
+        for i, exp in enumerate(self.main_window.project.experiments):
+            experiment_item = ExperimentItem(self.experiment_group, i, exp)
+            self.item_list.append(experiment_item)
 
         if not first_time:
             self.project_item.setExpanded(exp_p_item)
@@ -701,42 +701,41 @@ class NodeScriptsNodeItem(AbstractOutlinerItem):
     def update_item(self):
         self.setText(0, self.item.get_name())
 
-#
-# class ExperimentRootItem(AbstractOutlinerItem):
-#     def __init__(self, parent, index):
-#         super(ExperimentRootItem, self).__init__(parent, index)
-#         self.update_item()
-#
-#     def set_name(self, name):
-#         pass
-#         "Not implemented"
-#
-#     def update_item(self):
-#         self.setText(0, "Experiments")
-#
-#         self.setForeground(0, QtGui.QColor(106,165,255))
-#
-#
-# class ExperimentItem(AbstractOutlinerItem):
-#     def __init__(self, parent, index, script):
-#         super(ExperimentItem, self).__init__(parent, index)
-#         self.has_item = True
-#         self.is_editable = True
-#         self.item = script
-#         self.update_item()
-#
-#     def get_container(self):
-#         return self.item
-#
-#     def set_name(self, name):
-#         self.item.set_name(name)
-#
-#     def get_name(self):
-#         return self.item.get_name()
-#
-#     def update_item(self):
-#         self.setText(0, self.item.get_name())
-#
 
-pageend = None
+class ExperimentRootItem(AbstractOutlinerItem):
+    def __init__(self, parent, index):
+        super(ExperimentRootItem, self).__init__(parent, index)
+        self.update_item()
+
+    def set_name(self, name):
+        pass
+        "Not implemented"
+
+    def update_item(self):
+        self.setText(0, "Experiments")
+        self.setForeground(0, QtGui.QColor(106,165,255))
+
+
+class ExperimentItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, script):
+        super(ExperimentItem, self).__init__(parent, index)
+        self.has_item = True
+        self.is_editable = True
+        self.item = script
+        self.update_item()
+
+    def get_container(self):
+        return self.item
+
+    def set_name(self, name):
+        self.item.set_name(name)
+
+    def get_name(self):
+        return self.item.get_name()
+
+    def update_item(self):
+        self.setText(0, self.item.get_name())
+
+
+pass
 #endregion

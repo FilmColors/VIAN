@@ -92,6 +92,7 @@ class IProjectContainer(QObject):
     def get_type(self):
         return -1
 
+
 class ITimeRange():
 
     def get_start(self):
