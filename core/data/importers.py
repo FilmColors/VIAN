@@ -584,16 +584,25 @@ class SegmentationImporter(CSVImporter):
 
                     if t_type == "MS":
                         pass
+
                     elif t_type == "HH:MM:SS":
                         sp = t_start.split(":")
                         t_start = ts_to_ms(sp[0], sp[1], sp[2])
                         sp = t_end.split(":")
                         t_end = ts_to_ms(sp[0], sp[1], sp[2])
+
                     elif t_type == "HH:MM:SS:MS":
                         sp = t_start.split(":")
                         t_start = ts_to_ms(sp[0], sp[1], sp[2], sp[3])
                         sp = t_end.split(":")
                         t_end = ts_to_ms(sp[0], sp[1], sp[2], sp[3])
+
+                    elif t_type == "HH:MM:SS:FRAME":
+                        sp = t_start.split(":")
+                        t_start = ts_to_ms(sp[0], sp[1], sp[2]) + (int(sp[3]) * (1000 / fps))
+                        sp = t_end.split(":")
+                        t_end = ts_to_ms(sp[0], sp[1], sp[2]) + (int(sp[3]) * (1000 / fps))
+
                     elif t_type == "FrameIDX":
                         t_start = frame2ms(int(t_start), fps)
                         t_end = frame2ms(int(t_end), fps)
