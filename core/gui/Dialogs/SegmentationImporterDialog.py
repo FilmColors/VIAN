@@ -69,6 +69,7 @@ class SegmentationImporterDialog(EDialogWidget):
                                               self.comboBox_startField.currentText(),
                                               self.comboBox_endField.currentText(),
                                               self.comboBox_annotationField.currentText(),
-                                              self.comboBox_tType.currentText())
+                                              self.comboBox_tType.currentText(),
+                                              self.comboBox_Mode.currentText())
 
             self.close()

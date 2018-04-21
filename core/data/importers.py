@@ -558,7 +558,8 @@ class SegmentationImporter(CSVImporter):
     def __init__(self):
         super(SegmentationImporter, self).__init__()
 
-    def import_segmentation(self, path, project:VIANProject, fps,has_header, f_start, f_end, f_body, t_type = "ms"):
+    def import_segmentation(self, path, project:VIANProject, fps,has_header, f_start, f_end, f_body, t_type = "ms", c_mode = "BOTH"):
+        segments = []
         with open(path, 'r') as csvfile:
             segmentation = project.create_segmentation(name="Imported Segmentation", dispatch=False)
             # We do not want to dispatch until the end of the import
@@ -607,16 +608,25 @@ class SegmentationImporter(CSVImporter):
                         t_start = frame2ms(int(t_start), fps)
                         t_end = frame2ms(int(t_end), fps)
 
-                    mode = SegmentCreationMode.INTERVAL
-                    if t_start == t_end:
-                        mode = SegmentCreationMode.FORWARD
+                    segments.append([t_start, t_end])
 
-                    segmentation.create_segment2(start=t_start, stop=t_end, mode=mode,
-                                                        dispatch=False, body=str(body), inhibit_overlap=False)
 
                 except Exception as e:
                     print("Error in Import Segmentation:", e)
                     continue
+
+        mode = SegmentCreationMode.INTERVAL
+        for i, s in enumerate(segments):
+            if c_mode == "Start To End":
+                segmentation.create_segment2(start=s[0], stop=s[1], mode=mode,
+                                             dispatch=False, body=str(body), inhibit_overlap=False)
+            else:
+                if i < len(segments) - 1:
+                    segmentation.create_segment2(start=s[0], stop=segments[i + 1][0], mode=mode,
+                                                 dispatch=False, body=str(body), inhibit_overlap=False)
+                else:
+                    segmentation.create_segment2(start=s[0], stop=project.movie_descriptor.duration, mode=mode,
+                                                 dispatch=False, body=str(body), inhibit_overlap=False)
 
         project.dispatch_changed()
 

@@ -1510,7 +1510,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def set_end(self, end):
-        print("TEST, END SET")
         if end < self.start + self.MIN_SIZE :
             end = self.start + self.MIN_SIZE
 
@@ -2358,7 +2357,10 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable, IHasVocabulary):
     def deserialize(self, serialization, project):
         self.project = project
         self.name = serialization['name']
-        self.unique_id = serialization['unique_id']
+        try:
+            self.unique_id = serialization['unique_id']
+        except:
+            pass
 
         for s in serialization['shots']:
             shot = self.project.get_by_id(s)
