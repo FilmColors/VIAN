@@ -40,6 +40,8 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.target_items = []
         self.inhibit_ui_signals = False
 
+        self.curr_parameter_widget = None
+
         # This contains all current option of the ComboBox Target Container
         self.target_container_options = []
 
@@ -51,9 +53,9 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.listView_Vocabularies.itemChanged.connect(self.update_vocabulary_list_in_object)
         self.listTargets.itemChanged.connect(self.update_target_list_in_object)
         self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
+        self.listWidget_Analyses.itemSelectionChanged.connect(self.on_selected_analysis_changed)
         self.btn_AddObject.clicked.connect(self.add_class_object)
         self.btn_RemoveObject.clicked.connect(self.remove_class_object)
-
 
     def update_ui(self):
         if self.current_experiment is None or self.main_window.project is None:
@@ -110,16 +112,22 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
         for c in self.main_window.project.segmentation:
             itm = TargetItem(self.listTargets, c, "All Segments of " + c.get_name())
+            if c in self.selected_class_object.obj.target_container:
+                itm.setCheckState(Qt.Checked)
             self.listTargets.addItem(itm)
             self.target_items.append(itm)
 
         for c in self.main_window.project.annotation_layers:
             itm = TargetItem(self.listTargets, c, "All Annotations of " + c.get_name())
+            if c in self.selected_class_object.obj.target_container:
+                itm.setCheckState(Qt.Checked)
             self.listTargets.addItem(itm)
             self.target_items.append(itm)
 
         for c in self.main_window.project.screenshot_groups:
             itm = TargetItem(self.listTargets, c, "All Screenshots of " + c.get_name())
+            if c in self.selected_class_object.obj.target_container:
+                itm.setCheckState(Qt.Checked)
             self.listTargets.addItem(itm)
             self.target_items.append(itm)
 
@@ -136,6 +144,17 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         else:
             self.selected_class_object = None
         self.inhibit_ui_signals = False
+
+    def on_selected_analysis_changed(self):
+        if self.curr_parameter_widget is not None:
+            self.widgetParam.layout().removeWidget(self.curr_parameter_widget)
+            self.curr_parameter_widget.deleteLater()
+
+        if len(self.listWidget_Analyses.selectedItems()) > 0:
+            self.widgetParam.layout()
+            curr_itm = self.listWidget_Analyses.selectedItems()[0]
+            self.curr_parameter_widget = curr_itm.analysis_class().get_parameter_widget()
+            self.widgetParam.layout().addWidget(self.curr_parameter_widget)
 
     def add_class_object(self):
         name = self.lineEdit_ObjectName.text()

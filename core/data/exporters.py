@@ -108,12 +108,7 @@ class SegmentationExporter(IConcurrentJob):
                 if self.export_text:
                     line += s['annotation_body'].replace("\n", "")
                 result += line +"\n"
-                # value = s['additional_identifiers'][0]
-                # start = ms_to_string(s['start'])
-                # end = ms_to_string(s["end"])
-                # duration = ms_to_string(s["end"] - s['start'])
 
-                # result += name + tab + tab + start + tab + end + tab + duration + tab + value + "\n"
         try:
             with open(self.file_path , "w") as output:
                 output.write(result)

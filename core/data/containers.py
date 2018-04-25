@@ -3024,10 +3024,13 @@ class ColormetryAnalysis(AnalysisContainer):
 
         return self
 
+
 class AnalysisParameters():
-    def __init__(self, target_items):
+    def __init__(self, target_items=None):
         self.target_items = []
-        self.set_targets(target_items)
+
+        if target_items is not None:
+            self.set_targets(target_items)
 
     def set_targets(self, project_container_list):
         for o in project_container_list:
@@ -3436,7 +3439,7 @@ def get_default_vocabulary():
     return voc
 #endregion
 
-
+#region Experiments
 class ClassificationObject(IProjectContainer, IHasName):
     """
     A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
@@ -3449,7 +3452,6 @@ class ClassificationObject(IProjectContainer, IHasName):
     """
     def __init__(self, name, parent = None):
         IProjectContainer.__init__(self)
-
         self.name = name
         self.parent = parent
         self.children = []
@@ -3461,7 +3463,6 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.classification_vocabularies.append(voc)
         for w in voc.words_plain:
             self.unique_keywords.append(UniqueKeyword(voc, w, self))
-
 
     def remove_vocabulary(self, voc):
         self.classification_vocabularies.remove(voc)
@@ -3576,6 +3577,7 @@ class Experiment(IProjectContainer, IHasName):
         self.name = name
         self.classification_objects = []
         self.analyses = []
+        self.analyses_parameters = []
 
     def get_name(self):
         return self.name
@@ -3618,13 +3620,19 @@ class Experiment(IProjectContainer, IHasName):
             root.get_children_plain(result)
         return result
 
-    def add_analysis(self, analysis):
+    def add_analysis(self, analysis:AnalysisContainer, parameters:AnalysisParameters = None):
         if analysis not in self.analyses:
             self.analyses.append(analysis)
 
+            if parameters is None:
+                parameters = AnalysisParameters()
+            self.analyses_parameters.append(parameters)
+
     def remove_analysis(self, analysis):
         if analysis in self.analyses:
+            idx = self.analyses.index(analysis)
             self.analyses.remove(analysis)
+            self.analyses_parameters.pop(idx)
 
     def serialize(self):
         data = dict(
