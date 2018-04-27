@@ -1,20 +1,21 @@
-import sys
+import os
 import os
 import sys
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import Qt
 
-import pyqtgraph as pg
-from extensions.plugins.imdb_finder.imdb_finder import IMDBFinder
+from core.gui.hsv_color_picker import HSVColorPickerDock
+
 
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = IMDBFinder(None, None)
-        self.setCentralWidget(self.t)
+        # self.t = HSVColorPickerDock(self)
+        # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
 
-
+        self.setCentralWidget(QtWidgets.QFontDialog())
         self.resize(1200, 800)
 
 

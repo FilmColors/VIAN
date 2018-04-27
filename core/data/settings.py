@@ -1,3 +1,11 @@
+"""
+The UserSettings Class is used to Store Variables from VIAN. 
+DockWidgets States, Options etc.
+
+Everything is serialized to the settings.json file in the UserDirectory/VIAN.
+
+"""
+
 import glob
 import json
 import os
@@ -5,6 +13,7 @@ from collections import namedtuple
 
 from core.data.enums import ScreenshotNamingConventionOptions as naming
 from PyQt5.QtGui import QFont, QColor
+
 Font = namedtuple('Font', ['font_family', 'font_size', 'font_color'])
 Palette = namedtuple('Palette', ['palette_name', 'palette_colors'])
 
@@ -84,26 +93,31 @@ class UserSettings():
         self.USE_CORPUS = False
         self.USE_ELAN = False
 
+        self.dock_widgets_data = []
 
     def get_qt_color(self, color):
+        """
+        Returns Font and Color
+        :param color: 
+        :return: 
+        """
         font = QFont(color.font_family)
         font.setPixelSize(color.font_size)
         color = QColor(color.font_color[0], color.font_color[0], color.font_color[0], color.font_color[0])
         return font, color
 
     def main_font(self):
+        """
+        Returns the Main Font of the Settings
+        :return: font, color 
+        """
         return self.get_qt_color(self.MAIN_FONT)
 
-    def store(self):
-        dict = vars(self)
-        try:
-            with open(self.store_path, 'w') as f:
-                json.dump(dict, f)
-            print("Stored Settings to: ", self.store_path)
-        except Exception as e:
-            print(e)
-
     def generate_dir_paths(self):
+        """
+        Generates the default Directory Paths
+        :return: 
+        """
         self.DIR_BASE = (os.path.abspath(".") + "/").replace("\\", "/")
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_USER = "user/"
@@ -143,6 +157,11 @@ class UserSettings():
             print("Successfully Loaded Settings from: ", self.store_path)
 
     def add_to_recent_files(self, project):
+        """
+        Adds a project to the Recent Files
+        :param project: a VIANProject object
+        :return: 
+        """
         path = project.path
         name = project.name
 
@@ -166,15 +185,46 @@ class UserSettings():
             self.recent_files_path = n_path
 
     def remove_from_recent_files(self, file):
+        """
+        Removes a specific file from the recent list
+        :param file: The FilePath to be removed
+        :return: 
+        """
         idx = self.recent_files_path.index(file)
         self.recent_files_name.pop(idx)
         self.recent_files_path.pop(idx)
 
+    def store(self, dock_widgets):
+        """
+        Saves all current settings and the settings of the EDockWidgets
+        :param dock_widgets: 
+        :return: 
+        """
+        self.dock_widgets_data = []
+        for w in dock_widgets:
+            data = dict(
+                class_name=w.__class__.__name__,
+                settings = w.get_settings()
+            )
+            self.dock_widgets_data.append(data)
+
+        ddict = vars(self)
+        try:
+            with open(self.store_path, 'w') as f:
+                json.dump(ddict, f)
+        except Exception as e:
+            print(e)
+
     def load(self):
+        """
+        Loads the Settings from the UserDir, and checks if the necessary folders exist
+        in the User/VIAN Directory
+        :return: 
+        """
         try:
             with open(self.store_path ,"r") as f:
-                dict = json.load(f)
-                for attr, value in dict.items():
+                data = json.load(f)
+                for attr, value in data.items():
                     if not attr == "PALETTES" and not attr=="MAIN_FONT":
                         setattr(self, attr, value)
         except IOError as e:
@@ -182,11 +232,29 @@ class UserSettings():
 
         self.integritiy_check()
 
-    def load_last(self):
-        files = glob.glob(self.DIR_PROJECT)
-        if len(files) > 0:
-            files.sort(key=os.path.getmtime, reverse=True)
-            self.store_path = files[0]
-            self.load()
+    def apply_dock_widgets_settings(self, dock_widgets):
+        """
+        Applies the Settings of the EDockWidgets to them
+        
+        :param dock_widgets: A list of EDockWidgets
+        :return: None
+        """
+        for sett in self.dock_widgets_data:
+            try:
+                for w in dock_widgets:
+                    if w.__class__.__name__ == sett['class_name']:
+                        w.apply_settings(sett['settings'])
+                        break
+            except Exception as e:
+                print(e)
+                pass
+
+# @OC
+    # def load_last(self):
+    #     files = glob.glob(self.DIR_PROJECT)
+    #     if len(files) > 0:
+    #         files.sort(key=os.path.getmtime, reverse=True)
+    #         self.store_path = files[0]
+    #         self.load()
 
 

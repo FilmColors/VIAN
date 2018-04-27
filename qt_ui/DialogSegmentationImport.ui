@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>311</width>
-    <height>254</height>
+    <width>468</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -137,6 +137,46 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <item>
+      <widget class="QLabel" name="label_8">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Mode:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox_Mode">
+       <item>
+        <property name="text">
+         <string>Start To End</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Start To Next</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QLabel" name="label_5">
@@ -175,6 +215,11 @@
        <item>
         <property name="text">
          <string>HH:MM:SS:MS</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HH:MM:SS:FRAME</string>
         </property>
        </item>
        <item>

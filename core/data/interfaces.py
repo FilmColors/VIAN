@@ -28,28 +28,35 @@ class IProjectChangeNotify():
         pass
 
 
-class IHasVocabulary():
+class IClassifiable():
     def __init__(self):
         self.voc_list = []
 
+    def get_parent_container(self):
+        return None
+
     def has_word(self, word):
-        return word in self.voc_list
+        pass
+        # return word in self.voc_list
 
     def toggle_word(self, word):
-        if word in self.voc_list:
-            self.remove_word(word)
-        else:
-            self.add_word(word)
+        pass
+        # if word in self.voc_list:
+        #     self.remove_word(word)
+        # else:
+        #     self.add_word(word)
 
     def add_word(self, word):
-        if word not in self.voc_list:
-            self.voc_list.append(word)
-            word.add_connected_item(self)
+        pass
+        # if word not in self.voc_list:
+        #     self.voc_list.append(word)
+        #     word.add_connected_item(self)
 
     def remove_word(self, word):
-        if word in self.voc_list:
-            self.voc_list.remove(word)
-        word.remove_connected_item(self)
+        pass
+        # if word in self.voc_list:
+        #     self.voc_list.remove(word)
+        # word.remove_connected_item(self)
 
 
 class IProjectContainer(QObject):
@@ -91,6 +98,7 @@ class IProjectContainer(QObject):
 
     def get_type(self):
         return -1
+
 
 class ITimeRange():
 

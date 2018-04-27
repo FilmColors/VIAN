@@ -6,6 +6,7 @@ from core.gui.ewidgetbase import EDialogWidget
 from core.analysis.colorimetry.computation import calculate_histogram
 from PyQt5.QtCore import QRect, Qt
 from core.data.interfaces import IConcurrentJob
+from core.data.enums import *
 
 
 AUTO_SEGM_EVEN = 0
@@ -25,7 +26,13 @@ def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10
 
         segmentation = project.create_segmentation("Auto Segmentation", False)
         for i in range(n_segment):
-            segmentation.create_segment(i * segm_width, i * segm_width + segm_width, dispatch=False)
+            segmentation.create_segment2(i * segm_width,
+                                         i * segm_width + segm_width,
+                                         mode=SegmentCreationMode.INTERVAL,
+                                         inhibit_overlap=False,
+                                         dispatch=False)
+
+            # segmentation.create_segment(i * segm_width, i * segm_width + segm_width, dispatch=False)
         project.dispatch_changed()
 
     elif mode == AUTO_SEGM_CHIST:
@@ -275,9 +282,11 @@ class ApplySegmentationWindow(QMainWindow):
 
         segmentation = self.project.create_segmentation("Auto Segmentation", dispatch=False)
         for s in segments:
-            print(frame2ms(s[0], self.fps), frame2ms(s[1], self.fps))
-            segmentation.create_segment(frame2ms(s[0], self.fps), frame2ms(s[1], self.fps),
-                                        dispatch=False)
+            segmentation.create_segment2(frame2ms(s[0], self.fps),
+                                         frame2ms(s[1], self.fps),
+                                         mode=SegmentCreationMode.INTERVAL,
+                                         inhibit_overlap=False,
+                                         dispatch=False)
 
         self.project.dispatch_changed()
 

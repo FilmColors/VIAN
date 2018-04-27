@@ -191,24 +191,9 @@ class SimpleWorker(QRunnable):
         self.signals.sign_progress.emit((float_value * 100, 0))
 
 
-#
-# class YieldingWorkerSignals(QObject):
-#     sign_finished = pyqtSignal(tuple)
-#     sign_error = pyqtSignal(tuple)
-#     sign_progress = pyqtSignal(tuple)
-#     sign_yield = pyqtSignal(object)
-#     sign_aborted = pyqtSignal(int)
-#
-#
-# class YieldingWorker():
-#     def __init__(self):
-#         self.signals = YieldingWorkerSignals()
-#
-
-
-
-def run_minimal_worker(worker: MinimalThreadWorker, finish_func = None):
+def run_minimal_worker(worker: MinimalThreadWorker, finish_func = None, thread_name = "Default-Name"):
     thread = QThread()
+    thread.setObjectName(thread_name)
     worker.moveToThread(thread)
     if finish_func is not None:
         worker.finished.connect(finish_func)

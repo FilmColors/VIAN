@@ -18,9 +18,10 @@ TGT_ENTRIES = [ 'All',
                 "All Screenshots of <Create Screenshots Group>"]
 
 class ExperimentEditorDock(EDockWidget):
-    def __init__(self, main_window, editor):
+    def __init__(self, main_window):
         super(ExperimentEditorDock, self).__init__(main_window, limit_size=False)
-        self.setWidget(editor)
+        self.experiment_editor = ExperimentEditor(main_window)
+        self.setWidget(self.experiment_editor)
         self.setWindowTitle("Experiment Overview")
 
 
@@ -36,20 +37,13 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
         self.voc_items = []
         self.analysis_items = []
+        self.target_items = []
         self.inhibit_ui_signals = False
 
-        self.cache_obj = None
-        self.cache_param = None
+        self.curr_parameter_widget = None
 
         # This contains all current option of the ComboBox Target Container
         self.target_container_options = []
-
-        self.cB_ClassSegment.stateChanged.connect(self.source_changed)
-        self.cB_ClassAnnotation.stateChanged.connect(self.source_changed)
-        self.cB_ClassScreenshots.stateChanged.connect(self.source_changed)
-
-        # self.cB_ClassSegmentation.stateChanged.connect(self.source_changed)
-        # self.cB_ClassAnnotationLayer.stateChanged.connect(self.source_changed)
 
         self.lineEdit_ExperimentName.textChanged.connect(self.name_changed)
         self.lineEdit_ObjectName.returnPressed.connect(self.add_class_object)
@@ -57,22 +51,17 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         # self.treeWidget_Objects = QTreeWidget()
         self.treeWidget_Objects.itemSelectionChanged.connect(self.on_class_selection_changed)
         self.listView_Vocabularies.itemChanged.connect(self.update_vocabulary_list_in_object)
+        self.listTargets.itemChanged.connect(self.update_target_list_in_object)
         self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
+        self.listWidget_Analyses.itemSelectionChanged.connect(self.on_selected_analysis_changed)
         self.btn_AddObject.clicked.connect(self.add_class_object)
         self.btn_RemoveObject.clicked.connect(self.remove_class_object)
-        self.comboBox_TargetContainers.currentIndexChanged.connect(self.on_target_container_changed)
 
     def update_ui(self):
         if self.current_experiment is None or self.main_window.project is None:
             self.set_enabled(False)
         else:
             self.set_enabled(True)
-
-            self.cB_ClassSegment.setChecked(SEGMENT in self.current_experiment.classification_sources)
-            # self.cB_ClassSegmentation.setChecked(SEGMENTATION in self.current_experiment.classification_sources)
-            self.cB_ClassAnnotation.setChecked(ANNOTATION in self.current_experiment.classification_sources)
-            self.cB_ClassScreenshots.setChecked(SCREENSHOT in self.current_experiment.classification_sources)
-            # self.cB_ClassAnnotationLayer.setChecked(ANNOTATION_LAYER in self.current_experiment.classification_sources)
 
             self.lineEdit_ExperimentName.setText(self.current_experiment.name)
             self.update_classification_object_tree()
@@ -84,14 +73,12 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.listView_Vocabularies.clear()
         self.voc_items = []
         if self.selected_class_object is not None:
-            # self.listView_Vocabularies = QListWidget()
             for voc in self.main_window.project.vocabularies:
-                if voc.derived_vocabulary is False:
-                    itm = VocabularyListItem(self.listView_Vocabularies, voc)
-                    self.listView_Vocabularies.addItem(itm)
-                    if voc in self.selected_class_object.obj.get_base_vocabularies():
-                        itm.setCheckState(Qt.Checked)
-                    self.voc_items.append(itm)
+                itm = VocabularyListItem(self.listView_Vocabularies, voc)
+                self.listView_Vocabularies.addItem(itm)
+                if voc in self.selected_class_object.obj.get_vocabularies():
+                    itm.setCheckState(Qt.Checked)
+                self.voc_items.append(itm)
 
     def update_classification_object_tree(self):
         self.treeWidget_Objects.clear()
@@ -118,89 +105,31 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.treeWidget_Objects.expandAll()
 
     def update_target_container_combobox(self):
-        self.comboBox_TargetContainers.currentIndexChanged.disconnect(self.on_target_container_changed)
+        self.listTargets.clear()
+        self.target_items.clear()
+        if self.selected_class_object is None:
+            return
 
-        self.comboBox_TargetContainers.clear()
-        self.target_container_options.clear()
-        self.comboBox_TargetContainers.addItem(TGT_ENTRIES[0])
-        self.target_container_options.append(("All", None))
+        for c in self.main_window.project.segmentation:
+            itm = TargetItem(self.listTargets, c, "All Segments of " + c.get_name())
+            if c in self.selected_class_object.obj.target_container:
+                itm.setCheckState(Qt.Checked)
+            self.listTargets.addItem(itm)
+            self.target_items.append(itm)
 
-        if SEGMENT in self.current_experiment.classification_sources:
-            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[1])
-            self.target_container_options.append((TGT_ENTRIES[1], None))
+        for c in self.main_window.project.annotation_layers:
+            itm = TargetItem(self.listTargets, c, "All Annotations of " + c.get_name())
+            if c in self.selected_class_object.obj.target_container:
+                itm.setCheckState(Qt.Checked)
+            self.listTargets.addItem(itm)
+            self.target_items.append(itm)
 
-            for segm in self.current_experiment.project.segmentation:
-                self.comboBox_TargetContainers.addItem(TGT_ENTRIES[4] + segm.get_name())
-                self.target_container_options.append((TGT_ENTRIES[4] + segm.get_name(), segm))
-
-            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[7])
-            self.target_container_options.append((TGT_ENTRIES[7], None))
-
-        if ANNOTATION in self.current_experiment.classification_sources:
-            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[2])
-            self.target_container_options.append((TGT_ENTRIES[1], None))
-
-            for ann in self.current_experiment.project.annotation_layers:
-                self.comboBox_TargetContainers.addItem(TGT_ENTRIES[5] + ann.get_name())
-                self.target_container_options.append((TGT_ENTRIES[5] + ann.get_name(), ann))
-
-            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[8])
-            self.target_container_options.append((TGT_ENTRIES[8], None))
-
-        if SCREENSHOT in self.current_experiment.classification_sources:
-            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[3])
-            self.target_container_options.append((TGT_ENTRIES[3], None))
-
-            for grp in self.current_experiment.project.screenshot_groups:
-                self.comboBox_TargetContainers.addItem(TGT_ENTRIES[6] + grp.get_name())
-                self.target_container_options.append((TGT_ENTRIES[6] + grp.get_name(), grp))
-
-            self.comboBox_TargetContainers.addItem(TGT_ENTRIES[9])
-            self.target_container_options.append((TGT_ENTRIES[9], None))
-
-        self.comboBox_TargetContainers.currentIndexChanged.connect(self.on_target_container_changed)
-
-    def on_target_container_changed(self):
-        if self.selected_class_object is not None:
-            idx = self.comboBox_TargetContainers.currentIndex()
-            curr_tpl = self.target_container_options[idx]
-            obj = self.selected_class_object.obj
-
-            if curr_tpl[0] == "All Segments of <Create Segmentation>":
-                popup = CreateSegmentationPopup(self.main_window, self.main_window.project,
-                                                self.selected_class_object.obj.name, self.on_new_created_object)
-                self.cache_obj = obj
-                self.cache_param = TargetContainerType.EXPLICIT_SEGMENTS
-            elif curr_tpl[0] == "All Annotations of <Create Annotation Layer":
-                popup = CreateAnnotationLayerPopup(self.main_window, self.main_window.project,
-                                                   self.selected_class_object.obj.name, self.on_new_created_object)
-                self.cache_obj = obj
-                self.cache_param = TargetContainerType.EXPLICIT_ANNOTATIONS
-
-            elif curr_tpl[0] == "All Screenshots of <Create Screenshots Group>":
-                popup = CreateScreenshotGroupPopup(self.main_window, self.main_window.project,
-                                                   self.selected_class_object.obj.name, self.on_new_created_object)
-                self.cache_obj = obj
-                self.cache_param = TargetContainerType.EXPLICIT_SCREENSHOTS
-
-            elif "All Segments of" in curr_tpl[0] and curr_tpl[1] is not None:
-                obj.set_target_container(curr_tpl[1], TargetContainerType.EXPLICIT_SEGMENTS)
-            elif "All Annotations of" in curr_tpl[0] and curr_tpl[1] is not None:
-                obj.set_target_container(curr_tpl[1], TargetContainerType.EXPLICIT_ANNOTATIONS)
-            elif "All Screenshots of" in curr_tpl[0] and curr_tpl[1] is not None:
-                obj.set_target_container(curr_tpl[1], TargetContainerType.EXPLICIT_SCREENSHOTS)
-
-            elif "All Segments" in curr_tpl[0]:
-                obj.set_target_container(None, TargetContainerType.ALL_SEGMENTS)
-            elif "All Annotations" in curr_tpl[0]:
-                obj.set_target_container(None, TargetContainerType.ALL_ANNOTATIONS)
-            elif "All Screenshots" in curr_tpl[0]:
-                obj.set_target_container(None, TargetContainerType.ALL_SCREENSHOTS)
-
-            else:
-                obj.set_target_container(None)
-
-            self.update_classification_object_tree()
+        for c in self.main_window.project.screenshot_groups:
+            itm = TargetItem(self.listTargets, c, "All Screenshots of " + c.get_name())
+            if c in self.selected_class_object.obj.target_container:
+                itm.setCheckState(Qt.Checked)
+            self.listTargets.addItem(itm)
+            self.target_items.append(itm)
 
     def on_new_created_object(self, returnvalue):
         self.cache_obj.set_target_container(returnvalue, self.cache_param)
@@ -211,9 +140,21 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.selected_class_object = self.treeWidget_Objects.selectedItems()[0]
             self.lineEdit_ObjectNameDetails.setText(self.selected_class_object.obj.name)
             self.update_vocabulary_view()
+            self.update_target_container_combobox()
         else:
             self.selected_class_object = None
         self.inhibit_ui_signals = False
+
+    def on_selected_analysis_changed(self):
+        if self.curr_parameter_widget is not None:
+            self.widgetParam.layout().removeWidget(self.curr_parameter_widget)
+            self.curr_parameter_widget.deleteLater()
+
+        if len(self.listWidget_Analyses.selectedItems()) > 0:
+            self.widgetParam.layout()
+            curr_itm = self.listWidget_Analyses.selectedItems()[0]
+            self.curr_parameter_widget = curr_itm.analysis_class().get_parameter_widget()
+            self.widgetParam.layout().addWidget(self.curr_parameter_widget)
 
     def add_class_object(self):
         name = self.lineEdit_ObjectName.text()
@@ -230,7 +171,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
     def remove_class_object(self):
         if self.selected_class_object is not None:
-            if isinstance(self.selected_class_object.obj.parent, ClassificationObjects):
+            if isinstance(self.selected_class_object.obj.parent, ClassificationObject):
                 self.selected_class_object.obj.parent.remove_child(self.selected_class_object.obj)
             else:
                 self.current_experiment.remove_class_object(self.selected_class_object.obj)
@@ -269,12 +210,11 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             return
         for itm in self.voc_items:
             if itm.checkState() == Qt.Checked:
-                if itm.voc not in self.selected_class_object.obj.get_base_vocabularies():
+                if itm.voc not in self.selected_class_object.obj.get_vocabularies():
                     self.selected_class_object.obj.add_vocabulary(itm.voc)
             else:
-                for v in self.selected_class_object.obj.classification_vocabularies:
-                    if v.base_vocabulary == itm.voc:
-                        self.selected_class_object.obj.remove_vocabulary(v)
+                if itm.voc in self.selected_class_object.obj.get_vocabularies():
+                    self.selected_class_object.obj.remove_vocabulary(itm.voc)
 
     def update_analysis_list(self):
         self.listWidget_Analyses.clear()
@@ -284,7 +224,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.listWidget_Analyses.addItem(itm)
             self.analysis_items.append(itm)
             if self.current_experiment is not None:
-                if analysis.__name__ in self.current_experiment.analyses_templates:
+                if analysis.__name__ in self.current_experiment.analyses:
                     itm.setCheckState(Qt.Checked)
                 if self.main_window.project.has_analysis(analysis.__name__):
                     itm.setForeground(QColor(0, 204, 0))
@@ -294,11 +234,21 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
     def update_analysis_list_in_experiment(self):
         for itm in self.analysis_items:
             if itm.checkState() == Qt.Checked:
-                if itm.analysis_class.__name__ not in self.current_experiment.analyses_templates:
-                    self.current_experiment.analyses_templates.append(itm.analysis_class.__name__)
+                if itm.analysis_class.__name__ not in self.current_experiment.analyses:
+                    self.current_experiment.analyses.append(itm.analysis_class.__name__)
             else:
-                if itm.analysis_class.__name__ in self.current_experiment.analyses_templates:
-                    self.current_experiment.analyses_templates.remove(itm.analysis_class.__name__)
+                if itm.analysis_class.__name__ in self.current_experiment.analyses:
+                    self.current_experiment.analyses.remove(itm.analysis_class.__name__)
+
+    def update_target_list_in_object(self):
+        if self.selected_class_object is not None:
+            for itm in self.target_items:
+                if itm.checkState() == Qt.Checked:
+                    if itm.target_item not in self.selected_class_object.obj.target_container:
+                        self.selected_class_object.obj.target_container.append(itm.target_item)
+                else:
+                    if itm.target_item in self.selected_class_object.obj.target_container:
+                        self.selected_class_object.obj.target_container.remove(itm.target_item)
 
     def on_selected(self, sender, selected):
         self.inhibit_ui_signals = True
@@ -314,6 +264,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.inhibit_ui_signals = False
 
     def on_loaded(self, project):
+
         if len(project.experiments) > 0:
             self.current_experiment = project.experiments[0]
         else:
@@ -355,4 +306,12 @@ class AnalysisItem(QListWidgetItem):
         super(AnalysisItem, self).__init__(parent, Qt.ItemIsUserCheckable)
         self.analysis_class = analysis_class
         self.setText(self.analysis_class().name)
+        self.setCheckState(Qt.Unchecked)
+
+
+class TargetItem(QListWidgetItem):
+    def __init__(self, parent, target_item, text):
+        super(TargetItem, self).__init__(parent, Qt.ItemIsUserCheckable)
+        self.target_item = target_item
+        self.setText(text)
         self.setCheckState(Qt.Unchecked)

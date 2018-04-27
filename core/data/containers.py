@@ -22,23 +22,10 @@ from enum import Enum
 # from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import QPoint, QRect, QSize
-#
-# PROJECT = -1
-# SEGMENTATION = 0
-# SEGMENT = 1
-# ANNOTATION = 2
-# ANNOTATION_LAYER = 3
-# SCREENSHOT = 4
-# MOVIE_DESCRIPTOR = 5
-# ANALYSIS = 6
-# SCREENSHOT_GROUP = 7
-# NODE = 8
-# NODE_SCRIPT = 9
 
-
-class VIANProject(IHasName, IHasVocabulary):
+class VIANProject(IHasName, IClassifiable):
     def __init__(self, main_window, path = "", name = "", folder=""):
-        IHasVocabulary.__init__(self)
+        IClassifiable.__init__(self)
         self.undo_manager = UndoRedoManager()
         self.main_window = main_window
         # self.streamer = main_window.project_streamer
@@ -63,7 +50,8 @@ class VIANProject(IHasName, IHasVocabulary):
         self.analysis = []
         self.screenshot_groups = []
         self.vocabularies = []
-        # self.experiments = []
+
+        self.experiments = []
 
         self.current_script = None
         self.node_scripts = []
@@ -79,7 +67,6 @@ class VIANProject(IHasName, IHasVocabulary):
         self.colormetry_analysis = None
 
         self.add_vocabulary(get_default_vocabulary())
-        # self.create_default_experiment()
 
         self.inhibit_dispatch = False
         self.selected = []
@@ -149,10 +136,15 @@ class VIANProject(IHasName, IHasVocabulary):
         if not os.path.isdir(self.export_dir):
             os.mkdir(self.export_dir)
 
-    def get_all_containers(self):
+    def get_all_containers(self, types = None):
         result = []
-        for itm in self.id_list:
-            result.append(itm[1])
+        if types is None:
+            for itm in self.id_list:
+                result.append(itm[1])
+        else:
+            for itm in self.id_list:
+                if itm[1].get_type() in types:
+                    result.append(itm[1])
         return result
 
     def unload_all(self):
@@ -183,7 +175,10 @@ class VIANProject(IHasName, IHasVocabulary):
         new = self.create_segmentation(name = segmentation.name + "_Copy")
 
         for s in segmentation.segments:
-            segm = new.create_segment(start = s.get_start(), stop = s.get_end(), dispatch=False)
+            # segm = new.create_segment(start = s.get_start(), stop = s.get_end(), dispatch=False)
+            segm = new.create_segment2(start = s.get_start(), stop = s.get_end(),
+                                       dispatch=False,
+                                       mode=SegmentCreationMode.INTERVAL)
             segm.annotation_body = s.annotation_body
 
         print("Dispatching")
@@ -197,8 +192,7 @@ class VIANProject(IHasName, IHasVocabulary):
             main_segmentation = self.segmentation[self.main_segmentation_index]
 
         self.segmentation.remove(segmentation)
-        # for exp in self.experiments:
-        #     exp.clear_from_deleted_containers()
+        self.remove_from_id_list(segmentation)
         self.undo_manager.to_undo((self.remove_segmentation, [segmentation]), (self.add_segmentation, [segmentation]))
 
 
@@ -325,6 +319,7 @@ class VIANProject(IHasName, IHasVocabulary):
 
 
             self.screenshots.remove(screenshot)
+            self.remove_from_id_list(screenshot)
             self.sort_screenshots()
             self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
             self.dispatch_changed()
@@ -339,7 +334,7 @@ class VIANProject(IHasName, IHasVocabulary):
             grp = ScreenshotGroup(self, name)
         else:
             grp = group
-
+        grp.set_project(self)
         self.screenshot_groups.append(grp)
         if not initial:
             self.dispatch_changed()
@@ -349,6 +344,7 @@ class VIANProject(IHasName, IHasVocabulary):
     def remove_screenshot_group(self, grp):
         if grp is not self.screenshot_groups[0]:
             self.screenshot_groups.remove(grp)
+            self.remove_from_id_list(grp)
             self.dispatch_changed()
 
     def get_screenshots_of_segment(self, main_segm_id):
@@ -363,7 +359,6 @@ class VIANProject(IHasName, IHasVocabulary):
                     result.append(s)
 
         return result
-
 
     def set_current_screenshot_group(self, grp):
         self.active_screenshot_group.is_current = False
@@ -388,9 +383,11 @@ class VIANProject(IHasName, IHasVocabulary):
         self.dispatch_changed()
 
     def remove_analysis(self, analysis):
-        self.analysis.remove(analysis)
-        self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
-        self.dispatch_changed()
+        if analysis in self.analysis:
+            self.analysis.remove(analysis)
+            self.remove_from_id_list(analysis)
+            self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
+            self.dispatch_changed()
 
     def get_analyzes_of_item(self, item):
         result = []
@@ -473,6 +470,7 @@ class VIANProject(IHasName, IHasVocabulary):
 
         self.undo_manager.to_undo((self.add_annotation_layer, [layer]),
                                   (self.remove_annotation_layer, [layer]))
+
         self.dispatch_changed()
 
     def remove_annotation_layer(self, layer):
@@ -488,7 +486,7 @@ class VIANProject(IHasName, IHasVocabulary):
         if len(self.annotation_layers) > 0:
             self.current_annotation_layer = self.annotation_layers[0]
 
-
+        self.remove_from_id_list(layer)
         self.dispatch_changed()
 
     def remove_annotation(self, annotation):
@@ -526,7 +524,7 @@ class VIANProject(IHasName, IHasVocabulary):
     #endregion
 
     #region IO
-    def store_project(self, settings, global_settings, path = None):
+    def store_project(self, settings, path = None):
         """
         DEPRECATED
         :param settings: 
@@ -542,6 +540,7 @@ class VIANProject(IHasName, IHasVocabulary):
         analyzes = []
         scripts = []
         vocabularies = []
+        experiments = []
 
         for v in self.vocabularies:
             vocabularies.append(v.serialize())
@@ -564,6 +563,8 @@ class VIANProject(IHasName, IHasVocabulary):
         for e in self.node_scripts:
             scripts.append(e.serialize())
 
+        for f in self.experiments:
+            experiments.append(f.serialize())
 
         data = dict(
             path = self.path,
@@ -581,7 +582,8 @@ class VIANProject(IHasName, IHasVocabulary):
             analyzes = analyzes,
             movie_descriptor = self.movie_descriptor.serialize(),
             scripts = scripts,
-            vocabularies=vocabularies
+            vocabularies=vocabularies,
+            experiments = experiments
         )
 
         if path is None:
@@ -592,9 +594,6 @@ class VIANProject(IHasName, IHasVocabulary):
 
         if settings.SCREENSHOTS_STATIC_SAVE:
             np.savez(numpy_path, imgs = screenshots_img, annotations = screenshots_ann, empty=[True])
-
-
-        global_settings.add_project(self)
 
         try:
             with open(project_path, 'w') as f:
@@ -612,11 +611,6 @@ class VIANProject(IHasName, IHasVocabulary):
 
         with open(path) as f:
             my_dict = json.load(f)
-
-        # remove the default Experiment
-
-        # self.remove_experiment(self.experiments[0])
-
 
         self.path = my_dict['path']
         self.path = path
@@ -695,6 +689,8 @@ class VIANProject(IHasName, IHasVocabulary):
 
         try:
             old = self.screenshot_groups
+            for o in old:
+                self.remove_screenshot_group(o)
             self.screenshot_groups = []
 
             for e in my_dict['screenshot_groups']:
@@ -725,6 +721,13 @@ class VIANProject(IHasName, IHasVocabulary):
             self.main_window.print_message(e, "Red")
 
 
+        try:
+            for e in my_dict['experiments']:
+                new = Experiment().deserialize(e, self)
+
+        except Exception as e:
+            print(e)
+
         # Finalizing the Project, Hooking up the ID Connections
         # Connecting the NodeScriptAnalysis Objects to their Final Nodes
         for a in self.analysis:
@@ -734,13 +737,7 @@ class VIANProject(IHasName, IHasVocabulary):
                     if node is not None:
                         node.operation.result = res
 
-        # try:
-        #     for g in my_dict['experiments']:
-        #         new = Experiment().deserialize(g, self)
-        #         # self.add_experiment(new)
-        # except Exception as e:
-        #     # raise e
-        #     print(e)
+
 
         # Migrating the Project to the new FileSystem
         if move_project_to_directory_project:
@@ -767,12 +764,12 @@ class VIANProject(IHasName, IHasVocabulary):
         self.sort_screenshots()
         self.undo_manager.clear()
 
-    def get_template(self, segm, voc, ann, scripts): #, experiment, experiment_exporter):
+    def get_template(self, segm, voc, ann, scripts):
         segmentations = []
         vocabularies = []
         layers = []
         node_scripts = []
-        experiments = []
+
         if segm:
             for s in self.segmentation:
                 segmentations.append([s.get_name(), s.unique_id])
@@ -786,21 +783,18 @@ class VIANProject(IHasName, IHasVocabulary):
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
 
-        # if experiment:
-        #     for e in self.experiments:
-        #         experiments.append(experiment_exporter.export(None, e, return_dict = True))
+
 
         template = dict(
             segmentations = segmentations,
             vocabularies = vocabularies,
             layers = layers,
             node_scripts=node_scripts,
-            # experiments = experiments
 
         )
         return template
 
-    def apply_template(self, template_path, experiment_importer):
+    def apply_template(self, template_path):
 
         try:
             with open(template_path, "r") as f:
@@ -824,9 +818,6 @@ class VIANProject(IHasName, IHasVocabulary):
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
-
-        for e in template['experiments']:
-            experiment_importer.import_experiment(None, self, e)
 
 
     #endregion
@@ -906,12 +897,9 @@ class VIANProject(IHasName, IHasVocabulary):
             model.appendRow(QStandardItem(w.name))
         return model
 
-    def get_word_object_from_name(self, name, experiment = None):
-        if experiment is not None:
-            vocabularies = experiment.get_vocabulary_list()
-        else:
-            vocabularies = self.vocabularies
+    def get_word_object_from_name(self, name):
 
+        vocabularies = self.vocabularies
         for v in vocabularies:
             for w in v.words_plain:
                 if w.name == name:
@@ -932,37 +920,6 @@ class VIANProject(IHasName, IHasVocabulary):
             return new_voc, id_table
         else:
             return new_voc
-
-    #endregion
-
-    #region Experiments
-    # def create_experiment(self, dispatch = True):
-    #     new = Experiment()
-    #     self.add_experiment(new, dispatch)
-    #     return new
-    #
-    # def add_experiment(self, experiment, dispatch = True):
-    #     experiment.set_project(self)
-    #     self.experiments.append(experiment)
-    #
-    #     self.undo_manager.to_undo((self.add_experiment, [experiment]),
-    #                               (self.remove_experiment, [experiment]))
-    #
-    #     if dispatch:
-    #         self.dispatch_changed(item=experiment)
-    #
-    # def remove_experiment(self, experiment):
-    #     if experiment in self.experiments:
-    #         self.experiments.remove(experiment)
-    #         self.remove_from_id_list(experiment)
-    #         self.undo_manager.to_undo((self.remove_experiment, [experiment]),
-    #                                   (self.add_experiment, [experiment]))
-    #         self.dispatch_changed()
-    #
-    # def create_default_experiment(self):
-    #     default = self.create_experiment()
-    #     default.set_name("Default Experiment")
-    #     default.create_class_object("Global")
 
     #endregion
 
@@ -993,11 +950,38 @@ class VIANProject(IHasName, IHasVocabulary):
 
         self.add_media_object(new, container)
 
-
     def add_media_object(self, media_object, container:IHasMediaObject, dispatch = True):
         media_object.set_project(self)
         container.add_media_object(media_object)
         self.dispatch_changed(item = container)
+
+    #endregion
+
+    #region Experiments
+
+    def create_experiment(self):
+        new = Experiment()
+        self.add_experiment(new)
+        pass
+
+    def add_experiment(self, experiment):
+        experiment.set_project(self)
+        self.experiments.append(experiment)
+
+        self.undo_manager.to_undo((self.add_experiment, [experiment]),
+                                  (self.remove_experiment, [experiment]))
+        self.dispatch_changed(item=experiment)
+
+    def remove_experiment(self, experiment):
+        if experiment in self.experiments:
+            self.experiments.remove(experiment)
+            self.remove_from_id_list(experiment)
+            self.undo_manager.to_undo((self.remove_experiment, [experiment]),
+                                      (self.add_experiment, [experiment]))
+
+            self.dispatch_changed()
+
+
 
     #endregion
 
@@ -1036,13 +1020,11 @@ class VIANProject(IHasName, IHasVocabulary):
         for d in self.id_list:
             if d[1] == container_object:
                 self.id_list.remove(d)
+                print("Removed: ", d)
                 break
 
     def clean_id_list(self):
-        for itm in self.id_list:
-            if itm[0] != itm[1].unique_id:
-                self.id_list.remove(itm)
-                print(itm, " removed from ID-List")
+        self.id_list = [itm for itm in self.id_list if itm[0] == itm[1].unique_id]
 
     def replace_ids(self):
         for itm in self.id_list:
@@ -1101,11 +1083,10 @@ class VIANProject(IHasName, IHasVocabulary):
     pass
 
 #region Segmentaion
-class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource, IHasVocabulary):
+class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
-        IHasVocabulary.__init__(self)
         self.name = name
         if segments is None:
             segments = []
@@ -1128,93 +1109,174 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return s
         return None
 
-    def create_segment(self, start, stop, ID = None, from_last_threshold = 100, forward_segmenting = False,
-                       inhibit_overlap = True,  dispatch = True, annotation_body = ""):
+    # @OC
+    # def create_segment(self, start, stop, ID = None, from_last_threshold = 1, forward_segmenting = False,
+    #                    inhibit_overlap = True,  dispatch = True, annotation_body = ""):
+    #     """
+    #     Creates a new Segment
+    #     :param start:
+    #     :param stop:
+    #     :param ID:
+    #     :param from_last_threshold:
+    #     :param forward_segmenting:
+    #     :param inhibit_overlap:
+    #     :param dispatch:
+    #     :param annotation_body:
+    #     :return:
+    #     """
+    #
+    #     # Is the Segment longer than the minimal Threshold (in ms)?
+    #     if stop - start < from_last_threshold:
+    #
+    #         # Forward Segmentation: Create a Segment from Position to next Segment or End
+    #         # If the new overlaps with the last: shorten the last
+    #         if forward_segmenting:
+    #             # Find the next Segment if there is one and create a segment from start to the next segment start
+    #
+    #             next = None
+    #             last = None
+    #             for s in self.segments:
+    #                 if s.start < start:
+    #                     last = s
+    #                 if s.start > start and next is None:
+    #                     next = s
+    #                 if last is not None and next is not None:
+    #                     break
+    #
+    #             if next is None:
+    #                 stop = self.project.movie_descriptor.duration
+    #             else:
+    #                 stop = next.get_start() - 1
+    #
+    #             if last is not None and last.end > start:
+    #                 last.set_end(start - 1)
+    #
+    #         # Backwards Segmentation: Create a Segment from the Last to current Position
+    #         else:
+    #             last = None
+    #             for i, s in enumerate(self.segments):
+    #                 if s.start < start:
+    #                     last = s
+    #             if last is not None:
+    #                 start = last.end
+    #             else:
+    #                 start = 0
+    #
+    #     if inhibit_overlap:
+    #         last = None
+    #         next = None
+    #
+    #         for i, s in enumerate(self.segments):
+    #             if s.start < start:
+    #                 last = s
+    #                 if len(self.segments) > i + 1:
+    #                     next = self.segments[i + 1]
+    #                 else:
+    #                     next = None
+    #
+    #         if last is not None and last.end > start:
+    #             start = last.end
+    #         if next is not None and next.start < stop:
+    #             stop = next.start - 1
+    #
+    #     if ID is None:
+    #         ID = len(self.segments) + 1
+    #
+    #     # IF the Segment is to small, we don't want to create it
+    #     if start > stop - 100:
+    #         return
+    #
+    #     # if the Segment does still overlap, we don't want to create it
+    #     last = None
+    #     next = None
+    #     for i, s in enumerate(self.segments):
+    #         if s.start < start:
+    #             last = s
+    #             if len(self.segments) > i + 1:
+    #                 next = self.segments[i + 1]
+    #             else:
+    #                 next = None
+    #
+    #     if last is not None and last.end > start:
+    #         return
+    #     if next is not None and next.start < stop:
+    #         return
+    #
+    #     new_seg = Segment(ID = ID, start = start, end = stop, name=str(ID),
+    #                       segmentation = self, annotation_body=annotation_body)
+    #     new_seg.set_project(self.project)
+    #
+    #     self.add_segment(new_seg, dispatch)
+    #
+    #     return new_seg
 
 
-        # Are we fast segmenting?
-        if stop - start < from_last_threshold:
+    # TODO repace old create_segment method
 
-            # Forward Segmentation: Create a Segment from Position to next Segment or End
-            # If the new overlaps with the last: shorten the last
-            if forward_segmenting:
-                # Find the next Segment if there is one and create a segment from start to the next segment start
-                next = None
-                last = None
-                for s in self.segments:
-                    if s.start < start:
-                        last = s
-                    if s.start > start and next is None:
-                        next = s
-                    if last is not None and next is not None:
-                        break
+    def create_segment2(self, start, stop, mode:SegmentCreationMode = SegmentCreationMode.BACKWARD,
+                        body = "",
+                        dispatch  = True,
+                        inhibit_overlap = True, minimal_length = 5):
 
-                if next is None:
-                    stop = self.project.movie_descriptor.duration
-                else:
-                    stop = next.get_start() - 1
-
-                if last is not None and last.end > start:
-                    last.set_end(start - 1)
-
-            # Backwards Segmentation: Create a Segment from the Last to current Position
-            else:
-                last = None
-                for i, s in enumerate(self.segments):
-                    if s.start < start:
-                        last = s
-                if last is not None:
-                    start = last.end
-                else:
-                    start = 0
-
-        if inhibit_overlap:
+        # If the Segment is smaller than the minimal_length, don't do anything
+        if mode == SegmentCreationMode.BACKWARD:
             last = None
-            next = None
-
             for i, s in enumerate(self.segments):
                 if s.start < start:
                     last = s
-                    if len(self.segments) > i + 1:
-                        next = self.segments[i + 1]
-                    else:
-                        next = None
+            if last is not None:
+                start = last.end
+            else:
+                start = 0
+        # Find the next Segment if there is one and
+        # create a segment from position to the next segment or the movies end if none exists
+        elif mode == SegmentCreationMode.FORWARD:
+            next = None
+            last = None
+            for s in self.segments:
+                if s.start < start:
+                    last = s
+                if s.start > start and next is None:
+                    next = s
+                if last is not None and next is not None:
+                    break
+
+            if next is None:
+                stop = self.project.movie_descriptor.duration
+            else:
+                stop = next.get_start()
 
             if last is not None and last.end > start:
-                start = last.end
-            if next is not None and next.start < stop:
-                stop = next.start - 1
+                last.set_end(start)
 
-        if ID is None:
-            ID = len(self.segments) + 1
+        elif mode == SegmentCreationMode.INTERVAL:
+            if inhibit_overlap:
+                last = None
+                next = None
 
-        # IF the Segment is to small, we don't want to create it
-        if start > stop - 100:
+                for i, s in enumerate(self.segments):
+                    if s.start < start:
+                        last = s
+                        if len(self.segments) > i + 1:
+                            next = self.segments[i + 1]
+                        else:
+                            next = None
+
+                if last is not None and last.end > start:
+                    start = last.end
+                if next is not None and next.start < stop:
+                    stop = next.start
+
+        if stop - start < minimal_length:
             return
 
-        # if the Segment does still overlap, we don't want to create it
-        last = None
-        next = None
-        for i, s in enumerate(self.segments):
-            if s.start < start:
-                last = s
-                if len(self.segments) > i + 1:
-                    next = self.segments[i + 1]
-                else:
-                    next = None
-
-        if last is not None and last.end > start:
-            return
-        if next is not None and next.start < stop:
-            return
-
-        new_seg = Segment(ID = ID, start = start, end = stop, name=str(ID),
-                          segmentation = self, annotation_body=annotation_body)
+        ID = len(self.segments) + 1
+        new_seg = Segment(ID=ID, start=start, end=stop, name=str(ID),
+                          segmentation=self, annotation_body=body)
         new_seg.set_project(self.project)
 
         self.add_segment(new_seg, dispatch)
 
-        return new_seg
 
     def add_segment(self, segment, dispatch = True):
         # Finding the Segments location
@@ -1251,7 +1313,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if segm in self.segments:
             old_end = segm.get_end()
             segm.end = time
-            new = self.create_segment(time, old_end)
+            # new = self.create_segment(time, old_end)
+            new = self.create_segment2(time, old_end, mode=SegmentCreationMode.INTERVAL, dispatch=False)
             self.project.undo_manager.to_undo((self.cut_segment, [segm, time]), (self.merge_segments, [segm, new]))
 
     def merge_segments(self, a, b):
@@ -1277,7 +1340,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             self.remove_segment(b, dispatch=False)
             self.remove_segment(a, dispatch=False)
 
-            segm = self.create_segment(start, end)
+            # segm = self.create_segment(start, end)
+            segm = self.create_segment2(start, end, mode=SegmentCreationMode.INTERVAL, dispatch=False)
             segm.media_objects = media_objects
             self.project.undo_manager.to_undo((self.merge_segments, [a, b]), (self.cut_segment, [segm, cut_t]))
             self.dispatch_on_changed()
@@ -1325,17 +1389,12 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         for s in self.segments:
             s_segments.append(s.serialize())
 
-        words = []
-        for w in self.voc_list:
-            words.append(w.unique_id)
-
         result = dict(
             name = self.name,
             unique_id = self.unique_id,
             segments = s_segments,
             notes = self.notes,
             locked = self.locked,
-            words = words
         )
 
         return result
@@ -1358,14 +1417,14 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         except:
             self.locked = False
 
-        try:
-            for w in serialization["words"]:
-                word = self.project.get_by_id(w)
-                if word is not None:
-                    self.add_word(self.project.get_by_id(w))
-
-        except Exception as e:
-            pass
+        # try:
+        #     for w in serialization["words"]:
+        #         word = self.project.get_by_id(w)
+        #         if word is not None:
+        #             self.add_word(self.project.get_by_id(w))
+        #
+        # except Exception as e:
+        #     pass
 
         return self
 
@@ -1415,11 +1474,12 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return "Invalid Property"
         return ""
 
-class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary, IHasMediaObject):
+
+class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject):
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None, annotation_body = "", name = "New Segment"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
-        IHasVocabulary.__init__(self)
+        IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
 
         self.MIN_SIZE = 10
@@ -1448,7 +1508,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def set_end(self, end):
-        print("TEST, END SET")
         if end < self.start + self.MIN_SIZE :
             end = self.start + self.MIN_SIZE
 
@@ -1489,15 +1548,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         return self.annotation_body
 
     def serialize(self):
-        words = []
 
         media_objects = []
         for obj in self.media_objects:
             media_objects.append(obj.serialize())
-
-
-        for w in self.voc_list:
-            words.append(w.unique_id)
 
         r = dict(
              scene_id = self.ID,
@@ -1509,7 +1563,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             annotation_body = self.annotation_body,
             notes = self.notes,
             locked = self.locked,
-            words = words,
             media_objects = media_objects
         )
         return r
@@ -1540,14 +1593,14 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         except:
             self.annotation_body = ""
 
-        try:
-            for w in serialization["words"]:
-                word = self.project.get_by_id(w)
-                if word is not None:
-                    self.add_word(self.project.get_by_id(w))
-
-        except Exception as e:
-            print(e)
+        # try:
+        #     for w in serialization["words"]:
+        #         word = self.project.get_by_id(w)
+        #         if word is not None:
+        #             self.add_word(self.project.get_by_id(w))
+        #
+        # except Exception as e:
+        #     print(e)
 
         try:
             for w in serialization["media_objects"]:
@@ -1576,6 +1629,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     def delete(self):
         self.segmentation.remove_segment(self)
 
+    def get_parent_container(self):
+        return self.segmentation
 #endregion
 
 #region Annotation
@@ -1588,12 +1643,12 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 #     FreeHand = 5
 #
 
-class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IHasVocabulary, IHasMediaObject):
+class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, IHasMediaObject):
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
                  name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
-        IHasVocabulary.__init__(self)
+        IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
 
         self.name = name
@@ -1745,7 +1800,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.dispatch_on_changed(item=self)
 
     def get_color(self):
-        return QtGui.QColor(self.color[0], self.color[1], self.color[1])
+        return QtGui.QColor(self.color[0], self.color[1], self.color[2])
 
     def add_path(self, path, color, width):
         self.free_hand_paths.append([path, color, width])
@@ -1766,16 +1821,9 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.widget.update_paths()
 
     def serialize(self):
-        words = []
         media_objects = []
         for obj in self.media_objects:
             media_objects.append(obj.serialize())
-
-        for w in self.voc_list:
-            if w is not None:
-                words.append(w.unique_id)
-            else:
-                self.voc_list.remove(w)
 
         result = dict(
             name = self.name,
@@ -1796,7 +1844,6 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             resource_path = self.resource_path,
             free_hand_paths = self.free_hand_paths,
             notes = self.notes,
-            words=words,
             tracking = self.tracking,
             is_automated = self.is_automated,
             automated_source = self.automated_source,
@@ -1843,14 +1890,14 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         except:
             self.locked = False
 
-        try:
-            for w in serialization["words"]:
-                word = self.project.get_by_id(w)
-                if word is not None:
-                    self.add_word(self.project.get_by_id(w))
-
-        except Exception as e:
-            pass
+        # try:
+        #     for w in serialization["words"]:
+        #         word = self.project.get_by_id(w)
+        #         if word is not None:
+        #             self.add_word(self.project.get_by_id(w))
+        #
+        # except Exception as e:
+        #     pass
 
         try:
             self.is_automated = serialization['is_automated']
@@ -1895,12 +1942,13 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
     def delete(self):
         self.annotation_layer.remove_annotation(self)
 
+    def get_parent_container(self):
+        return self.annotation_layer
 
-class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IHasVocabulary):
+class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
     def __init__(self, name = None, t_start = None, t_end = None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
-        IHasVocabulary.__init__(self)
 
         self.name = name
         self.t_start = t_start
@@ -1977,10 +2025,6 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         for a in self.annotations:
             s_annotations.append(a.serialize())
 
-        words = []
-        for w in self.voc_list:
-            words.append(w.unique_id)
-
         result = dict(
             name = self.name,
             unique_id=self.unique_id,
@@ -1990,7 +2034,6 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             annotations = s_annotations,
             notes = self.notes,
             locked=self.locked,
-            words=words,
             is_visible = self.is_visible
         )
         return result
@@ -2015,14 +2058,14 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             new.annotation_layer = self
             self.annotations.append(new)
 
-        try:
-            for w in serialization["words"]:
-                word = self.project.get_by_id(w)
-                if word is not None:
-                    self.add_word(self.project.get_by_id(w))
-
-        except Exception as e:
-            pass
+        # try:
+        #     for w in serialization["words"]:
+        #         word = self.project.get_by_id(w)
+        #         if word is not None:
+        #             self.add_word(self.project.get_by_id(w))
+        #
+        # except Exception as e:
+        #     pass
 
         try:
             self.is_visible = serialization['is_visible']
@@ -2070,12 +2113,12 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 
 #region Screenshots
 
-class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IHasVocabulary):
+class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable):
     def __init__(self, title = "", image = None,
                  img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
                  shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None):
         IProjectContainer.__init__(self)
-        IHasVocabulary.__init__(self)
+        IClassifiable.__init__(self)
         self.title = title
         self.img_movie = image
         self.img_blend = img_blend
@@ -2171,11 +2214,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             self.scene_id = segment.ID
 
     def serialize(self):
-
-        words = []
-        for w in self.voc_list:
-            words.append(w.unique_id)
-
         result = dict(
             title = self.title,
             unique_id=self.unique_id,
@@ -2187,7 +2225,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             movie_timestamp = self.movie_timestamp,
             creation_timestamp = self.creation_timestamp,
             notes = self.notes,
-            words=words
         )
 
 
@@ -2213,14 +2250,14 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.img_movie = np.zeros(shape=(30,50,3), dtype=np.uint8)
         self.img_blend = None
 
-        try:
-            for w in serialization["words"]:
-                word = self.project.get_by_id(w)
-                if word is not None:
-                    self.add_word(self.project.get_by_id(w))
-
-        except Exception as e:
-            pass
+        # try:
+        #     for w in serialization["words"]:
+        #         word = self.project.get_by_id(w)
+        #         if word is not None:
+        #             self.add_word(self.project.get_by_id(w))
+        #
+        # except Exception as e:
+        #     pass
 
         return self
 
@@ -2237,11 +2274,12 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def delete(self):
         self.project.remove_screenshot(self)
 
+    def get_parent_container(self):
+        return self.screenshot_group
 
-class ScreenshotGroup(IProjectContainer, IHasName, ISelectable, IHasVocabulary):
+class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     def __init__(self, project, name = "New Screenshot Group"):
         IProjectContainer.__init__(self)
-        IHasVocabulary.__init__(self)
         self.set_project(project)
         self.name = name
         self.screenshots = []
@@ -2281,35 +2319,34 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable, IHasVocabulary):
         for s in self.screenshots:
             shot_ids.append(s.get_id())
 
-        words = []
-        for w in self.voc_list:
-            words.append(w.unique_id)
-
-
         data = dict(
             name=self.name,
+            unique_id = self.unique_id,
             shots = shot_ids,
-            words=words
         )
         return data
 
     def deserialize(self, serialization, project):
         self.project = project
         self.name = serialization['name']
+        try:
+            self.unique_id = serialization['unique_id']
+        except:
+            pass
 
         for s in serialization['shots']:
             shot = self.project.get_by_id(s)
             shot.screenshot_group = self.name
             self.screenshots.append(shot)
 
-        try:
-            for w in serialization["words"]:
-                word = self.project.get_by_id(w)
-                if word is not None:
-                    self.add_word(self.project.get_by_id(w))
-
-        except Exception as e:
-            pass
+        # try:
+        #     for w in serialization["words"]:
+        #         word = self.project.get_by_id(w)
+        #         if word is not None:
+        #             self.add_word(self.project.get_by_id(w))
+        #
+        # except Exception as e:
+        #     pass
 
         return self
 
@@ -2556,11 +2593,11 @@ class ConnectionDescriptor(IProjectContainer):
 #endregion
 
 #region MovieDescriptor
-class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IHasVocabulary):
+class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
                  duration=100, fps = 30):
         IProjectContainer.__init__(self)
-        IHasVocabulary.__init__(self)
+        IClassifiable.__init__(self)
         self.set_project(project) # TODO This should be changed
         self.movie_name = movie_name
         self.movie_path = movie_path
@@ -2959,10 +2996,13 @@ class ColormetryAnalysis(AnalysisContainer):
 
         return self
 
+
 class AnalysisParameters():
-    def __init__(self, target_items):
+    def __init__(self, target_items=None):
         self.target_items = []
-        self.set_targets(target_items)
+
+        if target_items is not None:
+            self.set_targets(target_items)
 
     def set_targets(self, project_container_list):
         for o in project_container_list:
@@ -3095,7 +3135,6 @@ class Vocabulary(IProjectContainer, IHasName):
         self.category = "default"
 
         self.derived_vocabulary = False
-        self.experiment = None
         self.base_vocabulary = None
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
@@ -3134,13 +3173,8 @@ class Vocabulary(IProjectContainer, IHasName):
         children = []
         word.get_children_plain(children)
 
-        for itm in word.connected_items:
-            itm.remove_word(word)
-
         for w in children:
             self.words_plain.remove(w)
-            for itm in w.connected_items:
-                itm.remove_word(w)
 
         if word in self.words:
             self.words.remove(word)
@@ -3296,11 +3330,6 @@ class Vocabulary(IProjectContainer, IHasName):
         print("Vocabulary ID: ", vid)
         return vid
 
-    # def set_experiment(self, experiment, base_vocabulary):
-    #     self.experiment = experiment
-    #     self.base_vocabulary = base_vocabulary
-    #     self.derived_vocabulary = True
-
     def get_type(self):
         return VOCABULARY
 
@@ -3377,127 +3406,8 @@ def get_default_vocabulary():
     return voc
 #endregion
 
-#region Experiment
-# class Experiment(IProjectContainer, IHasName):
-#     """
-#     An Experiment defines a specific set of rules, with which the user wants to perform a classification of a film.
-#
-#     Example:
-#         A User wants to analyze the Color Features of a Film. To do so, he wants to segment Films into temporal Segments
-#         each one is a Scene.
-#         He then wants to classify the Foreground and the Background Color for each Segment based on his homemade
-#         Vocabulary called "ColorVocabulary". At the end, he also wants to generate some automated ColorFeature Extractions
-#         based on this Segmentation.
-#
-#     """
-#
-#     def __init__(self, name="New Experiment"):
-#         IProjectContainer.__init__(self)
-#
-#         self.name = name
-#         self.classification_sources = []
-#         self.classification_objects = []
-#         self.analyses_templates = []
-#
-#         self.classified_containers = []
-#
-#     def remove_class_object(self, classification_target):
-#         if classification_target in self.classification_objects:
-#             self.classification_objects.remove(classification_target)
-#             self.project.remove_from_id_list(classification_target)
-#
-#     def create_class_object(self, name, parent = None):
-#         new = ClassificationObjects(name, experiment=self)
-#
-#         if parent == self or parent is None:
-#             self.add_class_object(new)
-#         else:
-#             parent.add_child(new)
-#
-#         return new
-#
-#     def clear_from_deleted_containers(self):
-#         for root in self.classification_objects:
-#             objects = []
-#             root.get_children_plain(objects)
-#             for obj in objects:
-#                 obj.clear_deleted_containers()
-#
-#     def add_class_object(self, classification_object):
-#         self.classification_objects.append(classification_object)
-#         classification_object.set_project(self.project)
-#         classification_object.parent = self
-#
-#     def get_type(self):
-#         return EXPERIMENT
-#
-#     def get_name(self):
-#         return self.name
-#
-#     def set_name(self, name):
-#         self.name = name
-#         self.dispatch_on_changed(item = self)
-#
-#     def serialize(self):
-#
-#         serializations = []
-#         for cls in self.classification_objects:
-#             plain = []
-#             cls.get_children_plain(plain)
-#             for c in plain:
-#                 serializations.append(c.serialize())
-#
-#         serialization = dict(
-#             name = self.name,
-#             unique_id = self.unique_id,
-#             classification_objects = serializations,
-#             classification_sources = self.classification_sources,
-#             analyses_templates = self.analyses_templates,
-#
-#         )
-#         return serialization
-#
-#     def deserialize(self, serialization, project):
-#         self.name = serialization['name']
-#         self.unique_id = serialization['unique_id']
-#         self.classification_sources = serialization['classification_sources']
-#         self.analyses_templates = serialization['analyses_templates']
-#         project.add_experiment(self)
-#
-#         for obj in serialization['classification_objects']:
-#             ClassificationObjects("NONAME", self).deserialize(obj, project)
-#
-#         return self
-#
-#     def get_classification_objects_plain(self):
-#         result = []
-#         for c in self.classification_objects:
-#             r = [c]
-#             c.get_children_plain(r)
-#             result.extend(r)
-#
-#         return result
-#
-#     def get_vocabulary_list(self, container = None):
-#         if container is None:
-#             result = []
-#             for obj in self.get_classification_objects_plain():
-#                 for voc in obj.classification_vocabularies:
-#                     result.append(voc)
-#             return result
-#         else:
-#             result = []
-#             for obj in self.get_classification_objects_plain():
-#                 if obj.has_container(container):
-#                     for voc in obj.classification_vocabularies:
-#                         result.append(voc)
-#             return result
-#
-#     def delete(self):
-#         self.project.remove_experiment(self)
-#         self.dispatch_on_changed()
-
-class ClassificationObjects(IProjectContainer, IHasName):
+#region Experiments
+class ClassificationObject(IProjectContainer, IHasName):
     """
     A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
     Several ClassificationTargets may form a Tree. 
@@ -3509,82 +3419,37 @@ class ClassificationObjects(IProjectContainer, IHasName):
     """
     def __init__(self, name, experiment, parent = None):
         IProjectContainer.__init__(self)
-
         self.name = name
         self.experiment = experiment
         self.parent = parent
         self.children = []
         self.classification_vocabularies = []
-
+        self.unique_keywords = []
         self.target_container = []
-        self.target_containers_string = "All"
-        self.target_container_type = TargetContainerType.ALL
 
     def add_vocabulary(self, voc: Vocabulary, dispatch = True):
-        new_voc = self.project.copy_vocabulary(voc, add_to_global=False)
-        new_voc.set_name(self.name + ":" + new_voc.get_name())
-        self.project.add_vocabulary(new_voc, dispatch)
-        new_voc.set_experiment(self.experiment, voc)
-        self.classification_vocabularies.append(new_voc)
-        self.dispatch_on_changed()
+        self.classification_vocabularies.append(voc)
+        for w in voc.words_plain:
+            keyword = UniqueKeyword(self.experiment, voc, w, self)
+            keyword.set_project(self.project)
+            self.unique_keywords.append(keyword)
 
     def remove_vocabulary(self, voc):
         self.classification_vocabularies.remove(voc)
-        self.project.remove_vocabulary(voc)
+        to_delete = [x for x in self.unique_keywords if x.voc_obj == voc]
+        self.unique_keywords = [x for x in self.unique_keywords if not x.voc_obj == voc]
 
-    def get_base_vocabularies(self):
-        """
-        Returns a list of all Base Vocabularies used in this Object
-        :param voc: The Base Vocabulary
-        :return: list of all Base Vocabularies
-        """
-        result = []
-        for v in self.classification_vocabularies:
-            if v is not None:
-                result.append(v.base_vocabulary)
-        return result
+        for d in to_delete:
+            self.project.remove_from_id_list(d)
 
-    def clear_deleted_containers(self):
-        for tgt in self.target_container:
-            if tgt not in self.project.segmentation and \
-                tgt not in self.project.annotation_layers and \
-                    tgt not in self.project.screenshot_groups:
-                self.target_container.remove(tgt)
+    def get_vocabularies(self):
+        return self.classification_vocabularies
 
     def get_name(self):
         return self.name
 
     def set_name(self, name):
         self.name = name
-
-    def has_container(self, container):
-        """
-        :param container: 
-        :return: returns True if the input container is target of this Classification Object
-        """
-        if self.target_container_type == TargetContainerType.EXPLICIT_ANNOTATIONS:
-            if container in self.target_container[0].annotations:
-                return True
-        elif self.target_container_type == TargetContainerType.EXPLICIT_SCREENSHOTS:
-            if container in self.target_container[0].screenshots:
-                return True
-
-        elif self.target_container_type == TargetContainerType.EXPLICIT_SEGMENTS:
-            if container in self.target_container[0].segments:
-                return True
-
-        elif self.target_container_type is TargetContainerType.ALL_SEGMENTS:
-            if container.get_type() == SEGMENT:
-                return True
-        elif self.target_container_type is TargetContainerType.ALL_SCREENSHOTS:
-            if container.get_type() == SCREENSHOT:
-                return True
-        elif self.target_container_type is TargetContainerType.ALL_ANNOTATIONS:
-            if container.get_type() == ANNOTATION:
-                return True
-        else:
-            return True
-        return False
 
     def add_child(self, classification_object):
         classification_object.parent = self
@@ -3598,19 +3463,6 @@ class ClassificationObjects(IProjectContainer, IHasName):
         else:
             print("NOT FOUND")
 
-    def set_target_container(self, container: IProjectContainer, type = TargetContainerType.ALL):
-        if not isinstance(container, list):
-            container = [container]
-        if container == [None]:
-            self.target_container = []
-            self.target_containers_string = "All"
-        else:
-            self.target_container = container
-            self.target_containers_string = str(self.target_container)
-
-        self.target_container_type = type
-        self.dispatch_on_changed(item=self)
-
     def get_children_plain(self, list):
         list.append(self)
         if len(self.children) > 0:
@@ -3621,17 +3473,17 @@ class ClassificationObjects(IProjectContainer, IHasName):
         return CLASSIFICATION_OBJECT
 
     def serialize(self):
+
         serialization = dict(
             name=self.name,
             unique_id = self.unique_id,
             parent = self.parent.unique_id,
-            children = [c.unique_id for c in self.children],
             classification_vocabularies = [v.unique_id for v in self.classification_vocabularies],
-            classification_vocabularies_vid = [v.base_vocabulary.get_vocabulary_id() for v in self.classification_vocabularies],
-            target_container = [c.unique_id for c in self.target_container],
-            target_container_type = self.target_container_type.value
-
+            unique_keywords = [k.serialize() for k in self.unique_keywords],
+            target_container = [k.unique_id for k in self.target_container],
+            children = [c.unique_id for c in self.children],
         )
+
         return serialization
 
     def deserialize(self, serialization, project):
@@ -3639,20 +3491,220 @@ class ClassificationObjects(IProjectContainer, IHasName):
         self.unique_id = serialization['unique_id']
         p = project.get_by_id(serialization['parent'])
 
-        if isinstance(p, ClassificationObjects):
+        if isinstance(p, ClassificationObject):
             p.add_child(self)
         else:
-            p.add_class_object(self)
+            p.classification_objects.append(self)
+            self.parent = p
+            self.set_project(project)
 
         self.classification_vocabularies = [project.get_by_id(uid) for uid in serialization['classification_vocabularies']]
-        try:
-            self.target_container = [project.get_by_id(uid) for uid in serialization['target_container']]
-            self.target_container_type = TargetContainerType(serialization['target_container_type'])
-        except:
-            self.target_container = []
-            self.target_container_type = TargetContainerType.ALL
+        self.unique_keywords = [UniqueKeyword(self.experiment).deserialize(ser, project) for ser in serialization['unique_keywords']]
+        self.target_container = [project.get_by_id(uid) for uid in serialization['target_container']]
 
         return self
+
+
+class UniqueKeyword(IProjectContainer):
+    """
+    Unique Keywords are generated when a Vocabulary is added to a Classification Object. 
+    For each word in the Vocabulary a Unique Keyword is created to the Classification Object. 
+    """
+    def __init__(self, experiment,  voc_obj:Vocabulary = None, word_obj:VocabularyWord = None, class_obj:ClassificationObject = None):
+        IProjectContainer.__init__(self)
+        self.experiment = experiment
+        self.voc_obj = voc_obj
+        self.word_obj = word_obj
+        self.class_obj = class_obj
+
+    def get_name(self):
+        return self.word_obj.get_name()
+
+    def serialize(self):
+        data = dict(
+            unique_id = self.unique_id,
+            voc_obj = self.voc_obj.unique_id,
+            word_obj = self.word_obj.unique_id,
+            class_obj = self.class_obj.unique_id
+        )
+
+        return data
+
+    def deserialize(self, serialization, project:VIANProject):
+        self.unique_id = serialization['unique_id']
+        self.voc_obj = project.get_by_id(serialization['voc_obj'])
+        self.word_obj = project.get_by_id(serialization['word_obj'])
+        self.class_obj = project.get_by_id(serialization['class_obj'])
+        self.set_project(project)
+
+        return self
+
+
+class Experiment(IProjectContainer, IHasName):
+    """
+    An Experiment holds all information connected to Classification of Objects.
+    As such it defines rules for an experiment and tracks the Progress.
+
+    """
+
+    def __init__(self, name="New Experiment"):
+        IProjectContainer.__init__(self)
+        self.name = name
+        self.classification_objects = []
+        self.analyses = []
+        self.analyses_parameters = []
+
+        # This is a list of [container_id, unique_keyword_id]
+        self.classification_results = []
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_type(self):
+        return EXPERIMENT
+
+    def create_class_object(self, name, parent):
+        obj = ClassificationObject(name, self, parent)
+        if parent is self:
+            obj.set_project(self.project)
+            self.classification_objects.append(obj)
+        else:
+            parent.add_child(obj)
+
+    def get_unique_keywords(self, container_type = None):
+        """
+        :return: Returns a List of UniqueKeywords used in this Experiment's Classification Objects
+        """
+        keywords = []
+        objects = self.get_classification_objects_plain()
+        if container_type is None:
+            for k in objects:
+                keywords.extend(k.unique_keywords)
+        else:
+            for k in objects:
+                if container_type in k.target_container:
+                    keywords.extend(k.unique_keywords)
+                    break
+        return keywords
+
+    def add_classification_object(self, obj: ClassificationObject):
+        if obj not in self.classification_objects:
+            self.classification_objects.append(obj)
+
+    def remove_classification_object(self, obj: ClassificationObject):
+        if obj in self.classification_objects:
+            self.classification_objects.remove(obj)
+
+    def get_containers_to_classify(self):
+        """
+        Returns a list of all containers to classify in this experiment. 
+        :return: 
+        """
+        result = []
+        for c in self.get_classification_objects_plain():
+            for tgt in c.target_container:
+                if tgt.get_type() == SEGMENTATION:
+                    for child in tgt.segments:
+                        if child not in result:
+                            result.append(child)
+                if tgt.get_type() == ANNOTATION_LAYER:
+                    for child in tgt.annotations:
+                        if child not in result:
+                            result.append(child)
+                if tgt.get_type() == SCREENSHOT_GROUP:
+                    for child in tgt.screenshots:
+                        if child not in result:
+                            result.append(child)
+        return result
+
+    def get_classification_objects_plain(self):
+        result = []
+        for root in self.classification_objects:
+            root.get_children_plain(result)
+        return result
+
+    def add_analysis(self, analysis:AnalysisContainer, parameters:AnalysisParameters = None):
+        if analysis not in self.analyses:
+            self.analyses.append(analysis)
+
+            if parameters is None:
+                parameters = AnalysisParameters()
+            self.analyses_parameters.append(parameters)
+
+    def remove_analysis(self, analysis):
+        if analysis in self.analyses:
+            idx = self.analyses.index(analysis)
+            self.analyses.remove(analysis)
+            self.analyses_parameters.pop(idx)
+
+    def toggle_tag(self, container: IClassifiable, keyword: UniqueKeyword):
+        tag = [container, keyword]
+        print("Toggled", tag)
+        if tag not in self.classification_results:
+            self.classification_results.append(tag)
+        else:
+            self.classification_results.remove([container, keyword])
+
+    def has_tag(self, container: IClassifiable, keyword: UniqueKeyword):
+        tag = [container, keyword]
+        if tag in self.classification_results:
+            return True
+        else:
+            return False
+
+    def tag_container(self, container: IClassifiable, keyword: UniqueKeyword):
+        tag = [container, keyword]
+        if tag not in self.classification_results:
+            self.classification_results.append(tag)
+
+    def remove_tag(self, container: IClassifiable, keyword: UniqueKeyword):
+        try:
+            self.classification_results.remove([container, keyword])
+        except Exception as e:
+            print(e)
+
+    def remove_all_tags_with_container(self, container):
+        self.classification_results[:] = [tup for tup in self.classification_results if not tup[0] is container]
+
+    def serialize(self):
+        data = dict(
+            name=self.name,
+            unique_id = self.unique_id,
+            classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
+            analyses=self.analyses,
+            classification_results = [(c[0].unique_id, c[1].unique_id) for c in self.classification_results]
+        )
+        return data
+
+    def deserialize(self, serialization, project):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        project.add_experiment(self)
+
+        for ser in serialization['classification_objects']:
+            obj = ClassificationObject("", self).deserialize(ser, project)
+
+        self.analyses = serialization['analyses']
+
+        try:
+            for ser in serialization['classification_results']:
+                c = project.get_by_id(ser[0])
+                k = project.get_by_id(ser[1])
+                if c is not None and k is not None:
+                    self.classification_results.append([c, k])
+                else:
+                    print("Loading Classification mapping failed: ", c, k)
+
+        except Exception as e:
+            print(e)
+            pass
+
+        return self
+
+
 #endregion
 
 #region MediaObject
@@ -3689,6 +3741,7 @@ class AbstractMediaObject(IProjectContainer, IHasName):
     def preview(self):
         pass
 
+
 class FileMediaObject(AbstractMediaObject):
     def __init__(self, name, file_path, container, dtype):
         super(FileMediaObject, self).__init__(name, container, dtype)
@@ -3711,10 +3764,8 @@ class FileMediaObject(AbstractMediaObject):
         return self
 
     def preview(self):
-        try:
-            open_file(self.file_path)
-        except Exception as e:
-            print(e)
+        success = open_file(self.file_path)
+        # TODO Files that are not here anymore should be asked to be removed, or linked again
 
 
 class DataMediaObject(AbstractMediaObject):

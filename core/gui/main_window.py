@@ -11,6 +11,8 @@ import time
 import inspect
 import sys
 
+import threading
+
 import importlib
 from functools import partial
 
@@ -18,7 +20,6 @@ from core.concurrent.worker_functions import *
 from core.concurrent.worker import MinimalThreadWorker
 from core.data.enums import *
 from core.data.importers import *
-from core.data.masterfile import MasterFile
 from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater
@@ -26,28 +27,23 @@ from core.data.exporters import *
 from core.data.tools import *
 from core.concurrent.auto_segmentation import *
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
-from core.gui.Dialogs.elan_opened_movie import ELANMovieOpenDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
-from core.gui.Dialogs.welcome_dialog import WelcomeDialog
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.concurrent_tasks import ConcurrentTaskDock
-from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar
+from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
-from core.gui.keyeventhandler import EKeyEventHandler
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
 from core.gui.player_vlc import Player_VLC, PlayerDockWidget
-# from core.gui.experiment_editor import ExperimentEditor, ExperimentEditorDock
 from core.gui.colormetry_widget import *
 from core.analysis.colorimetry.colormetry2 import ColormetryJob2
-# from core.gui.shots_window import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
@@ -56,12 +52,9 @@ from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.quick_annotation import QuickAnnotationWidget, QuickAnnotationDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
-from core.remote.corpus.client import CorpusClient
-from core.remote.corpus.corpus import *
-from core.remote.elan.server.server import QTServer
 from extensions.extension_list import ExtensionList
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
-
+from core.gui.experiment_editor import ExperimentEditorDock
 
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
@@ -72,7 +65,7 @@ __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.5.4"
+__version__ = "0.5.5"
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -106,32 +99,25 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.extension_list = ExtensionList(self)
         self.is_darwin = False
-        if sys.platform == "darwin":  # for MacOS
+
+        # for MacOS
+        if sys.platform == "darwin":
             self.is_darwin = True
             self.setAttribute(Qt.WA_MacFrameworkScaled)
             self.setAttribute(Qt.WA_MacOpaqueSizeGrip)
-            # self.setAttribute(Qt.WA_MacNoClickThrough)
-
-            # self.setAttribute(Qt.WA_MacNormalSize)
 
         self.plugin_menu = self.extension_list.get_plugin_menu(self.menuWindows)
         self.menuBar().addMenu(self.plugin_menu)
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
 
+        self.dock_widgets = []
         self.settings = UserSettings()
         self.settings.load()
-
-        self.master_file = MasterFile(self.settings)
-        self.master_file.load()
-        self.icons = IconContainer()
 
         loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
 
-
         self.updater = VianUpdater(self, self.version)
-
-        self.key_event_handler = EKeyEventHandler(self)
 
         # Central Widgets
         self.video_player = None
@@ -156,15 +142,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls = None
         self.elan_status = None
         self.source_status = None
-        # self.shots_window = None
         self.phonon_player = None
         self.annotation_toolbar = None
-        # self.annotation_viewer = None
+        self.annotation_options = None
         self.drawing_overlay = None
         self.timeline = None
         self.output_line = None
         self.perspective_manager = None
-        # self.screenshots_editor = None
         self.screenshot_toolbar = None
         self.outliner = None
         self.progress_bar = None
@@ -178,8 +162,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_matrix = None
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
-      #   self.experiment_editor = None
-       #  self.experiment_editor_dock = None
+        self.experiment_dock = None
+
+
         self.quick_annotation_dock = None
         self.colorimetry_live = None
 
@@ -189,16 +174,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drawing_editor = None
         self.concurrent_task_viewer = None
 
-        self.dock_widgets = []
-
         # self.player = Player_VLC(self)
         self.player = Player_VLC(self)
         self.player_dock_widget = None
-
-        self.server = QTServer(self.player)
-        self.server.player = self.player
-        if self.settings.USE_ELAN:
-            self.server.start()
 
         self.project = VIANProject(self, "", "Default Project")
 
@@ -210,18 +188,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
 
-
         # self.frame_update_thread.started.connect(self.frame_update_worker.run)
         self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
 
         self.create_widget_elan_status()
+        loading_screen.showMessage("Creating GUI: Player", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_widget_video_player()
         # self.create_analyses_widget()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
         self.create_annotation_toolbar()
+        self.create_annotation_dock()
+        self.annotation_options.optionsChanged.connect(self.annotation_toolbar.on_options_changed)
+        self.annotation_options.optionsChanged.connect(self.drawing_overlay.on_options_changed)
+
+        loading_screen.showMessage("Creating GUI: ScreenshotManager", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_screenshot_manager()
 
+        loading_screen.showMessage("Creating GUI: NodeEditor", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_node_editor_results()
         self.create_node_editor()
         self.create_screenshots_toolbar()
@@ -229,6 +216,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_screenshot_manager_dock_widget()
         self.create_inspector()
 
+        loading_screen.showMessage("Creating GUI: Timeline", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_timeline()
         self.create_widget_player_controls()
         self.create_perspectives_manager()
@@ -238,11 +227,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_manager()
         self.create_vocabulary_matrix()
 
+        loading_screen.showMessage("Creating GUI: Analysis", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_analysis_results_widget()
-        # self.create_experiment_editor()
         self.create_quick_annotation_dock()
 
+        loading_screen.showMessage("Creating GUI: Colorimetry Live Widget", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
         self.create_colorimetry_live()
+
+        loading_screen.showMessage("Creating GUI: Experiment Editor", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
+        self.create_experiment_editor()
+
+        self.settings.apply_dock_widgets_settings(self.dock_widgets)
+
+        loading_screen.showMessage("Creating GUI: Create Layout", Qt.AlignHCenter | Qt.AlignBottom,
+                                   QColor(200, 200, 200, 100))
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -250,42 +251,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tabifyDockWidget(self.inspector, self.history_view)
         self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
 
-
         self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
 
         self.annotation_toolbar.raise_()
         self.inspector.raise_()
         self.screenshots_manager_dock.raise_()
-        # self.annotation_tb2 = AnnotationToolbar2(self,self.drawing_overlay)
-        # self.addToolBar(self.annotation_tb2)
 
-        # self.tabifyDockWidget(self.screenshots_editor, self.annotation_viewer)
-        # self.tabifyDockWidget(self.screenshots_editor, self.inspector)
         self.setTabPosition(QtCore.Qt.RightDockWidgetArea, QtWidgets.QTabWidget.East)
         self.history_view.hide()
         self.concurrent_task_viewer.hide()
 
-        # self.drawing_overlay.setParent(self)
 
-
-
-        # Binding the Action Menu
-        # self.connect(self.actionScreenshot, QtCore.SIGNAL("triggered()"), self.screenshot)
-        # self.connect(self.actionControls, QtCore.SIGNAL("triggered()"), self.create_widget_player_controls)
-        # self.connect(self.actionElanConnection, QtCore.SIGNAL("triggered()"), self.create_widget_elan_status)
-        # self.connect(self.actionShots, QtCore.SIGNAL("triggered()"), self.create_widget_shots_window)
-
-        ## Action Slots ##
         # Tab File
-
         loading_screen.showMessage("Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(250, 250, 250, 100))
+
+        ## Action Slots ##
+        # FILE MENU
         self.actionNew.triggered.connect(self.action_new_project)
         self.actionLoad.triggered.connect(self.on_load_project)
         self.actionSave.triggered.connect(self.on_save_project)
         self.actionSaveAs.triggered.connect(self.on_save_project_as)
         self.actionBackup.triggered.connect(self.on_backup)
 
+        ## IMPORT
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.action_importELAN_Project.triggered.connect(self.import_elan_project)
         self.actionImportVocabulary.triggered.connect(partial(self.import_vocabulary, None))
@@ -293,16 +282,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportFilmColorsFilemaker.triggered.connect(self.import_filemaker)
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
-        self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
 
+        ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
         self.actionExportTemplate.triggered.connect(self.export_template)
         self.actionExportVocabulary.triggered.connect(self.export_vocabulary)
-        self.actionExportExperiment.triggered.connect(self.export_experiment)
         self.actionClose_Project.triggered.connect(self.close_project)
         self.actionZip_Project.triggered.connect(self.on_zip_project)
         self.actionExit.triggered.connect(self.on_exit)
 
+        # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
         self.actionRedo.triggered.connect(self.on_redo)
         self.actionDelete.triggered.connect(self.on_delete)
@@ -320,7 +309,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTimeline.triggered.connect(self.create_timeline)
         self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
-        # self.actionExperiment_Editor.triggered.connect(self.create_experiment_editor)
 
         self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup.name))
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
@@ -336,11 +324,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
         self.actionAdd_Annotation_Layer.triggered.connect(self.on_new_annotation_layer)
         self.actionAdd_Segmentation.triggered.connect(self.on_new_segmentation)
-#        self.actionCreateExperiment.triggered.connect(self.on_new_experiment)
 
         self.actionScreenshot.triggered.connect(self.on_screenshot)
         self.actionAdd_Key.triggered.connect(self.on_key_annotation)
         self.actionAdd_Segment.triggered.connect(self.on_new_segment)
+        self.actionCreateExperiment.triggered.connect(self.on_create_experiment)
         self.actionAbout.triggered.connect(self.on_about)
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
@@ -367,7 +355,6 @@ class MainWindow(QtWidgets.QMainWindow):
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
                                     self.drawing_overlay,
-                                    # self.annotation_viewer,
                                     self.screenshots_manager,
                                     self.outliner,
                                     self.timeline.timeline,
@@ -379,7 +366,9 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.numpy_data_manager,
                                     self.project_streamer,
                                     self.analysis_results_widget,
-                                    # self.experiment_editor
+                                    self.annotation_options,
+                                    self.experiment_dock.experiment_editor
+
                                           ]
 
         self.menus_list = [
@@ -392,13 +381,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.menuAnalysis,
             self.menuTools
         ]
-
-        # self.actionElanConnection.triggered.connect(self.create_widget_elan_status)
-        # self.actionShots.triggered.connect(self.create_widget_shots_window)
-
-
-
-
 
         # Autosave
         self.autosave_timer = QTimer()
@@ -423,8 +405,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
         self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
-        # self.player.started.connect(partial(self.frame_update_worker.set_colormetry_update, True))
-        # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, False))
 
         self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, False))
         self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, True))
@@ -435,36 +415,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.frame_update_worker.signals.onColormetryUpdate.connect(self.colorimetry_live.update_timestep)
 
-        self.screenshot_blocked = False
-
-        # self.menuAnalysis.addMenu("Extensions")
-
         self.analysis_list = []
-
-        self.is_selecting_analyzes = False
-
 
         loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
         self.update_recent_menu()
-
-
-        # self.load_project("projects/ratatouille/Ratatouille.eext")
-
-        # SEGMENT EVALUATOR
-        # self.current_segment_evaluator = CurrentSegmentEvaluater()
-        # self.player.started.connect(self.current_segment_evaluator.play)
-        # self.player.stopped.connect(self.current_segment_evaluator.pause)
-        # self.onTimeStep.connect(self.current_segment_evaluator.set_time)
-        # self.current_segment_evaluator.signals.segmentChanged.connect(self.currentSegmentChanged.emit)
-        # self.thread_pool.start(self.current_segment_evaluator)
         self.switch_perspective(Perspective.Segmentation.name)
 
         self.player_controls.setState(False)
 
         self.create_analysis_list()
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
-        # self.onOpenCVFrameVisibilityChanged.emit(self.settings.OPENCV_PER_FRAME != 0)
         self.update_vian(False)
 
         self.project.undo_manager.clear()
@@ -481,7 +442,7 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 os.remove(force_file_path)
                 self.settings.GRID_SIZE = 1
-                self.settings.store()
+                self.settings.store(self.dock_widgets)
                 self.show_welcome()
             except Exception as e:
                 print(e)
@@ -491,9 +452,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.settings.USER_NAME == "":
             self.show_first_start()
-
-
-
 
     def print_time(self, segment):
         print(segment)
@@ -514,12 +472,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None:
             self.project.colormetry_analysis.append_data(data[0])
             self.timeline.timeline.set_colormetry_progress(data[1])
+
     #region WidgetCreation
 
     def show_welcome(self):
         open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
         self.settings.SHOW_WELCOME = False
-        self.settings.store()
+        self.settings.store(self.dock_widgets)
 
     def show_first_start(self):
         dialog = DialogFirstStart(self)
@@ -546,24 +505,27 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_widget_elan_status(self):
         if self.elan_status is None:
             self.source_status = StatusVideoSource(self)
-            self.elan_status = StatusBar(self, self.server)
+            self.elan_status = StatusBar(self)
             self.output_line = OutputLine(self)
             self.progress_bar = StatusProgressBar(self)
 
             self.statusBar().addWidget(self.source_status)
+            self.statusBar().addPermanentWidget(self.output_line)
             self.statusBar().addPermanentWidget(self.progress_bar)
-            self.statusBar().addWidget(self.output_line)
-
             self.statusBar().addPermanentWidget(self.elan_status)
             self.statusBar().setFixedHeight(45)
 
-    # def create_experiment_editor(self):
-    #     if self.experiment_editor_dock is None:
-    #         self.experiment_editor = ExperimentEditor(self)
-    #         self.experiment_editor_dock = ExperimentEditorDock(self, self.experiment_editor)
-    #         self.addDockWidget(Qt.LeftDockWidgetArea, self.experiment_editor_dock)
-    #     else:
-    #         self.experiment_editor_dock.activateWindow()
+    def create_annotation_dock(self):
+        if self.annotation_options is None:
+            self.annotation_options = AnnotationOptionsDock(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.annotation_options, Qt.Horizontal)
+        else:
+            if self.annotation_options.isVisible():
+                self.annotation_options.hide()
+            else:
+                self.annotation_options.show()
+                self.annotation_options.raise_()
+                self.annotation_options.activateWindow()
 
     def create_widget_video_player(self):
         if self.player_dock_widget is None:
@@ -584,17 +546,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.annotation_toolbar is None:
             self.annotation_toolbar = AnnotationToolbar(self, self.drawing_overlay)
             self.addToolBar(self.annotation_toolbar)
-            # self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.annotation_toolbar)
         else:
             self.annotation_toolbar.show()
-
-    def create_screenshot_manager(self):
-        if self.screenshots_manager is None:
-            self.screenshots_manager = ScreenshotsManagerWidget(self, key_event_handler = self.key_event_handler, parent=None)
-        else:
-            self.screenshots_manager.activateWindow()
-
-#OLD CODE
 
     def create_inspector(self):
         if self.inspector is None:
@@ -673,11 +626,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.timeline.raise_()
                 self.timeline.activateWindow()
 
+    def create_screenshot_manager(self):
+        if self.screenshots_manager is None:
+            self.screenshots_manager = ScreenshotsManagerWidget(self, parent=None)
+        else:
+            self.screenshots_manager.activateWindow()
+
     def create_screenshot_manager_dock_widget(self):
         if self.screenshots_manager_dock is None:
             self.screenshots_manager_dock = ScreenshotsManagerDockWidget(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Horizontal)
-            # self.on_movie_updated()
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
         else:
             if self.screenshots_manager_dock.isVisible():
@@ -709,6 +667,15 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.vocabulary_manager.show()
             self.vocabulary_manager.activateWindow()
+
+
+    def create_experiment_editor(self):
+        if self.experiment_dock is None:
+            self.experiment_dock = ExperimentEditorDock(self)
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.experiment_dock, QtCore.Qt.Vertical)
+        else:
+            self.experiment_dock.show()
+            self.experiment_dock.activateWindow()
 
     def create_vocabulary_matrix(self):
         if self.vocabulary_matrix is None:
@@ -887,9 +854,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def on_movie_opened(self):
-        if self.player.movie_path != self.project.get_movie().movie_path:
-            dialog = ELANMovieOpenDialog(self, self.master_file, self.player.movie_path)
-            dialog.show()
+        # TODO What is this for??
         self.player_controls.on_play()
 
     def on_exit(self):
@@ -903,7 +868,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
 
         self.dispatch_on_closed()
-        self.settings.store()
+        self.settings.store(self.dock_widgets)
 
         self.frame_update_thread.quit()
 
@@ -960,9 +925,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         job = CreateScreenshotJob([frame_pos, self.project.movie_descriptor.movie_path, annotation_dicts, time])
         self.run_job_concurrent(job)
-
-    # def on_new_experiment(self):
-    #     self.project.create_experiment()
 
     def get_frame(self, time):
         if time <= 0:
@@ -1120,7 +1082,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget.show()
             self.colorimetry_live.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
 
@@ -1136,14 +1099,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.show()
             self.inspector.show()
             self.player_dock_widget.show()
+            self.annotation_options.show()
 
             self.annotation_toolbar.show()
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
+            self.tabifyDockWidget(self.inspector, self.annotation_options)
             self.elan_status.stage_selector.set_stage(1, False)
             self.screenshots_manager_dock.raise_()
-
 
         elif perspective == Perspective.ScreenshotsManager.name:
             self.current_perspective = Perspective.ScreenshotsManager
@@ -1213,12 +1177,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner.show()
             self.vocabulary_manager.show()
             self.inspector.show()
-            # self.experiment_editor_dock.show()
+            self.experiment_dock.show()
 
             self.elan_status.stage_selector.set_stage(2, False)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Vertical)
-            # self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_editor_dock)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_dock)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
         elif perspective == Perspective.QuickAnnotation.name:
@@ -1264,7 +1228,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.hide()
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
-        # self.experiment_editor_dock.hide()
+        self.annotation_options.hide()
+
+        self.experiment_dock.hide()
         self.quick_annotation_dock.hide()
         self.colorimetry_live.hide()
 
@@ -1402,6 +1368,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def decrease_playrate(self):
         self.player.set_rate(self.player.get_rate() - 0.1)
         self.player_controls.update_rate()
+
+    def on_create_experiment(self):
+        if self.project is not None:
+            self.project.create_experiment()
+
     # endregion
 
     #region Project Management
@@ -1433,19 +1404,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_recent_menu()
 
         self.project.inhibit_dispatch = True
+
         if template_path is not None:
-            self.project.apply_template(template_path, ExperimentImporter())
+            self.project.apply_template(template_path)
 
         self.project.create_file_structure()
+
         # Importing all Vocabularies
         if vocabularies is not None:
             for i, v in enumerate(vocabularies):
                 print("Importing: " + str(i) + " " + v + "\r")
                 self.project.import_vocabulary(v)
 
-        # self.player.open_movie(project.movie_descriptor.movie_path)
-        self.master_file.add_project(project)
-        self.project.store_project(self.settings, self.master_file)
+        self.project.store_project(self.settings)
 
         self.project.inhibit_dispatch = False
         self.dispatch_on_loaded()
@@ -1516,9 +1487,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.movie_descriptor.movie_path = self.player.movie_path
 
             path = self.project.path
-            args = [self.project, path, self.settings, self.master_file]
+            args = [self.project, path, self.settings]
         else:
-            args = [self.project, self.project.path, self.settings, self.master_file]
+            args = [self.project, self.project.path, self.settings]
 
         if sync:
             store_project_concurrent(args, self.dummy_func)
@@ -1595,38 +1566,6 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region Import / Export
-
-    def import_experiment(self):
-        paths = QFileDialog.getOpenFileNames(filter="*" + FILE_EXT_EXPERIMENT)[0]
-        importer = ExperimentImporter()
-        for p in paths:
-            if os.path.isfile(p):
-                try:
-                    importer.import_experiment(p, self.project)
-                except Exception as e:
-                    print("Error in import_experiment()", str(e))
-
-    def export_experiment(self):
-        to_export = []
-        for sel in self.project.selected:
-            if sel.get_type() == EXPERIMENT:
-                to_export.append(sel)
-
-        dir = QFileDialog.getExistingDirectory(self, directory=self.project.export_dir)
-
-        if not os.path.isdir(dir):
-            self.print_message(str(dir) + " is not a valid Directory", "Red")
-
-        exporter = ExperimentExporter()
-        for exp in to_export:
-            try:
-                exporter.export(dir + "/" + exp.get_name().replace(" ", "_") + FILE_EXT_EXPERIMENT, experiment=exp)
-            except Exception as e:
-                raise(e)
-                print("Error in export_experiment()", str(e))
-
-        QMessageBox.information(self, "Export Finished", "The Experiments have been exported to " + str(dir))
-
     def export_template(self):
         dialog = ExportTemplateDialog(self)
         dialog.show()
@@ -1635,8 +1574,6 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             if path is None:
                 path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
-            # path = path.replace("file:///", "")
-            # path = path.replace("file:", "")
 
             path = parse_file_path(path)
 
@@ -1677,22 +1614,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def import_segmentation(self, path=None):
         dialog = SegmentationImporterDialog(self, self.project, self)
         dialog.show()
-        # QMessageBox.warning(self, "Deprecated",
-        #                     "The Segmentation Importer is deprecated and therefore removed from VIAN.\n "
-        #                     "For ELAN Projects use the \"ELAN Project Importer\". \n "
-        #                     "A new Version for importing arbitary Segmentations is planned but not yet included.")
-        # SegmentationImporterDialog(self, self.project, self)
 
     def export_segmentation(self):
-        # path = QFileDialog.getSaveFileName(directory=self.project.path, filter=".txt")[0]
         dialog = ExportSegmentationDialog(self)
         dialog.show()
 
     def import_vocabulary(self, paths=None):
         if paths is None:
             paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
-
-        # path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
         try:
             self.project.inhibit_dispatch = True
             for p in paths:
@@ -1700,7 +1629,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.inhibit_dispatch = False
             self.project.dispatch_changed()
         except Exception as e:
-            raise e
             self.print_message("Vocabulary Import Failed", "Red")
             self.print_message(str(e), "Red")
 
@@ -1709,10 +1637,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def import_screenshots(self, paths=None):
-        # paths = QFileDialog.getOpenFileNames()[0]
-        # args = [self.project.movie_descriptor.movie_path, paths]
-        # importer = ScreenshotImporter(args)
-        # self.run_job_concurrent(importer)
         dialog = DialogScreenshotImport(self, paths)
         dialog.show()
 
@@ -1834,12 +1758,6 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             for o in self.i_project_notify_reciever:
                 o.on_changed(self.project, item)
-        # self.player.on_changed(self.project)
-        # self.drawing_overlay.on_changed(self.project)
-        # self.annotation_viewer.on_changed(self.project)
-        # self.screenshots_manager.on_changed(self.project)
-        # self.timeline.timeline.on_changed(self.project)
-        # self.outliner.on_changed(self.project)
 
     def dispatch_on_selected(self, sender, selected):
         if self.project is None:
@@ -1850,7 +1768,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 o.on_selected(sender, selected)
 
     def dispatch_on_timestep_update(self, time):
-        # self.timeline.timeline.on_timestep_update(time)
         if self.project is None:
             return
 
@@ -1858,10 +1775,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onTimeStep.emit(time)
         QCoreApplication.removePostedEvents(self.frame_update_worker)
         self.onUpdateFrame.emit(time, frame)
-
-
-        # self.frame_update_worker.setMSPosition(time, frame)
-        # self.frame_update_thread.start()
 
         if self.project.get_main_segmentation() is not None:
             current_segment = self.project.get_main_segmentation().get_segment_of_time(time)
@@ -1891,38 +1804,6 @@ class MainWindow(QtWidgets.QMainWindow):
                                 a.is_visible = False
                                 a.widget.hide()
 
-
-
-                    # self.drawing_overlay.on_timestep_update(time)
-
-
-            #endregion
-            # DEPRECATED
-            # for l in self.project.annotation_layers:
-            #     if l.is_visible:
-            #
-            #     if l.get_start() <= time <= l.get_end():
-            #         if l.is_visible == False:
-            #             l.is_visible = True
-            #             for a in l.annotations:
-            #                 if a.widget is not None:
-            #                     a.widget.show()
-            #                     a.widget.is_active = True
-            #     else:
-            #         if l.is_visible is True:
-            #             l.is_visible = False
-            #             for a in l.annotations:
-            #                 if a.widget is not None:
-            #                     a.widget.hide()
-            #                     a.widget.is_active = False
-
-
-
-                                        # self.drawing_overlay.on_timestep_update(time)
-
-
-                                        # endregion
-
     def dispatch_on_closed(self):
         self.autosave_timer.stop()
         self.set_ui_enabled(False)
@@ -1932,13 +1813,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #endregion
     pass
-
-
-class IconContainer():
-    def __init__(self):
-        path = os.path.abspath("qt_ui/icons/")
-        self.movie_icon = QIcon(QPixmap(path + "icon_movie.png"))
-
 
 class DialogFirstStart(QtWidgets.QDialog):
     def __init__(self, main_window):
@@ -1965,7 +1839,7 @@ class DialogFirstStart(QtWidgets.QDialog):
 
     def on_ok(self):
         self.check_if_finished()
-        self.settings.store()
+        self.settings.store(self.main_window.dock_widgets)
         if self.may_proceed:
             self.close()
         else:

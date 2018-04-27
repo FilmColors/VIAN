@@ -35,6 +35,7 @@ def ts_to_ms(hour=0, min=0, sec=0, ms=0):
     time += ms
     return time
 
+
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)
@@ -291,5 +292,7 @@ def open_file(file_name):
         else:
             opener ="open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, file_name])
+        return True
     except Exception as e:
         print(e)
+        return False

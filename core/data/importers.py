@@ -65,8 +65,8 @@ class ELANProjectImporter():
                 value = j[0]
                 t_start = j[1]
                 t_stop = j[2]
-                segm = segmentation.create_segment(start = t_start, stop = t_stop,
-                                                   dispatch=False, annotation_body = value)
+                segm = segmentation.create_segment2(start = t_start, stop = t_stop, mode=SegmentCreationMode.INTERVAL,
+                                                   dispatch=False, body = value)
 
         for s in project.segmentation:
             s.update_segment_ids()
@@ -324,7 +324,6 @@ class ScreenshotImporter(IConcurrentJob):
 
         return result
 
-
     def modify_project(self, project:VIANProject, result, sign_progress = None):
         project.inhibit_dispatch=True
         for r in result:
@@ -412,7 +411,6 @@ class FileMakerVocImporter():
             header_words.append([w])
         return header_words
 
-
     def apply_vocabulary(self, table, project: VIANProject, print_failed = False):
         if table is None:
             return
@@ -449,8 +447,10 @@ class FileMakerVocImporter():
             idx = s[0]
             objs = s[1]
             if idx < len(main_seg.segments):
-                for word in objs:
-                    main_seg.segments[idx].add_word(word)
+                pass
+                #TODO Reimplement
+                # for word in objs:
+                #     main_seg.segments[idx].add_word(word)
             else:
                 print("Sub-Segmentation Ignored")
 
@@ -560,7 +560,8 @@ class SegmentationImporter(CSVImporter):
     def __init__(self):
         super(SegmentationImporter, self).__init__()
 
-    def import_segmentation(self, path, project:VIANProject, fps,has_header, f_start, f_end, f_body, t_type = "ms"):
+    def import_segmentation(self, path, project:VIANProject, fps,has_header, f_start, f_end, f_body, t_type = "ms", c_mode = "BOTH"):
+        segments = []
         with open(path, 'r') as csvfile:
             segmentation = project.create_segmentation(name="Imported Segmentation", dispatch=False)
             # We do not want to dispatch until the end of the import
@@ -586,152 +587,48 @@ class SegmentationImporter(CSVImporter):
 
                     if t_type == "MS":
                         pass
+
                     elif t_type == "HH:MM:SS":
                         sp = t_start.split(":")
                         t_start = ts_to_ms(sp[0], sp[1], sp[2])
                         sp = t_end.split(":")
                         t_end = ts_to_ms(sp[0], sp[1], sp[2])
+
                     elif t_type == "HH:MM:SS:MS":
                         sp = t_start.split(":")
                         t_start = ts_to_ms(sp[0], sp[1], sp[2], sp[3])
                         sp = t_end.split(":")
                         t_end = ts_to_ms(sp[0], sp[1], sp[2], sp[3])
+
+                    elif t_type == "HH:MM:SS:FRAME":
+                        sp = t_start.split(":")
+                        t_start = ts_to_ms(sp[0], sp[1], sp[2]) + (int(sp[3]) * (1000 / fps))
+                        sp = t_end.split(":")
+                        t_end = ts_to_ms(sp[0], sp[1], sp[2]) + (int(sp[3]) * (1000 / fps))
+
                     elif t_type == "FrameIDX":
                         t_start = frame2ms(int(t_start), fps)
                         t_end = frame2ms(int(t_end), fps)
 
-                    segmentation.create_segment(start=t_start, stop=t_end, annotation_body=str(body), dispatch=False)
+                    segments.append([t_start, t_end])
+
 
                 except Exception as e:
                     print("Error in Import Segmentation:", e)
                     continue
 
+        mode = SegmentCreationMode.INTERVAL
+        for i, s in enumerate(segments):
+            if c_mode == "Start To End":
+                segmentation.create_segment2(start=s[0], stop=s[1], mode=mode,
+                                             dispatch=False, body=str(body), inhibit_overlap=False)
+            else:
+                if i < len(segments) - 1:
+                    segmentation.create_segment2(start=s[0], stop=segments[i + 1][0], mode=mode,
+                                                 dispatch=False, body=str(body), inhibit_overlap=False)
+                else:
+                    segmentation.create_segment2(start=s[0], stop=project.movie_descriptor.duration, mode=mode,
+                                                 dispatch=False, body=str(body), inhibit_overlap=False)
+
         project.dispatch_changed()
 
-
-#
-# class ExperimentImporter():
-#     def import_experiment(self, path, project:VIANProject, data = None):
-#         if data is None:
-#             with open(path, "r") as f:
-#                 data = json.load(f)
-#
-#         base_vocs_ser = data['base_vocs']
-#         experiment_ser = data['experiment']
-#
-#         # We first need to import the Vocabularies into the Base Vocabularies,
-#         # and then derive one for each of the Classification Objects.
-#
-#         # Adding all Vocabularies that are no duplicates
-#         print("Importing Vocabularies")
-#         base_voc_voc_ids = []
-#         base_voc_unique_ids = []
-#
-#         for i, s in enumerate(base_vocs_ser):
-#
-#             voc = project.add_vocabulary(Vocabulary("New").deserialize(s, project), dispatch = False)
-#             base_voc_unique_ids.append(voc.unique_id)
-#             base_voc_voc_ids.append(voc.get_vocabulary_id())
-#
-#         print(base_voc_voc_ids)
-#         print(base_voc_unique_ids)
-#
-#         experiment = project.create_experiment(dispatch=False)
-#         experiment.name = experiment_ser['name']
-#         experiment.unique_id = experiment_ser['unique_id']
-#         experiment.classification_sources = experiment_ser['classification_sources']
-#         experiment.analyses_templates = experiment_ser['analyses_templates']
-#
-#         old_ids = [experiment_ser['unique_id']]
-#         new_ids = [experiment.unique_id]
-#
-#         for obj in experiment_ser['classification_objects']:
-#             parent_id_old = obj['parent']
-#             parent_new_id = new_ids[old_ids.index(parent_id_old)]
-#             old_ids.append(obj['unique_id'])
-#
-#             class_obj = experiment.create_class_object(obj['name'], project.get_by_id(parent_new_id))
-#             new_ids.append(class_obj.unique_id)
-#             for vid in obj['classification_vocabularies_vid']:
-#                 print(vid)
-#                 v_unique_id = base_voc_unique_ids[base_voc_voc_ids.index(vid)]
-#                 class_obj.add_vocabulary(project.get_by_id(v_unique_id), dispatch = False)
-#
-#
-
-
-
-
-
-
-# OLD CODE
-# def import_elan_segmentation(path, name, id_identifier, prevent_overlapping = False): #, additional_identifiers):
-#     """
-#     This Function is deprecated.
-#
-#     :param path:
-#     :param name:
-#     :param id_identifier:
-#     :param prevent_overlapping:
-#     :return:
-#     """
-#     path = os.path.abspath(path)
-#     if not os.path.isfile(path):
-#         return False, "Path not found\n" + path
-#
-#     lines = []
-#     segments_data = []
-#
-#     try:
-#         with open(path, 'rb') as csvfile:
-#             spamreader = csv.reader(csvfile, delimiter='\t', quotechar='|')
-#             for row in spamreader:
-#                 lines.append(row)
-#
-#         curr_id = 0
-#         last_end = 0
-#         segments = []
-#         for row in lines:
-#             if row[0] in id_identifier:
-#                 id_sequence = curr_id
-#                 start_time = int(row[2])
-#                 end_time = int(row[3])
-#                 duration = int(row[4])
-#                 identifier = str(row[5])
-#
-#                 if prevent_overlapping:
-#                     start_time = np.clip(start_time, last_end, None)
-#                     last_end = end_time
-#
-#                 segments.append(Segment(id_sequence, start_time, end_time, duration, [identifier]))
-#                 curr_id += 1
-#
-#
-#
-#
-#
-#         segmentation = Segmentation(name, segments)
-#         return True, segmentation
-#
-#     except Exception as e:
-#         return False, str(e)
-#
-# def get_elan_segmentation_identifiers(path):
-#     path = os.path.abspath(path)
-#     if not os.path.isfile(path):
-#         return False, "No such File Exists"
-#
-#     identifiers = []
-#
-#     # Finding all identifiers exported
-#     try:
-#         with open(path, 'rb') as csvfile:
-#             spamreader = csv.reader(csvfile, delimiter='\t', quotechar='|')
-#
-#             for row in spamreader:
-#                 if row[0] not in identifiers:
-#                     identifiers.append(row[0])
-#         return True, identifiers
-#     except Exception as e:
-#         print(e)
-#         return False, e

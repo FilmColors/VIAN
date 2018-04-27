@@ -4,8 +4,8 @@ import cv2
 import numpy as np
 from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLayout, QLabel
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFontDialog, QSizePolicy, QTabWidget, QSlider
 from PyQt5.QtGui import QIcon, QFont
 
 from core.data.computation import *
@@ -15,6 +15,8 @@ from core.gui.perspectives import Perspective
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending, IConcurrentJob
 from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu
+from core.gui.hsv_color_picker import HSVColorPicker
+
 
 from core.concurrent.worker import LiveWidgetThreadWorker, run_minimal_worker
 from .ewidgetbase import EDockWidget, EToolBar
@@ -28,7 +30,6 @@ class AnnotationToolbar(EToolBar):
     def __init__(self, main_window, drawing_widget):
         super(AnnotationToolbar, self).__init__(main_window, "Annotation Toolbar")
         self.drawing_widget = drawing_widget
-        self.color_picker = ColorSelector(self, main_window.settings)
 
         self.action_rect = self.addAction(create_icon("qt_ui/icons/icon_rectangle.png"), "")
         self.action_ellipse = self.addAction(create_icon("qt_ui/icons/icon_ellipse.png"), "")
@@ -36,10 +37,8 @@ class AnnotationToolbar(EToolBar):
         self.action_image = self.addAction(create_icon("qt_ui/icons/icon_image.png"), "")
         self.action_freehand = self.addAction(create_icon("qt_ui/icons/icon_freehand.png"), "")
         self.action_test = self.addAction("Test")
-        self.addWidget(self.color_picker)
 
         self.setIconSize(QtCore.QSize(64,64))
-
 
         self.action_rect.triggered.connect(self.on_rectangle)
         self.action_ellipse.triggered.connect(self.on_ellipse)
@@ -48,53 +47,20 @@ class AnnotationToolbar(EToolBar):
         self.action_test.triggered.connect(self.main_window.test_function)
         self.action_freehand.triggered.connect(self.on_freehand)
 
-        self.spinBox_LineThickness = QtWidgets.QSpinBox(self)
-        self.spinBox_LineThickness.setValue(5)
-        self.spinBox_FontSize = QtWidgets.QSpinBox(self)
-        self.spinBox_FontSize.setValue(12)
-
-
-        w_font_size = QWidget()
-        w_line_width = QWidget()
-        w_font_size.setLayout(QHBoxLayout())
-        w_line_width.setLayout(QHBoxLayout())
-
-        widget = QWidget(self)
-        widget.setLayout(QVBoxLayout(widget))
-        w_line_width.layout().addWidget(QLabel("Line Width:"))
-        w_line_width.layout().addWidget(self.spinBox_LineThickness)
-
-        w_font_size.layout().addWidget(QLabel("Font Size:"))
-        w_font_size.layout().addWidget(self.spinBox_FontSize)
-        widget.layout().addWidget(w_font_size)
-        widget.layout().addWidget(w_line_width)
-        self.addWidget(widget)
-
-
-        self.current_color = (0, 0, 0)
-        self.line_width = 5
-
-
-        self.color_picker.on_selection.connect(self.on_color_change)
-        self.spinBox_LineThickness.valueChanged.connect(self.on_line_width_change)
-
-
-    #region Events
-    def on_color_change(self, color):
-        self.current_color = color
-
-    def on_line_width_change(self):
-        self.line_width = self.spinBox_LineThickness.value()
+        self.current_color = (0,0,0)
+        self.current_line_thickness = (5)
+        self.current_font_size = 12
+        self.current_font_family = "Arial"
 
     def on_rectangle(self):
-        self.drawing_widget.create_rectangle(self.current_color, self.spinBox_LineThickness.value())
+        self.drawing_widget.create_rectangle(self.current_color, self.current_line_thickness)
 
     def on_ellipse(self):
-        self.drawing_widget.create_ellipse(self.current_color, self.spinBox_LineThickness.value())
+        self.drawing_widget.create_ellipse(self.current_color, self.current_line_thickness)
 
     def on_text(self):
-        self.drawing_widget.create_text(self.current_color, self.spinBox_LineThickness.value(),
-                                        self.spinBox_FontSize.value())
+        self.drawing_widget.create_text(self.current_color, self.current_line_thickness,
+                                        font_size=self.current_font_size, font=self.current_font_family)
 
     def on_line(self):
         pass
@@ -105,13 +71,93 @@ class AnnotationToolbar(EToolBar):
         self.drawing_widget.create_image(image_path)
 
     def on_freehand(self):
-        freehand = self.drawing_widget.create_freehand(self.current_color, self.spinBox_LineThickness.value())
+        freehand = self.drawing_widget.create_freehand(self.current_color, self.current_line_thickness)
 
     def on_arrow(self):
         self.main_window.test_function()
 
+    @pyqtSlot(str, int, int, tuple)
+    def on_options_changed(self, font_family, font_size, line, color):
+        self.current_font_size = font_size
+        self.current_color = color
+        self.current_line_thickness = line
+        self.current_font_family = font_family
+
     pass
     #endregion
+
+
+class AnnotationOptionsDock(EDockWidget, IProjectChangeNotify):
+    optionsChanged = pyqtSignal(str, int, int, tuple) # font_family, font_size, line, color
+
+    def __init__(self, main_window):
+        super(AnnotationOptionsDock, self).__init__(main_window, limit_size=False)
+        self.setWindowTitle("Annotation Options")
+        self.lwidget = QTabWidget()
+        self.setWidget(self.lwidget)
+        self.color_picker = HSVColorPicker(self)
+        self.color_picker.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.font_picker = QFontDialog(self)
+
+        self.width_widget = QWidget()
+        self.width_widget.setLayout(QHBoxLayout())
+        self.width_widget.layout().addWidget(QLabel("Width:"))
+        self.lbl_width = QLabel("0")
+        self.width_slider = QSlider(Qt.Horizontal)
+        self.width_slider.setRange(1, 100)
+        self.width_widget.layout().addWidget(self.width_slider)
+        self.width_widget.layout().addWidget(self.lbl_width)
+
+        self.color_widget = QWidget()
+        self.color_widget.setLayout(QVBoxLayout())
+        self.color_widget.layout().addWidget(self.width_widget)
+        self.color_widget.layout().addWidget(self.color_picker)
+
+        self.lwidget.addTab(self.color_widget, "Color")
+        self.lwidget.addTab(self.font_picker, "Font")
+
+        self.color_picker.colorChanged.connect(self.onOptionsChange)
+        self.font_picker.currentFontChanged.connect(self.onOptionsChange)
+        self.width_slider.valueChanged.connect(self.onOptionsChange)
+
+        self.current_annotations = []
+
+    def on_changed(self, project, item):
+        pass
+
+    def on_loaded(self, project):
+        pass
+
+    def on_closed(self):
+        pass
+
+    def on_selected(self, sender, selected):
+        self.current_annotations = []
+        if len(selected) > 0:
+            sel = selected[0]
+            if sel.get_type() == ANNOTATION:
+                self.color_picker.setColorRGB(sel.color)
+
+        for sel in selected:
+            if sel.get_type() == ANNOTATION:
+                self.current_annotations.append(sel)
+
+    def onOptionsChange(self, **args):
+        font = self.font_picker.currentFont()
+        print(self.color_picker.colorRGB())
+        self.optionsChanged.emit(font.family(), font.pointSize(), self.width_slider.value(), self.color_picker.colorRGB())
+        self.lbl_width.setText(str(self.width_slider.value()))
+
+        for s in self.current_annotations:
+            try:
+                s.color = self.color_picker.colorRGB()
+                s.font_size = font.pointSize()
+                s.font = font.family()
+                s.line_w = self.width_slider.value()
+                s.widget.update()
+            except:
+                pass
 
 
 class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepending):
@@ -147,6 +193,11 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.show_annotations = True
 
 
+        # The current Values given by the Annotation Options Dock
+        self.current_font_size = 12
+        self.current_color = (0,0,0)
+        self.current_line_thickness = 12
+        self.current_font_family = "Arial"
 
         self.show()
 
@@ -154,6 +205,13 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         # self.main_window.player.started.connect(partial(self.on_opencv_frame_visibilty_changed, False))
         self.main_window.onOpenCVFrameVisibilityChanged.connect(self.on_opencv_frame_visibilty_changed)
         self.main_window.frame_update_worker.signals.onOpenCVFrameUpdate.connect(self.assign_opencv_image)
+
+    @pyqtSlot(str, int, int, tuple)
+    def on_options_changed(self, font_family, font_size, line, color):
+        self.current_font_size = font_size
+        self.current_color = color
+        self.current_line_thickness = line
+        self.current_font_family = font_family
 
     def on_loaded(self, project):
         self.cleanup()
@@ -297,26 +355,22 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             self.update_annotation_widgets()
             ellipse.widget.select()
 
-    def create_text(self, color= None, line = None, font_size = None, start = None, end = None):
+    def create_text(self, color= (200, 200, 200), line = 5, font_size = 12, start = None, end = None, font = "Arial"):
         if start == None:
             start = self.current_time
+
         if end == None:
             end = start + 1000
-
-        if color == None:
-            color = (200, 200, 200)
-        if font_size == None:
-            font_size = 12
-        if line == None:
-            line = 5
 
         if self.project.current_annotation_layer is not None:
             a_text = Annotation(AnnotationType.Text, (200, 200), color=color, line_w=line,
                                 text="^This is some sample text", name="New Text",
                                 t_start=start, t_end=end)
+            a_text.font = font
+            a_text.font_size = font_size
+
             a_text.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_text)
-            # self.main_window.annotation_viewer.update_list()
             self.update_annotation_widgets()
             a_text.widget.select()
 
@@ -931,7 +985,6 @@ class DrawingBase(QtWidgets.QWidget):
         self.is_selected = True
         self.raise_()
 
-
         if dispatch:
             self.overlay.project.set_selected(None, self.annotation_object)
 
@@ -1194,20 +1247,18 @@ class DrawingFreeHand(DrawingBase):
         self.overlay.is_freehand_drawing = True
         self.overlay.main_window.annotation_toolbar.show_indicator(True)
 
-
     def abort_drawing(self):
         self.is_drawing = False
         self.overlay.is_freehand_drawing = False
         self.overlay.main_window.annotation_toolbar.show_indicator(False)
-
 
     def mousePressEvent(self, QMouseEvent):
         if not self.is_drawing:
             super(DrawingFreeHand, self).mousePressEvent(QMouseEvent)
         else:
             if QMouseEvent.button() == Qt.LeftButton:
-                self.current_line_width = self.overlay.main_window.annotation_toolbar.line_width
-                self.current_color = self.overlay.main_window.annotation_toolbar.current_color
+                self.current_line_width = self.overlay.current_line_thickness
+                self.current_color = self.overlay.current_color
                 self.pen_location = QMouseEvent.pos()
                 self.new_path = [[self.pen_location], self.current_color, self.current_line_width]
                 self.has_first_point = True
@@ -1252,7 +1303,6 @@ class DrawingFreeHand(DrawingBase):
                 # self.has_first_point = False
                 # self.overlay.main_window.annotation_toolbar.show_indicator(False)
                 # self.update_paths()
-
 
     def drawShape(self, qp, rect = None):
         if rect is None:

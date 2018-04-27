@@ -164,7 +164,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
     """
-    def __init__(self,main_window, key_event_handler, parent = None):
+    def __init__(self,main_window, parent = None):
         super(ScreenshotsManagerWidget, self).__init__(parent)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -497,9 +497,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         for s in self.images_plain:
             if isinstance(s, ScreenshotManagerPixmapItems) and s.screenshot_obj == scr_item:
                 rect = s.sceneBoundingRect()
+                print(rect)
                 self.fitInView(rect, Qt.KeepAspectRatio)
                 self.curr_scale = self.sceneRect().width() / rect.width()
                 break
+        print("Not Found")
 
 
     def frame_segment(self, segment_index, center = True):

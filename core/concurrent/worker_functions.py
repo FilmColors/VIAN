@@ -37,7 +37,6 @@ def store_project_concurrent(args, sign_progress):
     project = args[0]
     path = args[1]
     settings = args[2]
-    global_settings = args[3]
 
     a_layer = []
     screenshots = []
@@ -47,7 +46,7 @@ def store_project_concurrent(args, sign_progress):
     analyzes = []
     screenshot_groups = []
     scripts = []
-    # experiments = []
+    experiments = []
 
     vocabularies = []
 
@@ -78,8 +77,8 @@ def store_project_concurrent(args, sign_progress):
     for f in project.node_scripts:
         scripts.append(f.serialize())
 
-    # for g in project.experiments:
-    #     experiments.append(g.serialize())
+    for g in project.experiments:
+        experiments.append(g.serialize())
 
     data = dict(
         path=project.path,
@@ -100,7 +99,7 @@ def store_project_concurrent(args, sign_progress):
         screenshot_groups=screenshot_groups,
         scripts = scripts,
         vocabularies=vocabularies,
-        # experiments = experiments
+        experiments = experiments
 
     )
     sign_progress(0.6)
@@ -113,8 +112,6 @@ def store_project_concurrent(args, sign_progress):
 
     if settings.SCREENSHOTS_STATIC_SAVE:
         np.savez(numpy_path, imgs=screenshots_img, annotations=screenshots_ann, empty=[True])
-
-    global_settings.add_project(project)
 
     sign_progress(0.8)
     try:

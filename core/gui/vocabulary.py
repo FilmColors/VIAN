@@ -3,11 +3,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QFont
 from PyQt5 import uic
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
-from core.data.interfaces import IProjectChangeNotify, IHasVocabulary, ITimeRange
+from core.data.interfaces import IProjectChangeNotify, IClassifiable, ITimeRange
 from core.data.enums import get_type_as_string
 import os
 from functools import partial
 from core.data.enums import *
+import numpy as np
 from random import shuffle
 #region --DEFINITIONS--
 MATRIX_ORDER_PER_SEGMENT = 0
@@ -236,530 +237,220 @@ class VocabularyExportDialog(EDialogWidget):
 class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(ClassificationWindow, self).__init__(main_window, limit_size=False)
+        path = os.path.abspath("qt_ui/ClassificationWidget.ui")
+        uic.loadUi(path, self)
         self.main_window = main_window
         self.n_per_row = 20
         self.setWindowTitle("Classification Window")
-        self.all_boxes = []
 
-        self.main_segmentation_only = False
-
-        self.object_tabs_list = []
-        self.object_tabs = QTabWidget(self)
-        self.object_classes = []
-
-        self.tabs_list = []
-        self.voc_categories = []
-        self.current_experiment = None
-        self.ordered_containers = []
-        self.current_container = None
-        self.current_position = 0
         self.order_method = MATRIX_ORDER_PER_SEGMENT
 
-        # Header Segment Selection Buttons
+        self.btn_StartClassification.clicked.connect(self.on_start_classification)
+        self.btn_StopClassification.clicked.connect(self.on_stop_classification)
+        self.btn_Previous.clicked.connect(self.on_previous)
+        self.btn_Next.clicked.connect(self.on_next)
 
-        self.segment_selection = QWidget(self)
-        self.segment_selection.setLayout(QHBoxLayout(self.segment_selection))
-        self.btn_previous = QPushButton("Previous Item", self.segment_selection)
-        self.btn_previous.clicked.connect(self.on_button_previous)
-        self.btn_previous.setMinimumHeight(30)
-        self.lbl_current = QLabel(str(self.current_position), self.segment_selection)
-        self.btn_next = QPushButton("Next Item", self.segment_selection)
-        self.btn_next.clicked.connect(self.on_button_next)
-        self.btn_next.setMinimumHeight(30)
-        self.segment_selection.layout().addWidget(self.btn_previous)
-        self.segment_selection.layout().addItem(QSpacerItem(10, 2, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.segment_selection.layout().addWidget(self.lbl_current)
-        self.segment_selection.layout().addItem(QSpacerItem(10, 2, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.segment_selection.layout().addWidget(self.btn_next)
 
-        self.btn_abort = QPushButton("Stop Classification")
-        self.btn_abort.clicked.connect(self.on_stop_classification)
-        self.progress_view = QProgressBar(self)
-        self.progress_view.setTextVisible(True)
+        for itm in MATRIX_ORDERS:
+            self.comboBox_Sorting.addItem(itm)
 
-        self.lower_w = QWidget(self)
-        self.lower_w.setLayout(QHBoxLayout(self.lower_w))
-        self.lower_w.layout().addWidget(self.progress_view)
-        self.lower_w.layout().addWidget(self.btn_abort)
+        self.current_idx = 0
+        self.current_experiment = None
+        self.current_container = None
+        self.sorted_containers = []
 
-        self.central = QWidget(self)
-        self.central.setLayout(QVBoxLayout(self.central))
-
-        # self.tabs = QTabWidget(self)
-
-        self.central.layout().addWidget(self.segment_selection)
-        self.central.layout().addWidget(self.object_tabs)
-        self.central.layout().addWidget(self.lower_w)
-
-        self.start_widget = QWidget(self)
-        self.start_widget.setLayout(QVBoxLayout(self.start_widget))
-
-        self.w_ordering = QWidget(self.start_widget)
-        self.w_ordering.setLayout(QHBoxLayout(self.w_ordering))
-        lbl2 = QLabel("Ordering:")
-        lbl2.setAlignment(Qt.AlignRight)
-        self.cb_ordering = QComboBox(self.start_widget)
-        self.cb_ordering.currentIndexChanged.connect(self.on_order_changed)
-        self.cb_ordering.addItems(MATRIX_ORDERS)
-
-        self.w_ordering.layout().addWidget(lbl2)
-        self.w_ordering.layout().addWidget(self.cb_ordering)
-
-        self.experiment_selection = QWidget(self)
-        self.experiment_selection.setLayout(QHBoxLayout(self.experiment_selection))
-
-        lbl1 = QLabel("Experiment:")
-        lbl1.setAlignment(Qt.AlignRight)
-        self.cb_experiment = QComboBox(self.experiment_selection)
-        self.cb_experiment.currentIndexChanged.connect(self.on_experiment_changed)
-        self.experiment_selection.layout().addWidget(lbl1)
-        self.experiment_selection.layout().addWidget(self.cb_experiment)
-
-        self.start_button = QPushButton("Start Classification", self.start_widget)
-        self.start_button.setStyleSheet("QPushButton{color: green; font-size: 14pt;}")
-        self.start_button.setFixedHeight(100)
-        self.start_button.clicked.connect(self.on_start_classification)
-        self.start_widget.layout().addItem(QSpacerItem(0,0,QSizePolicy.Preferred, QSizePolicy.Expanding))
-        self.start_widget.layout().addWidget(self.experiment_selection)
-        self.start_widget.layout().addWidget(self.w_ordering)
-        self.start_widget.layout().addWidget(self.start_button)
-        self.start_widget.layout().addItem(QSpacerItem(0, 0, QSizePolicy.Preferred, QSizePolicy.Expanding))
-
-        self.stack = QStackedWidget(self)
-        self.stack.addWidget(self.central)
-        self.stack.addWidget(self.start_widget)
-        self.stack.setCurrentIndex(1)
-        # self.setLayout(QHBoxLayout(self))
-        self.setWidget(self.stack)
-        self.recreate_widget()
-        # self.set_stick_to_type(False)
+        # GUI
+        self.tab_widget = QTabWidget(self.contentWidget)
+        self.contentWidget.layout().addWidget(self.tab_widget)
+        self.tab_categories = []
+        self.tabs = [] # The Category Tabs
+        self.checkbox_groups = []
+        self.checkbox_names =[]
+        self.all_checkboxes = []
 
     def on_changed(self, project, item):
-        return
-        #TODO
-        if item is not None:
-            if item.get_type() == VOCABULARY or item.get_type() == VOCABULARY_WORD or item.get_type() == EXPERIMENT:
-                self.recreate_widget()
+        self.comboBox_Experiment.clear()
+        if len(project.experiments) > 0:
+            self.setEnabled(True)
+            for e in project.experiments:
+                self.comboBox_Experiment.addItem(e.get_name())
         else:
-            self.update_widget()
-        self.update_experiment_list()
+            self.setEnabled(False)
+
+        return
 
     def on_loaded(self, project):
-        return
-        #TODO
-        self.recreate_widget()
+        self.comboBox_Experiment.clear()
+        if len(project.experiments) > 0:
+            self.setEnabled(True)
+            for e in project.experiments:
+                self.comboBox_Experiment.addItem(e.get_name())
+        else:
+            self.setEnabled(False)
+
+        self.stackedWidget.setCurrentIndex(0)
 
     def on_selected(self, sender, selected):
-        #TODO
-        return
-        if len(selected) > 0:
-            self.recreate_widget(selected[0])
-            self.update_widget()
+        # if sender is not self:
+        #     if len(selected) > 0:
+        #         self.current_container = selected[0]
+        #     else:
+        #         self.current_container = None
+        #     self.update_widget()
+        pass
 
     def on_closed(self):
+        self.stackedWidget.setCurrentIndex(0)
+        self.setEnabled(False)
         return
-        #TODO
-        self.current_container = None
-        self.current_experiment = None
-        self.recreate_widget()
 
     def on_start_classification(self):
-        self.recreate_widget()
-        self.update_container_order()
-        self.stack.setCurrentIndex(0)
-        self.cb_experiment.currentIndexChanged.disconnect()
-        self.cb_ordering.currentIndexChanged.disconnect()
+        self.stackedWidget.setCurrentIndex(1)
+        self.current_idx = 0
+        self.current_experiment = self.main_window.project.experiments[self.comboBox_Experiment.currentIndex()]
+        self.sorted_containers = self.current_experiment.get_containers_to_classify()
+
+        #TODO Sort Containers
+        self.update_widget()
 
     def on_stop_classification(self):
-        self.stack.setCurrentIndex(1)
-        self.cb_experiment.currentIndexChanged.connect(self.on_experiment_changed)
-        self.cb_ordering.currentIndexChanged.connect(self.on_order_changed)
+        self.stackedWidget.setCurrentIndex(0)
+
+    def on_next(self):
+        if len(self.sorted_containers) > self.current_idx + 1:
+            self.current_idx += 1
+            self.update_widget()
+
+    def on_previous(self):
+        if 0 <= self.current_idx - 1:
+            self.current_idx -= 1
+            self.update_widget()
 
     def on_order_changed(self):
         self.order_method = self.cb_ordering.currentIndex()
 
-    def update_container_order(self):
-        to_classify = []
-        if self.project() is None:
-            return
-
-        if self.current_experiment is not None:
-            c_types = self.current_experiment.classification_sources
-            for c in self.project().get_all_containers():
-                if c.get_type() in c_types:
-                    to_classify.append(c)
-
-        if self.main_segmentation_only and self.project().get_main_segmentation() is not None:
-            main_segm = self.project().get_main_segmentation().segments
-
-            excluded = []
-            for c in to_classify:
-                if not(c.get_type() == SEGMENT and c not in main_segm):
-                    if isinstance(c, ITimeRange):
-                        excluded.append(c)
-
-            to_classify = excluded
-
-        if len(to_classify) > 0:
-            if self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_SEGMENT:
-                ordered = sorted(to_classify, key=lambda x:x.get_start())
-            elif self.cb_ordering.currentIndex() == MATRIX_ORDER_PER_TYPE:
-                ordered = sorted(to_classify, key=lambda x: x.get_type())
-            else:
-                shuffle(to_classify)
-                ordered = to_classify
-
-            self.ordered_containers = ordered
-
-    def update_widget(self):
-        if self.project() is None:
-            for itm in self.all_boxes:
-                itm[0].setEnabled(False)
-
-        elif self.project().selected is not None and len(self.project().selected) > 0 and isinstance(self.project().selected[0], IHasVocabulary):
-            for itm in self.all_boxes:
-                itm[0].setEnabled(True)
-                itm[0].setChecked(self.project().selected[0].has_word(itm[1]))
-        else:
-            for itm in self.all_boxes:
-                itm[0].setEnabled(False)
-
-    def update_experiment_list(self):
-        return
-        # TODO
-        last_selected = self.cb_experiment.currentText()
-        self.cb_experiment.clear()
-        new = []
-        # for exp in self.project().experiments:
-        #     self.cb_experiment.addItem(exp.get_name())
-        #     new.append(exp.get_name())
-
-        if last_selected in new:
-            self.cb_experiment.setCurrentText(last_selected)
-
-        elif len(self.project().experiments) > 0:
-            self.current_experiment = self.project().experiments[0]
-
-    def recreate_widget(self, container = None):
-        # self.tabs.clear()
-        self.object_tabs.clear()
-        self.object_tabs_list = []
-
-        self.voc_categories = []
-        self.object_classes = []
-        self.tabs_list = []
-
-        if self.project() is None or self.current_experiment is None:
-            return
-
-        vocabularies = self.current_experiment.get_vocabulary_list(container)
-
-        for voc in vocabularies:
-            if voc is None:
-                continue
-
-            voc_class = voc.name.split(":")[0]
-            voc_name = voc.name.split(":")[1]
-
-            if voc_class not in self.object_classes:
-                self.object_classes.append(voc_class)
-                tab_widget = QTabWidget(self.object_tabs)
-                self.object_tabs.addTab(tab_widget, voc_class)
-                self.object_tabs_list.append(tab_widget)
-                self.voc_categories.append([])
-                self.tabs_list.append([])
-
-            object_idx = self.object_classes.index(voc_class)
-
-            if voc.category not in self.voc_categories[object_idx]:
-                self.voc_categories[object_idx].append(voc.category)
-                area = QScrollArea(self.object_tabs_list[object_idx])
-                area.setWidgetResizable(True)
-                t = QWidget(None)
-                l = QVBoxLayout(t)
-                t.setLayout(l)
-
-                area.setWidget(t)
-                self.object_tabs_list[object_idx].addTab(area, voc.category)
-                self.tabs_list[object_idx].append(t)
-
-        for voc in vocabularies:
-            if voc is None:
-                continue
-
-            class_idx = self.object_classes.index(voc.name.split(":")[0])
-            tab_idx = self.voc_categories[class_idx].index(voc.category)
-            tab = self.tabs_list[class_idx][tab_idx]
-            # l = QVBoxLayout(tab)
-            # tab.setLayout(l)
-
-            outer = QFrame(tab)
-            # outer.setFrameStyle(QFrame.Panel)
-            outer.setLayout(QVBoxLayout(outer))
-            outer.setStyleSheet("QWidget{background: rgb(30,30,30)}")
-            tab.layout().addWidget(outer)
-
-            frame = QWidget(tab)
-
-            frame.setLayout(QHBoxLayout(frame))
-            lbl = QLabel(voc.name)
-            lbl.setStyleSheet("QLabel{color:#6391b5;}")
-            # lbl.setFixedWidth(150)
-            lbl.setWordWrap(True)
-            outer.layout().addWidget(lbl)
-            outer.layout().addWidget(frame)
-            col_count = 0
-            hbox = QVBoxLayout(frame)
-            hbox.setSpacing(2)
-            voc_list = voc.get_vocabulary_as_list()
-
-            voc_list = sorted(voc_list, key=lambda x:x.name.lower())
-            for w in voc_list:
-                cb = WordCheckBox(frame, w)
-                cb.stateChanged.connect(self.on_cb_change)
-                cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
-                if len(self.project().selected) > 0 \
-                        and isinstance(self.project().selected[0], IHasVocabulary) \
-                        and self.project().selected[0].has_word(w):
-                    cb.setChecked(True)
-                hbox.addWidget(cb)
-                col_count += 1
-                self.all_boxes.append([cb, w])
-
-                if col_count == self.n_per_row:
-                    frame.layout().addItem(hbox)
-                    hbox = QVBoxLayout(tab)
-                    col_count = 0
-
-            if col_count != 0:
-                hbox.addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))
-                frame.layout().addItem(hbox)
-
-            # frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
-            # frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
-            # tab.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
-
-        for i in range(len(self.tabs_list)):
-            for t in self.tabs_list[i]:
-                t.layout().addItem(QSpacerItem(2,2,QSizePolicy.Preferred, QSizePolicy.Expanding))
-        # for voc in self.project().vocabularies:
-        #     model = voc.get_vocabulary_item_model()
-        #     # model = QStandardItemModel()
-        #     tab_idx = self.voc_categories.index(voc.category)
-        #     tab = self.tabs_list[tab_idx]
-        #     l = QVBoxLayout(tab)
-        #     tab.setLayout(l)
-        #     for i in range(model.rowCount()):
-        #         word_model = model.child(i, 0)
-        #         word = word_model.voc_object
-        #         l.addWidget(QLabel(word.name))
-        #         frame = QFrame(tab)
-        #         vbox = QVBoxLayout(frame)
-        #         frame.setLayout(vbox)
-        #         l.addWidget(frame)
-        #
-        #         col_count = 0
-        #         hbox = QHBoxLayout(frame)
-        #         for j in range(word_model.rowCount()):
-        #             w = word_model.child(j , 0).voc_object
-        #             cb = QCheckBox(w.name, frame)
-        #             cb.stateChanged.connect(self.on_cb_change)
-        #             hbox.addWidget(cb)
-        #             col_count += 1
-        #             if col_count == self.n_per_row:
-        #                 vbox.addItem(hbox)
-        #                 hbox = QHBoxLayout(frame)
-        #                 col_count = 0
-
-                # vbox.addItem(hbox)
-
-
-            # tab.layout().addItem(QSpacerItem(1,1,QSizePolicy.Fixed, QSizePolicy.Expanding))
-
-            # self.tabs.addTab(tab, voc.name)
-
-    # def recreate_widget(self, container=None):
-    #     self.tabs.clear()
-    #     self.voc_categories = []
-    #
-    #     self.tabs_list = []
-    #
-    #     if self.project() is None:
-    #         return
-    #
-    #     if self.current_experiment is not None:
-    #         vocabularies = self.current_experiment.get_vocabulary_list(container)
-    #
-    #     else:
-    #         vocabularies = self.project().vocabularies
-    #
-    #     for voc in vocabularies:
-    #         if voc.category not in self.voc_categories:
-    #             self.voc_categories.append(voc.category)
-    #             area = QScrollArea(self.tabs)
-    #             area.setWidgetResizable(True)
-    #             t = QWidget(None)
-    #             l = QVBoxLayout(t)
-    #             t.setLayout(l)
-    #
-    #             area.setWidget(t)
-    #             self.tabs.addTab(area, voc.category)
-    #             self.tabs_list.append(t)
-    #
-    #     for voc in vocabularies:
-    #         tab_idx = self.voc_categories.index(voc.category)
-    #         tab = self.tabs_list[tab_idx]
-    #         # l = QVBoxLayout(tab)
-    #         # tab.setLayout(l)
-    #         outer = QFrame(tab)
-    #         # outer.setFrameStyle(QFrame.Panel)
-    #         outer.setLayout(QVBoxLayout(outer))
-    #         outer.setStyleSheet("QWidget{background: rgb(30,30,30)}")
-    #         tab.layout().addWidget(outer)
-    #
-    #         frame = QWidget(tab)
-    #
-    #         frame.setLayout(QHBoxLayout(frame))
-    #         lbl = QLabel(voc.name)
-    #         lbl.setStyleSheet("QLabel{color:#6391b5;}")
-    #         # lbl.setFixedWidth(150)
-    #         lbl.setWordWrap(True)
-    #         outer.layout().addWidget(lbl)
-    #         outer.layout().addWidget(frame)
-    #         col_count = 0
-    #         hbox = QVBoxLayout(frame)
-    #         hbox.setSpacing(2)
-    #         voc_list = voc.get_vocabulary_as_list()
-    #
-    #         voc_list = sorted(voc_list, key=lambda x: x.name.lower())
-    #         for w in voc_list:
-    #             cb = WordCheckBox(frame, w)
-    #             cb.stateChanged.connect(self.on_cb_change)
-    #             cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
-    #             if len(self.project().selected) > 0 \
-    #                     and isinstance(self.project().selected[0], IHasVocabulary) \
-    #                     and self.project().selected[0].has_word(w):
-    #                 cb.setChecked(True)
-    #             hbox.addWidget(cb)
-    #             col_count += 1
-    #             self.all_boxes.append([cb, w])
-    #
-    #             if col_count == self.n_per_row:
-    #                 frame.layout().addItem(hbox)
-    #                 hbox = QVBoxLayout(tab)
-    #                 col_count = 0
-    #
-    #         if col_count != 0:
-    #             hbox.addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))
-    #             frame.layout().addItem(hbox)
-    #
-    #             # frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
-    #             # frame.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
-    #             # tab.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Fixed, QSizePolicy.Expanding))
-    #
-    #     for t in self.tabs_list:
-    #         t.layout().addItem(QSpacerItem(2, 2, QSizePolicy.Preferred, QSizePolicy.Expanding))
-    #         # for voc in self.project().vocabularies:
-    #         #     model = voc.get_vocabulary_item_model()
-    #         #     # model = QStandardItemModel()
-    #         #     tab_idx = self.voc_categories.index(voc.category)
-    #         #     tab = self.tabs_list[tab_idx]
-    #         #     l = QVBoxLayout(tab)
-    #         #     tab.setLayout(l)
-    #         #     for i in range(model.rowCount()):
-    #         #         word_model = model.child(i, 0)
-    #         #         word = word_model.voc_object
-    #         #         l.addWidget(QLabel(word.name))
-    #         #         frame = QFrame(tab)
-    #         #         vbox = QVBoxLayout(frame)
-    #         #         frame.setLayout(vbox)
-    #         #         l.addWidget(frame)
-    #         #
-    #         #         col_count = 0
-    #         #         hbox = QHBoxLayout(frame)
-    #         #         for j in range(word_model.rowCount()):
-    #         #             w = word_model.child(j , 0).voc_object
-    #         #             cb = QCheckBox(w.name, frame)
-    #         #             cb.stateChanged.connect(self.on_cb_change)
-    #         #             hbox.addWidget(cb)
-    #         #             col_count += 1
-    #         #             if col_count == self.n_per_row:
-    #         #                 vbox.addItem(hbox)
-    #         #                 hbox = QHBoxLayout(frame)
-    #         #                 col_count = 0
-    #
-    #         # vbox.addItem(hbox)
-    #
-    #
-    #         # tab.layout().addItem(QSpacerItem(1,1,QSizePolicy.Fixed, QSizePolicy.Expanding))
-    #
-    #         # self.tabs.addTab(tab, voc.name)
-    #
-    def on_experiment_changed(self):
-        if len(self.project().experiments) == 0:
-            return
-
-        idx = self.cb_experiment.currentIndex()
-        if len(self.project().experiments) > idx:
-            self.current_experiment = self.project().experiments[idx]
-        self.recreate_widget()
-
-    def on_cb_change(self):
-        sender = self.sender()
-        state = sender.isChecked()
-        name = sender.text()
-        word = sender.word
-
-        if self.current_container is None:
-            return
-
-        # for itm in self.project().selected:
-        if isinstance(self.current_container, IHasVocabulary):
-            if state:
-                self.current_container.add_word(word)
-            else:
-                self.current_container.remove_word(word)
-                sender.setStyleSheet("QCheckBox{color: #b1b1b1;}")
-
-    def on_button_previous(self):
-        if self.ordered_containers is None:
-            return
-
-        if self.current_position > 0:
-            self.current_position -= 1
-
-            if self.current_position < len(self.ordered_containers):
-                cont = self.ordered_containers[self.current_position]
-                self.frame_container(cont)
-
     def frame_container(self, container):
-        start = container.get_start()
-        end = container.get_end()
-
-        self.main_window.timeline.timeline.frame_time_range(start + 5000, end - 5000)
-        self.lbl_current.setText(str(container.get_name()).zfill(3))
-        self.main_window.player.set_media_time(start + 5000)
-        self.current_container = container
-        self.project().set_selected(None, [container])
-
-        # If the container is a Screenshot, we want to focus it
-        if container.get_type() == SCREENSHOT:
+        if container.get_type() == (SEGMENT or ANNOTATION):
+            self.main_window.player.set_media_time(container.get_start())
+            self.main_window.timeline.timeline.frame_time_range(container.get_start(), container.get_end())
+        elif container.get_type() == SCREENSHOT:
+            segm = self.main_window.project.get_main_segmentation().get_segment_of_time(container.get_start())
+            self.main_window.player.set_media_time(container.get_start())
+            self.main_window.timeline.timeline.frame_time_range(segm.get_start(), segm.get_end())
             self.main_window.screenshots_manager.frame_screenshot(container)
 
-    def on_button_next(self):
-        if self.ordered_containers is None:
+
+
+
+
+    def update_widget(self):
+        if self.current_experiment is None:
             return
 
-        if self.current_position + 1 < len(self.ordered_containers):
-            self.current_position += 1
+        # for cb in self.all_checkboxes:
+        #     cb.disconnect()
+        # self.all_checkboxes = []
+        self.tab_widget.clear()
+        self.tabs = []
+        self.tab_categories = []
+        self.checkbox_groups = []
+        self.checkbox_names = []
 
-            cont = self.ordered_containers[self.current_position]
-            self.frame_container(cont)
 
-            self.progress_view.setValue(int((self.current_position / len(self.ordered_containers)) * 100))
 
-    def resizeEvent(self, *args, **kwargs):
-        super(ClassificationWindow, self).resizeEvent(*args, **kwargs)
+        if len(self.sorted_containers) > self.current_idx:
+            self.current_container = self.sorted_containers[self.current_idx]
+            self.main_window.project.set_selected(None, selected = [self.current_container])
+            self.lbl_CurrentContainer.setText(self.current_container.get_name())
+            self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
+        else:
+            self.current_container = None
+
+        if self.current_container is not None:
+            keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+            for k in keywords:
+                if k.voc_obj.category not in self.tab_categories:
+                    tab = QScrollArea()
+                    tab.setWidget(QWidget())
+                    tab.widget().setLayout(QVBoxLayout())
+                    tab.setWidgetResizable(True)
+
+                    self.tabs.append(tab)
+                    self.tab_categories.append(k.voc_obj.category)
+                    self.tab_widget.addTab(tab, k.voc_obj.category)
+                else:
+                    tab = self.tabs[self.tab_categories.index(k.voc_obj.category)]
+
+                if k.voc_obj.name + ":" + k.class_obj.name not in self.checkbox_names:
+                    self.checkbox_names.append(k.voc_obj.name + ":" + k.class_obj.name)
+                    group = CheckBoxGroupWidget(tab, k.voc_obj.name + ":" + k.class_obj.name)
+                    tab.widget().layout().addWidget(group)
+                    self.checkbox_groups.append(group)
+                else:
+                    group = self.checkbox_groups[self.checkbox_names.index(k.voc_obj.name + ":" + k.class_obj.name)]
+
+                checkbox = WordCheckBox(group, k)
+                checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                group.add_checkbox(checkbox)
+
+        for t in self.tabs:
+            t.widget().layout().addItem(QSpacerItem(1,1,QSizePolicy.Preferred, QSizePolicy.Expanding))
+
+        self.frame_container(self.current_container)
+
+class CheckBoxGroupWidget(QWidget):
+    def __init__(self, parent, name ,n_columns = 3):
+        super(CheckBoxGroupWidget, self).__init__(parent)
+        path = os.path.abspath("qt_ui/ClassificationCategory.ui")
+        uic.loadUi(path, self)
+        self.cx = 0
+        self.cy = 0
+        self.items = []
+        self.expanded = True
+        self.n_columns = n_columns
+        self.btn_Class.setText(name)
+        self.btn_Class.clicked.connect(self.toggle_expand)
+
+        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+
+    def add_checkbox(self, checkbox):
+        self.items.append(checkbox)
+        self.items = sorted(self.items, key = lambda x: x.word.get_name())
+        size = len(self.items)
+        n_rows = np.ceil(size/self.n_columns)
+
+        r = 0
+        c = 0
+        for w in self.items:
+            if c == 0:
+                self.vl_01.addWidget(w)
+            elif c == 1:
+                self.vl_02.addWidget(w)
+            else:
+                self.vl_03.addWidget(w)
+            r += 1
+            if r == n_rows:
+                r = 0
+                c += 1
+
+
+    def toggle_expand(self):
+        if self.expanded:
+            self.hide_all()
+        else:
+            self.show_all()
+        self.expanded = not self.expanded
+
+    def hide_all(self):
+        self.widgetContent.hide()
+        # for itm in self.items:
+        #     itm.hide()
+
+    def show_all(self):
+        self.widgetContent.show()
+        # for itm in self.items:
+        #     itm.show()
 
 
 class WordCheckBox(QCheckBox):

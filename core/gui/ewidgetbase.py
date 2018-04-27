@@ -28,6 +28,7 @@ def line_separator(Orientation):
 
     return frame
 
+
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
@@ -47,6 +48,8 @@ class EDockWidget(QDockWidget):
             self.max_width = 800
         else:
             self.max_width = 400
+
+        self.main_window.dock_widgets.append(self)
 
         # Currently VLC breaks the DockWidgets under OSX, we disable it therefore
         if self.main_window.is_darwin:
@@ -105,6 +108,11 @@ class EDockWidget(QDockWidget):
     def set_ui_enabled(self, state):
         self.setDisabled(not state)
 
+    def get_settings(self):
+        return dict()
+
+    def apply_settings(self, settings):
+        pass
 
 class EDialogWidget(QDialog):
     def __init__(self,  parent = None,  main_window = None, help_path = None):
