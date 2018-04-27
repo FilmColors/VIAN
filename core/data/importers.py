@@ -447,8 +447,10 @@ class FileMakerVocImporter():
             idx = s[0]
             objs = s[1]
             if idx < len(main_seg.segments):
-                for word in objs:
-                    main_seg.segments[idx].add_word(word)
+                pass
+                #TODO Reimplement
+                # for word in objs:
+                #     main_seg.segments[idx].add_word(word)
             else:
                 print("Sub-Segmentation Ignored")
 

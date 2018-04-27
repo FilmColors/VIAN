@@ -21,7 +21,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.lineEdit_Name.editingFinished.connect(self.set_name)
         self.textEdit_Notes.textChanged.connect(self.set_notes)
 
-        self.lineEdit_Vocabulary.returnPressed.connect(self.add_voc_word)
+        # self.lineEdit_Vocabulary.returnPressed.connect(self.add_voc_word)
         self.completer = QCompleter()
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.btn_VocMatrix.clicked.connect(self.main_window.create_vocabulary_matrix)
@@ -51,19 +51,19 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.lineEdit_Vocabulary.setText(self.completer.currentCompletion())
 
     def set_voc_words(self):
-        if self.item is not None and isinstance(self.item, IHasVocabulary):
+        if self.item is not None and isinstance(self.item, IClassifiable):
             text = ""
             for word in self.item.voc_list:
                 text += word.name + ", "
             self.textEdit_VocList.setPlainText(text)
 
-    def add_voc_word(self):
-        if self.lineEdit_Vocabulary.text() != "" and self.item is not None:
-            new_word = self.project().get_word_object_from_name(self.lineEdit_Vocabulary.text())
-            if new_word is not None:
-                self.item.add_word(new_word)
-        self.set_voc_words()
-        self.lineEdit_Vocabulary.setText("")
+    # def add_voc_word(self):
+    #     if self.lineEdit_Vocabulary.text() != "" and self.item is not None:
+    #         new_word = self.project().get_word_object_from_name(self.lineEdit_Vocabulary.text())
+    #         if new_word is not None:
+    #             self.item.add_word(new_word)
+    #     self.set_voc_words()
+    #     self.lineEdit_Vocabulary.setText("")
 
     def on_changed(self, project, item):
         if item is not None and not isinstance(item, AbstractMediaObject):

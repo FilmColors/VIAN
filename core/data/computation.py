@@ -292,5 +292,7 @@ def open_file(file_name):
         else:
             opener ="open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, file_name])
+        return True
     except Exception as e:
         print(e)
+        return False
