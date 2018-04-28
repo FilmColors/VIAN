@@ -310,6 +310,13 @@ class FilmColorsDatabase():
     def get_segments(self, voc, filters):
         return self.db[voc].find(**filters)
 
+    def has_segments(self, voc, filters):
+        res = self.db[voc].find(**filters, _limit=1)
+        for r in res:
+            return True
+        return False
+
+
     def get_keywords(self, filters):
         return self.db[TB_KEYWORDS].find(**filters)
 

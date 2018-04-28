@@ -1,11 +1,19 @@
-from core.corpus.entities import *
 import dataset as ds
+
+from core.corpus.shared.entities import *
+
 
 class CorpusDB():
     def __init__(self):
         pass
 
     def add_project(self, project:VIANProject):
+        pass
+
+    def commit_project(self, project:VIANProject):
+        pass
+
+    def checkout_project(self, project_id):
         pass
 
     def import_dataset(self, csv_dataset):
@@ -30,6 +38,9 @@ class CorpusDB():
         pass
 
     def get_vocabularies(self):
+        pass
+
+    def get_analysis_results(self, filters):
         pass
 
     def get_words(self):

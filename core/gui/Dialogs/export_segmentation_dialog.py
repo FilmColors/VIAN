@@ -30,9 +30,7 @@ class ExportSegmentationDialog(EDialogWidget):
 
 
     def on_browse(self):
-        path = QFileDialog.getSaveFileName(directory=self.main_window.project.path, filter="*.txt")[0]
-        if ".txt" not in path:
-            path += ".txt"
+        path = QFileDialog.getSaveFileName(directory=self.main_window.project.path, filter="*.csv *.txt")[0]
         self.lineEdit_Path.setText(path)
 
     def on_export(self):
@@ -40,6 +38,7 @@ class ExportSegmentationDialog(EDialogWidget):
         frame = self.cB_FramePosition.isChecked()
         milli = self.cB_Miliseconds.isChecked()
         formated = self.cB_FormatedTime.isChecked()
+        formated_ms = self.cB_FormatedTimeMS.isChecked()
 
         t_start = self.cB_Start.isChecked()
         t_end = self.cB_End.isChecked()
@@ -53,7 +52,7 @@ class ExportSegmentationDialog(EDialogWidget):
                 segmentations.append(self.main_window.project.segmentation[i].serialize())
 
 
-        exporter = SegmentationExporter(path, milli, formated, text, frame, t_start,
+        exporter = SegmentationExporter(path, milli, formated, formated_ms, text, frame, t_start,
                                         t_end, t_duration, self.main_window.player.get_fps())
         # segmentations = []
         # for s in self.main_window.project.segmentation:

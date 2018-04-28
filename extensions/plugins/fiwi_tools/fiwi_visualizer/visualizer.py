@@ -52,6 +52,7 @@ class FiwiVisualizer(QMainWindow):
         super(FiwiVisualizer, self).__init__(parent)
         path = os.path.abspath("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/WindowFiwiDatabase.ui")
         uic.loadUi(path, self)
+
         self.plugin = plugin
         self.actionOpen_Database.triggered.connect(partial(self.on_load_database, None, None))
         self.actionCorpus_Manager.triggered.connect(self.create_movie_list)
@@ -76,11 +77,23 @@ class FiwiVisualizer(QMainWindow):
         self.setCentralWidget(self.central)
         self.current_widget = None
 
-        self.color_dt_plots = ColorDTWidget(self.central)
+        self.info_dock = None
+        self.create_info_dock()
+
+        self.color_dt_plots = ColorDTWidget(self.central, self.info_dock)
         self.color_space_plots = ColorSpacePlots(self.central, self)
         self.color_space_plane = ColorSpaceLPlanePlots(self.central, self)
         self.node_graph = VocabularyGraph(self)
         self.feature_plot = FeaturePlot(self)
+
+
+        self.visualization_widgets = [
+            self.node_graph,
+            self.color_dt_plots,
+            self.color_space_plots,
+            self.color_space_plane,
+            self.feature_plot
+        ]
 
         self.central.addWidget(self.node_graph)
         self.central.addWidget(self.color_dt_plots)
@@ -92,12 +105,10 @@ class FiwiVisualizer(QMainWindow):
 
         self.query_dock = None
         self.movie_list_dock = None
-        self.info_dock = None
 
         self.create_movie_list()
         self.create_query_dock()
         self.movie_list_dock.hide()
-        self.create_info_dock()
 
         self.onModeChanged.connect(self.query_dock.on_mode_changed)
         self.onCurrentCorpusChanged.connect(self.query_dock.on_corpus_changed)
@@ -108,12 +119,12 @@ class FiwiVisualizer(QMainWindow):
         self.mode = MODE_CORPUS
         self.files = []
 
-        self.ctrl_node_graph = self.node_graph.get_controls()
+        # self.ctrl_node_graph = self.node_graph.get_controls()
 
-        self.info_dock.inner.addWidget(self.ctrl_node_graph)
-        self.info_dock.inner.addWidget(QWidget())
-        self.info_dock.inner.addWidget(QWidget())
-        self.info_dock.inner.addWidget(QWidget())
+        # self.info_dock.inner.addWidget(self.ctrl_node_graph)
+        # self.info_dock.inner.addWidget(self.color_dt_plots_params)
+        # self.info_dock.inner.addWidget(QWidget())
+        # self.info_dock.inner.addWidget(QWidget())
 
         self.vis_toolbar = VisualizationToolbar(self)
         self.onModeChanged.connect(self.vis_toolbar.mode_changed)
@@ -152,7 +163,15 @@ class FiwiVisualizer(QMainWindow):
 
     def set_current_plot(self, idx):
         self.central.setCurrentIndex(idx)
-        self.info_dock.inner.setCurrentIndex(idx)
+        if self.visualization_widgets[idx] is self.color_dt_plots:
+            self.color_dt_plots.on_tab_changed()
+        elif self.visualization_widgets[idx] is self.color_space_plots:
+            self.color_space_plots.on_tab_changed()
+
+        elif self.visualization_widgets[idx] is self.node_graph:
+            self.info_dock.set_widget(self.node_graph.get_controls(), "Node Graph")
+
+        # self.info_dock.inner.setCurrentIndex(idx)
 
     def sync_on_load_database(self, sqlite_path = None, root_path = None):
         try:
@@ -233,6 +252,18 @@ class FiwiVisualizer(QMainWindow):
         labels = [k.to_string() for k in unique_keywords]
 
         all_movies = database.get_movies_objs()
+        all_movies = sorted(all_movies, key=lambda x:x.name)
+
+        #FILTERING NON USED MOVIES
+        # movies_with_results = []
+        # for i, m in enumerate(all_movies):
+        #     on_progress(i / len(all_movies))
+        #     if database.has_segments("Global:Literal", dict(Item_ID=m.fm_id)):
+        #         movies_with_results.append(m)
+        #         print("OK", m.name)
+        #     else:
+        #         print("False", m.name)
+        # all_movies = movies_with_results
 
         on_progress(1.0)
         return [root_dir,
@@ -264,7 +295,7 @@ class FiwiVisualizer(QMainWindow):
         self.set_current_corpus(0)
 
         self.movie_list_dock.list_files(self.all_movies)
-
+        self.raise_()
     #region Query
     def on_start_query(self):
         if self.mode == MODE_CORPUS:
@@ -278,7 +309,8 @@ class FiwiVisualizer(QMainWindow):
 
         self.query_dock.setEnabled(False)
         curr_corpus = None
-        if self.current_corpora is not None:
+
+        if self.current_corpora is not None and self.current_corpora.name != "Complete Database":
             curr_corpus = self.current_corpus().to_fm_ids()
 
         if self.mode == MODE_MOVIE and self.current_movie is not None:
@@ -286,6 +318,7 @@ class FiwiVisualizer(QMainWindow):
         else:
             fm_id = self.query_dock.lineEdit_fm_id.text()
 
+        print(curr_corpus, fm_id)
         worker = SimpleWorker(self.on_query, self.on_query_finished,
                               self.on_progress,
                               args=[self.query_dock.current_filters,
@@ -426,6 +459,8 @@ class FiwiVisualizer(QMainWindow):
         return [current_stills, current_segments]
 
     def on_query_finished(self, result):
+        if result is None:
+            return
         self.is_querying = False
         self.query_dock.setEnabled(True)
         self.current_stills = result[0]
@@ -659,11 +694,18 @@ class VisualizationToolbar(QToolBar):
         self.a_features = self.addAction(create_icon("extensions/plugins/fiwi_tools/fiwi_visualizer/qt_ui/icon_features.png"), "")
 
 
-        self.a_node_graph.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 0))
-        self.a_colordt.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 1))
-        self.a_color_ab.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 2))
-        self.a_color_la.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 3))
-        self.a_features.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 4))
+        # self.a_node_graph.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 0))
+        # self.a_colordt.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 1))
+        # self.a_color_ab.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 2))
+        # self.a_color_la.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 3))
+        # self.a_features.triggered.connect(partial(self.visualizer.central.setCurrentIndex, 4))
+        self.a_node_graph.triggered.connect(partial(self.visualizer.set_current_plot, 0))
+        self.a_colordt.triggered.connect(partial(self.visualizer.set_current_plot, 1))
+        self.a_color_ab.triggered.connect(partial(self.visualizer.set_current_plot, 2))
+        self.a_color_la.triggered.connect(partial(self.visualizer.set_current_plot, 3))
+        self.a_features.triggered.connect(partial(self.visualizer.set_current_plot, 4))
+
+        self.mode_changed(MODE_CORPUS)
 
     @pyqtSlot(int)
     def mode_changed(self, mode):
@@ -708,7 +750,6 @@ class InfoDock(QDockWidget):
         self.setWindowTitle("Inspector")
         self.visualizer = visualizer
 
-        self.inner = QStackedWidget(self)
-        self.setWidget(self.inner)
-
-
+    def set_widget(self, widget, title):
+        self.setWindowTitle("Settings: " + title)
+        self.setWidget(widget)

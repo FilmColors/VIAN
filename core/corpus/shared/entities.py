@@ -15,6 +15,22 @@ class DBSettings():
         self.classification_objecs = classification_objects
 
 
+class DBProject():
+    def __init__(self):
+        self.project_id = -1
+
+        #Fields
+        self.is_checked_out = False
+        self.last_modified = 0
+        self.root_path = ""
+
+    def from_project(self, m: MovieDescriptor):
+        pass
+
+    def from_database(self, movie_entry):
+        pass
+
+
 class DBMovie():
     def __init__(self):
         # Key

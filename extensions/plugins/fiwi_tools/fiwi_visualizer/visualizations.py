@@ -8,18 +8,22 @@ from core.visualization.feature_plot import GenericFeaturePlot, SegmentTuple, Fe
 import numpy as np
 
 class ColorDTWidget(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, info_dock):
         super(ColorDTWidget, self).__init__(parent)
         self.fg_view = ImagePlotTime(self)
         self.bg_view = ImagePlotTime(self)
         self.gl_view = ImagePlotTime(self)
         self.setLayout(QVBoxLayout(self))
 
+        self.info_dock = info_dock
+
+
         self.tab = QTabWidget(self)
         self.tab.addTab(self.fg_view, "Foreground")
         self.tab.addTab(self.bg_view, "Background")
         self.tab.addTab(self.gl_view, "Global")
 
+        self.tab.currentChanged.connect(self.on_tab_changed)
         self.layout().addWidget(self.tab)
 
     def update_view(self, stills_glob = None, stills_fg = None, stills_bg = None):
@@ -62,6 +66,17 @@ class ColorDTWidget(QWidget):
         view.update_grid()
         view.sort_images()
 
+    def on_tab_changed(self):
+        idx = self.tab.currentIndex()
+        if idx == 0:
+            self.info_dock.set_widget(self.fg_view.get_param_widget(), "Color-dt Foreground")
+
+        elif idx == 1:
+            self.info_dock.set_widget(self.bg_view.get_param_widget(), "Color-dt Background")
+
+        elif idx == 2:
+            self.info_dock.set_widget(self.gl_view.get_param_widget(), "Color-dt Global")
+
 
 class ColorSpacePlots(QWidget):
     def __init__(self, parent, visualizer):
@@ -70,6 +85,7 @@ class ColorSpacePlots(QWidget):
         self.bg_view = ImagePlotCircular(self)
         self.gl_view = ImagePlotCircular(self)
         self.setLayout(QVBoxLayout(self))
+        self.info_dock = visualizer.info_dock
 
         visualizer.onImagePosScaleChanged.connect(self.fg_view.scale_pos)
         visualizer.onImagePosScaleChanged.connect(self.bg_view.scale_pos)
@@ -111,6 +127,16 @@ class ColorSpacePlots(QWidget):
         self.fg_view.frame_default()
         self.gl_view.frame_default()
 
+    def on_tab_changed(self):
+        idx = self.tab.currentIndex()
+        if idx == 0:
+            self.info_dock.set_widget(self.fg_view.get_param_widget(), "Color-AB Foreground")
+
+        elif idx == 1:
+            self.info_dock.set_widget(self.bg_view.get_param_widget(), "Color-AB Background")
+
+        elif idx == 2:
+            self.info_dock.set_widget(self.gl_view.get_param_widget(), "Color-AB Global")
 
 class ColorSpaceLPlanePlots(QWidget):
     def __init__(self, parent, visualizer):

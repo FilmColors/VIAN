@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>386</width>
-    <height>343</height>
+    <width>402</width>
+    <height>366</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,6 +61,9 @@
      <property name="text">
       <string>Frame Index</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -74,6 +77,13 @@
     <widget class="QCheckBox" name="cB_FormatedTime">
      <property name="text">
       <string>Time [HH:MM:SS]</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_FormatedTimeMS">
+     <property name="text">
+      <string>Time [HH:MM:SS:MS]</string>
      </property>
     </widget>
    </item>
@@ -96,12 +106,18 @@
      <property name="text">
       <string>Segment Start</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="cB_End">
      <property name="text">
       <string>Segment End</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
