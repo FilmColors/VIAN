@@ -28,7 +28,7 @@ class ColormetryJob2(QObject):
         self.duration = project.movie_descriptor.duration
         frame_duration = ms_to_frames(self.duration, project.movie_descriptor.fps)
         return [
-            project.movie_descriptor.movie_path,
+            project.movie_descriptor.get_movie_path(),
             start,
             frame_duration,
             30,

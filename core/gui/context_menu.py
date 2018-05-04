@@ -7,6 +7,9 @@ from core.data.enums import *
 from core.data.computation import parse_file_path
 from core.data.containers import *
 
+from core.corpus.shared.entities import DBProject
+from core.corpus.client.corpus_client import CorpusClient
+
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):
 
 
@@ -456,7 +459,7 @@ class MovieDescriptorContextMenu(ContextMenu):
 
     def on_set_movie_path(self):
         path = parse_file_path(QFileDialog.getOpenFileName(self)[0])
-        self.movie_descriptor.movie_path = path
+        self.movie_descriptor.set_movie_path(path)
         self.main_window.player.open_movie(path)
         self.main_window.dispatch_on_changed()
 
@@ -583,3 +586,41 @@ class MediaObjectContextMenu(ContextMenu):
                 obj.container.remove_media_object(obj)
         except:
             pass
+
+
+class CorpusProjectContextMenu(ContextMenu):
+    def __init__(self, parent, pos, project:VIANProject, dbproject:DBProject, corpus_client:CorpusClient):
+        super(CorpusProjectContextMenu, self).__init__(parent, pos)
+        self.project = project
+        self.dbproject = dbproject
+        self.corpus_client = corpus_client
+
+        self.a_open = self.addAction("Open Project")
+        self.a_check_in = self.addAction("Check In")
+        self.a_check_out = self.addAction("Check Out")
+        self.a_commit = self.addAction("Commit")
+        self.a_remove = self.addAction("Remove from Corpus")
+
+        self.a_open.triggered.connect(self.on_open)
+        self.a_check_in.triggered.connect(self.on_check_in)
+        self.a_check_out.triggered.connect(self.on_check_out)
+        self.a_commit.triggered.connect(self.on_commit)
+        self.a_remove.triggered.connect(self.on_remove)
+        self.popup(pos)
+
+    def on_open(self):
+        r = self.corpus_client.get_project_path(self.dbproject)
+        if r is not None:
+            self.main_window.load_project(r)
+
+    def on_check_in(self):
+        self.corpus_client.checkin_project(self.dbproject)
+
+    def on_check_out(self):
+        self.corpus_client.checkout_project(self.dbproject)
+
+    def on_commit(self):
+        pass
+
+    def on_remove(self):
+        self.corpus_client.remove_project(self.dbproject)

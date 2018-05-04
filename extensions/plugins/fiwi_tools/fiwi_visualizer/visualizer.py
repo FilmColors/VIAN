@@ -538,6 +538,9 @@ class FiwiVisualizer(QMainWindow):
 
         still_objs = database.get_stills_of_movie(movie)
         result_stills = []
+        for r in still_objs:
+            for t in r:
+                print(t.segm_id, t.shot_id)
         for group in still_objs:
             for i, s in enumerate(group):
                 stdout.write("\r" + str(root_dir + s.rel_path))

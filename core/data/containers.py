@@ -39,6 +39,8 @@ class VIANProject(IHasName, IClassifiable):
         self.shots_dir = ""
         self.export_dir = ""
 
+        self.corpus_id = -1
+
         self.id_list = []
 
         self.annotation_layers = []
@@ -118,6 +120,20 @@ class VIANProject(IHasName, IClassifiable):
 
     def get_type(self):
         return PROJECT
+
+    def reset_file_paths(self, folder, file, main_window = None):
+        self.path = file
+        self.folder = folder
+        root = self.folder
+
+        self.data_dir = root + "/data"
+        self.results_dir = root + "/results"
+        self.shots_dir = root + "/shots"
+        self.export_dir = root + "/export"
+
+        if self.main_window is not None:
+            self.main_window.project_streamer.on_loaded(self)
+
 
     def create_file_structure(self):
         root = self.folder
@@ -568,6 +584,7 @@ class VIANProject(IHasName, IClassifiable):
 
         data = dict(
             path = self.path,
+            corpus_id = self.corpus_id,
             name = self.name,
             notes=self.notes,
             results_dir = self.results_dir,
@@ -618,6 +635,10 @@ class VIANProject(IHasName, IClassifiable):
         self.main_segmentation_index = my_dict['main_segmentation_index']
 
         try:
+            self.corpus_id = my_dict['corpus_id']
+        except:
+            self.corpus_id = -1
+        try:
             self.notes = my_dict['notes']
         except:
             self.notes = ""
@@ -655,7 +676,7 @@ class VIANProject(IHasName, IClassifiable):
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
-
+        print(self.movie_descriptor.movie_path)
         # Attempt to load the Vocabularies, this might fail if the save is from VIAN 0.1.1
         try:
             self.vocabularies = []
@@ -2607,9 +2628,9 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.duration = duration
         self.notes = ""
         self.fps = fps
+        self.is_relative = False
 
     def serialize(self):
-
         data = dict(
             movie_name=self.movie_name,
             unique_id=self.unique_id,
@@ -2619,6 +2640,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             source=self.source,
             duration=self.duration,
             notes=self.notes,
+            is_relative = self.is_relative
         )
 
         return data
@@ -2628,8 +2650,6 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.dispatch_on_changed(item=self)
 
     def deserialize(self, serialization):
-        # Dirty but should work, since the movie is the only Container that is added during Project Creation
-        # we have to remove it from the id-list
         self.project.remove_from_id_list(self)
 
         for key, value in list(serialization.items()):
@@ -2662,6 +2682,21 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 
     def get_source_properties(self):
         return ["Current Time", "Current Frame", "Movie Name", "Movie Path", "Movie ID", "Year", "Source", "Duration", "Notes"]
+
+    def get_movie_path(self):
+        if self.is_relative:
+            return self.project.folder + self.movie_path
+        else:
+            return self.movie_path
+
+    def set_movie_path(self, path):
+        if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
+            self.movie_path = os.path.basename(path)
+            self.is_relative = True
+        else:
+            self.movie_path = path
+            self.is_relative = False
+        print("MoviePath set: ", path, " to \"" ,self.movie_path, "\"  ", self.is_relative)
 
     def get_auto_text(self, property_name, time_ms, fps):
         if property_name == "Current Time":

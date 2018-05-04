@@ -97,7 +97,7 @@ class NewProjectDialog(EDialogWidget):
         self.btn_Help.clicked.connect(self.on_help)
 
         self.lineEdit_MoviePath.setText(movie_path)
-        self.project.movie_descriptor.movie_path = movie_path
+        self.project.movie_descriptor.set_movie_path(movie_path)
 
         self.lineEdit_ProjectName.setText(self.project_name)
         self.set_project_path()
@@ -195,14 +195,14 @@ class NewProjectDialog(EDialogWidget):
         if not os.path.isfile(self.lineEdit_MoviePath.text()):
             self.lineEdit_MoviePath.setText("Not a Path")
             return
-        self.project.movie_descriptor.movie_path = self.lineEdit_MoviePath.text()
+        self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
 
     def on_cancel(self):
         self.close()
 
     def on_ok(self):
         template = self.templates[self.comboBox_Template.currentIndex()]
-
+        copy_movie = self.comboBox_Move.currentText()
         # Checking if the project dir is existing
         if not os.path.isdir(self.project_dir):
             self.settings.integritiy_check()
@@ -221,7 +221,7 @@ class NewProjectDialog(EDialogWidget):
 
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
-        self.project.movie_descriptor.movie_path = self.lineEdit_MoviePath.text()
+        self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
         print(self.project.folder, "\n",
               self.project.path, "\n",
               self.settings.DIR_PROJECT)
@@ -232,5 +232,5 @@ class NewProjectDialog(EDialogWidget):
         #         vocabularies.append(c[1])
 
         # self.main_window.new_project(self.project, template, vocabularies)
-        self.main_window.new_project(self.project, template)
+        self.main_window.new_project(self.project, template, copy_movie=copy_movie)
         self.close()

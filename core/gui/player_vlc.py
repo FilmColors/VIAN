@@ -233,6 +233,8 @@ class Player_VLC(VideoPlayer):
         self.init_ui()
 
     def release_player(self):
+        if self.media_player is not None:
+            self.media_player.stop()
         if self.vlc_instance is not None:
             self.vlc_instance.release()
             self.vlc_instance = None
@@ -376,7 +378,8 @@ class Player_VLC(VideoPlayer):
     def stop(self):
         if self.media_player is None:
             return
-        self.media_player.stop()
+        # self.media_player.stop()
+        self.media_player.set_pause(-1)
         self.playing = False
         if self.media is not None:
             self.media.release()
@@ -511,10 +514,11 @@ class Player_VLC(VideoPlayer):
             return self.fps
 
     def on_loaded(self, project):
-        path = project.movie_descriptor.movie_path
+        path = project.movie_descriptor.get_movie_path()
         self.media_descriptor = project.movie_descriptor
 
         # Check if the file exists locally
+        print("Movie Path", path, project.movie_descriptor.movie_name)
         if not os.path.isfile(path):
             exists = False
 
@@ -535,7 +539,7 @@ class Player_VLC(VideoPlayer):
                                         "Could not find movie: " + str(path) +
                                         "\nPlease set it manually after clicking \"OK\".")
                 path = QtWidgets.QFileDialog.getOpenFileName(self)[0]
-                project.movie_descriptor.movie_path = path
+                project.movie_descriptor.set_movie_path(path)
 
         self.open_movie(path)
         self.media_descriptor.set_duration(self.get_media_duration())

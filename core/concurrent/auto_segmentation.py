@@ -39,7 +39,7 @@ def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10
         ready, colormetry = project.get_colormetry()
 
         job = AutoSegmentingJob(
-            [project.movie_descriptor.movie_path,
+            [project.movie_descriptor.get_movie_path(),
              30,
              project.movie_descriptor.fps,
              colormetry.histograms,

@@ -9,6 +9,8 @@ import sys
 import argparse
 import os
 import webbrowser
+import shutil
+from zipfile import ZipFile
 
 def ms_to_string(ms, include_ms = False):
     ms = int(ms)
@@ -296,3 +298,16 @@ def open_file(file_name):
     except Exception as e:
         print(e)
         return False
+
+
+def extract_zip(zipfilepath, extractiondir):
+    zip = ZipFile(zipfilepath)
+    zip.extractall(path=extractiondir)
+    print("Extraction finished")
+
+def is_subdir(path, directory):
+    path = os.path.realpath(path)
+    directory = os.path.realpath(directory)
+    relative = os.path.relpath(path, directory)
+    return not relative.startswith(os.pardir + os.sep)
+

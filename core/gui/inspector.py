@@ -277,7 +277,7 @@ class AttributesAnnotation(QWidget):
 
             job = BasicTrackingJob([self.annotation.unique_id,
                                     bbox,
-                                    self.main_window.project.movie_descriptor.movie_path,
+                                    self.main_window.project.movie_descriptor.get_movie_path(),
                                     self.annotation.get_start(),
                                     self.annotation.get_end(),
                                     self.main_window.player.get_fps(),

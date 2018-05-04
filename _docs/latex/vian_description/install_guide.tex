@@ -1,0 +1,130 @@
+\documentclass[11pt, a4paper,oneside,chapterprefix=false]{scrbook}
+
+\usepackage{a4wide}
+\usepackage{times}
+\usepackage{helvet}   % sets sans serif font
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\usepackage{graphicx}
+\usepackage{subfigure}  
+\usepackage{fancybox} % for shadowed or double bordered boxes
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+
+\DeclareGraphicsExtensions{.pdf, .jpg}
+
+%% macros
+\input{include/math}
+\input{include/codelisting_layout}
+
+\usepackage{color}
+\usepackage{hyperref}
+\definecolor{RED}{rgb}{1,0,0}
+\definecolor{GREEN}{rgb}{0,0.7,0}
+\definecolor{BLUE}{rgb}{0,0,1}
+\definecolor{Orange}{rgb}{0.7,0.7,0.7}
+\newcommand{\FIXME}[1]{{\color{RED}{\textbf{FIX}: #1}}}
+
+\addtolength{\textheight}{2.0cm}
+\addtolength{\voffset}{-1cm}
+\addtolength{\textwidth}{1.8cm}
+\addtolength{\hoffset}{-.9cm}
+
+\widowpenalty=10000
+\clubpenalty=10000
+
+%\author{Hans Muster}
+%\title{Blockwise Hierarchical Data Decompositions}
+%\date{Fall Semester 2011}
+
+\begin{document}
+
+\frontmatter
+%\maketitle %automatic version
+% --- selfmade version ----
+\begin{titlepage}
+	\setlength{\parindent}{0cm}
+	\addtolength{\textheight}{1.0cm}
+
+	\vspace{0.5cm}
+	\Huge
+	{\textbf \textsf{VIAN\\ \huge Visual Film Annotation and Analysis}}
+
+	\vfill\vfill\vfill
+	\vfill
+	\includegraphics*[width=1.0\textwidth]{figures/vian_02.png}
+	\vfill \vfill \vfill
+	\large
+	Author:\\
+	Gaudenz Halter\\
+	
+	
+	
+	
+
+
+	\begin{minipage}[b]{0.5\textwidth}
+	ERC Advanced Grant FilmColors\\
+	Department of Film Studies \\
+	University of Z{\"u}rich
+	\end{minipage}
+	%
+	\begin{minipage}[b]{0.5\textwidth} \raggedleft
+	Visualization and MultiMedia Lab \\
+	Department of Informatics \\
+	University of Z{\"u}rich
+	\end{minipage}
+
+	\vfill
+	\hrule
+	\vspace{0.5cm}
+	\includegraphics*[width=0.3\textwidth]{figures/uzh_logo} \hfill
+	\includegraphics*[width=0.3\textwidth]{figures/vmml_logo}
+
+\end{titlepage}
+%%
+
+
+%=====================================================================
+\section{Introduction} \label{chp:introduction}
+%=====================================================================
+ There already exists a large number of tools for annotating films, many of them are mature and well adopted by the community. Still, analyzing films and especially corpora of films on their aesthetics has specific needs regarding the toolset and visualization an application must offer, such as managing exemplary stills, annotating specific regions of a frame, classification of regions with a large amount of tags, usage of (semi-)automatic tools to only name a few. \\
+VIAN aims to close this gap, by offering an additional set of tools for the collection, classification and visualization of single films and whole corpora. \\
+ 
+
+%=====================================================================
+\section{Features} \label{chp:features}
+%=====================================================================
+\subsection{Screenshot Manager}
+Typically, analysis of film aesthetics involves taking a large number of exemplary stills to illustrate a specific matter of a film segment. In the case of the \textit{ERC Advanced Grant FilmColors} project the number of stills range between 500 to 1000 for a full-length film. \\
+While most of the annotation tools allow the export of stills, the creation and export often requires several user-input, which can become a major time-leak regarding the shear number of stills to take.\\
+\\
+VIAN allows to create stills on the fly using one hotkey, it's frame-index and time stamp is then stored to minimize storage, finally, stills can be exported in a variety of image-formats.
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/screenshots.png}
+	\caption{The default view of VIAN. The Screenshot Manager on the right. Stills are sorted by the segmentation and indexed within the segment.}
+	\label{fig:histogram3d}
+\end{figure}
+
+\subsection{Visual Annotation}
+
+\subsection{Classification}
+\subsection{Analyses}
+\subsubsection{Python Analyses}
+\subsubsection{Node Scripts}
+
+%=====================================================================
+\section{Data Model} \label{chp:data_model}
+%=====================================================================
+
+
+%=====================================================================
+\section{FilmColors - Workflow} \label{chp:workflow}
+%=====================================================================
+
+
+
+\end{document}

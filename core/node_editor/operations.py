@@ -224,7 +224,7 @@ class ProjectNode(Operation):
 
 
     def perform(self, args, progress_signal, project):
-        self.result = [project.movie_descriptor.movie_path, project.movie_descriptor.duration, None]
+        self.result = [project.movie_descriptor.get_movie_path(), project.movie_descriptor.duration, None]
     
 
 #endregion

@@ -70,6 +70,7 @@ class UserSettings():
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
         self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
+        self.DIR_CORPORA = self.DIR_PROJECT + "/corpora/"
 
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
@@ -128,9 +129,9 @@ class UserSettings():
         self.store_path = self.DIR_PROJECT + "settings.json"
         self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
+        self.DIR_CORPORA = self.DIR_PROJECT + "/corpora/"
 
-
-        for d in [self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS]:
+        for d in [self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS, self.DIR_CORPORA]:
             if not os.path.isdir(d):
                 os.mkdir(d)
                 print(d + "\t Directory created.")
@@ -143,11 +144,11 @@ class UserSettings():
         """
 
         integer = True
-        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_PLUGINS]:
+        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_PLUGINS, self.DIR_CORPORA]:
             if not os.path.isdir(dir):
                 self.generate_dir_paths()
                 integer = False
-                print("Settings: Directories regenerated")
+                print("Recreated Missing Directories")
                 break
 
 
@@ -180,7 +181,9 @@ class UserSettings():
             n_name.extend(self.recent_files_name)
             self.recent_files_name = n_name
 
-            n_path = [self.recent_files_path.pop(idx)]
+            #Update the File Path
+            self.recent_files_path.pop(idx)
+            n_path = [path]
             n_path.extend(self.recent_files_path)
             self.recent_files_path = n_path
 

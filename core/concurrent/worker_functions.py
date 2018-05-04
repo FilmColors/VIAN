@@ -83,6 +83,7 @@ def store_project_concurrent(args, sign_progress):
     data = dict(
         path=project.path,
         name=project.name,
+        corpus_id = project.corpus_id,
         annotation_layers=a_layer,
         notes=project.notes,
         current_annotation_layer=None,

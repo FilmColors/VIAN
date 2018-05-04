@@ -108,7 +108,7 @@ class DialogScreenshotImport(EDialogWidget):
 
         args = dict(
             mode=mode,
-            movie_path = project.movie_descriptor.movie_path,
+            movie_path = project.movie_descriptor.get_movie_path(),
             scr_paths = scr_paths,
             segment_ids = segment_ids,
             segment_ranges = segment_ranges,

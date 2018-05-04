@@ -27,10 +27,10 @@ class VianUpdater(IConcurrentJob):
         self.to_exclude = ["user"]
         self.box = None
 
-    def update(self):
+    def update(self, force = False):
         try:
             do_update = self.get_server_version()
-            if do_update:
+            if do_update or force:
                 job = VianUpdaterJob([self.app_root, self.source_dir, self.url_source])
                 self.main_window.run_job_concurrent(job)
         except Exception as e:

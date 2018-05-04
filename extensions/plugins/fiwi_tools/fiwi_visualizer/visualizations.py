@@ -96,6 +96,8 @@ class ColorSpacePlots(QWidget):
         self.tab.addTab(self.bg_view, "Background")
         self.tab.addTab(self.gl_view, "Global")
 
+        self.tab.currentChanged.connect(self.on_tab_changed)
+
         self.layout().addWidget(self.tab)
 
     def update_view(self, stills_glob = None, still_fg = None, still_bg = None):

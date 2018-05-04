@@ -27,8 +27,6 @@ class ExportSegmentationDialog(EDialogWidget):
         self.btn_Cancel.clicked.connect(self.close)
         self.btn_Help.clicked.connect(self.on_help)
 
-
-
     def on_browse(self):
         path = QFileDialog.getSaveFileName(directory=self.main_window.project.path, filter="*.csv *.txt")[0]
         self.lineEdit_Path.setText(path)

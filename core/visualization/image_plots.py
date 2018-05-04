@@ -334,7 +334,20 @@ class ImagePlotCircular(ImagePlot):
         slider_yscale.valueChanged.connect(self.set_image_scale)
 
         hl1.addWidget(slider_xscale)
+        x_scale_line = QSpinBox(w)
+        x_scale_line.setRange(1, 1000)
+        x_scale_line.setValue(100)
+        x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        hl1.addWidget(x_scale_line)
+
         hl2.addWidget(slider_yscale)
+        y_scale_line = QSpinBox(w)
+        y_scale_line.setRange(1, 1000)
+        y_scale_line.setValue(100)
+        y_scale_line.valueChanged.connect(slider_yscale.setValue)
+        slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        hl2.addWidget(y_scale_line)
 
         w.layout().addItem(hl1)
         w.layout().addItem(hl2)
@@ -600,6 +613,20 @@ class ImagePlotTime(ImagePlot):
 
         hl1.addWidget(slider_xscale)
         hl2.addWidget(slider_yscale)
+
+        x_scale_line = QSpinBox(w)
+        x_scale_line.setRange(1, 500)
+        x_scale_line.setValue(self.x_scale)
+        x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        hl1.addWidget(x_scale_line)
+
+        y_scale_line = QSpinBox(w)
+        y_scale_line.setRange(1, 500)
+        y_scale_line.setValue(self.y_scale)
+        y_scale_line.valueChanged.connect(slider_yscale.setValue)
+        slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        hl2.addWidget(y_scale_line)
 
         w.layout().addItem(hl1)
         w.layout().addItem(hl2)
