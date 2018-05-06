@@ -13,7 +13,7 @@ from core.data.computation import *
 from core.gui.vocabulary import VocabularyItem
 from core.data.project_streaming import ProjectStreamer, NUMPY_NO_OVERWRITE
 from core.data.enums import *
-
+from typing import List
 from core.data.project_streaming import IStreamableContainer
 
 from core.node_editor.node_editor import *
@@ -2615,7 +2615,7 @@ class ConnectionDescriptor(IProjectContainer):
 
 #region MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
-    def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
+    def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id="0_0_0", year=1800, source="",
                  duration=100, fps = 30):
         IProjectContainer.__init__(self)
         IClassifiable.__init__(self)
@@ -2697,6 +2697,9 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             self.movie_path = path
             self.is_relative = False
         print("MoviePath set: ", path, " to \"" ,self.movie_path, "\"  ", self.is_relative)
+
+    def get_movie_id_list(self):
+        return self.movie_id.split("_")
 
     def get_auto_text(self, property_name, time_ms, fps):
         if property_name == "Current Time":
@@ -3655,7 +3658,7 @@ class Experiment(IProjectContainer, IHasName):
                             result.append(child)
         return result
 
-    def get_classification_objects_plain(self):
+    def get_classification_objects_plain(self) -> List[ClassificationObject]:
         result = []
         for root in self.classification_objects:
             root.get_children_plain(result)

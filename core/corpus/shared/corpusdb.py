@@ -6,6 +6,7 @@ import glob
 import shutil
 
 TABLE_PROJECTS = "PROJECTS"
+TABLE_MOVIES = "MOVIES"
 TABLE_SEGMENTS = "SEGMENTS"
 TABLE_SCREENSHOT_GRP = "SCREENSHOT_GROUPS"
 TABLE_SCREENSHOTS = "SHOTS"
@@ -16,13 +17,32 @@ TABLE_KEYWORDS = "KEYWORDS"
 TABLE_VOCABULARIES = "VOCABULARIES"
 TABLE_CLASSIFICATION_OBJECTS = "CLASSIFICATION_OBJECTS"
 TABLE_CONTRIBUTORS = "CONTRIBUTORS"
+TABLE_KEYWORD_MAPPING = "KEYWORD_MAPPING"
+TABLE_EXPERIMENTS = "EXPERIMENTS"
+
+
+ALL_PROJECT_TABLES = [
+    TABLE_SEGMENTS,
+    TABLE_SEGMENTATIONS,
+    TABLE_ANNOTATIONS,
+    TABLE_ANNOTATION_LAYERS,
+    TABLE_SCREENSHOT_GRP,
+    TABLE_SCREENSHOTS
+]
 
 ALL_TABLES = [
     TABLE_PROJECTS,
     TABLE_SEGMENTS,
+    TABLE_SCREENSHOT_GRP,
     TABLE_SCREENSHOTS,
+    TABLE_ANNOTATION_LAYERS,
+    TABLE_SEGMENTATIONS,
     TABLE_ANNOTATIONS,
-    TABLE_KEYWORDS
+    TABLE_KEYWORDS,
+    TABLE_VOCABULARIES,
+    TABLE_CLASSIFICATION_OBJECTS,
+    TABLE_CONTRIBUTORS,
+    TABLE_KEYWORD_MAPPING,
 ]
 
 class CorpusDB():
@@ -41,6 +61,9 @@ class CorpusDB():
         pass
 
     def checkout_project(self, project_id, contributor=DBContributor):
+        pass
+
+    def checkin_project(self, project_id, contributor: DBContributor):
         pass
 
     def get_project_path(self, dbproject: DBProject):
@@ -131,6 +154,14 @@ class DatasetCorpusDB(CorpusDB):
         super(DatasetCorpusDB, self).__init__()
         self.sql_path = ""
         self.db = None
+        self.constrain_segmentations = False
+        self.constrain_ann_layer = False
+        self.constain_class_objs = False
+        self.constrain_screenshot_grps = False
+
+        self.no_movies = False
+
+
         pass
 
     def connect(self, path):
@@ -158,6 +189,8 @@ class DatasetCorpusDB(CorpusDB):
         :param project: 
         :return: 
         """
+
+        log = []
         project_obj = DBProject().from_project(project)
 
         table = self.db[TABLE_PROJECTS]
@@ -165,7 +198,6 @@ class DatasetCorpusDB(CorpusDB):
 
         #region Check if Project exists
         existing = False
-        existing_proj = None
         local_project = self.get_project(project_obj.project_id)
         if local_project is not None:
             existing = True
@@ -177,31 +209,127 @@ class DatasetCorpusDB(CorpusDB):
 
         try:
             self.db.begin()
-            # Zip the Project and store it in the projects directory
+            #region Zip the Project
+            #and store it in the projects directory
             archive_file = self.root_dir + PROJECTS_DIR + project.name
             project_obj = DBProject().from_project(project)
             shutil.make_archive(archive_file, 'zip', project.folder)
             project_obj.archive = archive_file + ".zip"
+            #endregion
 
-            # Make an entry in the Corpus Project Table
+            project_id = -1
+            # Update the Project Entry, remove all associated container from the Database
             if existing:
                 d = project_obj.to_database(include_id=True)
                 table.update(d, ['id'])
-                # Check if the Heavy files need to be updated:
-
+                project_id = project_obj.project_id
+                # Clear all Containers of this project from the Database
+                for t in ALL_PROJECT_TABLES:
+                    self.db[t].delete(id=project_obj.project_id)
+                self.db[TABLE_KEYWORD_MAPPING].delete(project_id=project_obj.project_id)
             else:
                 d = project_obj.to_database(include_id=False)
                 table.insert(d)
                 res = table.find_one(**project_obj.to_database(include_id=False))
                 project.corpus_id = res['id']
+                project_id = res['id']
 
+            #region Movie
+            dbentry = DBMovie().from_project(project.movie_descriptor)
+            dbmovies = self.get_movies(dict(movie_id_a = dbentry.movie_id[0],
+                                            movie_id_b = dbentry.movie_id[1],
+                                            movie_id_c = dbentry.movie_id[2]))
+            if len(dbmovies) > 0:
+                movie_id = dbmovies[0].movie_id_db
+            else:
+                movie_id = self.db[TABLE_MOVIES].insert(dbentry.to_database(False))
+
+            #endregion
+
+            #region Segmentation
+            main_segmentation_db = [] # All DBSegments of the Main Segmentation
+            for s in project.segmentation:
+                segmentation_id = -1
+
+                # Insert a Segmentation if allowed
+                if self.constrain_segmentations:
+                     dbsegms = self.get_segmentations(dict(name=s.get_name()))
+                     if len(dbsegms) > 0:
+                         segmentation_id = dbsegms[0].segmentation_id
+                     else:
+                         log.append("Segmentation skipped due to missing root segmentation: " + s.get_name())
+                         continue
+                else:
+                    dbsegms = self.get_segmentations(dict(name=s.get_name()))
+                    if len(dbsegms) > 0:
+                        segmentation_id = dbsegms[0].segmentation_id
+                    else:
+                        segmentation_entry = DBSegmentation().from_project(s)
+                        segmentation_id = self.db[TABLE_SEGMENTATIONS].insert(segmentation_entry.to_database(False))
+
+                for segm in s.segments:
+                    dbsegm = DBSegment().from_project(segm, project_id, movie_id, segmentation_id)
+                    dbsegm.segment_id = self.db[TABLE_SEGMENTS].insert(dbsegm.to_database(False))
+
+                    if s.is_main_segmentation:
+                        main_segmentation_db.append(dbsegms)
+            #endregion
+
+            # region Annotations
+            for layer in project.annotation_layers:
+                # Insert a AnnotationLayer if allowed
+                if self.constrain_ann_layer:
+                    db_ann_lay = self.get_annotation_layers(dict(name=layer.get_name()))
+                    if len(db_ann_lay) > 0:
+                        layer_id = db_ann_lay.layer_id
+                    else:
+                        log.append("Annotation Layer skipped due to missing root Annotation Layer: " + s.get_name())
+                        continue
+                else:
+                    db_ann_lay = self.get_annotation_layers(dict(name=layer.get_name()))
+                    if len(db_ann_lay) > 0:
+                        layer_id = db_ann_lay.layer_id
+                    else:
+                        ann_layer_entry = DBAnnotationLayer().from_project(layer)
+                        layer_id = self.db[TABLE_ANNOTATION_LAYERS].insert(ann_layer_entry.to_database(False))
+
+                for ann in layer.annotations:
+                    dbann = DBAnnotation().from_project(project_id, ann, movie_id, layer_id)
+                    self.db[TABLE_ANNOTATIONS].insert(dbann.to_database(False))
+            #endregion
+
+            #region Screenshots
+            for scr_grp in project.screenshot_groups:
+                if self.constrain_screenshot_grps:
+                    db_scr_grp = self.get_screenshot_groups(dict(name=scr_grp.get_name()))
+                    if len(db_scr_grp) > 0:
+                        scr_grp_id = db_scr_grp[0].group_id
+                    else:
+                        log.append("Annotation Layer skipped due to missing root Annotation Layer: " + s.get_name())
+                        continue
+                else:
+                    db_scr_grp = self.get_screenshot_groups(dict(name=scr_grp.get_name()))
+                    if len(db_scr_grp) > 0:
+                        scr_grp_id = db_scr_grp[0].group_id
+                    else:
+                        scr_group_entry = DBScreenshotGroup().from_project(scr_grp)
+                        scr_grp_id = self.db[TABLE_SCREENSHOT_GRP].insert(scr_group_entry.to_database(False))
+
+            for scr in project.screenshots:
+                segment_id = main_segmentation_db[scr.scene_id - 1].segment_id
+                dbscr = DBScreenshot().from_project(scr, project_id, movie_id, segment_id, scr_grp_id, self.root_dir)
+                self.db[TABLE_SCREENSHOTS].insert(dbscr.to_database(False))
+
+            #endregion
             self.db.commit()
 
             self.checkin_project(project.corpus_id, contributor)
+            print(log)
             return True, project_obj
         except Exception as e:
             print(e)
             self.db.rollback()
+            raise e
             return False, str(e)
 
     def checkout_project(self, project_id, contributor:DBContributor):
@@ -255,7 +383,11 @@ class DatasetCorpusDB(CorpusDB):
         pass
 
     def clear(self, tables = None):
-        self.db[TABLE_PROJECTS].drop()
+        if tables is None:
+            tables = ALL_TABLES
+        for t in tables:
+            self.db[t].drop()
+
 
     #region Users
     def add_user(self, contributor: DBContributor):
@@ -287,7 +419,7 @@ class DatasetCorpusDB(CorpusDB):
 
     def get_users(self, filters = None):
         if filters is None:
-            query = self.db[TABLE_CONTRIBUTORS].find_all()
+            query = self.db[TABLE_CONTRIBUTORS].find()
         else:
             query = self.db[TABLE_CONTRIBUTORS].find(**filters)
 
@@ -324,38 +456,96 @@ class DatasetCorpusDB(CorpusDB):
 
     def get_annotation_layers(self, filters = None):
         if filters is None:
-            return self.db[TABLE_ANNOTATION_LAYERS].all()
-        return self.db[TABLE_ANNOTATION_LAYERS].find(**filters)
+            query = self.db[TABLE_ANNOTATION_LAYERS].all()
+        else:
+            query = self.db[TABLE_ANNOTATION_LAYERS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBAnnotationLayer().from_database(q))
+        return result
 
     def get_segmentations(self, filters = None):
         if filters is None:
-            return self.db[TABLE_SEGMENTATIONS].all()
-        return self.db[TABLE_SEGMENTATIONS].find(**filters)
+            query = self.db[TABLE_SEGMENTATIONS].all()
+        else:
+            query = self.db[TABLE_SEGMENTATIONS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBSegmentation().from_database(q))
+        return result
 
     def get_segments(self, filters = None):
         if filters is None:
-            return self.db[TABLE_SEGMENTS].all()
-        return self.db[TABLE_SEGMENTS].find(**filters)
+            query = self.db[TABLE_SEGMENTS].all()
+        else:
+            query = self.db[TABLE_SEGMENTS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBSegment().from_database(q))
+        return result
 
     def get_screenshots(self, filters = None):
         if filters is None:
-            return self.db[TABLE_SCREENSHOTS].all()
-        return self.db[TABLE_SCREENSHOTS].find(**filters)
+            query = self.db[TABLE_SCREENSHOTS].all()
+        else:
+            query = self.db[TABLE_SCREENSHOTS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBScreenshot().from_database(q))
+        return result
+
+    def get_screenshot_groups(self, filters = None):
+        if filters is None:
+            query = self.db[TABLE_SCREENSHOT_GRP].all()
+        else:
+            query = self.db[TABLE_SCREENSHOT_GRP].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBScreenshotGroup().from_database(q))
+        return result
 
     def get_annotations(self, filters = None):
         if filters is None:
-            return self.db[TABLE_ANNOTATIONS].all()
-        return self.db[TABLE_ANNOTATIONS].find(**filters)
+            query = self.db[TABLE_ANNOTATIONS].all()
+        else:
+            query = self.db[TABLE_ANNOTATIONS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBAnnotation().from_database(q))
+        return result
 
     def get_vocabularies(self, filters = None):
         if filters is None:
-            return self.db[TABLE_VOCABULARIES].all()
-        return self.db[TABLE_VOCABULARIES].find(**filters)
+            query = self.db[TABLE_VOCABULARIES].all()
+        else:
+            query = self.db[TABLE_VOCABULARIES].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBVocabulary().from_database(q))
+        return result
 
     def get_classification_objects(self, filters = None):
         if filters is None:
-            return self.db[TABLE_CLASSIFICATION_OBJECTS].all()
-        return self.db[TABLE_CLASSIFICATION_OBJECTS].find(**filters)
+            query = self.db[TABLE_CLASSIFICATION_OBJECTS].all()
+        else:
+            query = self.db[TABLE_CLASSIFICATION_OBJECTS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBClassificationObject().from_database(q))
+        return result
+
+    def get_experiments(self, filters = None):
+        pass
+
+
 
     def get_settings(self):
         pass
@@ -365,6 +555,16 @@ class DatasetCorpusDB(CorpusDB):
             return self.db[TABLE_KEYWORDS].all()
         return self.db[TABLE_KEYWORDS].find(**filters)
 
+    def get_movies(self, filters = None):
+        if filters is None:
+            query = self.db[TABLE_MOVIES].all()
+        else:
+            query = self.db[TABLE_MOVIES].find(**filters)
+
+        result = []
+        for entry in query:
+            result.append(DBMovie().from_database(entry))
+        return result
     #endregion
 
     #region IO
@@ -391,4 +591,11 @@ class DatasetCorpusDB(CorpusDB):
         return self
     #endregion
 
+    def __str__(self):
+        result = ""
+        for t in ALL_TABLES:
+            entries = self.db[t].find()
+            for e in entries:
+                result += str(e) + "\n"
+        return result
 

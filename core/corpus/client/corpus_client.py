@@ -317,7 +317,8 @@ class CorpusClientWidget(QWidget):
 
     def on_contributor_update(self, contributor):
         self.contributor = contributor
-        self.btn_Person.setIcon(create_icon(contributor.image_path))
+        if os.path.isfile(self.contributor.image_path):
+            self.btn_Person.setIcon(create_icon(contributor.image_path))
         self.corpus_client.metadata.store(self.corpus_client.metadata.path)
 
     def on_commit(self):
@@ -329,6 +330,8 @@ class CorpusClientWidget(QWidget):
 
     def on_project_changed(self, dbproject):
         self.dbproject = dbproject
+        if self.dbproject is None:
+            return
 
         self.btn_CheckOut.clicked.disconnect()
         if self.dbproject.is_checked_out:

@@ -7,6 +7,7 @@ SCR_DIR = "/screenshots/"
 MOVIE_DIR = "/movie/"
 ANALYSIS_DIR = "/analysis/"
 PROJECTS_DIR = "/projects/"
+EXPERIMENTS_DIR = "/experiments/"
 FTP_DIR = "/ftp/"
 
 # region Functions
@@ -134,12 +135,12 @@ class DBProject(DBEntity):
 class DBMovie(DBEntity):
     def __init__(self):
         # Key
-        self.movie_id = -1
+        self.movie_id_db = -1
 
         # Fields
         self.movie_name = ""
         self.movie_path = ""
-        self.movie_id = -1
+        self.movie_id = (0, 0, 0)
         self.year = -1
         self.source = ""
         self.duration = -1
@@ -147,26 +148,41 @@ class DBMovie(DBEntity):
         self.fps = -1
 
     def from_project(self, m: MovieDescriptor):
-        self.movie_id = m.movie_id
+        self.movie_id_db = m.movie_id
         self.movie_name = m.movie_name
         self.movie_path = m.movie_path
-        self.movie_id = m.movie_id
+        try:
+            self.movie_id = m.movie_id.split("_")
+        except:
+            self.movie_id = "0_0_0".split("_")
         self.year = m.year
         self.source = m.source
         self.duration = m.duration
         self.notes = m.notes
         self.fps = m.fps
+        return self
 
     def from_database(self, movie_entry):
-        pass
+        self.movie_id_db = movie_entry['id']
+        self.movie_name = movie_entry['movie_name']
+        self.movie_path = movie_entry['movie_path']
+        self.movie_id = (movie_entry['movie_id_a'], movie_entry['movie_id_b'], movie_entry['movie_id_c'])
+        self.year = movie_entry['year']
+        self.source = movie_entry['source']
+        self.duration = movie_entry['duration']
+        self.notes = movie_entry['notes']
+        self.fps = movie_entry['fps']
+        return self
 
     def to_database(self, include_id = False):
         if include_id:
             result = dict(
-                id = self.movie_id,
+                id = self.movie_id_db,
                 movie_name = self.movie_name,
                 movie_path = self.movie_path,
-                movie_id = self.movie_id,
+                movie_id_a = self.movie_id[0],
+                movie_id_b = self.movie_id[1],
+                movie_id_c = self.movie_id[2],
                 year = self.year,
                 source = self.source,
                 duration = self.duration,
@@ -177,14 +193,16 @@ class DBMovie(DBEntity):
             result = dict(
                 movie_name=self.movie_name,
                 movie_path=self.movie_path,
-                movie_id=self.movie_id,
+                movie_id_a = self.movie_id[0],
+                movie_id_b = self.movie_id[1],
+                movie_id_c = self.movie_id[2],
                 year=self.year,
                 source=self.source,
                 duration=self.duration,
                 notes=self.notes,
                 fps=self.fps,
             )
-
+        return result
 
     def __str__(self):
         return self.movie_id + " " + self.name + " " + str(self.year)
@@ -200,10 +218,12 @@ class DBAnnotationLayer(DBEntity):
 
     def from_project(self, l: AnnotationLayer):
         self.name = l.get_name()
+        return self
 
     def from_database(self, entry):
         self.name = entry['name']
         self.layer_id = entry['id']
+        return self
 
     def to_database(self, include_id = False):
         if include_id:
@@ -230,6 +250,7 @@ class DBSegmentation(DBEntity):
 
     def from_project(self, s: Segmentation):
         self.name = s.get_name()
+        return self
 
     def from_database(self, entry):
         self.name = entry['name']
@@ -280,6 +301,7 @@ class DBSegment(DBEntity):
         self.segm_end = s.end
         self.segm_duration = s.duration
         self.segm_body = s.annotation_body
+        return self
 
     def from_database(self, entry):
         self.segment_id = entry['a']
@@ -293,6 +315,8 @@ class DBSegment(DBEntity):
         self.segm_end = entry['segm_end']
         self.segm_duration = entry['segm_duration']
         self.segm_body = entry['segm_body']
+
+        return self
 
     def to_database(self, include_id = False):
         if include_id:
@@ -321,6 +345,8 @@ class DBSegment(DBEntity):
                 segm_duration=self.segm_duration,
                 segm_body=self.segm_body
             )
+
+        print(result)
         return result
 
 
@@ -346,10 +372,11 @@ class DBAnnotation(DBEntity):
         self.movie_id = movie_id
         self.annotation_layer_id = annotation_layer_id
 
-        self.ann_type = a.a_type
+        self.ann_type = a.a_type.name
         self.ann_pos = a.orig_position
         self.ann_size = a.size
         self.ann_text = a.text
+        return self
 
     def to_database(self, include_id=False):
         if include_id:
@@ -379,8 +406,42 @@ class DBAnnotation(DBEntity):
             )
         return result
 
-    def from_database(self, annotation_entry):
-        pass
+    def from_database(self, entry):
+        self.movie_id = entry['movie_id']
+        self.annotation_layer_id = entry['annotation_layer_id']
+
+        self.ann_type = entry['ann_type']
+        self.ann_pos = to_tuple2(entry['ann_pos'], cast=float)
+        self.ann_size = to_tuple2(entry['ann_size'],cast=float)
+        self.ann_text = entry['ann_text']
+
+
+class DBScreenshotGroup(DBEntity):
+    def __init__(self):
+        self.group_id = -1
+
+        self.name = ""
+
+    def to_database(self, include_id = False):
+        if include_id:
+           result = dict(
+               id = self.group_id,
+               name = self.name
+           )
+        else:
+            result = dict(
+                name = self.name
+            )
+        return result
+
+    def from_project(self, obj: ScreenshotGroup):
+        self.name = obj.name
+        return self
+
+    def from_database(self, entry):
+        self.group_id = entry['id']
+        self.name = entry['name']
+        return self
 
 
 class DBScreenshot(DBEntity):
@@ -389,6 +450,7 @@ class DBScreenshot(DBEntity):
         self.movie_id = -1
         self.segment_id = -1
         self.project_id = -1
+        self.screenshot_group_id = -1
 
         # Key
         self.screenshot_id = -1
@@ -398,11 +460,12 @@ class DBScreenshot(DBEntity):
         self.pixmap = None
         self.time_ms = -1
 
-    def from_project(self, s: Screenshot, project_id, movie_id, segment_id, db_root):
+    def from_project(self, s: Screenshot, project_id, movie_id, segment_id, screenshot_group_id, db_root):
         self.movie_id = movie_id
         self.segment_id = segment_id
         self.project_id = project_id
         self.time_ms = s.movie_timestamp
+        self.screenshot_group_id = screenshot_group_id
         self.file_path = db_root \
                          + SCR_DIR \
                          + str(self.movie_id) + "_" \
@@ -410,14 +473,17 @@ class DBScreenshot(DBEntity):
                          + str(s.shot_id_segm) + ".png"
 
         cv2.imwrite(self.file_path, s.img_movie)
+        return self
 
     def from_database(self, entry):
         self.screenshot_id = entry['id']
         self.movie_id = entry['movie_id']
+        self.screenshot_group_id = entry['screenshot_group_id']
         self.segment_id = entry['segment_id']
         self.project_id = entry['project_id']
         self.time_ms = entry['time_ms']
         self.file_path = entry['file_path']
+        return self
 
     def to_database(self, include_id = False):
         if include_id:
@@ -427,6 +493,7 @@ class DBScreenshot(DBEntity):
                 movie_id = self.movie_id,
                 segment_id = self.segment_id,
                 project_id = self.project_id,
+                screenshot_group_id  = self.screenshot_group_id,
 
                 time_ms = self.time_ms,
                 file_path = self.file_path,
@@ -436,6 +503,7 @@ class DBScreenshot(DBEntity):
                 movie_id=self.movie_id,
                 segment_id=self.segment_id,
                 project_id=self.project_id,
+                screenshot_group_id=self.screenshot_group_id,
 
                 time_ms=self.time_ms,
                 file_path=self.file_path,
@@ -490,6 +558,37 @@ class UniqueKeyword(DBEntity):
         return self.class_name + ":" + self.voc_name + ":" + self.word_name
 
 
+class KeywordMappingEntry(DBEntity):
+    def __init__(self, project_id = -1, container_type = -1, keyword_id = -1):
+        self.entry_id = -1
+
+        self.project_id = project_id
+        self.container_type = container_type
+        self.keyword_id = keyword_id
+
+    def from_database(self, entry):
+        self.entry_id = entry['id']
+        self.project_id = entry['project_id']
+        self.container_type = entry['container_type']
+        self.keyword_id = entry['keyword_id']
+
+    def to_database(self, include_id = False):
+        if include_id:
+            result = dict(
+                id=self.entry_id,
+                project_id = self.project_id,
+                keyword_id = self.keyword_id,
+                container_type = self.container_type,
+            )
+        else:
+            result = dict(
+                project_id=self.project_id,
+                keyword_id=self.keyword_id,
+                container_type=self.container_type,
+            )
+        return result
+
+
 class DBContributor(DBEntity):
     def __init__(self, name = "", image_path = "", affiliation = ""):
         self.contributor_id = -1
@@ -525,6 +624,74 @@ class DBContributor(DBEntity):
         self.n_contributions = entry['n_contributions']
         self.affiliation = entry['affiliation']
         return self
+
+
+class DBExperiment(DBEntity):
+    def __init__(self, db_root):
+        self.experiment_id = -1
+
+        # DATABASE Stored
+        self.name = ""
+        self.descriptor_path = ""
+
+        # JSON Stored
+        self.classification_objects = []
+        self.analyses_names = []
+        self.analyses_params = []
+
+        self.db_root = db_root
+
+    def from_database(self, entry):
+        self.experiment_id = entry['id']
+        self.descriptor_path = entry['path']
+        self.name = entry['name']
+
+        self.load_descriptor()
+        return self
+
+    def to_database(self, include_id = False):
+        if include_id:
+            result = dict(
+                path = self.descriptor_path,
+                name = self.name
+            )
+        else:
+            result = dict(
+                id = self.experiment_id,
+                path = self.descriptor_path,
+                name = self.name
+            )
+        self.store_descriptor()
+        return result
+
+    def from_project(self, obj: Experiment):
+        self.name = obj.name
+        self.descriptor_path = self.db_root + EXPERIMENTS_DIR + self.descriptor_path + ".json"
+
+        all_cobj = obj.get_classification_objects_plain()
+        self.classification_objects = []
+        for c in all_cobj:
+            voc_names = [v.get_name() for v in c.get_vocabularies()]
+            self.classification_objects.append([c.get_name(), c.parent.get_name(), voc_names])
+        self.analyses_names = obj.analyses
+        self.analyses_params = [p.serialize() for p in obj.analyses_parameters]
+
+        return self
+
+    def store_descriptor(self):
+        with open(self.descriptor_path, "w") as f:
+            json.dump(self.__dict__, f)
+
+    def load_descriptor(self):
+        try:
+            with open(self.descriptor_path, "w") as f:
+                data = json.load(f)
+                for attr, val in data.items():
+                    setattr(self, attr, val)
+        except Exception as e:
+            print("Experiment Descriptor not found")
+            print(e)
+
 
 #endregion
 
