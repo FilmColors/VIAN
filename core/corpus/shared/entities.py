@@ -152,7 +152,8 @@ class DBMovie(DBEntity):
         self.movie_name = m.movie_name
         self.movie_path = m.movie_path
         try:
-            self.movie_id = m.movie_id.split("_")
+            split = m.movie_id.split("_")
+            self.movie_id = (split[0], split[1], split[2])
         except:
             self.movie_id = "0_0_0".split("_")
         self.year = m.year
@@ -255,6 +256,7 @@ class DBSegmentation(DBEntity):
     def from_database(self, entry):
         self.name = entry['name']
         self.segmentation_id = entry['id']
+        return self
 
     def from_dict(self, d):
         pass
@@ -346,7 +348,6 @@ class DBSegment(DBEntity):
                 segm_body=self.segm_body
             )
 
-        print(result)
         return result
 
 
@@ -460,9 +461,8 @@ class DBScreenshot(DBEntity):
         self.pixmap = None
         self.time_ms = -1
 
-    def from_project(self, s: Screenshot, project_id, movie_id, segment_id, screenshot_group_id, db_root):
+    def from_project(self, s: Screenshot, project_id, movie_id, screenshot_group_id, db_root):
         self.movie_id = movie_id
-        self.segment_id = segment_id
         self.project_id = project_id
         self.time_ms = s.movie_timestamp
         self.screenshot_group_id = screenshot_group_id
@@ -479,7 +479,6 @@ class DBScreenshot(DBEntity):
         self.screenshot_id = entry['id']
         self.movie_id = entry['movie_id']
         self.screenshot_group_id = entry['screenshot_group_id']
-        self.segment_id = entry['segment_id']
         self.project_id = entry['project_id']
         self.time_ms = entry['time_ms']
         self.file_path = entry['file_path']
@@ -491,7 +490,6 @@ class DBScreenshot(DBEntity):
                 id = self.screenshot_id,
 
                 movie_id = self.movie_id,
-                segment_id = self.segment_id,
                 project_id = self.project_id,
                 screenshot_group_id  = self.screenshot_group_id,
 
@@ -501,7 +499,6 @@ class DBScreenshot(DBEntity):
         else:
             result = dict(
                 movie_id=self.movie_id,
-                segment_id=self.segment_id,
                 project_id=self.project_id,
                 screenshot_group_id=self.screenshot_group_id,
 
@@ -513,80 +510,138 @@ class DBScreenshot(DBEntity):
 
 class DBClassificationObject(DBEntity):
     def __init__(self):
-        pass
+        self.classification_object_id = -1
+        self.experiment_id = -1
+        self.name = ""
 
-    def from_project(self, obj: ClassificationObject):
-        pass
+    def from_project(self, obj: ClassificationObject, experiment_id):
+        self.name = obj.name
+        self.experiment_id = experiment_id
+        return self
 
-    def from_dict(self, d):
-        pass
+    def to_database(self, include_id=False):
+        if include_id:
+            result = dict(
+                id=self.classification_object_id,
+                experiment_id=self.experiment_id,
+                name=self.name
+            )
+        else:
+            result = dict(
+                experiment_id=self.experiment_id,
+                name=self.name
+            )
+        return result
 
-    def to_dict(self):
-        pass
+    def from_database(self, entry):
+        self.classification_object_id = entry['id']
+        self.experiment_id = entry['experiment_id']
+        self.name = entry['name']
+        return self
 
 
 class DBVocabulary(DBEntity):
     def __init__(self):
-        pass
+        self.vocabulary_id = -1
+        self.name = ""
 
     def from_project(self, obj: Vocabulary):
-        pass
+        self.name = obj.name
+        return self
+
+    def to_database(self, include_id=False):
+        if include_id:
+            result = dict(
+                id=self.vocabulary_id,
+                name=self.name
+            )
+        else:
+            result = dict(
+                name=self.name
+            )
+        return result
 
     def from_database(self, entry):
-        pass
-
-    def from_dict(self, d):
-        for key, value in d.items():
-            setattr(self, key, value)
-
-    def to_dict(self):
-        pass
+        self.vocabulary_id = entry['id']
+        self.name = entry['name']
+        return self
 
 
-class UniqueKeyword(DBEntity):
-    def __init__(self, voc, word, class_name, word_id=0):
-        self.voc_name = voc
-        self.word_name = word
-        self.class_name = class_name
-        self.word_id = word_id
+class DBVocabularyWord(DBEntity):
+    def __init__(self):
+        self.word_id = -1
 
-    def to_query(self):
-        table_name = self.class_name + ":" + self.voc_name
-        return table_name, self.word_name
+        self.vocabulary_id = -1
 
-    def __str__(self):
-        return self.class_name + ":" + self.voc_name + ":" + self.word_name
+        self.name = ""
 
-
-class KeywordMappingEntry(DBEntity):
-    def __init__(self, project_id = -1, container_type = -1, keyword_id = -1):
-        self.entry_id = -1
-
-        self.project_id = project_id
-        self.container_type = container_type
-        self.keyword_id = keyword_id
-
-    def from_database(self, entry):
-        self.entry_id = entry['id']
-        self.project_id = entry['project_id']
-        self.container_type = entry['container_type']
-        self.keyword_id = entry['keyword_id']
+    def from_project(self, obj:VocabularyWord, vocabulary_id):
+        self.vocabulary_id = vocabulary_id
+        self.name = obj.name
+        return self
 
     def to_database(self, include_id = False):
         if include_id:
             result = dict(
-                id=self.entry_id,
-                project_id = self.project_id,
-                keyword_id = self.keyword_id,
-                container_type = self.container_type,
+                id = self.word_id,
+                vocabulary_id = self.vocabulary_id,
+                name = self.name
             )
         else:
             result = dict(
-                project_id=self.project_id,
-                keyword_id=self.keyword_id,
-                container_type=self.container_type,
+                vocabulary_id = self.vocabulary_id,
+                name = self.name
             )
         return result
+
+    def from_database(self, entry):
+        self.word_id = entry['id']
+        self.vocabulary_id = entry['vocabulary_id']
+        self.name = entry['name']
+        return self
+
+
+class DBUniqueKeyword(DBEntity):
+    def __init__(self):
+        self.unique_keyword_id = -1
+
+        self.vocabulary_id = -1
+        self.word_id = -1
+        self.class_obj_id = -1
+        self.word_name = ""
+
+    def from_project(self, obj: VocabularyWord, vocabulary_id, word_id, class_obj_id):
+        self.vocabulary_id = vocabulary_id
+        self.word_id = word_id
+        self.class_obj_id = class_obj_id
+        self.word_name = obj.get_name()
+        return self
+
+    def to_database(self, include_id=False):
+        if include_id:
+            result = dict(
+                id=self.vocabulary_id,
+                vocabulary_id=self.vocabulary_id,
+                word_id=self.word_id,
+                class_obj_id=self.class_obj_id,
+                word_name=self.word_name
+            )
+        else:
+            result = dict(
+                vocabulary_id=self.vocabulary_id,
+                word_id=self.word_id,
+                class_obj_id=self.class_obj_id,
+                word_name=self.word_name
+            )
+        return result
+
+    def from_database(self, entry):
+        self.unique_keyword_id = entry['unique_keyword_id']
+        self.vocabulary_id = entry['vocabulary_id']
+        self.word_id = entry['word_id']
+        self.class_obj_id = entry['class_obj_id']
+        self.word_name = entry['word_name']
+        return self
 
 
 class DBContributor(DBEntity):
@@ -652,12 +707,12 @@ class DBExperiment(DBEntity):
     def to_database(self, include_id = False):
         if include_id:
             result = dict(
+                id = self.experiment_id,
                 path = self.descriptor_path,
                 name = self.name
             )
         else:
             result = dict(
-                id = self.experiment_id,
                 path = self.descriptor_path,
                 name = self.name
             )
@@ -666,7 +721,7 @@ class DBExperiment(DBEntity):
 
     def from_project(self, obj: Experiment):
         self.name = obj.name
-        self.descriptor_path = self.db_root + EXPERIMENTS_DIR + self.descriptor_path + ".json"
+        self.descriptor_path = self.db_root + EXPERIMENTS_DIR + obj.name + ".json"
 
         all_cobj = obj.get_classification_objects_plain()
         self.classification_objects = []
@@ -684,13 +739,44 @@ class DBExperiment(DBEntity):
 
     def load_descriptor(self):
         try:
-            with open(self.descriptor_path, "w") as f:
+            with open(self.descriptor_path, "r") as f:
                 data = json.load(f)
                 for attr, val in data.items():
                     setattr(self, attr, val)
         except Exception as e:
             print("Experiment Descriptor not found")
             print(e)
+
+
+class KeywordMappingEntry(DBEntity):
+    def __init__(self, project_id=-1, container_type=-1, keyword_id=-1):
+        self.entry_id = -1
+
+        self.project_id = project_id
+        self.container_type = container_type
+        self.keyword_id = keyword_id
+
+    def from_database(self, entry):
+        self.entry_id = entry['id']
+        self.project_id = entry['project_id']
+        self.container_type = entry['container_type']
+        self.keyword_id = entry['keyword_id']
+
+    def to_database(self, include_id=False):
+        if include_id:
+            result = dict(
+                id=self.entry_id,
+                project_id=self.project_id,
+                keyword_id=self.keyword_id,
+                container_type=self.container_type,
+            )
+        else:
+            result = dict(
+                project_id=self.project_id,
+                keyword_id=self.keyword_id,
+                container_type=self.container_type,
+            )
+        return result
 
 
 #endregion

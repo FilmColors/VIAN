@@ -15,10 +15,15 @@ TABLE_SEGMENTATIONS = "SEGMENTATIONS"
 TABLE_ANNOTATIONS = "ANNOTATIONS"
 TABLE_KEYWORDS = "KEYWORDS"
 TABLE_VOCABULARIES = "VOCABULARIES"
+TABLE_VOCABULARY_WORDS = "VOCABULARY_WORDS"
 TABLE_CLASSIFICATION_OBJECTS = "CLASSIFICATION_OBJECTS"
 TABLE_CONTRIBUTORS = "CONTRIBUTORS"
-TABLE_KEYWORD_MAPPING = "KEYWORD_MAPPING"
+TABLE_KEYWORD_MAPPING_SEGMENTS = "KEYWORD_MAPPING_SEGMENTS"
+TABLE_KEYWORD_MAPPING_SCREENSHOTS = "KEYWORD_MAPPING_SCREENSHOTS"
+TABLE_KEYWORD_MAPPING_ANNOTATIONS = "KEYWORD_MAPPING_ANNOTATIONS"
 TABLE_EXPERIMENTS = "EXPERIMENTS"
+TABLE_SCEENSHOT_SEGMENTS_MAPPING = "SCREENSHOT_SEGM_MAPPING"
+TABLE_SCEENSHOT_GROUPS_MAPPING = "SCREENSHOT_GROUPS_MAPPING"
 
 
 ALL_PROJECT_TABLES = [
@@ -27,11 +32,17 @@ ALL_PROJECT_TABLES = [
     TABLE_ANNOTATIONS,
     TABLE_ANNOTATION_LAYERS,
     TABLE_SCREENSHOT_GRP,
-    TABLE_SCREENSHOTS
+    TABLE_SCREENSHOTS,
+    TABLE_SCEENSHOT_SEGMENTS_MAPPING,
+    TABLE_SCEENSHOT_GROUPS_MAPPING,
+    TABLE_KEYWORD_MAPPING_SEGMENTS,
+    TABLE_KEYWORD_MAPPING_SCREENSHOTS,
+    TABLE_KEYWORD_MAPPING_ANNOTATIONS
 ]
 
 ALL_TABLES = [
     TABLE_PROJECTS,
+    TABLE_MOVIES,
     TABLE_SEGMENTS,
     TABLE_SCREENSHOT_GRP,
     TABLE_SCREENSHOTS,
@@ -42,7 +53,12 @@ ALL_TABLES = [
     TABLE_VOCABULARIES,
     TABLE_CLASSIFICATION_OBJECTS,
     TABLE_CONTRIBUTORS,
-    TABLE_KEYWORD_MAPPING,
+    TABLE_KEYWORD_MAPPING_SEGMENTS,
+    TABLE_KEYWORD_MAPPING_SCREENSHOTS,
+    TABLE_KEYWORD_MAPPING_ANNOTATIONS,
+    TABLE_EXPERIMENTS,
+    TABLE_SCEENSHOT_SEGMENTS_MAPPING,
+    TABLE_SCEENSHOT_GROUPS_MAPPING
 ]
 
 class CorpusDB():
@@ -88,6 +104,7 @@ class CorpusDB():
         os.mkdir(root + MOVIE_DIR)
         os.mkdir(root + ANALYSIS_DIR)
         os.mkdir(root + PROJECTS_DIR)
+        os.mkdir(root + EXPERIMENTS_DIR)
 
     def connect(self, path):
         pass
@@ -127,7 +144,7 @@ class CorpusDB():
     def get_analysis_results(self, filters):
         pass
 
-    def get_words(self):
+    def get_keywords(self):
         pass
 
     def get_settings(self):
@@ -156,8 +173,10 @@ class DatasetCorpusDB(CorpusDB):
         self.db = None
         self.constrain_segmentations = False
         self.constrain_ann_layer = False
-        self.constain_class_objs = False
+        self.constrain_class_objs = False
         self.constrain_screenshot_grps = False
+        self.constrain_experiments = False
+        self.constrain_vocabularies = False
 
         self.no_movies = False
 
@@ -216,18 +235,20 @@ class DatasetCorpusDB(CorpusDB):
             shutil.make_archive(archive_file, 'zip', project.folder)
             project_obj.archive = archive_file + ".zip"
             #endregion
-
+            classifiable_containers_db = []
+            classifiable_containers_proj = []
             project_id = -1
             # Update the Project Entry, remove all associated container from the Database
             if existing:
+                print("Project already exists... Cleaning")
                 d = project_obj.to_database(include_id=True)
                 table.update(d, ['id'])
                 project_id = project_obj.project_id
                 # Clear all Containers of this project from the Database
                 for t in ALL_PROJECT_TABLES:
-                    self.db[t].delete(id=project_obj.project_id)
-                self.db[TABLE_KEYWORD_MAPPING].delete(project_id=project_obj.project_id)
+                    self.db[t].delete(project_id=project_obj.project_id)
             else:
+                print("New Project Adding...")
                 d = project_obj.to_database(include_id=False)
                 table.insert(d)
                 res = table.find_one(**project_obj.to_database(include_id=False))
@@ -247,7 +268,7 @@ class DatasetCorpusDB(CorpusDB):
             #endregion
 
             #region Segmentation
-            main_segmentation_db = [] # All DBSegments of the Main Segmentation
+            db_segmentations = [] # All DBSegments of the Main Segmentation
             for s in project.segmentation:
                 segmentation_id = -1
 
@@ -267,12 +288,19 @@ class DatasetCorpusDB(CorpusDB):
                         segmentation_entry = DBSegmentation().from_project(s)
                         segmentation_id = self.db[TABLE_SEGMENTATIONS].insert(segmentation_entry.to_database(False))
 
+                all_db_segments = []
                 for segm in s.segments:
                     dbsegm = DBSegment().from_project(segm, project_id, movie_id, segmentation_id)
                     dbsegm.segment_id = self.db[TABLE_SEGMENTS].insert(dbsegm.to_database(False))
+                    all_db_segments.append(dbsegm)
 
-                    if s.is_main_segmentation:
-                        main_segmentation_db.append(dbsegms)
+                    # We Will later need these two array to map the Classification Results
+                    classifiable_containers_db.append(dbsegm)
+                    classifiable_containers_proj.append(segm)
+
+                db_segmentations.append(all_db_segments)
+
+
             #endregion
 
             # region Annotations
@@ -288,7 +316,7 @@ class DatasetCorpusDB(CorpusDB):
                 else:
                     db_ann_lay = self.get_annotation_layers(dict(name=layer.get_name()))
                     if len(db_ann_lay) > 0:
-                        layer_id = db_ann_lay.layer_id
+                        layer_id = db_ann_lay[0].layer_id
                     else:
                         ann_layer_entry = DBAnnotationLayer().from_project(layer)
                         layer_id = self.db[TABLE_ANNOTATION_LAYERS].insert(ann_layer_entry.to_database(False))
@@ -296,16 +324,23 @@ class DatasetCorpusDB(CorpusDB):
                 for ann in layer.annotations:
                     dbann = DBAnnotation().from_project(project_id, ann, movie_id, layer_id)
                     self.db[TABLE_ANNOTATIONS].insert(dbann.to_database(False))
+                    # We Will later need these two array to map the Classification Results
+                    classifiable_containers_db.append(dbann)
+                    classifiable_containers_proj.append(ann)
             #endregion
 
             #region Screenshots
+            all_db_scrs = []
+            added_proj_scrs = []
+            all_db_scr_mapped_groups = []
+            all_db_scr_mapped_segments = []
             for scr_grp in project.screenshot_groups:
                 if self.constrain_screenshot_grps:
                     db_scr_grp = self.get_screenshot_groups(dict(name=scr_grp.get_name()))
                     if len(db_scr_grp) > 0:
                         scr_grp_id = db_scr_grp[0].group_id
                     else:
-                        log.append("Annotation Layer skipped due to missing root Annotation Layer: " + s.get_name())
+                        log.append("Screenshot Group skipped due to missing root Screenshot Group: " + s.get_name())
                         continue
                 else:
                     db_scr_grp = self.get_screenshot_groups(dict(name=scr_grp.get_name()))
@@ -315,10 +350,221 @@ class DatasetCorpusDB(CorpusDB):
                         scr_group_entry = DBScreenshotGroup().from_project(scr_grp)
                         scr_grp_id = self.db[TABLE_SCREENSHOT_GRP].insert(scr_group_entry.to_database(False))
 
-            for scr in project.screenshots:
-                segment_id = main_segmentation_db[scr.scene_id - 1].segment_id
-                dbscr = DBScreenshot().from_project(scr, project_id, movie_id, segment_id, scr_grp_id, self.root_dir)
-                self.db[TABLE_SCREENSHOTS].insert(dbscr.to_database(False))
+                for scr in scr_grp.screenshots:
+                    # Make sure a Screenshot is only added once
+                    if scr in added_proj_scrs:
+                        all_db_scr_mapped_groups[added_proj_scrs.index(scr)].append(scr_grp_id)
+                        continue
+                    dbscr = DBScreenshot().from_project(scr, project_id, movie_id, scr_grp_id, self.root_dir)
+                    dbscr.screenshot_id = self.db[TABLE_SCREENSHOTS].insert(dbscr.to_database(False))
+                    all_db_scrs.append(dbscr)
+                    added_proj_scrs.append(scr)
+                    all_db_scr_mapped_groups.append([scr_grp_id])
+
+                    # We Will later need these two array to map the Classification Results
+                    classifiable_containers_db.append(dbscr)
+                    classifiable_containers_proj.append(scr)
+
+                    mapped_segments = []
+                    for segments in db_segmentations:
+                        for segm in segments:
+                            if segm.segm_start <= dbscr.time_ms < segm.segm_end:
+                                mapped_segments.append([segm.segment_id, segm.segmentation_id])
+                                break
+
+                    all_db_scr_mapped_segments.append(mapped_segments)
+
+            for idx, dbscr in enumerate(all_db_scrs):
+                for grp in all_db_scr_mapped_groups[idx]:
+                    d = dict(
+                        screenshot_id = dbscr.screenshot_id,
+                        sceenshot_group_id = grp,
+                        project_id=project_id
+                    )
+                    self.db[TABLE_SCEENSHOT_GROUPS_MAPPING].insert(d)
+
+                for segm in all_db_scr_mapped_segments[idx]:
+                    d = dict(
+                        screenshot_id=dbscr.screenshot_id,
+                        segment_id = segm[0],
+                        segmentation_id = segm[1],
+                        project_id = project_id
+                    )
+                    self.db[TABLE_SCEENSHOT_SEGMENTS_MAPPING].insert(d)
+
+
+
+            #endregion
+
+            #region Experiment
+            for exp in project.experiments:
+                if self.constrain_experiments:
+                    db_exps = self.get_experiments(dict(name=exp.get_name()))
+                    if len(db_exps) > 0:
+                        exp_id = db_exps[0].experiment_id
+                    else:
+                        log.append("Experiment skipped due to missing root Experiment: " + s.get_name())
+                        continue
+                else:
+                    db_exps = self.get_experiments(dict(name=exp.get_name()))
+                    if len(db_scr_grp) > 0:
+                        exp_id = db_scr_grp[0].group_id
+                    else:
+                        exp_entry = DBExperiment(self.root_dir).from_project(exp)
+                        exp_id = self.db[TABLE_EXPERIMENTS].insert(exp_entry.to_database(False))
+
+                all_vocs_db = []
+                all_vocs_proj = []
+
+                all_words_db = []
+                all_words_proj = []
+                for voc in exp.get_vocabularies():
+                    if self.constrain_vocabularies:
+                        db_vocs = self.get_vocabularies(dict(name=voc.get_name()))
+                        # if the Vocabulary exists, we want to have a sorted list of all words,
+                        # ordered in the same fashion as the words of the project
+                        if len(db_vocs) > 0:
+                            voc_id = db_vocs[0].vocabulary_id
+                            all_vocs_db.append(db_vocs[0])
+                            all_vocs_proj.append(voc)
+                            all_words_unsorted = self.get_vocabulary_words(dict(vocabulary_id = voc_id))
+                            for w in voc.get_vocabulary_as_list():
+                                for wdb in all_words_unsorted:
+                                    if w.name == wdb.name:
+                                        all_words_db.append(wdb)
+                                        all_words_proj.append(w)
+                                        break
+                        else:
+                            log.append(
+                                "Classification Object skipped due to missing root Classification Object: " + s.get_name())
+                            continue
+                    else:
+                        db_vocs = self.get_vocabularies(dict(name=voc.get_name()))
+                        if len(db_vocs) > 0:
+                            voc_id = db_vocs[0].vocabulary_id
+                            all_vocs_db.append(db_vocs[0])
+                            all_vocs_proj.append(voc)
+                            all_words_unsorted = self.get_vocabulary_words(dict(vocabulary_id = voc_id))
+                            for w in voc.get_vocabulary_as_list():
+                                for wdb in all_words_unsorted:
+                                    if w.name == wdb.name:
+                                        all_words_db.append(wdb)
+                                        all_words_proj.append(w)
+                                        break
+
+                        else:
+                            voc_entry = DBVocabulary().from_project(voc)
+                            voc_entry.vocabulary_id = self.db[TABLE_VOCABULARIES].insert(voc_entry.to_database(False))
+                            all_vocs_db.append(voc_entry)
+                            all_vocs_proj.append(voc)
+
+                            for w in voc.get_vocabulary_as_list():
+                                word_entry = DBVocabularyWord().from_project(w, voc_entry.vocabulary_id)
+                                word_entry.word_id = self.db[TABLE_VOCABULARY_WORDS].insert(word_entry.to_database(False))
+                                all_words_proj.append(w)
+                                all_words_db.append(word_entry)
+
+                all_cl_objs_db = []
+                all_cl_objs_proj = []
+                all_unique_keywords_db = []
+                all_unique_keywords_proj = []
+                for cl_obj in exp.get_classification_objects_plain():
+                    if self.constrain_class_objs:
+                        db_clobjs = self.get_classification_objects(dict(name=cl_obj.get_name(), experiment_id=exp_id))
+                        if len(db_clobjs) > 0:
+                            cl_id = db_clobjs[0].experiment_id
+                            all_cl_objs_db.append(db_clobjs[0])
+                            all_cl_objs_proj.append(cl_obj)
+                            unique_keywords_db_unsorted = self.get_keywords(dict(class_obj_id=cl_id, experiment_id=exp_id))
+                            for keyw_proj in cl_obj.unique_keywords:
+                                for keywdb in unique_keywords_db_unsorted:
+                                    if keyw_proj.name == keywdb.name:
+                                        all_unique_keywords_db.append(keywdb)
+                                        all_unique_keywords_proj.append(keyw_proj)
+                                        break
+
+
+                        else:
+                            log.append(
+                                "Classification Object skipped due to missing root Classification Object: " + s.get_name())
+                            continue
+                    else:
+                        db_clobjs = self.get_classification_objects(dict(name=cl_obj.get_name(), experiment_id=exp_id))
+                        if len(db_clobjs) > 0:
+                            cl_id = db_clobjs[0].experiment_id
+                            all_cl_objs_db.append(db_clobjs[0])
+                            all_cl_objs_proj.append(cl_obj)
+                            unique_keywords_db_unsorted = self.get_keywords(dict(class_obj_id=cl_id, experiment_id=exp_id))
+                            for keyw_proj in cl_obj.unique_keywords:
+                                for keywdb in unique_keywords_db_unsorted:
+                                    if keyw_proj.name == keywdb.name:
+                                        all_unique_keywords_db.append(keywdb)
+                                        all_unique_keywords_proj.append(keyw_proj)
+                                        break
+                        else:
+                            cl_entry = DBClassificationObject().from_project(cl_obj, exp_id)
+                            cl_entry.classification_object_id = self.db[TABLE_CLASSIFICATION_OBJECTS].insert(
+                                cl_entry.to_database(False))
+                            all_cl_objs_db.append(cl_entry)
+                            all_cl_objs_proj.append(cl_obj)
+                            for keyw_proj in cl_obj.unique_keywords:
+                                voc_obj_db = None
+                                # Find the corresponding DBVocabulary
+                                for v in all_vocs_db:
+                                    if v.name == keyw_proj.voc_obj.name:
+                                        voc_obj_db = v
+                                        break
+                                if voc_obj_db is None:
+                                    log.append("Vocabulary Object not found in all Vocabularies")
+                                    continue
+
+                                # Find the corresponding DBVocabulary
+                                word_obj_db = None
+                                for w in all_words_db:
+                                    if w.name == keyw_proj.word_obj.name and w.vocabulary_id == voc_obj_db.vocabulary_id:
+                                        word_obj_db = w
+                                        break
+
+                                if word_obj_db is not None and voc_obj_db is not None:
+                                    keyword_entry = DBUniqueKeyword().from_project(keyw_proj, voc_obj_db.vocabulary_id,
+                                                                                   word_obj_db.word_id,
+                                                                                   cl_entry.classification_object_id)
+                                    keyword_entry.unique_keyword_id = self.db[TABLE_KEYWORDS].insert(keyword_entry.to_database(False))
+                                    all_unique_keywords_db.append(keyword_entry)
+                                    all_unique_keywords_proj.append(keyw_proj)
+
+
+                for res in exp.classification_results:
+                    try:
+                        container_proj = res[0]
+                        keyword_proj = res[1]
+                        container_db = classifiable_containers_db[classifiable_containers_proj.index(container_proj)]
+                        keyword_db = all_unique_keywords_db[all_unique_keywords_proj.index(keyword_proj)]
+                        if isinstance(container_db, DBSegment):
+                            self.db[TABLE_KEYWORD_MAPPING_SEGMENTS].insert(dict
+                                                                           (segment_id = container_db.segment_id,
+                                                                            keyword_id = keyword_db.unique_keyword_id,
+                                                                            project_id = project_id)
+                                                                           )
+                        elif isinstance(container_db, DBAnnotation):
+                            self.db[TABLE_KEYWORD_MAPPING_ANNOTATIONS].insert(dict
+                                                                           (annotation_id = container_db.annotation_id,
+                                                                            keyword_id = keyword_db.unique_keyword_id,
+                                                                            project_id = project_id)
+                                                                           )
+                        elif isinstance(container_db, DBScreenshot):
+                            self.db[TABLE_KEYWORD_MAPPING_SEGMENTS].insert(dict
+                                                                           (screenshot_id = container_db.screenshot_id,
+                                                                            keyword_id = keyword_db.unique_keyword_id,
+                                                                            project_id = project_id)
+                                                                           )
+                        else:
+                            print(container_db, keyword_db)
+                    except Exception as e:
+                        print (e)
+
+
+
 
             #endregion
             self.db.commit()
@@ -385,8 +631,13 @@ class DatasetCorpusDB(CorpusDB):
     def clear(self, tables = None):
         if tables is None:
             tables = ALL_TABLES
-        for t in tables:
-            self.db[t].drop()
+        try:
+            self.db.begin()
+            for t in tables:
+                self.db[t].drop()
+            self.db.commit()
+        except:
+            self.db.rollback()
 
 
     #region Users
@@ -531,6 +782,17 @@ class DatasetCorpusDB(CorpusDB):
             result.append(DBVocabulary().from_database(q))
         return result
 
+    def get_vocabulary_words(self, filters = None):
+        if filters is None:
+            query = self.db[TABLE_VOCABULARY_WORDS].all()
+        else:
+            query = self.db[TABLE_VOCABULARY_WORDS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBVocabularyWord().from_database(q))
+        return result
+
     def get_classification_objects(self, filters = None):
         if filters is None:
             query = self.db[TABLE_CLASSIFICATION_OBJECTS].all()
@@ -543,17 +805,29 @@ class DatasetCorpusDB(CorpusDB):
         return result
 
     def get_experiments(self, filters = None):
-        pass
+        if filters is None:
+            query = self.db[TABLE_EXPERIMENTS].all()
+        else:
+            query = self.db[TABLE_EXPERIMENTS].find(**filters)
 
-
+        result = []
+        for q in query:
+            result.append(DBExperiment(self.root_dir).from_database(q))
+        return result
 
     def get_settings(self):
         pass
 
-    def get_words(self, filters = None):
+    def get_keywords(self, filters = None):
         if filters is None:
-            return self.db[TABLE_KEYWORDS].all()
-        return self.db[TABLE_KEYWORDS].find(**filters)
+            query = self.db[TABLE_KEYWORDS].all()
+        else:
+            query = self.db[TABLE_KEYWORDS].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBUniqueKeyword().from_database(q))
+        return result
 
     def get_movies(self, filters = None):
         if filters is None:

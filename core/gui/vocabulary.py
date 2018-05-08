@@ -330,6 +330,9 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.order_method = self.cb_ordering.currentIndex()
 
     def frame_container(self, container):
+        if container is None:
+            return
+
         if container.get_type() == (SEGMENT or ANNOTATION):
             self.main_window.player.set_media_time(container.get_start())
             self.main_window.timeline.timeline.frame_time_range(container.get_start(), container.get_end())

@@ -363,8 +363,9 @@ class VIANProject(IHasName, IClassifiable):
             self.remove_from_id_list(grp)
             self.dispatch_changed()
 
-    def get_screenshots_of_segment(self, main_segm_id):
-        segmentation = self.get_main_segmentation()
+    def get_screenshots_of_segment(self, main_segm_id, segmentation = None):
+        if segmentation is None:
+            segmentation = self.get_main_segmentation()
         result = []
         if segmentation is not None:
             start = segmentation.segments[main_segm_id].get_start()
@@ -3592,7 +3593,7 @@ class Experiment(IProjectContainer, IHasName):
         self.analyses = []
         self.analyses_parameters = []
 
-        # This is a list of [container_id, unique_keyword_id]
+        # This is a list of [IClassifiable, UniqueKeyword]
         self.classification_results = []
 
     def get_name(self):
@@ -3603,6 +3604,12 @@ class Experiment(IProjectContainer, IHasName):
 
     def get_type(self):
         return EXPERIMENT
+
+    def get_vocabularies(self):
+        result = []
+        for clobj in self.classification_objects:
+            result.extend(clobj.get_vocabularies())
+        return result
 
     def create_class_object(self, name, parent):
         obj = ClassificationObject(name, self, parent)
