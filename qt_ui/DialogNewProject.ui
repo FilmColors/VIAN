@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>561</width>
-    <height>529</height>
+    <width>565</width>
+    <height>514</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,8 +44,14 @@
            <widget class="QLabel" name="label_7">
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -77,8 +83,14 @@
            <widget class="QLabel" name="projectNameLabel">
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -100,8 +112,14 @@
            <widget class="QLabel" name="projectPathLabel">
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -136,8 +154,14 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -150,6 +174,12 @@
           </item>
           <item>
            <widget class="QComboBox" name="comboBox_ProjectType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <item>
              <property name="text">
               <string>Film Media</string>
@@ -193,8 +223,14 @@
            <widget class="QLabel" name="templateLabel">
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -265,8 +301,14 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -294,8 +336,14 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -330,8 +378,14 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -344,6 +398,18 @@
           </item>
           <item>
            <widget class="QSpinBox" name="spinBox_ID_0">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>The Medium's ID</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
             <property name="maximum">
              <number>99999</number>
             </property>
@@ -354,6 +420,18 @@
           </item>
           <item>
            <widget class="QSpinBox" name="spinBox_ID_1">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>The Manifestation of the Medium (i.e. Director's Cut, A/B Negativ)</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
             <property name="maximum">
              <number>99999</number>
             </property>
@@ -361,6 +439,18 @@
           </item>
           <item>
            <widget class="QSpinBox" name="spinBox_ID_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>The Copy of the Media (i.e. DVD 1 of 2)</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
             <property name="maximum">
              <number>99999</number>
             </property>
@@ -380,8 +470,14 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -394,6 +490,12 @@
           </item>
           <item>
            <widget class="QSpinBox" name="spinBox_Year">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="maximum">
              <number>99999</number>
             </property>
@@ -416,8 +518,14 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="text">
@@ -446,13 +554,13 @@
            <widget class="QLabel" name="label_10">
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>150</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>300</width>
               <height>16777215</height>
              </size>
             </property>
@@ -466,8 +574,14 @@
           </item>
           <item>
            <widget class="QComboBox" name="comboBox_Move">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="currentText">
-             <string>Copy</string>
+             <string>No</string>
             </property>
             <item>
              <property name="text">
@@ -489,40 +603,6 @@
          </layout>
         </item>
        </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QFrame" name="frame_Vocabularies">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Panel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_12">
-      <item>
-       <widget class="QLabel" name="label_8">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Vocabularies:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>

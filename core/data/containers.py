@@ -134,7 +134,6 @@ class VIANProject(IHasName, IClassifiable):
         if self.main_window is not None:
             self.main_window.project_streamer.on_loaded(self)
 
-
     def create_file_structure(self):
         root = self.folder
 
@@ -475,7 +474,7 @@ class VIANProject(IHasName, IClassifiable):
         return self.movie_descriptor
 
     #region Annotations
-    def create_annotation_layer(self, name, t_start, t_stop):
+    def create_annotation_layer(self, name, t_start = 0, t_stop = 0):
         layer = AnnotationLayer(name, t_start, t_stop)
         self.add_annotation_layer(layer)
         return layer
@@ -786,11 +785,12 @@ class VIANProject(IHasName, IClassifiable):
         self.sort_screenshots()
         self.undo_manager.clear()
 
-    def get_template(self, segm, voc, ann, scripts):
+    def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
         segmentations = []
         vocabularies = []
         layers = []
         node_scripts = []
+        experiments = []
 
         if segm:
             for s in self.segmentation:
@@ -800,11 +800,14 @@ class VIANProject(IHasName, IClassifiable):
                 vocabularies.append(v.serialize())
         if ann:
             for l in self.annotation_layers:
-                layers.append([l.get_name(), l.get_start(), l.get_end(), l.unique_id])
+                layers.append([l.get_name(), l.unique_id])
         if scripts:
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
 
+        if experiment:
+            for e in self.experiments:
+                experiments.append(e.to_template())
 
 
         template = dict(
@@ -812,7 +815,7 @@ class VIANProject(IHasName, IClassifiable):
             vocabularies = vocabularies,
             layers = layers,
             node_scripts=node_scripts,
-
+            experiments = experiments
         )
         return template
 
@@ -828,19 +831,23 @@ class VIANProject(IHasName, IClassifiable):
         for s in template['segmentations']:
             new = Segmentation(s[0])
             new.unique_id = s[1]
-            self.add_segmentation(new, False)
+            self.add_segmentation(new)
 
         for v in template['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
         for l in template['layers']:
-            self.create_annotation_layer(l[0], int(l[1]), int(l[2]))
+            new = AnnotationLayer(l[0])
+            new.unique_id = l[1]
+            self.add_annotation_layer(new)
 
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
 
+        for e in template['experiments']:
+            new = Experiment().deserialize(e, self)
 
     #endregion
 
@@ -1968,7 +1975,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         return self.annotation_layer
 
 class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
-    def __init__(self, name = None, t_start = None, t_end = None):
+    def __init__(self, name = None, t_start = 0, t_end = 0):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
 
@@ -3544,6 +3551,7 @@ class ClassificationObject(IProjectContainer, IHasName):
         return self
 
 
+
 class UniqueKeyword(IProjectContainer):
     """
     Unique Keywords are generated when a Vocabulary is added to a Classification Object. 
@@ -3724,6 +3732,16 @@ class Experiment(IProjectContainer, IHasName):
         )
         return data
 
+    def to_template(self):
+        data = dict(
+            name=self.name,
+            unique_id=self.unique_id,
+            classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
+            analyses=self.analyses,
+            classification_results=[]
+        )
+        return data
+
     def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
@@ -3749,6 +3767,8 @@ class Experiment(IProjectContainer, IHasName):
 
         return self
 
+    def delete(self):
+        self.project.remove_experiment(self)
 
 #endregion
 

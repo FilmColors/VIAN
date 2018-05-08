@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
-    <height>250</height>
+    <width>429</width>
+    <height>258</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Corpus Identity Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -82,6 +82,20 @@
           <widget class="QLineEdit" name="lineEdit_Name"/>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Password:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdi_Password">
+         <property name="placeholderText">
+          <string>Use a simple, non-private Password</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="label_3">

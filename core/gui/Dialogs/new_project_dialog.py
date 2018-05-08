@@ -37,42 +37,6 @@ class NewProjectDialog(EDialogWidget):
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
 
-        #region VOCABULARIES DEPRECATED
-
-        # self.vocabulary_inner = QWidget(self)
-        # self.vocabulary_inner.setLayout(QHBoxLayout(self))
-        # self.vocabulary_scroll = QScrollArea(self)
-        # self.vocabulary_scroll.setWidget(self.vocabulary_inner)
-        # self.frame_Vocabularies.layout().addWidget(self.vocabulary_scroll)
-        # self.vocabulary_inner.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        #
-        # n_per_col = int(len(self.vocabularies) / 3)
-        # self.voc_cbs = []
-        # vbox = QVBoxLayout(self.vocabulary_inner)
-        # counter = 0
-
-
-        # for voc in self.vocabularies:
-        #     cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.vocabulary_inner)
-        #     cb.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
-        #     cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
-        #     cb.setChecked(True)
-        #     vbox.addWidget(cb)
-        #     self.voc_cbs.append([cb, voc])
-        #     counter += 1
-        #     if counter == n_per_col:
-        #         vbox.setSpacing(10)
-        #         self.vocabulary_inner.layout().addItem(vbox)
-        #         vbox = QVBoxLayout(self.vocabulary_inner)
-        #         counter = 0
-        # if counter != 0:
-        #     vbox.addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        #     self.vocabulary_inner.layout().addItem(vbox)
-        #
-        # self.vocabulary_inner.resize(self.vocabulary_inner.sizeHint())
-        #endregion
-
-        self.frame_Vocabularies.hide()
         self.find_templates()
 
         self.cB_AutomaticNaming.stateChanged.connect(self.on_automatic_naming_changed)

@@ -70,6 +70,9 @@ def open_context_menu(main_window, pos, containers, project, screenshot_root = F
             cm = MediaObjectContextMenu(main_window, pos, project, media_objects)
             return cm
 
+        if container_type == EXPERIMENT:
+            return ExperimentContextMenu(main_window, pos, project, containers)
+
         else:
             cm = ContextMenu(main_window, pos)
             return cm
@@ -584,6 +587,24 @@ class MediaObjectContextMenu(ContextMenu):
         try:
             for obj in self.media_object:
                 obj.container.remove_media_object(obj)
+        except:
+            pass
+
+
+class ExperimentContextMenu(ContextMenu):
+    def __init__(self, parent, pos, project:VIANProject, experiments: List[Experiment]):
+        super(ExperimentContextMenu, self).__init__(parent, pos)
+        self.project = project
+        self.experiments = experiments
+        self.a_delete = self.addAction("Delete Experiments")
+        self.a_delete.triggered.connect(self.on_delete)
+        self.popup(pos)
+
+
+    def on_delete(self):
+        try:
+            for obj in self.experiments:
+                self.project.remove_experiment(obj)
         except:
             pass
 

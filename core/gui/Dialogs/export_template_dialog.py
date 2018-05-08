@@ -23,12 +23,11 @@ class ExportTemplateDialog(EDialogWidget):
         vocabulary = self.cB_Vocabulary.isChecked()
         annotation_layers = self.cB_AnnotationLayers.isChecked()
         node_scripts = self.cB_NodeScripts.isChecked()
-        # experiments = self.cB_Experiments.isChecked()
+        experiments = self.cB_Experiments.isChecked()
 
         template = self.main_window.project.get_template(segmentation, vocabulary,
-                                                         annotation_layers, node_scripts),
-                                                         # experiments)#, ExperimentExporter())
-
+                                                         annotation_layers, node_scripts,
+                                                         experiments)
         path = self.settings.DIR_TEMPLATES + name + ".viant"
         try:
             with open(path, "w") as f:

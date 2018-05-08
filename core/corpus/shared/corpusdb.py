@@ -171,6 +171,9 @@ class DatasetCorpusDB(CorpusDB):
         super(DatasetCorpusDB, self).__init__()
         self.sql_path = ""
         self.db = None
+
+        # Constrain means: A Segmentation can only be commited if there exists a Segmentation
+        # with this name in the Database (No new Segmentations can be added)
         self.constrain_segmentations = False
         self.constrain_ann_layer = False
         self.constrain_class_objs = False
@@ -178,10 +181,12 @@ class DatasetCorpusDB(CorpusDB):
         self.constrain_experiments = False
         self.constrain_vocabularies = False
 
+        self.default_annotation_layers = []
+        self.default_segmentations = []
+        self.default_screenshot_groups = []
+
+        self.default_experiments = []
         self.no_movies = False
-
-
-        pass
 
     def connect(self, path):
         self.path = path
@@ -848,7 +853,13 @@ class DatasetCorpusDB(CorpusDB):
                 name = self.name,
                 file_path = self.file_path,
                 root_dir = self.root_dir,
-                sql_path = self.sql_path
+                sql_path = self.sql_path,
+                constrain_segmentations = self.constrain_segmentations,
+                constrain_ann_layer = self.constrain_ann_layer,
+                constrain_class_objs = self.constrain_class_objs,
+                constrain_screenshot_grps = self.constrain_screenshot_grps ,
+                constrain_experiments = self.constrain_experiments,
+                constrain_vocabularies = self.constrain_vocabularies,
             )
             json.dump(data, f)
 
