@@ -645,12 +645,13 @@ class DBUniqueKeyword(DBEntity):
 
 
 class DBContributor(DBEntity):
-    def __init__(self, name = "", image_path = "", affiliation = ""):
+    def __init__(self, name = "", image_path = "", affiliation = "", password=""):
         self.contributor_id = -1
 
         self.name = name
         self.image_path = image_path
         self.n_contributions = 0
+        self.password = password
 
         self.affiliation = affiliation
 
@@ -661,14 +662,16 @@ class DBContributor(DBEntity):
                 name = self.name,
                 image_path = self.image_path,
                 n_contributions = self.n_contributions,
-                affiliation = self.affiliation
+                affiliation = self.affiliation,
+                password = self.password
             )
         else:
             result = dict(
                 name=self.name,
                 image_path=self.image_path,
                 n_contributions=self.n_contributions,
-                affiliation=self.affiliation
+                affiliation=self.affiliation,
+                password=self.password
             )
         return result
 
@@ -678,6 +681,7 @@ class DBContributor(DBEntity):
         self.image_path = entry['image_path']
         self.n_contributions = entry['n_contributions']
         self.affiliation = entry['affiliation']
+        self.password = entry['password']
         return self
 
 

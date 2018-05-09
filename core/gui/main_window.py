@@ -16,6 +16,8 @@ import threading
 import importlib
 from functools import partial
 
+from core.data.headless import load_project_headless
+
 from core.concurrent.worker_functions import *
 from core.concurrent.worker import MinimalThreadWorker
 from core.data.enums import *
@@ -94,7 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
         loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,100))
-        
+
         if PROFILE:
             self.profiler = cProfile.Profile()
             self.profiler.enable()
@@ -366,6 +368,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Corpus
         self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
         self.actionOpenLocal.triggered.connect(self.open_local_corpus)
+        self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -473,7 +476,9 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        self.abortAllConcurrentThreads.emit()
+        p = load_project_headless(
+            "C:/Users/Gaudenz Halter/Documents/VIAN/229_1_1_Jigokumon_1953_BF/229_1_1_Jigokumon_1953_BF.eext")
+        print(p)
 
     def start_colormetry(self):
         job = ColormetryJob2(30, self)
@@ -1492,6 +1497,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_closed()
 
     def load_project(self, path):
+        if self.project is not None:
+            self.close_project()
 
         if path == "" or path is None:
             self.print_message("Not Loaded, Path was Empty")
@@ -1708,13 +1715,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_local_corpus(self):
         try:
             path = QFileDialog.getOpenFileName(self, directory=self.settings.DIR_CORPORA, filter="*.vian_corpus")[0]
-            self.corpus_client.connect_local(path)
+            self.corpus_client.on_connect_local(path)
         except Exception as e:
-            raise e
             print(e)
 
+    def open_remote_corpus(self):
+        dialog = CorpusConnectRemotDialog(self, self.corpus_client.metadata.contributor)
+        dialog.onConnectRemote.connect(self.corpus_client.connect_remote)
+        dialog.show()
+
     def connect_to_corpus(self, corpus: CorpusDB):
-        self.corpus_client.connect_local(corpus.file_path)
+        self.corpus_client.on_connect_local(corpus.file_path)
 
     def disconnect_to_corpus(self, corpus: CorpusDB):
         self.onCorpusDisconnected.emit(corpus)

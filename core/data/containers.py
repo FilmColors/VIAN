@@ -624,6 +624,7 @@ class VIANProject(IHasName, IClassifiable):
             path += settings.PROJECT_FILE_EXTENSION
 
         if not os.path.isfile(path):
+            print("File not Found: ", path)
             return
 
         with open(path) as f:
@@ -688,10 +689,11 @@ class VIANProject(IHasName, IClassifiable):
             self.main_window.print_message("Loading Vocabularies failed", "Red")
             self.main_window.print_message(e, "Red")
 
+
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
-
+        print("OMM")
         for i, b in enumerate(my_dict['screenshots']):
             new = Screenshot().deserialize(b, self)
             self.add_screenshot(new)
@@ -706,7 +708,6 @@ class VIANProject(IHasName, IClassifiable):
                 self.add_analysis(new)
                 if isinstance(new, ColormetryAnalysis):
                     self.colormetry_analysis = new
-
 
         try:
             old = self.screenshot_groups
@@ -784,6 +785,7 @@ class VIANProject(IHasName, IClassifiable):
 
         self.sort_screenshots()
         self.undo_manager.clear()
+        print("Loaded")
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
         segmentations = []
@@ -1716,6 +1718,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         else:
             self.t_end = t_end
 
+
         if self.a_type == AnnotationType.Image and self.resource_path is not "":
             self.load_image()
 
@@ -1947,7 +1950,6 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
                 self.media_objects.append(new)
         except Exception as e:
             print(e)
-
         if len(self.keys)>0:
             self.has_key = True
         self.widget = None
@@ -1961,12 +1963,17 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         return ANNOTATION
 
     def load_image(self):
-        img = cv2.imread(self.resource_path, -1)
-        if img is not None:
-            if img.shape[2] == 3:
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-            qimage, qpixmap = numpy_to_qt_image(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-            self.image = qimage
+        try:
+            img = cv2.imread(self.resource_path, -1)
+            print("DONE")
+            if img is not None:
+                if img.shape[2] == 3:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+                qimage, qpixmap = numpy_to_qt_image(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
+                self.image = qimage
+        except Exception as e:
+            print(e)
+
 
     def delete(self):
         self.annotation_layer.remove_annotation(self)
@@ -2081,9 +2088,11 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         except:
             self.locked = False
 
+
         for a in serialization['annotations']:
             new = Annotation()
             new.deserialize(a, self.project)
+
             new.annotation_layer = self
             self.annotations.append(new)
 

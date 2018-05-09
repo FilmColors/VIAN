@@ -216,9 +216,7 @@ class DatasetCorpusDB(CorpusDB):
 
         log = []
         project_obj = DBProject().from_project(project)
-
         table = self.db[TABLE_PROJECTS]
-
 
         #region Check if Project exists
         existing = False

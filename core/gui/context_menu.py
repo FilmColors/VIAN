@@ -630,9 +630,8 @@ class CorpusProjectContextMenu(ContextMenu):
         self.popup(pos)
 
     def on_open(self):
-        r = self.corpus_client.get_project_path(self.dbproject)
-        if r is not None:
-            self.main_window.load_project(r)
+        self.corpus_client.on_open_corpus_project(self.dbproject)
+
 
     def on_check_in(self):
         self.corpus_client.checkin_project(self.dbproject)

@@ -76,10 +76,32 @@ class CorpusUserDialog(EDialogWidget):
 
     def on_ok(self):
         self.contributor.name = self.lineEdit_Name.text()
+        self.contributor.password = self.lineEdi_Password.text()
         if os.path.isfile(self.image_path):
             cv2.imwrite(self.main_window.settings.DIR_CORPORA + "/user_img.jpg", cv2.imread(self.image_path))
         self.contributor.image_path = self.image_path
         self.onContributorUpdate.emit(self.contributor)
+        self.close()
+
+    def on_cancel(self):
+        self.close()
+
+
+class CorpusConnectRemotDialog(EDialogWidget):
+    onConnectRemote = pyqtSignal(str, int, str, int)
+
+    def __init__(self, main_window, contributor:DBContributor):
+        super(CorpusConnectRemotDialog, self).__init__(main_window, main_window)
+        path = os.path.abspath("qt_ui/DialogConnectRemoteCorpus.ui")
+        uic.loadUi(path, self)
+
+        self.contributor = contributor
+        self.btn_Connect.clicked.connect(self.on_ok)
+        self.btn_Cancel.clicked.connect(self.on_cancel)
+
+    def on_ok(self):
+        self.onConnectRemote.emit(self.lineEdit.text(), self.spinBox.value(),
+                                  self.lineEdit_FTPIP.text(), self.spinBox_FTPPORT.value())
         self.close()
 
     def on_cancel(self):

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>837</width>
-    <height>628</height>
+    <width>576</width>
+    <height>512</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,7 +46,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>837</width>
+     <width>576</width>
      <height>21</height>
     </rect>
    </property>
@@ -54,6 +54,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionLoad_Dataset"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -68,6 +69,11 @@
   <action name="actionRun">
    <property name="text">
     <string>Run</string>
+   </property>
+  </action>
+  <action name="actionLoad_Dataset">
+   <property name="text">
+    <string>Load Database</string>
    </property>
   </action>
  </widget>

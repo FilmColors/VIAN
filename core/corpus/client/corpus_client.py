@@ -4,6 +4,7 @@ from core.corpus.shared.corpusdb import DatasetCorpusDB
 from core.corpus.shared.enums import *
 from core.corpus.shared.entities import *
 from core.corpus.shared.widgets import CorpusUserDialog
+from core.corpus.client.corpus_interfaces import *
 
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import extract_zip
@@ -18,14 +19,23 @@ class CorpusClient(QObject, IProjectChangeNotify):
     onCorpusChanged = pyqtSignal(object)
     onCurrentDBProjectChanged = pyqtSignal(object)
 
+    onConnectUser = pyqtSignal(object, object)
+    onDisconnectUser = pyqtSignal(object)
+    onCommitProject = pyqtSignal(object, object)
+    onCheckOutProject = pyqtSignal(object, object)
+    onCheckInProject = pyqtSignal(object, object)
+    onDownloadProject = pyqtSignal(object, object)
+
     def __init__(self, parent):
         super(CorpusClient, self).__init__(parent)
         self.tcp_ip = "127.0.0.1"
         self.tcp_port = 5005
         self.is_remote = False
-        self.local_corpus = None
+        self.corpus_interface = CorpusInterface()
         self.connected = False
         self.main_window = parent
+
+        self.execution_thread = None
 
         self.current_dbproject = None
 
@@ -37,115 +47,146 @@ class CorpusClient(QObject, IProjectChangeNotify):
     def connect(self, remote = False):
         pass
 
-    def connect_local(self, file_path):
-        self.is_remote = False
-        self.local_corpus = DatasetCorpusDB().load(file_path)
-        self.local_corpus.connect_user(self.metadata.contributor)
-        if self.local_corpus is not None:
-            self.connected = True
-            self.onCorpusConnected.emit(self.local_corpus)
-            self.metadata.on_connect(self.tcp_ip, self.local_corpus.name, self.tcp_port, self.local_corpus.get_projects(), "local")
-            self.metadata.synchronize_corpus(self.local_corpus.name, self.get_corpus().get_projects())
-            self.onCorpusChanged.emit(self)
-
-    def connect_remote(self):
+    def on_connect_local(self, file_path):
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self.tcp_ip, self.tcp_port))
-            s.send(self.make_message(ServerCommands.Connect))
-            data = s.recv(BUFFER_SIZE)
-            print(data)
-            s.close()
+            self.is_remote = False
+            self.corpus_interface = LocalCorpusInterface()
+            self.connect_signals()
+            self.execution_thread = QThread()
+            self.corpus_interface.moveToThread(self.execution_thread)
+            self.execution_thread.start()
+
+            self.onConnectUser.emit(self.metadata.contributor, file_path)
         except Exception as e:
             print(e)
 
-    def on_commit_project(self, project):
-        self.commit_project(project)
+    @pyqtSlot(str, int, str, int)
+    def connect_remote(self, tcp_ip, tcp_port, ftp_ip, ftp_port):
+        try:
+            self.is_remote = True
+            self.corpus_interface = RemoteCorpusInterface(self.main_window.settings.DIR_CORPORA)
+            self.connect_signals()
+            self.execution_thread = QThread()
+            self.corpus_interface.moveToThread(self.execution_thread)
+            self.execution_thread.start()
+            self.onConnectUser.emit(self.metadata.contributor, [tcp_ip, tcp_port, ftp_ip, ftp_port])
 
-    def commit_project(self, project: VIANProject):
-        if not self.connected:
-            return
+        except Exception as e:
+            print(e)
 
-        if self.is_remote:
+    def connect_signals(self):
+        try:
+            self.onConnectUser.disconnect()
+            self.onCommitProject.disconnect()
+            self.onCheckOutProject.disconnect()
+            self.onCheckInProject.disconnect()
+            self.onDownloadProject.disconnect()
+
+            self.corpus_interface.onConnected.disconnect()
+            self.corpus_interface.onCheckedIn.disconnect()
+            self.corpus_interface.onCheckedOut.disconnect()
+            self.corpus_interface.onCommited.disconnect()
+            self.corpus_interface.onReceivedProjects.disconnect()
+        except:
             pass
+
+        self.onConnectUser.connect(self.corpus_interface.connect_user)
+        self.onDisconnectUser.connect(self.corpus_interface.disconnect_user)
+        self.onCommitProject.connect(self.corpus_interface.commit_project)
+        self.onCheckOutProject.connect(self.corpus_interface.checkout_project)
+        self.onCheckInProject.connect(self.corpus_interface.checkin_project)
+        self.onDownloadProject.connect(self.corpus_interface.download_project)
+
+        self.corpus_interface.onConnected.connect(self.on_connect_finished)
+        self.corpus_interface.onCheckedIn.connect(self.on_check_in_finished)
+        self.corpus_interface.onCheckedOut.connect(self.on_check_out_finished)
+        self.corpus_interface.onCommited.connect(self.on_commit_finished)
+        self.corpus_interface.onReceivedProjects.connect(self.on_received_projects)
+        self.corpus_interface.onReadyForExtraction.connect(self.on_project_downloaded)
+
+    @pyqtSlot(bool, object, object)
+    def on_connect_finished(self, success, dbprojects, user):
+        if success:
+            self.metadata.contributor.contributor_id = user.contributor_id
+            self.connected = True
+            self.onCorpusConnected.emit(self.corpus_interface)
+            self.metadata.on_connect(self.tcp_ip, self.corpus_interface.name, self.tcp_port, dbprojects, "local")
+            self.synchronize(self.corpus_interface.name, dbprojects)
         else:
-            old_dir = project.folder
+            print("Failed to connect")
+
+    def on_commit_project(self, project):
+        try:
             self.main_window.on_save_project(sync=True)
-            success, dbproject = self.local_corpus.commit_project(project, self.metadata.contributor)
-            # The Path might have changed
+            self.onCommitProject.emit(self.metadata.contributor, project)
+        except Exception as e:
+            print(e)
 
-            if success:
-                answer = QMessageBox.question(self.main_window, "Remove Local Project", "The Project has been commited.\n "
-                                                    "It is now located in <YourCorpus/projects/<Your_Project.zip>\n\n "
-                                                    "Do you want to remove the working project just commited?\n "
-                                                    "It can later be downloaded again")
-                if answer == QMessageBox.Yes:
-                    shutil.rmtree(old_dir, True, print)
-                dbproject.path = project.path
-                dbproject.folder = project.folder
-                self.metadata.update_project(self.local_corpus.name, dbproject)
+    @pyqtSlot(bool, object, object)
+    def on_commit_finished(self, success, dbproject, vian_project:VIANProject):
+        if success:
+            answer = QMessageBox.question(self.main_window, "Remove Local Project", "The Project has been commited.\n "
+                                                        "Do you want to remove the working project just commited?\n "
+                                                        "It can later be downloaded again")
+            if answer == QMessageBox.Yes:
+                shutil.rmtree(vian_project.folder, True, print)
+            self.metadata.update_project(self.corpus_interface.name, dbproject)
 
-        self.on_commit_finished()
-
-    def on_commit_finished(self):
         self.metadata.store()
         self.onCorpusChanged.emit(self)
 
-    def disconnect(self):
+    def on_disconnect_user(self):
+        self.onDisconnectUser.emit(self.metadata.contributor)
         self.connected = False
 
-    def get_project_path(self, dbproject: DBProject):
-        if not self.connected:
-            return
-        if self.is_remote:
-            pass
-        else:
-            success, path = self.metadata.has_local_file(self.local_corpus.name, dbproject)
-            print("TEST GET PATH ", success, path)
+    def on_open_corpus_project(self, dbproject: DBProject):
+        if self.connected:
+            success, path = self.metadata.has_local_file(self.corpus_interface.name, dbproject)
+            print("Project is Local: ", success, path)
             print("ProjectID: ", dbproject.project_id)
             if success:
                 self.onCorpusChanged.emit(self)
-                return path
+                self.main_window.load_project(path)
             else:
                 answer = QMessageBox.question(self.main_window, "No Local File Found", "There is no local file of " + dbproject.name + ".\n"
                                       "do you want to download it from the Corpus?")
                 if answer == QMessageBox.Yes:
-                    archive = self.local_corpus.get_project_path(dbproject)
-                    if archive is not None:
-                        dbproject.path = self.main_window.settings.DIR_PROJECT + "/" + dbproject.name + "/" + dbproject.name + ".eext"
-                        dbproject.folder = self.main_window.settings.DIR_PROJECT + "/" + dbproject.name
-                        extract_zip(archive, self.main_window.settings.DIR_PROJECT + "/" + dbproject.name)
-                        self.onCorpusChanged.emit(self)
-                        self.metadata.synchronize_corpus(self.get_corpus().name, self.local_corpus.get_projects())
-                        return dbproject.path
-        return None
+                    self.onDownloadProject.emit(self.metadata.contributor, dbproject)
+
+    @pyqtSlot(object)
+    def on_received_projects(self, dbprojects):
+        pass
+
+    @pyqtSlot(bool, object, str)
+    def on_project_downloaded(self, success, dbproject, archive):
+        print("Download:", success)
+        if success:
+            dbproject.path = self.main_window.settings.DIR_PROJECT + "/" + dbproject.name + "/" + dbproject.name + ".eext"
+            dbproject.folder = self.main_window.settings.DIR_PROJECT + "/" + dbproject.name
+            extract_zip(archive, self.main_window.settings.DIR_PROJECT + "/" + dbproject.name)
+            self.onCorpusChanged.emit(self)
+            answer = QMessageBox.question(self.main_window, "Download Complete",    "The download of " + dbproject.name + " is complete.\n "
+                                                                                    "Do you want to open it now?")
+            if answer == QMessageBox.Yes:
+                self.main_window.load_project(dbproject.path)
 
     def checkout_project(self, dbproject: DBProject):
-        if not self.connected:
-            return
-        if self.is_remote:
-            pass
-        else:
-            success, location = self.local_corpus.checkout_project(dbproject.project_id, self.metadata.contributor)
+        if self.connected:
+            self.onCheckOutProject.emit(self.metadata.contributor, dbproject)
 
-            # if success:
-            #     extract_zip(location, self.main_window.settings.DIR_PROJECT + "/" + dbproject.name + "/")
-            print("CheckOut: ", success, location)
-
-            self.metadata.synchronize_corpus(self.local_corpus.name, self.local_corpus.get_projects())
-        self.onCorpusChanged.emit(self)
+    @pyqtSlot(bool, object)
+    def on_check_out_finished(self, success, dbprojects: List[DBProject]):
+        print("Checkout: ", success)
+        self.synchronize(self.corpus_interface.name, dbprojects)
 
     def checkin_project(self, dbproject:DBProject):
-        if not self.connected:
-            return
-        if self.is_remote:
-            pass
-        else:
-            success = self.local_corpus.checkin_project(dbproject.project_id, self.metadata.contributor)
-            print("CheckIn: ", success)
+        if self.connected:
+            self.onCheckInProject.emit(self.metadata.contributor, dbproject)
 
-        self.metadata.synchronize_corpus(self.local_corpus.name, self.get_corpus().get_projects())
-        self.onCorpusChanged.emit(self)
+    @pyqtSlot(bool, object)
+    def on_check_in_finished(self, success, project):
+        print("Checkout: ", success)
+        pass
 
     def get_project_from_corpus(self, corpus_id):
         if not self.connected:
@@ -154,10 +195,13 @@ class CorpusClient(QObject, IProjectChangeNotify):
         if self.is_remote:
             pass
         else:
-            return self.local_corpus.get_project(corpus_id)
+            return self.corpus_interface.get_project(corpus_id)
 
-    def synchronize(self):
-        self.metadata.synchronize_corpus(self.get_corpus(), self.get_corpus().get_projects())
+    def on_synchronize(self):
+        pass
+
+    def synchronize(self, corpus_name, dbprojects: List[DBProject]):
+        self.metadata.synchronize_corpus(corpus_name, dbprojects)
         self.onCorpusChanged.emit(self)
 
     #region Querying
@@ -168,17 +212,16 @@ class CorpusClient(QObject, IProjectChangeNotify):
         if self.is_remote:
             pass
         else:
-            self.local_corpus.remove_project(dbproject)
+            self.corpus_interface.remove_project(dbproject)
         self.onCorpusChanged.emit(self)
 
     def get_projects(self, filters = None):
-        if not self.connected:
+        if self.connected:
+            print("CorpusName: ", self.corpus_interface.name)
+            return self.metadata.get_project(self.corpus_interface.name)
+        else:
             return []
 
-        if self.is_remote:
-            return []
-        else:
-            return self.local_corpus.get_projects(filters)
 
     def get_annotation_layers(self, filters = None):
         pass
@@ -212,12 +255,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         if self.is_remote:
             pass
         else:
-            return self.local_corpus
-
-    def make_message(self, command: ServerCommands, message=None):
-        if message is None:
-            message = dict()
-        return (str(command.value) + SPLIT_ITEM + json.dumps(message)).encode()
+            return self.corpus_interface
 
     def on_loaded(self, project):
         if not self.connected:
@@ -230,7 +268,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
                 project.corpus_id = self.current_dbproject.project_id
             pass
         else:
-            self.current_dbproject = self.get_project_from_corpus(project.corpus_id)
+            self.current_dbproject = self.metadata.get_project(self.corpus_interface.name, project.corpus_id)
         self.onCurrentDBProjectChanged.emit(self.current_dbproject)
 
     def on_closed(self):
@@ -326,7 +364,8 @@ class CorpusClientWidget(QWidget):
             self.corpus_client.on_commit_project(self.main_window.project)
 
     def on_update(self):
-        self.corpus_client.synchronize()
+        pass
+        # self.corpus_client.synchronize()
 
     def on_project_changed(self, dbproject):
         self.dbproject = dbproject
@@ -341,6 +380,7 @@ class CorpusClientWidget(QWidget):
         self.btn_CheckOut.clicked.connect(self.on_check_out)
 
     def on_check_out(self):
+        print("Current DBProject:", self.dbproject)
         if self.dbproject is not None:
             if self.btn_CheckOut.isChecked():
                 self.corpus_client.checkout_project(self.dbproject)
@@ -381,13 +421,23 @@ class CorpusMetaDataList():
                 return c
         return None
 
-    def get_project(self, corpus_name, project_id):
-        c = self.get_corpus(corpus_name)
-        if c is None:
-            for p in c.projects:
-                if c.project_id == project_id:
-                    return p
-        return None
+    def get_project(self, corpus_name, project_id = None, project_name = None):
+        if project_id is not None and project_name is None:
+            c = self.get_corpus(corpus_name)
+            if c is not None:
+                for p in c.projects:
+                    if project_id is not None:
+                        if p.project_id == project_id:
+                            return p
+                        elif project_name == p.name:
+                            return p
+            return None
+        else:
+            c = self.get_corpus(corpus_name)
+            if c is not None:
+                return c.projects
+            else:
+                return []
 
     def get_project_by_path(self, corpus_name, project_path):
         c = self.get_corpus(corpus_name)
