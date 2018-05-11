@@ -1720,7 +1720,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print(e)
 
     def open_remote_corpus(self):
-        dialog = CorpusConnectRemotDialog(self, self.corpus_client.metadata.contributor)
+        dialog = CorpusConnectRemoteDialog(self, self.corpus_client.metadata.contributor)
         dialog.onConnectRemote.connect(self.corpus_client.connect_remote)
         dialog.show()
 

@@ -3560,7 +3560,6 @@ class ClassificationObject(IProjectContainer, IHasName):
         return self
 
 
-
 class UniqueKeyword(IProjectContainer):
     """
     Unique Keywords are generated when a Vocabulary is added to a Classification Object. 

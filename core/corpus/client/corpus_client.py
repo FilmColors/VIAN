@@ -281,7 +281,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
 class CorpusClientToolBar(QToolBar):
     def __init__(self, parent, corpus_client: CorpusClient):
         super(CorpusClientToolBar, self).__init__(parent)
-
+        self.setWindowTitle("Corpus Toolbar")
         self.spacer = QWidget()
         self.spacer.setLayout(QHBoxLayout())
         self.spacer.layout().addItem(QSpacerItem(1,1,QSizePolicy.Expanding, QSizePolicy.Fixed))

@@ -87,11 +87,11 @@ class CorpusUserDialog(EDialogWidget):
         self.close()
 
 
-class CorpusConnectRemotDialog(EDialogWidget):
+class CorpusConnectRemoteDialog(EDialogWidget):
     onConnectRemote = pyqtSignal(str, int, str, int)
 
     def __init__(self, main_window, contributor:DBContributor):
-        super(CorpusConnectRemotDialog, self).__init__(main_window, main_window)
+        super(CorpusConnectRemoteDialog, self).__init__(main_window, main_window)
         path = os.path.abspath("qt_ui/DialogConnectRemoteCorpus.ui")
         uic.loadUi(path, self)
 
