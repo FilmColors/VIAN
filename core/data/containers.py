@@ -63,7 +63,7 @@ class VIANProject(IHasName, IClassifiable):
         self.active_screenshot_group = self.screenshot_groups[0]
         self.active_screenshot_group.is_current = True
 
-        self.folder = path.split("/")[len(path.split("/")) - 1]
+        # self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
         self.colormetry_analysis = None
@@ -277,9 +277,25 @@ class VIANProject(IHasName, IClassifiable):
     # endregion
 
     # region Screenshots
-    def create_screenshot(self, name, image, time_ms):
-        new = Screenshot(name,image,timestamp=time_ms)
-        self.add_screenshot(new)
+    def create_screenshot(self, name, frame_pos = None, time_ms = None):
+        if frame_pos is None and time_ms is None:
+            print("Either frame or ms has to be given")
+            return
+        video_capture = cv2.VideoCapture(self.movie_descriptor.movie_path)
+
+        if frame_pos is None:
+            frame_pos = ms_to_frames(time_ms, video_capture.get(cv2.CAP_PROP_FPS))
+        else:
+            time_ms = frame2ms(frame_pos, video_capture.get(cv2.CAP_PROP_FPS))
+
+        video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
+        ret, frame = video_capture.read()
+
+        if ret:
+            # shot = Screenshot(title="New Screenshot", image=frame, img_blend=frame_annotated, timestamp=time, frame_pos=frame_pos, annotation_item_ids=annotation_ids)
+
+            new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos)
+            self.add_screenshot(new)
 
     def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)
@@ -288,7 +304,6 @@ class VIANProject(IHasName, IClassifiable):
         self.screenshot_groups[0].add_screenshots(screenshot)
         if group == 0 and self.active_screenshot_group is not None and self.active_screenshot_group is not self.screenshot_groups[0]:
             self.active_screenshot_group.add_screenshots(screenshot)
-
 
         self.sort_screenshots()
         self.undo_manager.to_undo((self.add_screenshot, [screenshot]),(self.remove_screenshot, [screenshot]))
@@ -567,8 +582,6 @@ class VIANProject(IHasName, IClassifiable):
         for b in self.screenshots:
             src, img = b.serialize()
             screenshots.append(src)
-            screenshots_img.append(img[0])
-            screenshots_ann.append(img[1])
 
         for c in self.segmentation:
             segmentations.append(c.serialize())

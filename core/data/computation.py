@@ -12,7 +12,7 @@ import webbrowser
 import shutil
 from zipfile import ZipFile
 
-def ms_to_string(ms, include_ms = False):
+def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
     ms = int(ms)
     seconds = (ms // 1000) % 60
     minutes = (ms // (1000 * 60)) % 60
@@ -20,7 +20,10 @@ def ms_to_string(ms, include_ms = False):
 
     r = ms - (hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000)
     if include_ms:
-        return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2) + "::" + str(r).zfill(4)
+        return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2) + ":" + str(r).zfill(3)
+    elif include_frame:
+        frame = int(r / 1000 * fps)
+        return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2) + ":" + str(frame).zfill(2)
     else:
         return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
 

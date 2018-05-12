@@ -21,11 +21,16 @@ class ExportSegmentationDialog(EDialogWidget):
             self.layout_Segmentations.addWidget(cb)
             self.segm_cBs.append(cb)
 
-
+        self.checkBox_Timestamp.stateChanged.connect(self.on_timestamp_toggle)
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Export.clicked.connect(self.on_export)
         self.btn_Cancel.clicked.connect(self.close)
         self.btn_Help.clicked.connect(self.on_help)
+
+    def on_timestamp_toggle(self):
+        state = self.checkBox_Timestamp.isChecked()
+        self.comboBox_Format.setEnabled(state)
+        self.label_Format.setEnabled(state)
 
     def on_browse(self):
         path = QFileDialog.getSaveFileName(directory=self.main_window.project.path, filter="*.csv *.txt")[0]
@@ -34,9 +39,25 @@ class ExportSegmentationDialog(EDialogWidget):
     def on_export(self):
         text = self.cB_AnnotationText.isChecked()
         frame = self.cB_FramePosition.isChecked()
-        milli = self.cB_Miliseconds.isChecked()
-        formated = self.cB_FormatedTime.isChecked()
-        formated_ms = self.cB_FormatedTimeMS.isChecked()
+        timestamp = self.checkBox_Timestamp.isChecked()
+        mode = self.comboBox_Format.currentText()
+
+        milli = False
+        formated = False
+        formated_ms = False
+        formated_frame = False
+
+        if timestamp:
+            if mode == "MS":
+                milli = True
+            elif mode == "HH:MM:SS":
+                formated = True
+            elif mode == "HH:MM:SS:MS":
+                formated_ms = True
+            elif mode == "HH:MM:SS:FRAME":
+                formated_frame = True
+            else:
+                timestamp = False
 
         t_start = self.cB_Start.isChecked()
         t_end = self.cB_End.isChecked()
@@ -50,7 +71,7 @@ class ExportSegmentationDialog(EDialogWidget):
                 segmentations.append(self.main_window.project.segmentation[i].serialize())
 
 
-        exporter = SegmentationExporter(path, milli, formated, formated_ms, text, frame, t_start,
+        exporter = SegmentationExporter(path, milli, formated, formated_ms, formated_frame, text, frame, t_start,
                                         t_end, t_duration, self.main_window.player.get_fps())
         # segmentations = []
         # for s in self.main_window.project.segmentation:

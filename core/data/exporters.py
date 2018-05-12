@@ -49,11 +49,13 @@ class ScreenshotsExporter():
 
 
 class SegmentationExporter(IConcurrentJob):
-    def __init__(self, file_path, export_ms, export_formated, export_formated_ms, export_text, export_frame, t_start, t_end, t_duration, fps):
+    def __init__(self, file_path, export_ms, export_formated, export_formated_ms, export_formated_frame,
+                 export_text, export_frame, t_start, t_end, t_duration, fps):
         self.file_path = file_path
         self.fps = fps
         self.export_formated = export_formated
         self.export_formated_ms = export_formated_ms
+        self.export_formated_frame = export_formated_frame
         self.export_text = export_text
         self.export_frame = export_frame
         self.t_start = t_start
@@ -105,6 +107,16 @@ class SegmentationExporter(IConcurrentJob):
 
                     if self.t_duration:
                         line += ms_to_string(duration, include_ms=True) + "\t"
+
+                if self.export_formated_frame:
+                    if self.t_start:
+                        line += ms_to_string(start, include_frame=True, fps = self.fps) + "\t"
+
+                    if self.t_end:
+                        line += ms_to_string(end, include_frame=True, fps = self.fps) + "\t"
+
+                    if self.t_duration:
+                        line += ms_to_string(duration, include_frame=True, fps = self.fps) + "\t"
 
                 if self.export_frame:
                     if self.t_start:

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>402</width>
-    <height>394</height>
+    <width>660</width>
+    <height>478</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Segmentation Exporter</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -67,31 +67,67 @@
      <property name="text">
       <string>Frame Index</string>
      </property>
-     <property name="checked">
-      <bool>true</bool>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checkBox_Timestamp">
+     <property name="text">
+      <string>Timestamp</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="cB_Miliseconds">
-     <property name="text">
-      <string>Time [Milliseconds]</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cB_FormatedTime">
-     <property name="text">
-      <string>Time [HH:MM:SS]</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cB_FormatedTimeMS">
-     <property name="text">
-      <string>Time [HH:MM:SS:MS]</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="layoutFormat">
+     <item>
+      <widget class="QLabel" name="label_Format">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Time Format:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox_Format">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>MS</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HH:MM:SS</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HH:MM:SS:MS</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HH:MM:SS:FRAME</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="Line" name="line">
@@ -112,18 +148,12 @@
      <property name="text">
       <string>Segment Start</string>
      </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
     </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="cB_End">
      <property name="text">
       <string>Segment End</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
      </property>
     </widget>
    </item>
