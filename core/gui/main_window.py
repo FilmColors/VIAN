@@ -16,8 +16,6 @@ import threading
 import importlib
 from functools import partial
 
-from core.data.headless import load_project_headless
-
 from core.concurrent.worker_functions import *
 from core.concurrent.worker import MinimalThreadWorker
 from core.data.enums import *
@@ -67,11 +65,12 @@ from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
+VERSION = "0.5.8"
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.5.8"
+__version__ = VERSION
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -476,9 +475,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        p = load_project_headless(
-            "C:/Users/Gaudenz Halter/Documents/VIAN/229_1_1_Jigokumon_1953_BF/229_1_1_Jigokumon_1953_BF.eext")
-        print(p)
+        pass
 
     def start_colormetry(self):
         job = ColormetryJob2(30, self)

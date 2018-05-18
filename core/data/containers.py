@@ -563,73 +563,87 @@ class VIANProject(IHasName, IClassifiable):
         :param path: 
         :return: 
         """
+        project = self
+
         a_layer = []
         screenshots = []
         screenshots_img = []
         screenshots_ann = []
         segmentations = []
         analyzes = []
+        screenshot_groups = []
         scripts = []
-        vocabularies = []
         experiments = []
 
-        for v in self.vocabularies:
+        vocabularies = []
+
+        for v in project.vocabularies:
             vocabularies.append(v.serialize())
 
-        for a in self.annotation_layers:
+        for a in project.annotation_layers:
             a_layer.append(a.serialize())
 
-        for b in self.screenshots:
+
+        for b in project.screenshots:
             src, img = b.serialize()
             screenshots.append(src)
+            # screenshots_img.append(img[0])
+            # screenshots_ann.append(img[1])
 
-        for c in self.segmentation:
+        for c in project.segmentation:
             segmentations.append(c.serialize())
 
-        for d in self.analysis:
+        for d in project.analysis:
             analyzes.append(d.serialize())
 
-        for e in self.node_scripts:
-            scripts.append(e.serialize())
+        for e in project.screenshot_groups:
+            screenshot_groups.append(e.serialize())
 
-        for f in self.experiments:
-            experiments.append(f.serialize())
+        for f in project.node_scripts:
+            scripts.append(f.serialize())
+
+        for g in project.experiments:
+            experiments.append(g.serialize())
 
         data = dict(
-            path = self.path,
-            corpus_id = self.corpus_id,
-            name = self.name,
-            notes=self.notes,
-            results_dir = self.results_dir,
-            export_dir=self.export_dir,
-            shots_dir=self.shots_dir,
-            data_dir=self.data_dir,
-            annotation_layers = a_layer,
-            current_annotation_layer = None,
-            main_segmentation_index = self.main_segmentation_index,
-            screenshots = screenshots,
-            segmentation = segmentations,
-            analyzes = analyzes,
-            movie_descriptor = self.movie_descriptor.serialize(),
-            scripts = scripts,
+            path=project.path,
+            name=project.name,
+            corpus_id=project.corpus_id,
+            annotation_layers=a_layer,
+            notes=project.notes,
+            current_annotation_layer=None,
+            results_dir=project.results_dir,
+            export_dir=project.export_dir,
+            shots_dir=project.shots_dir,
+            data_dir=project.data_dir,
+            main_segmentation_index=project.main_segmentation_index,
+            screenshots=screenshots,
+            segmentation=segmentations,
+            analyzes=analyzes,
+            movie_descriptor=project.movie_descriptor.serialize(),
+            version=project.main_window.version,
+            screenshot_groups=screenshot_groups,
+            scripts=scripts,
             vocabularies=vocabularies,
-            experiments = experiments
-        )
+            experiments=experiments
 
+        )
         if path is None:
-            path = self.path.replace(settings.PROJECT_FILE_EXTENSION, "")
+            path = project.path
+        path = path.replace(settings.PROJECT_FILE_EXTENSION, "")
 
         numpy_path = path + "_scr"
         project_path = path + ".eext"
 
         if settings.SCREENSHOTS_STATIC_SAVE:
-            np.savez(numpy_path, imgs = screenshots_img, annotations = screenshots_ann, empty=[True])
+            np.savez(numpy_path, imgs=screenshots_img, annotations=screenshots_ann, empty=[True])
 
         try:
             with open(project_path, 'w') as f:
                 json.dump(data, f)
-        except Exception:
-            print(Exception)
+        except Exception as e:
+            print(e)
+
 
     def load_project(self, settings, path):
 
@@ -2720,12 +2734,16 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             return self.movie_path
 
     def set_movie_path(self, path):
+
         if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
             self.movie_path = os.path.basename(path)
             self.is_relative = True
         else:
             self.movie_path = path
             self.is_relative = False
+
+        cap = cv2.VideoCapture(self.get_movie_path())
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
         print("MoviePath set: ", path, " to \"" ,self.movie_path, "\"  ", self.is_relative)
 
     def get_movie_id_list(self):

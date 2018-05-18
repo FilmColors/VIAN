@@ -1,6 +1,7 @@
 from core.data.containers import *
 from core.data.settings import UserSettings
 from core.data.project_streaming import *
+from core.gui.main_window import VERSION
 
 class HeadlessUserSettings():
     def __init__(self):
@@ -14,6 +15,7 @@ class HeadlessMainWindow(QObject):
         self.thread_pool = QThreadPool()
         self.numpy_data_manager = NumpyDataManager(self)
         self.project_streamer = ProjectStreamerShelve(self)
+        self.version = VERSION
 
 
     def print_message(self, msg, color):
@@ -51,6 +53,10 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
     :return: a VIANProject created from the input or None if failed
     """
     try:
+        if not os.path.isfile(movie_path):
+            print("Movie Not found: ", movie_path)
+            return
+
         project = VIANProject(HeadlessMainWindow(), name=name, folder=location, path=location + "/" + name)
         project.inhibit_dispatch = True
         project.movie_descriptor.set_movie_path(movie_path)
@@ -73,15 +79,24 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         project.store_project(HeadlessUserSettings(), project.path)
         return project
     except Exception as e:
+        try:
+            shutil.rmtree(location)
+        except:
+            print("Could not remove folder: ", location)
         raise e
         return None
 
+
 if __name__ == '__main__':
     # p = load_project_headless("C:/Users/Gaudenz Halter/Documents/VIAN/229_1_1_Jigokumon_1953_BF/229_1_1_Jigokumon_1953_BF.eext")
-    segmentations = [["Main", [
-        [0, 1000, "Hello"],
-        [1001, 5000, "World"]]]]
+    segmentations = [
+        ["Main", [
+            [0, 1000, "Hello"],
+            [1001, 5000, "World"]
+            ]
+         ]
+    ]
     screenshots = [300, 500, 800]
-    p = create_project_headless("TestHeadlessCreation", "C:/Users/Gaudenz/Documents/VIAN/TestHeadlessCreation/",
-                                "C:/Users/Gaudenz/Documents/VIAN/229_1_1_Jigokumon_1953_DVD.mov",
+    p = create_project_headless("TestHeadlessCreation", "C:/Users/Gaudenz Halter/Documents/VIAN/TestHeadlessCreation/",
+                                "C:/Users/Gaudenz Halter/Desktop/229_1_1_Jigokumon_1953_DVD.mov",
                                 screenshots, segmentations)

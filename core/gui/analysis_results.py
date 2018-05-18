@@ -71,7 +71,6 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.current_visualization[0].widget.show()
         self.fullscreen_view = None
 
-
     def clear_analysis_widget(self):
         for c in self.analysis_widget.children():
             if isinstance(c, QWidget):
