@@ -2790,6 +2790,9 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
     def apply_loaded(self, obj):
         self.data = obj
 
+    def sync_load(self):
+        self.data = self.project.main_window.project_streamer.sync_load(self.unique_id)
+
     def get_name(self):
         return self.name
 
@@ -2823,41 +2826,38 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
         self.script_id = script_id
         self.final_node_ids = final_nodes_ids
 
-    # def unload_container(self, data = None):
-    #     super(NodeScriptAnalysis, self).unload_container(self.data)
-    #     self.data = None
-    #
-    # def apply_loaded(self, obj):
-    #     self.data = obj
-    #
+
     def get_type(self):
         return ANALYSIS_NODE_SCRIPT
 
     def serialize(self):
         data_json = []
 
-        #Loop over each final node of the Script
-        for i, n in enumerate(self.data):
-            node_id = self.final_node_ids[i]
-            node_result = []
-            result_dtypes = []
+        try:
+            #Loop over each final node of the Script
+            for i, n in enumerate(self.data):
+                node_id = self.final_node_ids[i]
+                node_result = []
+                result_dtypes = []
 
-            # Loop over each result in the final node
-            for d in n:
-                if isinstance(d, np.ndarray):
-                    node_result.append(d.tolist())
-                    result_dtypes.append(str(d.dtype))
-                elif isinstance(d, list):
-                    node_result.append(d)
-                    result_dtypes.append("list")
-                else:
-                    node_result.append(np.array(d).tolist())
-                    result_dtypes.append(str(np.array(d).dtype))
-            data_json.append([node_id, node_result, result_dtypes])
+                # Loop over each result in the final node
+                for d in n:
+                    if isinstance(d, np.ndarray):
+                        node_result.append(d.tolist())
+                        result_dtypes.append(str(d.dtype))
+                    elif isinstance(d, list):
+                        node_result.append(d)
+                        result_dtypes.append("list")
+                    else:
+                        node_result.append(np.array(d).tolist())
+                        result_dtypes.append(str(np.array(d).dtype))
+                data_json.append([node_id, node_result, result_dtypes])
 
-        # We want to store the analysis container if it is not already stored
+            # We want to store the analysis container if it is not already stored
 
-        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
+            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
+        except Exception as e:
+            print(e)
 
         data = dict(
             name=self.name,
@@ -2878,24 +2878,29 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
 
         self.final_node_ids = []
         self.data = []
-        # Loop over each final node of the Script
-        for r in serialization['data_json']:
+        try:
+            data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
 
-            node_id = r[0]
-            node_results = r[1]
-            result_dtypes = r[2]
+            # Loop over each final node of the Script
+            for r in data_json:
 
-            node_data = []
-            self.final_node_ids.append(node_id)
+                node_id = r[0]
+                node_results = r[1]
+                result_dtypes = r[2]
 
-            # Loop over each Result of the Final Node
-            for j, res in enumerate(node_results):
-                if result_dtypes[j] == "list":
-                    node_data.append(res)
-                else:
-                    node_data.append(np.array(res, dtype=result_dtypes[j]))
+                node_data = []
+                self.final_node_ids.append(node_id)
 
-                self.data.append(node_data)
+                # Loop over each Result of the Final Node
+                for j, res in enumerate(node_results):
+                    if result_dtypes[j] == "list":
+                        node_data.append(res)
+                    else:
+                        node_data.append(np.array(res, dtype=result_dtypes[j]))
+
+                    self.data.append(node_data)
+        except Exception as e:
+            print(e)
 
         return self
 
@@ -2918,8 +2923,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
         except Exception as e:
             print("Preview:", e)
-            # QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
-            #                     " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 
     def get_visualization(self):
         try:

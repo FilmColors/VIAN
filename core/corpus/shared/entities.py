@@ -3,6 +3,8 @@ from core.corpus.shared.enums import *
 import cv2
 import datetime
 
+from core.analysis.analysis_import import *
+
 SCR_DIR = "/screenshots/"
 MOVIE_DIR = "/movie/"
 ANALYSIS_DIR = "/analysis/"
@@ -782,6 +784,72 @@ class KeywordMappingEntry(DBEntity):
             )
         return result
 
+
+class DBAnalysis(DBEntity):
+    def __init__(self):
+        self.analysis_id = -1
+        self.project_id = -1
+
+        self.analysis_class_name = ""
+        self.analysis_data = ""
+        self.analysis_type = -1 # 0: JobAnalysis, 1: ScriptAnalysis
+
+    def from_database(self, entry):
+        self.analysis_id = entry['analysis_id']
+        self.project_id = entry['project_id']
+        self.analysis_class_name = entry['analysis_name']
+        self.analysis_type = entry['analysis_type']
+        if self.analysis_type == 0:
+            self.analysis_data = eval(self.analysis_class_name)().from_database(entry['data'])
+        else:
+            self.analysis_data = entry['data']
+
+    def from_project(self, obj: AnalysisContainer, project_id):
+        self.project_id = project_id
+        if isinstance(obj, IAnalysisJobAnalysis):
+            self.analysis_class_name = obj.analysis_job_class
+            self.analysis_data = obj.data
+            self.analysis_type = 0
+        elif isinstance(obj, NodeScriptAnalysis):
+            self.analysis_class_name = obj.project.get_by_id(obj.script_id).get_name()
+            self.analysis_data = obj.data
+            self.analysis_type = 1
+        elif isinstance(obj, ColormetryAnalysis):
+            self.analysis_class_name = "Colormetry"
+            self.analysis_data = obj.data
+            self.analysis_type = 2
+        return self
+
+
+    def to_database(self, include_id = False):
+        if self.analysis_type == 0:
+            data = eval(self.analysis_class_name)().to_database(self.analysis_data)
+
+        elif self.analysis_type == 1:
+            data = self.analysis_data
+
+        elif self.analysis_type == 2:
+            data = self.analysis_data
+
+        else:
+            raise Exception("Analysis not identified")
+
+        if include_id:
+            result = dict(
+                analysis_id = self.analysis_id,
+                project_id = self.project_id,
+                analysis_name=self.analysis_class_name,
+                analysis_type=self.analysis_type,
+                data = data
+            )
+        else:
+            result = dict(
+                project_id=self.project_id,
+                analysis_name=self.analysis_class_name,
+                analysis_type=self.analysis_type,
+                data=data
+            )
+        return result
 
 #endregion
 

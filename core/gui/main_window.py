@@ -108,6 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_darwin = False
 
         # for MacOS
+
         if sys.platform == "darwin":
             self.is_darwin = True
             self.setAttribute(Qt.WA_MacFrameworkScaled)
@@ -475,7 +476,12 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        pass
+        for a in self.project.analysis:
+            a.sync_load()
+            t = DBAnalysis().from_project(a)
+            q = t.to_database()
+            t.from_database(q)
+
 
     def start_colormetry(self):
         job = ColormetryJob2(30, self)

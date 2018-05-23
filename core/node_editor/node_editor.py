@@ -92,14 +92,6 @@ class NodeEditor(QWidget, IProjectChangeNotify):
         self.thread_pool.setMaxThreadCount(8)
         self.thread_pool.maxThreadCount()
 
-
-        # self.add_node(Node(self, self, OperationFrameReader()))
-        # n2 = self.add_node(Node(self, self, OperationNormalize()))
-        # n2.move(500,500)
-        #
-        # n2 = self.add_node(Node(self, self, OperationShowImage()))
-        # n2.move(800, 500)
-
         self.connection_drag = None
 
         self.is_compiled = False
@@ -221,63 +213,6 @@ class NodeEditor(QWidget, IProjectChangeNotify):
         self.clear()
         self.current_script = script
         self.update_node_editor()
-    # def save_script(self, file_path):
-    #     nodes = []
-    #     connections = []
-    #
-    #     for n in self.nodes:
-    #         nodes.append(n.serialize())
-    #
-    #     for c in self.connections:
-    #         connections.append(c.serialize())
-    #
-    #     data = dict(
-    #         id_counter = self.id_counter,
-    #         nodes = nodes,
-    #         connections = connections,
-    #     )
-    #
-    #     with open(file_path, "wb") as f:
-    #         json.dump(data, f)
-    #
-    # def load_script(self, file_path):
-    #     self.clear()
-    #     with open(file_path, "rb") as f:
-    #         data = json.load(f)
-    #
-    #     nodes = data['nodes']
-    #     connections = data['connections']
-    #
-    #     for n in nodes:
-    #         # node = Node(self, self, eval(n['operation'])())
-    #         node = self.current_script.create_node(self, eval(n['operation'])(), QPoint(0,0),  n['unique_id'])
-    #         self.add_node(node)
-    #         pos = QPoint(n['pos'][0]* self.scale, n['pos'][1] * self.scale)
-    #         node.scale(self.scale)
-    #         node.node_pos = pos
-    #         node.move(pos)
-    #
-    #     for c in connections:
-    #         input_node = self.get_by_ID(c['input_node'])
-    #         output_node = self.get_by_ID(c['output_node'])
-    #         input_field = input_node.fields[c['input_field']]
-    #         output_field = output_node.fields[c['output_field']]
-    #
-    #         print input_node, output_node
-    #
-    #         conn = Connection(self)
-    #         conn.set_input_field(input_field)
-    #         conn.set_output_field(output_field)
-    #         self.connections.append(conn)
-    #         self.current_script.add_connection(conn)
-    #
-    #         print conn
-    #         conn.input_field.add_connection(conn)
-    #         conn.output_field.add_connection(conn)
-    #         conn.output_field.node.update_output_types()
-    #
-    #
-    #     self.id_counter = len(self.connections) + len(self.nodes)
 
     def update_node_editor(self):
         for node in self.current_script.nodes:
@@ -1058,7 +993,6 @@ class LoopNode(Node):
         for e in self.loop_nodes:
             if e.operation.execute_output_fields_in_loop:
                 e.operation.reset_result()
-
 
 
 class NodeField(QWidget):

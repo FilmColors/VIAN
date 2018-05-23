@@ -24,6 +24,7 @@ TABLE_KEYWORD_MAPPING_ANNOTATIONS = "KEYWORD_MAPPING_ANNOTATIONS"
 TABLE_EXPERIMENTS = "EXPERIMENTS"
 TABLE_SCEENSHOT_SEGMENTS_MAPPING = "SCREENSHOT_SEGM_MAPPING"
 TABLE_SCEENSHOT_GROUPS_MAPPING = "SCREENSHOT_GROUPS_MAPPING"
+TABLE_ANALYSES = "ANALYSES"
 
 
 ALL_PROJECT_TABLES = [
@@ -180,10 +181,13 @@ class DatasetCorpusDB(CorpusDB):
         self.constrain_screenshot_grps = False
         self.constrain_experiments = False
         self.constrain_vocabularies = False
+        self.constrain_analyses = False
 
         self.default_annotation_layers = []
         self.default_segmentations = []
         self.default_screenshot_groups = []
+        self.default_analyses = []
+
 
         self.default_experiments = []
         self.no_movies = False
@@ -565,8 +569,16 @@ class DatasetCorpusDB(CorpusDB):
                             print(container_db, keyword_db)
                     except Exception as e:
                         print (e)
+            #endregion
 
-
+            #region Analysis
+            for a in project.analysis:
+                if self.constrain_analyses and a.get_name() not in self.default_analyses:
+                    log.append("Analysis skipped due to missing root Analysis: " + s.get_name())
+                    continue
+                else:
+                    db_analysis = DBAnalysis().from_project(a, project_id)
+                    db_analysis.analysis_id = self.db[TABLE_ANALYSES].insert(db_analysis.to_database(False))
 
 
             #endregion
@@ -816,6 +828,17 @@ class DatasetCorpusDB(CorpusDB):
         result = []
         for q in query:
             result.append(DBExperiment(self.root_dir).from_database(q))
+        return result
+
+    def get_analyses(self, filters = None):
+        if filters is None:
+            query = self.db[TABLE_ANALYSES].all()
+        else:
+            query = self.db[TABLE_ANALYSES].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBAnalysis().from_database(q))
         return result
 
     def get_settings(self):

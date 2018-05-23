@@ -307,7 +307,33 @@ class IAnalysisJob(ILiveWidgetExposing):
         pass
 
     def get_source_types(self):
+        """
+        Returns a list of allowed type enum-entries
+        :return: 
+        """
         return self.source_types
+
+    def to_database(self, container_data):
+        """
+        Base Method which should return a dict of byte serialized 
+        nump arrays if necessary, or a dict of simple key value pairs.
+
+        For numpy arrays use following: 
+        byte_array = numpy_array.tostring()
+
+        :return: 
+        """
+        return dict()
+
+    def from_database(self, database_data):
+        """
+        The inverse of the to_database() implementation. 
+
+        For numpy arrays:
+        numpy_array = numpy.fromstring(byte_array)
+
+        :return: 
+        """
 
     def abort(self):
         pass

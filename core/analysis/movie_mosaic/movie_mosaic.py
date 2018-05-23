@@ -148,6 +148,13 @@ class MovieMosaicAnalysis(IAnalysisJob):
         return MovieMosaicPreferences()
 
 
+    def from_database(self, database_data):
+        return np.array(eval(database_data.decode()))
+
+    def to_database(self, container_data):
+        return np.array2string(container_data['mosaic'], separator=",").encode()
+
+
 
 class MovieMosaicPreferences(ParameterWidget):
     def __init__(self):

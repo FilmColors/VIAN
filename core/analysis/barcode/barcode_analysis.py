@@ -197,6 +197,12 @@ class BarcodeAnalysisJob(IAnalysisJob):
         """
         return BarcodeParameterWidget()
 
+    def from_database(self, database_data):
+        pass
+
+    def to_database(self, container_data):
+        return json.dumps(dict(name="barcode")).encode()
+
 
 class BarcodeParameterWidget(ParameterWidget):
     """
