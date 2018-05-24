@@ -583,7 +583,6 @@ class VIANProject(IHasName, IClassifiable):
         for a in project.annotation_layers:
             a_layer.append(a.serialize())
 
-
         for b in project.screenshots:
             src, img = b.serialize()
             screenshots.append(src)
@@ -642,7 +641,7 @@ class VIANProject(IHasName, IClassifiable):
             with open(project_path, 'w') as f:
                 json.dump(data, f)
         except Exception as e:
-            print(e)
+            print("Exception during Storing: ", str(e))
 
 
     def load_project(self, settings, path):
@@ -2857,7 +2856,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
 
             self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
         except Exception as e:
-            print(e)
+            print("Exception in NodeScriptAnalysis.serialize(): ", str(e))
 
         data = dict(
             name=self.name,

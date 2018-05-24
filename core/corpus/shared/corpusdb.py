@@ -187,10 +187,10 @@ class DatasetCorpusDB(CorpusDB):
         self.default_segmentations = []
         self.default_screenshot_groups = []
         self.default_analyses = []
-
-
         self.default_experiments = []
-        self.no_movies = False
+
+        self.allow_project_download = True
+        self.allow_movie_upload = False
 
     def connect(self, path):
         self.path = path
@@ -202,13 +202,28 @@ class DatasetCorpusDB(CorpusDB):
     def initialize(self, name, root_dir):
         CorpusDB.initialize(self, name, root_dir)
         self.sql_path = 'sqlite:///' + self.root_dir + "/" +self.name + ".vian_corpus_sql"
-        print(self.sql_path)
-        print(self.root_dir)
-        print(self.file_path)
+
+        print("\nCORPUS CREATED")
+        print("  SQL:", self.sql_path)
+        print(" ROOT:", self.root_dir)
+        print(" FILE:", self.file_path)
+
+        print()
+        print("Attributes:")
+        for attr, val in self.__dict__.items():
+            print(attr, val)
+
         self.db = ds.connect(self.sql_path)
         self.db.begin()
         self.db["SETTINGS"].insert(dict(name=name, root_dir=root_dir, created=str(get_current_time())))
+
+        for s in self.default_segmentations:
+            self.db[TABLE_SEGMENTATIONS].insert(DBSegmentation(s).to_database(False))
+        for l in self.default_annotation_layers:
+            self.db[TABLE_ANNOTATION_LAYERS].insert(DBAnnotationLayer(l).to_database(False))
+
         self.db.commit()
+        print("\n\n")
         self.save(self.file_path)
 
     def commit_project(self, project: VIANProject, contributor: DBContributor):
@@ -260,6 +275,7 @@ class DatasetCorpusDB(CorpusDB):
                 table.insert(d)
                 res = table.find_one(**project_obj.to_database(include_id=False))
                 project.corpus_id = res['id']
+                project_obj.project_id = res['id']
                 project_id = res['id']
 
             #region Movie
@@ -588,9 +604,8 @@ class DatasetCorpusDB(CorpusDB):
             print(log)
             return True, project_obj
         except Exception as e:
-            print(e)
+            print("Exception in CorpusDB:commit_project(): ", str(e))
             self.db.rollback()
-            raise e
             return False, str(e)
 
     def checkout_project(self, project_id, contributor:DBContributor):
@@ -626,7 +641,8 @@ class DatasetCorpusDB(CorpusDB):
                     self.db.commit()
                     return True
                 except Exception as e:
-                    print(e)
+                    print("Exception in CorpusDB:checkin_project(): ", str(e))
+                    raise(e)
                     self.db.rollback()
             else:
                 print("User not regconized or not matching the Check Out User")
@@ -651,7 +667,8 @@ class DatasetCorpusDB(CorpusDB):
             for t in tables:
                 self.db[t].drop()
             self.db.commit()
-        except:
+        except Exception as e:
+            print("Exception in CorpusDB:clear(): ", str(e))
             self.db.rollback()
 
 
@@ -667,7 +684,7 @@ class DatasetCorpusDB(CorpusDB):
             self.db.rollback()
 
     def connect_user(self, contributor: DBContributor):
-        users = self.get_users(dict(id=contributor.contributor_id))
+        users = self.get_users(dict(name=contributor.name, password=contributor.password))
         if len(users) == 0:
             self.add_user(contributor)
             return contributor
@@ -881,6 +898,11 @@ class DatasetCorpusDB(CorpusDB):
                 constrain_screenshot_grps = self.constrain_screenshot_grps ,
                 constrain_experiments = self.constrain_experiments,
                 constrain_vocabularies = self.constrain_vocabularies,
+                constrain_analyses = self.constrain_analyses,
+
+                default_annotation_layers = self.default_annotation_layers,
+                default_screenshot_groups = self.default_screenshot_groups,
+                default_segmentations = self.default_segmentations,
             )
             json.dump(data, f)
 
@@ -892,6 +914,7 @@ class DatasetCorpusDB(CorpusDB):
                     setattr(self, attr, value)
             self.connect(self.sql_path)
         except Exception as e:
+
             print(e)
             return False
         return self

@@ -14,6 +14,7 @@ class CorpusInterface(QObject):
     onReceivedProjects = pyqtSignal(object)
     onReadyForExtraction = pyqtSignal(bool, object, str)
     onEmitProgress = pyqtSignal(float, str)
+    onCheckOutStateRecieved = pyqtSignal(int)
 
     def __init__(self):
         super(CorpusInterface, self).__init__()
@@ -47,6 +48,9 @@ class CorpusInterface(QObject):
     def download_project(self, user, project):
         pass
 
+    @pyqtSlot(object, object)
+    def check_checkout_state(self, user, dbproject):
+        pass
 
 class LocalCorpusInterface(CorpusInterface):
     def __init__(self):
@@ -105,6 +109,20 @@ class LocalCorpusInterface(CorpusInterface):
             self.onReadyForExtraction.emit(True, project, archive)
         else:
             self.onReadyForExtraction.emit(False, None, None)
+
+    @pyqtSlot(object, object)
+    def check_checkout_state(self, user, dbproject):
+        result = self.local_corpus.get_project(dbproject.project_id)
+        print(result.is_checked_out)
+        if result is not None:
+            if result.is_checked_out == True and result.checked_out_user != user.contributor_id:
+                self.onCheckOutStateRecieved.emit(CHECK_OUT_OTHER)
+            elif result.is_checked_out == True and result.checked_out_user == user.contributor_id:
+                self.onCheckOutStateRecieved.emit(CHECK_OUT_SELF)
+            else:
+                self.onCheckOutStateRecieved.emit(CHECK_OUT_NO)
+        else:
+            self.onCheckOutStateRecieved.emit(CHECK_OUT_NOT_IN_DB)
 
 
 class RemoteCorpusInterface(CorpusInterface):
@@ -263,3 +281,22 @@ class RemoteCorpusInterface(CorpusInterface):
         except Exception as e:
             print("Exception in RemoteCorpusClient.download_project(): ", str(e))
             self.onReadyForExtraction.emit(False, None, None)
+
+    @pyqtSlot(object, object)
+    def check_checkout_state(self, user, dbproject):
+        result = json.loads(self.send_message(ServerCommands.Get_CheckOut_State,
+                                              dict(
+                                                  user=user.to_database(True),
+                                                  dbproject=dbproject.to_database(True)
+                                              )).decode())
+
+        if result['success'] is not False:
+            proj  = DBProject().from_database(result['dbproject'])
+            if proj.is_checked_out == True and proj.checked_out_user != user.contributor_id:
+                self.onCheckOutStateRecieved.emit(CHECK_OUT_OTHER)
+            elif proj.is_checked_out == True and proj.checked_out_user == user.contributor_id:
+                self.onCheckOutStateRecieved.emit(CHECK_OUT_SELF)
+            else:
+                self.onCheckOutStateRecieved.emit(CHECK_OUT_NO)
+        else:
+            self.onCheckOutStateRecieved.emit(CHECK_OUT_NOT_IN_DB)

@@ -8,6 +8,7 @@ from PyQt5 import uic
 
 from core.corpus.shared.corpusdb import DatasetCorpusDB
 from core.corpus.shared.entities import *
+from core.gui.tools import StringList
 import json
 import socket
 import threading
@@ -21,11 +22,20 @@ class CreateCorpusDialog(EDialogWidget):
         path = os.path.abspath("qt_ui/DialogCreateCorpus.ui")
         uic.loadUi(path, self)
 
+        self.sl_segm = StringList(self)
+        self.sl_segm.setTitle("Add all Default Segmentation Names:")
+        self.wc_segm.layout().addWidget(self.sl_segm)
+
+        self.sl_layers = StringList(self)
+        self.sl_layers.setTitle("Add all Default Annotation Layer Names:")
+        self.wc_ann.layout().addWidget(self.sl_layers)
+
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_OK.clicked.connect(self.on_create)
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.lineEdit_Root.setText(self.main_window.settings.DIR_CORPORA)
+
 
     def on_browse(self):
         root = QFileDialog.getExistingDirectory(self, directory=self.main_window.settings.DIR_CORPORA)
@@ -34,7 +44,20 @@ class CreateCorpusDialog(EDialogWidget):
     def on_create(self):
         if self.lineEdit_Name.text() != "" and os.path.isdir(self.lineEdit_Root.text()):
             database = DatasetCorpusDB()
+            database.allow_movie_upload = self.cB_AllowUpload.isChecked()
+            database.allow_project_download = self.cb_AllowDownload.isChecked()
+
+            database.constrain_segmentations = self.cB_ConstrSegmentation.isChecked()
+            database.constrain_analyses = self.cB_ConstrAnalyses.isChecked()
+            database.constrain_class_objs = self.cB_ConstrClassObj.isChecked()
+            database.constrain_vocabularies = self.cB_ConstrVocabularies.isChecked()
+            database.constrain_experiments = self.cB_ConstrExperiments.isChecked()
+
+            database.default_segmentations = self.sl_segm.get_entries()
+            database.default_annotation_layers = self.sl_layers.get_entries()
+
             database.initialize(self.lineEdit_Name.text(), self.lineEdit_Root.text())
+
             self.close()
             self.onCreated.emit(database)
         else:
@@ -42,6 +65,7 @@ class CreateCorpusDialog(EDialogWidget):
 
     def on_cancel(self):
         self.close()
+
 
 class CorpusUserDialog(EDialogWidget):
     onContributorUpdate = pyqtSignal(object)

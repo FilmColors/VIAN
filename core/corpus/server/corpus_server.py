@@ -244,38 +244,64 @@ class CorpusServer(QObject):
                     path = ""
                 )
 
+
+        elif task == ServerCommands.Get_CheckOut_State:
+            try:
+                user = DBContributor().from_database(data['user'])
+                project = DBProject().from_database(data['dbproject'])
+                db_project = self.local_corpus.get_project(project.project_id)
+
+                if db_project is None:
+                    response_data = dict(
+                        success=False,
+                        dbproject=None,
+                    )
+                else:
+                    response_data = dict(
+                        success=True,
+                        dbproject=db_project.to_database(True),
+                    )
+            except Exception as e:
+                print("Exception in ServerCommands.Get_CheckOut_State: " + str(e))
+                response_data = dict(
+                    success=False,
+                    dbproject=None,
+                )
+
         result = json.dumps(response_data).encode()
         return result
 
-
-    def on_commit_asked(self, project: DBProject):
-        """
-        Returns true if the project is not checked out by another user, 
-        :param project: 
-        :return: [True, [Files Needed]]
-        """
-
-    def on_commit_finished(self):
-        """
-        After the Client has finished copying all data, 
-        it informs the server to have finished
-        :return: 
-        """
-
-    def on_check_out_inquiry(self):
-        """
-        returns true if the project may be checked out
-        :return: 
-        """
-
-    def on_check_in(self):
-        pass
-
-    def on_get_project(self):
-        """
-        
-        :return: 
-        """
+    # def on_commit_asked(self, project: DBProject):
+    #     """
+    #     Returns true if the project is not checked out by another user,
+    #     :param project:
+    #     :return: [True, [Files Needed]]
+    #     """
+    #
+    # def on_commit_finished(self):
+    #     """
+    #     After the Client has finished copying all data,
+    #     it informs the server to have finished
+    #     :return:
+    #     """
+    #
+    # def on_check_out_inquiry(self):
+    #     """
+    #     returns true if the project may be checked out
+    #     :return:
+    #     """
+    #
+    # def on_check_in(self):
+    #     pass
+    #
+    # def on_get_project(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def on_checkout_state_asked(self):
+    #     pass
 
 
 

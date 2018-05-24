@@ -82,7 +82,7 @@ class DBProject(DBEntity):
         self.project_id = movie_entry['id']
         self.corpus_id = movie_entry['corpus_id']
         self.name = movie_entry['name']
-        self.is_checked_out = movie_entry['is_checked_out'] == "True"
+        self.is_checked_out = movie_entry['is_checked_out'] == 1
         self.last_modified = movie_entry['last_modified']
         self.path = movie_entry['path']
         self.folder = movie_entry['folder']
@@ -212,11 +212,11 @@ class DBMovie(DBEntity):
 
 
 class DBAnnotationLayer(DBEntity):
-    def __init__(self):
+    def __init__(self, name = ""):
         # Key
         self.layer_id = -1
 
-        self.name = ""
+        self.name = name
         self.is_mandatory = False
 
     def from_project(self, l: AnnotationLayer):
@@ -244,11 +244,11 @@ class DBAnnotationLayer(DBEntity):
 
 
 class DBSegmentation(DBEntity):
-    def __init__(self):
+    def __init__(self, name = ""):
         # Key
         self.segmentation_id = 0
 
-        self.name = ""
+        self.name = name
         self.is_mandatory = False
 
     def from_project(self, s: Segmentation):

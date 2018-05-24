@@ -18,6 +18,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
     onCorpusDisconnected = pyqtSignal(object)
     onCorpusChanged = pyqtSignal(object)
     onCurrentDBProjectChanged = pyqtSignal(object)
+    onCheckOutStateChanged = pyqtSignal(int)
 
     onConnectUser = pyqtSignal(object, object)
     onDisconnectUser = pyqtSignal(object)
@@ -25,6 +26,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
     onCheckOutProject = pyqtSignal(object, object)
     onCheckInProject = pyqtSignal(object, object)
     onDownloadProject = pyqtSignal(object, object)
+    onCheckCheckOutState = pyqtSignal(object, object)
 
     def __init__(self, parent):
         super(CorpusClient, self).__init__(parent)
@@ -96,6 +98,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.onCheckOutProject.connect(self.corpus_interface.checkout_project)
         self.onCheckInProject.connect(self.corpus_interface.checkin_project)
         self.onDownloadProject.connect(self.corpus_interface.download_project)
+        self.onCheckCheckOutState.connect(self.corpus_interface.check_checkout_state)
 
         self.corpus_interface.onConnected.connect(self.on_connect_finished)
         self.corpus_interface.onCheckedIn.connect(self.on_check_in_finished)
@@ -103,6 +106,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.corpus_interface.onCommited.connect(self.on_commit_finished)
         self.corpus_interface.onReceivedProjects.connect(self.on_received_projects)
         self.corpus_interface.onReadyForExtraction.connect(self.on_project_downloaded)
+        self.corpus_interface.onCheckOutStateRecieved.connect(self.on_check_out_state_recieved)
 
     @pyqtSlot(bool, object, object)
     def on_connect_finished(self, success, dbprojects, user):
@@ -112,6 +116,8 @@ class CorpusClient(QObject, IProjectChangeNotify):
             self.onCorpusConnected.emit(self.corpus_interface)
             self.metadata.on_connect(self.tcp_ip, self.corpus_interface.name, self.tcp_port, dbprojects, "local")
             self.synchronize(self.corpus_interface.name, dbprojects)
+            if self.get_project() is not None:
+                self.get_check_out_state()
         else:
             print("Failed to connect")
 
@@ -120,7 +126,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
             self.main_window.on_save_project(sync=True)
             self.onCommitProject.emit(self.metadata.contributor, project)
         except Exception as e:
-            print(e)
+            print("Exception in CorpusClient::on_commit_project()", e)
 
     @pyqtSlot(bool, object, object)
     def on_commit_finished(self, success, dbproject, vian_project:VIANProject):
@@ -131,9 +137,13 @@ class CorpusClient(QObject, IProjectChangeNotify):
             if answer == QMessageBox.Yes:
                 shutil.rmtree(vian_project.folder, True, print)
             self.metadata.update_project(self.corpus_interface.name, dbproject)
-
+            self.current_dbproject = dbproject
+            vian_project.corpus_id = dbproject.project_id
+            self.onCurrentDBProjectChanged.emit(dbproject)
+            self.main_window.on_save_project()
         self.metadata.store()
         self.onCorpusChanged.emit(self)
+
 
     def on_disconnect_user(self):
         self.onDisconnectUser.emit(self.metadata.contributor)
@@ -185,7 +195,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
     @pyqtSlot(bool, object)
     def on_check_in_finished(self, success, project):
-        print("Checkout: ", success)
+        print("CheckIn: ", success)
         pass
 
     def get_project_from_corpus(self, corpus_id):
@@ -196,6 +206,14 @@ class CorpusClient(QObject, IProjectChangeNotify):
             pass
         else:
             return self.corpus_interface.get_project(corpus_id)
+
+    def get_check_out_state(self):
+        if self.connected and self.current_dbproject is not None:
+            self.onCheckCheckOutState.emit(self.metadata.contributor, self.current_dbproject)
+
+    @pyqtSlot(int)
+    def on_check_out_state_recieved(self, value):
+        self.onCheckOutStateChanged.emit(value)
 
     def on_synchronize(self):
         pass
@@ -221,7 +239,6 @@ class CorpusClient(QObject, IProjectChangeNotify):
             return self.metadata.get_project(self.corpus_interface.name)
         else:
             return []
-
 
     def get_annotation_layers(self, filters = None):
         pass
@@ -266,9 +283,9 @@ class CorpusClient(QObject, IProjectChangeNotify):
             self.current_dbproject = self.metadata.get_project_by_path(self.get_corpus().name, project.path)
             if self.current_dbproject is not None:
                 project.corpus_id = self.current_dbproject.project_id
-            pass
         else:
             self.current_dbproject = self.metadata.get_project(self.corpus_interface.name, project.corpus_id)
+            self.get_check_out_state()
         self.onCurrentDBProjectChanged.emit(self.current_dbproject)
 
     def on_closed(self):
@@ -313,10 +330,12 @@ class CorpusClientWidget(QWidget):
         self.main_window = main_window
 
         self.dbproject = None
+        self.checkout_state = 0
 
         self.corpus_client.onCorpusConnected.connect(self.on_connected)
         self.corpus_client.onCorpusDisconnected.connect(self.on_disconnected)
         self.corpus_client.onCurrentDBProjectChanged.connect(self.on_project_changed)
+        self.corpus_client.onCheckOutStateChanged.connect(self.checkout_state_changed)
         self.contributor = corpus_client.metadata.contributor
 
         self.btn_Commit.clicked.connect(self.on_commit)
@@ -367,17 +386,33 @@ class CorpusClientWidget(QWidget):
         pass
         # self.corpus_client.synchronize()
 
+    def checkout_state_changed(self, value):
+        print("RECIEVED", value)
+        self.btn_CheckOut.clicked.disconnect()
+        if value == CHECK_OUT_SELF:
+            self.btn_CheckOut.setEnabled(True)
+            self.btn_Commit.setEnabled(True)
+            self.btn_CheckOut.setChecked(True)
+        elif value == CHECK_OUT_NO:
+            self.btn_CheckOut.setEnabled(True)
+            self.btn_Commit.setEnabled(True)
+            self.btn_CheckOut.setChecked(False)
+        else:
+            self.btn_CheckOut.setEnabled(False)
+            self.btn_Commit.setEnabled(False)
+        self.btn_CheckOut.clicked.connect(self.on_check_out)
+        self.checkout_state = value
+
     def on_project_changed(self, dbproject):
         self.dbproject = dbproject
         if self.dbproject is None:
             return
-
-        self.btn_CheckOut.clicked.disconnect()
-        if self.dbproject.is_checked_out:
-            self.btn_CheckOut.setChecked(True)
-        else:
-            self.btn_CheckOut.setChecked(False)
-        self.btn_CheckOut.clicked.connect(self.on_check_out)
+        # self.btn_CheckOut.clicked.disconnect()
+        # if self.dbproject.is_checked_out:
+        #     self.btn_CheckOut.setChecked(True)
+        # else:
+        #     self.btn_CheckOut.setChecked(False)
+        # self.btn_CheckOut.clicked.connect(self.on_check_out)
 
     def on_check_out(self):
         print("Current DBProject:", self.dbproject)

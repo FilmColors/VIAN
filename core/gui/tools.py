@@ -2,8 +2,10 @@
 import os
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QFrame
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt, QPoint
 
 from core.gui.ewidgetbase import EDialogWidget
 
@@ -74,4 +76,96 @@ class DialogPrompt(EDialogWidget):
         uic.loadUi(path, self)
         self.label.setText(text)
         self.show()
+
+
+class StringList(QWidget):
+    def __init__(self, parent):
+        super(StringList, self).__init__(parent)
+        path = os.path.abspath("qt_ui/SimpleStringList.ui")
+        uic.loadUi(path, self)
+
+        self.entries = []
+        self.btn_Add.clicked.connect(self.on_add)
+        self.btn_Remove.clicked.connect(self.on_remove)
+
+        self.list = EListWidget(self)
+        self.list.onNameChanged.connect(self.on_name_changed)
+        self.widget.layout().addWidget(self.list)
+
+        self.list.installEventFilter(self)
+
+    def setTitle(self, title):
+        self.lbl_Title.setText(title)
+
+    def get_entries(self):
+        return self.entries
+
+    def on_add(self):
+        self.entries.append("New Entry")
+        self.update_widget()
+
+    @pyqtSlot(str, str)
+    def on_name_changed(self, a, b):
+        if a in self.entries:
+            idx = self.entries.index(a)
+            self.entries.pop(idx)
+            self.entries.insert(idx, b)
+        self.update_widget()
+
+    def update_widget(self):
+        self.list.clear()
+        for e in self.entries:
+            self.list.addItem(StringListitem(self.list, e))
+
+    def on_remove(self):
+        if self.list.currentItem() is not None:
+            if self.list.currentItem().text() in self.entries:
+                self.entries.remove(self.list.currentItem().text())
+            self.update_widget()
+
+
+class StringListitem(QListWidgetItem):
+    def __init__(self, parent, text):
+        super(StringListitem, self).__init__(parent)
+        self.setText(text)
+
+
+class EListWidget(QListWidget):
+    onNameChanged = pyqtSignal(str, str)
+    def __init__(self, parent):
+        super(EListWidget, self).__init__(parent)
+        self.line_edit = None
+
+    def mouseDoubleClickEvent(self, e):
+        if self.currentItem() is not None:
+            self.line_edit = PopupLineEdit(self)
+            rect = self.visualItemRect(self.currentItem())
+            pos = QPoint(rect.x(), rect.y())
+            pos = self.mapToParent(pos)
+
+            self.line_edit.move(self.mapToGlobal(pos))
+            self.line_edit.resize(self.width(), self.line_edit.height())
+            self.line_edit.show()
+            self.line_edit.returnPressed.connect(self.on_lineedit_closed)
+            self.line_edit.setFocus(Qt.OtherFocusReason)
+
+        print("Hello")
+
+    def on_lineedit_closed(self):
+        self.line_edit.close()
+        self.onNameChanged.emit(self.currentItem().text(), self.line_edit.text())
+        self.line_edit = None
+
+
+
+class PopupLineEdit(QLineEdit):
+    def __init__(self, parent):
+        super(PopupLineEdit, self).__init__(parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        self.setWindowModality(Qt.NonModal)
+        # self.setFocus(Qt.OtherFocusReason)
+
+    def focusOutEvent(self, QFocusEvent):
+        self.close()
+
 

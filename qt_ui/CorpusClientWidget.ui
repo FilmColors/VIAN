@@ -61,6 +61,9 @@
          <height>50</height>
         </size>
        </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>
@@ -125,6 +128,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn_CheckOut">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
            <horstretch>0</horstretch>
@@ -140,7 +146,8 @@
          <property name="icon">
           <iconset>
            <normaloff>icons/icon_lock_green.png</normaloff>
-           <normalon>icons/icon_check_out.png</normalon>icons/icon_lock_green.png</iconset>
+           <normalon>icons/icon_check_out.png</normalon>
+           <disabledoff>icons/icon_checked_out_by_other.png</disabledoff>icons/icon_lock_green.png</iconset>
          </property>
          <property name="iconSize">
           <size>

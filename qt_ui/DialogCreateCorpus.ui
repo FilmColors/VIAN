@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>238</height>
+    <width>488</width>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,6 +67,109 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_AllowUpload">
+     <property name="text">
+      <string>Allow Movie Upload</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cb_AllowDownload">
+     <property name="text">
+      <string>Allow Project Download</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_3">
+     <property name="lineWidth">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>&lt;b&gt;Constraints</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_ConstrSegmentation">
+     <property name="text">
+      <string>Segmentation</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="wc_segm" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_4"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_ConstrAnnotationLayers">
+     <property name="text">
+      <string>Annotation Layers</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="wc_ann" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_5"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_ConstrExperiments">
+     <property name="text">
+      <string>Experiments</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_ConstrClassObj">
+     <property name="text">
+      <string>Classification Objects</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_ConstrVocabularies">
+     <property name="text">
+      <string>Vocabularies</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cB_ConstrAnalyses">
+     <property name="text">
+      <string>Analyses</string>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">

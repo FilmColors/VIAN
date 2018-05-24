@@ -6,16 +6,16 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 
-from core.gui.hsv_color_picker import HSVColorPickerDock
+from core.gui.tools import StringList
 
 
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        # self.t = HSVColorPickerDock(self)
+        self.t = StringList(self)
         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
 
-        self.setCentralWidget(QtWidgets.QFontDialog())
+        self.setCentralWidget(self.t)
         self.resize(1200, 800)
 
 
