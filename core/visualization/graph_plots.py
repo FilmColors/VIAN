@@ -11,7 +11,7 @@ import networkx as nx
 
 from core.gui.ewidgetbase import EGraphicsView, line_separator
 
-
+#region DEFINITIONS
 DATA_SET = "../../results/result_fm_db_parser.pickle"
 
 COL_NODE_DES = QColor(30, 30, 30, 150)
@@ -30,7 +30,7 @@ COL_EDGE_UNH = QColor(200, 200, 140, 5)
 PEN_UNH = 2
 PEN_DES = 3
 PEN_SEL = 6
-#enregion
+#endregion
 
 
 class GraphNode(QGraphicsEllipseItem):
@@ -423,7 +423,6 @@ class VocabularyGraph(QWidget):
             if n.label.toPlainText() == label:
                 self.on_selection(n)
                 break
-
 
 
 class GraphControls(QWidget):

@@ -33,7 +33,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
             else:
                 start = ms_to_frames(t.get_start(), fps)
                 end = ms_to_frames(t.get_end(), fps)
-            args.append([start, end, project.movie_descriptor.movie_path, parameters])
+            args.append([start, end, project.movie_descriptor.get_movie_path(), parameters])
 
         return args
 
@@ -146,6 +146,13 @@ class MovieMosaicAnalysis(IAnalysisJob):
 
     def get_parameter_widget(self):
         return MovieMosaicPreferences()
+
+
+    def from_database(self, database_data):
+        return np.array(eval(database_data.decode()))
+
+    def to_database(self, container_data):
+        return np.array2string(container_data['mosaic'], separator=",").encode()
 
 
 

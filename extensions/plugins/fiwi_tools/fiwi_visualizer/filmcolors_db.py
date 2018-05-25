@@ -108,8 +108,14 @@ class UniqueKeyword():
 class DBStill():
     def __init__(self, row, t_type):
         self.fm_id = row['FM_ID']
-        self.segm_id = row['SEGM_ID']
-        self.shot_id = row['SHOT_ID']
+        try:
+            self.segm_id = int(row['SEGM_ID'])
+        except:
+            self.segm_id = row['SEGM_ID']
+        try:
+            self.shot_id = int(row['SHOT_ID'])
+        except:
+            self.segm_id = row['SHOT_ID']
         self.variation = row['SEGM_VAR']
         self.col = [float(row['L']),float(row['A']),float(row['B'])]
         self.sat = float(row['S'])
@@ -310,6 +316,12 @@ class FilmColorsDatabase():
     def get_segments(self, voc, filters):
         return self.db[voc].find(**filters)
 
+    def has_segments(self, voc, filters):
+        res = self.db[voc].find(**filters, _limit=1)
+        for r in res:
+            return True
+        return False
+
     def get_keywords(self, filters):
         return self.db[TB_KEYWORDS].find(**filters)
 
@@ -319,8 +331,11 @@ class FilmColorsDatabase():
     def get_stills_of_movie(self, movie:DBMovie):
 
         fg = [DBStill(rs, TB_STILL_FG) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_FG)]
+        fg = sorted(fg, key=lambda x: (x.segm_id, x.shot_id))
         bg = [DBStill(rs, TB_STILL_BG) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_BG)]
+        bg = sorted(bg, key=lambda x: (x.segm_id, x.shot_id))
         glob = [DBStill(rs, TB_STILL_GLOB) for rs in self.get_stills(dict(FM_ID=movie.fm_id), TB_STILL_GLOB)]
+        glob = sorted(glob, key=lambda x: (x.segm_id, x.shot_id))
 
         return[fg, bg, glob]
 

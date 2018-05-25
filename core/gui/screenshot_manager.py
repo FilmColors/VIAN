@@ -31,6 +31,7 @@ class ScreenshotsToolbar(EToolBar):
         self.toggle_annotation = self.addAction(create_icon("qt_ui/icons/icon_toggle_annotations.png"), "")
         self.action_export.triggered.connect(self.on_export)
         self.toggle_annotation.triggered.connect(self.on_toggle_annotations)
+
         self.show()
 
     def on_export(self):

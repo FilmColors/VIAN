@@ -55,7 +55,7 @@ class ELANProjectImporter():
 
         project_path = directory + filename
         project = VIANProject(self.main_window, project_path, filename)
-        project.movie_descriptor.movie_path = movie_path
+        project.movie_descriptor.set_movie_path(movie_path)
 
         for i in segmentations:
             segmentation_name = i[0]
@@ -94,8 +94,8 @@ class ELANProjectImporter():
         print("Imported ELAN Project:")
         print("      Name: ", project.name)
         print(" Directory: ", project.folder)
-        print("      Path: ", project.movie_descriptor.movie_path)
-        print("Movie Path: ", project.movie_descriptor.movie_path)
+        print("      Path: ", project.movie_descriptor.get_movie_path())
+        print("Movie Path: ", project.movie_descriptor.get_movie_path())
         print("######################")
 
         project.create_file_structure()

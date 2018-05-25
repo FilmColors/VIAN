@@ -7,6 +7,9 @@ from core.data.enums import *
 from core.data.computation import parse_file_path
 from core.data.containers import *
 
+from core.corpus.shared.entities import DBProject
+from core.corpus.client.corpus_client import CorpusClient
+
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):
 
 
@@ -66,6 +69,9 @@ def open_context_menu(main_window, pos, containers, project, screenshot_root = F
             media_objects = containers
             cm = MediaObjectContextMenu(main_window, pos, project, media_objects)
             return cm
+
+        if container_type == EXPERIMENT:
+            return ExperimentContextMenu(main_window, pos, project, containers)
 
         else:
             cm = ContextMenu(main_window, pos)
@@ -456,7 +462,7 @@ class MovieDescriptorContextMenu(ContextMenu):
 
     def on_set_movie_path(self):
         path = parse_file_path(QFileDialog.getOpenFileName(self)[0])
-        self.movie_descriptor.movie_path = path
+        self.movie_descriptor.set_movie_path(path)
         self.main_window.player.open_movie(path)
         self.main_window.dispatch_on_changed()
 
@@ -583,3 +589,58 @@ class MediaObjectContextMenu(ContextMenu):
                 obj.container.remove_media_object(obj)
         except:
             pass
+
+
+class ExperimentContextMenu(ContextMenu):
+    def __init__(self, parent, pos, project:VIANProject, experiments: List[Experiment]):
+        super(ExperimentContextMenu, self).__init__(parent, pos)
+        self.project = project
+        self.experiments = experiments
+        self.a_delete = self.addAction("Delete Experiments")
+        self.a_delete.triggered.connect(self.on_delete)
+        self.popup(pos)
+
+
+    def on_delete(self):
+        try:
+            for obj in self.experiments:
+                self.project.remove_experiment(obj)
+        except:
+            pass
+
+
+class CorpusProjectContextMenu(ContextMenu):
+    def __init__(self, parent, pos, project:VIANProject, dbproject:DBProject, corpus_client:CorpusClient):
+        super(CorpusProjectContextMenu, self).__init__(parent, pos)
+        self.project = project
+        self.dbproject = dbproject
+        self.corpus_client = corpus_client
+
+        self.a_open = self.addAction("Open Project")
+        self.a_check_in = self.addAction("Check In")
+        self.a_check_out = self.addAction("Check Out")
+        self.a_commit = self.addAction("Commit")
+        self.a_remove = self.addAction("Remove from Corpus")
+
+        self.a_open.triggered.connect(self.on_open)
+        self.a_check_in.triggered.connect(self.on_check_in)
+        self.a_check_out.triggered.connect(self.on_check_out)
+        self.a_commit.triggered.connect(self.on_commit)
+        self.a_remove.triggered.connect(self.on_remove)
+        self.popup(pos)
+
+    def on_open(self):
+        self.corpus_client.on_open_corpus_project(self.dbproject)
+
+
+    def on_check_in(self):
+        self.corpus_client.checkin_project(self.dbproject)
+
+    def on_check_out(self):
+        self.corpus_client.checkout_project(self.dbproject)
+
+    def on_commit(self):
+        pass
+
+    def on_remove(self):
+        self.corpus_client.remove_project(self.dbproject)

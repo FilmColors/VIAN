@@ -43,7 +43,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         # Since multiple_result is True, we want to generate a Barcode for each Segmentation
         # Thus an array of arguments has to be returned. For each Segmentation one argument Array
         args = []
-        movie_path = project.movie_descriptor.movie_path
+        movie_path = project.movie_descriptor.get_movie_path()
 
         # Targets are Segmentations
         for tgt in targets:
@@ -196,6 +196,12 @@ class BarcodeAnalysisJob(IAnalysisJob):
         activates the Analysis.
         """
         return BarcodeParameterWidget()
+
+    def from_database(self, database_data):
+        pass
+
+    def to_database(self, container_data):
+        return json.dumps(dict(name="barcode")).encode()
 
 
 class BarcodeParameterWidget(ParameterWidget):

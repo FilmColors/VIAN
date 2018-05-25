@@ -7,13 +7,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+from core.visualization.basic_vis import IVIANVisualization
 from core.data.computation import *
 from typing import *
 
 FeatureTuple = namedtuple("FeatureTuple", ["name", "segment_ids"])
 SegmentTuple = namedtuple("SegmentTuple", ['id', "start", "end"])
 
-class VIANFeaturePlot(QGraphicsView):
+class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, project: VIANProject, title =""):
         super(VIANFeaturePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
@@ -203,7 +204,7 @@ class VIANFeaturePlot(QGraphicsView):
         self.images.clear()
 
 
-class GenericFeaturePlot(QGraphicsView):
+class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, title =""):
         super(GenericFeaturePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
@@ -370,18 +371,17 @@ class GenericFeaturePlot(QGraphicsView):
         self.feature_items.clear()
         self.feature_labels.clear()
 
-    def export(self, return_image = False, width = 4096, height = 4096):
+    def render_to_image(self, background: QColor, size: QSize):
         """
-        Renders the scene content to an image, alternatively if return iamge is set to True, 
-        the QImage is returned and not stored to disc
-        :param return_image: 
-        :return: 
-        """
-
+                Renders the scene content to an image, alternatively if return iamge is set to True, 
+                the QImage is returned and not stored to disc
+                :param return_image: 
+                :return: 
+                """
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
-        image = QImage(QSize(width, height), QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format_ARGB32)
         image.fill(Qt.transparent)
 
         painter = QPainter()
@@ -389,11 +389,9 @@ class GenericFeaturePlot(QGraphicsView):
         self.scene().render(painter)
         painter.end()
 
-        if return_image:
-            return image
-        else:
-            path = QFileDialog.getSaveFileName()[0]
-            image.save(path)
+        return image
+
+
 
 class FeatureRectItem(QGraphicsRectItem):
     def __init__(self, x, y, w, h, pen, brush):
@@ -408,7 +406,6 @@ class FeatureRectItem(QGraphicsRectItem):
         self.setBrush(self.c_hovered)
         self.scene().update(self.scene().itemsBoundingRect())
         super(FeatureRectItem, self).hoverEnterEvent(event)
-
 
     def hoverLeaveEvent(self, event: 'QGraphicsSceneHoverEvent'):
         self.setBrush(self.c_unhovered)

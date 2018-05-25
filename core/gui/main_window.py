@@ -56,16 +56,21 @@ from extensions.extension_list import ExtensionList
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from core.gui.experiment_editor import ExperimentEditorDock
 
+from core.corpus.client.corpus_client import CorpusClientToolBar, CorpusClient
+from core.corpus.shared.widgets import *
+from core.corpus.shared.corpusdb import CorpusDB, DatasetCorpusDB
+
 from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
+VERSION = "0.5.8"
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
-__version__ = "0.5.5"
+__version__ = VERSION
 __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
@@ -80,6 +85,8 @@ class MainWindow(QtWidgets.QMainWindow):
     currentSegmentChanged = pyqtSignal(int)
     abortAllConcurrentThreads = pyqtSignal()
     onOpenCVFrameVisibilityChanged = pyqtSignal(bool)
+    onCorpusConnected = pyqtSignal(object)
+    onCorpusDisconnected = pyqtSignal(object)
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -88,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
         loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,100))
-        
+
         if PROFILE:
             self.profiler = cProfile.Profile()
             self.profiler.enable()
@@ -101,6 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_darwin = False
 
         # for MacOS
+
         if sys.platform == "darwin":
             self.is_darwin = True
             self.setAttribute(Qt.WA_MacFrameworkScaled)
@@ -163,6 +171,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
         self.experiment_dock = None
+        self.corpus_client_toolbar = None
 
 
         self.quick_annotation_dock = None
@@ -179,6 +188,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget = None
 
         self.project = VIANProject(self, "", "Default Project")
+        self.corpus_client = CorpusClient(self)
 
         loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
@@ -244,6 +254,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         loading_screen.showMessage("Creating GUI: Create Layout", Qt.AlignHCenter | Qt.AlignBottom,
                                    QColor(200, 200, 200, 100))
+
+        self.create_corpus_client_toolbar()
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -352,6 +364,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionClearRecent.triggered.connect(self.clear_recent)
 
+
+        # Corpus
+        self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
+        self.actionOpenLocal.triggered.connect(self.open_local_corpus)
+        self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
+
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
                                     self.drawing_overlay,
@@ -367,7 +385,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.project_streamer,
                                     self.analysis_results_widget,
                                     self.annotation_options,
-                                    self.experiment_dock.experiment_editor
+                                    self.experiment_dock.experiment_editor,
+                                    self.corpus_client
 
                                           ]
 
@@ -457,7 +476,12 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        self.abortAllConcurrentThreads.emit()
+        for a in self.project.analysis:
+            a.sync_load()
+            t = DBAnalysis().from_project(a)
+            q = t.to_database()
+            t.from_database(q)
+
 
     def start_colormetry(self):
         job = ColormetryJob2(30, self)
@@ -469,7 +493,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread_pool.start(worker)
 
     def on_colormetry_push_back(self, data):
-        if self.project is not None:
+        if self.project is not None and self.project.colormetry_analysis is not None:
             self.project.colormetry_analysis.append_data(data[0])
             self.timeline.timeline.set_colormetry_progress(data[1])
 
@@ -603,7 +627,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_outliner(self):
         if self.outliner is None:
-            self.outliner = Outliner(self)
+            self.outliner = Outliner(self, self.corpus_client)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.outliner)
         else:
             if self.outliner.isVisible():
@@ -668,7 +692,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_manager.show()
             self.vocabulary_manager.activateWindow()
 
-
     def create_experiment_editor(self):
         if self.experiment_dock is None:
             self.experiment_dock = ExperimentEditorDock(self)
@@ -719,6 +742,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.colorimetry_live.hide()
             else:
                 self.colorimetry_live.show()
+
+    def create_corpus_client_toolbar(self):
+        if self.corpus_client_toolbar is None:
+            self.corpus_client_toolbar = CorpusClientToolBar(self, self.corpus_client)
+            self.addToolBar(self.corpus_client_toolbar)
+
+        else:
+            self.screenshot_toolbar.show()
+
 
     #endregion
 
@@ -845,7 +877,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.print_message("Update Aborted", "Orange")
         else:
             if show_newest:
-                QMessageBox.information(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version)
+                answer = QMessageBox.question(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version + "\n" +
+                                        "Do you want to update anyway?")
+                if answer == QMessageBox.Yes:
+                    self.updater.update(force = True)
+                else:
+                    self.print_message("Update Aborted", "Orange")
             else:
                 self.print_message("VIAN is up to date with version: " + str(__version__), "Green")
 
@@ -923,7 +960,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     a_dict = a.serialize()
                     annotation_dicts.append(a_dict)
 
-        job = CreateScreenshotJob([frame_pos, self.project.movie_descriptor.movie_path, annotation_dicts, time])
+        job = CreateScreenshotJob([frame_pos, self.project.movie_descriptor.get_movie_path(), annotation_dicts, time])
         self.run_job_concurrent(job)
 
     def get_frame(self, time):
@@ -1395,7 +1432,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
         dialog.show()
 
-    def new_project(self, project, template_path = None, vocabularies = None):
+    def new_project(self, project, template_path = None, vocabularies = None, copy_movie = "None"):
         if self.project is not None:
             self.close_project()
 
@@ -1415,6 +1452,17 @@ class MainWindow(QtWidgets.QMainWindow):
             for i, v in enumerate(vocabularies):
                 print("Importing: " + str(i) + " " + v + "\r")
                 self.project.import_vocabulary(v)
+
+        if copy_movie == "Copy":
+            new_path = self.project.folder + os.path.basename(self.project.movie_descriptor.movie_path)
+            print("Copy: ", new_path, self.project.movie_descriptor.movie_path)
+            shutil.copy(self.project.movie_descriptor.movie_path, new_path)
+            self.project.movie_descriptor.set_movie_path(new_path)
+
+        elif copy_movie == "Move":
+            new_path = self.project.folder + os.path.basename(self.project.movie_descriptor.movie_path)
+            shutil.move(self.project.movie_descriptor.movie_path, new_path)
+            self.project.movie_descriptor.set_movie_path(new_path)
 
         self.project.store_project(self.settings)
 
@@ -1452,6 +1500,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_closed()
 
     def load_project(self, path):
+        if self.project is not None:
+            self.close_project()
 
         if path == "" or path is None:
             self.print_message("Not Loaded, Path was Empty")
@@ -1484,7 +1534,7 @@ class MainWindow(QtWidgets.QMainWindow):
             name = split[len(split)-1]
             self.project.path = path + name
             self.project.name = name
-            self.project.movie_descriptor.movie_path = self.player.movie_path
+            self.project.movie_descriptor.set_movie_path(self.player.movie_path)
 
             path = self.project.path
             args = [self.project, path, self.settings]
@@ -1497,6 +1547,8 @@ class MainWindow(QtWidgets.QMainWindow):
             worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
             self.start_worker(worker, "Saving Project")
 
+        print(self.project.folder)
+        self.settings.add_to_recent_files(self.project)
         self.project.undo_manager.no_changes = True
 
         return
@@ -1649,6 +1701,39 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #endregion
 
+
+    #region Corpus
+    def on_create_corpus(self):
+        dialog = CreateCorpusDialog(self)
+        dialog.show()
+        dialog.onCreated.connect(self.on_corpus_created)
+
+    @pyqtSlot(object)
+    def on_corpus_created(self,  corpus: CorpusDB):
+        if corpus is not None:
+            answer = QMessageBox.question(self, "Corpus", "Do you want to connect to " + corpus.name + " now?")
+            if answer == QMessageBox.Yes:
+                self.connect_to_corpus(corpus)
+
+    def open_local_corpus(self):
+        try:
+            path = QFileDialog.getOpenFileName(self, directory=self.settings.DIR_CORPORA, filter="*.vian_corpus")[0]
+            self.corpus_client.on_connect_local(path)
+        except Exception as e:
+            print(e)
+
+    def open_remote_corpus(self):
+        dialog = CorpusConnectRemoteDialog(self, self.corpus_client.metadata.contributor)
+        dialog.onConnectRemote.connect(self.corpus_client.connect_remote)
+        dialog.show()
+
+    def connect_to_corpus(self, corpus: CorpusDB):
+        self.corpus_client.on_connect_local(corpus.file_path)
+
+    def disconnect_to_corpus(self, corpus: CorpusDB):
+        self.onCorpusDisconnected.emit(corpus)
+
+    #endregion
     def set_ui_enabled(self, state):
         self.actionSave.setDisabled(not state)
         self.actionSaveAs.setDisabled(not state)
@@ -1713,11 +1798,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
             screenshot_annotation_dicts.append(a_dicts)
 
-        self.frame_update_worker.set_movie_path(self.project.movie_descriptor.movie_path)
+        self.frame_update_worker.set_movie_path(self.project.movie_descriptor.get_movie_path())
         self.frame_update_worker.set_project(self.project)
 
         self.screenshots_manager.set_loading(True)
-        job = LoadScreenshotsJob([self.project.movie_descriptor.movie_path, screenshot_position, screenshot_annotation_dicts])
+        job = LoadScreenshotsJob([self.project.movie_descriptor.get_movie_path(), screenshot_position, screenshot_annotation_dicts])
         self.run_job_concurrent(job)
 
         self.setWindowTitle("VIAN Project:" + str(self.project.path))

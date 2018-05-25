@@ -1,10 +1,27 @@
 import pyqtgraph as pg
 from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene
-from PyQt5.QtGui import QColor, QPen
+from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import numpy as np
 
-class HistogramVis(QWidget):
+from core.gui.tools import ExportImageDialog
+
+class IVIANVisualization():
+    def export(self, main_window = None):
+        if not isinstance(main_window, QWidget):
+            main_window = None
+        dialog = ExportImageDialog(main_window, self)
+        dialog.show()
+
+    def render_to_image(self, background: QColor, size: QSize):
+        image = QImage(size, QImage.Format_RGBA8888)
+        qp = QPainter()
+        qp.begin(image)
+        qp.fillRect(image.rect(), background)
+        qp.end()
+        return image
+
+class HistogramVis(QWidget, IVIANVisualization):
     def __init__(self, parent):
         super(HistogramVis, self).__init__(parent)
         self.view = pg.PlotWidget()
@@ -35,7 +52,7 @@ class HistogramVis(QWidget):
             itm.setOpts(height=[ys[i]])
 
 
-class PaletteVis(QWidget):
+class PaletteVis(QWidget, IVIANVisualization):
     def __init__(self, parent):
         super(PaletteVis, self).__init__(parent)
         self.view = QGraphicsView()

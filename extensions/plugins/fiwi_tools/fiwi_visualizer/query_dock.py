@@ -119,7 +119,6 @@ class QueryDock(QDockWidget):
         for itm in self.filters:
             itm.setChecked(False)
 
-
     def update_corpora_list(self, corporas):
         self.cb_Corporas.currentIndexChanged.disconnect(self.visualizer.set_current_corpus)
         self.cb_movie.currentIndexChanged.disconnect(self.on_movie_changed)
@@ -167,7 +166,6 @@ class QueryDock(QDockWidget):
         self.lbl_n_images.setText(str(v))
         self.visualizer.n_stills_max = v
 
-
     @pyqtSlot(int)
     def on_mode_changed(self, mode):
         if mode == 0:
@@ -178,14 +176,11 @@ class QueryDock(QDockWidget):
             self.w_movie_level.hide()
             self.w_corpus_level.show()
 
-
-
-
     @pyqtSlot(object)
     def on_corpus_changed(self, corpus):
         self.cb_movie.clear()
         for m in corpus.movies:
-            self.cb_movie.addItem(m.name)
+            self.cb_movie.addItem(m.name[:50])
 
     def on_movie_changed(self):
         try:

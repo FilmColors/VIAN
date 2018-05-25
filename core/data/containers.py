@@ -13,7 +13,7 @@ from core.data.computation import *
 from core.gui.vocabulary import VocabularyItem
 from core.data.project_streaming import ProjectStreamer, NUMPY_NO_OVERWRITE
 from core.data.enums import *
-
+from typing import List
 from core.data.project_streaming import IStreamableContainer
 
 from core.node_editor.node_editor import *
@@ -39,6 +39,8 @@ class VIANProject(IHasName, IClassifiable):
         self.shots_dir = ""
         self.export_dir = ""
 
+        self.corpus_id = -1
+
         self.id_list = []
 
         self.annotation_layers = []
@@ -61,7 +63,7 @@ class VIANProject(IHasName, IClassifiable):
         self.active_screenshot_group = self.screenshot_groups[0]
         self.active_screenshot_group.is_current = True
 
-        self.folder = path.split("/")[len(path.split("/")) - 1]
+        # self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
         self.colormetry_analysis = None
@@ -118,6 +120,19 @@ class VIANProject(IHasName, IClassifiable):
 
     def get_type(self):
         return PROJECT
+
+    def reset_file_paths(self, folder, file, main_window = None):
+        self.path = file
+        self.folder = folder
+        root = self.folder
+
+        self.data_dir = root + "/data"
+        self.results_dir = root + "/results"
+        self.shots_dir = root + "/shots"
+        self.export_dir = root + "/export"
+
+        if self.main_window is not None:
+            self.main_window.project_streamer.on_loaded(self)
 
     def create_file_structure(self):
         root = self.folder
@@ -262,9 +277,25 @@ class VIANProject(IHasName, IClassifiable):
     # endregion
 
     # region Screenshots
-    def create_screenshot(self, name, image, time_ms):
-        new = Screenshot(name,image,timestamp=time_ms)
-        self.add_screenshot(new)
+    def create_screenshot(self, name, frame_pos = None, time_ms = None):
+        if frame_pos is None and time_ms is None:
+            print("Either frame or ms has to be given")
+            return
+        video_capture = cv2.VideoCapture(self.movie_descriptor.movie_path)
+
+        if frame_pos is None:
+            frame_pos = ms_to_frames(time_ms, video_capture.get(cv2.CAP_PROP_FPS))
+        else:
+            time_ms = frame2ms(frame_pos, video_capture.get(cv2.CAP_PROP_FPS))
+
+        video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
+        ret, frame = video_capture.read()
+
+        if ret:
+            # shot = Screenshot(title="New Screenshot", image=frame, img_blend=frame_annotated, timestamp=time, frame_pos=frame_pos, annotation_item_ids=annotation_ids)
+
+            new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos)
+            self.add_screenshot(new)
 
     def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)
@@ -273,7 +304,6 @@ class VIANProject(IHasName, IClassifiable):
         self.screenshot_groups[0].add_screenshots(screenshot)
         if group == 0 and self.active_screenshot_group is not None and self.active_screenshot_group is not self.screenshot_groups[0]:
             self.active_screenshot_group.add_screenshots(screenshot)
-
 
         self.sort_screenshots()
         self.undo_manager.to_undo((self.add_screenshot, [screenshot]),(self.remove_screenshot, [screenshot]))
@@ -347,8 +377,9 @@ class VIANProject(IHasName, IClassifiable):
             self.remove_from_id_list(grp)
             self.dispatch_changed()
 
-    def get_screenshots_of_segment(self, main_segm_id):
-        segmentation = self.get_main_segmentation()
+    def get_screenshots_of_segment(self, main_segm_id, segmentation = None):
+        if segmentation is None:
+            segmentation = self.get_main_segmentation()
         result = []
         if segmentation is not None:
             start = segmentation.segments[main_segm_id].get_start()
@@ -458,7 +489,7 @@ class VIANProject(IHasName, IClassifiable):
         return self.movie_descriptor
 
     #region Annotations
-    def create_annotation_layer(self, name, t_start, t_stop):
+    def create_annotation_layer(self, name, t_start = 0, t_stop = 0):
         layer = AnnotationLayer(name, t_start, t_stop)
         self.add_annotation_layer(layer)
         return layer
@@ -532,74 +563,86 @@ class VIANProject(IHasName, IClassifiable):
         :param path: 
         :return: 
         """
+        project = self
+
         a_layer = []
         screenshots = []
         screenshots_img = []
         screenshots_ann = []
         segmentations = []
         analyzes = []
+        screenshot_groups = []
         scripts = []
-        vocabularies = []
         experiments = []
 
-        for v in self.vocabularies:
+        vocabularies = []
+
+        for v in project.vocabularies:
             vocabularies.append(v.serialize())
 
-        for a in self.annotation_layers:
+        for a in project.annotation_layers:
             a_layer.append(a.serialize())
 
-        for b in self.screenshots:
+        for b in project.screenshots:
             src, img = b.serialize()
             screenshots.append(src)
-            screenshots_img.append(img[0])
-            screenshots_ann.append(img[1])
+            # screenshots_img.append(img[0])
+            # screenshots_ann.append(img[1])
 
-        for c in self.segmentation:
+        for c in project.segmentation:
             segmentations.append(c.serialize())
 
-        for d in self.analysis:
+        for d in project.analysis:
             analyzes.append(d.serialize())
 
-        for e in self.node_scripts:
-            scripts.append(e.serialize())
+        for e in project.screenshot_groups:
+            screenshot_groups.append(e.serialize())
 
-        for f in self.experiments:
-            experiments.append(f.serialize())
+        for f in project.node_scripts:
+            scripts.append(f.serialize())
+
+        for g in project.experiments:
+            experiments.append(g.serialize())
 
         data = dict(
-            path = self.path,
-            name = self.name,
-            notes=self.notes,
-            results_dir = self.results_dir,
-            export_dir=self.export_dir,
-            shots_dir=self.shots_dir,
-            data_dir=self.data_dir,
-            annotation_layers = a_layer,
-            current_annotation_layer = None,
-            main_segmentation_index = self.main_segmentation_index,
-            screenshots = screenshots,
-            segmentation = segmentations,
-            analyzes = analyzes,
-            movie_descriptor = self.movie_descriptor.serialize(),
-            scripts = scripts,
+            path=project.path,
+            name=project.name,
+            corpus_id=project.corpus_id,
+            annotation_layers=a_layer,
+            notes=project.notes,
+            current_annotation_layer=None,
+            results_dir=project.results_dir,
+            export_dir=project.export_dir,
+            shots_dir=project.shots_dir,
+            data_dir=project.data_dir,
+            main_segmentation_index=project.main_segmentation_index,
+            screenshots=screenshots,
+            segmentation=segmentations,
+            analyzes=analyzes,
+            movie_descriptor=project.movie_descriptor.serialize(),
+            version=project.main_window.version,
+            screenshot_groups=screenshot_groups,
+            scripts=scripts,
             vocabularies=vocabularies,
-            experiments = experiments
-        )
+            experiments=experiments
 
+        )
         if path is None:
-            path = self.path.replace(settings.PROJECT_FILE_EXTENSION, "")
+            path = project.path
+        path = path.replace(settings.PROJECT_FILE_EXTENSION, "")
 
         numpy_path = path + "_scr"
         project_path = path + ".eext"
 
         if settings.SCREENSHOTS_STATIC_SAVE:
-            np.savez(numpy_path, imgs = screenshots_img, annotations = screenshots_ann, empty=[True])
+            np.savez(numpy_path, imgs=screenshots_img, annotations=screenshots_ann, empty=[True])
 
         try:
             with open(project_path, 'w') as f:
                 json.dump(data, f)
-        except Exception:
-            print(Exception)
+        except Exception as e:
+            print("Exception during Storing: ", str(e))
+
 
     def load_project(self, settings, path):
 
@@ -607,6 +650,7 @@ class VIANProject(IHasName, IClassifiable):
             path += settings.PROJECT_FILE_EXTENSION
 
         if not os.path.isfile(path):
+            print("File not Found: ", path)
             return
 
         with open(path) as f:
@@ -617,6 +661,10 @@ class VIANProject(IHasName, IClassifiable):
         self.name = my_dict['name']
         self.main_segmentation_index = my_dict['main_segmentation_index']
 
+        try:
+            self.corpus_id = my_dict['corpus_id']
+        except:
+            self.corpus_id = -1
         try:
             self.notes = my_dict['notes']
         except:
@@ -655,7 +703,7 @@ class VIANProject(IHasName, IClassifiable):
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
-
+        print(self.movie_descriptor.movie_path)
         # Attempt to load the Vocabularies, this might fail if the save is from VIAN 0.1.1
         try:
             self.vocabularies = []
@@ -667,10 +715,11 @@ class VIANProject(IHasName, IClassifiable):
             self.main_window.print_message("Loading Vocabularies failed", "Red")
             self.main_window.print_message(e, "Red")
 
+
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
-
+        print("OMM")
         for i, b in enumerate(my_dict['screenshots']):
             new = Screenshot().deserialize(b, self)
             self.add_screenshot(new)
@@ -685,7 +734,6 @@ class VIANProject(IHasName, IClassifiable):
                 self.add_analysis(new)
                 if isinstance(new, ColormetryAnalysis):
                     self.colormetry_analysis = new
-
 
         try:
             old = self.screenshot_groups
@@ -763,12 +811,14 @@ class VIANProject(IHasName, IClassifiable):
 
         self.sort_screenshots()
         self.undo_manager.clear()
+        print("Loaded")
 
-    def get_template(self, segm, voc, ann, scripts):
+    def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
         segmentations = []
         vocabularies = []
         layers = []
         node_scripts = []
+        experiments = []
 
         if segm:
             for s in self.segmentation:
@@ -778,11 +828,14 @@ class VIANProject(IHasName, IClassifiable):
                 vocabularies.append(v.serialize())
         if ann:
             for l in self.annotation_layers:
-                layers.append([l.get_name(), l.get_start(), l.get_end(), l.unique_id])
+                layers.append([l.get_name(), l.unique_id])
         if scripts:
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
 
+        if experiment:
+            for e in self.experiments:
+                experiments.append(e.to_template())
 
 
         template = dict(
@@ -790,7 +843,7 @@ class VIANProject(IHasName, IClassifiable):
             vocabularies = vocabularies,
             layers = layers,
             node_scripts=node_scripts,
-
+            experiments = experiments
         )
         return template
 
@@ -806,19 +859,23 @@ class VIANProject(IHasName, IClassifiable):
         for s in template['segmentations']:
             new = Segmentation(s[0])
             new.unique_id = s[1]
-            self.add_segmentation(new, False)
+            self.add_segmentation(new)
 
         for v in template['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
         for l in template['layers']:
-            self.create_annotation_layer(l[0], int(l[1]), int(l[2]))
+            new = AnnotationLayer(l[0])
+            new.unique_id = l[1]
+            self.add_annotation_layer(new)
 
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
 
+        for e in template['experiments']:
+            new = Experiment().deserialize(e, self)
 
     #endregion
 
@@ -1687,6 +1744,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         else:
             self.t_end = t_end
 
+
         if self.a_type == AnnotationType.Image and self.resource_path is not "":
             self.load_image()
 
@@ -1918,7 +1976,6 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
                 self.media_objects.append(new)
         except Exception as e:
             print(e)
-
         if len(self.keys)>0:
             self.has_key = True
         self.widget = None
@@ -1932,12 +1989,17 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         return ANNOTATION
 
     def load_image(self):
-        img = cv2.imread(self.resource_path, -1)
-        if img is not None:
-            if img.shape[2] == 3:
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-            qimage, qpixmap = numpy_to_qt_image(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-            self.image = qimage
+        try:
+            img = cv2.imread(self.resource_path, -1)
+            print("DONE")
+            if img is not None:
+                if img.shape[2] == 3:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+                qimage, qpixmap = numpy_to_qt_image(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
+                self.image = qimage
+        except Exception as e:
+            print(e)
+
 
     def delete(self):
         self.annotation_layer.remove_annotation(self)
@@ -1946,7 +2008,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         return self.annotation_layer
 
 class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
-    def __init__(self, name = None, t_start = None, t_end = None):
+    def __init__(self, name = None, t_start = 0, t_end = 0):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
 
@@ -2052,9 +2114,11 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         except:
             self.locked = False
 
+
         for a in serialization['annotations']:
             new = Annotation()
             new.deserialize(a, self.project)
+
             new.annotation_layer = self
             self.annotations.append(new)
 
@@ -2594,7 +2658,7 @@ class ConnectionDescriptor(IProjectContainer):
 
 #region MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
-    def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id=-0o001, year=1800, source="",
+    def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id="0_0_0", year=1800, source="",
                  duration=100, fps = 30):
         IProjectContainer.__init__(self)
         IClassifiable.__init__(self)
@@ -2607,9 +2671,9 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.duration = duration
         self.notes = ""
         self.fps = fps
+        self.is_relative = False
 
     def serialize(self):
-
         data = dict(
             movie_name=self.movie_name,
             unique_id=self.unique_id,
@@ -2619,6 +2683,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             source=self.source,
             duration=self.duration,
             notes=self.notes,
+            is_relative = self.is_relative
         )
 
         return data
@@ -2628,8 +2693,6 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.dispatch_on_changed(item=self)
 
     def deserialize(self, serialization):
-        # Dirty but should work, since the movie is the only Container that is added during Project Creation
-        # we have to remove it from the id-list
         self.project.remove_from_id_list(self)
 
         for key, value in list(serialization.items()):
@@ -2662,6 +2725,28 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 
     def get_source_properties(self):
         return ["Current Time", "Current Frame", "Movie Name", "Movie Path", "Movie ID", "Year", "Source", "Duration", "Notes"]
+
+    def get_movie_path(self):
+        if self.is_relative:
+            return self.project.folder + self.movie_path
+        else:
+            return self.movie_path
+
+    def set_movie_path(self, path):
+
+        if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
+            self.movie_path = os.path.basename(path)
+            self.is_relative = True
+        else:
+            self.movie_path = path
+            self.is_relative = False
+
+        cap = cv2.VideoCapture(self.get_movie_path())
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        print("MoviePath set: ", path, " to \"" ,self.movie_path, "\"  ", self.is_relative)
+
+    def get_movie_id_list(self):
+        return self.movie_id.split("_")
 
     def get_auto_text(self, property_name, time_ms, fps):
         if property_name == "Current Time":
@@ -2704,6 +2789,9 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
     def apply_loaded(self, obj):
         self.data = obj
 
+    def sync_load(self):
+        self.data = self.project.main_window.project_streamer.sync_load(self.unique_id)
+
     def get_name(self):
         return self.name
 
@@ -2737,41 +2825,38 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
         self.script_id = script_id
         self.final_node_ids = final_nodes_ids
 
-    # def unload_container(self, data = None):
-    #     super(NodeScriptAnalysis, self).unload_container(self.data)
-    #     self.data = None
-    #
-    # def apply_loaded(self, obj):
-    #     self.data = obj
-    #
+
     def get_type(self):
         return ANALYSIS_NODE_SCRIPT
 
     def serialize(self):
         data_json = []
 
-        #Loop over each final node of the Script
-        for i, n in enumerate(self.data):
-            node_id = self.final_node_ids[i]
-            node_result = []
-            result_dtypes = []
+        try:
+            #Loop over each final node of the Script
+            for i, n in enumerate(self.data):
+                node_id = self.final_node_ids[i]
+                node_result = []
+                result_dtypes = []
 
-            # Loop over each result in the final node
-            for d in n:
-                if isinstance(d, np.ndarray):
-                    node_result.append(d.tolist())
-                    result_dtypes.append(str(d.dtype))
-                elif isinstance(d, list):
-                    node_result.append(d)
-                    result_dtypes.append("list")
-                else:
-                    node_result.append(np.array(d).tolist())
-                    result_dtypes.append(str(np.array(d).dtype))
-            data_json.append([node_id, node_result, result_dtypes])
+                # Loop over each result in the final node
+                for d in n:
+                    if isinstance(d, np.ndarray):
+                        node_result.append(d.tolist())
+                        result_dtypes.append(str(d.dtype))
+                    elif isinstance(d, list):
+                        node_result.append(d)
+                        result_dtypes.append("list")
+                    else:
+                        node_result.append(np.array(d).tolist())
+                        result_dtypes.append(str(np.array(d).dtype))
+                data_json.append([node_id, node_result, result_dtypes])
 
-        # We want to store the analysis container if it is not already stored
+            # We want to store the analysis container if it is not already stored
 
-        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, self.data)
+            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
+        except Exception as e:
+            print("Exception in NodeScriptAnalysis.serialize(): ", str(e))
 
         data = dict(
             name=self.name,
@@ -2792,24 +2877,29 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
 
         self.final_node_ids = []
         self.data = []
-        # Loop over each final node of the Script
-        for r in serialization['data_json']:
+        try:
+            data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
 
-            node_id = r[0]
-            node_results = r[1]
-            result_dtypes = r[2]
+            # Loop over each final node of the Script
+            for r in data_json:
 
-            node_data = []
-            self.final_node_ids.append(node_id)
+                node_id = r[0]
+                node_results = r[1]
+                result_dtypes = r[2]
 
-            # Loop over each Result of the Final Node
-            for j, res in enumerate(node_results):
-                if result_dtypes[j] == "list":
-                    node_data.append(res)
-                else:
-                    node_data.append(np.array(res, dtype=result_dtypes[j]))
+                node_data = []
+                self.final_node_ids.append(node_id)
 
-                self.data.append(node_data)
+                # Loop over each Result of the Final Node
+                for j, res in enumerate(node_results):
+                    if result_dtypes[j] == "list":
+                        node_data.append(res)
+                    else:
+                        node_data.append(np.array(res, dtype=result_dtypes[j]))
+
+                    self.data.append(node_data)
+        except Exception as e:
+            print(e)
 
         return self
 
@@ -2832,8 +2922,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
         except Exception as e:
             print("Preview:", e)
-            # QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
-            #                     " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 
     def get_visualization(self):
         try:
@@ -2894,9 +2982,16 @@ class ColormetryAnalysis(AnalysisContainer):
         self.frame_pos = []
         self.histograms = []
         self.avg_colors = []
-        self.palettes = []
+
+        self.palette_bins = []
+        self.palette_cols = []
+        self.palette_layers = []
+
         self.resolution = 30
         self.has_finished = False
+
+        self.current_idx = 0
+        self.current_junk_idx = 0
 
         self.linear_colors = []
         for x in range(16):
@@ -2918,21 +3013,35 @@ class ColormetryAnalysis(AnalysisContainer):
             self.histograms.append(data['hist'])
             self.frame_pos.append(data['frame_pos'])
             self.avg_colors.append(data['avg_color'])
+
+            # self.palettes.append(data['palette'].tree)
+
+            self.palette_bins.append(data['palette'].tree[2])
+            self.palette_cols.append(data['palette'].tree[1])
+            self.palette_layers.append(data['palette'].tree[0])
+
+
+            #TODO Palettes should be either numpy or list, but not both
+
+            # print("Hist: ", np.array(data['hist']).nbytes)
+            # print("avg_color: ", np.array(data['avg_color']).nbytes)
+            # print("palette: ", np.array(data['palette']).nbytes)
+
         except Exception as e:
-            print("append_data() raised ", str(e))
+            raise e
+            print("ColormetryAnalysis.append_data() raised ", str(e))
 
     def get_update(self, time_ms):
         try:
             frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
             if len(self.histograms) > 0:
-                hist_data =self.histograms[frame_idx]
-
-                hist_data_pal = np.resize(hist_data, new_shape=(hist_data.shape[0] ** 3))
-                pal_indices = np.argsort(hist_data_pal)[-6:]
-                pal_cols = self.linear_colors[pal_indices]
-                palette_values = hist_data_pal[pal_indices]
-
-                return dict(hist=hist_data, palette = dict(val=palette_values, col=pal_cols))
+                # hist_data =self.histograms[frame_idx]
+                #
+                # hist_data_pal = np.resize(hist_data, new_shape=(hist_data.shape[0] ** 3))
+                # pal_indices = np.argsort(hist_data_pal)[-6:]
+                # pal_cols = self.linear_colors[pal_indices]
+                # palette_values = hist_data_pal[pal_indices]
+                return dict(palette = [self.palette_layers[frame_idx], self.palette_cols[frame_idx], self.palette_bins[frame_idx]])
 
         except Exception as e:
             print(e)
@@ -2940,6 +3049,9 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self, obj):
         self.has_finished = True
+        self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
+        self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
+        self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
 
     def serialize(self):
         data = dict(
@@ -2948,7 +3060,9 @@ class ColormetryAnalysis(AnalysisContainer):
             frame_pos=self.frame_pos,
             histograms=self.histograms,
             avg_colors=self.avg_colors,
-            palettes=self.palettes,
+            palette_colors=self.palette_cols,
+            palette_layers=self.palette_layers,
+            palette_bins=self.palette_bins,
             resolution=self.resolution,
         )
 
@@ -2969,7 +3083,6 @@ class ColormetryAnalysis(AnalysisContainer):
         self.unique_id = serialization['unique_id']
         self.notes = serialization['notes']
 
-
         try:
             self.has_finished = serialization['has_finished']
             data = streamer.sync_load(self.unique_id)
@@ -2979,19 +3092,24 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.frame_pos =  data['frame_pos']
                 self.histograms =  data['histograms']
                 self.avg_colors =  data['avg_colors']
-                self.palettes =  data['palettes']
+
+                self.palette_cols = data['palette_colors']
+                self.palette_layers = data['palette_layers']
+                self.palette_bins = data['palette_bins']
+
                 self.resolution =  data['resolution']
             else:
+                print("No Colormetry Data Loaded")
                 self.curr_location = 0
                 self.time_ms = []
                 self.frame_pos = []
                 self.histograms = []
                 self.avg_colors = []
-                self.palettes = []
+
                 self.resolution = 30
                 self.has_finished = False
         except Exception as e:
-            raise(e)
+            print("Exception in Loading Analysis", e)
 
 
         return self
@@ -3554,7 +3672,7 @@ class Experiment(IProjectContainer, IHasName):
         self.analyses = []
         self.analyses_parameters = []
 
-        # This is a list of [container_id, unique_keyword_id]
+        # This is a list of [IClassifiable, UniqueKeyword]
         self.classification_results = []
 
     def get_name(self):
@@ -3565,6 +3683,12 @@ class Experiment(IProjectContainer, IHasName):
 
     def get_type(self):
         return EXPERIMENT
+
+    def get_vocabularies(self):
+        result = []
+        for clobj in self.classification_objects:
+            result.extend(clobj.get_vocabularies())
+        return result
 
     def create_class_object(self, name, parent):
         obj = ClassificationObject(name, self, parent)
@@ -3620,7 +3744,7 @@ class Experiment(IProjectContainer, IHasName):
                             result.append(child)
         return result
 
-    def get_classification_objects_plain(self):
+    def get_classification_objects_plain(self) -> List[ClassificationObject]:
         result = []
         for root in self.classification_objects:
             root.get_children_plain(result)
@@ -3679,6 +3803,16 @@ class Experiment(IProjectContainer, IHasName):
         )
         return data
 
+    def to_template(self):
+        data = dict(
+            name=self.name,
+            unique_id=self.unique_id,
+            classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
+            analyses=self.analyses,
+            classification_results=[]
+        )
+        return data
+
     def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
@@ -3704,6 +3838,8 @@ class Experiment(IProjectContainer, IHasName):
 
         return self
 
+    def delete(self):
+        self.project.remove_experiment(self)
 
 #endregion
 

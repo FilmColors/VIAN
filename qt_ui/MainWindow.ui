@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1167</width>
-    <height>940</height>
+    <width>1083</width>
+    <height>914</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1167</width>
+     <width>1083</width>
      <height>21</height>
     </rect>
    </property>
@@ -201,6 +201,17 @@
     </property>
     <addaction name="actionAuto_Segmentation"/>
    </widget>
+   <widget class="QMenu" name="menuCorpus">
+    <property name="title">
+     <string>Corpus</string>
+    </property>
+    <addaction name="actionCreateCorpus"/>
+    <addaction name="actionOpenLocal"/>
+    <addaction name="actionOpenRemote"/>
+    <addaction name="separator"/>
+    <addaction name="actionCommitProject"/>
+    <addaction name="actionCheckoutProject"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuCreate"/>
@@ -208,6 +219,7 @@
    <addaction name="menuTools"/>
    <addaction name="menuPlayer"/>
    <addaction name="menuAnalysis"/>
+   <addaction name="menuCorpus"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -708,6 +720,34 @@
   <action name="actionImportVIANExperiment">
    <property name="text">
     <string>VIAN Experiment</string>
+   </property>
+  </action>
+  <action name="actionCreateCorpus">
+   <property name="text">
+    <string>Create Corpus</string>
+   </property>
+  </action>
+  <action name="actionOpenLocal">
+   <property name="text">
+    <string>Open Local</string>
+   </property>
+  </action>
+  <action name="actionCommitProject">
+   <property name="text">
+    <string>Commit Project</string>
+   </property>
+  </action>
+  <action name="actionCheckoutProject">
+   <property name="text">
+    <string>Checkout Project</string>
+   </property>
+  </action>
+  <action name="actionOpenRemote">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Open Remote</string>
    </property>
   </action>
  </widget>

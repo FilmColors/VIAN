@@ -25,7 +25,7 @@ class ColometricsAnalysis(IAnalysisJob):
                                                   multiple_result=True)
 
     def prepare(self, project: VIANProject, targets: List[ITimeRange], parameters, fps):
-        path = project.movie_descriptor.movie_path
+        path = project.movie_descriptor.get_movie_path()
         resolution = parameters['resolution']
         color_space = cv2.COLOR_BGR2Lab
 

@@ -1,0 +1,112 @@
+ \def\mathbi#1{\textbf{\em #1}}
+ 
+% commands
+\newcommand{\Adjoint}{\mbox{\rm Adj}}
+\newcommand{\Area}{\mbox{\rm Area}}
+\newcommand{\ACos}{{\mbox{\rm Cos}^{-1}}}
+\newcommand{\ASin}{{\mbox{\rm Sin}^{-1}}}
+\newcommand{\ATan}{{\mbox{\rm atan2}}}
+\newcommand{\Code}[1]{{\tt #1}}
+\newcommand{\Complex}{\mbox{\bf C}}
+\newcommand{\Cross}{{\mbox{\rm Cross}}}
+\newcommand{\Mydddot}[1]{\mbox{\shortstack{$.$\hspace*{-1pt}$.$\hspace*{-1pt}$.$\\$#1$}}}
+\newcommand{\Degree}{\mbox{\rm degree}}
+\newcommand{\Diag}{\mbox{\rm Diag}}
+\newcommand{\Dim}{\mbox{\rm dim}}
+\newcommand{\Dist}{\mbox{\rm Distance}}
+\newcommand{\IntTwo}{\int\!\!\int}
+\newcommand{\IntThree}{\int\!\!\int\! \!\int}
+\newcommand{\Kernel}{\mbox{\rm kernel}}
+\newcommand{\Kross}{\mbox{\rm Kross}}
+\newcommand{\Grad}{\nabla}
+\newcommand{\Perp}{\mbox{\rm Perp}}
+\newcommand{\Point}[1]{{\cal #1}}
+\newcommand{\Rank}{\mbox{\rm rank}}
+\newcommand{\Range}{\mbox{\rm range}}
+\newcommand{\Real}{{\mbox{\rm I}\hspace*{-2pt}\mbox{\rm R}}}
+\newcommand{\RealSbt}{{\mbox{\rm\scriptsize I}\hspace*{-2pt}\mbox{\rm\scriptsize R}}}
+\newcommand{\Res}{\mbox{\rm resultant}}
+\newcommand{\Sbt}[1]{{\mbox{\rm\scriptsize #1}}}
+\newcommand{\MySign}{\mbox{\rm Sign}}
+\newcommand{\SignSBT}{\mbox{\rm\scriptsize Sign}}
+\newcommand{\Skew}{\mbox{\rm Skew}}
+\newcommand{\Span}{\mbox{\rm Span}}
+\newcommand{\SqrDist}{\mbox{\rm Distance$^2$}}
+\newcommand{\Trace}{\mbox{\rm Trace}}
+\newcommand{\TRN}{{\mbox{\rm\scriptsize T}}}
+\newcommand{\Vector}[1]{\mbox{\bf #1}}
+\newcommand{\VectorM}[1]{\mbox{\boldmath $#1$}}
+\newcommand{\Volume}{\mbox{\rm Volume}}
+
+\newcommand{\IVec}{\mbox{\boldmath $\imath$}}
+\newcommand{\JVec}{\mbox{\boldmath $\jmath$}}
+\newcommand{\KVec}{\mbox{\boldmath $k$}}
+\newcommand{\LVec}{\mbox{\boldmath $\ell$}}
+\newcommand{\RMat}{{\cal R}}
+\newcommand{\QMat}{{\cal Q}}
+\newcommand{\QCMat}{\overline{\cal Q}}
+
+\newcommand{\Lerp}{\mbox{\rm lerp}}
+\newcommand{\Slerp}{\mbox{\rm slerp}}
+\newcommand{\Quad}{\mbox{\rm quad}}
+\newcommand{\Squad}{\mbox{\rm squad}}
+
+\newcommand{\ODer}[2]{\frac{d #1}{d #2}}
+\newcommand{\ODerT}[2]{\frac{d^2 #1}{d {#2}^2}}
+\newcommand{\ODerM}[3]{\frac{d #1}{d #2 \, d #3}}
+\newcommand{\PDer}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\PDerT}[2]{\frac{\partial^2 #1}{\partial {#2}^2}}
+\newcommand{\PDerM}[3]{\frac{\partial^2 #1}{\partial #2 \, \partial #3}}
+
+% mass density symbol
+\newcommand{\Den}{\delta}
+
+% environments
+\newenvironment{BArray}[1]{\left\{ \begin{array}{#1}}{\end{array} \right\}}
+\newenvironment{Combin}{\left( \begin{array}{c}}{\end{array} \right)}
+\newenvironment{Matrix}[1]{\left[ \begin{array}{#1}}{\end{array} \right]}
+
+
+\let\mbf=\mathbf
+\let\mvec=\mathbf
+\let\mcal=\mathcal
+\let\mfunc=\mathrm
+
+%\def\R{\mbox{\ensuremath{\mathrm{I\!R}}}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\C}{\ensuremath{\mathbb{C}}}
+
+\newcommand{\of}[1]{\left( #1 \right)}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\Vert {#1} \right\Vert}
+\newcommand{\gradient}[1]{\nabla{\!}_{#1}{\,}}
+\newcommand{\twovec}[2]{\left( #1 \atop #2 \right)}
+\newcommand{\threevec}[3]{\left(\begin{array}{c}#1\\#2\\#3\end{array}\right)}
+\newcommand{\fourvec}[4]{\left(\begin{array}{c}#1\\#2\\#3\\#4\end{array}\right)}
+
+\newcommand{\refsec}[1]{Section~\ref{sec:#1}}
+\newcommand{\reffig}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\reftab}[1]{Tab.~\ref{tab:#1}}
+\newcommand{\refeq}[1]{Eq.~(\ref{eq:#1})}
+
+%\newcommand{\R}{\hspace*{0.1ex}{\sf I} \hspace{-0.3ex}{\sf R}}
+
+%6.5
+\newcommand{\eps}{\mbox{$\epsilon$}}
+\newcommand{\dmin}{\mbox{$d_{\min}$}}
+\newcommand{\dmax}{\mbox{$d_{\max}$}}
+\newcommand{\dminmax}{\mbox{$[\dmin,\dmax]$}}
+
+%4.2:
+\def\M{\mathcal{M}}
+\def\n{\mathbi{n}}
+\def\p{\mathbi{p}}
+\def\q{\mathbi{q}}
+\def\x{\mathbi{x}}
+\def\tp{^{\mathsf{T}}}
+
+\let\vec=\mathbi%
+\let\mat=\mathbf%
+\let\set= \mathcal%

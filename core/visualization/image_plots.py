@@ -7,12 +7,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF
 
 from core.data.computation import *
-
+from core.visualization.basic_vis import IVIANVisualization
 SOURCE_FOREGROUND = 0
 SOURCE_BACKGROUND = 1
 SOURCE_COMPLETE = 2
 
-class ImagePlot(QGraphicsView):
+class ImagePlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
         super(ImagePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
@@ -23,6 +23,7 @@ class ImagePlot(QGraphicsView):
 
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.pos_scale = 1.0
+        self.img_scale = 1.0
 
         self.setBackgroundBrush(QColor(30, 30, 30))
         self.setScene(QGraphicsScene(self))
@@ -160,7 +161,7 @@ class ImagePlot(QGraphicsView):
             self.translate(cursor_pos.x(), cursor_pos.y())
 
             for itm in self.images:
-                itm.setScale(1 - self.curr_scale)
+                itm.setScale(self.img_scale * (1.0 - self.curr_scale))
 
         else:
             super(QGraphicsView, self).wheelEvent(event)
@@ -179,7 +180,7 @@ class ImagePlot(QGraphicsView):
 
         # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
 
-    def export(self, return_image = False, width = 4096, height = 4096):
+    def render_to_image(self, background: QColor, size: QSize):
         """
         Renders the scene content to an image, alternatively if return iamge is set to True, 
         the QImage is returned and not stored to disc
@@ -190,7 +191,7 @@ class ImagePlot(QGraphicsView):
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
-        image = QImage(QSize(width, height), QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format_ARGB32)
         image.fill(Qt.transparent)
 
         painter = QPainter()
@@ -198,11 +199,7 @@ class ImagePlot(QGraphicsView):
         self.scene().render(painter)
         painter.end()
 
-        if return_image:
-            return image
-        else:
-            path = QFileDialog.getSaveFileName()[0]
-            image.save(path)
+        return image
 
     @pyqtSlot(int)
     def on_high_cut(self, value):
@@ -211,7 +208,6 @@ class ImagePlot(QGraphicsView):
                 tpl[1].hide()
             else:
                 tpl[1].show()
-
 
     @pyqtSlot(int)
     def on_low_cut(self, value):
@@ -250,8 +246,6 @@ class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
 
-
-
     def add_image(self, x, y, img, convert = True, luminance = None, to_float = False):
         try:
             if convert:
@@ -267,7 +261,7 @@ class ImagePlotCircular(ImagePlot):
             else:
                 itm.setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(y * self.magnification))
 
-
+            itm.setScale(self.img_scale)
 
             self.images.append(itm)
 
@@ -305,6 +299,55 @@ class ImagePlotCircular(ImagePlot):
             y = 128 * self.magnification * np.sin(i * (2 * np.pi / self.n_grid))
             self.scene().addLine(0, 0 , x, y, pen)
         self.circle0.show()
+
+    def set_range_scale(self, value):
+        self.pos_scale = value / 100
+        for img in self.images:
+            if isinstance(img, VIANPixmapGraphicsItem):
+                img.scale_pos(self.pos_scale)
+
+    def set_image_scale(self,value):
+        for img in self.images:
+            img.setScale(value / 100)
+        self.img_scale = value / 100
+
+    def get_param_widget(self):
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        hl1 = QHBoxLayout(w)
+        hl1.addWidget(QLabel("Range Scale:", w))
+        hl2 = QHBoxLayout(w)
+        hl2.addWidget(QLabel("Image Scale:", w))
+
+        slider_xscale = QSlider(Qt.Horizontal, w)
+        slider_xscale.setRange(1, 1000)
+        slider_xscale.setValue(100)
+        slider_xscale.valueChanged.connect(self.set_range_scale)
+        slider_yscale = QSlider(Qt.Horizontal, w)
+        slider_yscale.setRange(1, 1000)
+        slider_xscale.setValue(100)
+        slider_yscale.valueChanged.connect(self.set_image_scale)
+
+        hl1.addWidget(slider_xscale)
+        x_scale_line = QSpinBox(w)
+        x_scale_line.setRange(1, 1000)
+        x_scale_line.setValue(100)
+        x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        hl1.addWidget(x_scale_line)
+
+        hl2.addWidget(slider_yscale)
+        y_scale_line = QSpinBox(w)
+        y_scale_line.setRange(1, 1000)
+        y_scale_line.setValue(100)
+        y_scale_line.valueChanged.connect(slider_yscale.setValue)
+        slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        hl2.addWidget(y_scale_line)
+
+        w.layout().addItem(hl1)
+        w.layout().addItem(hl2)
+
+        return w
 
 
 class ImagePlotPlane(ImagePlot):
@@ -452,7 +495,7 @@ class ImagePlotControls(QWidget):
 class ImagePlotTime(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None, title=""):
         self.x_scale = 0.001
-        self.y_scale = 50
+        self.y_scale = 200 #50 default
         self.base_line = 1000
         self.x_end = 0
         self.lines = []
@@ -464,6 +507,7 @@ class ImagePlotTime(ImagePlot):
 
         self.labels = []
 
+        self.values = []
         super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
         self.font_size = 60
 
@@ -495,15 +539,17 @@ class ImagePlotTime(ImagePlot):
         if self.x_end < x * self.x_scale:
             self.x_end = x * self.x_scale
 
-        self.luminances.append([y, itm])
-
+        self.luminances.append([np.nan_to_num(y), itm])
+        self.values.append([x, np.nan_to_num(y)])
         itm.show()
 
     def clear_view(self):
         super(ImagePlotTime, self).clear_view()
         self.x_end = 0
+        self.values = []
+        self.lines = []
 
-    def add_grid(self):
+    def add_grid(self, set_scene_rect = True):
         pen = QPen()
         pen.setWidth(10)
         pen.setColor(QColor(200, 200, 200, 150))
@@ -512,11 +558,72 @@ class ImagePlotTime(ImagePlot):
         font.setPointSize(self.font_size)
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
         self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
-
-        self.setSceneRect(self.scene().itemsBoundingRect())
+        if set_scene_rect:
+            self.setSceneRect(self.scene().itemsBoundingRect())
 
     def update_grid(self):
+        for l in self.lines:
+            self.scene().removeItem(l)
         self.lines = []
-        self.add_grid()
+        self.setSceneRect(self.scene().itemsBoundingRect())
+        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+        # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        self.add_grid(False)
 
 
+    def set_x_scale(self, value):
+        self.x_scale = value
+        self.x_scale = self.pixel_size_x / np.clip((len(self.images) * ((500 - value) / 100)), 0.00001, None)
+        self.update_position()
+
+    def set_y_scale(self, value):
+        self.y_scale = value
+        self.y_scale = self.pixel_size_y / np.clip((100 * (value / 100)), 0.00001, None)
+        self.update_position()
+
+    def update_position(self):
+        for idx, v in enumerate(self.values):
+            itm = self.images[idx]
+            x = v[0]
+            y = v[1]
+            itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
+        self.update_grid()
+
+    def get_param_widget(self):
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        hl1 = QHBoxLayout(w)
+        hl1.addWidget(QLabel("X-Scale:", w))
+        hl2 = QHBoxLayout(w)
+        hl2.addWidget(QLabel("Y-Scale:", w))
+
+        slider_xscale = QSlider(Qt.Horizontal, w)
+        slider_xscale.setRange(1, 500)
+        slider_xscale.setValue(self.x_scale)
+        slider_xscale.valueChanged.connect(self.set_x_scale)
+        slider_yscale = QSlider(Qt.Horizontal, w)
+        slider_yscale.setRange(1, 500)
+        slider_xscale.setValue(self.y_scale)
+        slider_yscale.valueChanged.connect(self.set_y_scale)
+
+        hl1.addWidget(slider_xscale)
+        hl2.addWidget(slider_yscale)
+
+        x_scale_line = QSpinBox(w)
+        x_scale_line.setRange(1, 500)
+        x_scale_line.setValue(self.x_scale)
+        x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        hl1.addWidget(x_scale_line)
+
+        y_scale_line = QSpinBox(w)
+        y_scale_line.setRange(1, 500)
+        y_scale_line.setValue(self.y_scale)
+        y_scale_line.valueChanged.connect(slider_yscale.setValue)
+        slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        hl2.addWidget(y_scale_line)
+
+        w.layout().addItem(hl1)
+        w.layout().addItem(hl2)
+
+        return w

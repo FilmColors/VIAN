@@ -9,8 +9,10 @@ import sys
 import argparse
 import os
 import webbrowser
+import shutil
+from zipfile import ZipFile
 
-def ms_to_string(ms, include_ms = False):
+def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
     ms = int(ms)
     seconds = (ms // 1000) % 60
     minutes = (ms // (1000 * 60)) % 60
@@ -18,7 +20,10 @@ def ms_to_string(ms, include_ms = False):
 
     r = ms - (hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000)
     if include_ms:
-        return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2) + "::" + str(r).zfill(4)
+        return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2) + ":" + str(r).zfill(3)
+    elif include_frame:
+        frame = int(r / 1000 * fps)
+        return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2) + ":" + str(frame).zfill(2)
     else:
         return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
 
@@ -34,6 +39,34 @@ def ts_to_ms(hour=0, min=0, sec=0, ms=0):
     time += sec * 1000
     time += ms
     return time
+
+
+def tpl_bgr_to_lab(bgr):
+    """
+    Converts a BGR Color Tuple to a uint8 Lab Color Tuple using OpenCV Conversion.
+    :param tpl: Input Tuple BGR
+    :return: Output Tuple Lab
+    """
+    if not isinstance(bgr, np.ndarray):
+        bgr = np.array(bgr)
+    img = bgr.astype(np.float32) / 255
+    lab = cv2.cvtColor(np.array([[img] * 2] * 2), cv2.COLOR_BGR2Lab)[0, 0,:]
+    return lab
+
+
+def tpl_bgr_to_lch(tpl):
+    """
+    Converts a BGR Color Tuple to a float32 Lab Color Tuple using OpenCV Conversion.
+    :param tpl: Input Tuple BGR
+    :return: Output Tuple LCH, float32
+    """
+
+    lab = tpl_bgr_to_lab(tpl)
+    lch = np.empty(lab.shape, dtype=np.float32)
+    lch[:, 0] = lab[:, 0]
+    lch[:, 1] = np.linalg.norm(lab[:, 1:3], axis=1)
+    lch[:, 2] = np.arctan2(lab[:, 2], lab[:, 1])
+    return lch
 
 
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
@@ -296,3 +329,16 @@ def open_file(file_name):
     except Exception as e:
         print(e)
         return False
+
+
+def extract_zip(zipfilepath, extractiondir):
+    zip = ZipFile(zipfilepath)
+    zip.extractall(path=extractiondir)
+    print("Extraction finished")
+
+def is_subdir(path, directory):
+    path = os.path.realpath(path)
+    directory = os.path.realpath(directory)
+    relative = os.path.relpath(path, directory)
+    return not relative.startswith(os.pardir + os.sep)
+

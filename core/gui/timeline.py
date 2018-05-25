@@ -1066,6 +1066,7 @@ class TimebarSlice(QtWidgets.QWidget):
         self.offset = QtCore.QPoint(0,0)
         self.text = ""
         self.curr_pos = self.pos()
+        self.curr_size = self.size()
 
         self.update_text()
 

@@ -82,7 +82,6 @@ class ProjectStreamerShelve(ProjectStreamer):
         self.store_dir = store_dir + "/"
         self.container_db = self.store_dir + "container"
         self.arbitrary_db = self.store_dir + "arbitrary"
-
         self.async_stream_worker.set_paths(self.container_db, self.arbitrary_db)
 
     def async_store(self, id: int, data_dict, data_type = STREAM_DATA_IPROJECT_CONTAINER, proceed_slot = None, proceed_slot_args = None):

@@ -37,42 +37,6 @@ class NewProjectDialog(EDialogWidget):
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
 
-        #region VOCABULARIES DEPRECATED
-
-        # self.vocabulary_inner = QWidget(self)
-        # self.vocabulary_inner.setLayout(QHBoxLayout(self))
-        # self.vocabulary_scroll = QScrollArea(self)
-        # self.vocabulary_scroll.setWidget(self.vocabulary_inner)
-        # self.frame_Vocabularies.layout().addWidget(self.vocabulary_scroll)
-        # self.vocabulary_inner.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        #
-        # n_per_col = int(len(self.vocabularies) / 3)
-        # self.voc_cbs = []
-        # vbox = QVBoxLayout(self.vocabulary_inner)
-        # counter = 0
-
-
-        # for voc in self.vocabularies:
-        #     cb = QCheckBox(voc.replace("\\", "/").split("/").pop().replace(".txt", ""), self.vocabulary_inner)
-        #     cb.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
-        #     cb.setStyleSheet("QCheckBox:unchecked{ color: #b1b1b1; }QCheckBox:checked{ color: #3f7eaf; }")
-        #     cb.setChecked(True)
-        #     vbox.addWidget(cb)
-        #     self.voc_cbs.append([cb, voc])
-        #     counter += 1
-        #     if counter == n_per_col:
-        #         vbox.setSpacing(10)
-        #         self.vocabulary_inner.layout().addItem(vbox)
-        #         vbox = QVBoxLayout(self.vocabulary_inner)
-        #         counter = 0
-        # if counter != 0:
-        #     vbox.addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        #     self.vocabulary_inner.layout().addItem(vbox)
-        #
-        # self.vocabulary_inner.resize(self.vocabulary_inner.sizeHint())
-        #endregion
-
-        self.frame_Vocabularies.hide()
         self.find_templates()
 
         self.cB_AutomaticNaming.stateChanged.connect(self.on_automatic_naming_changed)
@@ -97,7 +61,7 @@ class NewProjectDialog(EDialogWidget):
         self.btn_Help.clicked.connect(self.on_help)
 
         self.lineEdit_MoviePath.setText(movie_path)
-        self.project.movie_descriptor.movie_path = movie_path
+        self.project.movie_descriptor.set_movie_path(movie_path)
 
         self.lineEdit_ProjectName.setText(self.project_name)
         self.set_project_path()
@@ -195,14 +159,14 @@ class NewProjectDialog(EDialogWidget):
         if not os.path.isfile(self.lineEdit_MoviePath.text()):
             self.lineEdit_MoviePath.setText("Not a Path")
             return
-        self.project.movie_descriptor.movie_path = self.lineEdit_MoviePath.text()
+        self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
 
     def on_cancel(self):
         self.close()
 
     def on_ok(self):
         template = self.templates[self.comboBox_Template.currentIndex()]
-
+        copy_movie = self.comboBox_Move.currentText()
         # Checking if the project dir is existing
         if not os.path.isdir(self.project_dir):
             self.settings.integritiy_check()
@@ -221,7 +185,7 @@ class NewProjectDialog(EDialogWidget):
 
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
-        self.project.movie_descriptor.movie_path = self.lineEdit_MoviePath.text()
+        self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
         print(self.project.folder, "\n",
               self.project.path, "\n",
               self.settings.DIR_PROJECT)
@@ -232,5 +196,5 @@ class NewProjectDialog(EDialogWidget):
         #         vocabularies.append(c[1])
 
         # self.main_window.new_project(self.project, template, vocabularies)
-        self.main_window.new_project(self.project, template)
+        self.main_window.new_project(self.project, template, copy_movie=copy_movie)
         self.close()

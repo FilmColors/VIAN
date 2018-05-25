@@ -7,12 +7,13 @@ from PyQt5.QtGui import QFont, QIcon
 
 from core.data.computation import ms_to_string
 from core.data.interfaces import IProjectChangeNotify
-from core.gui.context_menu import open_context_menu
+from core.gui.context_menu import open_context_menu, CorpusProjectContextMenu
 from .ewidgetbase import EDockWidget
-
+from core.corpus.client.corpus_client import CorpusClient
+from core.corpus.shared.entities import DBProject
 
 class Outliner(EDockWidget, IProjectChangeNotify):
-    def __init__(self,main_window):
+    def __init__(self, main_window, corpus_client:CorpusClient):
         super(Outliner, self).__init__(main_window, width=500)
         path = os.path.abspath("qt_ui/Outliner.ui")
         uic.loadUi(path, self)
@@ -22,17 +23,22 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.performed_selection = False
         self.project_item = None
 
+        self.corpus_client = corpus_client
+
+        self.corpus_client.onCorpusConnected.connect(self.recreate_tree)
+        self.corpus_client.onCorpusDisconnected.connect(self.recreate_tree)
+        self.corpus_client.onCorpusChanged.connect(self.recreate_tree)
         self.item_list = []
 
 
         self.show()
 
     def recreate_tree(self):
-
         self.tree.selection_dispatch = False
         # Storing last State of the None container items
         first_time = True
         self.item_list = []
+
 
         if self.project_item is not None:
             first_time = False
@@ -41,86 +47,98 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             for i in range(self.project_item.childCount()):
                 exp_group_nodes.append(self.project_item.child(i).isExpanded())
 
-
-
         self.tree.clear()
-
+        self.project_item = None
         p = self.project()
-        self.project_item = ProjectOutlinerItem(self.tree, 0, p)
+        if p is not None:
+            self.project_item = ProjectOutlinerItem(self.tree, 0, p)
 
-        self.descriptor_item = MovieDescriptorOutlinerItem(self.project_item, 0, p.movie_descriptor)
-        self.item_list.append(self.descriptor_item)
-        #self.descriptor_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_movie.png"))
+            self.descriptor_item = MovieDescriptorOutlinerItem(self.project_item, 0, p.movie_descriptor)
+            self.item_list.append(self.descriptor_item)
+            #self.descriptor_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_movie.png"))
 
-        # Segmentation
-        self.segmentation_group = SegmentationOutlinerRootItem(self.project_item, 0)
-        for i, st in enumerate(p.get_segmentations()):
-            segmentation_item =  SegmentationOutlinerItem(self.segmentation_group, i, st)
-            self.item_list.append(segmentation_item)
+            # Segmentation
+            self.segmentation_group = SegmentationOutlinerRootItem(self.project_item, 0)
+            for i, st in enumerate(p.get_segmentations()):
+                segmentation_item =  SegmentationOutlinerItem(self.segmentation_group, i, st)
+                self.item_list.append(segmentation_item)
 
-            if i == self.project().main_segmentation_index:
-                segmentation_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
+                if i == self.project().main_segmentation_index:
+                    segmentation_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
 
-            for j, s in enumerate(st.segments):
-                segment_item = SegmentOutlinerItem(segmentation_item, i, s)
-                self.item_list.append(segment_item)
-        # Screenshots
-        self.screenshot_group = ScreenshotRootOutlinerItem(self.project_item, 1)
-        for i, scr_grp in enumerate(p.screenshot_groups):
-            scr_group =  ScreenshotGroupOutlinerItem(self.screenshot_group, i, scr_grp)
+                for j, s in enumerate(st.segments):
+                    segment_item = SegmentOutlinerItem(segmentation_item, i, s)
+                    self.item_list.append(segment_item)
+            # Screenshots
+            self.screenshot_group = ScreenshotRootOutlinerItem(self.project_item, 1)
+            for i, scr_grp in enumerate(p.screenshot_groups):
+                scr_group =  ScreenshotGroupOutlinerItem(self.screenshot_group, i, scr_grp)
 
-            if scr_grp is self.project().active_screenshot_group:
-                scr_group.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
+                if scr_grp is self.project().active_screenshot_group:
+                    scr_group.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
 
-            for j, scr in enumerate(scr_grp.screenshots):
-                screenshot = ScreenshotOutlinerItem(scr_group, i, scr)
-                self.item_list.append(screenshot)
-        # for i, scr in enumerate(p.get_screenshots()):
-        #     screenshot =  ScreenshotOutlinerItem(self.screenshot_group, i, scr)
-        #     self.item_list.append(screenshot)
+                for j, scr in enumerate(scr_grp.screenshots):
+                    screenshot = ScreenshotOutlinerItem(scr_group, i, scr)
+                    self.item_list.append(screenshot)
+            # for i, scr in enumerate(p.get_screenshots()):
+            #     screenshot =  ScreenshotOutlinerItem(self.screenshot_group, i, scr)
+            #     self.item_list.append(screenshot)
 
-        # Annotations
-        self.annotation_group = AnnotationLayerOutlinerRootItem(self.project_item, 2)
-        for i,l in enumerate(self.main_window.project.get_annotation_layers()):
-            layer_item = AnnotationLayerOutlinerItem(self.annotation_group, i, l)
-            self.item_list.append(layer_item)
-            for j, d in enumerate(l.annotations):
-                annotation_item = AnnotationOutlinerItem(layer_item, j, d)
-                self.item_list.append(annotation_item)
+            # Annotations
+            self.annotation_group = AnnotationLayerOutlinerRootItem(self.project_item, 2)
+            for i,l in enumerate(self.main_window.project.get_annotation_layers()):
+                layer_item = AnnotationLayerOutlinerItem(self.annotation_group, i, l)
+                self.item_list.append(layer_item)
+                for j, d in enumerate(l.annotations):
+                    annotation_item = AnnotationOutlinerItem(layer_item, j, d)
+                    self.item_list.append(annotation_item)
 
 
-        self.analyzes_group = AnalyzesOutlinerRootItem(self.project_item, 3)
-        for i, a in enumerate(self.main_window.project.analysis):
-            analysis_item = AnalyzesOutlinerItem(self.analyzes_group, i, a)
-            self.item_list.append(analysis_item)
+            self.analyzes_group = AnalyzesOutlinerRootItem(self.project_item, 3)
+            for i, a in enumerate(self.main_window.project.analysis):
+                analysis_item = AnalyzesOutlinerItem(self.analyzes_group, i, a)
+                self.item_list.append(analysis_item)
 
-        self.node_scripts_group = NodeScriptsRootItem(self.project_item, 4)
-        for i, s in enumerate(self.main_window.project.node_scripts):
-            script_item = NodeScriptsItem(self.node_scripts_group, i, s)
-            self.item_list.append(script_item)
-            for j, n in enumerate(s.nodes):
-                node_item = NodeScriptsNodeItem(script_item, j, n)
-                self.item_list.append(node_item)
+            self.node_scripts_group = NodeScriptsRootItem(self.project_item, 4)
+            for i, s in enumerate(self.main_window.project.node_scripts):
+                script_item = NodeScriptsItem(self.node_scripts_group, i, s)
+                self.item_list.append(script_item)
+                for j, n in enumerate(s.nodes):
+                    node_item = NodeScriptsNodeItem(script_item, j, n)
+                    self.item_list.append(node_item)
 
-        self.experiment_group = ExperimentRootItem(self.project_item, 5)
-        for i, exp in enumerate(self.main_window.project.experiments):
-            experiment_item = ExperimentItem(self.experiment_group, i, exp)
-            self.item_list.append(experiment_item)
+            self.experiment_group = ExperimentRootItem(self.project_item, 5)
+            for i, exp in enumerate(self.main_window.project.experiments):
+                experiment_item = ExperimentItem(self.experiment_group, i, exp)
+                self.item_list.append(experiment_item)
 
-        if not first_time:
-            self.project_item.setExpanded(exp_p_item)
-            for i in range(self.project_item.childCount()):
-                self.project_item.child(i).setExpanded(exp_group_nodes[i])
+            if not first_time:
+                self.project_item.setExpanded(exp_p_item)
+                for i in range(self.project_item.childCount()):
+                    self.project_item.child(i).setExpanded(exp_group_nodes[i])
 
-            complete_list = []
-            self.project_item.get_children(complete_list)
-            for i in complete_list:
-                if i.has_item:
-                    i.setExpanded(i.get_container().outliner_expanded)
+                complete_list = []
+                self.project_item.get_children(complete_list)
+                for i in complete_list:
+                    if i.has_item:
+                        i.setExpanded(i.get_container().outliner_expanded)
 
-        # self.on_selected(None, self.project().selected)
-        self.tree.selection_dispatch = True
-        self.on_selected(None, self.project().get_selected())
+                    # self.on_selected(None, self.project().selected)
+            self.tree.selection_dispatch = True
+            self.on_selected(None, self.project().get_selected())
+
+        if self.corpus_client.connected:
+            to_add = []
+            if self.project() is not None:
+                for p in self.corpus_client.get_projects():
+                    if p.name != self.project().get_name():
+                        to_add.append(p)
+
+            for p in sorted(to_add, key= lambda x:x.name):
+                itm = CorpusProjectOutlinerItem(self.tree, 0, p)
+                self.item_list.append(itm)
+
+
 
     def update_tree(self, item):
         found = False
@@ -279,7 +297,7 @@ class OutlinerTreeWidget(QTreeWidget):
         selected_objs = []
 
         for s in selected_items:
-            if s.get_container() is not None:
+            if s.get_container() is not None and not isinstance(s.get_container(), DBProject):
                 selected_objs.append(s.get_container())
                 s.setSelected(True)
 
@@ -325,7 +343,10 @@ class OutlinerTreeWidget(QTreeWidget):
         elif isinstance(self.selectedItems()[0], NodeScriptsRootItem):
             context_menu = open_context_menu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()), [],
                                            self.project, scripts_root=True)
-            print("ROOT")
+
+        elif isinstance(self.selectedItems()[0], CorpusProjectOutlinerItem):
+            context_menu = CorpusProjectContextMenu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()),
+                                                    self.project, self.selectedItems()[0].get_container(), self.outliner.corpus_client)
         else:
             containers = []
             for item in self.selectedItems():
@@ -359,7 +380,6 @@ class QOutlinerLineEdit(QLineEdit):
 
     def focusOutEvent(self, QFocusEvent):
         self.close()
-
 
 
 #region Outliner Items #
@@ -399,6 +419,27 @@ class AbstractOutlinerItem(QTreeWidgetItem):
                 self.child(i).get_children(list)
         else:
             list.append(self)
+
+
+class CorpusProjectOutlinerItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, dbproject: DBProject):
+        super(CorpusProjectOutlinerItem, self).__init__(parent, index)
+        self.dbproject = dbproject
+        self.update_item()
+
+    def set_name(self, name):
+        "Not implemented"
+
+    def update_item(self):
+        super(CorpusProjectOutlinerItem, self).update_item()
+        self.setText(0, self.dbproject.name)
+        if self.dbproject.is_checked_out:
+            self.setForeground(0, QtGui.QColor(216, 51, 36, 150)) #0, 113, 122
+        else:
+            self.setForeground(0, QtGui.QColor(255, 255, 255, 200))
+
+    def get_container(self):
+        return self.dbproject
 
 
 class SegmentationOutlinerRootItem(AbstractOutlinerItem):
@@ -593,6 +634,7 @@ class ProjectOutlinerItem(AbstractOutlinerItem):
 
     def update_item(self):
         self.setText(0, self.project.name)
+        self.setForeground(0, QtGui.QColor(22, 142, 42, 200))
 
 
 class MovieDescriptorOutlinerItem(AbstractOutlinerItem):
