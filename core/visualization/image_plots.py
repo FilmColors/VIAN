@@ -7,12 +7,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF
 
 from core.data.computation import *
-
+from core.visualization.basic_vis import IVIANVisualization
 SOURCE_FOREGROUND = 0
 SOURCE_BACKGROUND = 1
 SOURCE_COMPLETE = 2
 
-class ImagePlot(QGraphicsView):
+class ImagePlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
         super(ImagePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
@@ -180,7 +180,7 @@ class ImagePlot(QGraphicsView):
 
         # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
 
-    def export(self, return_image = False, width = 4096, height = 4096):
+    def render_to_image(self, background: QColor, size: QSize):
         """
         Renders the scene content to an image, alternatively if return iamge is set to True, 
         the QImage is returned and not stored to disc
@@ -191,7 +191,7 @@ class ImagePlot(QGraphicsView):
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
-        image = QImage(QSize(width, height), QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format_ARGB32)
         image.fill(Qt.transparent)
 
         painter = QPainter()
@@ -199,11 +199,7 @@ class ImagePlot(QGraphicsView):
         self.scene().render(painter)
         painter.end()
 
-        if return_image:
-            return image
-        else:
-            path = QFileDialog.getSaveFileName()[0]
-            image.save(path)
+        return image
 
     @pyqtSlot(int)
     def on_high_cut(self, value):
@@ -212,7 +208,6 @@ class ImagePlot(QGraphicsView):
                 tpl[1].hide()
             else:
                 tpl[1].show()
-
 
     @pyqtSlot(int)
     def on_low_cut(self, value):

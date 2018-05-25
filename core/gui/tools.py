@@ -3,12 +3,12 @@ import os
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QPoint
-
-from core.gui.ewidgetbase import EDialogWidget
-
+from core.data.computation import pixmap_to_numpy
+from core.gui.ewidgetbase import EDialogWidget, EGraphicsView
+import cv2
 
 class ColorPicker(QFrame):
     colorChanged = pyqtSignal(tuple)
@@ -157,7 +157,6 @@ class EListWidget(QListWidget):
         self.line_edit = None
 
 
-
 class PopupLineEdit(QLineEdit):
     def __init__(self, parent):
         super(PopupLineEdit, self).__init__(parent)
@@ -167,5 +166,148 @@ class PopupLineEdit(QLineEdit):
 
     def focusOutEvent(self, QFocusEvent):
         self.close()
+
+
+class ExportImageDialog(EDialogWidget):
+    def __init__(self, main_window, visualization):
+        super(ExportImageDialog, self).__init__(visualization, main_window)
+        path = os.path.abspath("qt_ui/DialogExportImage.ui")
+        uic.loadUi(path, self)
+        self.visualization = visualization
+        self.preview = ExportPreviewWidget(self, self.visualization)
+        self.widget_Preview.setLayout(QVBoxLayout(self))
+        self.widget_Preview.layout().addWidget(self.preview)
+
+        self.spinBox_BG_R.valueChanged.connect(self.on_update)
+        self.spinBox_BG_G.valueChanged.connect(self.on_update)
+        self.spinBox_BG_B.valueChanged.connect(self.on_update)
+        self.spinBox_BG_A.valueChanged.connect(self.on_update)
+        self.spinBox_Width.valueChanged.connect(self.on_update)
+        self.spinBox_Height.valueChanged.connect(self.on_update)
+
+        self.btn_Export.clicked.connect(self.on_export)
+        self.btn_Cancel.clicked.connect(self.close)
+        self.btn_ResetRegion.clicked.connect(self.preview.reset_region)
+        self.on_update()
+
+    def on_update(self):
+        background = QColor(self.spinBox_BG_R.value(), self.spinBox_BG_G.value(), self.spinBox_BG_B.value(), self.spinBox_BG_A.value())
+        size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value())
+        image = self.visualization.render_to_image(background, size)
+        self.preview.set_image(image)
+        return image
+
+    def on_export(self):
+        img = self.on_update()
+        if self.main_window is not None:
+            file_name = QFileDialog.getSaveFileName(self,
+                                                    directory=self.main_window.project.export_dir,
+                                                    filter="*.png *.jpg")[0]
+        else:
+            file_name = QFileDialog.getSaveFileName(self,
+                                                    filter="*.png *.jpg")[0]
+
+        try:
+            region = self.preview.region
+            size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value())
+
+            img = pixmap_to_numpy(QPixmap(img))
+
+            if region is not None:
+                img = img[
+                      int(region.y()):int(region.y() + region.height()),
+                      int(region.x()):int(region.x() + region.width())
+                      ]
+
+                img = cv2.resize(img, (size.width(), size.height()), interpolation=cv2.INTER_CUBIC)
+
+            cv2.imwrite(file_name, img)
+        except Exception as e:
+            raise e
+            pass
+
+
+class ExportPreviewWidget(QGraphicsView):
+    def __init__(self, parent, visualization):
+        super(ExportPreviewWidget, self).__init__(parent)
+        self.visualization = visualization
+        self.gscene = QGraphicsScene()
+        self.setScene(self.gscene)
+
+        self.image = None
+        self.image_item = None
+
+        self.is_selecting = False
+        self.p_start = QPoint()
+        self.p_end = QPoint()
+        self.region = None
+        self.selector_frame = self.gscene.addRect(self.sceneRect(), QColor(255, 255, 255))
+
+    def reset_region(self):
+        self.region = None
+        self.selector_frame.setRect(self.sceneRect())
+
+    def set_image(self, image:QImage):
+        self.image = image
+        self.gscene.clear()
+        pen = QPen()
+        pen.setWidthF(10)
+        pen.setColor(QColor(255,255,255))
+        self.image_item = self.gscene.addPixmap(QPixmap(image))
+        self.selector_frame = self.gscene.addRect(self.sceneRect(), pen)
+
+    def frame_image(self):
+        if self.image_item is not None:
+            rect = self.image_item.sceneBoundingRect()
+            self.fitInView(rect, Qt.KeepAspectRatio)
+
+    def resizeEvent(self, event: QResizeEvent):
+        super(ExportPreviewWidget, self).resizeEvent(event)
+        self.frame_image()
+
+    def start_selection(self, pos):
+        self.is_selecting = True
+        self.p_start = pos
+
+    def update_selection(self, pos):
+        new_s = QPoint()
+        new_e = QPoint()
+        if pos.x() > self.p_start.x():
+            new_s.setX(self.p_start.x())
+            new_e.setX(pos.x())
+        else:
+            new_s.setX(pos.x())
+            new_e.setX(self.p_start.x())
+
+        if pos.y() > self.p_end.y():
+            new_s.setY(self.p_start.y())
+            new_e.setY(pos.y())
+        else:
+            new_s.setY(pos.y())
+            new_e.setY(self.p_start.y())
+
+        self.selector_frame.setRect(new_s.x(), new_s.y(), new_e.x() - new_s.x(), new_e.y() - new_s.y())
+
+
+    def end_selection(self):
+        self.is_selecting = False
+        self.region = self.selector_frame.sceneBoundingRect()
+
+    def mousePressEvent(self, event: QMouseEvent):
+        self.start_selection(self.mapToScene(event.pos()))
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self.is_selecting:
+            self.update_selection(self.mapToScene(event.pos()))
+
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        self.end_selection()
+
+
+    def update(self):
+        super(ExportPreviewWidget, self).update()
+        self.frame_image()
+
+
 
 

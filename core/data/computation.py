@@ -41,6 +41,34 @@ def ts_to_ms(hour=0, min=0, sec=0, ms=0):
     return time
 
 
+def tpl_bgr_to_lab(bgr):
+    """
+    Converts a BGR Color Tuple to a uint8 Lab Color Tuple using OpenCV Conversion.
+    :param tpl: Input Tuple BGR
+    :return: Output Tuple Lab
+    """
+    if not isinstance(bgr, np.ndarray):
+        bgr = np.array(bgr)
+    img = bgr.astype(np.float32) / 255
+    lab = cv2.cvtColor(np.array([[img] * 2] * 2), cv2.COLOR_BGR2Lab)[0, 0,:]
+    return lab
+
+
+def tpl_bgr_to_lch(tpl):
+    """
+    Converts a BGR Color Tuple to a float32 Lab Color Tuple using OpenCV Conversion.
+    :param tpl: Input Tuple BGR
+    :return: Output Tuple LCH, float32
+    """
+
+    lab = tpl_bgr_to_lab(tpl)
+    lch = np.empty(lab.shape, dtype=np.float32)
+    lch[:, 0] = lab[:, 0]
+    lch[:, 1] = np.linalg.norm(lab[:, 1:3], axis=1)
+    lch[:, 2] = np.arctan2(lab[:, 2], lab[:, 1])
+    return lch
+
+
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)

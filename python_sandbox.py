@@ -5,9 +5,6 @@
 
 import numpy as np
 import cv2
-img = cv2.imread("C:/Users/Gaudenz Halter/Pictures/vlcsnap-error665.png")
-a = img
-
-
-cv2.imshow("test", b)
-cv2.waitKey()
+asset=[0,1,2,3,3,3,3,4,5,6,7,77,7,8,9]
+arr = np.array(asset)
+print(arr[:10])

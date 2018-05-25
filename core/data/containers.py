@@ -2982,9 +2982,16 @@ class ColormetryAnalysis(AnalysisContainer):
         self.frame_pos = []
         self.histograms = []
         self.avg_colors = []
-        self.palettes = []
+
+        self.palette_bins = []
+        self.palette_cols = []
+        self.palette_layers = []
+
         self.resolution = 30
         self.has_finished = False
+
+        self.current_idx = 0
+        self.current_junk_idx = 0
 
         self.linear_colors = []
         for x in range(16):
@@ -3006,21 +3013,35 @@ class ColormetryAnalysis(AnalysisContainer):
             self.histograms.append(data['hist'])
             self.frame_pos.append(data['frame_pos'])
             self.avg_colors.append(data['avg_color'])
+
+            # self.palettes.append(data['palette'].tree)
+
+            self.palette_bins.append(data['palette'].tree[2])
+            self.palette_cols.append(data['palette'].tree[1])
+            self.palette_layers.append(data['palette'].tree[0])
+
+
+            #TODO Palettes should be either numpy or list, but not both
+
+            # print("Hist: ", np.array(data['hist']).nbytes)
+            # print("avg_color: ", np.array(data['avg_color']).nbytes)
+            # print("palette: ", np.array(data['palette']).nbytes)
+
         except Exception as e:
-            print("append_data() raised ", str(e))
+            raise e
+            print("ColormetryAnalysis.append_data() raised ", str(e))
 
     def get_update(self, time_ms):
         try:
             frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
             if len(self.histograms) > 0:
-                hist_data =self.histograms[frame_idx]
-
-                hist_data_pal = np.resize(hist_data, new_shape=(hist_data.shape[0] ** 3))
-                pal_indices = np.argsort(hist_data_pal)[-6:]
-                pal_cols = self.linear_colors[pal_indices]
-                palette_values = hist_data_pal[pal_indices]
-
-                return dict(hist=hist_data, palette = dict(val=palette_values, col=pal_cols))
+                # hist_data =self.histograms[frame_idx]
+                #
+                # hist_data_pal = np.resize(hist_data, new_shape=(hist_data.shape[0] ** 3))
+                # pal_indices = np.argsort(hist_data_pal)[-6:]
+                # pal_cols = self.linear_colors[pal_indices]
+                # palette_values = hist_data_pal[pal_indices]
+                return dict(palette = [self.palette_layers[frame_idx], self.palette_cols[frame_idx], self.palette_bins[frame_idx]])
 
         except Exception as e:
             print(e)
@@ -3028,6 +3049,9 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self, obj):
         self.has_finished = True
+        self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
+        self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
+        self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
 
     def serialize(self):
         data = dict(
@@ -3036,7 +3060,9 @@ class ColormetryAnalysis(AnalysisContainer):
             frame_pos=self.frame_pos,
             histograms=self.histograms,
             avg_colors=self.avg_colors,
-            palettes=self.palettes,
+            palette_colors=self.palette_cols,
+            palette_layers=self.palette_layers,
+            palette_bins=self.palette_bins,
             resolution=self.resolution,
         )
 
@@ -3057,7 +3083,6 @@ class ColormetryAnalysis(AnalysisContainer):
         self.unique_id = serialization['unique_id']
         self.notes = serialization['notes']
 
-
         try:
             self.has_finished = serialization['has_finished']
             data = streamer.sync_load(self.unique_id)
@@ -3067,19 +3092,24 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.frame_pos =  data['frame_pos']
                 self.histograms =  data['histograms']
                 self.avg_colors =  data['avg_colors']
-                self.palettes =  data['palettes']
+
+                self.palette_cols = data['palette_colors']
+                self.palette_layers = data['palette_layers']
+                self.palette_bins = data['palette_bins']
+
                 self.resolution =  data['resolution']
             else:
+                print("No Colormetry Data Loaded")
                 self.curr_location = 0
                 self.time_ms = []
                 self.frame_pos = []
                 self.histograms = []
                 self.avg_colors = []
-                self.palettes = []
+
                 self.resolution = 30
                 self.has_finished = False
         except Exception as e:
-            raise(e)
+            print("Exception in Loading Analysis", e)
 
 
         return self
