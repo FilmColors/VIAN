@@ -288,7 +288,6 @@ class ExportPreviewWidget(QGraphicsView):
 
         self.selector_frame.setRect(new_s.x(), new_s.y(), new_e.x() - new_s.x(), new_e.y() - new_s.y())
 
-
     def end_selection(self):
         self.is_selecting = False
         self.region = self.selector_frame.sceneBoundingRect()

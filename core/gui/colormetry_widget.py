@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from core.data.interfaces import IProjectChangeNotify
 from core.analysis.colorimetry.hilbert import create_hilbert_color_pattern, hilbert_mapping_3d, HilbertMode
-from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget
+from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
 import cv2
 import numpy as np
 
@@ -37,9 +37,11 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         # self.palette = PaletteVis(self)
         self.palette = PaletteWidget(self)
         self.lab_palette = PaletteLABWidget(self)
+        self.time_palette = PaletteTimeWidget(self)
         # self.lt.addWidget(self.palette)
-        self.vis_tab.addTab(self.palette, "Palette")
+        self.vis_tab.addTab(self.palette, "Tree-Palette")
         self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
+        self.vis_tab.addTab(self.time_palette, "Time Palette")
         # self.vis_tab.addTab(self.histogram, "Histogram")
 
     def update_timestep(self, data):
@@ -59,12 +61,18 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             self.lab_palette.set_palette(data['palette'])
             self.lab_palette.draw_palette()
 
+    def plot_time_palette(self, data):
+        self.time_palette.set_palette(data[0], data[1])
+        self.time_palette.draw_palette()
 
     def on_selected(self, sender, selected):
         pass
+
     def on_closed(self):
         pass
+
     def on_changed(self, project, item):
         pass
+
     def on_loaded(self, project):
         pass
