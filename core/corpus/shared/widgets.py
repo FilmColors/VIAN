@@ -82,20 +82,29 @@ class CorpusUserDialog(EDialogWidget):
 
         self.lineEdit_Name.setText(self.contributor.name)
         self.lineEdit_Affiliation.setText(self.contributor.affiliation)
+        self.widget_image.setLayout(QHBoxLayout(self))
+
+        self.preview = EGraphicsView(self, auto_frame=True)
+        self.widget_image.layout().addWidget(self.preview)
 
         self.image_path = ""
         if os.path.isfile(self.contributor.image_path):
             self.image_path = self.contributor.image_path
             img_bgr = cv2.imread(self.image_path)
             img = numpy_to_pixmap(img_bgr, target_width=128)
-            self.lbl_Image.setPixmap(img)
+            self.preview.set_image(img)
+        else:
+            self.image_path = os.path.abspath("qt_ui/images/Blank_woman_placeholder.png")
+            img_bgr = cv2.imread(self.image_path)
+            img = numpy_to_pixmap(img_bgr, target_width=128)
+            self.preview.set_image(img)
 
     def on_browse(self):
         path = QFileDialog.getOpenFileName(self, filter="*.png *.jpg")[0]
         if os.path.isfile(path):
             img_bgr = cv2.imread(path)
             img = numpy_to_pixmap(img_bgr, target_width=128)
-            self.lbl_Image.setPixmap(img)
+            self.preview.set_image(img)
             self.image_path = path
 
     def on_ok(self):

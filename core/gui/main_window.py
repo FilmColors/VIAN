@@ -488,7 +488,7 @@ class MainWindow(QtWidgets.QMainWindow):
         args = job.prepare(self.project)
         worker = MinimalThreadWorker(job.run_concurrent, args, True)
         worker.signals.callback.connect(self.on_colormetry_push_back)
-        worker.signals.finished.connect(job.colormetry_analysis.set_finished)
+        worker.signals.finished.connect(self.on_colormetry_finished)
         self.abortAllConcurrentThreads.connect(job.abort)
         self.thread_pool.start(worker)
 
@@ -496,6 +496,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None and self.project.colormetry_analysis is not None:
             self.project.colormetry_analysis.append_data(data[0])
             self.timeline.timeline.set_colormetry_progress(data[1])
+
+
+    def on_colormetry_finished(self, res):
+        self.project.colormetry_analysis.set_finished(res)
+        self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
 
     #region WidgetCreation
 
@@ -1823,6 +1828,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     run_colormetry = True
         else:
             run_colormetry = ready
+
+        if coloremtry is not None:
+            self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
 
         if run_colormetry:
             ready, col = self.project.get_colormetry()

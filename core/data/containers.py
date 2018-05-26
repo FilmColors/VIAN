@@ -3041,11 +3041,23 @@ class ColormetryAnalysis(AnalysisContainer):
                 # pal_indices = np.argsort(hist_data_pal)[-6:]
                 # pal_cols = self.linear_colors[pal_indices]
                 # palette_values = hist_data_pal[pal_indices]
+
                 return dict(palette = [self.palette_layers[frame_idx], self.palette_cols[frame_idx], self.palette_bins[frame_idx]])
 
         except Exception as e:
             print(e)
             pass
+
+
+    def get_time_palette(self):
+        time_palette_data = []
+        for t in range(len(self.palette_layers)):
+            time_palette_data.append([
+                self.palette_layers[t],
+                self.palette_cols[t],
+                self.palette_bins[t]
+            ])
+        return [time_palette_data, self.time_ms]
 
     def set_finished(self, obj):
         self.has_finished = True
