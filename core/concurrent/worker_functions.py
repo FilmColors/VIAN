@@ -125,7 +125,12 @@ def store_project_concurrent(args, sign_progress):
 
 
 class LoadScreenshotsJob(IConcurrentJob):
+    """
+    Loads the frame at the stored screenshot positions into memory to represent them.
+    It tries to load both, the annotated and the basic frame.
 
+    If the annotated fails, it will be reset to None.
+    """
     def run_concurrent(self, args, sign_progress):
         movie_path = args[0]
         locations = args[1]
@@ -143,7 +148,9 @@ class LoadScreenshotsJob(IConcurrentJob):
             video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
             ret, frame = video_capture.read()
             if len(annotation_dicts[i]) > 0:
-                annotation = render_annotations(frame, annotation_dicts[i]).astype(np.uint8)
+                annotation = render_annotations(frame, annotation_dicts[i])
+                if annotation is not None:
+                    annotation = annotation.astype(np.uint8)
             else:
                 annotation = None
 
@@ -180,7 +187,6 @@ class CreateScreenshotJob(IConcurrentJob):
         annotation_dicts = args[2]
         time = args[3]
 
-
         # Create Screenshot Image
         video_capture = cv2.VideoCapture(movie_path)
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
@@ -189,14 +195,18 @@ class CreateScreenshotJob(IConcurrentJob):
         if frame is None:
             raise IOError("Couldn't Read Frame")
 
+        annotation_ids = []
         if len(annotation_dicts) > 0:
-            frame_annotated = render_annotations(frame, annotation_dicts)
+            try:
+                frame_annotated = render_annotations(frame, annotation_dicts)
+                if frame_annotated is not None:
+                    for a in annotation_dicts:
+                        annotation_ids.append(a['unique_id'])
+            except Exception as e:
+                print("Exception in CreateScreenshotJob::fun_Concurrent(): ", e)
+                frame_annotated = None
         else:
             frame_annotated = None
-
-        annotation_ids = []
-        for a in annotation_dicts:
-            annotation_ids.append(a['unique_id'])
 
         return [frame, frame_annotated, frame_pos, time, annotation_ids]
 
@@ -315,76 +325,80 @@ class ImportScreenshotsJob(IConcurrentJob):
 def render_annotations(frame, annotation_dicts):
     qimage, qpixmap = numpy_to_qt_image(frame)
     qp = QtGui.QPainter(qimage)
+    try:
+        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
 
-    qp.setRenderHint(QtGui.QPainter.Antialiasing)
-    qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        for a in annotation_dicts:
+            position    = a['orig_position']  # orig position has been modified depending on the keys
+            a_type      = AnnotationType(a['a_type'])
+            size        = a['size']
+            color       = a['color']
+            color = QtGui.QColor(color[0], color[1], color[2])
+            line_width  = a['line_w']
+            text        = a['text']
+            font_size   = a['font_size']
+            resource    = a['resource_path']
+            free_hand_paths = a['free_hand_paths']
 
-    for a in annotation_dicts:
-        position    = a['orig_position']  # orig position has been modified depending on the keys
-        a_type      = AnnotationType(a['a_type'])
-        size        = a['size']
-        color       = a['color']
-        color = QtGui.QColor(color[0], color[1], color[2])
-        line_width  = a['line_w']
-        text        = a['text']
-        font_size   = a['font_size']
-        resource    = a['resource_path']
-        free_hand_paths = a['free_hand_paths']
+            pen = QtGui.QPen()
+            pen.setColor(color)
+            pen.setWidth(line_width)
+            qp.setPen(pen)
 
-        pen = QtGui.QPen()
-        pen.setColor(color)
-        pen.setWidth(line_width)
-        qp.setPen(pen)
+            x = position[0]
+            y = position[1]
+            w = size[0]
+            h = size[1]
 
-        x = position[0]
-        y = position[1]
-        w = size[0]
-        h = size[1]
+            local_rect = QtCore.QRect(x, y, w, h)
+            s = local_rect
+            l = line_width
+            inner_rect_delta = 10
+            inner_rect = QtCore.QRect(s.x() + l + inner_rect_delta,
+                                           s.y() + l + inner_rect_delta,
+                                           s.width() - 2 * l - 2 * inner_rect_delta,
+                                           s.height() - 2 * l - 2 * inner_rect_delta)
 
-        local_rect = QtCore.QRect(x, y, w, h)
-        s = local_rect
-        l = line_width
-        inner_rect_delta = 10
-        inner_rect = QtCore.QRect(s.x() + l + inner_rect_delta,
-                                       s.y() + l + inner_rect_delta,
-                                       s.width() - 2 * l - 2 * inner_rect_delta,
-                                       s.height() - 2 * l - 2 * inner_rect_delta)
+            if a_type == AnnotationType.Ellipse:
+                qp.drawEllipse(inner_rect)
 
-        if a_type == AnnotationType.Ellipse:
-            qp.drawEllipse(inner_rect)
+            if a_type == AnnotationType.Rectangle:
+                qp.drawRect(inner_rect)
 
-        if a_type == AnnotationType.Rectangle:
-            qp.drawRect(inner_rect)
+            if a_type == AnnotationType.Text:
+                font = QtGui.QFont()
+                font.setPointSize(font_size)
+                qp.setFont(font)
+                qp.drawText(inner_rect, Qt.TextWordWrap, text)
 
-        if a_type == AnnotationType.Text:
-            font = QtGui.QFont()
-            font.setPointSize(font_size)
-            qp.setFont(font)
-            qp.drawText(inner_rect, Qt.TextWordWrap, text)
+            if a_type == AnnotationType.Image:
+                img = cv2.imread(resource, -1)
+                if img.shape[2] == 3:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+                img, pix = numpy_to_qt_image(img, cv2.COLOR_BGRA2RGBA, with_alpha=True)
+                qp.drawImage(inner_rect, img)
 
-        if a_type == AnnotationType.Image:
-            img = cv2.imread(resource, -1)
-            if img.shape[2] == 3:
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-            img, pix = numpy_to_qt_image(img, cv2.COLOR_BGRA2RGBA, with_alpha=True)
-            qp.drawImage(inner_rect, img)
+            if a_type == AnnotationType.FreeHand:
+                dx = position[0]
+                dy = position[1]
+                for p in free_hand_paths:
+                    path = QtGui.QPainterPath()
+                    pen = QtGui.QPen()
+                    pen.setColor(QtGui.QColor(p[1][0], p[1][1], p[1][2]))
+                    pen.setWidth(p[2])
+                    qp.setPen(pen)
 
-        if a_type == AnnotationType.FreeHand:
-            dx = position[0]
-            dy = position[1]
-            for p in free_hand_paths:
-                path = QtGui.QPainterPath()
-                pen = QtGui.QPen()
-                pen.setColor(QtGui.QColor(p[1][0], p[1][1], p[1][2]))
-                pen.setWidth(p[2])
-                qp.setPen(pen)
+                    if not len(p[0]) == 0:
+                        path.moveTo(QtCore.QPointF(p[0][0][0] + dx, p[0][0][1] + dy))
+                        for i in range(1, len(p[0]), 1):
+                            path.lineTo(QtCore.QPointF(p[0][i][0] + dx, p[0][i][1] + dy))
 
-                if not len(p[0]) == 0:
-                    path.moveTo(QtCore.QPointF(p[0][0][0] + dx, p[0][0][1] + dy))
-                    for i in range(1, len(p[0]), 1):
-                        path.lineTo(QtCore.QPointF(p[0][i][0] + dx, p[0][i][1] + dy))
+                    qp.drawPath(path)
+    except Exception as e:
+        qp.end()
+        return None
 
-                qp.drawPath(path)
     qp.end()
 
     img_numpy = convertQImageToMat(qimage)

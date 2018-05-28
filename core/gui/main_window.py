@@ -942,21 +942,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timeline.timeline.create_segment(None)
 
     def on_screenshot(self):
-        # imgs = self.drawing_overlay.render_annotation()
-        # qimage = imgs[0]
-        # frame = imgs[1]
-        #
-        # annotation = convertQImageToMat(qimage)
-        # blend = blend_transparent(frame, annotation)
-        #
-
-
         time = self.player.get_media_time()
-        # frame, pos = self.get_frame(time)
         
         frame_pos = self.player.get_frame_pos_by_time(time)
-        # result = create_screenshot([self.drawing_overlay, frame, time, pos], None)
-        # self.on_screenshot_finished(result)
 
         annotation_dicts = []
         for l in self.project.annotation_layers:

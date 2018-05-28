@@ -294,6 +294,8 @@ class CorpusClient(QObject, IProjectChangeNotify):
     def on_selected(self, sender, selected):
         pass
 
+    def on_changed(self, project, item):
+        pass
 
 class CorpusClientToolBar(QToolBar):
     def __init__(self, parent, corpus_client: CorpusClient):
