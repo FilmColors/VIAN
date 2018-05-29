@@ -66,10 +66,11 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
             self.current_visualization = []
 
     def return_from_fullscreen(self, widgets):
-        self.analysis_widget.layout().addWidget(widgets[0].widget)
-        self.current_visualization = widgets
-        self.current_visualization[0].widget.show()
-        self.fullscreen_view = None
+        if len(widgets) > 0:
+            self.analysis_widget.layout().addWidget(widgets[0].widget)
+            self.current_visualization = widgets
+            self.current_visualization[0].widget.show()
+            self.fullscreen_view = None
 
     def clear_analysis_widget(self):
         for c in self.analysis_widget.children():

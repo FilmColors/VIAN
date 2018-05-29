@@ -1010,7 +1010,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def run_job_concurrent(self, job):
         job.prepare(self.project)
-        worker = Worker(job.run_concurrent, self, self.on_job_concurrent_result, job.args, msg_finished="Screenshots Loaded", concurrent_job=job)
+        worker = Worker(job.run_concurrent, self, self.on_job_concurrent_result, job.args, msg_finished=str(job.__class__.__name__) + " finished", concurrent_job=job)
         self.abortAllConcurrentThreads.connect(job.abort)
         self.start_worker(worker, "Job")
 

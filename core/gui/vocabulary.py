@@ -342,10 +342,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.main_window.timeline.timeline.frame_time_range(segm.get_start(), segm.get_end())
             self.main_window.screenshots_manager.frame_screenshot(container)
 
-
-
-
-
     def update_widget(self):
         if self.current_experiment is None:
             return
@@ -359,8 +355,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.checkbox_groups = []
         self.checkbox_names = []
 
-
-
         if len(self.sorted_containers) > self.current_idx:
             self.current_container = self.sorted_containers[self.current_idx]
             self.main_window.project.set_selected(None, selected = [self.current_container])
@@ -371,6 +365,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         if self.current_container is not None:
             keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+            keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
             for k in keywords:
                 if k.voc_obj.category not in self.tab_categories:
                     tab = QScrollArea()
@@ -386,7 +381,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
                 if k.voc_obj.name + ":" + k.class_obj.name not in self.checkbox_names:
                     self.checkbox_names.append(k.voc_obj.name + ":" + k.class_obj.name)
-                    group = CheckBoxGroupWidget(tab, k.voc_obj.name + ":" + k.class_obj.name)
+                    group = CheckBoxGroupWidget(tab, k.class_obj.name + ":" + k.voc_obj.name)
                     tab.widget().layout().addWidget(group)
                     self.checkbox_groups.append(group)
                 else:
@@ -402,6 +397,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         self.frame_container(self.current_container)
 
+
 class CheckBoxGroupWidget(QWidget):
     def __init__(self, parent, name ,n_columns = 3):
         super(CheckBoxGroupWidget, self).__init__(parent)
@@ -412,10 +408,11 @@ class CheckBoxGroupWidget(QWidget):
         self.items = []
         self.expanded = True
         self.n_columns = n_columns
-        self.btn_Class.setText(name)
+        self.btn_Class.setText(name.ljust(50))
         self.btn_Class.clicked.connect(self.toggle_expand)
 
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.toggle_expand()
 
     def add_checkbox(self, checkbox):
         self.items.append(checkbox)
@@ -436,7 +433,6 @@ class CheckBoxGroupWidget(QWidget):
             if r == n_rows:
                 r = 0
                 c += 1
-
 
     def toggle_expand(self):
         if self.expanded:

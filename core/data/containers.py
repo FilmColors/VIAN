@@ -813,6 +813,7 @@ class VIANProject(IHasName, IClassifiable):
         self.undo_manager.clear()
         print("Loaded")
 
+
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
         segmentations = []
         vocabularies = []
@@ -1019,6 +1020,7 @@ class VIANProject(IHasName, IClassifiable):
     def create_experiment(self):
         new = Experiment()
         self.add_experiment(new)
+        return new
         pass
 
     def add_experiment(self, experiment):
@@ -3281,7 +3283,7 @@ class Vocabulary(IProjectContainer, IHasName):
         :param parent_word: the parent Word, either as String or Word Object
         :return: 
         """
-        if parent_word is None:
+        if parent_word is None or isinstance(parent_word, Vocabulary):
             word.parent = self
             self.words.append(word)
             self.words_plain.append(word)
@@ -3559,11 +3561,22 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.target_container = []
 
     def add_vocabulary(self, voc: Vocabulary, dispatch = True):
-        self.classification_vocabularies.append(voc)
-        for w in voc.words_plain:
-            keyword = UniqueKeyword(self.experiment, voc, w, self)
-            keyword.set_project(self.project)
-            self.unique_keywords.append(keyword)
+        if voc not in self.classification_vocabularies:
+            self.classification_vocabularies.append(voc)
+            keywords = []
+            for w in voc.words_plain:
+                keyword = UniqueKeyword(self.experiment, voc, w, self)
+                keyword.set_project(self.project)
+                self.unique_keywords.append(keyword)
+                keywords.append(keyword)
+            return keywords
+        else:
+            keywords = []
+            for r in self.unique_keywords:
+                if r.voc_obj == voc:
+                    keywords.append(r)
+            return keywords
+
 
     def remove_vocabulary(self, voc):
         self.classification_vocabularies.remove(voc)
@@ -3647,6 +3660,7 @@ class UniqueKeyword(IProjectContainer):
         self.voc_obj = voc_obj
         self.word_obj = word_obj
         self.class_obj = class_obj
+        self.notes = ""
 
     def get_name(self):
         return self.word_obj.get_name()
@@ -3656,7 +3670,8 @@ class UniqueKeyword(IProjectContainer):
             unique_id = self.unique_id,
             voc_obj = self.voc_obj.unique_id,
             word_obj = self.word_obj.unique_id,
-            class_obj = self.class_obj.unique_id
+            class_obj = self.class_obj.unique_id,
+            nodes = self.notes
         )
 
         return data
@@ -3666,6 +3681,11 @@ class UniqueKeyword(IProjectContainer):
         self.voc_obj = project.get_by_id(serialization['voc_obj'])
         self.word_obj = project.get_by_id(serialization['word_obj'])
         self.class_obj = project.get_by_id(serialization['class_obj'])
+        try:
+            self.notes = serialization['notes']
+        except:
+            pass
+
         self.set_project(project)
 
         return self
@@ -3710,6 +3730,7 @@ class Experiment(IProjectContainer, IHasName):
             self.classification_objects.append(obj)
         else:
             parent.add_child(obj)
+        return obj
 
     def get_unique_keywords(self, container_type = None):
         """
@@ -3724,7 +3745,6 @@ class Experiment(IProjectContainer, IHasName):
             for k in objects:
                 if container_type in k.target_container:
                     keywords.extend(k.unique_keywords)
-                    break
         return keywords
 
     def add_classification_object(self, obj: ClassificationObject):
