@@ -1333,7 +1333,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         new_seg.set_project(self.project)
 
         self.add_segment(new_seg, dispatch)
-
+        return new_seg
 
     def add_segment(self, segment, dispatch = True):
         # Finding the Segments location
@@ -1373,6 +1373,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             # new = self.create_segment(time, old_end)
             new = self.create_segment2(time, old_end, mode=SegmentCreationMode.INTERVAL, dispatch=False)
             self.project.undo_manager.to_undo((self.cut_segment, [segm, time]), (self.merge_segments, [segm, new]))
+            self.dispatch_on_changed()
 
     def merge_segments(self, a, b):
         if abs(a.ID - b.ID) <= 1:

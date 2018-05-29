@@ -642,7 +642,6 @@ class DatasetCorpusDB(CorpusDB):
                     return True
                 except Exception as e:
                     print("Exception in CorpusDB:checkin_project(): ", str(e))
-                    raise(e)
                     self.db.rollback()
             else:
                 print("User not regconized or not matching the Check Out User")
