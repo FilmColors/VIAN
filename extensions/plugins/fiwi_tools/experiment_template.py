@@ -3,22 +3,66 @@ import csv
 import json
 from core.data.containers import EXPERIMENT, Experiment, Vocabulary, VocabularyWord, ClassificationObject, VIANProject
 from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
+from core.gui.ewidgetbase import *
 
 # TODO Implement the Plugin
-# class FiwiGlossary2Template(GAPlugin):
-#     def __init__(self, main_window):
-#         super(FiwiGlossary2Template, self).__init__(main_window)
-#         self.plugin_name = "GlossaryDB to VIAN Template"
-#         self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
-#
-#     def get_window(self, parent):
-#         wnd = FiwiGlossary2TemplateDialog(parent, self)
-#         wnd.show()
-#
-# class FiwiGlossary2TemplateDialog()
-#     fiwi_glossary_to_template
+class FiwiGlossary2Template(GAPlugin):
+    def __init__(self, main_window):
+        super(FiwiGlossary2Template, self).__init__(main_window)
+        self.plugin_name = "GlossaryDB to VIANTemplate"
+        self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
 
-# class TemplateCreationDialog()
+    def get_window(self, parent):
+        wnd = FiwiGlossary2TemplateDialog(self.main_window)
+        wnd.show()
+
+class FiwiGlossary2TemplateDialog(EDialogWidget):
+    def __init__(self, main_window):
+        super(FiwiGlossary2TemplateDialog, self).__init__(main_window, main_window)
+        path = os.path.abspath("extensions/plugins/fiwi_tools/gui/fiwi_glossary_evaluation.ui")
+        uic.loadUi(path, self)
+        self.gl_path = ""
+        self.out_path = ""
+        self.voc_dir = ""
+
+
+    def on_ok(self):
+        try:
+            if os.path.isfile(self.line_gl.text()) and self.line_out.text() != "":
+                out_dir = None
+                if self.line_voc_dir.text() != "":
+                    if os.path.isdir(self.line_voc.text()):
+                        out_dir = self.line_voc.text()
+                glossary_to_template(self.line_gl.text(), template_path=self.line_out.text(), out_dir)
+        except:
+            pass
+
+    def on_browse_db(self):
+        try:
+            file = QFileDialog.getOpenFileName()[0]
+            if os.path.isfile(file):
+                self.db_path = file
+                self.line_db.setText(file)
+        except:
+            pass
+
+    def on_browse_gl(self):
+        try:
+            file = QFileDialog.getOpenFileName()[0]
+            if os.path.isfile(file):
+                self.gl_path = file
+                self.line_gl.setText(file)
+        except:
+            pass
+
+    def on_browse_out(self):
+        try:
+            file = QFileDialog.getOpenFileName()[0]
+            if os.path.isfile(file):
+                self.out_path = file
+                self.line_out.setText(file)
+        except:
+            pass
 
 
 def create_vocabulary(name, category = ""):

@@ -68,10 +68,10 @@ class ColormetryJob2(QObject):
             frame_lab = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2Lab)
 
             # Histogram
-            # hist = np.divide(calculate_histogram(frame_lab, 16), (width * height))
-            hist = None
-            palette = color_palette(frame_lab, n_merge_steps=200, n_merge_per_lvl=20)
-
+            hist = np.divide(calculate_histogram(frame_lab, 16), (width * height))
+            # hist = None
+            palette = color_palette(frame_lab, n_merge_steps=200, n_merge_per_lvl=20, image_size=150.0)
+            # palette = None
             # AVG Color
             avg_color = np.mean(frame_lab, axis=(0, 1)).astype(np.uint8)
 

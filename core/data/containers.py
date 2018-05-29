@@ -3031,7 +3031,6 @@ class ColormetryAnalysis(AnalysisContainer):
             # print("palette: ", np.array(data['palette']).nbytes)
 
         except Exception as e:
-            raise e
             print("ColormetryAnalysis.append_data() raised ", str(e))
 
     def get_update(self, time_ms):

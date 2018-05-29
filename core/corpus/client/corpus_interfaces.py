@@ -52,6 +52,7 @@ class CorpusInterface(QObject):
     def check_checkout_state(self, user, dbproject):
         pass
 
+
 class LocalCorpusInterface(CorpusInterface):
     def __init__(self):
         super(LocalCorpusInterface, self).__init__()

@@ -10,27 +10,79 @@ This script is included into VIAN.
 
 import numpy as np
 import csv
+import os
 from sys import stdout as console
 
 from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
+from core.gui.ewidgetbase import EDialogWidget
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from core.concurrent.worker import SimpleWorker
 
-# TODO Implement the Plugin
-# class FiwiGlossary2Template(GAPlugin):
-#     def __init__(self, main_window):
-#         super(FiwiGlossary2Template, self).__init__(main_window)
-#         self.plugin_name = "GlossaryDB to VIAN Template"
-#         self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
-#
-#     def get_window(self, parent):
-#         wnd = FiwiGlossary2TemplateDialog(parent, self)
-#         wnd.show()
-#
-# class FiwiGlossary2TemplateDialog()
-#     fiwi_glossary_to_template
+from PyQt5 import uic
 
-# class TemplateCreationDialog()
+class FiwiGlossary2Template(GAPlugin):
+    def __init__(self, main_window):
+        super(FiwiGlossary2Template, self).__init__(main_window)
+        self.plugin_name = "GlossaryDB Evaluation"
+        self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
 
-def parse(glossary_path, database_path, outfile, segment_path = None):
+    def get_window(self, parent):
+        wnd = FiwiGlossary2TemplateDialog(self.main_window)
+        wnd.show()
+
+class FiwiGlossary2TemplateDialog(EDialogWidget):
+    def __init__(self, main_window):
+        super(FiwiGlossary2TemplateDialog, self).__init__(main_window, main_window)
+        path = os.path.abspath("extensions/plugins/fiwi_tools/gui/fiwi_glossary_evaluation.ui")
+        uic.loadUi(path, self)
+        self.db_path = ""
+        self.gl_path = ""
+        self.out_path = ""
+
+
+    def on_ok(self):
+        if os.path.isfile(self.line_db.text()) and os.path.isfile(self.line_gl.text()) and os.path.isfile(self.line_out.text()):
+            self.main_window.run_job_concurrent(SimpleWorker(parse, self.main_window.worker_finished,
+                                                             self.main_window.worker_progress,
+                                                             args = [self.line_db.text(),
+                                                                     self.line_gl.text(),
+                                                                     self.line_out.text()
+                                                                     ]))
+
+    def on_browse_db(self):
+        try:
+            file = QFileDialog.getOpenFileName()[0]
+            if os.path.isfile(file):
+                self.db_path = file
+                self.line_db.setText(file)
+        except:
+            pass
+
+    def on_browse_gl(self):
+        try:
+            file = QFileDialog.getOpenFileName()[0]
+            if os.path.isfile(file):
+                self.gl_path = file
+                self.line_gl.setText(file)
+        except:
+            pass
+
+    def on_browse_out(self):
+        try:
+            file = QFileDialog.getOpenFileName()[0]
+            if os.path.isfile(file):
+                self.out_path = file
+                self.line_out.setText(file)
+        except:
+            pass
+
+def parse(args):
+
+    glossary_path = args[1]
+    database_path = args[0]
+    outfile = args[2]
+
     # Parse the Glossary
     glossary_words = []
     glossary_ids = []

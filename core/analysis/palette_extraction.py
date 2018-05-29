@@ -132,17 +132,22 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
 
 
 def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, image_size = 100.0, seeds_model = None,
-                  n_pixels = 200, out_path = "", n_merge_per_lvl = 10, plot = False, mask_inverse = False, normalization_lower_bound = 100.0):
+                  n_pixels = 200, out_path = "", n_merge_per_lvl = 10, plot = False, mask_inverse = False, normalization_lower_bound = 100.0,
+                  seeds_input_width = 600):
     # if mask is not None and mask_index is not None:
     #     frame[np.where(mask!=mask_index)] = [0, 0, 0]
 
-    # print("Seed")
+    print("Seed")
+    if seeds_input_width < frame.shape[0]:
+        rx = seeds_input_width / frame.shape[0]
+        frame = cv2.resize(frame, None, None, rx, rx, cv2.INTER_CUBIC)
     if seeds_model is None:
         seeds_model = PaletteExtractorModel(frame, n_pixels=n_pixels, num_levels=8)
     labels = seeds_model.forward(frame, 200).astype(np.uint8)
     if out_path != "":
         cv2.imwrite("../../results/seeds_"+out_path+str(n_pixels)+".jpg", cv2.cvtColor(seeds_model.labels_to_avg_color_mask(frame, labels), cv2.COLOR_LAB2BGR))
 
+    print("Resize")
     # Resizing all to same dimension
     fx = image_size / frame.shape[0]
     frame = cv2.resize(frame, None, None, fx, fx, cv2.INTER_CUBIC)
@@ -194,7 +199,6 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
     data = np.array(data)
     Z = linkage(data, 'ward')
     tree, merge_dists = to_cluster_tree(Z, all_labels, all_cols, n_merge_steps, n_merge_per_lvl)
-
     return PaletteAsset(tree, merge_dists)
 
 

@@ -62,8 +62,12 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             self.lab_palette.draw_palette()
 
     def plot_time_palette(self, data):
-        self.time_palette.set_palette(data[0], data[1])
-        self.time_palette.draw_palette()
+        try:
+            self.time_palette.set_palette(data[0], data[1])
+            self.time_palette.draw_palette()
+        except:
+            print("Exception in ColorimetryLiveWidget::plot_time_palette()")
+            pass
 
     def on_selected(self, sender, selected):
         pass
