@@ -1,137 +1,63 @@
-name: vian_dev
+name: vian_win
 channels:
-- anaconda
 - conda-forge
+- anaconda
 - menpo
 - anaconda-fusion
 - defaults
 dependencies:
-- cudatoolkit=8.0=3
-- cudnn=6.0=0
-- decorator=4.2.1=py35_0
-- freetype=2.8=vc14h17c9bdf_0
-- jpeg=9b=vc14h4d7706e_1
-- libpng=1.6.32=vc14h5163883_3
-- libprotobuf=3.2.0=vc14_0
-- networkx=2.1=py35_0
-- tk=8.6.7=vc14hb68737d_1
-- vs2015_runtime=14.0.25420=0
-- ca-certificates=2017.11.5=0
-- fuzzywuzzy=0.16.0=py_0
-- hdf5=1.10.1=vc14_1
-- icu=58.2=vc14_0
-- libgpuarray=0.7.5=vc14_0
-- libtiff=4.0.9=vc14_0
-- libwebp=0.5.2=vc14_7
-- openssl=1.0.2n=vc14_0
-- protobuf=3.5.1=py35_vc14_3
-- python-levenshtein=0.12.0=py35_0
-- qt=5.6.2=vc14_1
-- yaml=0.1.7=vc14_0
-- zlib=1.2.11=vc14_0
-- alabaster=0.7.10=py35h3a808de_0
 - asn1crypto=0.24.0=py35_0
-- babel=2.5.3=py35_0
-- bokeh=0.12.13=py35h047fa9f_0
-- certifi=2017.11.5=py35h456c6ae_0
 - cffi=1.11.4=py35hfa6e2cd_0
 - chardet=3.0.4=py35h177e1b7_1
-- colorama=0.3.9=py35h32a752f_0
 - cryptography=2.1.4=py35h8ead9e0_0
-- docutils=0.14=py35h8ccb97f_0
-- h5py=2.7.1=py35hb2c3add_0
-- icc_rt=2017.0.4=h97af966_0
+- decorator=4.2.1=py35_0
 - idna=2.6=py35h8dcb9ae_1
-- imagesize=0.7.1=py35h7f87e83_0
-- intel-openmp=2018.0.0=hd92c6cd_8
-- jinja2=2.10=py35hdf652bb_0
-- keras-gpu=2.1.3=py35_0
-- libpython=2.1=py35_0
-- m2w64-binutils=2.25.1=5
-- m2w64-bzip2=1.0.6=6
-- m2w64-crt-git=5.0.0.4636.2595836=2
-- m2w64-gcc=5.3.0=6
-- m2w64-gcc-ada=5.3.0=6
-- m2w64-gcc-fortran=5.3.0=6
-- m2w64-gcc-libgfortran=5.3.0=6
-- m2w64-gcc-libs=5.3.0=7
-- m2w64-gcc-libs-core=5.3.0=7
-- m2w64-gcc-objc=5.3.0=6
-- m2w64-gmp=6.1.0=2
-- m2w64-headers-git=5.0.0.4636.c0ad18a=2
-- m2w64-isl=0.16.1=2
-- m2w64-libiconv=1.14=6
-- m2w64-libmangle-git=5.0.0.4509.2e5a9a2=2
-- m2w64-libwinpthread-git=5.0.0.4634.697f757=2
-- m2w64-make=4.1.2351.a80a8b8=2
-- m2w64-mpc=1.0.3=3
-- m2w64-mpfr=3.1.4=4
-- m2w64-pkg-config=0.29.1=2
-- m2w64-toolchain=5.3.0=7
-- m2w64-tools-git=5.0.0.4592.90b8472=2
-- m2w64-windows-default-manifest=6.4=3
-- m2w64-winpthreads-git=5.0.0.4634.697f757=2
-- m2w64-zlib=1.2.8=10
-- mako=1.0.7=py35ha146b58_0
-- markupsafe=1.0=py35hc253e08_1
-- mkl=2018.0.1=h2108138_4
-- mkl-service=1.1.2=py35h051acba_4
-- msys2-conda-epoch=20160418=1
-- numpy=1.12.1=py35h02c1717_1
-- olefile=0.44=py35h7ba86d0_0
-- opencv=3.3.1=py35h20b85fd_1
-- phantomjs=2.1.1=0
-- pillow=5.0.0=py35h0738816_0
-- pip=9.0.1=py35h691316f_4
+- networkx=2.1=py35_0
 - pycparser=2.18=py35h15a15da_1
-- pygments=2.2.0=py35h24c0941_0
-- pygpu=0.7.5=py35hfa6e2cd_0
 - pyopenssl=17.5.0=py35h75c5b16_0
 - pyqt=5.6.0=py35hd46907b_5
 - pyqtgraph=0.10.0=py35_0
 - pysocks=1.6.7=py35hb30ac0d_1
-- python=3.5.4=h1357f44_23
-- python-dateutil=2.6.1=py35h6b299a3_1
-- pytz=2017.3=py35hb294b1a_0
-- pyyaml=3.12=py35h4bf9689_1
 - requests=2.18.4=py35h54a615f_1
 - scikit-learn=0.19.1=py35h2037775_0
 - scipy=1.0.0=py35h75710e8_0
-- selenium=3.8.1=py35_0
-- setuptools=38.4.0=py35_0
 - sip=4.18.1=py35h01cbaa7_2
 - six=1.11.0=py35hc1da2df_1
-- snowballstemmer=1.2.1=py35h4c55bfa_0
-- sphinx=1.6.6=py35_0
-- sphinx_rtd_theme=0.2.4=py35_0
-- sphinxcontrib=1.0=py35h45f5ca3_1
-- sphinxcontrib-websupport=1.0.1=py35ha3690eb_1
-- tensorflow-gpu=1.1.0=np112py35_0
-- theano=1.0.1=py35_0
-- tornado=4.5.3=py35_0
-- typing=3.6.2=py35h37628ea_0
 - urllib3=1.22=py35h8cc84eb_0
-- vc=14=h0510ff6_3
-- werkzeug=0.14.1=py35_0
-- wheel=0.30.0=py35h38a90bc_1
 - win_inet_pton=1.0.1=py35hbef1270_1
+- ca-certificates=2018.1.18=0
+- icu=58.2=vc14_0
+- jpeg=9b=vc14_2
+- libpng=1.6.28=vc14_2
+- libtiff=4.0.7=vc14_1
+- libwebp=0.5.2=vc14_7
+- opencv=3.3.0=py35_203
+- openssl=1.0.2n=vc14_0
+- qt=5.6.2=vc14_1
+- zlib=1.2.11=vc14_0
+- certifi=2018.1.18=py35_0
+- icc_rt=2017.0.4=h97af966_0
+- intel-openmp=2018.0.0=hd92c6cd_8
+- mkl=2018.0.1=h2108138_4
+- numpy=1.14.1=py35h4a99626_1
+- pip=9.0.1=py35h691316f_4
+- python=3.5.4=h1357f44_23
+- setuptools=38.5.1=py35_0
+- vc=14=h0510ff6_3
+- vs2015_runtime=14.0.25123=3
+- wheel=0.30.0=py35h38a90bc_1
 - wincertstore=0.2=py35hfebbdb8_0
 - pip:
   - alembic==0.9.8
   - banal==0.3.3
-  - bleach==1.5.0
   - dataset==1.0.6
-  - enum34==1.1.6
-  - html5lib==0.9999999
-  - imdbpy==6.4.1
-  - keras==2.1.3
-  - lxml==4.2.1
-  - markdown==2.6.11
+  - fastcluster==1.1.24
+  - mako==1.0.7
+  - markupsafe==1.0
   - normality==0.5.11
+  - python-dateutil==2.6.1
   - python-editor==1.0.3
-  - sphinx-rtd-theme==0.2.4
   - sqlalchemy==1.2.3
-  - tensorflow-tensorboard==0.4.0
   - win-inet-pton==1.0.1
-prefix: C:\dev\Anaconda3\envs\vian_dev
+prefix: C:\dev\Anaconda3\envs\vian_win
 

@@ -27,9 +27,9 @@ class VianUpdater(IConcurrentJob):
         self.to_exclude = ["user"]
         self.box = None
 
-    def update(self, force = False):
+    def update(self, force = False, include_beta = False):
         try:
-            do_update = self.get_server_version()
+            do_update = self.get_server_version(include_beta)
             if do_update or force:
                 job = VianUpdaterJob([self.app_root, self.source_dir, self.url_source])
                 self.main_window.run_job_concurrent(job)
@@ -37,14 +37,18 @@ class VianUpdater(IConcurrentJob):
             self.main_window.print_message("Update Failed, see Console for more Information", "Red")
             print(e)
 
-    def get_server_version(self):
+    def get_server_version(self, include_beta = False):
         version = None
+        build = None
         for line in urllib.request.urlopen(self.url_version):
             if "__version__" in str(line):
                 line = line.decode()
                 version = line.replace("__version__: ", "")
                 version = version.split(".")
                 version = [int(version[0]), int(version[1]), int(version[2])]
+            elif "__build__" in str(line):
+                line = line.decode()
+                build = line.replace("__version__: ", "")
 
         if version == None:
             return False
@@ -52,7 +56,10 @@ class VianUpdater(IConcurrentJob):
         if (self.current_version[0] < version[0]
             or (self.current_version[0] == version[0] and self.current_version[1] < version[1])
             or (self.current_version[0] == version[0] and self.current_version[1] == version[1] and self.current_version[2] < version[2])):
-            return True
+            if build == "beta":
+                return include_beta
+            else:
+                return True
         else:
             return False
 
@@ -92,7 +99,6 @@ class VianUpdaterJob(IConcurrentJob):
         self.source_dir = args[1]
         self.url_source = args[2]
 
-
         sign_progress(0.1)
         if os.path.exists(self.app_root + "/update/"):
             shutil.rmtree(self.app_root + "/update/")
@@ -113,7 +119,7 @@ class VianUpdaterJob(IConcurrentJob):
 
         for src_dir, dirs, files in os.walk(root_src_dir):
                 counter += 1
-                sign_progress(0.5 + (counter / total) / 2)
+                sign_progress(0.5 + ((counter / total) / 2))
 
                 src_dir = src_dir.replace("\\", "/")
                 dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
@@ -129,7 +135,6 @@ class VianUpdaterJob(IConcurrentJob):
                     except Exception as e:
                         print("Could not Copy File:", str(src_file), str(e))
                         continue
-
         try:
             shutil.rmtree(self.app_root + "/update/", ignore_errors=True)
         except Exception as e:

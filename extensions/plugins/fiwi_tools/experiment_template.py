@@ -105,8 +105,6 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
                 else:
                     glossary_omit.append(False)
 
-                if "mind" in word:
-                    print(word)
             counter += 1
 
     # We create a dummy object to create our container objects subsequently
@@ -140,6 +138,8 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
     keyword_ids = []
     for i in range(len(glossary_words)):
         if not glossary_omit[i] == True:
+            if i > 1250:
+                print(glossary_voc_names[i])
             if glossary_voc_names[i] not in existing_voc_names:
                 target_voc = create_vocabulary(glossary_voc_names[i], glossary_categories[i])
                 vocabularies.append(target_voc)
@@ -151,7 +151,6 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
                 target_voc = vocabularies[idx]
                 keyword_ids[idx].append(glossary_ids[i])
             target_voc.create_word(glossary_words[i], dispatch=False)
-
 
     # MERGE Vocabularies that are exactly the same
     voc_mapping = []
@@ -179,12 +178,12 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
             if voc_targets[i].lower() not in voc_mapping[idx]:
                 voc_mapping[idx].append(voc_targets[i].lower())
                 keyword_ids_merged[idx].append([x for _,x in sorted(zip([w.name for w in v.words_plain], keyword_ids[i]))])
-            # if (voc_targets[i].lower() == "exp_hues_intertitles"):
-            #     for q, itm in enumerate(v.words_plain):
-            #         print (itm.name, keyword_ids[i][q])
+
 
     # Do some manual renaming
     for i, v in enumerate(voc_merged):
+        if "Significance" in v.name:
+            continue
         if "Hue" in v.name:
             v.name = "Hues"
         elif "Textures" in v.name:
@@ -195,16 +194,11 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
             v.name = "Movement"
         elif "Surfaces" in v.name:
             v.name = "Surfaces"
-        # print(v.name.ljust(50), voc_mapping[i])#, voc_mapping[i], [n.name for n in v.words_plain])
 
-    # for i, t in enumerate(keyword_ids_merged):
-    #     print(voc_mapping[i], len(t), len(t[0]))
-    # for t in voc_mapping:
-    #     print(t)
     # Add the final list of Vocabularies to the Project and
     # Connect them to the Classification Objects
     for i, v in enumerate(voc_merged):
-
+        print(v.name)
         proj_voc = prj.create_vocabulary(v.name)
         proj_voc.category = v.category
 

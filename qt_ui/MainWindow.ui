@@ -110,6 +110,7 @@
     <addaction name="actionAbout"/>
     <addaction name="actionWelcome"/>
     <addaction name="actionUpdate"/>
+    <addaction name="actionCheck_for_Beta"/>
     <addaction name="actionDocumentation"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
@@ -748,6 +749,11 @@
    </property>
    <property name="text">
     <string>Open Remote</string>
+   </property>
+  </action>
+  <action name="actionCheck_for_Beta">
+   <property name="text">
+    <string>Check for Beta </string>
    </property>
   </action>
  </widget>

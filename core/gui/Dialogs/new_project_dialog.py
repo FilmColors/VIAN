@@ -95,7 +95,7 @@ class NewProjectDialog(EDialogWidget):
 
 
         self.project.folder = self.project_dir
-        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
+        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + self.settings.PROJECT_FILE_EXTENSION
 
         if self.auto_naming:
             self.project_name = self.get_movie_id() + "_" + \
@@ -185,7 +185,7 @@ class NewProjectDialog(EDialogWidget):
                 self.main_window.print_message("Project Creating failed due to an error in the settings file")
                 return
 
-        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name
+        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + self.main_window.settings.PROJECT_FILE_EXTENSION
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
         print(self.project.folder, "\n",

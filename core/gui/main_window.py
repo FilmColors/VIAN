@@ -65,7 +65,7 @@ from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
-VERSION = "0.5.8"
+VERSION = "0.6.0"
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -358,6 +358,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionDocumentation.triggered.connect(self.open_documentation)
 
         self.actionUpdate.triggered.connect(self.update_vian)
+        self.actionCheck_for_Beta.triggered.connect(partial(self.update_vian, True, True))
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
@@ -482,7 +483,6 @@ class MainWindow(QtWidgets.QMainWindow):
             q = t.to_database()
             t.from_database(q)
 
-
     def start_colormetry(self):
         job = ColormetryJob2(30, self)
         args = job.prepare(self.project)
@@ -496,7 +496,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None and self.project.colormetry_analysis is not None:
             self.project.colormetry_analysis.append_data(data[0])
             self.timeline.timeline.set_colormetry_progress(data[1])
-
 
     def on_colormetry_finished(self, res):
         self.project.colormetry_analysis.set_finished(res)
@@ -817,13 +816,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update(self, *__args):
         super(MainWindow, self).update(*__args)
-         #self.update_overlay()
-        # if self.is_darwin:
-        #     self.player.mac_frame.update()
 
-        # if self.is_darwin:
-        #     self.player_container.synchronize()
-        #     self.drawing_overlay.raise_()
     #endregion
 
     #region MainWindow Event Handlers
@@ -868,7 +861,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 print(e)
 
-    def update_vian(self, show_newest = True):
+    def update_vian(self, show_newest = True, allow_beta = False):
         try:
             result = self.updater.get_server_version()
         except:
@@ -1895,6 +1888,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #endregion
     pass
+
 
 class DialogFirstStart(QtWidgets.QDialog):
     def __init__(self, main_window):
