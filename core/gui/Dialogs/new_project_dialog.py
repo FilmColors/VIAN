@@ -80,7 +80,9 @@ class NewProjectDialog(EDialogWidget):
         self.set_project_path()
 
     def find_templates(self):
-        templates = glob.glob(self.settings.DIR_TEMPLATES + "*")
+        templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
+        templates.extend(glob.glob("user/templates/" + "*.viant"))
+
         self.templates.append(None)
         self.comboBox_Template.addItem("No Template")
         for t in templates:

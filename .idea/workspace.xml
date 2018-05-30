@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5f86adad-e443-47bd-a2df-ab0eb0627df8" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/app.iml" afterPath="$PROJECT_DIR$/.idea/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/user/templates/__init__.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py" afterPath="$PROJECT_DIR$/core/analysis/colorimetry/colormetry2.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/analysis/palette_extraction.py" afterPath="$PROJECT_DIR$/core/analysis/palette_extraction.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/data/containers.py" afterPath="$PROJECT_DIR$/core/data/containers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/main_window.py" afterPath="$PROJECT_DIR$/core/gui/main_window.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/visualization/palette_plot.py" afterPath="$PROJECT_DIR$/core/visualization/palette_plot.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/evaluate_script.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/evaluate_script.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/experiment_template.py" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/experiment_template.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/gui/fiwi_glossary_evaluation.ui" afterPath="$PROJECT_DIR$/extensions/plugins/fiwi_tools/gui/fiwi_glossary_evaluation.ui" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/Dialogs/new_project_dialog.py" afterPath="$PROJECT_DIR$/core/gui/Dialogs/new_project_dialog.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -539,7 +531,7 @@
         <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="3432">
-              <caret line="433" column="0" lean-forward="true" selection-start-line="433" selection-start-column="0" selection-end-line="433" selection-end-column="0" />
+              <caret line="433" column="0" lean-forward="false" selection-start-line="433" selection-start-column="0" selection-end-line="433" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc" expanded="false" />
                 <element signature="e#4419#4488#0" expanded="false" />
@@ -860,7 +852,7 @@
         <entry file="file://$PROJECT_DIR$/core/gui/player_vlc.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="247">
-              <caret line="431" column="0" lean-forward="true" selection-start-line="431" selection-start-column="0" selection-end-line="431" selection-end-column="0" />
+              <caret line="431" column="0" lean-forward="false" selection-start-line="431" selection-start-column="0" selection-end-line="431" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -876,11 +868,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="experiment_template.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="experiment_template.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/experiment_template.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="126">
-              <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="27" />
+            <state relative-caret-position="90">
+              <caret line="5" column="34" lean-forward="true" selection-start-line="5" selection-start-column="34" selection-end-line="5" selection-end-column="34" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
                 <element signature="e#326#647#0" expanded="false" />
@@ -892,6 +884,44 @@
                 <element signature="e#9231#9351#0" expanded="false" />
                 <element signature="e#9445#9557#0" expanded="false" />
                 <element signature="e#9827#10198#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="new_project_dialog.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/core/gui/Dialogs/new_project_dialog.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="223">
+              <caret line="83" column="22" lean-forward="false" selection-start-line="83" selection-start-column="22" selection-end-line="83" selection-end-column="22" />
+              <folding>
+                <element signature="e#936#1143#0" expanded="false" />
+                <element signature="e#2817#3213#0" expanded="false" />
+                <element signature="e#2889#2995#0" expanded="false" />
+                <element signature="e#3022#3149#0" expanded="false" />
+                <element signature="e#3685#4723#0" expanded="false" />
+                <element signature="e#3685#3696#0" expanded="false" />
+                <element signature="e#3932#4466#0" expanded="false" />
+                <element signature="e#4493#4723#0" expanded="false" />
+                <element signature="e#4769#4899#0" expanded="false" />
+                <element signature="e#4945#5392#0" expanded="false" />
+                <element signature="e#5033#5342#0" expanded="false" />
+                <element signature="e#5082#5253#0" expanded="false" />
+                <element signature="e#5440#5602#0" expanded="false" />
+                <element signature="e#5648#5832#0" expanded="false" />
+                <element signature="e#5878#5978#0" expanded="false" />
+                <element signature="e#6016#6131#0" expanded="false" />
+                <element signature="e#6175#6287#0" expanded="false" />
+                <element signature="e#6333#6427#0" expanded="false" />
+                <element signature="e#6474#6579#0" expanded="false" />
+                <element signature="e#6631#6847#0" expanded="false" />
+                <element signature="e#6698#6762#0" expanded="false" />
+                <element signature="e#6882#6894#0" expanded="false" />
+                <element signature="e#6925#8534#0" expanded="false" />
+                <element signature="e#7154#7243#0" expanded="false" />
+                <element signature="e#7350#7829#0" expanded="false" />
+                <element signature="e#7712#7829#0" expanded="false" />
+                <element signature="e#8222#8241#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -949,53 +979,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="worker.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/concurrent/worker.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="111">
-              <caret line="152" column="8" lean-forward="false" selection-start-line="152" selection-start-column="8" selection-end-line="152" selection-end-column="8" />
-              <folding>
-                <element signature="e#248#426#0" expanded="false" />
-                <element signature="e#629#1379#0" expanded="false" />
-                <element signature="e#1476#1684#0" expanded="false" />
-                <element signature="e#1924#2076#0" expanded="false" />
-                <element signature="e#2103#2581#0" expanded="false" />
-                <element signature="e#2740#2800#0" expanded="false" />
-                <element signature="e#2844#2935#0" expanded="false" />
-                <element signature="e#2980#4101#0" expanded="false" />
-                <element signature="e#3049#3262#0" expanded="false" />
-                <element signature="e#3307#4035#0" expanded="false" />
-                <element signature="e#3324#3945#0" expanded="false" />
-                <element signature="e#3362#3658#0" expanded="false" />
-                <element signature="e#3404#3504#0" expanded="false" />
-                <element signature="e#3547#3658#0" expanded="false" />
-                <element signature="e#3693#3945#0" expanded="false" />
-                <element signature="e#3735#3814#0" expanded="false" />
-                <element signature="e#3857#3945#0" expanded="false" />
-                <element signature="e#3989#4035#0" expanded="false" />
-                <element signature="e#4082#4101#0" expanded="false" />
-                <element signature="e#4159#4504#0" expanded="false" />
-                <element signature="e#4206#4308#0" expanded="false" />
-                <element signature="e#4341#4504#0" expanded="false" />
-                <element signature="e#4358#4442#0" expanded="false" />
-                <element signature="e#4563#5227#0" expanded="false" />
-                <element signature="e#4608#4744#0" expanded="false" />
-                <element signature="e#4793#5227#0" expanded="false" />
-                <element signature="e#4810#5143#0" expanded="false" />
-                <element signature="e#4861#5143#0" expanded="false" />
-                <element signature="e#4886#5046#0" expanded="false" />
-                <element signature="e#5106#5143#0" expanded="false" />
-                <element signature="e#5188#5227#0" expanded="false" />
-                <element signature="e#5952#6608#0" expanded="false" />
-                <element signature="e#5969#6329#0" expanded="false" />
-                <element signature="e#6358#6510#0" expanded="false" />
-                <element signature="e#6658#6713#0" expanded="false" />
-                <element signature="e#6823#7046#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="experiment_editor.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/gui/experiment_editor.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -1048,8 +1031,8 @@
       <find>print(&quot;resize</find>
       <find>run</find>
       <find>get_tim</find>
-      <find>print</find>
       <find>time_update</find>
+      <find>print</find>
     </findStrings>
     <replaceStrings>
       <replace>self.project()</replace>
@@ -1116,7 +1099,6 @@
         <option value="$PROJECT_DIR$/core/gui/outliner.py" />
         <option value="$PROJECT_DIR$/core/gui/player_vlc.py" />
         <option value="$PROJECT_DIR$/core/gui/Dialogs/export_template_dialog.py" />
-        <option value="$PROJECT_DIR$/core/gui/Dialogs/new_project_dialog.py" />
         <option value="$PROJECT_DIR$/core/gui/context_menu.py" />
         <option value="$PROJECT_DIR$/core/gui/timeline.py" />
         <option value="$PROJECT_DIR$/core/data/exporters.py" />
@@ -1156,6 +1138,7 @@
         <option value="$PROJECT_DIR$/core/visualization/palette_plot.py" />
         <option value="$PROJECT_DIR$/core/data/containers.py" />
         <option value="$PROJECT_DIR$/extensions/plugins/fiwi_tools/experiment_template.py" />
+        <option value="$PROJECT_DIR$/core/gui/Dialogs/new_project_dialog.py" />
       </list>
     </option>
   </component>
@@ -1204,25 +1187,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="core" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="visual-movie-annotator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="visual-movie-annotator" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="core" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="visualization" />
+              <option name="myItemId" value="user" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1247,11 +1212,11 @@
       <recent name="E:\Programming\Git\visual-movie-annotator\install" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Programming\Git\visual-movie-annotator\user\templates" />
       <recent name="E:\Programming\Git\visual-movie-annotator\extensions\plugins\fiwi_tools" />
       <recent name="E:\Programming\Git\visual-movie-annotator\core\analysis" />
       <recent name="E:\Programming\Git\visual-movie-annotator\core\visualization" />
       <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\plugins\imdb_finder" />
-      <recent name="E:\Programming\Git\visual-movie-annotator\_docs\source\plugins" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -1266,7 +1231,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.experiment_template">
+  <component name="RunManager" selected="Python.main">
     <configuration default="false" name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -1496,8 +1461,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.experiment_template" />
-        <item index="1" class="java.lang.String" itemvalue="Python.main" />
+        <item index="0" class="java.lang.String" itemvalue="Python.main" />
+        <item index="1" class="java.lang.String" itemvalue="Python.experiment_template" />
         <item index="2" class="java.lang.String" itemvalue="Python.python_sandbox" />
         <item index="3" class="java.lang.String" itemvalue="Python.server_main" />
         <item index="4" class="java.lang.String" itemvalue="Python.TestWindow" />
@@ -1556,7 +1521,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32719395" sideWeight="0.4952343" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -1565,7 +1529,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32827735" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18743229" sideWeight="0.49205717" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43228602" sideWeight="0.48720682" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22921109" sideWeight="0.51448435" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22921109" sideWeight="0.51448435" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.13867822" sideWeight="0.43123668" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2531983" sideWeight="0.48659793" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3900325" sideWeight="0.7905117" order="2" side_tool="false" content_ui="tabs" />
@@ -1645,13 +1609,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/analysis/movie_mosaic/movie_mosaic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1458">
-          <caret line="151" column="42" lean-forward="false" selection-start-line="151" selection-start-column="42" selection-end-line="151" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/gui/drawing_widget.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="666">
@@ -2675,7 +2632,7 @@
     <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3432">
-          <caret line="433" column="0" lean-forward="true" selection-start-line="433" selection-start-column="0" selection-end-line="433" selection-end-column="0" />
+          <caret line="433" column="0" lean-forward="false" selection-start-line="433" selection-start-column="0" selection-end-line="433" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
             <element signature="e#4419#4488#0" expanded="false" />
@@ -2994,15 +2951,15 @@
     <entry file="file://$PROJECT_DIR$/core/gui/player_vlc.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="247">
-          <caret line="431" column="0" lean-forward="true" selection-start-line="431" selection-start-column="0" selection-end-line="431" selection-end-column="0" />
+          <caret line="431" column="0" lean-forward="false" selection-start-line="431" selection-start-column="0" selection-end-line="431" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/extensions/plugins/fiwi_tools/experiment_template.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="27" />
+        <state relative-caret-position="90">
+          <caret line="5" column="34" lean-forward="true" selection-start-line="5" selection-start-column="34" selection-end-line="5" selection-end-column="34" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
             <element signature="e#326#647#0" expanded="false" />
@@ -3014,6 +2971,42 @@
             <element signature="e#9231#9351#0" expanded="false" />
             <element signature="e#9445#9557#0" expanded="false" />
             <element signature="e#9827#10198#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/gui/Dialogs/new_project_dialog.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="83" column="22" lean-forward="false" selection-start-line="83" selection-start-column="22" selection-end-line="83" selection-end-column="22" />
+          <folding>
+            <element signature="e#936#1143#0" expanded="false" />
+            <element signature="e#2817#3213#0" expanded="false" />
+            <element signature="e#2889#2995#0" expanded="false" />
+            <element signature="e#3022#3149#0" expanded="false" />
+            <element signature="e#3685#4723#0" expanded="false" />
+            <element signature="e#3685#3696#0" expanded="false" />
+            <element signature="e#3932#4466#0" expanded="false" />
+            <element signature="e#4493#4723#0" expanded="false" />
+            <element signature="e#4769#4899#0" expanded="false" />
+            <element signature="e#4945#5392#0" expanded="false" />
+            <element signature="e#5033#5342#0" expanded="false" />
+            <element signature="e#5082#5253#0" expanded="false" />
+            <element signature="e#5440#5602#0" expanded="false" />
+            <element signature="e#5648#5832#0" expanded="false" />
+            <element signature="e#5878#5978#0" expanded="false" />
+            <element signature="e#6016#6131#0" expanded="false" />
+            <element signature="e#6175#6287#0" expanded="false" />
+            <element signature="e#6333#6427#0" expanded="false" />
+            <element signature="e#6474#6579#0" expanded="false" />
+            <element signature="e#6631#6847#0" expanded="false" />
+            <element signature="e#6698#6762#0" expanded="false" />
+            <element signature="e#6882#6894#0" expanded="false" />
+            <element signature="e#6925#8534#0" expanded="false" />
+            <element signature="e#7154#7243#0" expanded="false" />
+            <element signature="e#7350#7829#0" expanded="false" />
+            <element signature="e#7712#7829#0" expanded="false" />
+            <element signature="e#8222#8241#0" expanded="false" />
           </folding>
         </state>
       </provider>
