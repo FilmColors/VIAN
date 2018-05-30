@@ -3004,6 +3004,8 @@ class ColormetryAnalysis(AnalysisContainer):
         self.linear_colors = np.array([self.linear_colors] * 2, dtype=np.uint8)
         self.linear_colors = cv2.cvtColor(self.linear_colors, cv2.COLOR_LAB2RGB)[0]
 
+        self.last_idx = 0
+
     def get_histogram(self, time_ms):
         pass
 
@@ -3036,6 +3038,10 @@ class ColormetryAnalysis(AnalysisContainer):
     def get_update(self, time_ms):
         try:
             frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
+            if frame_idx == self.last_idx:
+                return False
+            self.last_idx = frame_idx
+
             if len(self.histograms) > 0:
                 # hist_data =self.histograms[frame_idx]
                 #
