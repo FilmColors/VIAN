@@ -201,7 +201,7 @@ class PaletteLABWidget(QWidget):
 
         self.cb_background = QComboBox(self)
         self.cb_background.addItems(['White', "Light-Gray", 'Dark-Gray', 'Black'])
-        self.cb_background.setCurrentText("Light-Gray")
+        self.cb_background.setCurrentText("Dark-Gray")
 
         self.hbox_ctrl = QHBoxLayout(self)
 
@@ -237,7 +237,6 @@ class PaletteLABWidget(QWidget):
         self.hbox_dot_size.addWidget(self.slider_size)
         self.hbox_jitter.addWidget(self.slider_jitter)
 
-
         self.layout().addWidget(self.view)
         self.layout().addItem(self.hbox_ctrl)
         self.layout().addWidget(self.w_ctrls2)
@@ -247,7 +246,7 @@ class PaletteLABWidget(QWidget):
 
         self.slider_jitter.setValue(3)
         self.slider_scale.setValue(5)
-        self.slider_size.setValue(5)
+        self.slider_size.setValue(2)
 
         self.slider.valueChanged.connect(self.on_settings_changed)
         self.slider_jitter.valueChanged.connect(self.on_settings_changed)
@@ -257,10 +256,13 @@ class PaletteLABWidget(QWidget):
         self.cb_show_grid.stateChanged.connect(self.on_settings_changed)
         self.cb_background.currentTextChanged.connect(self.on_settings_changed)
 
+        self.w_ctrls2.setVisible(False)
+        self.show()
+
+
     def toggle_controls(self):
         v = not self.slider_size.isVisible()
         self.w_ctrls2.setVisible(v)
-
 
     def on_settings_changed(self):
         self.view.background = self.cb_background.currentText()

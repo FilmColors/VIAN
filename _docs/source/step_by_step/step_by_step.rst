@@ -10,7 +10,9 @@ Step-by-Step Guides
    annotation/annotation.rst
    screenshots/screenshots.rst
    analyses/analyses.rst
+   experiments/experiments.rst
    player/player.rst
+   vian_corpus/vian_corpus.rst
 
 
 

@@ -140,10 +140,14 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/analyses_list.html">All Analyses of VIAN</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/experiments/experiments.html">Experiments</a><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/player/player.html">VIAN’s Player</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/player/changing_subtitles.html">Changing Subtitles</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/vian_corpus/vian_corpus.html">VIAN Corpus</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../plugins/plugins.html">Plugins</a><ul>
@@ -294,28 +298,35 @@
         <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">IHasVocabulary</span><span class="p">():</span>
+<span class="k">class</span> <span class="nc">IClassifiable</span><span class="p">():</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="k">def</span> <span class="nf">get_parent_container</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
     <span class="k">def</span> <span class="nf">has_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span>
+        <span class="k">pass</span>
+        <span class="c1"># return word in self.voc_list</span>
 
     <span class="k">def</span> <span class="nf">toggle_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">remove_word</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_word</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="k">pass</span>
+        <span class="c1"># if word in self.voc_list:</span>
+        <span class="c1">#     self.remove_word(word)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.add_word(word)</span>
 
     <span class="k">def</span> <span class="nf">add_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
-            <span class="n">word</span><span class="o">.</span><span class="n">add_connected_item</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">pass</span>
+        <span class="c1"># if word not in self.voc_list:</span>
+        <span class="c1">#     self.voc_list.append(word)</span>
+        <span class="c1">#     word.add_connected_item(self)</span>
 
     <span class="k">def</span> <span class="nf">remove_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
-        <span class="n">word</span><span class="o">.</span><span class="n">remove_connected_item</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">pass</span>
+        <span class="c1"># if word in self.voc_list:</span>
+        <span class="c1">#     self.voc_list.remove(word)</span>
+        <span class="c1"># word.remove_connected_item(self)</span>
 
 
 <span class="k">class</span> <span class="nc">IProjectContainer</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
@@ -357,6 +368,7 @@
 
     <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
 
 <span class="k">class</span> <span class="nc">ITimeRange</span><span class="p">():</span>
 
@@ -564,8 +576,34 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-    <span class="k">def</span> <span class="nf">get_source_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_types</span>
+<div class="viewcode-block" id="IAnalysisJob.get_source_types"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.get_source_types">[docs]</a>    <span class="k">def</span> <span class="nf">get_source_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of allowed type enum-entries</span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_types</span></div>
+
+<div class="viewcode-block" id="IAnalysisJob.to_database"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.to_database">[docs]</a>    <span class="k">def</span> <span class="nf">to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Base Method which should return a dict of byte serialized </span>
+<span class="sd">        nump arrays if necessary, or a dict of simple key value pairs.</span>
+
+<span class="sd">        For numpy arrays use following: </span>
+<span class="sd">        byte_array = numpy_array.tostring()</span>
+
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="IAnalysisJob.from_database"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.from_database">[docs]</a>    <span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The inverse of the to_database() implementation. </span>
+
+<span class="sd">        For numpy arrays:</span>
+<span class="sd">        numpy_array = numpy.fromstring(byte_array)</span>
+
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
     <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>

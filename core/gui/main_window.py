@@ -272,7 +272,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setTabPosition(QtCore.Qt.RightDockWidgetArea, QtWidgets.QTabWidget.East)
         self.history_view.hide()
         self.concurrent_task_viewer.hide()
-
+        self.corpus_client_toolbar.hide()
 
         # Tab File
         loading_screen.showMessage("Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
@@ -345,6 +345,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
+
+        self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
 
         #TOOLS
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
@@ -1706,16 +1708,19 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             path = QFileDialog.getOpenFileName(self, directory=self.settings.DIR_CORPORA, filter="*.vian_corpus")[0]
             self.corpus_client.on_connect_local(path)
+            self.corpus_client_toolbar.show()
         except Exception as e:
             print(e)
 
     def open_remote_corpus(self):
         dialog = CorpusConnectRemoteDialog(self, self.corpus_client.metadata.contributor)
         dialog.onConnectRemote.connect(self.corpus_client.connect_remote)
+        self.corpus_client_toolbar.show()
         dialog.show()
 
     def connect_to_corpus(self, corpus: CorpusDB):
         self.corpus_client.on_connect_local(corpus.file_path)
+        self.corpus_client_toolbar.show()
 
     def disconnect_to_corpus(self, corpus: CorpusDB):
         self.onCorpusDisconnected.emit(corpus)

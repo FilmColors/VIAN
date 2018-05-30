@@ -156,6 +156,8 @@
     <addaction name="separator"/>
     <addaction name="menuPerspectives"/>
     <addaction name="separator"/>
+    <addaction name="actionCorpus"/>
+    <addaction name="separator"/>
     <addaction name="actionTaksMonitor"/>
     <addaction name="actionHistory"/>
     <addaction name="actionPreferences"/>
@@ -754,6 +756,11 @@
   <action name="actionCheck_for_Beta">
    <property name="text">
     <string>Check for Beta </string>
+   </property>
+  </action>
+  <action name="actionCorpus">
+   <property name="text">
+    <string>Corpus</string>
    </property>
   </action>
  </widget>
