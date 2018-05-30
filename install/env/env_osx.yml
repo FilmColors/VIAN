@@ -21,15 +21,18 @@ dependencies:
 - graphite2=1.3.10=h233cf8b_0
 - harfbuzz=1.5.0=h6db888e_0
 - idna=2.6=py35h01aacb0_1
+- intel-openmp=2018.0.0=h8158457_8
 - libcxx=4.0.1=h579ed51_0
 - libcxxabi=4.0.1=hebd6815_0
 - libedit=3.1=hb4e282d_0
 - libffi=3.2.1=h475c297_4
+- libgfortran=3.0.1=h93005f0_2
 - libopus=1.2.1=h169cedb_0
 - libpng=1.6.32=hd1e8b91_4
 - libprotobuf=3.4.1=h326466f_0
 - libtiff=4.0.9=h0dac147_0
 - libvpx=1.6.1=h057a404_0
+- mkl=2018.0.1=hfbd8650_4
 - ncurses=6.0=hd04f020_2
 - networkx=2.1=py35_0
 - opencv=3.3.1=py35h60a5f38_1
@@ -44,6 +47,8 @@ dependencies:
 - qt=5.6.2=h9975529_14
 - readline=7.0=hc1231fa_4
 - requests=2.18.4=py35h0d65e6b_1
+- scikit-learn=0.19.1=py35h2b554eb_0
+- scipy=1.0.0=py35h8b35106_0
 - setuptools=36.5.0=py35h52cde6a_0
 - sip=4.18.1=py35h79e1f92_2
 - six=1.11.0=py35h39a4c60_1
@@ -69,15 +74,11 @@ dependencies:
 - pcre=8.39=0
 - pixman=0.34.0=1
 - x264=20131217=3
-- intel-openmp=2018.0.0=h8158457_8
-- libgfortran=3.0.1=h93005f0_2
-- mkl=2018.0.1=hfbd8650_4
-- scikit-learn=0.19.1=py35h2b554eb_0
-- scipy=1.0.0=py35h8b35106_0
 - pip:
   - alembic==0.9.8
   - banal==0.3.3
   - dataset==1.0.6
+  - fastcluster==1.1.24
   - imdbpy==6.4.1
   - lxml==4.2.1
   - mako==1.0.7
