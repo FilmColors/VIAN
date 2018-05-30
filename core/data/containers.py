@@ -3559,12 +3559,14 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.unique_keywords = []
         self.target_container = []
 
-    def add_vocabulary(self, voc: Vocabulary, dispatch = True):
+    def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None):
         if voc not in self.classification_vocabularies:
             self.classification_vocabularies.append(voc)
             keywords = []
-            for w in voc.words_plain:
+            for i, w in enumerate(voc.words_plain):
                 keyword = UniqueKeyword(self.experiment, voc, w, self)
+                if external_ids is not None:
+                    keyword.external_id = external_ids[i]
                 keyword.set_project(self.project)
                 self.unique_keywords.append(keyword)
                 keywords.append(keyword)
@@ -3659,7 +3661,7 @@ class UniqueKeyword(IProjectContainer):
         self.voc_obj = voc_obj
         self.word_obj = word_obj
         self.class_obj = class_obj
-        self.notes = ""
+        self.external_id = -1
 
     def get_name(self):
         return self.word_obj.get_name()
@@ -3670,7 +3672,7 @@ class UniqueKeyword(IProjectContainer):
             voc_obj = self.voc_obj.unique_id,
             word_obj = self.word_obj.unique_id,
             class_obj = self.class_obj.unique_id,
-            nodes = self.notes
+            external_id = self.external_id
         )
 
         return data
@@ -3681,7 +3683,7 @@ class UniqueKeyword(IProjectContainer):
         self.word_obj = project.get_by_id(serialization['word_obj'])
         self.class_obj = project.get_by_id(serialization['class_obj'])
         try:
-            self.notes = serialization['notes']
+            self.external_id = serialization['external_id']
         except:
             pass
 

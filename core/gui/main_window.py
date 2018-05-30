@@ -406,7 +406,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.timeout.connect(self.on_save_project, False)
         self.update_autosave_timer(do_start=False)
 
-        self.time_update_interval = 100
+        self.time_update_interval = 50
         self.update_timer = QtCore.QTimer()
         self.update_timer.setTimerType(Qt.PreciseTimer)
         self.update_timer.setInterval(self.time_update_interval)
@@ -414,7 +414,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.time = 0
         self.time_counter = 0
-        self.clock_synchronize_step = 5
+        self.clock_synchronize_step = 20
         self.last_segment_index = 0
 
         self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.QueuedConnection)
@@ -490,7 +490,7 @@ class MainWindow(QtWidgets.QMainWindow):
         worker.signals.callback.connect(self.on_colormetry_push_back)
         worker.signals.finished.connect(self.on_colormetry_finished)
         self.abortAllConcurrentThreads.connect(job.abort)
-        self.thread_pool.start(worker)
+        self.thread_pool.start(worker, QThread.HighPriority)
 
     def on_colormetry_push_back(self, data):
         if self.project is not None and self.project.colormetry_analysis is not None:
@@ -1599,11 +1599,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def signal_timestep_update(self):
         if self.time_counter < self.clock_synchronize_step:
-            self.time += self.time_update_interval + 5
+            self.time += self.time_update_interval
             self.time_counter += 1
         else:
             self.time = self.player.get_media_time()
             self.time_counter = 0
+
         t = self.time
         if t > 0:
             self.dispatch_on_timestep_update(t)

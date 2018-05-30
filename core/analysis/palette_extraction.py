@@ -137,7 +137,6 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
     # if mask is not None and mask_index is not None:
     #     frame[np.where(mask!=mask_index)] = [0, 0, 0]
 
-    print("Seed")
     if seeds_input_width < frame.shape[0]:
         rx = seeds_input_width / frame.shape[0]
         frame = cv2.resize(frame, None, None, rx, rx, cv2.INTER_CUBIC)
@@ -147,7 +146,6 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
     if out_path != "":
         cv2.imwrite("../../results/seeds_"+out_path+str(n_pixels)+".jpg", cv2.cvtColor(seeds_model.labels_to_avg_color_mask(frame, labels), cv2.COLOR_LAB2BGR))
 
-    print("Resize")
     # Resizing all to same dimension
     fx = image_size / frame.shape[0]
     frame = cv2.resize(frame, None, None, fx, fx, cv2.INTER_CUBIC)

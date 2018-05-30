@@ -20,42 +20,49 @@ from PyQt5.QtWidgets import *
 from core.concurrent.worker import SimpleWorker
 
 from PyQt5 import uic
+from core.data.interfaces import IConcurrentJob
 
-class FiwiGlossary2Template(GAPlugin):
+class FiwiGlossaryEvaluationPlugin(GAPlugin):
     def __init__(self, main_window):
-        super(FiwiGlossary2Template, self).__init__(main_window)
+        super(FiwiGlossaryEvaluationPlugin, self).__init__(main_window)
         self.plugin_name = "GlossaryDB Evaluation"
         self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
 
     def get_window(self, parent):
-        wnd = FiwiGlossary2TemplateDialog(self.main_window)
+        wnd = FiwiGlossaryEvaluationPluginDialog(self.main_window)
         wnd.show()
 
-class FiwiGlossary2TemplateDialog(EDialogWidget):
+class FiwiGlossaryEvaluationPluginDialog(EDialogWidget):
     def __init__(self, main_window):
-        super(FiwiGlossary2TemplateDialog, self).__init__(main_window, main_window)
+        super(FiwiGlossaryEvaluationPluginDialog, self).__init__(main_window, main_window)
         path = os.path.abspath("extensions/plugins/fiwi_tools/gui/fiwi_glossary_evaluation.ui")
         uic.loadUi(path, self)
-        self.db_path = ""
-        self.gl_path = ""
-        self.out_path = ""
+        self.btn_Glossary.clicked.connect(self.on_browse_gl)
+        self.btn_Database.clicked.connect(self.on_browse_db)
+        self.btn_Result.clicked.connect(self.on_browse_out)
 
+        self.btn_OK.clicked.connect(self.on_ok)
+        self.btn_Cancel.clicked.connect(self.close)
 
     def on_ok(self):
-        if os.path.isfile(self.line_db.text()) and os.path.isfile(self.line_gl.text()) and os.path.isfile(self.line_out.text()):
-            self.main_window.run_job_concurrent(SimpleWorker(parse, self.main_window.worker_finished,
-                                                             self.main_window.worker_progress,
-                                                             args = [self.line_db.text(),
-                                                                     self.line_gl.text(),
-                                                                     self.line_out.text()
-                                                                     ]))
+        try:
+            if os.path.isfile(self.lineEdit_DB.text()) and os.path.isfile(self.lineEdit_Glossary.text()):
+                self.main_window.run_job_concurrent(ConcurrentJobEvaluationParser(
+                                                                 args = [self.lineEdit_DB.text(),
+                                                                         self.lineEdit_Glossary.text(),
+                                                                         self.lineEdit_Result.text()
+                                                                         ])
+                )
+            self.close()
+        except Exception as e:
+            print(e)
+
 
     def on_browse_db(self):
         try:
             file = QFileDialog.getOpenFileName()[0]
             if os.path.isfile(file):
-                self.db_path = file
-                self.line_db.setText(file)
+                self.lineEdit_DB.setText(file)
         except:
             pass
 
@@ -63,25 +70,29 @@ class FiwiGlossary2TemplateDialog(EDialogWidget):
         try:
             file = QFileDialog.getOpenFileName()[0]
             if os.path.isfile(file):
-                self.gl_path = file
-                self.line_gl.setText(file)
+                self.lineEdit_Glossary.setText(file)
         except:
             pass
 
     def on_browse_out(self):
         try:
-            file = QFileDialog.getOpenFileName()[0]
-            if os.path.isfile(file):
-                self.out_path = file
-                self.line_out.setText(file)
+            file = QFileDialog.getSaveFileName(filter="*.csv")[0]
+            self.lineEdit_Result.setText(file)
         except:
             pass
 
-def parse(args):
+class ConcurrentJobEvaluationParser(IConcurrentJob):
+    def __init__(self, args):
+        super(ConcurrentJobEvaluationParser, self).__init__(args)
 
-    glossary_path = args[1]
-    database_path = args[0]
-    outfile = args[2]
+    def run_concurrent(self, args, sign_progress):
+        glossary_path = args[1]
+        database_path = args[0]
+        outfile = args[2]
+        parse(glossary_path, database_path, outfile, sign_progress)
+
+def parse(glossary_path,database_path, outfile, on_progress):
+
 
     # Parse the Glossary
     glossary_words = []
@@ -117,9 +128,14 @@ def parse(args):
                     glossary_omit.append(False)
 
                 if "mind" in word:
-                    print(word)
+                    pass
             counter += 1
     result = []
+    n_segms = 0
+    with open(database_path, 'r') as input_file:
+        reader = csv.reader(input_file, delimiter=';')
+        for r in reader:
+            n_segms += 1
 
     all_segments = []
     with open(database_path, 'r') as input_file:
@@ -133,6 +149,7 @@ def parse(args):
         failed_n = []
         failed_column = []
 
+        on_progress(0.0)
         n_yes = 0
         for row in reader:
             if counter == 0:
@@ -140,7 +157,7 @@ def parse(args):
                 headers = row
             else:
                 if counter % 100 == 0:
-                    console.write("\r" + str(counter))
+                    on_progress(counter / n_segms)
                 new_id = row[idx_id]
                 if new_id != current_id:
                     result.append(current_film)
@@ -184,16 +201,11 @@ def parse(args):
                                 failed_words.append(word)
                                 failed_column.append(headers[row_counter])
                                 failed_n.append(1)
-                                print("")
-                                print("Failed \'" + word + "\'")
                             else:
                                 failed_n[failed_words.index(word)] += 1
                     row_counter += 1
 
             counter += 1
-            #
-            # if counter == 300:
-            #     break
 
     result.append(current_film)
 

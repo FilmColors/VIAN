@@ -176,29 +176,34 @@ class PaletteLABWidget(QWidget):
         self.setLayout(QVBoxLayout(self))
         self.view = PaletteLABView(self)
 
-        self.slider = QSlider(Qt.Horizontal, self)
-        self.slider_size = QSlider(Qt.Horizontal, self)
-        self.slider_size.setRange(1,100)
-        self.slider_jitter = QSlider(Qt.Horizontal, self)
-        self.slider_jitter.setRange(0, 100)
-        self.slider_scale = QSlider(Qt.Horizontal, self)
-        self.slider_scale.setRange(1, 30)
+        self.w_ctrls2 = QWidget(self)
+        self.w_ctrls2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.w_ctrls2.setLayout(QVBoxLayout(self.w_ctrls2))
 
         self.cb_mode = QComboBox(self)
         self.cb_mode.addItems(['Layer', 'Full Tree'])
-        self.lbl_mode_hint = QLabel("Layer Index:", self)
-        self.lbl_depth = QLabel("0", self)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.layout().addWidget(self.view)
+        self.lbl_mode_hint = QLabel("Layer Index:", self.w_ctrls2)
         self.cb_show_grid = QCheckBox("Show Grid", self)
-        self.hbox_slider = QHBoxLayout(self)
+
+        self.hbox_slider = QHBoxLayout(self.w_ctrls2)
+        self.w_ctrls2.layout().addItem(self.hbox_slider)
+
+        self.slider = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider_size = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider_size.setRange(1, 100)
+        self.slider_jitter = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider_jitter.setRange(0, 100)
+        self.slider_scale = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider_scale.setRange(1, 30)
+
+        self.lbl_depth = QLabel("0", self.w_ctrls2)
+        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+
         self.cb_background = QComboBox(self)
         self.cb_background.addItems(['White', "Light-Gray", 'Dark-Gray', 'Black'])
         self.cb_background.setCurrentText("Light-Gray")
 
         self.hbox_ctrl = QHBoxLayout(self)
-        self.layout().addItem(self.hbox_ctrl)
-        self.layout().addItem(self.hbox_slider)
 
         self.hbox_ctrl.addWidget(QLabel("Mode: ", self))
         self.hbox_ctrl.addWidget(self.cb_mode)
@@ -207,29 +212,35 @@ class PaletteLABWidget(QWidget):
         self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hbox_ctrl.addWidget(QLabel("Background: ", self))
         self.hbox_ctrl.addWidget(self.cb_background)
-
+        self.btn_ctrls = QPushButton("Show Controls", self)
+        self.hbox_ctrl.addWidget(self.btn_ctrls)
+        self.btn_ctrls.clicked.connect(self.toggle_controls)
 
         self.hbox_slider.addWidget(self.lbl_mode_hint)
         self.hbox_slider.addWidget(self.slider)
-        self.hbox_slider.addWidget(QLabel("n-Merges:", self))
+        self.hbox_slider.addWidget(QLabel("n-Merges:", self.w_ctrls2))
         self.hbox_slider.addWidget(self.lbl_depth)
 
+        self.hbox_scale = QHBoxLayout(self.w_ctrls2)
+        self.hbox_dot_size = QHBoxLayout(self.w_ctrls2)
+        self.hbox_jitter = QHBoxLayout(self.w_ctrls2)
 
-        self.hbox_scale = QHBoxLayout(self)
-        self.hbox_dot_size = QHBoxLayout(self)
-        self.hbox_jitter = QHBoxLayout(self)
+        self.w_ctrls2.layout().addItem(self.hbox_scale)
+        self.w_ctrls2.layout().addItem(self.hbox_dot_size)
+        self.w_ctrls2.layout().addItem(self.hbox_jitter)
 
-        self.hbox_scale.addWidget(QLabel("Scale:", self))
-        self.hbox_dot_size.addWidget(QLabel("Dot Size:", self))
-        self.hbox_jitter.addWidget(QLabel("Jitter:", self))
+        self.hbox_scale.addWidget(QLabel("Scale:", self.w_ctrls2))
+        self.hbox_dot_size.addWidget(QLabel("Dot Size:", self.w_ctrls2))
+        self.hbox_jitter.addWidget(QLabel("Jitter:", self.w_ctrls2))
 
         self.hbox_scale.addWidget(self.slider_scale)
         self.hbox_dot_size.addWidget(self.slider_size)
         self.hbox_jitter.addWidget(self.slider_jitter)
 
-        self.layout().addItem(self.hbox_scale)
-        self.layout().addItem(self.hbox_dot_size)
-        self.layout().addItem(self.hbox_jitter)
+
+        self.layout().addWidget(self.view)
+        self.layout().addItem(self.hbox_ctrl)
+        self.layout().addWidget(self.w_ctrls2)
 
         self.cb_show_grid.setChecked(True)
         self.slider.setValue(12)
@@ -245,6 +256,11 @@ class PaletteLABWidget(QWidget):
         self.cb_mode.currentTextChanged.connect(self.on_settings_changed)
         self.cb_show_grid.stateChanged.connect(self.on_settings_changed)
         self.cb_background.currentTextChanged.connect(self.on_settings_changed)
+
+    def toggle_controls(self):
+        v = not self.slider_size.isVisible()
+        self.w_ctrls2.setVisible(v)
+
 
     def on_settings_changed(self):
         self.view.background = self.cb_background.currentText()

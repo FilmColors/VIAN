@@ -16,33 +16,32 @@ class FiwiGlossary2Template(GAPlugin):
         wnd = FiwiGlossary2TemplateDialog(self.main_window)
         wnd.show()
 
+
 class FiwiGlossary2TemplateDialog(EDialogWidget):
     def __init__(self, main_window):
         super(FiwiGlossary2TemplateDialog, self).__init__(main_window, main_window)
         path = os.path.abspath("extensions/plugins/fiwi_tools/gui/fiwi_glossary_evaluation.ui")
         uic.loadUi(path, self)
-        self.gl_path = ""
-        self.out_path = ""
-        self.voc_dir = ""
+        self.btn_Glossary.clicked.connect(self.on_browse_gl)
+        self.btn_Template.clicked.connect(self.on_browse_template)
+        self.btn_Vocabulary.clicked.connect(self.on_browse_out)
 
+        self.btn_OK.clicked.connect(self.on_ok)
+        self.btn_Cancel.clicked.connect(self.close)
 
     def on_ok(self):
         try:
-            if os.path.isfile(self.line_gl.text()) and self.line_out.text() != "":
-                out_dir = None
-                if self.line_voc_dir.text() != "":
-                    if os.path.isdir(self.line_voc.text()):
-                        out_dir = self.line_voc.text()
-                glossary_to_template(self.line_gl.text(), template_path=self.line_out.text(), out_dir)
-        except:
-            pass
+            if os.path.isfile(self.lineEdit_Template.text()) and os.path.isfile(self.lineEdit_Glossary.text()) and os.path.isfile(self.lineEdit_Result.text()):
+                exp_dir = None
+                if self.lineEdit_Vocabulary.text() != "":
+                    glossary_to_template(self.lineEdit_Glossary.text(),self.lineEdit_Template.text(), exp_dir)
+        except Exception as e:
+            print(e)
 
-    def on_browse_db(self):
+    def on_browse_template(self):
         try:
-            file = QFileDialog.getOpenFileName()[0]
-            if os.path.isfile(file):
-                self.db_path = file
-                self.line_db.setText(file)
+            file = QFileDialog.getSaveFileName(filter="*.viant")[0]
+            self.lineEdit_Template.setText(file)
         except:
             pass
 
@@ -50,17 +49,14 @@ class FiwiGlossary2TemplateDialog(EDialogWidget):
         try:
             file = QFileDialog.getOpenFileName()[0]
             if os.path.isfile(file):
-                self.gl_path = file
-                self.line_gl.setText(file)
+                self.lineEdit_Glossary.setText(file)
         except:
             pass
 
     def on_browse_out(self):
         try:
-            file = QFileDialog.getOpenFileName()[0]
-            if os.path.isfile(file):
-                self.out_path = file
-                self.line_out.setText(file)
+            file = QFileDialog.getExistingDirectory()
+            self.lineEdit_Vocabulary.setText(file)
         except:
             pass
 
@@ -100,7 +96,7 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
                 word = word.replace(" ", "_")
                 word = word.replace("-", "_")
                 glossary_words.append(word)
-                glossary_ids.append(r[idx_id])
+                glossary_ids.append(int(r[idx_id]))
                 glossary_categories.append(r[idx_column])
                 glossary_voc_names.append(r[idx_voc_name])
                 glossary_mapping_strings.append(r[idx_mapping])
@@ -149,10 +145,13 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
                 vocabularies.append(target_voc)
                 existing_voc_names.append(target_voc.name)
                 voc_targets.append(glossary_mapping_strings[i])
+                keyword_ids.append([glossary_ids[i]])
             else:
-                target_voc = vocabularies[existing_voc_names.index(glossary_voc_names[i])]
+                idx = existing_voc_names.index(glossary_voc_names[i])
+                target_voc = vocabularies[idx]
+                keyword_ids[idx].append(glossary_ids[i])
             target_voc.create_word(glossary_words[i], dispatch=False)
-            keyword_ids.append(glossary_ids[i])
+
 
     # MERGE Vocabularies that are exactly the same
     voc_mapping = []
@@ -174,12 +173,15 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
         if equal_voc is None:
             voc_merged.append(v)
             voc_mapping.append([voc_targets[i].lower()])
-            keyword_ids_merged.append([keyword_ids[i]])
+            keyword_ids_merged.append([[x for _,x in sorted(zip([w.name for w in v.words_plain],keyword_ids[i]))]])
         else:
             idx = voc_merged.index(equal_voc)
             if voc_targets[i].lower() not in voc_mapping[idx]:
                 voc_mapping[idx].append(voc_targets[i].lower())
-                keyword_ids_merged.append(keyword_ids[i])
+                keyword_ids_merged[idx].append([x for _,x in sorted(zip([w.name for w in v.words_plain], keyword_ids[i]))])
+            # if (voc_targets[i].lower() == "exp_hues_intertitles"):
+            #     for q, itm in enumerate(v.words_plain):
+            #         print (itm.name, keyword_ids[i][q])
 
     # Do some manual renaming
     for i, v in enumerate(voc_merged):
@@ -195,40 +197,45 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
             v.name = "Surfaces"
         # print(v.name.ljust(50), voc_mapping[i])#, voc_mapping[i], [n.name for n in v.words_plain])
 
+    # for i, t in enumerate(keyword_ids_merged):
+    #     print(voc_mapping[i], len(t), len(t[0]))
+    # for t in voc_mapping:
+    #     print(t)
     # Add the final list of Vocabularies to the Project and
     # Connect them to the Classification Objects
     for i, v in enumerate(voc_merged):
+
         proj_voc = prj.create_vocabulary(v.name)
         proj_voc.category = v.category
 
-        for w in v.words_plain:
+        for w in sorted(v.words_plain, key=lambda x:x.name):
             proj_voc.create_word(w.name, w.parent)
         v = proj_voc
 
         for j, t in enumerate(voc_mapping[i]):
             if "female_protagonist" in t:
-                p_fem.add_vocabulary(v)
+                p_fem.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             elif "female_support" in t:
-                s_fem.add_vocabulary(v)
+                s_fem.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             elif "male_protagonist" in t:
-                p_mal.add_vocabulary(v)
+                p_mal.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             elif "male_support" in t:
-                s_mal.add_vocabulary(v)
+                s_mal.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             elif "intertitle" in t:
-                intert.add_vocabulary(v)
+                intert.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             elif "character" in t or "foreground" in t:
-                fg.add_vocabulary(v)
+                fg.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             elif "environment" in t or "objects" in t:
-                bg.add_vocabulary(v)
+                bg.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             else:
-                glob.add_vocabulary(v)
+                glob.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
     for c in exp.get_classification_objects_plain():
         print("####", c.name, "####")
@@ -242,11 +249,6 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
         for v in exp.get_vocabularies():
             v.export_vocabulary(os.path.join(export_voc_dir, v.name + ".json"))
 
-    # Set the FIWI ID to the notes in all unique keywords as hidden info
-    # print(len(exp.get_unique_keywords()))
-    # for ukw in exp.get_unique_keywords():
-    #     print(ukw.get_name(), ukw.notes)
-
     template = prj.get_template(True, True, False, False, True)
 
     if ".viant" not in template_path:
@@ -257,6 +259,7 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
 
 
     prj.get_template()
+
 
 if __name__ == '__main__':
 
