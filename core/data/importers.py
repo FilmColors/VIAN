@@ -55,7 +55,18 @@ class ELANProjectImporter():
 
         project_path = directory + "/" + filename + ".eext"
         project = VIANProject(self.main_window, project_path, filename)
-        project.movie_descriptor.set_movie_path(movie_path)
+        try:
+            project.movie_descriptor.set_movie_path(movie_path)
+        except:
+            try:
+                QMessageBox.information(self.main_window,
+                                        "Could not Load Movie from ELAN File",
+                                        "Please select the Movie to this ELAN File manually.")
+                movie_path = QFileDialog.getOpenFileName()[0]
+                project.movie_descriptor.set_movie_path(movie_path)
+            except Exception as e:
+                print("LOG:", e)
+                return False
 
         for i in segmentations:
             segmentation_name = i[0]
