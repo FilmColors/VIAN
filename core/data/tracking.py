@@ -81,7 +81,7 @@ class BasicTrackingJob(IConcurrentJob):
 
         return [annotation_id, keys]
 
-    def modify_project(self, project, result, sign_progress=None):
+    def modify_project(self, project, result, sign_progress=None, main_window = None):
         annotation_id = result[0]
         keys = result[1]
 

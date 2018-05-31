@@ -159,7 +159,7 @@ class LoadScreenshotsJob(IConcurrentJob):
 
         return [screenshots, annotations]
 
-    def modify_project(self, project, result, sign_progress = None):
+    def modify_project(self, project, result, sign_progress = None, main_window = None):
         images = result[0]
         annotations = result[1]
 
@@ -210,7 +210,7 @@ class CreateScreenshotJob(IConcurrentJob):
 
         return [frame, frame_annotated, frame_pos, time, annotation_ids]
 
-    def modify_project(self, project, result, sign_progress = None):
+    def modify_project(self, project, result, sign_progress = None, main_window = None):
         frame = result[0]
         frame_annotated = result[1]
         frame_pos = result[2]
@@ -416,7 +416,7 @@ class ScreenshotStreamingJob(IConcurrentJob):
             s.resize(scale)
 
 
-    def modify_project(self, project, result, sign_progress = None):
+    def modify_project(self, project, result, sign_progress = None, main_window = None):
        pass
 
 

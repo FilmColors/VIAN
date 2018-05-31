@@ -168,7 +168,7 @@ class AutoSegmentingJob(IConcurrentJob):
 
         return [clusterings, frames, indices, fps, frame_resolution, n_cluster_range]
 
-    def modify_project(self, project, result, sign_progress=None):
+    def modify_project(self, project, result, sign_progress=None, main_window = None):
         if result is not None:
             widget = self.get_widget(project.main_window, result)
             widget.show()

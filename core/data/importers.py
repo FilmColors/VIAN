@@ -324,7 +324,7 @@ class ScreenshotImporter(IConcurrentJob):
 
         return result
 
-    def modify_project(self, project:VIANProject, result, sign_progress = None):
+    def modify_project(self, project:VIANProject, result, sign_progress = None, main_window = None):
         project.inhibit_dispatch=True
         for r in result:
             frame_pos = r[0]

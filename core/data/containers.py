@@ -3041,19 +3041,9 @@ class ColormetryAnalysis(AnalysisContainer):
             if frame_idx == self.last_idx:
                 return False
             self.last_idx = frame_idx
-
-            if len(self.histograms) > 0:
-                # hist_data =self.histograms[frame_idx]
-                #
-                # hist_data_pal = np.resize(hist_data, new_shape=(hist_data.shape[0] ** 3))
-                # pal_indices = np.argsort(hist_data_pal)[-6:]
-                # pal_cols = self.linear_colors[pal_indices]
-                # palette_values = hist_data_pal[pal_indices]
-
-                return dict(palette = [self.palette_layers[frame_idx], self.palette_cols[frame_idx], self.palette_bins[frame_idx]])
-
+            # if len(self.histograms) > 0:
+            return dict(palette = [self.palette_layers[frame_idx], self.palette_cols[frame_idx], self.palette_bins[frame_idx]])
         except Exception as e:
-            print(e)
             pass
 
 

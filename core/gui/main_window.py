@@ -22,7 +22,7 @@ from core.data.enums import *
 from core.data.importers import *
 from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
-from core.data.vian_updater import VianUpdater
+from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.exporters import *
 from core.data.tools import *
 from core.concurrent.auto_segmentation import *
@@ -1014,8 +1014,8 @@ class MainWindow(QtWidgets.QMainWindow):
         job = result[1]
         self.allow_dispatch_on_change = False
 
-        if not job.aborted:
-            job.modify_project(project=self.project,result=res)
+        if not job.aborted or isinstance(job, VianUpdaterJob):
+            job.modify_project(project=self.project, result=res, main_window = self)
 
         self.allow_dispatch_on_change = True
         self.dispatch_on_changed()
@@ -1327,7 +1327,7 @@ class MainWindow(QtWidgets.QMainWindow):
         analysis = result[1]
         result = result[0]
 
-        analysis.modify_project(self.project, result)
+        analysis.modify_project(self.project, result, main_window = self)
         self.project.add_analysis(result)
 
         # Unload the analysis from Memory

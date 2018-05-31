@@ -128,7 +128,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         sign_progress(1.0)
         return analysis
 
-    def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis):
+    def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window = None):
         """
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.

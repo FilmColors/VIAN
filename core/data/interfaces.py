@@ -247,7 +247,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         """
         print("get_name not implemented by", self)
 
-    def modify_project(self, project, result):
+    def modify_project(self, project, result, main_window = None):
         """
         If your Analysis should perform any modifications to the project, except storing the analysis,
         this is the place to perform them. 
@@ -381,9 +381,8 @@ class IConcurrentJob():
     def run_concurrent(self, args, sign_progress):
         print("run_concurrent not implemented by", self)
 
-    def modify_project(self, project, result, sign_progress = None):
+    def modify_project(self, project, result, sign_progress = None, main_window = None):
         pass
-        # print "modify_project not implemented by", self
 
     def abort(self):
         self.aborted = True

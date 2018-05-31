@@ -151,8 +151,8 @@ class PaletteView(QWidget, IVIANVisualization):
             return
         qp = QPainter()
         pen = QPen()
-        qp.setPen(pen)
         qp.begin(self)
+        qp.setPen(pen)
         qp.drawImage(self.rect(), self.image)
         qp.end()
 
@@ -245,7 +245,7 @@ class PaletteLABWidget(QWidget):
         self.slider.setValue(12)
 
         self.slider_jitter.setValue(3)
-        self.slider_scale.setValue(5)
+        self.slider_scale.setValue(2)
         self.slider_size.setValue(2)
 
         self.slider.valueChanged.connect(self.on_settings_changed)
@@ -368,7 +368,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
             lab = tpl_bgr_to_lab(color)
 
             # increase the visible number of dots:
-            if self.jitter > 0:
+            if self.jitter > 1:
                 ndot_factor = self.jitter / 2
             else:
                 ndot_factor = 1
@@ -391,8 +391,8 @@ class PaletteLABView(QWidget, IVIANVisualization):
             return
         qp = QPainter()
         pen = QPen()
-        qp.setPen(pen)
         qp.begin(self)
+        qp.setPen(pen)
         qp.drawImage(self.rect(), self.image)
         qp.end()
 
@@ -549,8 +549,8 @@ class PaletteTimeView(QWidget, IVIANVisualization):
             return
         qp = QPainter()
         pen = QPen()
-        qp.setPen(pen)
         qp.begin(self)
+        qp.setPen(pen)
         qp.drawImage(self.rect(), self.image)
         qp.end()
 

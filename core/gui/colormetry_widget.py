@@ -46,20 +46,12 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
     def update_timestep(self, data):
         if data is not None:
-            # hist_d = cv2.resize(data['hist'], dsize = (8,8,8), interpolation=cv2.INTER_CUBIC)
-            # hist_d = data['hist']
-            #
-            # for n in range(hist_d.ndim):
-            #     hist_d = np.add.reduceat(hist_d, indices=range(0, hist_d.shape[n], 2), axis=n)
-            # hist_d = np.nan_to_num(hist_d)
-            # hist_d = hist_d[self.h_indices[0], self.h_indices[1], self.h_indices[2]]
-            # # hist_d = np.log(hist_d + 1)
-
-            # self.histogram.update_plot(hist_d)
-            self.palette.set_palette(data['palette'])
-            self.palette.draw_palette()
-            self.lab_palette.set_palette(data['palette'])
-            self.lab_palette.draw_palette()
+            if self.vis_tab.currentIndex() == 0:
+                self.palette.set_palette(data['palette'])
+                self.palette.draw_palette()
+            elif self.vis_tab.currentIndex() == 1:
+                self.lab_palette.set_palette(data['palette'])
+                self.lab_palette.draw_palette()
 
     def plot_time_palette(self, data):
         try:
