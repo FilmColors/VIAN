@@ -1613,7 +1613,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def import_elan_project(self, path=None):
         try:
-            if path is None:
+            if path is None or not isinstance(path, str):
                 path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
 
             path = parse_file_path(path)
@@ -1627,9 +1627,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message("Import Successfull", "Green")
         except Exception as e:
             self.print_message("Import Failed", "Red")
-            self.print_message(
-                "This is a serious Bug, please report this message, together with your project to Gaudenz Halter",
-                "Red")
             self.print_message(str(e), "Red")
 
     def import_pipeline(self):
@@ -1689,7 +1686,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message(str(e), "Red")
 
     #endregion
-
 
     #region Corpus
     def on_create_corpus(self):

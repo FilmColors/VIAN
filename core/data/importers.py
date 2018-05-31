@@ -53,7 +53,7 @@ class ELANProjectImporter():
                 #TODO
                 pass
 
-        project_path = directory + filename + ".eext"
+        project_path = directory + "/" + filename + ".eext"
         project = VIANProject(self.main_window, project_path, filename)
         project.movie_descriptor.set_movie_path(movie_path)
 
@@ -90,7 +90,7 @@ class ELANProjectImporter():
             return False
 
         project.folder = dir + "/" + filename + "/"
-        project.path = dir + "/" + filename + "/" + filename + self.main_window.settingsPROJECT_FILE_EXTENSION
+        project.path = dir + "/" + filename + "/" + filename + self.main_window.settings.PROJECT_FILE_EXTENSION
         print("Imported ELAN Project:")
         print("      Name: ", project.name)
         print(" Directory: ", project.folder)
