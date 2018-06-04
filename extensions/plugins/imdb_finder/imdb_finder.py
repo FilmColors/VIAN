@@ -19,6 +19,7 @@ class MovieTuple():
         self.IMDb_ID = IMDb_ID
         self.Status = Status
 
+
 class FiwiVisualizerExtension(GAPlugin):
     def __init__(self, main_window):
         super(FiwiVisualizerExtension, self).__init__(main_window)
@@ -53,7 +54,6 @@ class IMDBFinder(QMainWindow):
         self.tableWidget_AllMovies.itemSelectionChanged.connect(self.load_cache)
 
         self.actionHelp.triggered.connect(self.on_help)
-
 
     def find_movies(self, movie_list):
         name = self.lineEdit_Name.text()
@@ -120,7 +120,6 @@ class IMDBFinder(QMainWindow):
         self.progress_bar.setValue(int(len(self.cache) / len(self.movie_list) * 100))
         self.update_movie_list()
 
-
     def import_list(self):
         try:
             path = QFileDialog.getOpenFileName(filter="*.csv *.txt")[0]
@@ -128,7 +127,9 @@ class IMDBFinder(QMainWindow):
             with open(path, "r") as f:
                 reader = csv.reader(f, delimiter=";")
                 counter = 0
+
                 for r in reader:
+                    print(r)
                     if counter == 0:
                         idx_fmID = r.index("FilemakerID")
                         idx_name = r.index("MovieName")
@@ -257,7 +258,6 @@ class IMDBBEntry(QWidget):
     def mousePressEvent(self, a0: QMouseEvent):
         self.onMovieClicked.emit(self.movie_id)
         print("Pressed")
-
 
 
 class ConcurrentQuery(MinimalThreadWorker):

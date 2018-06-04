@@ -86,7 +86,7 @@ class CorpusDB():
     def get_project_path(self, dbproject: DBProject):
         pass
 
-    def import_dataset(self, csv_dataset):
+    def import_dataset(self, segment_db, glossary_db, master_db, clear = True):
         pass
 
     def initialize(self, name, root_dir):
@@ -655,7 +655,7 @@ class DatasetCorpusDB(CorpusDB):
             print("Exception in CorpusDB:remove_project(): ", e)
         self.db[TABLE_PROJECTS].delete(id=dbproject.project_id)
 
-    def import_dataset(self, csv_dataset):
+    def import_dataset(self, segment_db, glossary_db, master_db, clear = True):
         pass
 
     def clear(self, tables = None):

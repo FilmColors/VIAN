@@ -55,7 +55,11 @@ class DBEntity():
 class DBProject(DBEntity):
     def __init__(self):
         self.project_id = -1
+
+        # FILEMAKER ID
         self.corpus_id = -1
+        self.manifestation_id = -1
+        self.copy_id = -1
 
         #Fields
         self.name = ""
@@ -67,10 +71,13 @@ class DBProject(DBEntity):
         self.path = ""
         self.archive = ""
 
-
     def from_project(self, project: VIANProject):
         self.name = project.name
-        self.project_id = project.corpus_id
+
+        self.project_id = project.corpus_id.split("_")[0]
+        self.manifestation_id = project.corpus_id.split("_")[1]
+        self.copy_id = project.corpus_id.split("_")[2]
+
         self.corpus_id = project.movie_descriptor.movie_id
         self.last_modified = str(get_current_time())
         self.path = project.path
@@ -851,6 +858,71 @@ class DBAnalysis(DBEntity):
             )
         return result
 
+
+class DBFilmographicalData(DBEntity):
+    def __init__(self):
+        self.filmography_id = -1
+        self.project_id = -1
+
+        # FIWI FIELDS
+        self.imdb_id = -1
+        self.color_process = ""
+        self.director = ""
+        self.genre = ""
+        self.cinematography = ""
+        self.color_consultant = ""
+        self.production_design = ""
+        self.art_director = ""
+        self.costum_design = ""
+        self.production_company = ""
+
+    def to_database(self, include_id=False):
+        if include_id:
+            result = dict(
+                id=self.filmography_id,
+                project_id=self.project_id,
+
+                imdb_id=self.imdb_id,
+                color_process=self.color_process,
+                director=self.director,
+                genre=self.genre,
+                cinematography=self.cinematography,
+                production_design=self.production_design,
+                costum_design=self.costum_design,
+                production_company=self.production_company,
+
+            )
+        else:
+            result = dict(
+                project_id=self.project_id,
+
+                imdb_id=self.imdb_id,
+                color_process=self.color_process,
+                director=self.director,
+                genre=self.genre,
+                cinematography=self.cinematography,
+                production_design=self.production_design,
+                costum_design=self.costum_design,
+                production_company=self.production_company,
+            )
+        return result
+
+    def from_database(self, entry):
+        self.filmography_id = entry['id']
+        self.project_id = entry['project_id']
+
+        # FIWI FIELDS
+        self.imdb_id = entry['imdb_id']
+        self.color_process = entry['color_process']
+        self.director = entry['director']
+        self.genre = entry['genre']
+        self.cinematography = entry['cinematography']
+        self.color_consultant = entry['color_consultant']
+        self.production_design = entry['production_design']
+        self.art_director = entry['art_director']
+        self.costum_design = entry['costum_design']
+        self.production_company = entry['production_company']
+        return self
 #endregion
 
 

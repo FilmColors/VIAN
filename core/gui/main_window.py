@@ -500,8 +500,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.timeline.set_colormetry_progress(data[1])
 
     def on_colormetry_finished(self, res):
-        self.project.colormetry_analysis.set_finished(res)
-        self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
+        try:
+            self.project.colormetry_analysis.set_finished(res)
+            self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
+        except:
+            pass
 
     #region WidgetCreation
 
