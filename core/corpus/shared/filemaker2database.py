@@ -161,7 +161,6 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_list):
             #     break
 
     result.append(current_film)
-
     with open(outfile, "w", newline='') as out_file:
         writer = csv.writer(out_file, delimiter=";")
         writer.writerow(["FM-ID", "Glossary-ID", "WordName", "EXP Field", "Frequency"])

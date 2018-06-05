@@ -1,0 +1,3 @@
+[submodule "core/VIANCorpus"]
+	path = core/VIANCorpus
+	url = https://github.com/ghalter/VIANCorpus.git
