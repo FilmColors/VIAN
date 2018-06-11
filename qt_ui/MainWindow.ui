@@ -43,7 +43,14 @@
      <property name="title">
       <string>Import</string>
      </property>
-     <addaction name="action_importELAN_Project"/>
+     <widget class="QMenu" name="menuELAN_Project">
+      <property name="title">
+       <string>ELAN Project</string>
+      </property>
+      <addaction name="actionImportElanNewProject"/>
+      <addaction name="actionImportElanThisProject"/>
+     </widget>
+     <addaction name="menuELAN_Project"/>
      <addaction name="separator"/>
      <addaction name="actionImportVocabulary"/>
      <addaction name="actionImportVIANExperiment"/>
@@ -52,8 +59,6 @@
      <addaction name="actionImportCSVVocabulary"/>
      <addaction name="actionImportScreenshots"/>
      <addaction name="separator"/>
-     <addaction name="actionImportFilmColorsPipeline"/>
-     <addaction name="actionImportFilmColorsFilemaker"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="title">
@@ -197,6 +202,9 @@
     <addaction name="actionFrame_Forward"/>
     <addaction name="actionFrame_Backward"/>
     <addaction name="menuFrame_Rate"/>
+    <addaction name="separator"/>
+    <addaction name="actionSetMovie"/>
+    <addaction name="actionReload_Movie"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -429,11 +437,6 @@
    </property>
    <property name="shortcut">
     <string>Alt+H</string>
-   </property>
-  </action>
-  <action name="action_importELAN_Project">
-   <property name="text">
-    <string>ELAN Project</string>
    </property>
   </action>
   <action name="action_ExportSegmentation">
@@ -761,6 +764,26 @@
   <action name="actionCorpus">
    <property name="text">
     <string>Corpus</string>
+   </property>
+  </action>
+  <action name="actionSetMovie">
+   <property name="text">
+    <string>Set Movie</string>
+   </property>
+  </action>
+  <action name="actionReload_Movie">
+   <property name="text">
+    <string>Reload Movie</string>
+   </property>
+  </action>
+  <action name="actionImportElanNewProject">
+   <property name="text">
+    <string>Create New Project</string>
+   </property>
+  </action>
+  <action name="actionImportElanThisProject">
+   <property name="text">
+    <string>Into this Project</string>
    </property>
   </action>
  </widget>

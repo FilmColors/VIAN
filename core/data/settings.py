@@ -44,6 +44,7 @@ class UserSettings():
         self.COPRUS_PORT = 5006
         self.COPRUS_PW = "CorpusPassword"
 
+        self.EARLY_STOP = 1000
         self.SHOW_WELCOME = True
 
         self.OPENCV_PER_FRAME = 0

@@ -2,15 +2,16 @@ import glob
 import os
 
 from PyQt5 import uic
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QCheckBox, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
 
 from core.data.containers import VIANProject
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
-
+from core.data.importers import ELANProjectImporter
 
 class NewProjectDialog(EDialogWidget):
-    def __init__(self, parent, settings, movie_path, vocabularies):
+    def __init__(self, parent, settings, movie_path = "", vocabularies = None, elan_segmentation = None):
         super(NewProjectDialog, self).__init__(parent, parent, "_docs/build/html/step_by_step/project_management/create_project.html")
         path = os.path.abspath("qt_ui/DialogNewProject.ui")
         uic.loadUi(path, self)
@@ -20,6 +21,7 @@ class NewProjectDialog(EDialogWidget):
         self.project_name = "project_name"
         self.auto_naming = False
 
+        self.elan_segmentation = elan_segmentation
         if movie_path is "":
             self.project_dir = settings.DIR_PROJECT
         else:
@@ -198,5 +200,7 @@ class NewProjectDialog(EDialogWidget):
         #         vocabularies.append(c[1])
 
         # self.main_window.new_project(self.project, template, vocabularies)
+        if self.elan_segmentation is not None:
+            ELANProjectImporter(self.main_window).apply_import(self.project, self.elan_segmentation)
         self.main_window.new_project(self.project, template, copy_movie=copy_movie)
         self.close()

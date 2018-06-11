@@ -65,7 +65,7 @@ from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
-VERSION = "0.6.1"
+VERSION = "0.6.2"
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -272,7 +272,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setTabPosition(QtCore.Qt.RightDockWidgetArea, QtWidgets.QTabWidget.East)
         self.history_view.hide()
         self.concurrent_task_viewer.hide()
-        self.corpus_client_toolbar.hide()
 
         # Tab File
         loading_screen.showMessage("Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
@@ -288,10 +287,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ## IMPORT
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
-        self.action_importELAN_Project.triggered.connect(self.import_elan_project)
+        self.actionImportElanNewProject.triggered.connect(partial(self.import_elan_project, "", True))
+        self.actionImportElanThisProject.triggered.connect(partial(self.import_elan_project, "", False))
         self.actionImportVocabulary.triggered.connect(partial(self.import_vocabulary, None))
-        self.actionImportFilmColorsPipeline.triggered.connect(self.import_pipeline)
-        self.actionImportFilmColorsFilemaker.triggered.connect(self.import_filemaker)
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
 
@@ -364,9 +362,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
-
+        self.actionSetMovie.triggered.connect(self.on_set_movie_path)
+        self.actionReload_Movie.triggered.connect(self.on_reload_movie)
         self.actionClearRecent.triggered.connect(self.clear_recent)
-
 
         # Corpus
         self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
@@ -756,6 +754,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.corpus_client_toolbar is None:
             self.corpus_client_toolbar = CorpusClientToolBar(self, self.corpus_client)
             self.addToolBar(self.corpus_client_toolbar)
+            self.corpus_client_toolbar.show()
 
         else:
             self.screenshot_toolbar.show()
@@ -804,7 +803,7 @@ class MainWindow(QtWidgets.QMainWindow):
             files = event.mimeData().urls()
             if "eaf" in file_extension:
                 print("Importing ELAN Project")
-                self.import_elan_project(str(event.mimeData().urls()[0]))
+                self.import_elan_project(str(event.mimeData().urls()[0]), False)
             elif "png" in file_extension or "jpg" in file_extension:
                 res_files = []
                 for f in files:
@@ -1401,6 +1400,17 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None:
             self.project.create_experiment()
 
+    def on_set_movie_path(self):
+        if self.project is not None:
+            path = parse_file_path(QFileDialog.getOpenFileName(self)[0])
+            self.project.movie_descriptor.set_movie_path(path)
+            self.player.open_movie(path)
+            self.dispatch_on_changed()
+
+    def on_reload_movie(self):
+        if self.project is not None:
+            self.player.on_loaded(self.project)
+
     # endregion
 
     #region Project Management
@@ -1423,7 +1433,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
         dialog.show()
 
-    def new_project(self, project, template_path = None, vocabularies = None, copy_movie = "None"):
+    def new_project(self, project, template_path = None, vocabularies = None, copy_movie = "None", finish_callback = None):
         if self.project is not None:
             self.close_project()
 
@@ -1459,6 +1469,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.project.inhibit_dispatch = False
         self.dispatch_on_loaded()
+
+        if finish_callback is not None:
+            finish_callback()
 
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
@@ -1605,6 +1618,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         t = self.time
         if t > 0:
+
+            if self.project is not None and t > self.project.movie_descriptor.duration - self.settings.EARLY_STOP:
+                self.player.pause()
             self.dispatch_on_timestep_update(t)
 
     #endregion
@@ -1614,23 +1630,32 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = ExportTemplateDialog(self)
         dialog.show()
 
-    def import_elan_project(self, path=None):
+    def import_elan_project(self, path=None, create_new = True):
+        importer = ELANProjectImporter(self, remote_movie=True, import_screenshots=True)
         try:
-            if path is None or not isinstance(path, str):
+            if path is None or not os.path.isfile(path):
                 path = QFileDialog.getOpenFileName(self, filter="*.eaf")[0]
 
-            path = parse_file_path(path)
+            movie_path, segmentation = importer.elan_project_importer(path)
 
-            importer = ELANProjectImporter(self, remote_movie=True, import_screenshots=True)
-            self.project = importer.import_project(path)
-            self.on_save_project(False)
+            # Create A New Project if necessary
+            if create_new:
+                if os.path.isfile(movie_path):
+                    cap = cv2.VideoCapture(movie_path)
+                    ret, frame = cap.read()
+                    if not ret:
+                        movie_path = ""
+                else:
+                    movie_path = ""
 
-            self.project.main_window = self
-            self.project.dispatch_loaded()
-            self.print_message("Import Successfull", "Green")
+                dialog = NewProjectDialog(self, self.settings, movie_path, elan_segmentation=segmentation)
+                dialog.show()
+            else:
+                if self.project is not None:
+                    importer.apply_import(self.project, segmentation)
+                    self.dispatch_on_changed()
         except Exception as e:
-            self.print_message("Import Failed", "Red")
-            self.print_message(str(e), "Red")
+            print(e)
 
     def import_pipeline(self):
         path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
@@ -1736,8 +1761,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportELANSegmentation.setDisabled(not state)
         self.actionImportVocabulary.setDisabled(not state)
         self.actionImportCSVVocabulary.setDisabled(not state)
-        self.actionImportFilmColorsPipeline.setDisabled(not state)
-        self.actionImportFilmColorsFilemaker.setDisabled(not state)
+
 
         for i in range(2, len(self.menus_list)): # The First two should also be active if no project is opened
             m = self.menus_list[i]

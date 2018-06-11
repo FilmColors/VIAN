@@ -453,18 +453,20 @@ class MovieDescriptorContextMenu(ContextMenu):
     def __init__(self, parent, pos, movie_descriptor):
         super(MovieDescriptorContextMenu, self).__init__(parent, pos)
         self.movie_descriptor = movie_descriptor[0]
-
+        self.main_window = parent
         self.action_set_movie_path = self.addAction("Set Movie Path")
         self.action_set_movie_path.triggered.connect(self.on_set_movie_path)
+        self.action_reload = self.addAction("Reload Movie")
+        self.action_reload.triggered.connect(self.on_reload_movie)
         self.action_update_movie_desc = self.addAction("Update Duration")
         self.action_update_movie_desc.triggered.connect(self.on_update_duration)
         self.popup(pos)
 
+    def on_reload_movie(self):
+        self.main_window.on_reload_movie()
+
     def on_set_movie_path(self):
-        path = parse_file_path(QFileDialog.getOpenFileName(self)[0])
-        self.movie_descriptor.set_movie_path(path)
-        self.main_window.player.open_movie(path)
-        self.main_window.dispatch_on_changed()
+        self.main_window.on_set_movie_path()
 
     def on_update_duration(self):
         self.main_window.project.movie_descriptor.set_duration(self.main_window.player.get_media_duration())

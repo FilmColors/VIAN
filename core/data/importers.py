@@ -20,53 +20,9 @@ class ELANProjectImporter():
         if movie_formats is None:
             self.movie_formats = [".mov", ".mp4", ".mkv", ".m4v"]
 
-    def import_project(self, path):
+    def import_project(self, path, project):
+        # Parse the Project
         movie_path, segmentations = self.elan_project_importer(path)
-
-        path = path.replace("\\", "/")
-        path = path.split("/")
-        filename = path.pop().replace(".eaf", "")
-
-        directory = ""
-        for p in path:
-            directory += p + "/"
-
-        if self.remote_movie:
-            files = glob.glob(directory + "*")
-            id_parts = filename.split("_")
-            filemaker_id = ""
-            for i in range(3):
-                filemaker_id += id_parts[i] + "_"
-            print("FILEMAKER ID:", filemaker_id)
-
-            for f in files:
-                if filemaker_id in f and any(ext in f for ext in self.movie_formats):
-                    movie_path = f
-
-        if self.import_screenshots:
-            dirs = glob.glob(directory + "*" + "/")
-            screenshot_dir = None
-            for d in dirs:
-                if "_SCR_" in d:
-                    screenshot_dir = d.replace("\\", "/")
-            if screenshot_dir is not None:
-                #TODO
-                pass
-
-        project_path = directory + "/" + filename + ".eext"
-        project = VIANProject(self.main_window, project_path, filename)
-        try:
-            project.movie_descriptor.set_movie_path(movie_path)
-        except:
-            try:
-                QMessageBox.information(self.main_window,
-                                        "Could not Load Movie from ELAN File",
-                                        "Please select the Movie to this ELAN File manually.")
-                movie_path = QFileDialog.getOpenFileName()[0]
-                project.movie_descriptor.set_movie_path(movie_path)
-            except Exception as e:
-                print("LOG:", e)
-                return False
 
         for i in segmentations:
             segmentation_name = i[0]
@@ -82,36 +38,22 @@ class ELANProjectImporter():
         for s in project.segmentation:
             s.update_segment_ids()
 
-        QMessageBox.information(self.main_window,
-                                "Choose the File Path",
-                                "Please Choose the Directory in which the new Project should be created.")
-
-        dir = QFileDialog.getExistingDirectory(directory=self.main_window.settings.DIR_PROJECT)
-        try:
-            # If this project does already exist, we want to test for an increasing number at the end
-            if os.path.isdir(dir + "/" + filename):
-                counter = 0
-                while(os.path.isdir(dir + "/" + filename + "_" + str(counter).zfill(2))):
-                    counter += 1
-                filename = filename + "_" + str(counter).zfill(2)
-
-            os.mkdir(dir + "/" + filename)
-        except:
-            self.main_window.print_message("IMPORT FAILED: Could not Create Directory: " + str(dir + filename), "Red")
-            return False
-
-        project.folder = dir + "/" + filename + "/"
-        project.path = dir + "/" + filename + "/" + filename + self.main_window.settings.PROJECT_FILE_EXTENSION
-        print("Imported ELAN Project:")
-        print("      Name: ", project.name)
-        print(" Directory: ", project.folder)
-        print("      Path: ", project.movie_descriptor.get_movie_path())
-        print("Movie Path: ", project.movie_descriptor.get_movie_path())
-        print("######################")
-
-        project.create_file_structure()
-
         return project
+
+    def apply_import(self, project, segmentations):
+        for i in segmentations:
+            segmentation_name = i[0]
+            segmentation = project.create_segmentation(segmentation_name, dispatch=False)
+
+            for j in i[1]:
+                value = j[0]
+                t_start = j[1]
+                t_stop = j[2]
+                segm = segmentation.create_segment2(start = t_start, stop = t_stop, mode=SegmentCreationMode.INTERVAL,
+                                                   dispatch=False, body = value)
+
+        for s in project.segmentation:
+            s.update_segment_ids()
 
     def find_time_slot(self, slots, slot_name):
         for s in slots:

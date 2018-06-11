@@ -2736,7 +2736,12 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             return self.movie_path
 
     def set_movie_path(self, path):
-
+        """
+        Sets the movie path of this project. 
+        If the movie is within the Projects directory it makes it relative, else it makes it absolut
+        :param path: 
+        :return: 
+        """
         if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
             self.movie_path = os.path.basename(path)
             self.is_relative = True

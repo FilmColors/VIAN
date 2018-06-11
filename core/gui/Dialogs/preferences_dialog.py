@@ -103,6 +103,7 @@ class DialogPreferences(EDialogWidget):
         self.settings.COPRUS_PW = self.lineEdit_CorpusPW.text()
         self.settings.AUTO_START_COLORMETRY = self.checkBox_AutoColormetry.isChecked()
         self.settings.UPDATE_SOURCE = self.lineEdit_UpdateSource.text()
+        self.settings.EARLY_STOP = self.spinBox_EarlyStop.value()
 
     def on_ok(self):
         self.apply_settings()
