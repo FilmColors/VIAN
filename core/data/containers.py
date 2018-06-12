@@ -11,7 +11,7 @@ from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelec
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 from core.gui.vocabulary import VocabularyItem
-from core.data.project_streaming import ProjectStreamer, NUMPY_NO_OVERWRITE
+from core.data.project_streaming import ProjectStreamer, NUMPY_NO_OVERWRITE, NUMPY_OVERWRITE
 from core.data.enums import *
 from typing import List
 from core.data.project_streaming import IStreamableContainer
@@ -643,9 +643,7 @@ class VIANProject(IHasName, IClassifiable):
         except Exception as e:
             print("Exception during Storing: ", str(e))
 
-
     def load_project(self, settings, path):
-
         if not settings.PROJECT_FILE_EXTENSION in path:
             path += settings.PROJECT_FILE_EXTENSION
 
@@ -684,6 +682,7 @@ class VIANProject(IHasName, IClassifiable):
 
 
         move_project_to_directory_project = False
+        version = [0,0,0]
         try:
             version = my_dict['version']
             version = version.split(".")
@@ -715,11 +714,10 @@ class VIANProject(IHasName, IClassifiable):
             self.main_window.print_message("Loading Vocabularies failed", "Red")
             self.main_window.print_message(e, "Red")
 
-
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
-        print("OMM")
+
         for i, b in enumerate(my_dict['screenshots']):
             new = Screenshot().deserialize(b, self)
             self.add_screenshot(new)
@@ -731,9 +729,13 @@ class VIANProject(IHasName, IClassifiable):
         for d in my_dict['analyzes']:
             if d is not None:
                 new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
-                self.add_analysis(new)
+
                 if isinstance(new, ColormetryAnalysis):
+                    # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
+                    if int(version[1]) < 6:
+                        new = ColormetryAnalysis()
                     self.colormetry_analysis = new
+                self.add_analysis(new)
 
         try:
             old = self.screenshot_groups
@@ -784,8 +786,6 @@ class VIANProject(IHasName, IClassifiable):
                     node = self.get_by_id(a.final_node_ids[i])
                     if node is not None:
                         node.operation.result = res
-
-
 
         # Migrating the Project to the new FileSystem
         if move_project_to_directory_project:
@@ -3019,6 +3019,20 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def append_data(self, data):
         try:
+            if not isinstance(self.palette_cols, List):
+                try:
+                    pass
+                    # TODO
+                    self.time_ms = self.time_ms.tolist()
+                    self.histograms = self.histograms.tolist()
+                    self.frame_pos = self.frame_pos.tolist()
+                    self.avg_colors = self.avg_colors.tolist()
+                    self.palette_cols = self.palette_cols.tolist()
+                    self.palette_layers = self.palette_layers.tolist()
+                    self.palette_bins = self.palette_bins.tolist()
+                except Exception as e:
+                    print("Could not Convert Colormetry data to list in append_data()", e)
+
             self.time_ms.append(data['time_ms'])
             self.histograms.append(data['hist'])
             self.frame_pos.append(data['frame_pos'])
@@ -3030,12 +3044,7 @@ class ColormetryAnalysis(AnalysisContainer):
             self.palette_cols.append(data['palette'].tree[1])
             self.palette_layers.append(data['palette'].tree[0])
 
-
-            #TODO Palettes should be either numpy or list, but not both
-
-            # print("Hist: ", np.array(data['hist']).nbytes)
-            # print("avg_color: ", np.array(data['avg_color']).nbytes)
-            # print("palette: ", np.array(data['palette']).nbytes)
+            self.current_idx += 1
 
         except Exception as e:
             print("ColormetryAnalysis.append_data() raised ", str(e))
@@ -3046,27 +3055,55 @@ class ColormetryAnalysis(AnalysisContainer):
             if frame_idx == self.last_idx:
                 return False
             self.last_idx = frame_idx
-            # if len(self.histograms) > 0:
-            return dict(palette = [self.palette_layers[frame_idx], self.palette_cols[frame_idx], self.palette_bins[frame_idx]])
+            return dict(palette = [np.array(self.palette_layers[frame_idx]), np.array(self.palette_cols[frame_idx]), np.array(self.palette_bins[frame_idx])])
         except Exception as e:
             pass
-
 
     def get_time_palette(self):
         time_palette_data = []
         for t in range(len(self.palette_layers)):
             time_palette_data.append([
-                self.palette_layers[t],
-                self.palette_cols[t],
-                self.palette_bins[t]
+                np.array(self.palette_layers[t]),
+                np.array(self.palette_cols[t]),
+                np.array(self.palette_bins[t])
             ])
         return [time_palette_data, self.time_ms]
 
     def set_finished(self, obj):
-        self.has_finished = True
-        self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
-        self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
-        self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
+        if self.current_idx - 1 < len(self.time_ms) and self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000:
+            self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
+            self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
+            self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
+            self.has_finished = True
+            print("Colormetry truely finished")
+
+        data = dict(
+            curr_location=self.curr_location,
+            time_ms=self.time_ms,
+            frame_pos=self.frame_pos,
+            histograms=self.histograms,
+            avg_colors=self.avg_colors,
+            palette_colors=self.palette_cols,
+            palette_layers=self.palette_layers,
+            palette_bins=self.palette_bins,
+            resolution=self.resolution,
+        )
+        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
+
+    def clear(self):
+        self.curr_location = 0
+        self.time_ms = []
+        self.frame_pos = []
+        self.histograms = []
+        self.avg_colors = []
+
+        self.palette_cols = []
+        self.palette_layers = []
+        self.palette_bins = []
+
+        self.resolution = 30
+        self.has_finished = False
+        self.current_idx = 0
 
     def serialize(self):
         data = dict(
@@ -3079,10 +3116,13 @@ class ColormetryAnalysis(AnalysisContainer):
             palette_layers=self.palette_layers,
             palette_bins=self.palette_bins,
             resolution=self.resolution,
+            current_idx = self.current_idx
         )
 
         if self.has_finished:
             self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_NO_OVERWRITE)
+        else:
+            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
 
         serialization = dict(
             name=self.name,
@@ -3090,6 +3130,7 @@ class ColormetryAnalysis(AnalysisContainer):
             analysis_container_class=self.__class__.__name__,
             notes=self.notes,
             has_finished = self.has_finished
+
         )
         return serialization
 
@@ -3102,6 +3143,7 @@ class ColormetryAnalysis(AnalysisContainer):
             self.has_finished = serialization['has_finished']
             data = streamer.sync_load(self.unique_id)
             if data is not None:
+                self.current_idx = data['current_idx']
                 self.curr_location = data['curr_location']
                 self.time_ms = data['time_ms']
                 self.frame_pos =  data['frame_pos']
@@ -3121,11 +3163,15 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.histograms = []
                 self.avg_colors = []
 
+                self.palette_cols = []
+                self.palette_layers = []
+                self.palette_bins = []
+
                 self.resolution = 30
                 self.has_finished = False
+                self.current_idx = 0
         except Exception as e:
             print("Exception in Loading Analysis", e)
-
 
         return self
 

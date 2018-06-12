@@ -65,7 +65,7 @@ from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
-VERSION = "0.6.2"
+VERSION = "0.6.3"
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -130,11 +130,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # Central Widgets
         self.video_player = None
         self.screenshots_manager = None
-
         self.allow_dispatch_on_change = True
 
         self.thread_pool = QThreadPool()
         self.thread_pool.setMaxThreadCount(8)
+
+        self.colormetry_running = False
+        self.colormetry_job = None
 
         loading_screen.showMessage("Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
@@ -350,6 +352,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
 
         self.actionColormetry.triggered.connect(self.start_colormetry)
+        self.actionClearColormetry.triggered.connect(self.clear_colormetry)
         self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
         self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
 
@@ -484,13 +487,22 @@ class MainWindow(QtWidgets.QMainWindow):
             t.from_database(q)
 
     def start_colormetry(self):
-        job = ColormetryJob2(30, self)
-        args = job.prepare(self.project)
-        worker = MinimalThreadWorker(job.run_concurrent, args, True)
-        worker.signals.callback.connect(self.on_colormetry_push_back)
-        worker.signals.finished.connect(self.on_colormetry_finished)
-        self.abortAllConcurrentThreads.connect(job.abort)
-        self.thread_pool.start(worker, QThread.HighPriority)
+        if self.colormetry_running == False:
+            job = ColormetryJob2(30, self)
+            self.project.colormetry_analysis.has_finished = False
+            args = job.prepare(self.project)
+            self.actionColormetry.setText("Pause Colormetry")
+            worker = MinimalThreadWorker(job.run_concurrent, args, True)
+            worker.signals.callback.connect(self.on_colormetry_push_back)
+            worker.signals.finished.connect(self.on_colormetry_finished)
+            self.abortAllConcurrentThreads.connect(job.abort)
+            self.thread_pool.start(worker, QThread.HighPriority)
+            self.colormetry_job = job
+            self.colormetry_running = True
+        else:
+            self.actionColormetry.setText("Start Colormetry")
+            self.colormetry_job.abort()
+            self.colormetry_running = False
 
     def on_colormetry_push_back(self, data):
         if self.project is not None and self.project.colormetry_analysis is not None:
@@ -503,6 +515,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
         except:
             pass
+
+    def clear_colormetry(self):
+        if self.project is not None:
+            if self.colormetry_job is not None:
+                self.colormetry_job.abort()
+            self.timeline.timeline.set_colormetry_progress(0.0)
+            self.project.colormetry_analysis.clear()
 
     #region WidgetCreation
 
@@ -1631,6 +1650,12 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def import_elan_project(self, path=None, create_new = True):
+        """
+        Imports an existing ELAN Project's segmentations either in the current project or into a new one
+        :param path: Path to the ELAN Project (optional)
+        :param create_new: If a new Project should be created (optional)
+        :return: Nothing
+        """
         importer = ELANProjectImporter(self, remote_movie=True, import_screenshots=True)
         try:
             if path is None or not os.path.isfile(path):
@@ -1656,22 +1681,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.dispatch_on_changed()
         except Exception as e:
             print(e)
-
-    def import_pipeline(self):
-        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
-        if not os.path.isfile(path):
-            self.print_message("Could not Open File", "Red")
-            return
-        importer = FilmColorsPipelineImporter()
-        importer.import_pipeline(path, self.project)
-
-    def import_filemaker(self):
-        path = QFileDialog.getOpenFileName(directory=self.project.export_dir)[0]
-        if not os.path.isfile(path):
-            self.print_message("Could not Open File", "Red")
-            return
-        importer = FileMakerVocImporter()
-        importer.import_filemaker(path, self.project)
 
     def import_csv_vocabulary(self):
         dialog = CSVVocabularyImportDialog(self, self.project)
@@ -1846,6 +1855,7 @@ class MainWindow(QtWidgets.QMainWindow):
             ready, col = self.project.get_colormetry()
             if not ready:
                 self.start_colormetry()
+
             else:
                 print("SetColormetry")
                 self.timeline.timeline.set_colormetry_progress(1.0)

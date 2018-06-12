@@ -25,7 +25,7 @@ class ColormetryJob2(QObject):
             start = 0
         else:
             self.colormetry_analysis = project.colormetry_analysis
-            start = self.colormetry_analysis.curr_location
+            start = self.colormetry_analysis.current_idx
         self.duration = project.movie_descriptor.duration
         frame_duration = ms_to_frames(self.duration, project.movie_descriptor.fps)
         return [
@@ -43,6 +43,7 @@ class ColormetryJob2(QObject):
         resolution = args[3]
         fps = args[4]
 
+        start *= resolution
         length = np.clip(int(end - start), 1, None)
 
         video_capture = cv2.VideoCapture(movie_path)
@@ -78,15 +79,14 @@ class ColormetryJob2(QObject):
             if self.aborted:
                 return
 
-            yielded_result = dict(frame_pos=i, time_ms=frame2ms(i, fps), hist=hist, avg_color=avg_color, palette=palette)
-            callback.emit([yielded_result, i / end])
+            yielded_result = dict(frame_pos=i + start, time_ms=frame2ms(i + start, fps), hist=hist, avg_color=avg_color, palette=palette)
+            callback.emit([yielded_result, (i + start) / end])
 
             hist_counter += 1
             progress_counter += 1
 
     @pyqtSlot(object)
     def colormetry_callback(self, yielded_result):
-
         self.colormetry_analysis.append_data(yielded_result)
         self.main_window.timeline.timeline.set_colormetry_progress(yielded_result.time_ms / self.duration)
 

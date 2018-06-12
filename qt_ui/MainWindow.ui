@@ -182,10 +182,11 @@
     <property name="title">
      <string>Analysis</string>
     </property>
-    <addaction name="actionColormetry"/>
     <addaction name="actionMovie_Barcode"/>
     <addaction name="actionMovie_Mosaic"/>
     <addaction name="separator"/>
+    <addaction name="actionColormetry"/>
+    <addaction name="actionClearColormetry"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
     <property name="title">
@@ -715,7 +716,7 @@
   </action>
   <action name="actionColormetry">
    <property name="text">
-    <string>Colormetry</string>
+    <string>Start Colormetry</string>
    </property>
   </action>
   <action name="actionExportExperiment">
@@ -784,6 +785,11 @@
   <action name="actionImportElanThisProject">
    <property name="text">
     <string>Into this Project</string>
+   </property>
+  </action>
+  <action name="actionClearColormetry">
+   <property name="text">
+    <string>Clear Colormetry</string>
    </property>
   </action>
  </widget>

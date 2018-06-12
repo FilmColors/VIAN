@@ -9,6 +9,7 @@ from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, QThread, Qt
 STREAM_DATA_IPROJECT_CONTAINER = 0
 STREAM_DATA_ARBITRARY = 1
 NUMPY_NO_OVERWRITE = 2
+NUMPY_OVERWRITE = 3
 
 
 class ProjectStreamer(IProjectChangeNotify, QObject):
