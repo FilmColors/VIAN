@@ -68,6 +68,13 @@ def create_vocabulary(name, category = ""):
 
 
 def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
+    """
+    Parses the GlossaryDB CSV and creates a custom experiment and VIANTemplate from the given data. 
+    :param glossary_path: 
+    :param template_path: 
+    :param export_voc_dir: 
+    :return: 
+    """
     # Parse the Glossary
     glossary_words = []
     glossary_ids = []

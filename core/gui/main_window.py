@@ -489,8 +489,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def start_colormetry(self):
         if self.colormetry_running == False:
             job = ColormetryJob2(30, self)
-            self.project.colormetry_analysis.has_finished = False
             args = job.prepare(self.project)
+            self.project.colormetry_analysis.has_finished = False
             self.actionColormetry.setText("Pause Colormetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)
             worker.signals.callback.connect(self.on_colormetry_push_back)
