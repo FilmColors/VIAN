@@ -26,13 +26,66 @@ class DialogScreenshotImport(EDialogWidget):
         self.btn_Cancel.clicked.connect(self.close)
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Help.clicked.connect(self.on_help)
+        self.preview_path = ""
+        self.sB_PositionSegment.valueChanged.connect(self.on_settings_changed)
+        self.sB_PositionTimeH.valueChanged.connect(self.on_settings_changed)
+        self.sB_PositionTimeM.valueChanged.connect(self.on_settings_changed)
+        self.sB_PositionTimeS.valueChanged.connect(self.on_settings_changed)
+        self.sB_PositionTimeMS.valueChanged.connect(self.on_settings_changed)
+        self.on_settings_changed()
 
+    def on_settings_changed(self):
+        if self.checkBox_UseLocation.isChecked():
+            try:
+                splitted = self.preview_path.split(self.lineEdit_Delimiter.text())
+
+                idx_h = self.sB_PositionTimeH.value() - 1
+                idx_m = self.sB_PositionTimeM.value() - 1
+                idx_s = self.sB_PositionTimeS.value() - 1
+                idx_ms = self.sB_PositionTimeMS.value() - 1
+                idx_segment = self.sB_PositionSegment.value() - 1
+                text = ""
+                text_full = ""
+                # IF has time location
+                if (idx_h >= 0 or idx_m >= 0 or idx_s >= 0 or idx_ms >= 0):
+                    if (idx_h >= 0 and idx_h < len(splitted)):
+                        text += "H = " + str(splitted[idx_h])
+
+                    if (idx_m >= 0 and idx_m < len(splitted)):
+                        text += "  M = " + str(splitted[idx_m])
+
+                    if (idx_s >= 0 and idx_s < len(splitted)):
+                        text += "  S = " + str(splitted[idx_s])
+
+                    if (idx_ms >= 0 and idx_ms < len(splitted)):
+                        text += "  MS = " + str(splitted[idx_ms])
+                else:
+                    if (idx_segment >= 0 and idx_h < len(splitted)):
+                        text += "  SEGM_ID = " + str(splitted[idx_segment])
+
+                for i, t in enumerate(splitted):
+                    if i not in [idx_h, idx_s, idx_m, idx_ms, idx_segment]:
+                        text_full += (str(t))
+                    else:
+                        text_full += ("[" + str(t) + "]")
+                    if i < len(splitted) - 1:
+                        text_full += " _ "
+                self.label_P0.setText(text)
+                self.label_P0.setVisible(True)
+                self.label_P1.setText(text_full)
+                self.label_P1.setVisible(True)
+            except Exception as e:
+                print(e)
+
+        else:
+            self.label_P0.setVisible(False)
+            self.label_P1.setVisible(False)
 
     def on_browse(self):
         files = QFileDialog.getOpenFileNames()[0]
         self.files = files
         self.lineEdit_Files.setText(str(files))
-
+        self.preview_path = files[0].replace("\\", "/").split("/").pop()
 
     def on_import(self, project:VIANProject, fps):
         mode = 0
@@ -119,7 +172,6 @@ class DialogScreenshotImport(EDialogWidget):
         self.main_window.run_job_concurrent(importer)
 
 
-
     def set_timestamp_enabled(self, state):
         self.lineEdit_Delimiter.setEnabled(state)
         self.sB_PositionSegment.setEnabled(state)
@@ -127,4 +179,5 @@ class DialogScreenshotImport(EDialogWidget):
         self.sB_PositionTimeM.setEnabled(state)
         self.sB_PositionTimeS.setEnabled(state)
         self.sB_PositionTimeMS.setEnabled(state)
+        self.on_settings_changed()
 

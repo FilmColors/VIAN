@@ -169,12 +169,14 @@ class ScreenshotImporter(IConcurrentJob):
                 for i, p in enumerate(scr_paths):
                     if i in indices:
                         p_paths.append(p)
-                result.extend(self.mode_complete(movie_path,
-                                                 p_paths,
-                                            sign_progress,
-                                            segment_ranges[u][0],
-                                            segment_ranges[u][1]))
-
+                try:
+                    result.extend(self.mode_complete(movie_path,
+                                                     p_paths,
+                                                sign_progress,
+                                                segment_ranges[u][0],
+                                                segment_ranges[u][1]))
+                except IndexError as e:
+                    print("There is no Segment with Index:" + u + " in the Segmentation, skipped images:" + str(p_paths))
 
             return result
 
@@ -539,7 +541,8 @@ class SegmentationImporter(CSVImporter):
                     body = row[idx_f_body]
 
                     if t_type == "MS":
-                        pass
+                        t_start = int(t_start)
+                        t_end = int(t_end)
 
                     elif t_type == "HH:MM:SS":
                         sp = t_start.split(":")
@@ -564,7 +567,6 @@ class SegmentationImporter(CSVImporter):
                         t_end = frame2ms(int(t_end), fps)
 
                     segments.append([t_start, t_end])
-
 
                 except Exception as e:
                     print("Error in Import Segmentation:", e)
