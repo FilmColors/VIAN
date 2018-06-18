@@ -24,6 +24,52 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import QPoint, QRect, QSize
 
 class VIANProject(IHasName, IClassifiable):
+    """
+    This Class hold the Complete VIAN Project.
+    As such it is the owner of all subsequent IProjectContainers, directly or indirectly
+
+    A VIANProject is a FileSystem and a json File that is located inside this folder.
+
+    Attribute Members:
+    self.undo_manager = UndoRedoManager()
+        self.main_window : A Reference to the Main Window
+        self.inhibit_dispatch : if Dispatch should be inhibited
+
+        self.path : The Path to the Projects .eext file (absolute)
+        self.name : The Name of the Project
+        self.folder : The Root Directory of the Project where the eext file lies inside
+        self.data_dir : the path to the data dir
+        self.results_dir : the path to the result dir
+        self.shots_dir : the path to the shot dir
+        self.export_dir : the path to the export dir
+
+        self.corpus_id : this is the VIANCorpus id of this project (default: -1)
+
+        self.id_list : A list of [Unique-ID, IProjectContainer] tuples
+
+        self.annotation_layers : A List of Annotation Layers
+        self.current_annotation_layer : The Currently Selected Annotation Layer
+        self.screenshots : A List of all Screenshots
+        self.segmentation : A List of all Segmentations
+        self.main_segmentation_index : The index of the main Segmentation Layer in self.segmentations
+        self.movie_descriptor : The Movie Descriptor of this Project
+        self.analysis : A List of IAnalysisResult
+        self.screenshot_groups : All Screenshot Groups
+        self.vocabularies : All Vocabularies (deprecated these are now global)
+
+        self.experiments : A List of all Experiments
+
+        self.current_script : The Currently Selected NodeScript
+        self.node_scripts : A List of All Node Scripts
+
+        self.add_screenshot_group("All Shots", initial=True)
+        self.active_screenshot_group = self.screenshot_groups[0]
+        self.active_screenshot_group.is_current = True
+
+        self.colormetry_analysis : The ColorimetryAnalysis Reference
+
+        self.selected : A List of Currently Selected IProjectContainers
+    """
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
         self.undo_manager = UndoRedoManager()
@@ -1143,6 +1189,15 @@ class VIANProject(IHasName, IClassifiable):
 
 #region Segmentaion
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
+    """
+    Member Attributes:
+        self.name : The Name of the Segmentation
+        self.segments : A List of Segments
+        self.timeline_visibility : if it is visible in the timeline or not
+        self.notes : Additional Notes that can be added to describe it in the Inspector
+        self.is_main_segmentation : If this is the main Segmentation
+
+    """
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
@@ -1536,6 +1591,21 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
 
 class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject):
+    """
+    Member Attributes:
+        self.MIN_SIZE : The Shortest size in MS
+        self.ID : The Segments ID in the Segmentation {0, ..., n}
+        self.start : Time start in MS
+        self.end : Time end in MS
+        self.name : the Name of the Segment
+
+        self.duration : The Duration of the Segment in MS
+        self.annotation_body : The Annotation Content Text
+        self.timeline_visibility : If it is visible in the Timeline
+        self.segmentation : it's parent Timeline
+        self.notes : Additional Notes that can be set in the Inspector
+
+    """
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None, annotation_body = "", name = "New Segment"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
@@ -1704,6 +1774,40 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 #
 
 class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, IHasMediaObject):
+    """
+    Member Attributes:
+    self.name = name
+        self.a_type : An AnnotationType Enum value:  { Rectangle = 0, Ellipse = 1, Line = 2, Text = 3, Image = 4, FreeHand = 5 }
+        self.t_start : The Start Time in MS
+        self.size : The Rect Size In original space
+        self.curr_size : The Rect Size in relative space to the currently displayed movie frame
+        self.color : The Color of the Annotation
+        self.orig_position : The Position in original space
+        self.line_w : The Line thickness
+
+
+        self.resource_path : Ressource Path if there should be one (Image Annotation)
+        self.text : Text if any (TextAnnotation)
+        self.font_size : Font Size if any (Text Annotation)
+        self.font : FontFamily Name if any (Text Anntotation)
+        self.has_key : If it is Keyed or not
+        self.keys : A List of (Time, Position) Tuples
+        self.free_hand_paths : A List of drawing Paths in form [path, color, width]
+        self.notes : Additional notes set in the Inspector
+
+        self.is_automated : If this Annotation content is driven by another variable
+        self.automated_source : The Source object hat is used in driving this ones content
+        self.automate_property : The Source object's property that is driving this ones content
+
+        self.tracking = tracking
+
+        self.annotation_layer : A Reference to it's parent Annotation Layer
+
+        self.is_visible : If this is globaly visible or not
+        self.widget : A Reference to it's widget in the DrawingOverlay
+        self.image : An Image data if there is any (Image Annotation)
+
+    """
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
                  name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static"):
         IProjectContainer.__init__(self)
@@ -2011,6 +2115,18 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         return self.annotation_layer
 
 class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
+    """
+    Member Variables:
+        self.name : The Name of this Annotation Layer
+        self.t_start : Start Time in MS
+        self.t_end : End Time in MS
+        self.annotations : A List of Annotations
+        self.is_current_layer : If this is the current layer to edit
+        self.is_visible : if this layer is currently visible or hidden
+        self.timeline_visibility : If the layer should be shown in the Timeline or not
+        self.notes : Additional notes set in the Inspector
+
+    """
     def __init__(self, name = None, t_start = 0, t_end = 0):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
@@ -2181,6 +2297,23 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 #region Screenshots
 
 class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable):
+    """
+    Member Attributes:
+        self.title: The Name of this Screenshot
+        self.img_movie : Image Data of the complete frame
+        self.img_blend = Image Data of the Annotated Frame if Any
+        self.annotation_item_ids : The Annotations that have been there while rendering the img_blend
+        self.frame_pos : THe Position of this Frame in Frames
+        self.scene_id : The Id of this Screenshot within the Main Segmentation of the Project
+        self.shot_id_global : The Id of this screenshot over all Screenshots
+        self.shot_id_segm : The Id of this shot within the segment
+        self.movie_timestamp : The Time in MS
+        self.creation_timestamp : The Time of Creation in time.now() format
+        self.screenshot_group : The Screenshot Groupd this is asociated to
+        self.notes : Additional Notes set in the Inspector
+
+        self.curr_size : The size of the loaded Image relative to it's original Size
+    """
     def __init__(self, title = "", image = None,
                  img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
                  shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None):
@@ -2198,8 +2331,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.creation_timestamp = str(datetime.datetime.now())
         self.screenshot_group = ""
         self.notes = ""
-        self.annotation_is_visible = False
-        self.timeline_visibility = True
+        self.annotation_is_visible = False #TODO WRONG
+        self.timeline_visibility = True #TODO WRONG
 
         self.curr_size = 1.0
 
@@ -2661,6 +2794,19 @@ class ConnectionDescriptor(IProjectContainer):
 
 #region MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
+    """
+    Member Attributes:
+        self.movie_name : The Name of the Movie
+        self.movie_path : The Path of the Movie
+        self.is_relative : If movie_path is relative or not
+        self.movie_id : The Movie ID tuple (ID, )
+        self.year : The Production Year of this Movie
+        self.source : The SourceType Enum of this movie {DVD, VHS, FILM}
+        self.duration : Duration of the Movie in MS
+        self.notes : Additinoal notes added in the Inspector
+        self.fps : The float FPS
+
+    """
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id="0_0_0", year=1800, source="",
                  duration=100, fps = 30):
         IProjectContainer.__init__(self)
@@ -2784,7 +2930,17 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 
 
 class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableContainer):
+    """
+    Member Attributes:
+        self.name : The Name of the Container (not the analysis)
+        self.notes : Additional Notes added in the Inspector
+        self.data : The Generic Data Dict defined by the respective Analysis
+    """
     def __init__(self, name = "", data = None):
+        """
+        :param name:
+        :param data:
+        """
         IProjectContainer.__init__(self)
         self.name = name
         self.notes = ""
@@ -2828,11 +2984,13 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
 
 
 class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
+    """
+
+    """
     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
         super(NodeScriptAnalysis, self).__init__(name, results)
         self.script_id = script_id
         self.final_node_ids = final_nodes_ids
-
 
     def get_type(self):
         return ANALYSIS_NODE_SCRIPT
@@ -3303,6 +3461,19 @@ class AnalysisParameters():
 
 #region Vocabulary
 class Vocabulary(IProjectContainer, IHasName):
+    """
+    Member Attributes:
+        self.name : The Name of the Vocabulary
+        self.comment : This is a generic field to put a description into about the Voc.
+        self.info_url : A URL to a description of this vocabulary
+        self.words : A List of VocabularyWords that sit in the root
+        self.words_plain : A List of All VocabularyWords that are in the Vocabulary
+        self.was_expanded : If it is expandend in the VocabularyManager
+        self.category : The Category it belongs to
+
+        self.derived_vocabulary : OBSOLETE
+        self.base_vocabulary : OBSOLETE
+    """
     def __init__(self, name):
         IProjectContainer.__init__(self)
         self.name = name
@@ -3313,8 +3484,8 @@ class Vocabulary(IProjectContainer, IHasName):
         self.was_expanded = False
         self.category = "default"
 
-        self.derived_vocabulary = False
-        self.base_vocabulary = None
+        self.derived_vocabulary = False  # TODO OBSOLETE
+        self.base_vocabulary = None # TODO OBSOLETE
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
         word = VocabularyWord(name, vocabulary=self)
@@ -3524,6 +3695,19 @@ class Vocabulary(IProjectContainer, IHasName):
         self.project.remove_vocabulary(self)
 
 class VocabularyWord(IProjectContainer, IHasName):
+    """
+    Member Attributes:
+        self.name : The Name of the Word
+        self.comment : An additional field to add some info about it. In the ERC_FILM_COLORS this refers to the glossary ID
+        self.info_url : A Url to the description of this Vocabulary
+        self.vocabulary : It's parent Vocabulary
+        self.is_checkable : If this word is checkeable or not
+        self.was_expanded : If this word is expanded in the Vocabulary Manager
+        self.parent : The Parent Word
+        self.children : The Children Words
+        self.connected_items : IProjectContainer objects that are connected with it # Obsolete
+
+    """
     def __init__(self, name, vocabulary, parent = None, is_checkable = False):
         IProjectContainer.__init__(self)
         self.name = name
@@ -3536,9 +3720,11 @@ class VocabularyWord(IProjectContainer, IHasName):
         self.children = []
         self.connected_items = []
 
+    # OBSOLETE
     def add_connected_item(self, item):
         self.connected_items.append(item)
 
+    # OBSOLETE
     def remove_connected_item(self, item):
         if item in self.connected_items:
             self.connected_items.remove(item)
@@ -3594,7 +3780,17 @@ class ClassificationObject(IProjectContainer, IHasName):
     Example: Say one wants to analyse the Foreground and Background Color of a given Film using his homemade 
     Vocabulary called "ColorVocabulary". 
     
-    The ClassificationTargets would therefore be "Foreground" and "Background", both will have "ColorVocabulary". 
+    The ClassificationTargets would therefore be "Foreground" and "Background", both will have "ColorVocabulary".
+
+    Member Attributes:
+        self.name : The Name of this ClassificationObject
+        self.experiment : A reference to the Experiment it belongs to
+        self.parent : A Parent Classification Object or an Experiment if it's at the root
+        self.children : A List of Chilren ClassificationObjects if any
+        self.classification_vocabularies : A List of Vocabularies attached to thsi ClassificationObject
+        self.unique_keywords : A List of Unique Keywords generated from this ClassificationObjects and its Vocabularies
+        self.target_container : A List of Target Containers to classify with this Classification Object
+
     """
     def __init__(self, name, experiment, parent = None):
         IProjectContainer.__init__(self)
@@ -3700,7 +3896,14 @@ class ClassificationObject(IProjectContainer, IHasName):
 class UniqueKeyword(IProjectContainer):
     """
     Unique Keywords are generated when a Vocabulary is added to a Classification Object. 
-    For each word in the Vocabulary a Unique Keyword is created to the Classification Object. 
+    For each word in the Vocabulary a Unique Keyword is created to the Classification Object.
+
+    Member Attributes:
+        self.experiment : The Experiment this Keyword belongs to
+        self.voc_obj : The Vocabulary this keyword origins
+        self.word_obj : The VocabularyWord this keyword origins
+        self.class_obj : The ClassObj this keyword origins
+        self.external_id : An External Key for the ERC-FilmColors Project
     """
     def __init__(self, experiment,  voc_obj:Vocabulary = None, word_obj:VocabularyWord = None, class_obj:ClassificationObject = None):
         IProjectContainer.__init__(self)
@@ -3743,6 +3946,14 @@ class Experiment(IProjectContainer, IHasName):
     """
     An Experiment holds all information connected to Classification of Objects.
     As such it defines rules for an experiment and tracks the Progress.
+
+    Member Attributes:
+        self.name : The Name of this Experiment
+        self.classification_objects : The Classification Objects Attached to it
+        self.analyses : The Names of Analyses that have to be performed in this experiment
+        self.analyses_parameters : The List of Analyses parameters connected to the analyses above
+
+        self.classification_results : The Classification Mapping a list of [IClassifiable, UniqueKeywords]
 
     """
 
@@ -3926,6 +4137,12 @@ class Experiment(IProjectContainer, IHasName):
 
 #region MediaObject
 class AbstractMediaObject(IProjectContainer, IHasName):
+    """
+    Member Attributes:
+            self.name : The Name of this Object
+            self.container : The Container it belongs to
+            self.dtype : The Type of data stored in this MediaObject
+    """
     def __init__(self, name, container:IHasMediaObject, dtype):
         IProjectContainer.__init__(self)
         self.name = name
@@ -3960,6 +4177,13 @@ class AbstractMediaObject(IProjectContainer, IHasName):
 
 
 class FileMediaObject(AbstractMediaObject):
+    """
+        Member Attributes:
+                self.name : The Name of this Object
+                self.container : The Container it belongs to
+                self.dtype : The Type of data stored in this MediaObject
+                self.file_path : The File Path to this object's source
+        """
     def __init__(self, name, file_path, container, dtype):
         super(FileMediaObject, self).__init__(name, container, dtype)
         self.file_path = file_path
@@ -3986,6 +4210,13 @@ class FileMediaObject(AbstractMediaObject):
 
 
 class DataMediaObject(AbstractMediaObject):
+    """
+        Member Attributes:
+                self.name : The Name of this Object
+                self.container : The Container it belongs to
+                self.dtype : The Type of data stored in this MediaObject
+                self.data : The Data Dict of this object
+        """
     def __init__(self, name, data, container, dtype):
         super(DataMediaObject, self).__init__(name, container, dtype)
         self.data = data
