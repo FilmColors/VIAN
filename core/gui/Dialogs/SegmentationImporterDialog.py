@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout,
 from PyQt5 import uic
 from core.data.importers import SegmentationImporter
 from core.gui.ewidgetbase import EDialogWidget
-from core.data.containers import *
+from core.container.project import *
 import os
 
 class SegmentationImporterDialog(EDialogWidget):

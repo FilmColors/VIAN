@@ -5,7 +5,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QCheckBox, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
 
-from core.data.containers import VIANProject
+from core.container.project import VIANProject
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ELANProjectImporter

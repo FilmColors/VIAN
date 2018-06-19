@@ -9,9 +9,10 @@ if sys.platform == "darwin":
     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
 else:
     from PyQt5.QtWebKitWidgets import QWebView
-from core.data.containers import *
+from core.container.project import *
 from core.gui.ewidgetbase import EDockWidget
 
+from core.data.computation import *
 VIS_TYPE_IMAGE = 0
 VIS_TYPE_WEB = 1
 VIS_TYPE_NONE = 2

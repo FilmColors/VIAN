@@ -1,0 +1,515 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>core.data.enums &mdash; VIAN 0.4.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VIAN
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../user_interface/user_interface.html">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/inspector.html">Inspector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/outliner.html">Outliner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/perspectives.html">Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#player-perspective">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#id1">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#screenshots-perspective">Screenshots Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#node-scripting-perspective">Node Scripting Perspective</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/timeline.html">Timeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../step_by_step/step_by_step.html">Step-by-Step Guides</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/project_management/project_management.html">Vian Projects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/create_project.html">Creating new Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/project_templates.html">Project Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/backups.html">Backups</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/segmentation/segmentation.html">Segmentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/merging_segments.html">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/auto_segmentation.html">Auto Segmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/import_screenshots.html">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/analyses/analyses.html">Analyses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/running_analyses.html">Running Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/viewing_analyses.html">Viewing Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/colormetry.html">Colormetry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/analyses_list.html">All Analyses of VIAN</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/experiments/experiments.html">Experiments</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/player/player.html">VIAN’s Player</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/player/changing_subtitles.html">Changing Subtitles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/vian_corpus/vian_corpus.html">VIAN Corpus</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/plugins.html">Plugins</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/imdb_finder/imdb_finder.html">IMDb Finder</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../DevelopersGuide.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/analyses.html">IAnalysisJob</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/analyses.html#functionality">Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/analyses.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/plugins.html">Plug-Ins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DevelopersGuide.html#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/latest.html">VIAN 0.5.0 - 0.5.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#attaching-files-to-annotations-and-segments">Attaching Files to Annotations and Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-visualization">Analyses - Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#backups">Backups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#extensive-list">Extensive List</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VIAN</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>core.data.enums</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for core.data.enums</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">In this File the ENUMS used in VIAN are defined. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">Enum</span>
+
+
+<span class="n">PROJECT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">SEGMENTATION</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">SEGMENT</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">ANNOTATION</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">ANNOTATION_LAYER</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">SCREENSHOT</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">MOVIE_DESCRIPTOR</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">ANALYSIS</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">SCREENSHOT_GROUP</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">NODE</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">NODE_SCRIPT</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">VOCABULARY</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">VOCABULARY_WORD</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">ANALYSIS_NODE_SCRIPT</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="n">ANALYSIS_JOB_ANALYSIS</span> <span class="o">=</span> <span class="mi">13</span>
+<span class="n">EXPERIMENT</span> <span class="o">=</span> <span class="mi">14</span>
+<span class="n">CLASSIFICATION_OBJECT</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">MEDIA_OBJECT</span> <span class="o">=</span> <span class="mi">16</span>
+
+<span class="n">FILE_EXT_PROJECT</span> <span class="o">=</span> <span class="s2">&quot;.eext&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">get_type_as_string</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">PROJECT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;PROJECT&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">SEGMENTATION</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;SEGMENTATION&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">SEGMENT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;SEGMENT&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">ANNOTATION</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ANNOTATION&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">ANNOTATION_LAYER</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ANNOTATION_LAYER&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">SCREENSHOT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;SCREENSHOT&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">MOVIE_DESCRIPTOR</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;MOVIE_DESCRIPTOR&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">ANALYSIS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ANALYSIS&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">SCREENSHOT_GROUP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;SCREENSHOT_GROUP&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">NODE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;NODE&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">NODE_SCRIPT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;NODE_SCRIPT&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">VOCABULARY</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;VOCABULARY&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">VOCABULARY_WORD</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;VOCABULARY_WORD&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">ANALYSIS_NODE_SCRIPT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ANALYSIS_NODE_SCRIPT&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">ANALYSIS_JOB_ANALYSIS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ANALYSIS_JOB_ANALYSIS&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">CLASSIFICATION_OBJECT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;CLASSIFICATION_OBJECT&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">EXPERIMENT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;EXPERIMENT&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Mehh, Whatever this should be&quot;</span>
+
+
+<div class="viewcode-block" id="AnnotationType"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.AnnotationType">[docs]</a><span class="k">class</span> <span class="nc">AnnotationType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">Rectangle</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Ellipse</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Line</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">Text</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">Image</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">FreeHand</span> <span class="o">=</span> <span class="mi">5</span></div>
+
+
+<div class="viewcode-block" id="ScreenshotNamingConventionOptions"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.ScreenshotNamingConventionOptions">[docs]</a><span class="k">class</span> <span class="nc">ScreenshotNamingConventionOptions</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">empty</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># Screenshot Attributes</span>
+    <span class="n">Screenshot_Title</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Screenshot&quot;</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">)</span>
+    <span class="n">Scene_ID</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Screenshot&quot;</span><span class="p">,</span> <span class="s2">&quot;scene_id&quot;</span><span class="p">)</span>
+    <span class="n">Timestamp</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Screenshot&quot;</span><span class="p">,</span> <span class="s2">&quot;movie_timestamp&quot;</span><span class="p">)</span>
+    <span class="n">Creation_Timestamp</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Screenshot&quot;</span><span class="p">,</span> <span class="s2">&quot;creation_timestamp&quot;</span><span class="p">)</span>
+    <span class="n">Shot_ID_Global</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Screenshot&quot;</span><span class="p">,</span> <span class="s2">&quot;shot_id_global&quot;</span><span class="p">)</span>
+    <span class="n">Shot_ID_Segment</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Screenshot&quot;</span><span class="p">,</span> <span class="s2">&quot;shot_id_segm&quot;</span><span class="p">)</span>
+    <span class="n">Shot_Group</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Screenshot&quot;</span><span class="p">,</span> <span class="s2">&quot;screenshot_group&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Movie Attributes</span>
+    <span class="n">Movie_ID</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Movie&quot;</span><span class="p">,</span> <span class="s2">&quot;movie_id&quot;</span><span class="p">)</span>
+    <span class="n">Movie_Name</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Movie&quot;</span><span class="p">,</span> <span class="s2">&quot;movie_name&quot;</span><span class="p">)</span>
+    <span class="n">Movie_Year</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Movie&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">)</span>
+    <span class="n">Movie_Source</span><span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Movie&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_enum_value</span><span class="p">(</span><span class="n">enum</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">enum</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">get_enum</span><span class="p">(</span><span class="n">enum</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">enum</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span>
+
+
+<div class="viewcode-block" id="MovieSource"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.MovieSource">[docs]</a><span class="k">class</span> <span class="nc">MovieSource</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">VHS</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">DVD</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">BluRay</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">Web</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">Film</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+
+<div class="viewcode-block" id="AspectRatio"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.AspectRatio">[docs]</a><span class="k">class</span> <span class="nc">AspectRatio</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">ASPECT_16_9</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;16/9&quot;</span><span class="p">)</span>
+    <span class="n">ASPECT_16_10</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ImageType"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.ImageType">[docs]</a><span class="k">class</span> <span class="nc">ImageType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">JPG</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">PNG</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="ProjectType"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.ProjectType">[docs]</a><span class="k">class</span> <span class="nc">ProjectType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">FILM_PROJECT</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">AUDIO_PROJECT</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="TargetContainerType"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.TargetContainerType">[docs]</a><span class="k">class</span> <span class="nc">TargetContainerType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">ALL</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ALL_SEGMENTS</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">EXPLICIT_SEGMENTS</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">ALL_ANNOTATIONS</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">EXPLICIT_ANNOTATIONS</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">ALL_SCREENSHOTS</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">EXPLICIT_SCREENSHOTS</span> <span class="o">=</span> <span class="mi">6</span></div>
+
+
+<div class="viewcode-block" id="SegmentCreationMode"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.SegmentCreationMode">[docs]</a><span class="k">class</span> <span class="nc">SegmentCreationMode</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines the Method hwo the Segment is created</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">BACKWARD</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">FORWARD</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">INTERVAL</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="MediaObjectType"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.enums.MediaObjectType">[docs]</a><span class="k">class</span> <span class="nc">MediaObjectType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">HYPERLINK</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">PDF</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">IMAGE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">SOURCE</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">EXTERNAL</span> <span class="o">=</span> <span class="mi">4</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Gaudenz Halter.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.4.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

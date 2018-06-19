@@ -7,10 +7,12 @@ from PyQt5.QtCore import *
 
 import numpy as np
 
-from core.data.containers import IAnalysisJobAnalysis
+from core.container.analysis import IAnalysisJobAnalysis
 from core.data.interfaces import IProjectChangeNotify
 
 FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
+
+
 
 
 class AnalysisResultsDock(EDockWidget):

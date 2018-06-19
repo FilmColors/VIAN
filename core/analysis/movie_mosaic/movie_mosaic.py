@@ -1,18 +1,12 @@
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
-from core.data.containers import *
-from core.analysis.colorimetry.hilbert import *
-from core.analysis.colorimetry.computation import *
-from core.gui.ewidgetbase import EGraphicsView #, GraphicsViewDockWidget
-
-import numpy as np
-from typing import List
+from core.container.project import *
 import cv2
-import webbrowser
-from core.data.computation import ms_to_frames
+import numpy as np
 from PyQt5 import uic
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 
+from core.analysis.colorimetry.computation import *
+from core.data.computation import ms_to_frames
+from core.container.project import *
+from core.gui.ewidgetbase import EGraphicsView  # , GraphicsViewDockWidget
 
 
 class MovieMosaicAnalysis(IAnalysisJob):

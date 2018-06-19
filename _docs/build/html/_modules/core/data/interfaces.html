@@ -170,6 +170,30 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/nodes.html">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/plugins.html">Plug-Ins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DevelopersGuide.html#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a><ul>
@@ -268,15 +292,17 @@
            <div itemprop="articleBody">
             
   <h1>Source code for core.data.interfaces</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">randint</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">In this Module, all interfaces used by VIAN are defined. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="k">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSlot</span>
 <span class="c1">#</span>
 <span class="c1"># from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER</span>
 <span class="n">VisualizationTab</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;VisualizationTab&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;widget&quot;</span><span class="p">,</span> <span class="s2">&quot;use_filter&quot;</span><span class="p">,</span> <span class="s2">&quot;controls&quot;</span><span class="p">])</span>
-
-
 
 <span class="k">class</span> <span class="nc">IProjectChangeNotify</span><span class="p">():</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dummy</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -458,7 +484,7 @@
         <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="IAnalysisJob"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob">[docs]</a><span class="k">class</span> <span class="nc">IAnalysisJob</span><span class="p">(</span><span class="n">ILiveWidgetExposing</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob">[docs]</a><span class="k">class</span> <span class="nc">IAnalysisJob</span><span class="p">(</span><span class="n">ILiveWidgetExposing</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is the BaseClass for all Analyses. </span>
 <span class="sd">    Subclass it to implement your own Analyses. </span>
@@ -485,7 +511,7 @@
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-<div class="viewcode-block" id="IAnalysisJob.prepare"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.prepare"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A step that should be performed in the main-thread before the processing takes place. </span>
 <span class="sd">        This is a good point to fetch all necessary data from the project and pack it to your needs.</span>
@@ -499,7 +525,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;prepare not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.process"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.process"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The Processing function, this will be executed in a seperate thread. </span>
 <span class="sd">        Make sure to **NOT** use the ProjectContainers within this Operation.</span>
@@ -517,7 +543,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;get_name not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.modify_project"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.modify_project">[docs]</a>    <span class="k">def</span> <span class="nf">modify_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.modify_project"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.modify_project">[docs]</a>    <span class="k">def</span> <span class="nf">modify_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">main_window</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If your Analysis should perform any modifications to the project, except storing the analysis,</span>
 <span class="sd">        this is the place to perform them. </span>
@@ -528,7 +554,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.get_parameter_widget"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.get_parameter_widget">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameter_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.get_parameter_widget"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.get_parameter_widget">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameter_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If your Analysis has additional parameters which can be set by the User, Subclass the ParameterWidget, </span>
 <span class="sd">        and return it in this Function. </span>
@@ -537,7 +563,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ParameterWidget</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.get_visualization"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.get_visualization">[docs]</a>    <span class="k">def</span> <span class="nf">get_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">result_path</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">main_window</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.get_visualization"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.get_visualization">[docs]</a>    <span class="k">def</span> <span class="nf">get_visualization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">result_path</span><span class="p">,</span> <span class="n">data_path</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">main_window</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function is called by VIAN if the User wants to display the complete Visualization of the Data. </span>
 <span class="sd">        While you may essentially use any type Type of Visualization, you should either: </span>
@@ -561,7 +587,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;get_name not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.get_preview"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.get_preview">[docs]</a>    <span class="k">def</span> <span class="nf">get_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.get_preview"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.get_preview">[docs]</a>    <span class="k">def</span> <span class="nf">get_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The Preview should be a visual representation of your analysis data, which can be displayed in the </span>
 <span class="sd">        Inspector, when the Analysis is selected. </span>
@@ -576,14 +602,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.get_source_types"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.get_source_types">[docs]</a>    <span class="k">def</span> <span class="nf">get_source_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.get_source_types"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.get_source_types">[docs]</a>    <span class="k">def</span> <span class="nf">get_source_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of allowed type enum-entries</span>
 <span class="sd">        :return: </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_types</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.to_database"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.to_database">[docs]</a>    <span class="k">def</span> <span class="nf">to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_data</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.to_database"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.to_database">[docs]</a>    <span class="k">def</span> <span class="nf">to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Base Method which should return a dict of byte serialized </span>
 <span class="sd">        nump arrays if necessary, or a dict of simple key value pairs.</span>
@@ -595,7 +621,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.from_database"><a class="viewcode-back" href="../../../dev_guide/analyses.html#core.data.interfaces.IAnalysisJob.from_database">[docs]</a>    <span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_data</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.from_database"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.from_database">[docs]</a>    <span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The inverse of the to_database() implementation. </span>
 
@@ -609,7 +635,7 @@
         <span class="k">pass</span></div>
 
 
-<span class="k">class</span> <span class="nc">ParameterWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterWidget"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.ParameterWidget">[docs]</a><span class="k">class</span> <span class="nc">ParameterWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The ParameterWidget is an additional widget which will be added to the Analysis Dialog. </span>
 <span class="sd">    Make sure to override the ParameterWidget.get_parameters() function to return the parameters in your </span>
@@ -621,13 +647,13 @@
 
 
 
-    <span class="k">def</span> <span class="nf">get_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterWidget.get_parameters"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.ParameterWidget.get_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is called on_analyse, bundles your parameters and hands them to the IAnalysisJob.process()</span>
 <span class="sd">        </span>
 <span class="sd">        :return: A List of Parameters</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
 
 
 <span class="k">class</span> <span class="nc">AutomatedTextSource</span><span class="p">():</span>
@@ -651,9 +677,8 @@
     <span class="k">def</span> <span class="nf">run_concurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;run_concurrent not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">modify_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">sign_progress</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">modify_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">sign_progress</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">main_window</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">pass</span>
-        <span class="c1"># print &quot;modify_project not implemented by&quot;, self</span>
 
     <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">aborted</span> <span class="o">=</span> <span class="kc">True</span>

@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLa
 from PyQt5.QtGui import QIcon, QFont
 
 from core.data.computation import *
-from core.data.containers import AnnotationLayer, Annotation
+from core.container.annotation import Annotation, AnnotationLayer
 from core.data.enums import *
 from core.gui.perspectives import Perspective
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending, IConcurrentJob

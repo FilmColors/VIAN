@@ -1,14 +1,11 @@
-from PyQt5.QtWidgets import *
-from PyQt5 import uic
-from core.gui.ewidgetbase import EDockWidget
-from core.data.interfaces import IProjectChangeNotify
-from core.data.containers import *
-from core.data.computation import ms_to_string, numpy_to_qt_image
-from core.data.enums import MovieSource
-from core.node_editor.node_editor import *
+from core.container.media_objects import AbstractMediaObject
+from core.data.computation import ms_to_string
 from core.data.tracking import BasicTrackingJob
-from core.gui.perspectives import Perspective
 from core.gui.context_menu import open_context_menu
+from core.gui.perspectives import Perspective
+from core.node_editor.node_editor import *
+
+from PyQt5 import QtCore
 
 class Inspector(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):

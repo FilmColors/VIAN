@@ -1,19 +1,14 @@
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
-from core.data.containers import *
-from core.analysis.colorimetry.hilbert import *
-from core.analysis.colorimetry.computation import *
-from core.gui.ewidgetbase import EHtmlDisplay
-
+from core.container.project import *
 import numpy as np
-from typing import List
-import cv2
-import webbrowser
-from core.data.computation import ms_to_frames
+import pyqtgraph as pg
 from PyQt5 import uic
-from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-import pyqtgraph as pg
+from core.analysis.colorimetry.computation import *
+from core.analysis.colorimetry.hilbert import *
+from core.data.computation import ms_to_frames
+from core.container.project import *
+
 
 class ColometricsAnalysis(IAnalysisJob):
 

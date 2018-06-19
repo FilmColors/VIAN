@@ -24,25 +24,13 @@
     )
     
 """
-
-
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
-from core.data.containers import *
-from core.analysis.colorimetry.computation import *
-
-import numpy as np
-from typing import List
-import cv2
-from core.data.computation import ms_to_frames
-from PyQt5 import uic
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-
-from core.visualization.image_plots import *
-from core.visualization.feature_plot import *
-
-
 import pyqtgraph as pg
+
+from core.container.segmentation import Segment
+from core.container.project import *
+from core.visualization.feature_plot import *
+from core.visualization.image_plots import *
+
 
 #region #--- Analysis ---
 class FilmColorsPipelineAnalysis(IAnalysisJob):

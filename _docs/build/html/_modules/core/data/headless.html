@@ -1,0 +1,468 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>core.data.headless &mdash; VIAN 0.4.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VIAN
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../UserGuide.html">User’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../user_interface/user_interface.html">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/inspector.html">Inspector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/outliner.html">Outliner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/perspectives.html">Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#player-perspective">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#id1">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#screenshots-perspective">Screenshots Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../user_interface/perspectives.html#node-scripting-perspective">Node Scripting Perspective</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../user_interface/timeline.html">Timeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../step_by_step/step_by_step.html">Step-by-Step Guides</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/project_management/project_management.html">Vian Projects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/create_project.html">Creating new Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/project_templates.html">Project Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/project_management/backups.html">Backups</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/segmentation/segmentation.html">Segmentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/merging_segments.html">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/segmentation/auto_segmentation.html">Auto Segmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/import_screenshots.html">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/analyses/analyses.html">Analyses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/running_analyses.html">Running Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/viewing_analyses.html">Viewing Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/colormetry.html">Colormetry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/analyses/analyses_list.html">All Analyses of VIAN</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/experiments/experiments.html">Experiments</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/player/player.html">VIAN’s Player</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../step_by_step/player/changing_subtitles.html">Changing Subtitles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../step_by_step/vian_corpus/vian_corpus.html">VIAN Corpus</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugins/plugins.html">Plugins</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../plugins/imdb_finder/imdb_finder.html">IMDb Finder</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../DevelopersGuide.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/analyses.html">IAnalysisJob</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/analyses.html#functionality">Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/analyses.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_guide/plugins.html">Plug-Ins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DevelopersGuide.html#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dev_guide/data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dev_guide/data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/latest.html">VIAN 0.5.0 - 0.5.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/latest.html#attaching-files-to-annotations-and-segments">Attaching Files to Annotations and Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-visualization">Analyses - Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#backups">Backups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_5/0_4_5.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whats_new/0_4_2/0_4_2.html#extensive-list">Extensive List</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VIAN</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>core.data.headless</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for core.data.headless</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This Module enables a headless opening and closing of VIANProjects, </span>
+<span class="sd">this it can be used to perform operations in a batch process without having the gui enabled. </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">core.container.project</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">core.data.settings</span> <span class="k">import</span> <span class="n">UserSettings</span>
+<span class="kn">from</span> <span class="nn">core.data.project_streaming</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">core.gui.main_window</span> <span class="k">import</span> <span class="n">VERSION</span>
+
+<span class="k">class</span> <span class="nc">HeadlessUserSettings</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PROJECT_FILE_EXTENSION</span> <span class="o">=</span> <span class="s2">&quot;.eext&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SCREENSHOTS_STATIC_SAVE</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">class</span> <span class="nc">HeadlessMainWindow</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HeadlessMainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thread_pool</span> <span class="o">=</span> <span class="n">QThreadPool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numpy_data_manager</span> <span class="o">=</span> <span class="n">NumpyDataManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_streamer</span> <span class="o">=</span> <span class="n">ProjectStreamerShelve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">VERSION</span>
+
+
+    <span class="k">def</span> <span class="nf">print_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">dispatch_on_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">receiver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="load_project_headless"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.headless.load_project_headless">[docs]</a><span class="k">def</span> <span class="nf">load_project_headless</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VIANProject</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads a VIAN project without needing a VIAN instance running by emulating VIAN. </span>
+<span class="sd">    :param path: The path to the project to load</span>
+<span class="sd">    :return: a loaded VIANProject or None if failed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="n">VIANProject</span><span class="p">(</span><span class="n">HeadlessMainWindow</span><span class="p">())</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">inhibit_dispatch</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">load_project</span><span class="p">(</span><span class="n">HeadlessUserSettings</span><span class="p">(),</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">print_all</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">project</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="create_project_headless"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.headless.create_project_headless">[docs]</a><span class="k">def</span> <span class="nf">create_project_headless</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">movie_path</span><span class="p">,</span> <span class="n">screenshots_frame_pos</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">segmentations</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">move_movie</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VIANProject</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a VIANProject without the need of a MainWindow</span>
+<span class="sd">    :param name: name of the project</span>
+<span class="sd">    :param movie_path: path to the movie</span>
+<span class="sd">    :param screenshots_frame_pos: a list of frame positions for the screenshots</span>
+<span class="sd">    :param segmentations: a list of lists [name, [segments]], each containing [start_ms, end_ms, body]</span>
+<span class="sd">    :param is_eaf: if the segmentation is a .eaf project</span>
+<span class="sd">    :param move_movie: how to handle the movie file &quot;None&quot;, &quot;move&quot; or &quot;copy&quot;</span>
+<span class="sd">    :return: a VIANProject created from the input or None if failed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">movie_path</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Movie Not found: &quot;</span><span class="p">,</span> <span class="n">movie_path</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">project</span> <span class="o">=</span> <span class="n">VIANProject</span><span class="p">(</span><span class="n">HeadlessMainWindow</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">location</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">location</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">inhibit_dispatch</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">set_movie_path</span><span class="p">(</span><span class="n">movie_path</span><span class="p">)</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">folder</span><span class="p">)</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">create_file_structure</span><span class="p">()</span>
+        <span class="c1"># Import Segmentation</span>
+        <span class="k">if</span> <span class="n">segmentations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">segmentations</span><span class="p">:</span>
+                <span class="n">segmentat</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">create_segmentation</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">segm</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">segmentat</span><span class="o">.</span><span class="n">create_segment2</span><span class="p">(</span><span class="n">segm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">segm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">body</span> <span class="o">=</span> <span class="n">segm</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="c1"># Import Screenshots</span>
+        <span class="k">if</span> <span class="n">screenshots_frame_pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">screenshots_frame_pos</span><span class="p">):</span>
+                <span class="n">project</span><span class="o">.</span><span class="n">create_screenshot</span><span class="p">(</span><span class="s2">&quot;Screenshot_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">frame_pos</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="c1"># Store the project</span>
+        <span class="c1">#TODO</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">store_project</span><span class="p">(</span><span class="n">HeadlessUserSettings</span><span class="p">(),</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">project</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not remove folder: &quot;</span><span class="p">,</span> <span class="n">location</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># p = load_project_headless(&quot;C:/Users/Gaudenz Halter/Documents/VIAN/229_1_1_Jigokumon_1953_BF/229_1_1_Jigokumon_1953_BF.eext&quot;)</span>
+    <span class="n">segmentations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s2">&quot;Main&quot;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="s2">&quot;Hello&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">1001</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="s2">&quot;World&quot;</span><span class="p">]</span>
+            <span class="p">]</span>
+         <span class="p">]</span>
+    <span class="p">]</span>
+    <span class="n">screenshots</span> <span class="o">=</span> <span class="p">[</span><span class="mi">300</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">800</span><span class="p">]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">create_project_headless</span><span class="p">(</span><span class="s2">&quot;TestHeadlessCreation&quot;</span><span class="p">,</span> <span class="s2">&quot;C:/Users/Gaudenz Halter/Documents/VIAN/TestHeadlessCreation/&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;C:/Users/Gaudenz Halter/Desktop/229_1_1_Jigokumon_1953_DVD.mov&quot;</span><span class="p">,</span>
+                                <span class="n">screenshots</span><span class="p">,</span> <span class="n">segmentations</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Gaudenz Halter.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.4.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from core.data.containers import VIANProject, SEGMENT
+from core.container.project import VIANProject, SEGMENT
 from collections import namedtuple
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import *

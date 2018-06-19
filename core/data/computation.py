@@ -1,3 +1,8 @@
+"""
+The Computation Module contains a list of often used operations in VIAN.
+These operations can be of arbitrary type and are not categorized. 
+"""
+
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
 import subprocess
@@ -13,6 +18,15 @@ import shutil
 from zipfile import ZipFile
 
 def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
+    """
+    Converts an Long int MS to a formatted string of type HH:MM:SS:(MS) 
+    
+    :param ms: the ms to convert
+    :param include_ms: if the MS should be included at the end of the string
+    :param include_frame: if the frame should be included at the end
+    :param fps: the fps of the movie to convert the frame if needed
+    :return: A string of selected format
+    """
     ms = int(ms)
     seconds = (ms // 1000) % 60
     minutes = (ms // (1000 * 60)) % 60
@@ -29,6 +43,14 @@ def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
 
 
 def ts_to_ms(hour=0, min=0, sec=0, ms=0):
+    """
+    Converts a Timestamp to miliseconds
+    :param hour: The given hours
+    :param min: The given minutes
+    :param sec: The given Seconds
+    :param ms: The fiven MS
+    :return: A int long MS
+    """
     hour = int(hour)
     min = int(min)
     sec = int(sec)
@@ -70,6 +92,14 @@ def tpl_bgr_to_lch(tpl):
 
 
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
+    """
+    Converts a Numpy Image array to a QTImage
+    :param arr: The nUmpy array 
+    :param cvt: A OpenCV Convertion if needed else NONE
+    :param target_width: The width of the final Image
+    :param with_alpha: if the alpha should be included
+    :return: (qimage, qpixmap) tuple
+    """
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)
 
@@ -88,6 +118,14 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
 
 
 def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
+    """
+    Converts a Numpy Image array to a QPixmap
+    :param arr: The nUmpy array 
+    :param cvt: A OpenCV Convertion if needed else NONE
+    :param target_width: The width of the final Image
+    :param with_alpha: if the alpha should be included
+    :return: QPixmap
+    """
 
     if cvt is not None:
             arr = cv2.cvtColor(arr,cvt)
@@ -107,6 +145,11 @@ def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alph
 
 
 def pixmap_to_numpy(pixmap: QPixmap):
+    """
+    Converts a Pixmap to a numpy array
+    :param pixmap: the Pixmap
+    :return: a numpy array
+    """
     return convertQImageToMat(pixmap.toImage().convertToFormat(QImage.Format_ARGB32_Premultiplied))
 
 
@@ -128,7 +171,12 @@ def convertQImageToMat(qimage):
 
 
 def blend_transparent(background, foreground):
-
+    """
+    Alpha blending of to images
+    :param background: foreground with alpha
+    :param foreground: background with no alpha
+    :return: a blended image
+    """
     alpha = foreground[:,:,3:]
 
     # Convert uint8 to float
@@ -151,6 +199,16 @@ def blend_transparent(background, foreground):
 
 
 def get_mouse_handle_by_location(pos, rect, border_size = 0.1, corner_size = 0.1, min_size = 40):
+    """
+    Returns a String of where the mouse is regarding to some center
+    
+    :param pos: 
+    :param rect: 
+    :param border_size: 
+    :param corner_size: 
+    :param min_size: 
+    :return: 
+    """
     x = pos.x()
     y = pos.y()
     width = rect.width()
@@ -209,10 +267,22 @@ def get_mouse_handle_by_location(pos, rect, border_size = 0.1, corner_size = 0.1
 
 
 def ms_to_frames(time, fps):
+    """
+    Converts Miliseconds to Frames
+    :param time: Time MS
+    :param fps: FPS of the Film
+    :return: returns a FRAME IDX
+    """
     return int(float(time) / 1000 * fps)
 
 
 def frame2ms(frame, fps):
+    """
+    Converts a Frame IDX to MS
+    :param frame: THE Frame IDX
+    :param fps: FPS of the Film
+    :return: Milliseconds of the Frame IDX
+    """
     return int(round(int(frame) * 1000.0 / fps,0))
 
 
@@ -240,6 +310,8 @@ def compare_images(imageA, imageB):
 
 
 def find_time_of_screenshot(movie, shot, start, end):
+
+
     # import the necessary packages
     # construct the argument parse and parse the arguments
 

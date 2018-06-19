@@ -1,3 +1,7 @@
+"""
+In this Module, all interfaces used by VIAN are defined. 
+"""
+
 from random import randint
 from collections import namedtuple
 from PyQt5.QtWidgets import *
@@ -5,8 +9,6 @@ from PyQt5.QtCore import QObject, pyqtSlot
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
 VisualizationTab = namedtuple("VisualizationTab", ["name", "widget", "use_filter", "controls"])
-
-
 
 class IProjectChangeNotify():
     def __init__(self, dummy = None):
@@ -161,6 +163,7 @@ class IHasMediaObject():
 
     def remove_media_object(self, media_object):
         if media_object in self.media_objects:
+            media_object.delete()
             self.media_objects.remove(media_object)
         self.project.dispatch_changed()
 

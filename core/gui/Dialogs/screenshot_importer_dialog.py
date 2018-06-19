@@ -8,7 +8,7 @@ from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ScreenshotImporter
 from core.data.computation import ts_to_ms, ms_to_frames
 from functools import partial
-from core.data.containers import VIANProject
+from core.container.project import VIANProject
 
 
 class DialogScreenshotImport(EDialogWidget):

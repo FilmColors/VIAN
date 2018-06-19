@@ -10,16 +10,13 @@ The Goal is:
 
 """
 
-from core.data.interfaces import IAnalysisJob, ParameterWidget
-from core.data.containers import *
-from core.data.computation import ms_to_frames, numpy_to_pixmap
-
-import webbrowser
 from typing import List
-import cv2
-import numpy as np
 
+from core.data.computation import ms_to_frames, numpy_to_pixmap
+from core.container.project import *
 from core.gui.ewidgetbase import EGraphicsView
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 BARCODE_MODE_BOTH = 0
 BARCODE_MODE_HORIZONTAL = 1
 
@@ -29,7 +26,7 @@ BARCODE_MODE_HORIZONTAL = 1
 
 class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
-        super(BarcodeAnalysisJob, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION],
+        super(BarcodeAnalysisJob, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION, SEGMENT],
                                                  author="Gaudenz Halter",
                                                  version="1.0.0",
                                                  multiple_result=True)
@@ -48,8 +45,8 @@ class BarcodeAnalysisJob(IAnalysisJob):
         # Targets are Segmentations
         for tgt in targets:
             name = tgt.get_name()
-            # Collecting all Segment start and end point in Frame-Indices
 
+            # Collecting all Segment start and end point in Frame-Indices
             segments = []
             if tgt.get_type() == SEGMENTATION:
                 for segm in tgt.segments:
@@ -58,12 +55,11 @@ class BarcodeAnalysisJob(IAnalysisJob):
 
                     segments.append([start, end])
 
+            elif tgt.get_type() == MOVIE_DESCRIPTOR:
+                segments.append([0, ms_to_frames(project.movie_descriptor.duration, fps)])
             else:
-                duration = project.movie_descriptor.duration
-                slice_size = parameters['slize_size']
-                for i in range(int(duration / slice_size)):
-                    segments.append([ms_to_frames(i, fps) * slice_size,
-                                     ms_to_frames(i, fps) * slice_size + slice_size])
+                segments.append([ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps)])
+
             args.append([segments, parameters, movie_path, name])
 
         return args
@@ -91,33 +87,55 @@ class BarcodeAnalysisJob(IAnalysisJob):
         video_capture = cv2.VideoCapture(movie_path)
         width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
 
-        barcode = np.zeros(shape=(len(segments), 3))
-        for idx, segm in enumerate(segments):
-            sign_progress(idx / len(segments))
-            start = segm[0]
-            end   = segm[1]
+        if len(segments) > 1:
+            barcode = np.zeros(shape=(len(segments), 3))
+            for idx, segm in enumerate(segments):
+                sign_progress(idx / len(segments))
+                start = segm[0]
+                end   = segm[1]
 
-            duration = end - start
+                duration = end - start
+                video_capture.set(cv2.CAP_PROP_POS_FRAMES, start)
+                segm_colors = []
 
-            video_capture.set(cv2.CAP_PROP_POS_FRAMES, start)
-            segm_colors = []
-            print(idx, len(segments), duration)
-            # Looping over all Frames of the Segment and
-            # Calculate the Average Color
-            for i in range(duration):
-                if i % resolution == 0:
-                    video_capture.set(cv2.CAP_PROP_POS_FRAMES, i + start)
+                # Looping over all Frames of the Segment and
+                # Calculate the Average Color
+                for i in range(duration):
                     ret, frame = video_capture.read()
-                else:
-                    continue
+                    if i % resolution != 0:
+                        continue
 
-                if frame is None:
-                    break
-
-                # segm_colors[i] = np.mean(frame, axis=(0,1))
-                segm_colors.append(np.mean(frame, axis=(0,1)))
+                    # video_capture.set(cv2.CAP_PROP_POS_FRAMES, i + start)
+                    # ret, frame = video_capture.read()
+                    segm_colors.append(np.mean(frame, axis=(0,1)))
 
             barcode[idx] = np.mean(np.array(segm_colors), axis=0)
+        else:
+            barcode = np.zeros(shape=(int((segments[0][1] - segments[0][0]) / resolution), 3))
+            for idx, segm in enumerate(segments):
+
+                start = segm[0]
+                end   = segm[1]
+
+                duration = end - start
+                video_capture.set(cv2.CAP_PROP_POS_FRAMES, start)
+
+                # Looping over all Frames of the Segment and
+                # Calculate the Average Color
+                idx = 0
+                for i in range(duration):
+                    sign_progress(i /duration)
+                    ret, frame = video_capture.read()
+                    if i % resolution != 0:
+                        continue
+
+                    # video_capture.set(cv2.CAP_PROP_POS_FRAMES, i + start)
+                    # ret, frame = video_capture.read()
+                    if idx < barcode.shape[0]:
+                        barcode[idx] = np.mean(frame, axis=(0,1))
+                    else:
+                        print("Out of Bound")
+                    idx += 1
 
         # Creating an IAnalysisJobAnalysis Object that will be handed back to the Main-Thread
         analysis = IAnalysisJobAnalysis(name="Barcode_" + name,
@@ -150,13 +168,6 @@ class BarcodeAnalysisJob(IAnalysisJob):
 
         path  = dir + "/" + result.get_name() + ".png"
         cv2.imwrite(path, image)
-
-        # Modifying the Project by creating a new Layer and a new Annotation
-        layer = project.create_annotation_layer("Barcode", 0, project.movie_descriptor.duration)
-        layer.create_annotation(AnnotationType.Image,
-                                             position = (0, 0),
-                                             size = (image_width, 50),
-                                             resource_path=path)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """

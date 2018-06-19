@@ -1,10 +1,8 @@
+from core.container.project import *
 from PyQt5.QtWidgets import *
-from PyQt5 import uic
+from PyQt5.QtWidgets import *
 
-from core.gui.ewidgetbase import EDockWidget, CreateSegmentationPopup, CreateAnnotationLayerPopup, CreateScreenshotGroupPopup
-from core.data.interfaces import IProjectChangeNotify
-from core.data.containers import *
-from core.data.enums import MovieSource, TargetContainerType
+from core.container.project import *
 
 TGT_ENTRIES = [ 'All',
                 "All Segments",

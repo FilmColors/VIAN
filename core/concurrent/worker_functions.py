@@ -1,14 +1,12 @@
-from core.data.computation import *
-from core.data.containers import *
-from core.data.interfaces import IConcurrentJob
-from core.gui.ewidgetbase import EGraphicsView
-from core.gui.main_window import *
-from collections import namedtuple
-from PyQt5 import QtGui
-from core.analysis.colorimetry.computation import calculate_histogram
-from PyQt5.QtCore import QRect, Qt
 import json
 
+from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
+
+from core.gui.main_window import *
+from core.data.interfaces import IConcurrentJob
+from core.data.computation import *
+from core.container.screenshot import *
 
 
 def create_screenshot(args, sign_progress):

@@ -1,3 +1,7 @@
+"""
+In this File the ENUMS used in VIAN are defined. 
+
+"""
 from enum import Enum
 
 

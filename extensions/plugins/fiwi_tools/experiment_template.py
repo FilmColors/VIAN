@@ -1,7 +1,8 @@
 import os
 import csv
 import json
-from core.data.containers import EXPERIMENT, Experiment, Vocabulary, VocabularyWord, ClassificationObject, VIANProject
+from core.container.project import EXPERIMENT, VIANProject
+from core.container.experiment import Vocabulary, VocabularyWord, ClassificationObject, Experiment
 from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
 from core.gui.ewidgetbase import *
 

@@ -14,7 +14,7 @@ from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
 
 from core.data.computation import *
-from core.data.containers import Screenshot
+from core.container.screenshot import Screenshot
 from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter

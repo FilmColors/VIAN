@@ -1,9 +1,13 @@
+"""
+Contains all Export Classes and Export Functions of VIAN
+"""
+
 import cv2
 import numpy as np
 from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
-from core.data.containers import *
+from core.container.project import *
 import os
 import shutil
 
@@ -12,6 +16,9 @@ def zip_project(output_file, project_folder):
 
 
 class ScreenshotsExporter():
+    """
+    A Class that is able to export Screenshots from a Project
+    """
     def __init__(self, settings, project, naming):
         self.settings = settings
         self.project = project
@@ -49,6 +56,9 @@ class ScreenshotsExporter():
 
 
 class SegmentationExporter(IConcurrentJob):
+    """
+    A Class that is able to export a Segmentation into CSV
+    """
     def __init__(self, file_path, export_ms, export_formated, export_formated_ms, export_formated_frame,
                  export_text, export_frame, t_start, t_end, t_duration, fps):
         self.file_path = file_path
@@ -171,6 +181,14 @@ class JsonExporter():
 #             return result
 
 def build_file_name(naming, screenshot, movie_descriptor):
+    """
+    Generates a Filename for the Screenshots by a given naming convention
+    
+    :param naming: 
+    :param screenshot: 
+    :param movie_descriptor: 
+    :return: 
+    """
     file_name = "/"
 
     for i, name in enumerate(naming):

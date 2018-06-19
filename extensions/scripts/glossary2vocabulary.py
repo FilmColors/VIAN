@@ -1,5 +1,6 @@
 import csv
-from core.data.containers import Vocabulary, VocabularyWord
+from core.container.experiment import Vocabulary, VocabularyWord
+
 
 class Converter():
     def __init__(self, input_path):

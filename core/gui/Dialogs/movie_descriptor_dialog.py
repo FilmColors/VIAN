@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox
 from PyQt5 import uic
-from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
+# from core.data.importers import import_elan_segmentation, get_elan_segmentation_identifiers
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.enums import MovieSource
 import os
 
+# TODO OBSOLETE
 class MovieDescriptorDialog(EDialogWidget):
     def __init__(self, parent, movie_descriptor, def_name = None, def_year = None):
         super(MovieDescriptorDialog, self).__init__(parent, parent)

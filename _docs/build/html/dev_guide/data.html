@@ -1,0 +1,886 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Package &mdash; VIAN 0.4.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="VIAN 0.4.0 documentation" href="../index.html"/>
+        <link rel="up" title="Developer’s Guide" href="../DevelopersGuide.html"/>
+        <link rel="next" title="What’s New" href="../whatsnew.html"/>
+        <link rel="prev" title="Segmentation Module" href="containers/segmentation.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VIAN
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../UserGuide.html">User’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_interface/user_interface.html">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/inspector.html">Inspector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/outliner.html">Outliner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/perspectives.html">Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#player-perspective">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#id1">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#screenshots-perspective">Screenshots Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_interface/perspectives.html#node-scripting-perspective">Node Scripting Perspective</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../user_interface/timeline.html">Timeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../step_by_step/step_by_step.html">Step-by-Step Guides</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/project_management/project_management.html">Vian Projects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/create_project.html">Creating new Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/project_templates.html">Project Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/project_management/backups.html">Backups</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/segmentation/segmentation.html">Segmentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/merging_segments.html">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/segmentation/auto_segmentation.html">Auto Segmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/import_screenshots.html">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/analyses/analyses.html">Analyses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/analyses/running_analyses.html">Running Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/analyses/viewing_analyses.html">Viewing Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/analyses/colormetry.html">Colormetry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/analyses/analyses_list.html">All Analyses of VIAN</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/experiments/experiments.html">Experiments</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/player/player.html">VIAN’s Player</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../step_by_step/player/changing_subtitles.html">Changing Subtitles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../step_by_step/vian_corpus/vian_corpus.html">VIAN Corpus</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/plugins.html">Plugins</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../plugins/imdb_finder/imdb_finder.html">IMDb Finder</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../DevelopersGuide.html">Developer’s Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="analyses.html">IAnalysisJob</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="analyses.html#functionality">Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="analyses.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins.html">Plug-Ins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../DevelopersGuide.html#documentation">Documentation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../whats_new/latest.html">VIAN 0.5.0 - 0.5.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/latest.html#attaching-files-to-annotations-and-segments">Attaching Files to Annotations and Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whats_new/latest.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../whats_new/0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_5/0_4_5.html#analyses-visualization">Analyses - Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_5/0_4_5.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_5/0_4_5.html#backups">Backups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_5/0_4_5.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_5/0_4_5.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_5/0_4_5.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_2/0_4_2.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_2/0_4_2.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_2/0_4_2.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../whats_new/0_4_2/0_4_2.html#extensive-list">Extensive List</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VIAN</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../DevelopersGuide.html">Developer’s Guide</a> &raquo;</li>
+        
+      <li>Data Package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dev_guide/data.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-package">
+<span id="id1"></span><h1>Data Package<a class="headerlink" href="#data-package" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="module-core.data.computation">
+<span id="computation-module"></span><h2>Computation Module<a class="headerlink" href="#module-core.data.computation" title="Permalink to this headline">¶</a></h2>
+<p>The Computation Module contains a list of often used operations in VIAN.
+These operations can be of arbitrary type and are not categorized.</p>
+<dl class="function">
+<dt id="core.data.computation.blend_transparent">
+<code class="descclassname">core.data.computation.</code><code class="descname">blend_transparent</code><span class="sig-paren">(</span><em>background</em>, <em>foreground</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#blend_transparent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.blend_transparent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alpha blending of to images
+:param background: foreground with alpha
+:param foreground: background with no alpha
+:return: a blended image</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.convertQImageToMat">
+<code class="descclassname">core.data.computation.</code><code class="descname">convertQImageToMat</code><span class="sig-paren">(</span><em>qimage</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#convertQImageToMat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.convertQImageToMat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a QImage into an opencv MAT format</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.frame2ms">
+<code class="descclassname">core.data.computation.</code><code class="descname">frame2ms</code><span class="sig-paren">(</span><em>frame</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#frame2ms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.frame2ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Frame IDX to MS
+:param frame: THE Frame IDX
+:param fps: FPS of the Film
+:return: Milliseconds of the Frame IDX</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.get_mouse_handle_by_location">
+<code class="descclassname">core.data.computation.</code><code class="descname">get_mouse_handle_by_location</code><span class="sig-paren">(</span><em>pos</em>, <em>rect</em>, <em>border_size=0.1</em>, <em>corner_size=0.1</em>, <em>min_size=40</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#get_mouse_handle_by_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.get_mouse_handle_by_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a String of where the mouse is regarding to some center</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pos</strong> – </li>
+<li><strong>rect</strong> – </li>
+<li><strong>border_size</strong> – </li>
+<li><strong>corner_size</strong> – </li>
+<li><strong>min_size</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.ms_to_frames">
+<code class="descclassname">core.data.computation.</code><code class="descname">ms_to_frames</code><span class="sig-paren">(</span><em>time</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#ms_to_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.ms_to_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts Miliseconds to Frames
+:param time: Time MS
+:param fps: FPS of the Film
+:return: returns a FRAME IDX</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.ms_to_string">
+<code class="descclassname">core.data.computation.</code><code class="descname">ms_to_string</code><span class="sig-paren">(</span><em>ms</em>, <em>include_ms=False</em>, <em>include_frame=False</em>, <em>fps=24</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#ms_to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.ms_to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an Long int MS to a formatted string of type HH:MM:SS:(MS)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ms</strong> – the ms to convert</li>
+<li><strong>include_ms</strong> – if the MS should be included at the end of the string</li>
+<li><strong>include_frame</strong> – if the frame should be included at the end</li>
+<li><strong>fps</strong> – the fps of the movie to convert the frame if needed</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A string of selected format</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.numpy_to_pixmap">
+<code class="descclassname">core.data.computation.</code><code class="descname">numpy_to_pixmap</code><span class="sig-paren">(</span><em>arr</em>, <em>cvt=4</em>, <em>target_width=None</em>, <em>with_alpha=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#numpy_to_pixmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.numpy_to_pixmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Numpy Image array to a QPixmap
+:param arr: The nUmpy array 
+:param cvt: A OpenCV Convertion if needed else NONE
+:param target_width: The width of the final Image
+:param with_alpha: if the alpha should be included
+:return: QPixmap</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.numpy_to_qt_image">
+<code class="descclassname">core.data.computation.</code><code class="descname">numpy_to_qt_image</code><span class="sig-paren">(</span><em>arr</em>, <em>cvt=4</em>, <em>target_width=None</em>, <em>with_alpha=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#numpy_to_qt_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.numpy_to_qt_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Numpy Image array to a QTImage
+:param arr: The nUmpy array 
+:param cvt: A OpenCV Convertion if needed else NONE
+:param target_width: The width of the final Image
+:param with_alpha: if the alpha should be included
+:return: (qimage, qpixmap) tuple</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.pixmap_to_numpy">
+<code class="descclassname">core.data.computation.</code><code class="descname">pixmap_to_numpy</code><span class="sig-paren">(</span><em>pixmap: PyQt5.QtGui.QPixmap</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#pixmap_to_numpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.pixmap_to_numpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Pixmap to a numpy array
+:param pixmap: the Pixmap
+:return: a numpy array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.tpl_bgr_to_lab">
+<code class="descclassname">core.data.computation.</code><code class="descname">tpl_bgr_to_lab</code><span class="sig-paren">(</span><em>bgr</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#tpl_bgr_to_lab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.tpl_bgr_to_lab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a BGR Color Tuple to a uint8 Lab Color Tuple using OpenCV Conversion.
+:param tpl: Input Tuple BGR
+:return: Output Tuple Lab</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.tpl_bgr_to_lch">
+<code class="descclassname">core.data.computation.</code><code class="descname">tpl_bgr_to_lch</code><span class="sig-paren">(</span><em>tpl</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#tpl_bgr_to_lch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.tpl_bgr_to_lch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a BGR Color Tuple to a float32 Lab Color Tuple using OpenCV Conversion.
+:param tpl: Input Tuple BGR
+:return: Output Tuple LCH, float32</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.ts_to_ms">
+<code class="descclassname">core.data.computation.</code><code class="descname">ts_to_ms</code><span class="sig-paren">(</span><em>hour=0</em>, <em>min=0</em>, <em>sec=0</em>, <em>ms=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#ts_to_ms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.ts_to_ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Timestamp to miliseconds
+:param hour: The given hours
+:param min: The given minutes
+:param sec: The given Seconds
+:param ms: The fiven MS
+:return: A int long MS</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-core.data.enums">
+<span id="enums-module"></span><h2>Enums Module<a class="headerlink" href="#module-core.data.enums" title="Permalink to this headline">¶</a></h2>
+<p>In this File the ENUMS used in VIAN are defined.</p>
+<dl class="class">
+<dt id="core.data.enums.AnnotationType">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">AnnotationType</code><a class="reference internal" href="../_modules/core/data/enums.html#AnnotationType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.AnnotationType" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.AspectRatio">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">AspectRatio</code><a class="reference internal" href="../_modules/core/data/enums.html#AspectRatio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.AspectRatio" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.ImageType">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">ImageType</code><a class="reference internal" href="../_modules/core/data/enums.html#ImageType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.ImageType" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.MediaObjectType">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">MediaObjectType</code><a class="reference internal" href="../_modules/core/data/enums.html#MediaObjectType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.MediaObjectType" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.MovieSource">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">MovieSource</code><a class="reference internal" href="../_modules/core/data/enums.html#MovieSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.MovieSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.ProjectType">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">ProjectType</code><a class="reference internal" href="../_modules/core/data/enums.html#ProjectType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.ProjectType" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.ScreenshotNamingConventionOptions">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">ScreenshotNamingConventionOptions</code><a class="reference internal" href="../_modules/core/data/enums.html#ScreenshotNamingConventionOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.ScreenshotNamingConventionOptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.SegmentCreationMode">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">SegmentCreationMode</code><a class="reference internal" href="../_modules/core/data/enums.html#SegmentCreationMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.SegmentCreationMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the Method hwo the Segment is created</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.TargetContainerType">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">TargetContainerType</code><a class="reference internal" href="../_modules/core/data/enums.html#TargetContainerType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.TargetContainerType" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-core.data.exporters">
+<span id="exporter-module"></span><h2>Exporter Module<a class="headerlink" href="#module-core.data.exporters" title="Permalink to this headline">¶</a></h2>
+<p>Contains all Export Classes and Export Functions of VIAN</p>
+<dl class="class">
+<dt id="core.data.exporters.ScreenshotsExporter">
+<em class="property">class </em><code class="descclassname">core.data.exporters.</code><code class="descname">ScreenshotsExporter</code><span class="sig-paren">(</span><em>settings</em>, <em>project</em>, <em>naming</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/exporters.html#ScreenshotsExporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.exporters.ScreenshotsExporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Class that is able to export Screenshots from a Project</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.exporters.SegmentationExporter">
+<em class="property">class </em><code class="descclassname">core.data.exporters.</code><code class="descname">SegmentationExporter</code><span class="sig-paren">(</span><em>file_path</em>, <em>export_ms</em>, <em>export_formated</em>, <em>export_formated_ms</em>, <em>export_formated_frame</em>, <em>export_text</em>, <em>export_frame</em>, <em>t_start</em>, <em>t_end</em>, <em>t_duration</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/exporters.html#SegmentationExporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.exporters.SegmentationExporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Class that is able to export a Segmentation into CSV</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.exporters.build_file_name">
+<code class="descclassname">core.data.exporters.</code><code class="descname">build_file_name</code><span class="sig-paren">(</span><em>naming</em>, <em>screenshot</em>, <em>movie_descriptor</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/exporters.html#build_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.exporters.build_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a Filename for the Screenshots by a given naming convention</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>naming</strong> – </li>
+<li><strong>screenshot</strong> – </li>
+<li><strong>movie_descriptor</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="module-core.data.headless"></span><p>This Module enables a headless opening and closing of VIANProjects, 
+this it can be used to perform operations in a batch process without having the gui enabled.</p>
+<dl class="function">
+<dt id="core.data.headless.create_project_headless">
+<code class="descclassname">core.data.headless.</code><code class="descname">create_project_headless</code><span class="sig-paren">(</span><em>name</em>, <em>location</em>, <em>movie_path</em>, <em>screenshots_frame_pos=None</em>, <em>segmentations=None</em>, <em>move_movie='None'</em><span class="sig-paren">)</span> &#x2192; core.container.project.VIANProject<a class="reference internal" href="../_modules/core/data/headless.html#create_project_headless"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.headless.create_project_headless" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a VIANProject without the need of a MainWindow
+:param name: name of the project
+:param movie_path: path to the movie
+:param screenshots_frame_pos: a list of frame positions for the screenshots
+:param segmentations: a list of lists [name, [segments]], each containing [start_ms, end_ms, body]
+:param is_eaf: if the segmentation is a .eaf project
+:param move_movie: how to handle the movie file “None”, “move” or “copy”
+:return: a VIANProject created from the input or None if failed</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.headless.load_project_headless">
+<code class="descclassname">core.data.headless.</code><code class="descname">load_project_headless</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span> &#x2192; core.container.project.VIANProject<a class="reference internal" href="../_modules/core/data/headless.html#load_project_headless"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.headless.load_project_headless" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a VIAN project without needing a VIAN instance running by emulating VIAN. 
+:param path: The path to the project to load
+:return: a loaded VIANProject or None if failed</p>
+</dd></dl>
+
+<span class="target" id="module-core.data.interfaces"></span><p>In this Module, all interfaces used by VIAN are defined.</p>
+<dl class="class">
+<dt id="core.data.interfaces.IAnalysisJob">
+<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">IAnalysisJob</code><span class="sig-paren">(</span><em>name</em>, <em>source_types</em>, <em>help_path=''</em>, <em>author='No Author'</em>, <em>version='0.0.1'</em>, <em>multiple_result=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the BaseClass for all Analyses. 
+Subclass it to implement your own Analyses.</p>
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.from_database">
+<code class="descname">from_database</code><span class="sig-paren">(</span><em>database_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.from_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.from_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>The inverse of the to_database() implementation.</p>
+<p>For numpy arrays:
+numpy_array = numpy.fromstring(byte_array)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.get_parameter_widget">
+<code class="descname">get_parameter_widget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_parameter_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_parameter_widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>If your Analysis has additional parameters which can be set by the User, Subclass the ParameterWidget, 
+and return it in this Function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Subclass of ParameterWidget</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.get_preview">
+<code class="descname">get_preview</code><span class="sig-paren">(</span><em>analysis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_preview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_preview" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Preview should be a visual representation of your analysis data, which can be displayed in the 
+Inspector, when the Analysis is selected.</p>
+<p>Make sure, that the creation of this widget should be fast.
+Easiest would be to render your data into an Image, convert it into a qpixamp and 
+attach it to a QLabel using QLabel(your_pixmap).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A QWidget serving as a preview</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.get_source_types">
+<code class="descname">get_source_types</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_source_types"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_source_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of allowed type enum-entries
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.get_visualization">
+<code class="descname">get_visualization</code><span class="sig-paren">(</span><em>analysis</em>, <em>result_path</em>, <em>data_path</em>, <em>project</em>, <em>main_window</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_visualization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_visualization" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is called by VIAN if the User wants to display the complete Visualization of the Data. 
+While you may essentially use any type Type of Visualization, you should either:</p>
+<ol class="arabic">
+<li><p class="first">subclass QMainWindow and implement your visualization into it.</p>
+</li>
+<li><p class="first">if you use a WebBased visualization use</p>
+<blockquote>
+<div><p>save your visualitations into the results/ directory of the project
+during the IAnalysisJob.modify_project() or IAnalysisJob.process()</p>
+<p>and in this function:
+import webbrowser
+webbrowser.open(url/to/your/result.html)</p>
+</div></blockquote>
+</li>
+</ol>
+<p>When using a QMainWindow, don’t forget to call QMainWindow.show() at the end of your __init__()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</li>
+<li><strong>result_path</strong> – The Path to the results directory of the project</li>
+<li><strong>data_path</strong> – The Path to the data directory of the project</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A QWidget which will be added to the Visualizations Tab</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.modify_project">
+<code class="descname">modify_project</code><span class="sig-paren">(</span><em>project</em>, <em>result</em>, <em>main_window=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.modify_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.modify_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>If your Analysis should perform any modifications to the project, except storing the analysis,
+this is the place to perform them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>project</strong> – The Current Project to perform modifications on</li>
+<li><strong>result</strong> – The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.prepare">
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>project</em>, <em>targets</em>, <em>parameters</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>A step that should be performed in the main-thread before the processing takes place. 
+This is a good point to fetch all necessary data from the project and pack it to your needs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>project</strong> – The current Project</li>
+<li><strong>targets</strong> – The Target IProjectContainer Objects</li>
+<li><strong>parameters</strong> – Additional Parameters as returned from your ParameterWidget.get_parameters()</li>
+<li><strong>fps</strong> – The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A List of packed Data which will be handed to the IAnalysisJob.process()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>args</em>, <em>sign_progress</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Processing function, this will be executed in a seperate thread. 
+Make sure to <strong>NOT</strong> use the ProjectContainers within this Operation.</p>
+<p>Also, for User-Convenience call the sign_progress function regularilly to indicate the current progress:</p>
+<p><em>Example</em>:
+progress is a number E [0.0, … , 1.0]
+sign_progress(0.5)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> – the Arguments as packed in IAnalysisJob.prepare()</li>
+<li><strong>sign_progress</strong> – a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">AnalysisJobAnalysis Object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.to_database">
+<code class="descname">to_database</code><span class="sig-paren">(</span><em>container_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.to_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.to_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base Method which should return a dict of byte serialized 
+nump arrays if necessary, or a dict of simple key value pairs.</p>
+<p>For numpy arrays use following: 
+byte_array = numpy_array.tostring()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.interfaces.ParameterWidget">
+<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">ParameterWidget</code><a class="reference internal" href="../_modules/core/data/interfaces.html#ParameterWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.ParameterWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ParameterWidget is an additional widget which will be added to the Analysis Dialog. 
+Make sure to override the ParameterWidget.get_parameters() function to return the parameters in your 
+desired form.</p>
+<dl class="method">
+<dt id="core.data.interfaces.ParameterWidget.get_parameters">
+<code class="descname">get_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#ParameterWidget.get_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.ParameterWidget.get_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is called on_analyse, bundles your parameters and hands them to the IAnalysisJob.process()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A List of Parameters</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.interfaces.VisualizationTab">
+<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">VisualizationTab</code><span class="sig-paren">(</span><em>name</em>, <em>widget</em>, <em>use_filter</em>, <em>controls</em><span class="sig-paren">)</span><a class="headerlink" href="#core.data.interfaces.VisualizationTab" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="core.data.interfaces.VisualizationTab.controls">
+<code class="descname">controls</code><a class="headerlink" href="#core.data.interfaces.VisualizationTab.controls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.data.interfaces.VisualizationTab.name">
+<code class="descname">name</code><a class="headerlink" href="#core.data.interfaces.VisualizationTab.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.data.interfaces.VisualizationTab.use_filter">
+<code class="descname">use_filter</code><a class="headerlink" href="#core.data.interfaces.VisualizationTab.use_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.data.interfaces.VisualizationTab.widget">
+<code class="descname">widget</code><a class="headerlink" href="#core.data.interfaces.VisualizationTab.widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<ul class="simple">
+<li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li>:ref:<a href="#id2"><span class="problematic" id="id3">`</span></a>search`cd _docs</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../whatsnew.html" class="btn btn-neutral float-right" title="What’s New" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="containers/segmentation.html" class="btn btn-neutral" title="Segmentation Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Gaudenz Halter.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

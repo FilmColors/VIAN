@@ -1,16 +1,10 @@
-import os
+from PyQt5 import QtWidgets, QtCore
 
-import numpy as np
-from PyQt5 import QtWidgets, uic, QtCore, QtGui
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QPushButton
-
-from core.data.computation import ms_to_string, numpy_to_qt_image
-from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
-from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup, TextEditPopup
-from core.data.containers import *
+from core.data.computation import ms_to_string
+from core.container.project import *
 from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
+from core.gui.ewidgetbase import ImagePreviewPopup, TextEditPopup
 
 
 class TimelineContainer(EDockWidget):
@@ -1876,6 +1870,8 @@ class SelectorContextMenu(QtWidgets.QMenu):
     new_segment = pyqtSignal(list, object)
     new_segmentation = pyqtSignal()
     new_layer = pyqtSignal(list)
+
+    # noinspection PyUnresolvedReferences
     def __init__(self, parent, pos, selector):
         super(SelectorContextMenu, self).__init__(parent)
         self.selector = selector

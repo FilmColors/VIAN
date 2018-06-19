@@ -1,15 +1,13 @@
+"""
+This File contains all classes that are related to Importing into VIAN. 
+"""
+
 import csv
-import os
 import pickle
-import glob
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
-import numpy as np
-
-from core.data.containers import *
-from core.data.interfaces import IConcurrentJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import *
+from core.container.analysis import IAnalysisJobAnalysis
 
 
 class ELANProjectImporter():

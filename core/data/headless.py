@@ -1,4 +1,10 @@
-from core.data.containers import *
+"""
+This Module enables a headless opening and closing of VIANProjects, 
+this it can be used to perform operations in a batch process without having the gui enabled. 
+
+"""
+
+from core.container.project import *
 from core.data.settings import UserSettings
 from core.data.project_streaming import *
 from core.gui.main_window import VERSION

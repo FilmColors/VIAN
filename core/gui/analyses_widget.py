@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QPushButton, QTreeWidgetItem, QLineEdit, QMainWindow
 from PyQt5.QtGui import QFont
 
 from core.data.computation import ms_to_string
-from core.data.containers import *
+from core.container.project import *
 from core.data.interfaces import IProjectChangeNotify, IAnalysisJob
 
 from .ewidgetbase import EDockWidget, EDialogWidget

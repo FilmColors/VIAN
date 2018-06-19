@@ -172,6 +172,30 @@
 <li class="toctree-l2"><a class="reference internal" href="nodes.html">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugins.html">Plug-Ins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../DevelopersGuide.html#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a><ul>
@@ -404,7 +428,7 @@ webbrowser.open(url/to/your/result.html)</p>
 
 <dl class="method">
 <dt id="core.data.interfaces.IAnalysisJob.modify_project">
-<code class="descname">modify_project</code><span class="sig-paren">(</span><em>project</em>, <em>result</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.modify_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.modify_project" title="Permalink to this definition">¶</a></dt>
+<code class="descname">modify_project</code><span class="sig-paren">(</span><em>project</em>, <em>result</em>, <em>main_window=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.modify_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.modify_project" title="Permalink to this definition">¶</a></dt>
 <dd><p>If your Analysis should perform any modifications to the project, except storing the analysis,
 this is the place to perform them.</p>
 <table class="docutils field-list" frame="void" rules="none">

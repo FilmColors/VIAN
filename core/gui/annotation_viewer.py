@@ -5,12 +5,12 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QTreeWidgetItem, QDialog
 
 from core.data.computation import ms_to_string
-from core.data.containers import Annotation
+from core.container.annotation import Annotation
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import EDialogWidget
 from core.gui.ewidgetbase import EDockWidget
 
-
+#TODO Obsolete
 class NewLayerDialog(EDialogWidget):
     def __init__(self, parent, t_start, t_end):
         super(NewLayerDialog, self).__init__(parent)
@@ -47,7 +47,7 @@ class NewLayerDialog(EDialogWidget):
         if int(self.text_Start.text()) > int(self.text_End.text()):
             self.text_End.setText(self.text_Start.text())
 
-
+#TODO OBSOLETE
 class EditLayerDialog(QDialog):
     def __init__(self, parent, annotation):
         super(EditLayerDialog, self).__init__(parent)

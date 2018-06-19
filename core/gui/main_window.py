@@ -24,7 +24,6 @@ from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.exporters import *
-from core.data.tools import *
 from core.concurrent.auto_segmentation import *
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -520,8 +519,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None:
             if self.colormetry_job is not None:
                 self.colormetry_job.abort()
+                self.project.colormetry_analysis.clear()
             self.timeline.timeline.set_colormetry_progress(0.0)
-            self.project.colormetry_analysis.clear()
+
 
     #region WidgetCreation
 

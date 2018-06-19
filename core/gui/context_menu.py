@@ -1,14 +1,8 @@
-import os
-
-from PyQt5 import uic
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QMainWindow, QMenu, QFileDialog
-from core.data.enums import *
-from core.data.computation import parse_file_path
-from core.data.containers import *
-
+from core.container.media_objects import AbstractMediaObject
 from core.corpus.shared.entities import DBProject
 from core.corpus.client.corpus_client import CorpusClient
+from core.container.project import *
+
 
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):
 
@@ -589,7 +583,8 @@ class MediaObjectContextMenu(ContextMenu):
         try:
             for obj in self.media_object:
                 obj.container.remove_media_object(obj)
-        except:
+        except Exception as e:
+            print(e)
             pass
 
 

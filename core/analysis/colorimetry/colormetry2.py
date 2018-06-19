@@ -1,4 +1,4 @@
-from core.data.containers import VIANProject
+from core.container.project import VIANProject
 from core.data.interfaces import IConcurrentJob
 from core.analysis.colorimetry.computation import calculate_histogram
 from core.data.computation import frame2ms, ms_to_frames
