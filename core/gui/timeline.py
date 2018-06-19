@@ -1890,7 +1890,7 @@ class SelectorContextMenu(QtWidgets.QMenu):
                 self.action_add_segment.triggered.connect(self.add_segment)
 
         self.true_end = self.selector.end
-        if self.selector.width() < 10:
+        if self.selector.width() < 20:
             self.selector.end = self.selector.start + 100 * self.timeline.scale
 
         self.action_add_layer = self.addAction("New Annotation Layer")
@@ -1906,16 +1906,17 @@ class SelectorContextMenu(QtWidgets.QMenu):
         self.a_add_image = self.annotation_menu.addAction("Image")
         self.a_add_free_hand = self.annotation_menu.addAction("Free Hand")
 
+
         self.a_add_rectangle.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_rectangle,
-                                                       None, None, start=self.selector.start, end=self.selector.end))
+                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
         self.a_add_ellipse.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_ellipse,
-                                                       None, None, start=self.selector.start, end=self.selector.end))
+                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
         self.a_add_text.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_text,
-                                                       None, None, None, start=self.selector.start, end=self.selector.end))
+                                                       [255, 255, 255], 12, 12, start=self.selector.start, end=self.selector.end))
         self.a_add_image.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_image,
-                                                       None, None, start=self.selector.start, end=self.selector.end))
+                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
         self.a_add_free_hand.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_freehand,
-                                                       None, None, start=self.selector.start, end=self.selector.end))
+                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
 
         self.popup(pos)
 

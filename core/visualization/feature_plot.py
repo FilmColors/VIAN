@@ -392,7 +392,6 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         return image
 
 
-
 class FeatureRectItem(QGraphicsRectItem):
     def __init__(self, x, y, w, h, pen, brush):
         super(FeatureRectItem, self).__init__(x, y, w, h)
