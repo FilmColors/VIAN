@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 
 from core.gui.tools import StringList
-
+from visualizer.vis_main_window import *
 
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -38,6 +38,6 @@ if __name__ == '__main__':
     sys.excepthook = my_exception_hook
     app = QApplication(sys.argv)
     set_style_sheet(app)
-    main = TWindow()
+    main = VIANVisualizer()
     sys.exit(app.exec_())
 
