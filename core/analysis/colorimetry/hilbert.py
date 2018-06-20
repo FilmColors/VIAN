@@ -199,6 +199,22 @@ def create_hilbert_conversion_tables(dir, n1=13, n2=256):
     return loaded['hilbert_2d'], loaded['hilbert_3d']
 
 
+def create_hilbert_lookup_table(s):
+    mapped = []
+    hilbert_traversal_3d(None, mapped, HilbertMode.Indices_All, s)
+    lookup = np.zeros(shape= (s, s, s), dtype=np.uint16)
+    idx = 0
+    for m in mapped:
+        lookup[m[0], m[1], m[2]] = idx
+        idx += 1
+    return lookup
+
+def get_hilbert_lookup():
+    if os.path.isfile("core/analysis/colorimetry/hilbert_lookup.npy"):
+        return np.load("core/analysis/colorimetry/hilbert_lookup.npy")
+    else:
+         return None
+
 def hilbert_traversal_2d(data, mapped, mode, s, multiplier = 4096, x = 0.0, y = 0.0, dx1 = 1.0, dy1 = 0.0, dx2 = 0.0, dy2 = 1.0):
     """
     http://www.fundza.com/algorithmic/space_filling/hilbert/basics/
@@ -278,3 +294,12 @@ def hilbert_2d(mapping, x0 = 0.0, y0 = 0.0, xi = 1.0, xj = 0.0, yi = 0.0, yj = 1
         hilbert_2d(mapping, x0 + xi / 2, y0 + xj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1,multiplier)
         hilbert_2d(mapping, x0 + xi / 2 + yi / 2, y0 + xj / 2 + yj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1,multiplier)
         hilbert_2d(mapping, x0 + xi / 2 + yi, y0 + xj / 2 + yj, -yi / 2, -yj / 2, -xi / 2, -xj / 2, n - 1,multiplier)
+
+
+if __name__ == '__main__':
+    import datetime
+
+    start = datetime.datetime.now()
+    lookup = create_hilbert_lookup_table(256)
+    np.save("hilbert_lookup.npy", lookup)
+    print(((datetime.datetime.now() - start)).total_seconds())

@@ -8,14 +8,17 @@ from PyQt5.QtWidgets import *
 import pickle
 import sys
 
+from core.analysis.colorimetry.hilbert import *
 from core.visualization.basic_vis import IVIANVisualization
 from core.data.computation import *
 import numpy as np
+
 
 class PaletteWidget(QWidget):
     def __init__(self, parent):
         super(PaletteWidget, self).__init__(parent)
         self.palette_tree = None
+
         self.setLayout(QVBoxLayout(self))
         self.view = PaletteView(self)
         self.slider = QSlider(Qt.Horizontal, self)
@@ -28,7 +31,7 @@ class PaletteWidget(QWidget):
         self.cb_show_grid = QCheckBox("Show Grid", self)
         self.hbox_slider = QHBoxLayout(self)
         self.cb_sorting = QComboBox(self)
-        self.cb_sorting.addItems(['Cluster', 'Frequency'])
+        self.cb_sorting.addItems(['Cluster', 'Frequency', "Hilbert"])
 
         self.hbox_ctrl = QHBoxLayout(self)
         self.layout().addItem(self.hbox_ctrl)
@@ -80,6 +83,7 @@ class PaletteView(QWidget, IVIANVisualization):
     def __init__(self, parent):
         super(PaletteView, self).__init__(parent)
         self.palette_layer = None
+        self.hilbert_lookup = get_hilbert_lookup()
         self.mode = "Layer"
         self.depth = 0
         self.image = None
@@ -136,6 +140,16 @@ class PaletteView(QWidget, IVIANVisualization):
                 new_sort = np.argsort(bins_to_draw)
                 cols_to_draw = cols_to_draw[new_sort]
                 bins_to_draw = bins_to_draw[new_sort]
+
+            elif self.sorting == "Hilbert":
+                indices = []
+                for c in cols_to_draw:
+                    c = tpl_bgr_to_lab(np.array([c[2], c[1], c[0]], np.uint8), False)
+                    indices.append(self.hilbert_lookup[c[0], c[1], c[2]])
+                new_sort = np.argsort(indices)
+                cols_to_draw = cols_to_draw[new_sort]
+                bins_to_draw = bins_to_draw[new_sort]
+
             for q in range(cols_to_draw.shape[0]):
                 color = cols_to_draw[q]
                 size = bins_to_draw[q] * width_factor

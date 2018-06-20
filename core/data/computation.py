@@ -63,7 +63,7 @@ def ts_to_ms(hour=0, min=0, sec=0, ms=0):
     return time
 
 
-def tpl_bgr_to_lab(bgr):
+def tpl_bgr_to_lab(bgr, as_float = True):
     """
     Converts a BGR Color Tuple to a uint8 Lab Color Tuple using OpenCV Conversion.
     :param tpl: Input Tuple BGR
@@ -71,7 +71,10 @@ def tpl_bgr_to_lab(bgr):
     """
     if not isinstance(bgr, np.ndarray):
         bgr = np.array(bgr)
-    img = bgr.astype(np.float32) / 255
+    if as_float:
+        img = bgr.astype(np.float32) / 255
+    else:
+        img = bgr
     lab = cv2.cvtColor(np.array([[img] * 2] * 2), cv2.COLOR_BGR2Lab)[0, 0,:]
     return lab
 

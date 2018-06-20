@@ -300,7 +300,7 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def get_time_palette(self):
         time_palette_data = []
-        for t in range(len(self.palette_layers)):
+        for t in range(len(self.palette_layers) - 1):
             time_palette_data.append([
                 np.array(self.palette_layers[t]),
                 np.array(self.palette_cols[t]),
