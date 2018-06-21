@@ -10,13 +10,18 @@ This script is included into VIAN.
 
 import numpy as np
 import csv
+import pickle
 from typing import Tuple
 from sys import stdout as console
 from core.corpus.shared.entities import *
-
+from extensions.plugins.fiwi_tools.entities import *
+from core.data.headless import *
 """
 A Mapping of Filmography Column Names to their respective attribute name in the DBFilmography Class
 """
+
+ERROR_LIST = []
+
 CorpusDBMapping = dict(
     imdb_id = "IMDb ID",
     filemaker_id = "FileMaker ID",
@@ -41,8 +46,29 @@ MasterDBMapping = dict(
     end = "exp_End",
     annotation = "exp_Annotation"
 )
-def get_movie_asset_by_id(movie_assets, fm_id):
-    return MovieAsset()
+def get_movie_asset_by_id(movie_assets:List[MovieAsset], fm_id):
+    for m in movie_assets:
+        if m.fm_id == fm_id:
+            return m
+    raise Exception("Movie with id: " + str(fm_id) + " is not in MovieAssets")
+
+
+def load_stage(result_dir, stage = 0, movie_asset = None)->List[MovieAsset]:
+    """
+    Loads the Movie-Assets from a specific Stage of the Pipeline
+    :param result_dir:
+    :param stage:
+    :param movie_asset:
+    :return:
+    """
+    files = glob.glob(result_dir + "stage_" + str(stage).zfill(2) + "*")
+    result = []
+    for file in files:
+        with open(file, "rb") as f:
+            result.append(pickle.load(f))
+
+    return result
+
 
 def parse_glossary(glossary_path):
     """
@@ -155,7 +181,11 @@ def parse_corpus(corpus_path, movie_assets) -> (List[DBFilmographicalData], List
     return (movie_results, filmography_result, movie_assets, assignments)
 
 
-def parse(corpus_path, glossary_path, database_path, outfile, movie_assets):
+def handle_error(item, e):
+    ERROR_LIST.append((item, e))
+
+
+def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, result_path):
     """
     Parses the given CorpusDB and DatabaseDB file and returns them project sorted project_wise
     :param corpus_path: 
@@ -165,19 +195,17 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets):
     :param movie_list: 
     :return: 
     """
-    result_movies = []
-    result_projects = []
+
+    # Parse the Glossary and all Keywords
     glossary_words, glossary_ids, glossary_categories, glossary_omit = parse_glossary(glossary_path)
+
+    # MOVIES only have the FM ID
     (movie_results, filmography_result, movie_assets, assignments) = parse_corpus(corpus_path, movie_assets)
 
 
-
-    # PARSE ALL SEGMENTS, sort them by FM-ID and Item ID (i.e. 000_1_1)
-    all_projects = []
-    # List of Tuples (FM_ID, [DB_SEGMENT, LIST[KeywordIDs]])
-    project_segments = []
+    # PARSE ALL SEGMENTS, sort them by FM-ID and Item-ID
+    all_projects = [] # List of Tuples (<FM_ID>_<ITEM_ID>, [DB_SEGMENT, LIST[KeywordIDs]])
     with open(database_path, 'r') as input_file:
-
         reader = csv.reader(input_file, delimiter=';')
         counter, idx_id, n_yes = 0, 0, 0
         current_id, current_film, failed_words, failed_n, failed_column = [], [], [], [], []
@@ -189,24 +217,31 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets):
                 idx_annotation = row.index(MasterDBMapping['annotation'])
                 headers = row
             else:
+                # Print Progress
                 if counter % 100 == 0:
                     console.write("\r" + str(counter))
+
+                # Get the Current FM-ID Item-ID
                 new_id = row[idx_id]
 
+                # If this id is not the same as the last
                 # Store movie and create a new one
                 if new_id != current_id:
                     all_projects.append(current_film)
                     current_id = new_id
-                    current_film = []
+                    current_film = [current_id, []]
 
-                row_counter = 0
+                # Create a new Segment
+                dbsegment = DBSegment()
+                dbsegment.segm_start = row[idx_start]
+                dbsegment.segm_end = row[idx_end]
+                dbsegment.segm_body = row[idx_annotation]
+                dbkeywords = []
+
+                # Iterate over all Columns and parse the keywords
+                column_counter = 0
                 for c in row:
-                    dbsegment = DBSegment()
-                    dbsegment.segm_start = row[idx_start]
-                    dbsegment.segm_end = row[idx_end]
-                    dbsegment.segm_body = row[idx_annotation]
-
-                    if row_counter == len(row) - 1:
+                    if column_counter == len(row) - 1:
                         continue
 
                     ws = c.split("°")
@@ -227,50 +262,77 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets):
                         if word == "" or word == " ":
                             continue
 
-                        for i, keyword in enumerate(glossary_words):
-                            if keyword.lower() == word.lower() and headers[row_counter].lower() == glossary_categories[i].lower():
-                                idx = i
-                                current_film[idx] += 1
+                        for idx, keyword in enumerate(glossary_words):
+                            if keyword.lower() == word.lower() and headers[column_counter].lower() == glossary_categories[idx].lower():
+                                dbkeywords.append(glossary_ids[idx])
                                 success = True
                                 break
 
                         if not success:
                             if word not in failed_words:
                                 failed_words.append(word)
-                                failed_column.append(headers[row_counter])
+                                failed_column.append(headers[column_counter])
                                 failed_n.append(1)
                                 print("")
                                 print("Failed \'" + word + "\'")
                             else:
                                 failed_n[failed_words.index(word)] += 1
-                    row_counter += 1
+                    column_counter += 1
+
+                # Finally combine the dbsegment and keywords to a tuple and add them to the current film
+                current_film[1].append((dbsegment, dbkeywords))
 
             counter += 1
             #
             # if counter == 300:
             #     break
 
+    # Now, Combine the Projects with their Movie
+    result = [] # A List of dicts
+    for p in all_projects:
+        for idx, m in enumerate(movie_results):
+            if (m.fm_id == p[0][0]):
+                r = dict(
+                    fm_id = p[0],
+                    segments = p[1],
+                    dbmovie = movie_results[idx],
+                    dbfilmography = filmography_result[idx],
+                    assignment = assignments[idx],
+                    movie_asset = movie_assets[idx]
+                )
+                result.append(r)
+                break
+
+    for r in result:
+        with open(result_path + str(r["fm_id"], "wb")) as f:
+            pickle.dump(r, f)
 
 
-    result.append(current_film)
-    with open(outfile, "w", newline='') as out_file:
-        writer = csv.writer(out_file, delimiter=";")
-        writer.writerow(["FM-ID", "Glossary-ID", "WordName", "EXP Field", "Frequency"])
-        for r in result:
-            for i, entry in enumerate(r):
-                if i == len(r) - 1:
-                    break
-                if glossary_ids[i] == "1288" and glossary_omit[i] is False:
-                    writer.writerow([r[len(r) - 1], glossary_ids[i], glossary_words[i], glossary_categories[i], entry])
+def generate_projects(input_dir, result_dir):
+    files = glob.glob(input_dir + "*")
+    for file in files:
+        data = None
+        with open(file, "rb") as f:
+            data = pickle.load(f)
+
+        if data is not None:
+            dbmovie = data['dbmovie']
+            masset = data['movie_asset']
+
+            project_name = data['fm_id'] + "_" + dbmovie.movie_name + "_" +dbmovie.year
+            scr_frame_ixs = [scr.frame_pos for scr in masset.shot_assets]
+            segments = [[s.segm_start, s.segm_end] for s in data['segments']]
+
+            vian_project = create_project_headless(project_name, result_dir, masset.movie_path, scr_frame_ixs, segments)
 
 
-    with open(outfile.replace("counting", "counting_failed"), "w", newline='') as out_file:
-        writer = csv.writer(out_file, delimiter=";")
-        for i, r in enumerate(failed_words):
-            writer.writerow([r, failed_n[i], failed_column[i]])
 
 if __name__ == '__main__':
+    corpus_path = "../.."
     gloss_file = "../../input/datasets/GlossaryDB_WordCount.csv"
     db_file = "../../input/datasets/MasterDB_WordCount.csv"
     outfile = "../../results/counting.csv"
-    parse(gloss_file, db_file, outfile=outfile)
+    asset_path = "/Volumes/fiwi_datenbank/PIPELINE_RESULTS/ASSETS/"
+    result_path = "/Volumes/fiwi_datenbank/PIPELINE_RESULTS/COMBINED/"
+    movie_assets = load_stage(asset_path, 1)
+    parse(corpus_path, gloss_file, db_file, outfile, movie_assets)

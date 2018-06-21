@@ -54,7 +54,6 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
     :param movie_path: path to the movie
     :param screenshots_frame_pos: a list of frame positions for the screenshots
     :param segmentations: a list of lists [name, [segments]], each containing [start_ms, end_ms, body]
-    :param is_eaf: if the segmentation is a .eaf project
     :param move_movie: how to handle the movie file "None", "move" or "copy"
     :return: a VIANProject created from the input or None if failed
     """
@@ -91,6 +90,8 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
             print("Could not remove folder: ", location)
         raise e
         return None
+
+
 
 
 if __name__ == '__main__':
