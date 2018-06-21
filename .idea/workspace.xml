@@ -9,12 +9,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5f86adad-e443-47bd-a2df-ab0eb0627df8" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/corpus" afterPath="$PROJECT_DIR$/core/corpus" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/app.iml" afterPath="$PROJECT_DIR$/.idea/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/drawing_widget.py" afterPath="$PROJECT_DIR$/core/gui/drawing_widget.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/main_window.py" afterPath="$PROJECT_DIR$/core/gui/main_window.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/gui/player_vlc.py" afterPath="$PROJECT_DIR$/core/gui/player_vlc.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -408,7 +404,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main_window.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main_window.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/gui/main_window.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="361">
@@ -416,6 +412,16 @@
               <folding>
                 <element signature="e#89#106#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="57">
+              <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -432,7 +438,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>FileMediaObject</find>
       <find>m</find>
       <find>media_</find>
       <find>media_o</find>
@@ -462,6 +467,7 @@
       <find>perspective</find>
       <find>set_overlay</find>
       <find>set_overlay_visibility</find>
+      <find>switch_perspec</find>
     </findStrings>
     <replaceStrings>
       <replace>self.project()</replace>
@@ -520,7 +526,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/core/data/importers.py" />
         <option value="$PROJECT_DIR$/_docs/source/conf.py" />
         <option value="$PROJECT_DIR$/_docs/source/dev_guide/containers/media_objects.rst" />
         <option value="$PROJECT_DIR$/_docs/source/dev_guide/containers/node_scripts.rst" />
@@ -571,6 +576,7 @@
         <option value="$PROJECT_DIR$/core/gui/player_vlc.py" />
         <option value="$PROJECT_DIR$/core/gui/drawing_widget.py" />
         <option value="$PROJECT_DIR$/core/gui/main_window.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -1066,13 +1072,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/_docs/source/dev_guide/data/exporter.rst">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/_docs/source/dev_guide/data/enums.rst">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
@@ -1896,6 +1895,14 @@
           <folding>
             <element signature="e#89#106#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="57">
+          <caret line="3" column="5" lean-forward="true" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
