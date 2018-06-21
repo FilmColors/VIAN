@@ -1245,11 +1245,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.centralWidget().show()
         # self.centralWidget().setBaseSize(size_central)
 
-        if self.player_dock_widget.isVisible():
-            self.set_overlay_visibility(True)
-        else:
-            self.set_overlay_visibility(False)
-
+        self.set_overlay_visibility(self.player_dock_widget.isVisible())
         self.set_default_dock_sizes(self.current_perspective)
 
     def hide_all_widgets(self):
@@ -1540,8 +1536,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_recent_menu()
 
         new.inhibit_dispatch = False
-        #self.project_streamer.set_project(new)
-        self.dispatch_on_loaded()
+        try:
+            self.dispatch_on_loaded()
+        except FileNotFoundError:
+            self.close_project()
 
     def on_save_project(self, open_dialog=False, sync = False):
         if open_dialog is True or self.project.path is "" or self.project.name is "":

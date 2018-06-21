@@ -519,6 +519,7 @@ class Player_VLC(VideoPlayer):
 
         # Check if the file exists locally
         print("Movie Path", path, project.movie_descriptor.movie_name)
+        success = True
         if not os.path.isfile(path):
             exists = False
 
@@ -539,10 +540,16 @@ class Player_VLC(VideoPlayer):
                                         "Could not find movie: " + str(path) +
                                         "\nPlease set it manually after clicking \"OK\".")
                 path = QtWidgets.QFileDialog.getOpenFileName(self)[0]
-                project.movie_descriptor.set_movie_path(path)
+                if os.path.isfile(path):
+                    project.movie_descriptor.set_movie_path(path)
+                else:
+                    success = False
 
-        self.open_movie(path)
-        self.media_descriptor.set_duration(self.get_media_duration())
+        if success:
+            self.open_movie(path)
+            self.media_descriptor.set_duration(self.get_media_duration())
+        else:
+            raise FileNotFoundError("No Movie Selected")
 
     def on_changed(self, project, item):
         pass

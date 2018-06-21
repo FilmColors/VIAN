@@ -555,15 +555,15 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 self.show_annotations = False
             else:
                 self.show_annotations = True
-
+            self.synchronize_transforms()
             super(DrawingOverlay, self).update()
+
             # self.synchronize_transforms()
 
     def set_input_transparent(self, transparent):
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents,transparent)
 
     def paintEvent(self, e):
-        self.synchronize_transforms()
         if not self.main_window.player.is_playing():
             qp = QtGui.QPainter()
             pen = QtGui.QPen()
