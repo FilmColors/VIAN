@@ -351,6 +351,20 @@ class VIANProject(IHasName, IClassifiable):
             new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos)
             self.add_screenshot(new)
 
+    def create_screenshot_headless(self, name, frame_pos = None, time_ms = None, fps = 29.0):
+        if frame_pos is None and time_ms is None:
+            print("Either frame or ms has to be given")
+            return
+
+        if frame_pos is None:
+            frame_pos = ms_to_frames(time_ms, fps)
+        else:
+            time_ms = frame2ms(frame_pos, fps)
+
+        new = Screenshot(name, None, img_blend=None, timestamp=time_ms, frame_pos=frame_pos)
+        self.add_screenshot(new)
+        return new
+
     def add_screenshot(self, screenshot, group = 0):
         self.screenshots.append(screenshot)
         screenshot.set_project(self)
@@ -782,14 +796,17 @@ class VIANProject(IHasName, IClassifiable):
 
         for d in my_dict['analyzes']:
             if d is not None:
-                new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
+                try:
+                    new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
 
-                if isinstance(new, ColormetryAnalysis):
-                    # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
-                    if int(version[1]) < 6:
-                        new = ColormetryAnalysis()
-                    self.colormetry_analysis = new
-                self.add_analysis(new)
+                    if isinstance(new, ColormetryAnalysis):
+                        # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
+                        if int(version[1]) < 6:
+                            new = ColormetryAnalysis()
+                        self.colormetry_analysis = new
+                    self.add_analysis(new)
+                except Exception as e:
+                    print("Exception in Load Analyses", e)
 
         try:
             old = self.screenshot_groups
@@ -964,7 +981,7 @@ class VIANProject(IHasName, IClassifiable):
                 y = [w.name for w in duplicate.words_plain]
 
                 if set(x) == set(y):
-                    print("RETURN")
+                    print("Vocabulary is duplicate")
                     return duplicate
 
         voc.name = name
@@ -1291,10 +1308,15 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         :param path: 
         :return: 
         """
-        if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
-            self.movie_path = os.path.basename(path)
-            self.is_relative = True
-        else:
+        try:
+            if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
+                self.movie_path = os.path.basename(path)
+                self.is_relative = True
+            else:
+                self.movie_path = path
+                self.is_relative = False
+        except Exception as e:
+            print(e)
             self.movie_path = path
             self.is_relative = False
 

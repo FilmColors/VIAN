@@ -2,7 +2,7 @@ from sklearn.cluster.hierarchical import AgglomerativeClustering
 from core.gui.main_window import *
 from collections import namedtuple
 from PyQt5 import QtGui
-from core.gui.ewidgetbase import EDialogWidget
+from core.gui.ewidgetbase import *
 from core.analysis.colorimetry.computation import calculate_histogram
 from PyQt5.QtCore import QRect, Qt
 from core.data.interfaces import IConcurrentJob
@@ -11,7 +11,6 @@ from core.data.enums import *
 
 AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1
-
 
 
 def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100):

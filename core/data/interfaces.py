@@ -338,6 +338,22 @@ class IAnalysisJob(ILiveWidgetExposing):
         :return: 
         """
 
+    def serialize(self, data_dict):
+        """
+        Override this Method if there needs to be a custom serialization
+        :param data_dict: 
+        :return: 
+        """
+        return data_dict
+
+    def deserialize(self, data_dict):
+        """
+        Override this Method if there needs to be a custom deserialization
+        :param data_dict: 
+        :return: 
+        """
+        return data_dict
+
     def abort(self):
         pass
 

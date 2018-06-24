@@ -184,6 +184,7 @@
     </property>
     <addaction name="actionMovie_Barcode"/>
     <addaction name="actionMovie_Mosaic"/>
+    <addaction name="actionColor_Palette"/>
     <addaction name="separator"/>
     <addaction name="actionColormetry"/>
     <addaction name="actionClearColormetry"/>
@@ -790,6 +791,11 @@
   <action name="actionClearColormetry">
    <property name="text">
     <string>Clear Colormetry</string>
+   </property>
+  </action>
+  <action name="actionColor_Palette">
+   <property name="text">
+    <string>Color Palette</string>
    </property>
   </action>
  </widget>

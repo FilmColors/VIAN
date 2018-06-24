@@ -8,14 +8,16 @@ This script is included into VIAN.
 @author: Gaudenz Halter
 """
 
-import numpy as np
 import csv
 import pickle
-from typing import Tuple
 from sys import stdout as console
+
 from core.corpus.shared.entities import *
-from extensions.plugins.fiwi_tools.entities import *
 from core.data.headless import *
+from core.data.computation import *
+from extensions.plugins.fiwi_tools.vian_dev.fiwi_server_binding.python_binding import MovieAsset, ScreenshotAsset
+
+
 """
 A Mapping of Filmography Column Names to their respective attribute name in the DBFilmography Class
 """
@@ -48,12 +50,18 @@ MasterDBMapping = dict(
 )
 def get_movie_asset_by_id(movie_assets:List[MovieAsset], fm_id):
     for m in movie_assets:
-        if m.fm_id == fm_id:
+        if m.fm_id[0] == fm_id:
+            print("Found")
             return m
     raise Exception("Movie with id: " + str(fm_id) + " is not in MovieAssets")
 
+def filemaker_timestamp2ms(a):
+    a = a.zfill(8)
+    a = [a[i:i + 2] for i in range(0, len(a), 2)]
+    return ts_to_ms(a[0], a[1], a[2], a[3])
 
-def load_stage(result_dir, stage = 0, movie_asset = None)->List[MovieAsset]:
+
+def load_stage(result_dir, stage = 0, movie_asset = None, n = 1000)->List[MovieAsset]:
     """
     Loads the Movie-Assets from a specific Stage of the Pipeline
     :param result_dir:
@@ -63,10 +71,14 @@ def load_stage(result_dir, stage = 0, movie_asset = None)->List[MovieAsset]:
     """
     files = glob.glob(result_dir + "stage_" + str(stage).zfill(2) + "*")
     result = []
+    c = 0
     for file in files:
+        if n < c:
+            break
         with open(file, "rb") as f:
             result.append(pickle.load(f))
-
+        c += 1
+        print(c)
     return result
 
 
@@ -110,7 +122,7 @@ def parse_glossary(glossary_path):
     return glossary_words, glossary_ids, glossary_categories, glossary_omit
 
 
-def parse_corpus(corpus_path, movie_assets) -> (List[DBFilmographicalData], List[DBMovie], List[MovieAsset] ,Tuple(List, List)):
+def parse_corpus(corpus_path, movie_assets):
     """
     Parse the CorpusDB CSV file an create the FilmographyData aswell as the mapping them to DBMovie and MovieAssets
     :param corpus_path: 
@@ -120,90 +132,75 @@ def parse_corpus(corpus_path, movie_assets) -> (List[DBFilmographicalData], List
     filmography_result = []
     movie_results = []
     assignments = []
-    movie_assets = []
+    movie_assets_res = []
 
     with open(corpus_path, 'r') as input_file:
         reader = csv.reader(input_file, delimiter=';')
         counter = 0
         for r in reader:
-            if counter == 0:
-                # Movie IDXs
-                idx_filemaker_id = r.index(CorpusDBMapping['filemaker_id'])
-                idx_country = r.index(CorpusDBMapping['country'])
-                idx_title = r.index(CorpusDBMapping['title'])
-                idx_year = r.index(CorpusDBMapping['year'])
+            try:
+                if counter == 0:
+                    # Movie IDXs
+                    idx_filemaker_id = r.index(CorpusDBMapping['filemaker_id'])
+                    idx_country = r.index(CorpusDBMapping['country'])
+                    idx_title = r.index(CorpusDBMapping['title'])
+                    idx_year = r.index(CorpusDBMapping['year'])
 
-                # Project IDXS
-                idx_corpus_assignment = r.index(CorpusDBMapping['corpus_assignment'])
-                idx_editors = r.index(CorpusDBMapping['editors'])
+                    # Project IDXS
+                    idx_corpus_assignment = r.index(CorpusDBMapping['corpus_assignment'])
+                    idx_editors = r.index(CorpusDBMapping['editors'])
 
-                #Filmography IDXs
-                idx_imdb = r.index(CorpusDBMapping['imdb_id'])
-                idx_color_process = r.index(CorpusDBMapping['color_process'])
-                idx_director = r.index(CorpusDBMapping['director'])
-                idx_genre = r.index(CorpusDBMapping['genre'])
-                idx_cinematography = r.index(CorpusDBMapping['cinematography'])
-                idx_color_consultant = r.index(CorpusDBMapping['color_consultant'])
-                idx_production_design = r.index(CorpusDBMapping['production_design'])
-                idx_art_director = r.index(CorpusDBMapping['art_director'])
-                idx_costume_design = r.index(CorpusDBMapping['production_company'])
-                idx_production_company = r.index(CorpusDBMapping['art_director'])
+                    #Filmography IDXs
+                    idx_imdb = r.index(CorpusDBMapping['imdb_id'])
+                    idx_color_process = r.index(CorpusDBMapping['color_process'])
+                    idx_director = r.index(CorpusDBMapping['director'])
+                    idx_genre = r.index(CorpusDBMapping['genre'])
+                    idx_cinematography = r.index(CorpusDBMapping['cinematography'])
+                    idx_color_consultant = r.index(CorpusDBMapping['color_consultant'])
+                    idx_production_design = r.index(CorpusDBMapping['production_design'])
+                    idx_art_director = r.index(CorpusDBMapping['art_director'])
+                    idx_costume_design = r.index(CorpusDBMapping['production_company'])
+                    idx_production_company = r.index(CorpusDBMapping['art_director'])
 
-            else:
-                row = r
-                fm_id = row[idx_filemaker_id]
-                masset = get_movie_asset_by_id(movie_assets, fm_id)
+                else:
+                    row = r
+                    fm_id = row[idx_filemaker_id]
+                    masset = get_movie_asset_by_id(movie_assets, fm_id)
 
-                dbmovie = DBMovie()
-                dbmovie.movie_id_db = fm_id
-                dbmovie.year = row[idx_year]
-                dbmovie.movie_name = row[idx_title]
+                    dbmovie = DBMovie()
+                    dbmovie.movie_id = fm_id
+                    dbmovie.year = row[idx_year]
+                    dbmovie.movie_name = row[idx_title]
 
-                fg = DBFilmographicalData()
-                fg.imdb_id = row[idx_imdb]
-                fg.color_process = row[idx_color_process]
-                fg.director = row[idx_director]
-                fg.genre = row[idx_genre]
-                fg.cinematography = row[idx_cinematography]
-                fg.color_consultant = row[idx_color_consultant]
-                fg.production_design = row[idx_production_design]
-                fg.art_director = row[idx_art_director]
-                fg.costum_design = row[idx_costume_design]
-                fg.country = row[idx_country]
-                fg.production_company = row[idx_production_company]
+                    fg = DBFilmographicalData()
+                    fg.imdb_id = row[idx_imdb]
+                    fg.color_process = row[idx_color_process]
+                    fg.director = row[idx_director]
+                    fg.genre = row[idx_genre]
+                    fg.cinematography = row[idx_cinematography]
+                    fg.color_consultant = row[idx_color_consultant]
+                    fg.production_design = row[idx_production_design]
+                    fg.art_director = row[idx_art_director]
+                    fg.costum_design = row[idx_costume_design]
+                    fg.country = row[idx_country]
+                    fg.production_company = row[idx_production_company]
 
-                movie_results.append(dbmovie)
-                filmography_result.append(fg)
-                assignments.append((row[idx_corpus_assignment], row[idx_editors]))
-                movie_assets.append(masset)
+                    movie_results.append(dbmovie)
+                    filmography_result.append(fg)
+                    assignments.append((row[idx_corpus_assignment], row[idx_editors]))
+                    movie_assets_res.append(masset)
 
-            counter += 1
-    return (movie_results, filmography_result, movie_assets, assignments)
+                counter += 1
+            except Exception as e:
+                handle_error(fm_id, e)
+    return (movie_results, filmography_result, movie_assets_res, assignments)
 
 
 def handle_error(item, e):
     ERROR_LIST.append((item, e))
 
 
-def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, result_path):
-    """
-    Parses the given CorpusDB and DatabaseDB file and returns them project sorted project_wise
-    :param corpus_path: 
-    :param glossary_path: 
-    :param database_path: 
-    :param outfile: 
-    :param movie_list: 
-    :return: 
-    """
-
-    # Parse the Glossary and all Keywords
-    glossary_words, glossary_ids, glossary_categories, glossary_omit = parse_glossary(glossary_path)
-
-    # MOVIES only have the FM ID
-    (movie_results, filmography_result, movie_assets, assignments) = parse_corpus(corpus_path, movie_assets)
-
-
-    # PARSE ALL SEGMENTS, sort them by FM-ID and Item-ID
+def parse_masterdb(database_path, glossary_words, glossary_categories, glossary_ids, glossary_omit):
     all_projects = [] # List of Tuples (<FM_ID>_<ITEM_ID>, [DB_SEGMENT, LIST[KeywordIDs]])
     with open(database_path, 'r') as input_file:
         reader = csv.reader(input_file, delimiter=';')
@@ -211,10 +208,11 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
         current_id, current_film, failed_words, failed_n, failed_column = [], [], [], [], []
         for row in reader:
             if counter == 0:
-                idx_id = row.index("FileMaker ID")
+                idx_id = row.index("exp_ItemID")
                 idx_start = row.index(MasterDBMapping['start'])
                 idx_end = row.index(MasterDBMapping['end'])
                 idx_annotation = row.index(MasterDBMapping['annotation'])
+                idx_FMID = row.index("FileMaker ID")
                 headers = row
             else:
                 # Print Progress
@@ -222,7 +220,7 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
                     console.write("\r" + str(counter))
 
                 # Get the Current FM-ID Item-ID
-                new_id = row[idx_id]
+                new_id = row[idx_id].split("_")
 
                 # If this id is not the same as the last
                 # Store movie and create a new one
@@ -241,7 +239,7 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
                 # Iterate over all Columns and parse the keywords
                 column_counter = 0
                 for c in row:
-                    if column_counter == len(row) - 1:
+                    if column_counter in [idx_start, idx_end, idx_annotation, idx_id, idx_FMID]:
                         continue
 
                     ws = c.split("°")
@@ -264,8 +262,11 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
 
                         for idx, keyword in enumerate(glossary_words):
                             if keyword.lower() == word.lower() and headers[column_counter].lower() == glossary_categories[idx].lower():
-                                dbkeywords.append(glossary_ids[idx])
-                                success = True
+                                if glossary_omit[idx] is False:
+                                    dbkeywords.append(glossary_ids[idx])
+                                    success = True
+                                else:
+                                    print(idx, " omitted")
                                 break
 
                         if not success:
@@ -286,12 +287,46 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
             #
             # if counter == 300:
             #     break
+    return all_projects
+
+
+def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, result_path, template_path):
+    """
+    Parses the given CorpusDB and DatabaseDB file and returns them project sorted project_wise
+    :param corpus_path: 
+    :param glossary_path: 
+    :param database_path: 
+    :param outfile: 
+    :param movie_list: 
+    :return: 
+    """
+
+    # MOVIES only have the FM ID
+    (movie_results, filmography_result, movie_assets, assignments) = parse_corpus(corpus_path, movie_assets)
+
+    # If the MasterDB has not been cached, parse it
+    if not os.path.isfile("all_projects_cache.pickle"):
+        # Parse the Glossary and all Keywords
+        glossary_words, glossary_ids, glossary_categories, glossary_omit = parse_glossary(glossary_path)
+
+        # PARSE ALL SEGMENTS, sort them by FM-ID and Item-ID
+        # List of Tuples (<FM_ID>_<ITEM_ID>, [DB_SEGMENT, LIST[KeywordIDs]])
+        all_projects = parse_masterdb(database_path, glossary_words, glossary_categories, glossary_ids, glossary_omit)
+        with open("all_projects_cache.pickle", "wb") as f:
+            pickle.dump(all_projects, f)
+    else:
+        with open("all_projects_cache.pickle", "rb") as f:
+            all_projects = pickle.load(f)
 
     # Now, Combine the Projects with their Movie
     result = [] # A List of dicts
     for p in all_projects:
+        # The First item is empty
+        if len(p) == 0:
+            continue
+        # Generate the Result
         for idx, m in enumerate(movie_results):
-            if (m.fm_id == p[0][0]):
+            if (m.movie_id == p[0][0]):
                 r = dict(
                     fm_id = p[0],
                     segments = p[1],
@@ -304,12 +339,14 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
                 break
 
     for r in result:
-        with open(result_path + str(r["fm_id"], "wb")) as f:
+        with open(result_path +str(r["fm_id"]) + ".pickle", "wb") as f:
             pickle.dump(r, f)
 
 
-def generate_projects(input_dir, result_dir):
+def generate_projects(input_dir, result_dir, replace_path = False):
     files = glob.glob(input_dir + "*")
+    glossary_words, glossary_ids2, glossary_categories, glossary_omit = parse_glossary("E:/Programming/Datasets/FilmColors/PIPELINE/_input\\GlossaryDB_WordCount.csv")
+
     for file in files:
         data = None
         with open(file, "rb") as f:
@@ -318,21 +355,90 @@ def generate_projects(input_dir, result_dir):
         if data is not None:
             dbmovie = data['dbmovie']
             masset = data['movie_asset']
+            fm_id_str = "_".join([data['fm_id'][0].zfill(3), data['fm_id'][1], data['fm_id'][2]])
+            project_name = fm_id_str + "_" + dbmovie.movie_name + "_" +dbmovie.year
 
-            project_name = data['fm_id'] + "_" + dbmovie.movie_name + "_" +dbmovie.year
-            scr_frame_ixs = [scr.frame_pos for scr in masset.shot_assets]
-            segments = [[s.segm_start, s.segm_end] for s in data['segments']]
 
-            vian_project = create_project_headless(project_name, result_dir, masset.movie_path, scr_frame_ixs, segments)
+            movie_path = masset.movie_path_abs
+            if replace_path:
+                movie_path = movie_path.replace("/Volumes/", "\\\\130.60.131.134\\")
+
+            project_folder = result_dir + "/" + project_name + "/"
+            vian_project = create_project_headless(project_name, project_folder, movie_path, [], [], move_movie="None", template_path=template_path)
+
+            #Create an Experiment and a Main Segmentation
+            experiment = vian_project.experiments[0]
+            main_segm = vian_project.segmentation[0]
+
+            # Create a Lookup Table for the GlossaryIDs
+            exp_keywords = experiment.get_unique_keywords()
+            glossary_ids = [k.external_id for k in exp_keywords]
+
+            # Apply the Classification
+            Errors = []
+
+            for idx, s in enumerate(data['segments']):
+                segment = s[0]
+                keywords = s[1]
+
+                # Filemaker exports timestamp without zfill and without ":" thus 00:00:12:34 becomes 1234
+                start = filemaker_timestamp2ms(segment.segm_start)
+                end = filemaker_timestamp2ms(segment.segm_end)
+                new_segm = main_segm.create_segment2(int(start), int(end), body = segment.segm_body, mode=SegmentCreationMode.INTERVAL, inhibit_overlap=False)
+                for k in keywords:
+                    try:
+                        uk = exp_keywords[glossary_ids.index(int(k))]
+                        experiment.toggle_tag(new_segm, uk)
+                    except Exception as e:
+                        idx = glossary_ids2.index(k)
+                        if (glossary_words[idx], glossary_categories[idx]) not in Errors:
+                            Errors.append((glossary_words[idx], glossary_categories[idx]))
+
+
+
+            # Create Screenshots:
+            cap = cv2.VideoCapture(movie_path)
+            fps = cap.get(cv2.CAP_PROP_FPS)
+
+            scr_groups = [""]
+            for i, scr in enumerate(masset.shot_assets):
+                if scr.scr_grp not in scr_groups:
+                    grp = vian_project.add_screenshot_group(scr.scr_grp)
+                    scr_groups.append(scr.scr_grp)
+                else:
+                    grp = vian_project.screenshot_groups[scr_groups.index(scr.scr_grp)]
+                shot = vian_project.create_screenshot_headless("SCR_" + str(i), scr.frame_pos, fps = fps)
+                grp.add_screenshots([shot])
+
+
+            vian_project.store_project(HeadlessUserSettings(), vian_project.path)
+            print(" --- ERRORS --- ")
+            for r in sorted(Errors, key=lambda x: x[1]):
+                print(r)
 
 
 
 if __name__ == '__main__':
-    corpus_path = "../.."
-    gloss_file = "../../input/datasets/GlossaryDB_WordCount.csv"
-    db_file = "../../input/datasets/MasterDB_WordCount.csv"
+    # corpus_path = "../.."
+    # gloss_file = "../../input/datasets/GlossaryDB_WordCount.csv"
+    # db_file = "../../input/datasets/MasterDB_WordCount.csv"
+    # outfile = "../../results/counting.csv"
+    # asset_path = "/Volumes/fiwi_datenbank/PIPELINE_RESULTS/ASSETS/"
+    # result_path = "/Volumes/fiwi_datenbank/PIPELINE_RESULTS/COMBINED/"
+    # template_path = "../../user/templates/ERC_FilmColors.viant"
+
+    corpus_path = "E:/Programming/Datasets/FilmColors/PIPELINE/_input\\CorpusDB.csv"
+    gloss_file = "E:/Programming/Datasets/FilmColors/PIPELINE/_input\\GlossaryDB_WordCount.csv"
+    db_file = "E:/Programming/Datasets/FilmColors/PIPELINE/_input\\MasterDB_WordCount.csv"
     outfile = "../../results/counting.csv"
-    asset_path = "/Volumes/fiwi_datenbank/PIPELINE_RESULTS/ASSETS/"
-    result_path = "/Volumes/fiwi_datenbank/PIPELINE_RESULTS/COMBINED/"
-    movie_assets = load_stage(asset_path, 1)
-    parse(corpus_path, gloss_file, db_file, outfile, movie_assets)
+    asset_path = "\\\\130.60.131.134\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\"
+    result_path = "E:/Programming/Datasets/FilmColors/PIPELINE\\COMBINED/"
+    project_dir = "E:/Programming/Datasets/FilmColors/PIPELINE\\PROJECTS/"
+    template_path = "C:/Users/Gaudenz Halter/Documents/VIAN/templates/ERC_FilmColors.viant"
+    # movie_assets = load_stage(asset_path, 1)
+
+    # movie_assets = load_stage("\\\\130.60.131.134\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\", 2, n=10)
+    with open("movie_assets_cache.pickle", "rb") as f:
+        movie_assets = pickle.load(f)
+    parse(corpus_path, gloss_file, db_file, outfile, movie_assets, result_path, template_path)
+    generate_projects(result_path, project_dir, replace_path=True)

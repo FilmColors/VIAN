@@ -136,8 +136,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         )
 
 
-        images = [self.img_movie.astype(np.uint8)]
-
+        # images = [self.img_movie.astype(np.uint8)]
+        images = None
         return result, images
 
     def deserialize(self, serialization, project):

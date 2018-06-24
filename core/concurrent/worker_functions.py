@@ -67,7 +67,11 @@ def store_project_concurrent(args, sign_progress):
         segmentations.append(c.serialize())
 
     for d in project.analysis:
-        analyzes.append(d.serialize())
+        try:
+            analyzes.append(d.serialize())
+        except Exception as e:
+            print("Exception in Analysis.serialize()", e)
+
 
     for e in project.screenshot_groups:
         screenshot_groups.append(e.serialize())

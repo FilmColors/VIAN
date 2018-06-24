@@ -13,7 +13,6 @@ from core.visualization.basic_vis import IVIANVisualization
 from core.data.computation import *
 import numpy as np
 
-
 class PaletteWidget(QWidget):
     def __init__(self, parent):
         super(PaletteWidget, self).__init__(parent)
@@ -380,6 +379,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
             color = cols_to_draw[q]
             radius = self.dot_size
             lab = tpl_bgr_to_lab(color)
+            print(lab)
 
             # increase the visible number of dots:
             if self.jitter > 1:
@@ -394,7 +394,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
                     ry = np.random.randint(-self.jitter, self.jitter)
                 else:
                     rx, ry = 0,0
-                path.addEllipse((t_width / 2) + ((self.scale * (-1.0 * lab[1]) - radius) + rx),
+                path.addEllipse((t_width / 2) + ((self.scale * (1.0 * lab[1]) - radius) + rx),
                                 (t_height / 2) + ((self.scale * (-1.0 * lab[2]) - radius) + ry),
                                 radius, radius)
                 qp.fillPath(path, QColor(int(color[2]), int(color[1]), int(color[0])))

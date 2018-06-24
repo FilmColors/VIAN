@@ -32,6 +32,9 @@ class Vocabulary(IProjectContainer, IHasName):
         self.base_vocabulary = None # TODO OBSOLETE
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
+        if name in [w.name for w in self.words_plain]:
+            print("Duplicate Word")
+            return
         word = VocabularyWord(name, vocabulary=self)
         word.unique_id = unique_id
         self.add_word(word, parent_word, dispatch)
@@ -399,7 +402,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             unique_id = self.unique_id,
             parent = self.parent.unique_id,
             classification_vocabularies = [v.unique_id for v in self.classification_vocabularies],
-            unique_keywords = [k.serialize() for k in self.unique_keywords],
+            unique_keywords =  [k.serialize() for k in self.unique_keywords],
             target_container = [k.unique_id for k in self.target_container],
             children = [c.unique_id for c in self.children],
         )
@@ -587,7 +590,7 @@ class Experiment(IProjectContainer, IHasName):
 
     def toggle_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         tag = [container, keyword]
-        print("Toggled", tag)
+        # print("Toggled", tag)
         if tag not in self.classification_results:
             self.classification_results.append(tag)
         else:

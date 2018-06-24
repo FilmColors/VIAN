@@ -129,6 +129,8 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
     fg = exp.create_class_object("Foreground", exp)
     bg = exp.create_class_object("Background", exp)
     intert = exp.create_class_object("Intertitle", exp)
+    env = exp.create_class_object("Environment", exp)
+    light = exp.create_class_object("Lighting", exp)
 
     p_fem = exp.create_class_object("Female Protagonist", fg)
     p_mal = exp.create_class_object("Male Protagonist", fg)
@@ -146,8 +148,8 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
     keyword_ids = []
     for i in range(len(glossary_words)):
         if not glossary_omit[i] == True:
-            if i > 1250:
-                print(glossary_voc_names[i])
+            # if i > 1250:
+            #     print(glossary_voc_names[i])
             if glossary_voc_names[i] not in existing_voc_names:
                 target_voc = create_vocabulary(glossary_voc_names[i], glossary_categories[i])
                 vocabularies.append(target_voc)
@@ -164,30 +166,39 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
     voc_mapping = []
     keyword_ids_merged = []
     voc_merged = []
+    print("--- ALL VOCABULARIES --")
     for i, v in enumerate(vocabularies):
         equal_voc = None
-
+        # print(v.name)
         # Find an equal existing vocabulary in the final list
         for j, y in enumerate(voc_merged):
             # Omit Significance
             if "significance" in v.name.lower():
                 break
 
-            if set([n.name for n in v.words_plain]) == set([n.name for n in y.words_plain]):
+            if set([n.name for n in v.words_plain]) == set([q.name for q in y.words_plain]):
                 equal_voc = y
+                if len(v.words_plain) != len(y.words_plain):
+                    print([n.name for n in v.words_plain])
+                    print([q.name for q in y.words_plain])
                 break
 
         if equal_voc is None:
             voc_merged.append(v)
             voc_mapping.append([voc_targets[i].lower()])
-            keyword_ids_merged.append([[x for _,x in sorted(zip([w.name for w in v.words_plain],keyword_ids[i]))]])
+            keyword_ids_merged.append([[x for _,x in sorted(zip([w.name for w in v.words_plain], keyword_ids[i]))]])
         else:
             idx = voc_merged.index(equal_voc)
             if voc_targets[i].lower() not in voc_mapping[idx]:
                 voc_mapping[idx].append(voc_targets[i].lower())
                 keyword_ids_merged[idx].append([x for _,x in sorted(zip([w.name for w in v.words_plain], keyword_ids[i]))])
 
+        # print("#################")
+        # for i, v in enumerate(voc_merged):
+        #     for j, t in enumerate(voc_mapping[i]):
+        #         print(len(v.words_plain) == len(keyword_ids_merged[i][j]), t, v.name)
 
+    print("#####################")
     # Do some manual renaming
     for i, v in enumerate(voc_merged):
         if "Significance" in v.name:
@@ -203,10 +214,14 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
         elif "Surfaces" in v.name:
             v.name = "Surfaces"
 
+    for i, v in enumerate(voc_merged):
+        for j, t in enumerate(voc_mapping[i]):
+            print(len(v.words_plain) == len(keyword_ids_merged[i][j]), t, v.name)
     # Add the final list of Vocabularies to the Project and
     # Connect them to the Classification Objects
     for i, v in enumerate(voc_merged):
         print(v.name)
+
         proj_voc = prj.create_vocabulary(v.name)
         proj_voc.category = v.category
 
@@ -214,6 +229,7 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
             proj_voc.create_word(w.name, w.parent)
         v = proj_voc
 
+        # Fint the correct classification Object
         for j, t in enumerate(voc_mapping[i]):
             if "female_protagonist" in t:
                 p_fem.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
@@ -233,8 +249,14 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
             elif "character" in t or "foreground" in t:
                 fg.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
-            elif "environment" in t or "objects" in t:
+            elif "objects" in t or "background" in t:
                 bg.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
+
+            elif "environment" in t:
+                env.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
+
+            elif "lighting" in t:
+                light.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
 
             else:
                 glob.add_vocabulary(v, external_ids=keyword_ids_merged[i][j])
@@ -245,7 +267,12 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
             print("---", v.name)
 
         print("")
-
+    to_count = []
+    for x in glossary_omit:
+        if x == False:
+            to_count.append(x)
+    print(len(to_count))
+    print(len(exp.get_unique_keywords()))
     # Export the Vocabularies if the path is set
     if export_voc_dir is not None:
         for v in exp.get_vocabularies():
@@ -259,13 +286,11 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
     with open(template_path, "w") as f:
         json.dump(template, f)
 
-
     prj.get_template()
 
 
 if __name__ == '__main__':
-
-    gl_path = "E:/Programming/Git/filmpalette/input/datasets/GlossaryDB_WordCount.csv"
+    gl_path = "E:\Programming\Datasets\FilmColors\PIPELINE\_input/GlossaryDB_WordCount.csv"
     voc_export = "C:/Users/Gaudenz Halter/Documents/VIAN/vocabularies"
     template_path = "C:/Users/Gaudenz Halter/Documents/VIAN/templates/ERC_FilmColors.viant"
     glossary_to_template("E:/Programming/Git/filmpalette/input/datasets/GlossaryDB_WordCount.csv", template_path, voc_export)

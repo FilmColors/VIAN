@@ -2,11 +2,18 @@
 Author: Gaudenz Halter
 University of Zurich
 """
+from scipy.cluster.hierarchy import dendrogram
+from scipy.spatial.distance import pdist
+from matplotlib import pyplot as plt
+
 from scipy.cluster.hierarchy import *
+from pipeline.misc_utils import all_test_images
 from fastcluster import linkage
+from sklearn.cluster.hierarchical import AgglomerativeClustering
 import numpy as np
 import cv2
 from typing import List
+import pickle
 
 
 class PaletteAsset():
@@ -52,6 +59,14 @@ class PaletteExtractorModel:
 
         return preview.astype(np.uint8)
 
+    # def labels_to_hist_palette(self, lab, labels):
+    #     img = self.labels_to_avg_color_mask(lab, labels)
+    #     hist1 = calculate_histogram(img, n_bins=64)
+    #
+    #     return self.hist_to_palette(hist1, n_col=10)
+    #     # hist2 = calculate_histogram(img, n_bins=32)
+    #     # hist3 = calculate_histogram(img, n_bins=64)
+
     def hist_to_palette(self, hist, n_col = 10):
         hist_lin = hist.reshape(hist.shape[1] * hist.shape[1] * hist.shape[2])
         shist = np.sort(hist_lin, axis=0)[-n_col:]
@@ -73,7 +88,6 @@ class PaletteExtractorModel:
             last += int(bins[b][1] * 1500 / total)
 
         return preview.astype(np.uint8)
-
 
 
 def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lvl = 10):
@@ -111,35 +125,55 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
             print(e)
             break
 
+    result = []
     cols = np.zeros(shape=(0, 3), dtype=np.uint8)
     ns = np.zeros(shape=(0), dtype=np.uint16)
     layers = np.zeros(shape=(0), dtype=np.uint16)
+    cols = []
+    ns = []
+    layers = []
 
     all_col = np.array(all_col, dtype=np.uint8)
     all_n = np.array(all_n, dtype=np.uint16)
 
-    i = 0
+    i, j = 0, 0
+    print("OK")
     for r in result_lbl:
         if i > 10 and i % n_merge_per_lvl != 0:
             i += 1
             continue
-        cols = np.concatenate((cols, all_col[r]))
-        ns = np.concatenate((ns, all_n[r]))
-        layers = np.concatenate((layers, np.array([i] * all_col[r].shape[0])))
+        # cols = np.concatenate((cols, all_col[r]))
+        # ns = np.concatenate((ns, all_n[r]))
+        # layers = np.concatenate((layers, np.array([i] * all_col[r].shape[0])))
+        cols.extend(all_col[r])
+        ns.extend(all_n[r])
+        layers.extend([i] * all_col[r].shape[0])
         i += 1
+        j += 1
 
+    cols = np.array(cols,dtype=np.uint8)
+    ns = np.array(ns, dtype=np.uint16)
+    layers = np.array(layers, dtype=np.uint16)
+    print("DONE")
+
+    print((cols.nbytes + ns.nbytes + layers.nbytes)/1000, "Kb")
+        # entry = []
+        # for lbl in r:
+        #     entry.append([
+        #         all_col[lbl],
+        #         all_n[lbl],
+        #                   ])
+        # result.append(entry)
     result = [layers, cols, ns]
     return result, merge_dists
 
 
-
 def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, image_size = 100.0, seeds_model = None,
-                  n_pixels = 200, out_path = "", n_merge_per_lvl = 10, plot = False, mask_inverse = False, normalization_lower_bound = 100.0,
-                  seeds_input_width = 600):
+                  n_pixels = 200, out_path = "", n_merge_per_lvl = 10, plot = False, mask_inverse = False):
+    # if mask is not None and mask_index is not None:
+    #     frame[np.where(mask!=mask_index)] = [0, 0, 0]
 
-    if seeds_input_width < frame.shape[0]:
-        rx = seeds_input_width / frame.shape[0]
-        frame = cv2.resize(frame, None, None, rx, rx, cv2.INTER_CUBIC)
+    # print("Seed")
     if seeds_model is None:
         seeds_model = PaletteExtractorModel(frame, n_pixels=n_pixels, num_levels=8)
     labels = seeds_model.forward(frame, 200).astype(np.uint8)
@@ -173,8 +207,8 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
 
     #Make sure the normalization factor is not too low
     normalization_f = np.amin(hist[0])
-    if normalization_f < normalization_lower_bound:
-        normalization_f = normalization_lower_bound
+    if normalization_f < 100:
+        normalization_f = 100.0
     labels_list = []
     colors_list = []
 
@@ -194,57 +228,64 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
         all_cols.extend([avg_color] * int(np.round(bin / normalization_f)) * 2)
         all_labels.extend([lbl] * int(np.round(bin / normalization_f)) * 2)
 
+    # Uncomment to use the image directly
+    # data = np.reshape(frame, newshape=(frame.shape[0] * frame.shape[1], 3))
+    # all_cols = np.reshape(frame_bgr, newshape=(frame_bgr.shape[0] * frame_bgr.shape[1], 3)).tolist()
+    # all_labels = list(range(data.shape[0]))
+    # t = [np.array([a[0], a[1], a[2]]) for a in all_cols]
+    # all_cols = t
+
     data = np.array(data)
+    # print(data.shape)
+    # print("Calculating Linkage")
     Z = linkage(data, 'ward')
+
     tree, merge_dists = to_cluster_tree(Z, all_labels, all_cols, n_merge_steps, n_merge_per_lvl)
+
+    if plot:
+        print("PLOTTING")
+        result_tot = None
+        c = -1
+        for r in tree:
+            c += 1
+            if c % n_merge_per_lvl != 0:
+                continue
+
+            result_img = np.zeros(shape=(100, 100, 3))
+            for itm in r:
+                img = np.array([[itm[0]] * itm[1]] * 100)
+                result_img = np.hstack((result_img, img))
+
+            result_img = cv2.resize(result_img.astype(np.uint8), (1200, 25), interpolation=cv2.INTER_CUBIC)
+            if result_tot is None:
+                result_tot = result_img
+            else:
+                result_tot = np.vstack((result_tot, result_img))
+                result_tot = np.vstack((result_tot, np.zeros(shape=(1, 1200, 3))))
+
+        result_tot = cv2.resize(result_tot.astype(np.uint8), (2048, 2048), interpolation=cv2.INTER_CUBIC)
+        cv2.imshow("", result_tot)
+        cv2.waitKey()
+        if out_path !="":
+            cv2.imwrite(out_path + ".png", result_tot)
     return PaletteAsset(tree, merge_dists)
 
 
-def combine_palettes(palette_assets: List[PaletteAsset], width=1000, height=100, n_merge_steps = 400, image_size = 1000.0, seeds_model = None,
-                  n_pixels = 400, n_merge_per_lvl = 15, plot = False):
-    """
-    Combines a set of Palettes by building an image from their deepest layer and calculating a new palette from it. 
-    :param palette_assets: 
-    :param width: 
-    :param height: 
-    :param n_merge_steps: 
-    :param image_size: 
-    :param seeds_model: 
-    :param n_pixels: 
-    :param n_merge_per_lvl: 
-    :param plot: 
-    :return: 
-    """
-    layer_idx = np.max(np.unique(palette_assets[0].tree[0]))
 
-    layer = None
-    for p in palette_assets:
-        all_layers = p.tree[0]
-        all_cols = p.tree[1]
-        all_bins = p.tree[2]
-        indices = np.where(all_layers == layer_idx)
+if __name__ == '__main__':
 
-        total = np.sum(all_bins[indices])
-        colors = []
-        layer_bins = all_bins[indices]
+    img = cv2.imread("E:/Programming/Git/filmpalette/results/test_frame.png")
+    # mask = cv2.imread("E:/Programming/Git/filmpalette/results/test_mask.png", 0)
 
-        for i, c in enumerate(all_cols[indices].tolist()):
-            colors.extend([c] * int(layer_bins[i]))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    p = color_palette(img, n_pixels=100, out_path="mask_test_result",
+                  n_merge_steps=200, n_merge_per_lvl=20, plot=False)
 
-        colors = np.array([colors] * height, dtype=np.uint8)
-        sub_img = cv2.resize(colors, (width, height), interpolation=cv2.INTER_CUBIC)
-        if layer is None:
-            layer = sub_img
-        else:
-            layer = np.vstack((layer, sub_img))
-
-
-    layer = cv2.resize(layer, (1000, 1000), interpolation=cv2.INTER_CUBIC)
-    layer = cv2.cvtColor(layer, cv2.COLOR_BGR2LAB)
-    return color_palette(layer, n_merge_steps = n_merge_steps, image_size = image_size, seeds_model = seeds_model,
-                  n_pixels = n_pixels, n_merge_per_lvl = n_merge_per_lvl, plot = plot)
-
-
-
-
-
+    with open("palette.pickle", "wb") as f:
+        pickle.dump(p, f)
+    # imgs = all_test_images()
+    # for p in imgs:
+    #     img = cv2.imread(p)
+    #     img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    #     color_palette(img, n_pixels=500, out_path=p.replace("\\", "/").split("/").pop().split(".")[0],
+    #                   n_merge_steps=150, n_merge_per_lvl=5)

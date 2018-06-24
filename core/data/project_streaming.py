@@ -302,6 +302,9 @@ class IStreamableContainer():
     @pyqtSlot(object, object)
     def on_data_loaded(self, obj, args):
         self.apply_loaded(obj)
+
+        # Perform a Callback if handed into Load Container
+        # Either with argumens or without
         if len(args) > 1 and args[1] is not None:
             args[0](args[1])
         else:

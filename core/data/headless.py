@@ -8,6 +8,7 @@ from core.container.project import *
 from core.data.settings import UserSettings
 from core.data.project_streaming import *
 from core.gui.main_window import VERSION
+from shutil import copy2, move
 
 class HeadlessUserSettings():
     def __init__(self):
@@ -29,6 +30,10 @@ class HeadlessMainWindow(QObject):
 
     def dispatch_on_changed(self, receiver=None, item=None):
         pass
+    def dispatch_on__loaded(self, *args):
+        pass
+    def dispatch_on_closed(self, *args):
+        pass
 
 
 def load_project_headless(path) -> VIANProject:
@@ -47,7 +52,7 @@ def load_project_headless(path) -> VIANProject:
         return None
 
 
-def create_project_headless(name, location, movie_path, screenshots_frame_pos = None, segmentations = None, move_movie="None") -> VIANProject:
+def create_project_headless(name, location, movie_path, screenshots_frame_pos = None, segmentations = None, move_movie="None", template_path = "") -> VIANProject:
     """
     Creates a VIANProject without the need of a MainWindow
     :param name: name of the project
@@ -63,25 +68,55 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
             return
 
         project = VIANProject(HeadlessMainWindow(), name=name, folder=location, path=location + "/" + name)
-        project.inhibit_dispatch = True
-        project.movie_descriptor.set_movie_path(movie_path)
+        project.inhibit_dispatch = False
 
         os.mkdir(project.folder)
         project.create_file_structure()
+
+        # Move the Movie if set
+        if move_movie == "copy":
+            new_path = project.folder + "/" + os.path.split(movie_path)[1]
+            copy2(movie_path, new_path)
+            movie_path = new_path
+        elif move_movie == "move":
+            new_path = project.folder + "/" + os.path.split(movie_path)
+            move(movie_path, new_path)
+            movie_path = new_path
+
+        project.movie_descriptor.set_movie_path(movie_path)
+
+        # Apply Template if set
+        if template_path is not None:
+            project.apply_template(template_path)
+
         # Import Segmentation
         if segmentations is not None:
             for s in segmentations:
-                segmentat = project.create_segmentation(s[0])
+                print(s)
+
+                segmentat = None
+                # Check if there already exists a segmentation with this name
+                for segm in project.segmentation:
+                    if segm.get_name() == s[0]:
+                        segmentat = s
+                        break
+                # if not create a new Segentation
+                if segmentat is None:
+                    segmentat = project.create_segmentation(s[0])
+
                 for segm in s[1]:
                     segmentat.create_segment2(segm[0], segm[1], body = segm[2])
+
         # Import Screenshots
         if screenshots_frame_pos is not None:
+            cap = cv2.VideoCapture(movie_path)
+            fps = cap.get(cv2.CAP_PROP_FPS)
             for i, s in enumerate(screenshots_frame_pos):
-                project.create_screenshot("Screenshot_" + str(i).zfill(3), frame_pos=s)
+                project.create_screenshot_headless("Screenshot_" + str(i).zfill(3), frame_pos=s, fps=fps)
 
         # Store the project
-        #TODO
         project.store_project(HeadlessUserSettings(), project.path)
+
         return project
     except Exception as e:
         try:
