@@ -241,6 +241,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
     def apply_loaded(self, obj):
         self.data = self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj)
 
+
 class ColormetryAnalysis(AnalysisContainer):
     def __init__(self, results = None):
         super(ColormetryAnalysis, self).__init__(name = "Colormetry", data = results)
@@ -328,26 +329,27 @@ class ColormetryAnalysis(AnalysisContainer):
             ])
         return [time_palette_data, self.time_ms]
 
-    def set_finished(self, obj):
-        if self.current_idx - 1 < len(self.time_ms) and self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000:
-            self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
-            self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
-            self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
-            self.has_finished = True
-            print("Colormetry truely finished")
+    def set_finished(self):
+        if self.current_idx - 1 < len(self.time_ms):
+            print("Colormetry Analysis finished: ", self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000)
+            if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000:
+                self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
+                self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
+                self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
+                self.has_finished = True
 
-        data = dict(
-            curr_location=self.curr_location,
-            time_ms=self.time_ms,
-            frame_pos=self.frame_pos,
-            histograms=self.histograms,
-            avg_colors=self.avg_colors,
-            palette_colors=self.palette_cols,
-            palette_layers=self.palette_layers,
-            palette_bins=self.palette_bins,
-            resolution=self.resolution,
-        )
-        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
+                data = dict(
+                    curr_location=self.curr_location,
+                    time_ms=self.time_ms,
+                    frame_pos=self.frame_pos,
+                    histograms=self.histograms,
+                    avg_colors=self.avg_colors,
+                    palette_colors=self.palette_cols,
+                    palette_layers=self.palette_layers,
+                    palette_bins=self.palette_bins,
+                    resolution=self.resolution,
+                )
+                self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
 
     def clear(self):
         self.curr_location = 0
@@ -379,7 +381,7 @@ class ColormetryAnalysis(AnalysisContainer):
         )
 
         if self.has_finished:
-            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_NO_OVERWRITE)
+            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
         else:
             self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
 
@@ -414,6 +416,8 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.palette_bins = data['palette_bins']
 
                 self.resolution =  data['resolution']
+                print(self.current_idx, self.time_ms[self.current_idx - 1])
+
             else:
                 print("No Colormetry Data Loaded")
                 self.curr_location = 0
@@ -429,8 +433,9 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.resolution = 30
                 self.has_finished = False
                 self.current_idx = 0
+
         except Exception as e:
-            print("Exception in Loading Analysis", e)
+            print("Exception in Loading Analysis", str(e))
 
         return self
 

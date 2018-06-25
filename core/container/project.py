@@ -804,7 +804,10 @@ class VIANProject(IHasName, IClassifiable):
                         if int(version[1]) < 6:
                             new = ColormetryAnalysis()
                         self.colormetry_analysis = new
-                    self.add_analysis(new)
+                        self.add_analysis(new)
+                        new.set_finished()
+                    else:
+                        self.add_analysis(new)
                 except Exception as e:
                     print("Exception in Load Analyses", e)
 

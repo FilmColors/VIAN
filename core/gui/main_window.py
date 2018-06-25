@@ -65,7 +65,7 @@ from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
-VERSION = "0.6.3"
+VERSION = "0.6.4"
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -512,10 +512,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_colormetry_finished(self, res):
         try:
-            self.project.colormetry_analysis.set_finished(res)
+            self.project.colormetry_analysis.set_finished()
             self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
     def clear_colormetry(self):
         if self.project is not None:
@@ -1833,6 +1833,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_timestep_update(-1)
 
         ready, coloremtry = self.project.get_colormetry()
+        print(ready, coloremtry)
         if not ready:
             run_colormetry = False
             if self.settings.AUTO_START_COLORMETRY:
