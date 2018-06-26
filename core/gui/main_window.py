@@ -513,9 +513,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_colormetry_finished(self, res):
         try:
             self.project.colormetry_analysis.set_finished()
-            self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
+            # self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
         except Exception as e:
-            print(e)
+            print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
     def clear_colormetry(self):
         if self.project is not None:
@@ -1849,8 +1849,8 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             run_colormetry = ready
 
-        if coloremtry is not None:
-            self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
+        # if coloremtry is not None:
+        #     self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
 
         if run_colormetry:
             ready, col = self.project.get_colormetry()

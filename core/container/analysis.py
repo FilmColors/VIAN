@@ -281,8 +281,6 @@ class ColormetryAnalysis(AnalysisContainer):
         try:
             if not isinstance(self.palette_cols, List):
                 try:
-                    pass
-                    # TODO
                     self.time_ms = self.time_ms.tolist()
                     self.histograms = self.histograms.tolist()
                     self.frame_pos = self.frame_pos.tolist()
@@ -298,13 +296,12 @@ class ColormetryAnalysis(AnalysisContainer):
             self.frame_pos.append(data['frame_pos'])
             self.avg_colors.append(data['avg_color'])
 
-            # self.palettes.append(data['palette'].tree)
-
+            print(len(self.time_ms), "\tIDX", self.current_idx)
             self.palette_bins.append(data['palette'].tree[2])
             self.palette_cols.append(data['palette'].tree[1])
             self.palette_layers.append(data['palette'].tree[0])
 
-            self.current_idx += 1
+            self.current_idx = len(self.time_ms)
 
         except Exception as e:
             print("ColormetryAnalysis.append_data() raised ", str(e))
@@ -331,11 +328,15 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self):
         if self.current_idx - 1 < len(self.time_ms):
-            print("Colormetry Analysis finished: ", self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000)
+            print(self.time_ms[self.current_idx - 1], self.project.movie_descriptor.duration)
+            print("Colormetry Analysis finished: ", self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 2000)
             if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000:
-                self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
-                self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
-                self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
+                if not isinstance(self.palette_cols, np.ndarray):
+                    self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
+                if not isinstance(self.palette_layers, np.ndarray):
+                    self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
+                if not isinstance(self.palette_bins, np.ndarray):
+                    self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
                 self.has_finished = True
 
                 data = dict(
@@ -404,9 +405,10 @@ class ColormetryAnalysis(AnalysisContainer):
             self.has_finished = serialization['has_finished']
             data = streamer.sync_load(self.unique_id)
             if data is not None:
-                self.current_idx = data['current_idx']
+                # self.current_idx = data['current_idx']
                 self.curr_location = data['curr_location']
                 self.time_ms = data['time_ms']
+
                 self.frame_pos =  data['frame_pos']
                 self.histograms =  data['histograms']
                 self.avg_colors =  data['avg_colors']
@@ -416,7 +418,6 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.palette_bins = data['palette_bins']
 
                 self.resolution =  data['resolution']
-                print(self.current_idx, self.time_ms[self.current_idx - 1])
 
             else:
                 print("No Colormetry Data Loaded")
@@ -436,7 +437,7 @@ class ColormetryAnalysis(AnalysisContainer):
 
         except Exception as e:
             print("Exception in Loading Analysis", str(e))
-
+        self.current_idx = len(self.time_ms)
         return self
 
 

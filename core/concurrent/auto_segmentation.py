@@ -137,6 +137,8 @@ class AutoSegmentingJob(IConcurrentJob):
                 return None
             if i % resolution == 0:
                 read_img += 1
+                if data_idx >= len(in_hists):
+                    break
                 if read_img % frame_resolution == 0:
                     cap.set(cv2.CAP_PROP_POS_FRAMES, i)
                     ret, frame = cap.read()
