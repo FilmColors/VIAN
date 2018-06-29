@@ -1,0 +1,15 @@
+<ANALYSES>
+	<COLORIMETRY_ANALSIS ID="8908799312" NAME="Colorimetry" PATH="8908799312.npz"/>
+	<JOB_ANALYSIS ID="1105697457" NAME="ColorPaletteAnalysis" PATH="1105697457.npz"/>
+</ANALYSES>
+
+## COLORIMETRY_ANALSIS 
+@ID: The unique id of this analysis object
+@NAME: Constant = "Colorimetry"
+@PATH: The path to the numpy numeric serialized data
+
+## JOB_ANALYSIS
+@ID: The unique id of this analysis object
+@NAME: The name of the JobAnalysis Class (can be used in an python::eval() statement)
+@PATH: The path to the numpy numeric serialized data
+

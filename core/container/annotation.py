@@ -97,11 +97,11 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
                 return
         if len(self.keys) == 0:
             self.has_key = False
-        self.dispatch_on_changed()
+        self.dispatch_on_changed(item=self)
 
     def remove_keys(self):
         self.keys = []
-        self.dispatch_on_changed()
+        self.dispatch_on_changed(item=self)
 
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.name]))
@@ -424,7 +424,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         annotation.annotation_layer = self
         self.project.undo_manager.to_undo((self.add_annotation, [annotation]),
                                           (self.remove_annotation, [annotation]))
-        self.dispatch_on_changed()
+        self.dispatch_on_changed(item=self)
 
     def remove_annotation(self, annotation):
         if annotation in self.annotations:
@@ -432,7 +432,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             self.annotations.remove(annotation)
             self.project.undo_manager.to_undo((self.remove_annotation, [annotation]),
                                               (self.add_annotation, [annotation]))
-            self.dispatch_on_changed()
+            self.dispatch_on_changed(item=self)
 
     def set_is_current_layer(self, bool):
         self.is_current_layer = bool

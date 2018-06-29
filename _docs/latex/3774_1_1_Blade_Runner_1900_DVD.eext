@@ -1,0 +1,232 @@
+{
+
+  "name": "3774_1_1_Blade_Runner_1900_DVD",
+  "path": "C://****/****/documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/3774_1_1_Blade_Runner_1900_DVD.eext", // The abs path to the project
+  "version": "0.6.4",
+  "corpus_id": -1,
+  "main_segmentation_index": 0, // THe Index of the Main Segmentation (Which is used for sorting screenshots)
+  "notes": "", // Additional information that can be set in the Inspector
+
+  /*Project Directories */
+  "data_dir": "C://****/****/documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/data",
+  "shots_dir": "C://****/****/documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/shots",
+  "export_dir": "C://****/****/documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/export",
+  "results_dir": "C://****/****/documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/results",
+
+  /* SEGMENTATIONS*/
+  "segmentation": [ /* A List of serialized Segmentations */
+    {
+      "segments": [ /* A List of serialized Segments */
+        {
+          "name": "1", // The Name of the Segment
+          "end": 107607, // MS of the End
+          "notes": "", // Additional Notes
+          "start": 0, // MS of the Start
+          "media_objects": [ // A List of serialized Media Objects
+            {
+              "dtype": 2, // What type the media object is (External, Data,)
+              "file_path": "C:\\*******/documents/VIAN//3774_1_1_Blade_Runner_1900_DVD//data/01_DOF_Explanation.png", // An absolute  path to the File, this is regenerated when loading the project
+              "name": "DOF_Explanation.png", // The name of the file in the data_dir directory
+              "unique_id": 1741505363
+            }
+          ],
+          "scene_id": 1, // The index of this segment in the Segmentation (starting with 1)
+          "unique_id": 1166372514,
+          "annotation_body": "Intertitle explains the already passed plot", // The text annotation
+          "locked": false, // If the segment is locked in the timelnie
+          "duration": null // @obsolete
+        }
+        /* ... more Segments ...*/
+      ],
+      "notes": "", // Additional information that can be set in the Inspector
+      "unique_id": 1049798528,
+      "locked": false, // If the segmentation is locked in the Timeline
+      "name": "Auto Segmentation" // The name of the segmentation
+    }
+    /*... more Segmentation ...*/
+  ],
+
+  /* ANNOTATION LAYERS */
+  "annotation_layers": [
+    {
+      "name": "New Layer", 
+      "locked": false, // If it is locked in the Timeline
+      "is_visible": true, // If it should be displayed
+      "unique_id": 2927829419,
+      "notes": "", // Additional information that can be set in the Inspector
+      "annotations": [ // A list of Annotation serializations
+        {
+          "free_hand_paths": [], // A list of FreeHand Paths if this is a FreeHand annotation
+          "name": "New Rectangle", 
+          "notes": "", // Additional information that can be set in the Inspector
+          "t_end": 82300, // When the visibility should be turned off
+          "is_automated": false, // if this annotation is driven by another containers value
+          "line_w": 5, // the line width of the frame if it has one
+          "orig_position": [ 178, 6 ], // The position in MovieSpace
+          "color": [ 230, 83, 162 ], // The color of the frame if it has one
+          "automate_property": null, // The value this is driven by if it is automated
+          "automated_source": -1, // The unique id of the object that contains the value above if it has any
+          "curr_size": [ 1512.5951940850277, 421.8022181146026 ], // The size of this annotation in MovieSpace
+          "t_start": 53900, // The MS start when the annotation should start beeing visible
+          "unique_id": 1432985272,
+          "font_size": 6, // The Font-Size if it has text
+          "resource_path": "", // The Image path it is an Image Annotation
+          "text": "", // The Text if it is a Text Annotation
+          "size": [ 1512.5951940850277, 421.8022181146026 ], // The current size (no need to be serialized) in PlayerSpace
+          "media_objects": [], // Attached media objects if there are any
+          "a_type": 0, // The AnnotationType Enum Value
+          "font": "Agency FB", // The Font Family
+          "tracking": "Static", // If this annotation should track something
+          "keys": [], // A list of Position Tuples if this annotation is animated
+          "widget": null // The displaying Widget
+        }
+        /* ... more Annotations .. */
+      ],
+      "is_current_layer": false // If this is the current top layer
+    }
+  ],
+
+  /* NODE SCRIPTS*/
+  "scripts": [
+    {
+      "notes": "", // Additional information that can be set in the Inspector
+      "connections": [
+        {
+          "output_node": 6264180387,
+          "input_pin_id": 2,
+          "output_pin_id": 0,
+          "input_node": 8803892119
+        }
+        /*... more Connections ...*/
+      ],
+      "name": "New Script", // The Name of the Script
+      "nodes": [
+        {
+          "name": "Read Frame Movie", 
+          "default_values": [ "test.mp4", 3000 ], // The Default Values of the input pins
+          "node_pos": [ 107, 94 ], // The position of the node in the Editor
+          "unique_id": 8803892119,
+          "notes": "", // Additional information that can be set in the Inspector
+          "operation": "OperationFrameReader", // The associated OperationClass Name.
+          "node_size": [ 200, 200 ] // The size of the Node in the editor
+        }
+        /*... more Nodes ...*/
+      ],
+      "unique_id": 1284084303
+    }
+    /*... more Scripts ...*/
+  ],
+
+  /* VOCABULARIES */
+  "vocabularies": [
+    {
+      "name": "Scene Locations",
+      "category": "default",  // The topic category it belongs to
+      "unique_id": 1095049086,
+      "words": [
+        {
+          "parent": 1095049086,
+          "name": "House", 
+          "unique_id": 3390127240,
+          "children": [] // Child words if any
+        }
+        //....
+      ]
+    }
+    // ....
+  ],
+  "screenshot_groups": [
+    {
+      "unique_id": 1404536708,
+      "name": "All Shots", 
+      "shots": [ 1651945337, 7522186061, 8671808241 /*...*/ ] // A list of associated shots as unique id
+    }
+  ],
+
+  /* EXPERIMENTS */
+  "experiments": [
+    {
+      "name": "ERC Advanced Grant FilmColors",
+      "analyses": [], // A list Analysis classes to perform
+      "unique_id": 4846731777,
+      "classification_objects": [
+        {
+          "parent": 4846731777,
+          "target_container": [ 1049798528 ], // A list of IClassifyable that contain this classification object
+          "name": "Global",
+          "children": [], // Child Classification objects if any
+          "classification_vocabularies": [ 7835076715, 3427161829 /*...*/ ], // The Vocabularies associated with this classification object
+          "unique_id": 6353598060,
+          "unique_keywords": [ // These are essentially the tags consisting of VocWord, ClassificationObject and Vocabulary
+            {
+              "voc_obj": 7835076715,
+              "external_id": 8,
+              "word_obj": 5741784264,
+              "unique_id": 4400252826,
+              "class_obj": 6353598060
+            }
+            /*...*/
+          ]
+        }
+      ],
+      "classification_results": [  // A List of Mappings: (Target.unique_id, UKeyqord.unique_id)
+        [ 1166372514, 2016330087 ],
+        [ 1166372514, 3935737480 ],
+        [ 1166372514, 3145357142 ],
+        [ 1166372514, 3663305810 ]
+        /*...*/
+      ]
+    }
+  ],
+
+  /* SCREENSHOTS */
+  "screenshots": [
+    {
+      "shot_id_global": 1, // The index of the screenshot in all screenshots sorted by time
+      "notes": "", // Additional notes from the inspector
+      "title": "Auto_Scr_0", 
+      "creation_timestamp": "2018-06-27 10:28:14.640474",
+      "movie_timestamp": 42, // Time in MS
+      "frame_pos": 1, // Frame IDX of this shot
+      "shot_id_segm": 1, // The Index of this Shot within the segment of the main segmentation (Starting with one)
+      "scene_id": 1, // The idx of the segment in the main segmentation it is associated with (Starting with one)
+      "unique_id": 1651945337,
+      "annotation_item_ids": null // Annotations that should be rendered ontop of this Screenshot
+    }
+    /*...*/
+  ],
+
+  /* ANALYSES */
+  "analyzes": [
+    {
+      "has_finished": true, // If the Colorimetry is completely finished
+      "unique_id": 8908799312,
+      "notes": "",
+      "name": "Colormetry",
+      "analysis_container_class": "ColormetryAnalysis"
+    },
+    {
+      "parameters": { "resolution": 100 },
+      "name": "Color-Palette",
+      "analysis_job_class": "ColorPaletteAnalysis",
+      "notes": "",
+      "unique_id": 1105697457,
+      "container": 3778593545,
+      "analysis_container_class": "IAnalysisJobAnalysis"
+    }
+  ],
+  
+  /* MOVIE DESCRIPTOR */
+  "movie_descriptor": {
+    "is_relative": false, // If the movie is located in the project directory
+    "movie_name": "Blade Runner",
+    "movie_id": "3774_1_1", // A ID related to the ERC FilmColors Project
+    "notes": "", 
+    "year": 2017, // The Production Year
+    "source": "DVD", // The Source of the Movie
+    "movie_path": "//****/Filme/spaete_Filme/3774_Blade_Runner_2049/3774_1_1_Blade_Runner_2049_DVD.m4v", // Abs or rel path depending on the location of the movie
+    "unique_id": 5420540984,
+    "duration": 9807872 // Duration in MS
+  }
+
+}

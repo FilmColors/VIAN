@@ -227,7 +227,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
         if dispatch:
             self.project.undo_manager.to_undo((self.add_segment, [segment]), (self.remove_segment, [segment]))
-            self.dispatch_on_changed()
+            self.dispatch_on_changed(item=self)
 
     def remove_segment(self, segment, dispatch = True):
         self.segments.remove(segment)
@@ -236,7 +236,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.project.sort_screenshots()
         if dispatch:
             self.project.undo_manager.to_undo((self.remove_segment, [segment]), (self.add_segment, [segment]))
-            self.dispatch_on_changed()
+            self.dispatch_on_changed(item=self)
 
     def cut_segment(self, segm, time):
         if segm in self.segments:
@@ -245,7 +245,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             # new = self.create_segment(time, old_end)
             new = self.create_segment2(time, old_end, mode=SegmentCreationMode.INTERVAL, dispatch=False)
             self.project.undo_manager.to_undo((self.cut_segment, [segm, time]), (self.merge_segments, [segm, new]))
-            self.dispatch_on_changed()
+            self.dispatch_on_changed(item=self)
 
     def merge_segments(self, a, b):
         if abs(a.ID - b.ID) <= 1:

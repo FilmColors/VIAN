@@ -1,0 +1,19 @@
+
+<ANNOTATION_LAYER ID="5865990447" NAME="New Layer">
+	<VISUAL_ANNOTATION A_TYPE="AnnotationType.Rectangle" COLOR="[231, 20, 221]" ID="3736115394" POS="495, 81" RESSOURCE_PATH="" SIZE="986.1626617375231, 248.42144177449177" TEXT="" T_END="ts68" T_START="ts67"/>
+</ANNOTATION_LAYER>
+
+## ANNOTATION_LAYER
+@ID: The unique id of this annotation layer
+@NAME: The name of this annotation layer
+
+## VISUAL_ANNOTATION
+@A_TYPE: The type of this annotation {AnnotationType.Rectangle, AnnotationType.Ellipse, AnnotationType.Line, AnnotationType.Text, AnnotationType.Image, AnnotationType.FreeHand}
+@COLOR: The Color of this annotation
+@ID: The unique id of this annotation
+@POS: A vector2 indicating the screen position of this annotation
+@RESSOURCE_PATH: If A_TYPE == AnnotationType.Image, this specifies the relative path to the Image-Source {.png, .jpg format}
+@SIZE: A vector2 indicating the screen size of this annotation
+@TEXT: If A_TYPE == AnnotationType.Text, this specifies the text of the annotation
+@T_END: A reference to a TIME_SLOT, when the annotation ends
+@T_START: A reference to a TIME_SLOT, when the annotation starts

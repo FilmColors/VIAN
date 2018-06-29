@@ -192,7 +192,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
 
         t_size = self.sceneRect().size().toSize()
         image = QImage(size, QImage.Format_ARGB32)
-        image.fill(Qt.transparent)
+        image.fill(background)
 
         painter = QPainter()
         painter.begin(image)
@@ -262,7 +262,7 @@ class ImagePlotCircular(ImagePlot):
                 itm.setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(y * self.magnification))
 
             itm.setScale(self.img_scale)
-
+            itm.scale_pos(self.pos_scale)
             self.images.append(itm)
 
             if luminance is not None:
@@ -302,6 +302,7 @@ class ImagePlotCircular(ImagePlot):
 
     def set_range_scale(self, value):
         self.pos_scale = value / 100
+
         for img in self.images:
             if isinstance(img, VIANPixmapGraphicsItem):
                 img.scale_pos(self.pos_scale)

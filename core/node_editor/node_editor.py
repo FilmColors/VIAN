@@ -42,6 +42,7 @@ class ScriptExecutor(QRunnable):
 
             res = True
         except Exception as e:
+            raise e
             print("")
             print("Script Executor Failed")
             print(e)
@@ -633,6 +634,7 @@ class Node(QWidget, IHasName):
         # Else return the existing cache
         if len(self.operation.result) == 0 or self.operation.multi_execute:
             args = []
+
             # Executing all Nodes before this one
             for p in self.fields:
                 if p.is_input:
@@ -1269,7 +1271,6 @@ class NodeEditorContextMenu(QMenu):
         self.a_random = self.computation_menu.addAction("Random Number")
         self.a_color2img = self.computation_menu.addAction("Color2Image")
 
-
         self.vis_menu = self.node_menu.addMenu("Visualization")
         self.a_show_img = self.vis_menu.addAction("Show Image")
 
@@ -1297,6 +1298,7 @@ class NodeEditorContextMenu(QMenu):
         self.a_add_segmentation = self.project_menu.addAction("Add Segmentation")
         self.a_create_annotation = self.project_menu.addAction("Create Annotation")
         self.a_add_annotation_layer = self.project_menu.addAction("Add Annotation Layer")
+        self.a_create_screenshot = self.project_menu.addAction("Create Screenshot")
 
 
 
@@ -1344,6 +1346,7 @@ class NodeEditorContextMenu(QMenu):
 
         self.a_create_annotation.triggered.connect(partial(self.node_editor.create_node, OperationCreateAnnotation(), self.node_pos))
         self.a_add_annotation_layer.triggered.connect(partial(self.node_editor.create_node, OperationAddAnnotationLayer(), self.node_pos))
+        self.a_create_screenshot.triggered.connect(partial(self.node_editor.create_node, OperationCreateScreenshot(), self.node_pos))
         self.popup(pos)
 
     def on_remove(self):

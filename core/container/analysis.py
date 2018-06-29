@@ -296,7 +296,6 @@ class ColormetryAnalysis(AnalysisContainer):
             self.frame_pos.append(data['frame_pos'])
             self.avg_colors.append(data['avg_color'])
 
-            print(len(self.time_ms), "\tIDX", self.current_idx)
             self.palette_bins.append(data['palette'].tree[2])
             self.palette_cols.append(data['palette'].tree[1])
             self.palette_layers.append(data['palette'].tree[0])
@@ -328,7 +327,6 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self):
         if self.current_idx - 1 < len(self.time_ms):
-            print(self.time_ms[self.current_idx - 1], self.project.movie_descriptor.duration)
             print("Colormetry Analysis finished: ", self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 2000)
             if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000:
                 if not isinstance(self.palette_cols, np.ndarray):

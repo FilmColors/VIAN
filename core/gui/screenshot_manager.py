@@ -2,11 +2,12 @@ import os
 import cv2
 import numpy as np
 
+from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QPoint, QRectF
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
-
+from core.data.enums import *
 from collections import namedtuple
 
 from core.data.computation import *
@@ -16,7 +17,7 @@ from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
-
+from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1
 SCALING_MODE_HEIGHT = 2
@@ -68,6 +69,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
         self.lbl_n = None
         self.bar = None
+        self.lbl_slider = None
+
+        self.curr_visualization = "Row-Column"
 
         self.a_static.triggered.connect(self.on_static)
         self.a_scale_width.triggered.connect(self.on_scale_to_width)
@@ -87,10 +91,21 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_show_only_current.setChecked(False)
         self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
 
+        self.m_visualization = self.inner.menuBar().addMenu("Visualization")
+        self.a_row_column = self.m_visualization.addAction("Row-Column")
+        self.a_row_column.setCheckable(True)
+        self.a_row_column.setChecked(True)
+        self.a_row_column.triggered.connect(partial(self.visualization_changed, "Row-Column"))
+        self.a_ab_view = self.m_visualization.addAction("CIE-Lab Top View")
+        self.a_ab_view.setCheckable(True)
+        self.a_ab_view.setChecked(False)
+        self.a_ab_view.triggered.connect(partial(self.visualization_changed, "AB-Plane"))
+
         self.inner.resize(400, self.height())
-
-
-
+        self.stack = None
+        self.ab_view = None
+        self.slider_image_size = None
+        self.lbl_slider_size = None
 
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
@@ -124,6 +139,23 @@ class ScreenshotsManagerDockWidget(EDockWidget):
     def on_follow_time(self):
         self.screenshot_manager.follow_time = self.a_follow_time.isChecked()
 
+    def visualization_changed(self, type):
+        self.curr_visualization = type
+        if type == "Row-Column":
+            self.a_ab_view.setChecked(False)
+            self.stack.setCurrentIndex(0)
+            self.lbl_slider.setText("N-Columns")
+            self.slider_image_size.setVisible(False)
+            self.lbl_slider_size.setVisible(False)
+        elif type == "AB-Plane":
+            self.a_row_column.setChecked(False)
+            self.stack.setCurrentIndex(1)
+            self.lbl_slider.setText("Scale")
+            self.slider_image_size.setVisible(True)
+            self.lbl_slider_size.setVisible(True)
+
+        self.main_window.dispatch_on_changed([self.main_window.screenshots_manager])
+
     def create_bottom_bar(self):
         bar = QStatusBar(self)
         l = QHBoxLayout(bar)
@@ -133,21 +165,39 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.slider_n_per_row.setValue(10)
         self.slider_n_per_row.setStyleSheet("QSlider{padding: 2px; margin: 2px; background: transparent}")
 
-
         self.slider_n_per_row.valueChanged.connect(self.on_n_per_row_changed)
-        lbl = QLabel("N-Columns:")
-        lbl.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
-        bar.addPermanentWidget(lbl)
+        self.lbl_slider = QLabel("N-Columns:")
+        self.lbl_slider.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
+        bar.addPermanentWidget(self.lbl_slider)
         bar.addPermanentWidget(self.slider_n_per_row)
         self.lbl_n = QLabel("\t" + str(self.slider_n_per_row.value()))
         bar.addPermanentWidget(self.lbl_n)
-        self.inner.setStatusBar(bar)
 
-        self.bar = bar
+        self.slider_image_size = QSlider(Qt.Horizontal, self)
+        self.slider_image_size.setRange(1, 200)
+        self.slider_image_size.setValue(10)
+        self.slider_image_size.setStyleSheet("QSlider{padding: 2px; margin: 2px; background: transparent}")
+
+        self.slider_image_size.valueChanged.connect(self.on_image_size_changed)
+        self.lbl_slider_size = QLabel("Image-Size::")
+        self.lbl_slider_size.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
+        bar.addPermanentWidget(self.lbl_slider_size)
+        bar.addPermanentWidget(self.slider_image_size)
+        self.slider_image_size.setVisible(False)
+        self.lbl_slider_size.setVisible(False)
+        self.inner.setStatusBar(bar)
+        self.bar_row_column = bar
 
     def set_manager(self, screenshot_manager):
-        self.setWidget(screenshot_manager)
+        self.stack = QStackedWidget(self.inner)
+        self.stack.addWidget(screenshot_manager)
+
+        self.ab_view = ImagePlotCircular(self.stack)
+        self.stack.addWidget(self.ab_view)
+        self.setWidget(self.stack)
+
         self.screenshot_manager = screenshot_manager
+        self.screenshot_manager.ab_view = self.ab_view
         self.create_bottom_bar()
 
     def on_toggle_show_current(self):
@@ -156,17 +206,23 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
 
     def on_n_per_row_changed(self, value):
-        self.screenshot_manager.n_per_row = value + 1
-        self.lbl_n.setText("\t" + str(value))
-        self.screenshot_manager.arrange_images()
-        self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
+        if self.curr_visualization == "Row-Column":
+            self.screenshot_manager.n_per_row = value + 1
+            self.lbl_n.setText("\t" + str(value))
+            self.screenshot_manager.arrange_images()
+            self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
 
+        elif self.curr_visualization == "AB-Plane":
+            self.ab_view.set_range_scale(self.slider_n_per_row.value() / 0.01)
+
+    def on_image_size_changed(self):
+        self.ab_view.set_image_scale(self.slider_image_size.value())
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
     """
-    def __init__(self,main_window, parent = None):
+    def __init__(self,main_window, parent = None, ab_view = None):
         super(ScreenshotsManagerWidget, self).__init__(parent)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -230,6 +286,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         # self.setBaseSize(500,500)
         self.rubberBandChanged.connect(self.rubber_band_selection)
 
+        self.ab_view = ab_view
+
+        self.ab_view_mean_cache = dict()
+        self.qimage_cache = dict()
+
     def set_loading(self, state):
         if state:
             self.clear_manager()
@@ -283,12 +344,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         current_segment_id = 0
         current_sm_object = None
+        new_qimage_cache = dict()
         for s in self.project.screenshots:
-            # s = Screenshot()
-
             # If this Screenshot belongs to a new Segment, append the last SMObject to the list
             if s.scene_id != current_segment_id:
-
                 if current_sm_object is not None:
                     self.images_segmentation.append(current_sm_object)
 
@@ -304,13 +363,20 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 image = s.img_movie
 
             # Convert to Pixmap
-            try:
+            # Cache the converted QPixamps if these are not the initial place holders
+            if image.shape[0] > 100:
+                # Check if the Image is already in the cache
+                if str(s.unique_id) in self.qimage_cache:
+                    qpixmap = self.qimage_cache[str(s.unique_id)]
+                else:
+                    try:
+                        qpixmap = numpy_to_pixmap(image)
+                        self.qimage_cache[str(s.unique_id)] = qpixmap
+                    except:
+                        continue
+                new_qimage_cache[str(s.unique_id)] = qpixmap
+            else:
                 qpixmap = numpy_to_pixmap(image)
-            except Exception as e:
-                print("An Error Occured, Save and Restart. An Error occured in the Screenshot", e)
-                # self.main_window.print_message("An Error Occured, Save and Restart. An Error occured in the Screenshot "
-                #                                "Manager, I suggest you restart the application" + str(e), "Orange")
-                continue
 
             item_image = ScreenshotManagerPixmapItems(qpixmap, self, s)
             self.scene.addItem(item_image)
@@ -330,6 +396,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if current_sm_object is not None:
             self.images_segmentation.append(current_sm_object)
 
+        self.qimage_cache = new_qimage_cache
         self.clear_selection_frames()
         self.arrange_images()
 
@@ -414,8 +481,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 img.setPos(x, y + int(img_height / 5))
                 img.selection_rect = QtCore.QRect(x, y + int(img_height / 5), img_width, img_height)
 
-
-
         self.scene.setSceneRect(self.sceneRect().x(), self.sceneRect().y(), self.n_per_row * (img_width + x_offset) - 0.5 * img_width, y)
 
         # Drawing the New Selection Frames
@@ -423,8 +488,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         self.img_height = img_height
         self.img_width = img_width
-
-        # self.frame_segment(self.current_segment_index, center=False)
 
     def add_line(self, y):
         p1 = QtCore.QPointF(0, y)
@@ -499,12 +562,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         for s in self.images_plain:
             if isinstance(s, ScreenshotManagerPixmapItems) and s.screenshot_obj == scr_item:
                 rect = s.sceneBoundingRect()
-                print(rect)
                 self.fitInView(rect, Qt.KeepAspectRatio)
                 self.curr_scale = self.sceneRect().width() / rect.width()
                 break
         print("Not Found")
-
 
     def frame_segment(self, segment_index, center = True):
         self.current_segment_index = segment_index
@@ -580,7 +641,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.project = project
         self.update_manager()
 
+        if self.ab_view is not None:
+            self.ab_view.scene().clear()
+
     def on_changed(self, project, item):
+        if item is not None and item.get_type() not in [SEGMENT, SEGMENTATION, SCREENSHOT, SCREENSHOT_GROUP, PROJECT]:
+            return
         self.project = project
         self.update_manager()
         self.on_selected(None, project.get_selected())
@@ -590,9 +656,27 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         else:
             self.center_images()
 
+        if self.ab_view is not None:
+            if self.ab_view.isVisible():
+                self.ab_view.clear_view()
+                self.ab_view.add_grid()
+                new_cache = dict()
+                for s in self.project.screenshots:
+                    if str(s.unique_id) not in self.ab_view_mean_cache:
+                        mean = np.mean(cv2.cvtColor(s.img_movie, cv2.COLOR_BGR2LAB),axis = (0,1))
+                    else:
+                        mean = self.ab_view_mean_cache[str(s.unique_id)]
+                    # We have to make sure that we do not cache the place holder before the actual images are loaded
+                    if s.img_movie.shape[0] > 100.0:
+                        new_cache[str(s.unique_id)] = mean
+                    self.ab_view.add_image(mean[1], mean[2], s.img_movie, to_float=True)
+                self.ab_view_mean_cache = new_cache
+
     def on_closed(self):
         self.clear_manager()
         self.setEnabled(False)
+        if self.ab_view is not None:
+            self.ab_view.scene().clear()
 
     def on_selected(self, sender, selected):
         if selected is None:

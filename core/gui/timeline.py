@@ -5,7 +5,7 @@ from core.container.project import *
 from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 from core.gui.ewidgetbase import ImagePreviewPopup, TextEditPopup
-
+import time
 
 class TimelineContainer(EDockWidget):
     def __init__(self, main_window):
@@ -366,7 +366,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         item = [control, [bars], self.bar_height]
         self.item_screenshots.append(item)
         self.items.append(item)
-        self.update_ui()
+
 
     def add_bar(self):
         b = TimelineBar(self.frame_Bars, self)
@@ -411,18 +411,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_label.move(pos + 20 + self.controls_width - self.scrollArea.horizontalScrollBar().value(), 5)
 
     def paintEvent(self, QPaintEvent):
-        #TODO are these statements really necessary??
-        # self.frame_Controls.setFixedSize(self.controls_width, self.frame_Controls.height())
-        # self.frame_Bars.setFixedSize(self.duration /self.scale + self.controls_width + self.timeline_tail, self.frame_Bars.height())
-        # self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
-        # self.time_scrubber.setFixedHeight(self.height())
-
         super(Timeline, self).paintEvent(QPaintEvent)
-
-
-
-        # This makes OSX go crazy
-        # self.update_time_bar()
 
     def update_time_bar(self):
         if self.time_bar is None:
@@ -500,6 +489,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()
+
         self.clear()
         self.duration = project.get_movie().duration
 
@@ -514,10 +504,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for grp in project.screenshot_groups:
             self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
-        # self.update_time_bar()
         self.on_selected(None, project.selected)
         self.update_ui()
-
         self.scrollArea.verticalScrollBar().setValue(vlocation)
 
     def on_selected(self, sender, selected):
@@ -1472,7 +1460,7 @@ class TimebarPicture(QtWidgets.QWidget):
         self.is_hovered = False
         self.color = (123, 86, 32, 100)
         self.pic_height = height
-        qimage, qpixmap = numpy_to_qt_image(screenshot.get_preview(scale=0.1))
+        qimage, qpixmap = screenshot.get_preview(scale=0.1)
         self.pixmap = qpixmap
         self.qimage = qimage
         self.size = (screenshot.img_movie.shape[0], screenshot.img_movie.shape[1])
@@ -1482,7 +1470,6 @@ class TimebarPicture(QtWidgets.QWidget):
         self.show()
 
     def paintEvent(self, QPaintEvent):
-
         if self.is_hovered:
             col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 100)
         else:

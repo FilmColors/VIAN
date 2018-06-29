@@ -192,6 +192,9 @@ class ExportImageDialog(EDialogWidget):
 
     def on_update(self):
         background = QColor(self.spinBox_BG_R.value(), self.spinBox_BG_G.value(), self.spinBox_BG_B.value(), self.spinBox_BG_A.value())
+        if not self.checkBox_Transparent.isChecked():
+            background.setAlpha(255)
+
         size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value())
         image = self.visualization.render_to_image(background, size)
         self.preview.set_image(image)

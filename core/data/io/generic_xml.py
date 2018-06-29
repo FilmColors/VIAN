@@ -83,16 +83,19 @@ class GenericXMLDevice():
         for a in lay.annotations:
             # a = Annotation()
             (ref_start, ref_end) = self.to_time_mapping(time_mapping, a)
+            pos = str(a.orig_position[0]) +", "+ str(a.orig_position[1])
+            size = str(a.size[0]) + ", " + str(a.size[1])
+            color = str(a.color[0]) + ", " + str(a.color[1])+ ", " + str(a.color[1])
             d = dict(
                 ID = str(a.unique_id),
                 T_START = ref_start,
                 T_END = ref_end,
                 A_TYPE = str(a.a_type),
-                POS = str(a.orig_position),
-                SIZE = str(a.size),
+                POS = pos,
+                SIZE = size,
                 TEXT = str(a.text),
                 RESSOURCE_PATH = str(a.resource_path),
-                COLOR = str(a.color)
+                COLOR = color
             )
             et.SubElement(grp, "VISUAL_ANNOTATION", d)
 
@@ -122,10 +125,14 @@ class GenericXMLDevice():
                 d = dict(
                     ID = str(s.unique_id)
                 )
-                et.SubElement(elem, "SCREENSHOT", d)
+                et.SubElement(elem, "SCREENSHOT_REF", d)
 
     def add_experiment(self, root, experiment: Experiment):
-        grp = et.SubElement(root, "EXPERIMENTS")
+        d = dict(
+            NAME = experiment.name,
+            ID = str(experiment.unique_id)
+        )
+        grp = et.SubElement(root, "EXPERIMENT", d)
         for t in experiment.classification_objects:
             # t = ClassificationObject()
             d = dict(
@@ -206,7 +213,7 @@ class GenericXMLDevice():
         """
         rough_string = et.tostring(elem, 'utf-8')
         reparsed = md.parseString(rough_string)
-        return reparsed.toprettyxml(indent="\t")
+        return reparsed.toprettyxml(indent="/t")
 
     def export(self, project: VIANProject, out_path):
 
@@ -282,13 +289,11 @@ class GenericXMLDevice():
 
             pos = c.get("POS").replace("[", "").replace("]", "").split(",")
             pos = (float(pos[0]), float(pos[1]))
-            print(size)
-            print(pos)
             ann = Annotation(t_start = self.get_time_ms(time_mapping, c.get("T_START")),
                              t_end=self.get_time_ms(time_mapping, c.get("T_END")),
                              text = c.get("TEXT"),
                              a_type = eval(c.get("A_TYPE")),
-                             size = size, orig_position = pos)
+                             size = size, orig_position = pos, resource_path=c.get("RESSOURCE_PATH"))
 
             ann.unique_id = int(c.get("ID"))
             lay.add_annotation(ann)
@@ -314,5 +319,7 @@ class GenericXMLDevice():
 
 if __name__ == '__main__':
     from core.data.headless import *
-    project = VIANProject(HeadlessMainWindow())
-    GenericXMLDevice().import_("../../../test/out.xml", project)
+    project = load_project_headless("C:/Users/Gaudenz Halter/Documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/3774_1_1_Blade_Runner_1900_DVD.eext")
+    GenericXMLDevice().export(project, "../../../test/")
+    # project = VIANProject(HeadlessMainWindow())
+    # GenericXMLDevice().import_("../../../test/out.xml", project)

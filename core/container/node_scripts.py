@@ -4,7 +4,8 @@ from PyQt5.QtCore import QPoint, QSize
 from core.data.enums import NODE_SCRIPT
 from core.data.interfaces import IProjectContainer, IHasName, ISelectable
 from core.node_editor.node_editor import NODE
-
+from core.node_editor.operations import *
+from core.node_editor.datatypes import *
 
 class NodeScript(IProjectContainer, IHasName, ISelectable):
     def __init__(self, name = ""):
@@ -23,7 +24,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
     def add_node(self, node):
         self.nodes.append(node)
         node.node_script = self
-        self.dispatch_on_changed()
+        self.dispatch_on_changed(item=self)
 
     def remove_node(self, node, dispatch = True):
         if node in self.nodes:
@@ -31,7 +32,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
             self.project.remove_from_id_list(node)
 
             if dispatch:
-                self.dispatch_on_changed()
+                self.dispatch_on_changed(item=self)
             print("Removed")
         else:
             print("Not Found")

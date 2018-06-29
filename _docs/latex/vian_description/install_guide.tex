@@ -11,6 +11,7 @@
 \usepackage{fancybox} % for shadowed or double bordered boxes
 \usepackage{fancyhdr}
 \usepackage{mdframed}
+\usepackage{pdflscape}
 
 \DeclareGraphicsExtensions{.pdf, .jpg}
 
@@ -49,7 +50,7 @@
 
 	\vspace{0.5cm}
 	\Huge
-	{\textbf \textsf{VIAN\\ \huge Visual Film Annotation and Analysis}}
+	{\textbf \textsf{VIAN\\ \huge Datamodel and XML Export Format}}
 
 	\vfill\vfill\vfill
 	\vfill
@@ -57,7 +58,7 @@
 	\vfill \vfill \vfill
 	\large
 	Author:\\
-	Gaudenz Halter\\
+	Gaudenz Halter, 27.06.2018\\
 	
 	
 	
@@ -86,93 +87,92 @@
 %%
 
 
-%=====================================================================
-\section{FilmColors Project} \label{chp:introduction}
-%=====================================================================
-VIAN is developed a part of the ERC FilmColors project, which aims to systematically investigate the relationships between technological processes and the aesthetics of film colors through a new interdisciplinary approach of film and computer science. The project will develop new software to analyze a large number of color films from each decade since the invention of film. Aesthetic analyses in film history will be supplemented with measurement methods from the natural sciences to investigate the chemical and physical characteristics of film colors.  \\
-Part of the project is the segmentation and classification of a corpus of approximately 450 films. The process for each movie is the following: 
+\begin{landscape}
+	\begin{figure}[htp]
+		\centering
+		\includegraphics[width = 1.5\textwidth]{figures/VIAN_DataModel_simplified.pdf}
+		\label{fig:vian_classobj}
+	\end{figure}
+\end{landscape}
 
-\begin{itemize}
-	\item Segment a Film into coherent segments (ELAN)
-	\item Taking a set of representing stills for each segment (ELAN)
-	\item Classifying the Segments based on a large set of Vocabularies (FileMaker) (approx. 1000 words)
-	\item Using (semi-)automatic tools to extract color-features (VIAN)
-\end{itemize}
+\section{Introduction}
+VIAN projects are serialized into a json file and a list of binary objects, holding large numeric data generated during analysis. (i.e. Color Palettes, Histograms, etc.)\\
 
-Most of these tasks have been done using ELAN for the segmentation and still-taking of the films. Since the number of stills per full-length movie lies roughly between 500 and 1000, storing each still separately and naming it correctly, can become a time-consuming process and involves a high error rate in the naming convention. As such, VIAN has initially been developed as an application that could be remotely controlled by ELAN and allowed to automatically generate stills, name them according to our convention, store them consistently and to be able to draw basic shapes onto a frame. 
-Over the last year, the list of requirements for VIAN has grown, including: 
+Since a lot of the data stored is application and python specific, VIAN supports an XML export of annotations and analysis, its elements are described in this document. Links between different entities are serialized using the ID attribute. IDs are guaranteed to be unique and declared before referenced in the document.
 
-\begin{itemize}
-	\item Providing an Interface for automatic analyses
-	\item Per Frame Update when scrubbing though a movie
-	\item Generating film visualizations
-\end{itemize}
+Additionally the VIAN project json file is described at the end of this document by an example.
 
-VIAN tries to simplify this process by combining all features needed in the described workflow. This is especially important for the FilmColors project, because one final product of the project should be a WebApp that allows visualization of the Corpus as well as a crowd-sourcing toolset that is able to commit new project to the Corpus. This toolset is VIAN. 
-
-
- 
-\newpage
-%=====================================================================
-\section{Entities} \label{chp:features}
-%=====================================================================
-
-The basic concept is, that there are entities that are collected by the user. (Segments, Visual Annotations and Screenshots), these can later be classified using a set of vocabularies. \\
-To give an impression on how VIAN works and looks, some of the features are subsequently described. 
-
-\subsection{Segmentation}
-VIAN uses two types of Tier based annotations, Segmentations and Visual Annotations. Segments refer to annotations that don’t have a visual representation on the films frame, thus these are equivalent to the annotations of ELAN. 
-
-\subsection{Visual Annotations}
-Contrary, visual annotations have an additional representation on the screen, i.e. Text, Image, basic geometric shapes or freehand drawing. Their position and size may vary over time (\textit{keyable}). 
-
-\begin{figure}[htp]
-	\centering
-	\includegraphics[width=1.0\textwidth]{figures/vian_segmentation.PNG}
-	\caption{The default view of VIAN. The Screenshot Manager on the right. Stills are sorted by the segmentation and indexed within the segment. Additionally they are shown in the timeline. }
-	\label{fig:vian_segmentation}
-\end{figure}
-
-\subsection{Screenshots}
-VIAN treats stills as important objects, makes it easy to create, export and manage them. Typically, the stills represent a specific feature of a segment that the annotating person has observed. VIAN sorts them according to the segment they are in. Stills are only stored only by time, thus must  be exported to be accessible without VIAN. 
-
-\subsection{External Media-Objects}
-For both, annotations and segments, external media can be attached by simply drag and drop the file on the target in the timeline. VIAN will then copy the file to the project directory and link the media file to the entity it has been dropped. Once the user wants to open the file, VIAN tries to use the default application of the OS to open the file. 
-
-
-\subsection{Experiments}
-
-Once the Entities are collected, classification can set place. This is done using VIAN’s Experiment entity, which defines a set of rules that the annotator must conform. 
-
-\begin{itemize}
-	\item Automatic analyses that have to be performed (and their parameters)
-	\item A list of Classification Objects and their associated Vocabularies
-	\item Which entities should be classified
-	\item The final classification results. (A list of keyword and entities)
-\end{itemize}
-
-Example: \\
-In the FilmColors project, there is a specific distinction between \textit{foreground} (the character-space) and the background (the object-space and void). One vocabulary called “Hues” was used to classify the most dominant colors of both the foreground and background. Thus the Classification Objects are \textit{foreground} and \textit{background}, both have to be classified by the vocabulary “\textit{Hue}”.\\
-A second vocabulary “\textit{Materials Character}” was used, to give information about what materials were used for clothing and jewelry of the characters. Since this vocabulary should only be applied to the characters, only the Classification Object “\textit{foreground}” should be classified by it.  In the VIAN Experiment editor this would look the following:
-
-\begin{figure}[htp]
-	\centering
-	\includegraphics[width=0.48\textwidth]{figures/vian_exp_bg.png}
-	\hfill
-	\includegraphics[width=0.48\textwidth]{figures/vian_exp_fg.png}
-	\caption{The default view of VIAN. The Screenshot Manager on the right. Stills are sorted by the segmentation and indexed within the segment. Additionally they are shown in the timeline. }
-	\label{fig:vian_classobj}
-\end{figure}
+\section{XML Schema}
+\subsection{Element: ANNOTATION\_DOCUMENT}
+\lstinputlisting[language=xml,label=example]{code/edocument.txt}
+\subsection{Element: HEADER}
+\lstinputlisting[language=xml,label=example]{code/eheader.txt}
+\subsection{Element: MEDIA\_DESCRIPTOR}
+\lstinputlisting[language=xml,label=example]{code/edescriptor.txt}
 
 \newpage
-Once the experiment is setup, VIAN will loop through all entities that should be classified and show the user the corresponding vocabularies. 
+\subsection{Element: TIME\_ORDER and TIME\_SLOT}
+\lstinputlisting[language=xml,label=example]{code/etimeorder.txt}
+VIAN uses an implicit timeline, that is, each Segment, Visual Annotation or Screenshot object stores it's media time directly. In the XML export format, a list of TIME\_SLOTS is created, and each serialization of an object media-time information references one or two TIME\_SLOTS. \\
+\\
+Note: Currently TIME\_SLOTS are unique, thus for each time there can not be more than one TIME\_SLOT.\\
+\subsection{Element: SEGMENTATION and SEGMENT}
+\lstinputlisting[language=xml,label=example]{code/esegmentation.txt}
+The first kind of annotation supported by VIAN are called "Segment" and are aggregated in a Tier called "Segmentation". A segment has a start and end-point and may have a text body. \\
 
-\begin{figure}[htp]
-	\centering
-	\includegraphics[width=1.0\textwidth]{figures/classification.PNG}
-	\caption{The default view of VIAN. The Screenshot Manager on the right. Stills are sorted by the segmentation and indexed within the segment. Additionally they are shown in the timeline. }
-	\label{fig:vian_classobj}
-\end{figure}
+\subsection{Element: SCREENSHOTS and SCREENSHOT}
+\lstinputlisting[language=xml,label=example]{code/escreenshots.txt}
+The second type of annotations are "Screenshots", which are aggregated in "ScreenshotGroups". 
+A screenshot only has a start-time in the XML export. 
 
+\newpage
+\subsection{Element: ANNOTATION\_LAYER and VISUAL\_ANNOTATION}
+Finally there are "Visual Annotations", aggregated in "Annotation Layers", which represent vector graphics, that are placed on the screen. \\
+\lstinputlisting[language=xml,label=example]{code/evisannotation.txt}
+Note that the export of visual annotations does currently not support: 
+\begin{itemize}
+	\item Export of keys on annotations
+	\item Export of FreeHand annotations. 
+\end{itemize}
+
+
+\newpage
+\subsection{Element: EXPERIMENT}
+The process of data acquisition (i.e. creating segments, annotations and screenshots) and classification of these entities using vocabularies is splitted, such that different classifications can be performed on the same segments and annotations. \\ 
+Essentially a subject of interest (Classification Object), can be present in several tiers (the targets), and can be classified by multiple vocabularies. For each classification object a list of unique keywords is generated which can then be attached to the classification targets as tags. All this information is contained in an experiment.\\
+
+\centering
+\begin{minipage}{0.8\textwidth}
+\textbf{Example:}
+	The classification object "Background" can be present in the scene segmentation as well as the screenshots, 
+	and would probably be classified with the vocabularies "Color", "Shadows". 
+\end{minipage}
+\lstinputlisting[language=xml,label=example]{code/eexperiment.txt}
+
+\subsection{Element: CLASSIFICATION\_OBJECT}
+\lstinputlisting[language=xml,label=example]{code/eclassificationobj.txt}
+
+\subsection{Element:VOCABULARY and VOCABULARY\_WORD}
+\lstinputlisting[language=xml,label=example]{code/evocabulary.txt}
+
+\subsection{Element: KEYWORDS}
+\lstinputlisting[language=xml,label=example]{code/ekeywords.txt}
+
+\subsection{Element: CLASSIFICATION}
+The classification represents the mapping of tags their targets. (screenshots, segments, visual annotations) 
+\lstinputlisting[language=xml,label=example]{code/eclassification.txt}
+\newpage
+
+\subsection{Element: EXTERNAL\_MEDIA\_OBJECT}
+\lstinputlisting[language=xml,label=example]{code/eexternalmedia.txt}
+
+\subsection{Element: ANALYSES}
+\lstinputlisting[language=xml,label=example]{code/eanalyses.txt}
+
+
+\newpage
+\section{Json Schema}
+VIAN serializes its projects into a folder hierarchy and a Json file. Since this contains a lot of application specific information and has never been intended to be read by other applications, the XML Export may be the better way enforce interoperability with other applications. But for the sake of completeness, a documented Json is shown in the rest of this document. 
+\lstinputlisting[language=c++,label=example]{code/bladerunner.eext}
 
 \end{document}

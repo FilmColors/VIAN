@@ -379,7 +379,6 @@ class PaletteLABView(QWidget, IVIANVisualization):
             color = cols_to_draw[q]
             radius = self.dot_size
             lab = tpl_bgr_to_lab(color)
-            print(lab)
 
             # increase the visible number of dots:
             if self.jitter > 1:

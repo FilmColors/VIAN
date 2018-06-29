@@ -24,6 +24,7 @@ from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
 from core.data.settings import UserSettings
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.exporters import *
+from core.concurrent.auto_screenshot import *
 from core.concurrent.auto_segmentation import *
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -65,7 +66,7 @@ from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
-VERSION = "0.6.4"
+VERSION = "0.6.5"
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
@@ -350,6 +351,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         #TOOLS
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
+        self.actionAuto_Screenshots.triggered.connect(self.on_auto_screenshot)
+
 
         self.actionColormetry.triggered.connect(self.start_colormetry)
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
@@ -945,13 +948,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.undo_manager.redo()
 
     def on_delete(self):
+        self.project.inhibit_dispatch = True
         to_delete = self.project.selected
         try:
             for d in to_delete:
                 d.delete()
         except Exception as e:
             print(e)
-
+        self.project.inhibit_dispatch = False
+        self.dispatch_on_changed()
     def update_overlay(self):
         if self.drawing_overlay is not None and self.drawing_overlay.isVisible():
             self.drawing_overlay.update()
@@ -1584,7 +1589,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_auto_segmentation(self):
         dialog = DialogAutoSegmentation(self, self.project)
         dialog.show()
-        # auto_segmentation(self.project,mode = AUTO_SEGM_CHIST, n_segment=10)
+
+    def on_auto_screenshot(self):
+        dialog = DialogAutoScreenshot(self, self.project)
+        dialog.show()
 
     # endregion
 
@@ -1865,7 +1873,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is None or not self.allow_dispatch_on_change:
             return
-
         if receiver is not None:
             for r in receiver:
                 r.on_changed(self.project, item)

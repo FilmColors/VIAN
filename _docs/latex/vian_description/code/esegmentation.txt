@@ -1,0 +1,13 @@
+<SEGMENTATION ID="7660852745" NAME="Main Segmentation">	
+	<SEGMENT BODY="Some Annotation Text" ID="1697026929" T_END="ts4" T_START="ts3"/>
+</SEGMENTATION>
+
+##SEGMENTATION
+@ID: Unique ID of this segmentation
+@NAME: The name of this segmentation
+
+#SEGMENT
+@BODY: The annotation text
+@ID: The unique ID of this annotation
+@T_END: A reference to a TIME_SLOT where this annotation ends
+@T_START: A reference to a TIME_SLOT where this annotation starts

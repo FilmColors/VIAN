@@ -213,6 +213,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionAuto_Segmentation"/>
+    <addaction name="actionAuto_Screenshots"/>
    </widget>
    <widget class="QMenu" name="menuCorpus">
     <property name="title">
@@ -796,6 +797,11 @@
   <action name="actionColor_Palette">
    <property name="text">
     <string>Color Palette</string>
+   </property>
+  </action>
+  <action name="actionAuto_Screenshots">
+   <property name="text">
+    <string>Auto Screenshots</string>
    </property>
   </action>
  </widget>

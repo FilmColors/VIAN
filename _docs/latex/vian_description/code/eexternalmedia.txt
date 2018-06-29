@@ -1,0 +1,7 @@
+<EXTERNAL_MEDIA_OBJECTS>
+	<EXTERNAL_MEDIA ID="1741505363" PATH="01_DOF_Explanation.png" TARGET_ID="1166372514"/>
+</EXTERNAL_MEDIA_OBJECTS>
+
+@ID: The unique id of this external media object
+@PATH: The relative path to the external media object in the export directory
+@TARGET_ID: The unique ID of the container this media objects is attached to

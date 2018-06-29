@@ -1,0 +1,7 @@
+<HEADER MEDIA_FILE="//abs/path/3774_1_1_Blade_Runner_2049_DVD.m4v" PROJECT_NAME="3774_1_1_Blade_Runner_1900_DVD" TIME_UNITS="milliseconds"></HEADER>
+
+## HEADER
+@ MEDIA_FILE: Absolute path to the media file
+@ PROJECT_NAME: The name of the project
+@ TIME_UNITS: How all time measurements in this document are encoded (always MS)
+

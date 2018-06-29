@@ -4,6 +4,7 @@ from PyQt5.QtCore import pyqtSlot
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from core.data.interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
+from core.data.computation import numpy_to_qt_image
 import datetime
 
 class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable):
@@ -42,6 +43,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.annotation_is_visible = False #TODO WRONG
         self.timeline_visibility = True #TODO WRONG
 
+        self.preview_cache = None
         self.curr_size = 1.0
 
 
@@ -60,7 +62,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             project = self.project
 
         obj = project.streamer.from_stream(self.unique_id)
-
 
     pyqtSlot(object)
     def on_images_loaded(self, obj):
@@ -108,7 +109,17 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             self.img_blend = np.zeros_like(self.img_movie)
 
     def get_preview(self, scale = 0.2):
-        return cv2.resize(self.img_movie, None,None, scale, scale, cv2.INTER_CUBIC)
+        """
+        Returns a resized tuple (qimage, qpixmap) from the movie-image. 
+        THe Preview will be cached for fast updated
+        :param scale: 
+        :return: 
+        """
+        if (self.preview_cache is None or self.preview_cache[0] != scale) and self.img_movie.shape[0] > 100:
+            self.preview_cache = (scale, numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC)))
+            return self.preview_cache[1]
+        else:
+            return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
     def set_name(self, name):
         self.title = name
@@ -202,7 +213,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         self.name = name
         for s in self.screenshots:
             s.screenshot_group = self.name
-        self.dispatch_on_changed()
+        self.dispatch_on_changed(item=self)
 
     def add_screenshots(self, shots):
         if not isinstance(shots, list):
@@ -211,7 +222,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
             self.screenshots.append(s)
             s.screenshot_group = self.get_name()
 
-        self.dispatch_on_changed()
+        self.dispatch_on_changed(item=self)
 
     def remove_screenshots(self, shots):
         if not isinstance(shots, list):

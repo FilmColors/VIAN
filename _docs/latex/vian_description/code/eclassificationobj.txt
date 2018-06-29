@@ -1,0 +1,8 @@
+<CLASSIFICATION_OBJECT ID="6353598060" NAME="Global">
+	<TARGET ID="1049798528"/>
+</CLASSIFICATION_OBJECT>
+
+@ID: The unique id of this classification object
+@NAME: The name of this classification object
+@TARGET_ID: A reference to IContainerGroup (Segmentation, AnnotationLayer, ScreenshotGroup) this classification object can be found in
+

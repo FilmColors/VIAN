@@ -9,6 +9,7 @@ from core.data.settings import UserSettings
 from core.data.project_streaming import *
 from core.gui.main_window import VERSION
 from shutil import copy2, move
+from core.gui.main_window import *
 
 class HeadlessUserSettings():
     def __init__(self):
@@ -34,6 +35,9 @@ class HeadlessMainWindow(QObject):
         pass
     def dispatch_on_closed(self, *args):
         pass
+
+    def eval_class(self, name):
+        return eval(name)
 
 
 def load_project_headless(path) -> VIANProject:

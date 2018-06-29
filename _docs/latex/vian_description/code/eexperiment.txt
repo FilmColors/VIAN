@@ -1,0 +1,11 @@
+<EXPERIMENT ID="4846731777" NAME="ERC Advanced Grant FilmColors">
+	<CLASSIFICATION_OBJECT ID="6353598060" NAME="Global"> ... </CLASSIFICATION_OBJECT>
+	...
+	<VOCABULARY CATEGORY="ELAN Data" ID="7835076715" INFO_URL="" NAME="Location"> ... </VOCABULARY>
+	...
+	<KEYWORDS> ... </KEYWORDS>
+	<CLASSIFICATION> ... </CLASSIFICATION>
+</EXPERIMENTS>
+
+@ID: The unique ID of the experiment
+@NAME: The name of the experiment

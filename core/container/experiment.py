@@ -85,7 +85,7 @@ class Vocabulary(IProjectContainer, IHasName):
         self.project.remove_from_id_list(word)
 
         if dispatch:
-            self.dispatch_on_changed()
+            self.dispatch_on_changed(item=self)
 
     def get_word_by_name(self, name):
         for w in self.words_plain:

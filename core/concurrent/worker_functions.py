@@ -27,7 +27,6 @@ def create_screenshot(args, sign_progress):
 
     shot = Screenshot("New Screenshot", frame, annotation, blend, time, 0, frame_pos)
 
-
     return shot
 
 

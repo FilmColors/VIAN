@@ -410,19 +410,15 @@ class OperationIterate(Operation):
 
             self.onProgress.emit(float(self.current_index) / self.iterable_length)
 
-
             if self.current_index < self.iterable_length - 1:
                 self.current_item = iterable[self.current_index]
                 self.result = [self.current_item, True]
-
-
 
             else:
                 self.current_item = iterable[self.current_index]
                 self.result = [self.current_item, False]
 
             self.current_index += 1
-
 
         except Exception as e:
             self.handle_exception(e)
@@ -638,6 +634,31 @@ class OperationAddAnnotationLayer(ProjectOperation):
             annotation = layer.create_annotation(type = AnnotationType.Rectangle, position = pos, size=size, color = (255,255,255), line_width = 5, name = name)
             layer.add_annotation(annotation)
 
+
+class OperationCreateScreenshot(Operation):
+    def __init__(self):
+        super(OperationCreateScreenshot, self).__init__("Create Screenshot",
+                                                       [Slot("Name", DT_Literal, "New Segmentation"),
+                                                        Slot("Frame-Pos", DT_Numeric, -1),
+                                                        Slot("Frame-MS", DT_Numeric, -1)],
+                                                     [Slot("Screnshot", DT_Screenshot, None)], is_final_node=True)
+
+    def perform(self, args, progress_signal, project):
+        try:
+            self.result = [[args[0], args[1], args[2]]]
+
+        except Exception as e:
+            self.handle_exception(e)
+
+
+    def modify_project(self, project, args):
+        name = args[0]
+        start_frame = args[1]
+        start_ms = args[2]
+        if start_frame >= 0:
+            project.create_screenshot(name, frame_pos=start_frame)
+        elif start_ms >= 0:
+            project.create_screenshot(name, time_ms=start_ms)
 
 
 

@@ -21,6 +21,7 @@ class IVIANVisualization():
         qp.end()
         return image
 
+
 class HistogramVis(QWidget, IVIANVisualization):
     def __init__(self, parent):
         super(HistogramVis, self).__init__(parent)

@@ -57,47 +57,10 @@ class DT_Vector2(DT_Vector):
     def __init__(self, parent = None, default_value = None):
         super(DT_Vector2, self).__init__(parent, color=QColor(232,209,116), default_value=default_value)
 
-    # def widget(self, parent):
-    #     w = super(DT_Vector2, self).widget(parent)
-    #     sp1 = QSpinBox(w)
-    #     sp2 = QSpinBox(w)
-    #
-    #     sp1.valueChanged.connect(partial(self.on_widget_changed, [sp1, sp2]))
-    #     sp2.valueChanged.connect(partial(self.on_widget_changed, [sp1, sp2]))
-    #
-    #     w.layout().addWidget(sp1)
-    #     w.layout().addWidget(sp2)
-    #     w.setStyleSheet("QWidget{margin: 0pt; padding: 0pt;}")
-    #
-    #     return w
-
-    # def on_widget_changed(self, boxes):
-    #     self.value = [boxes[0].value(), boxes[1].value()]
-
 
 class DT_Vector3(DT_Vector):
     def __init__(self, parent = None, default_value = None):
         super(DT_Vector3, self).__init__(parent, color=QColor(227,158,84), default_value=default_value)
-
-    # def widget(self, parent):
-    #     w = super(DT_Vector3, self).widget(parent)
-    #     sp1 = QSpinBox(w)
-    #     sp2 = QSpinBox(w)
-    #     sp3 = QSpinBox(w)
-    #
-    #     sp1.valueChanged.connect(partial(self.on_widget_changed, [sp1, sp2, sp3]))
-    #     sp2.valueChanged.connect(partial(self.on_widget_changed, [sp1, sp2, sp3]))
-    #     sp3.valueChanged.connect(partial(self.on_widget_changed, [sp1, sp2, sp3]))
-    #
-    #     w.layout().addWidget(sp1)
-    #     w.layout().addWidget(sp2)
-    #     w.layout().addWidget(sp3)
-    #
-    #     return w
-
-
-    # def on_widget_changed(self, boxes):
-    #     self.value = [boxes[0].value(), boxes[1].value(), boxes[2].value()]
 
 
 class DT_VectorArray(DT_Numeric):
@@ -132,6 +95,7 @@ class DT_Segment(DataType):
     def set_segment_end(self, end_ms):
         self.value[2] = end_ms
 
+
 class DT_Annotation(DataType):
     def __init__(self,parent = None,  color = QColor(225, 82, 230), default_value = None):
         super(DT_Annotation, self).__init__(parent, color = color, default_value=default_value)
@@ -139,7 +103,10 @@ class DT_Annotation(DataType):
         self.value = ["New Annotation", (0, 0), (100, 100)]
 
 
-
+class DT_Screenshot(DataType):
+    def __init__(self, parent = None, color = QColor(225, 160, 20), default_value = None):
+        super(DT_Screenshot, self).__init__(parent, color = color, default_value=default_value)
+        self.value = ["New Screenshot", 0]
 
 #endregion
 
@@ -206,7 +173,6 @@ def cast_numeric_axis_reduction(input_slots, axis):
 
 def cast_axis_extension(input_slots):
     input_types = [s.data_type() for s in input_slots]
-
 
     if isinstance(input_types[0], DT_Image):
         output_types = [DT_ImageStack]

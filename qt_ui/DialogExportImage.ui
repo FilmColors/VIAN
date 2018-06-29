@@ -133,12 +133,12 @@
             </size>
            </property>
            <property name="text">
-            <string>Transparent:</string>
+            <string>Use Transparency:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox">
+          <widget class="QCheckBox" name="checkBox_Transparent">
            <property name="text">
             <string/>
            </property>
@@ -175,8 +175,14 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
            <property name="maximum">
             <number>255</number>
+           </property>
+           <property name="value">
+            <number>27</number>
            </property>
           </widget>
          </item>
@@ -188,8 +194,14 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
            <property name="maximum">
             <number>255</number>
+           </property>
+           <property name="value">
+            <number>27</number>
            </property>
           </widget>
          </item>
@@ -201,8 +213,14 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
            <property name="maximum">
             <number>255</number>
+           </property>
+           <property name="value">
+            <number>27</number>
            </property>
           </widget>
          </item>
@@ -215,6 +233,9 @@
             </sizepolicy>
            </property>
            <property name="maximum">
+            <number>255</number>
+           </property>
+           <property name="value">
             <number>255</number>
            </property>
           </widget>
