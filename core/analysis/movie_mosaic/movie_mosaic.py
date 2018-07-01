@@ -8,7 +8,6 @@ from core.data.computation import ms_to_frames
 from core.container.project import *
 from core.gui.ewidgetbase import EGraphicsView  # , GraphicsViewDockWidget
 
-
 class MovieMosaicAnalysis(IAnalysisJob):
     def __init__(self):
         super(MovieMosaicAnalysis, self).__init__(name = "Movie Mosaic",
@@ -147,7 +146,6 @@ class MovieMosaicAnalysis(IAnalysisJob):
 
     def to_database(self, container_data):
         return np.array2string(container_data['mosaic'], separator=",").encode()
-
 
 
 class MovieMosaicPreferences(ParameterWidget):

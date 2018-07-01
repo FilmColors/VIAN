@@ -411,9 +411,33 @@ def extract_zip(zipfilepath, extractiondir):
     zip.extractall(path=extractiondir)
     print("Extraction finished")
 
+
 def is_subdir(path, directory):
     path = os.path.realpath(path)
     directory = os.path.realpath(directory)
     relative = os.path.relpath(path, directory)
     return not relative.startswith(os.pardir + os.sep)
+
+
+def images_to_movie(imgs, out_file, time_scale = 20, fps = 20.0, size = (640,480), codec = 'DIVX'):
+    """
+    Creates a movie from a list of numpy images
+    :param imgs: a list of numpy images
+    :param out_file: the name of the output file
+    :param time_scale: How often an image should be repeated before the next one is drawn
+    :param fps: the FPS of the movie
+    :param size: the size of the movie
+    :param codec: the Codec
+    :return: 
+    """
+    if size is None:
+        size = (imgs[0].shape[0], imgs[0].shape[1])
+    fourcc = cv2.VideoWriter_fourcc(*"MJPG")
+    writer = cv2.VideoWriter(out_file, fourcc, fps, size)
+    for img in imgs:
+        for t in range(time_scale):
+            img = cv2.resize(img, size, interpolation=cv2.INTER_CUBIC)
+            writer.write(img)
+    writer.release()
+
 

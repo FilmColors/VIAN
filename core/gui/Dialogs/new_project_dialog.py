@@ -1,5 +1,6 @@
 import glob
 import os
+import cv2
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
@@ -9,6 +10,7 @@ from core.container.project import VIANProject
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ELANProjectImporter
+from core.data.computation import images_to_movie
 
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path = "", vocabularies = None, elan_segmentation = None):
@@ -64,11 +66,20 @@ class NewProjectDialog(EDialogWidget):
 
         self.lineEdit_MoviePath.setText(movie_path)
         self.project.movie_descriptor.set_movie_path(movie_path)
+        self.checkBox_FromImages.stateChanged.connect(self.on_from_images_changed)
 
         self.lineEdit_ProjectName.setText(self.project_name)
         self.set_project_path()
 
+        self.image_paths = []
+
         self.show()
+
+    def on_from_images_changed(self):
+        if self.checkBox_FromImages.isChecked():
+            self.moviePathLabel.setText("Image Files")
+        else:
+            self.moviePathLabel.setText("Media Path")
 
     def on_automatic_naming_changed(self):
         auto = self.cB_AutomaticNaming.isChecked()
@@ -134,10 +145,14 @@ class NewProjectDialog(EDialogWidget):
         self.lineEdit_ProjectPath.setText(self.project.folder)
 
     def on_browse_movie_path(self):
-        path = QFileDialog.getOpenFileName()[0]
-        # self.project.movie_descriptor.movie_path = path
-        self.lineEdit_MoviePath.setText(path)
-        self.path_set_from_dialog = True
+        if self.checkBox_FromImages.isChecked() is False:
+            path = QFileDialog.getOpenFileName()[0]
+            # self.project.movie_descriptor.movie_path = path
+            self.lineEdit_MoviePath.setText(path)
+            self.path_set_from_dialog = True
+        else:
+            self.image_paths = QFileDialog.getOpenFileNames()[0]
+            print(self.image_paths)
 
     def on_desc_name_changed(self):
         self.project.movie_descriptor.movie_name = self.lineEdit_Name.text()
@@ -177,7 +192,8 @@ class NewProjectDialog(EDialogWidget):
             self.project_dir = self.settings.DIR_PROJECT
         try:
             os.mkdir(self.project_dir + "/" + self.project_name)
-        except:
+        except Exception as e:
+            print(e)
             QMessageBox.warning(self, "Could not Find Root Directory",
                                 "The Root directory of your projects could not be found, please set it manually.")
             self.project_dir = QFileDialog.getExistingDirectory()
@@ -189,6 +205,26 @@ class NewProjectDialog(EDialogWidget):
 
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + self.main_window.settings.PROJECT_FILE_EXTENSION
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
+
+        if self.checkBox_FromImages.isChecked():
+            if len(self.image_paths) == 0:
+                QMessageBox.warning(self, "No Images added",
+                                    "There are no images selected to generate a movie from.")
+                return
+            imgs = []
+            for p in self.image_paths:
+                try:
+                    imgs.append(cv2.imread(p))
+                except Exception as e:
+                    continue
+            if len(imgs) == 0:
+                QMessageBox.warning(self, "Failed to read Images",
+                                    "Failed to read images, are these files really images?")
+                return
+            path = self.project.folder + self.project_name + ".avi"
+            images_to_movie(imgs, path, size = (imgs[0].shape[0], imgs[0].shape[1]))
+            self.lineEdit_MoviePath.setText(path)
+
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
         print(self.project.folder, "\n",
               self.project.path, "\n",

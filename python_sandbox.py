@@ -9,6 +9,7 @@ from core.container.annotation import *
 from core.container.media_objects import *
 from core.data.headless import *
 
+from core.data.computation import images_to_movie
 
 def build_document(author = "author", format = "2.8", version = "2.8"):
     root = et.Element("ANNOTATION_DOCUMENT")
@@ -247,7 +248,22 @@ def export(project: VIANProject, out_path):
 
     with open(out_path + "out.xml", "w") as f:
         f.write(prettify(root))
+#
+#
+# project = load_project_headless("C:/Users/Gaudenz Halter/Documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/3774_1_1_Blade_Runner_1900_DVD.eext")
+# export(project, "test/")
 
-
-project = load_project_headless("C:/Users/Gaudenz Halter/Documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/3774_1_1_Blade_Runner_1900_DVD.eext")
-export(project, "test/")
+root = "E:\\Programming\\Datasets\\LIP2\\train_images\\"
+paths = [
+    root + "77_471474.jpg",
+    root + "113_1207747.jpg",
+    root + "136_500146.jpg",
+    root + "165_443487.jpg",
+]
+imgs = []
+for p in paths:
+    img = cv2.imread(p)
+    imgs.append(img)
+    cv2.imshow("wind", img)
+    cv2.waitKey(100)
+images_to_movie(imgs, "test.avi",fps=20.0)

@@ -316,7 +316,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         """
         return self.source_types
 
-    def to_database(self, container_data):
+    def to_json(self, container_data):
         """
         Base Method which should return a dict of byte serialized 
         nump arrays if necessary, or a dict of simple key value pairs.
@@ -328,7 +328,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         """
         return dict()
 
-    def from_database(self, database_data):
+    def from_json(self, database_data):
         """
         The inverse of the to_database() implementation. 
 
