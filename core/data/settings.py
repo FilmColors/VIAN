@@ -237,6 +237,18 @@ class UserSettings():
 
         self.integritiy_check()
 
+    def clean_up_recent(self):
+        # Check if recent files exist:
+        new_paths = []
+        new_names = []
+        for i, q in enumerate(self.recent_files_path):
+            if os.path.isfile(q):
+                new_names.append(self.recent_files_name[i])
+                new_paths.append(self.recent_files_path[i])
+        self.recent_files_name = new_names
+        self.recent_files_path = new_paths
+
+
     def apply_dock_widgets_settings(self, dock_widgets):
         """
         Applies the Settings of the EDockWidgets to them

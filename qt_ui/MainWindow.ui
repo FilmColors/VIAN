@@ -76,6 +76,7 @@
       <string>Recently Opened</string>
      </property>
      <addaction name="actionClearRecent"/>
+     <addaction name="actionCleanUpRecent"/>
      <addaction name="separator"/>
     </widget>
     <addaction name="actionNew"/>
@@ -188,6 +189,7 @@
     <addaction name="separator"/>
     <addaction name="actionColormetry"/>
     <addaction name="actionClearColormetry"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
     <property name="title">
@@ -802,6 +804,11 @@
   <action name="actionAuto_Screenshots">
    <property name="text">
     <string>Auto Screenshots</string>
+   </property>
+  </action>
+  <action name="actionCleanUpRecent">
+   <property name="text">
+    <string>Clean Up</string>
    </property>
   </action>
  </widget>

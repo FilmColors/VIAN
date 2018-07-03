@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import bisect
 from typing import List
 from PyQt5.QtWidgets import QMessageBox
 
@@ -327,7 +328,6 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self):
         if self.current_idx - 1 < len(self.time_ms):
-            print("Colormetry Analysis finished: ", self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 2000)
             if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000:
                 if not isinstance(self.palette_cols, np.ndarray):
                     self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
@@ -418,7 +418,6 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.resolution =  data['resolution']
 
             else:
-                print("No Colormetry Data Loaded")
                 self.curr_location = 0
                 self.time_ms = []
                 self.frame_pos = []
@@ -436,6 +435,63 @@ class ColormetryAnalysis(AnalysisContainer):
         except Exception as e:
             print("Exception in Loading Analysis", str(e))
         self.current_idx = len(self.time_ms)
+        return self
+
+
+class MaskAnalysis(AnalysisContainer):
+    def __init__(self, labels, name="Mask Segmentation", results = None):
+        """
+        :param name: The Name of the Segmentation as it should appear in the Outliner
+        :param labels: A List of labels sorted by label index (implicit)
+        :param results: 
+        """
+
+        super(MaskAnalysis, self).__init__(name=name, data=results)
+        self.masks = []
+        self.time_ms = []
+        self.frame_pos = []
+        self.labels = labels
+
+    def insert(self, data):
+        """
+        Inserts a new mask sorted into the Analysis
+        :param data: a dict(frame_pos, time_ms, mask)
+        :return: 
+        """
+
+        bisect.insort(self.frame_pos, data['frame_pos'])
+        idx = self.frame_pos.index(data['frame_pos'])
+        self.time_ms.insert(idx, data['time_ms'])
+        self.masks.insert(idx, data['mask'])
+
+
+    def serialize(self):
+        data = dict(
+            masks = self.masks,
+            time_ms = self.time_ms,
+            frame_pos = self.frame_pos
+        )
+
+        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
+        serialization = dict(
+            name=self.name,
+            unique_id=self.unique_id,
+            analysis_container_class=self.__class__.__name__,
+            notes=self.notes,
+        )
+
+        return serialization
+
+    def deserialize(self, serialization, streamer):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.notes = serialization['notes']
+
+        data = streamer.sync_load(self.unique_id)
+        self.frame_pos = data['frame_pos']
+        self.masks = data['masks']
+        self.time_ms = data['time_ms']
+
         return self
 
 

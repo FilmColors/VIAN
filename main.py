@@ -21,6 +21,7 @@ import traceback
 from datetime import datetime
 from threading import Thread
 
+import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
@@ -66,6 +67,9 @@ def my_exception_hook(exctype, value, traceback):
     sys._excepthook(exctype, value, traceback)
     sys.exit(1)
 
+def handler(msg_type, msg_log_context, msg_string):
+    pass
+
 
 def set_style_sheet(app, path):
     style_sheet = open(os.path.abspath(path), 'r')
@@ -81,7 +85,7 @@ def set_attributes(app):
 
 if __name__ == '__main__':
     attributes = None
-
+    PyQt5.QtCore.qInstallMessageHandler(handler)
 
     if not DEBUG:
         try:

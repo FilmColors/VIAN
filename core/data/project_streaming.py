@@ -125,9 +125,13 @@ class ProjectStreamerShelve(ProjectStreamer):
 
     #region IProjectChangeNotify
     def on_loaded(self, project):
-        self.clean_up()
+        if self.project is not None:
+            self.clean_up()
+
         self.project = project
-        self.set_store_dir(self.project.data_dir)
+
+        if self.project is not None:
+            self.set_store_dir(self.project.data_dir)
 
     def on_changed(self, project, item):
         pass
@@ -272,20 +276,21 @@ class NumpyDataManager(ProjectStreamer):
                 print("Error in NumpyDataManager.remove_item:", str(e))
 
     def clean_up(self, ids):
-        try:
-            ids = [str(id) for id in ids]
-            files = glob.glob(self.project.data_dir + "/*.npz*")
-            file_names = [f.replace("\\", "/").split("/").pop().split(".")[0] for f in files]
-            for i, n in enumerate(file_names):
-                if n not in ids:
-                    try:
-                        os.remove(files[i])
-                        print("Cleanup: ", files[i])
-                    except Exception as e:
-                        print(str(e))
-        except Exception as e:
-            print("Error in NumpyDataManager.CleanUp:", str(e))
-            pass
+        if self.project is not None:
+            try:
+                ids = [str(id) for id in ids]
+                files = glob.glob(self.project.data_dir + "/*.npz*")
+                file_names = [f.replace("\\", "/").split("/").pop().split(".")[0] for f in files]
+                for i, n in enumerate(file_names):
+                    if n not in ids:
+                        try:
+                            os.remove(files[i])
+                            print("Cleanup: ", files[i])
+                        except Exception as e:
+                            print(str(e))
+            except Exception as e:
+                print("Error in NumpyDataManager.CleanUp:", str(e))
+                pass
 
     #endregion
     pass

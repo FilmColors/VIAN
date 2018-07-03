@@ -556,6 +556,17 @@ class VIANProject(IHasName, IClassifiable):
     def get_movie(self):
         return self.movie_descriptor
 
+    def get_mask_analyses(self):
+        """
+        Returns a list of all Analyses that are of type MaskAnalysis
+        :return: A list of MaskAnalyses if any
+        """
+        result = []
+        for a in self.analysis:
+            if isinstance(a, MaskAnalysis):
+                result.append(a)
+        return result
+
     #region Annotations
     def create_annotation_layer(self, name, t_start = 0, t_stop = 0):
         layer = AnnotationLayer(name, t_start, t_stop)
@@ -885,7 +896,6 @@ class VIANProject(IHasName, IClassifiable):
 
         self.sort_screenshots()
         self.undo_manager.clear()
-        print("Loaded")
 
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
@@ -1154,7 +1164,7 @@ class VIANProject(IHasName, IClassifiable):
         for d in self.id_list:
             if d[1] == container_object:
                 self.id_list.remove(d)
-                print("Removed: ", d)
+                # print("Removed: ", d)
                 break
 
     def clean_id_list(self):

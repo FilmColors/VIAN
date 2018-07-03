@@ -194,7 +194,7 @@ class Player_VLC(VideoPlayer):
     def __init__(self, main_window):
         super(Player_VLC, self).__init__(main_window)
 
-        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --verbose 1 --no-embedded-video"
+        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --quiet --no-embedded-video" #--verbose 0
         self.media_player = None
         self.vlc_instance = None
         # self.media_player = self.vlc_instance.media_player_new()
@@ -293,7 +293,7 @@ class Player_VLC(VideoPlayer):
 
         # Uncomment this line to get the old functionality
         # fps = self.media_player.get_fps()
-        print("FPS:", self.media_player.get_fps())
+        # print("FPS:", self.media_player.get_fps())
         capture = cv2.VideoCapture(self.movie_path)
         #if fps != 0:
         #    self.fps = capture.get(cv2.CAP_PROP_FPS)
@@ -312,7 +312,6 @@ class Player_VLC(VideoPlayer):
     # *** ELAN INTERFACE METHODS *** #
     def open_movie(self, path, from_server = False):
         # create the media
-        print("Opening Movie:", path)
 
         if self.vlc_instance is None:
             self.init_vlc()
@@ -518,7 +517,6 @@ class Player_VLC(VideoPlayer):
         self.media_descriptor = project.movie_descriptor
 
         # Check if the file exists locally
-        print("Movie Path", path, project.movie_descriptor.movie_name)
         success = True
         if not os.path.isfile(path):
             exists = False

@@ -94,6 +94,29 @@ def tpl_bgr_to_lch(tpl):
     return lch
 
 
+
+
+def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
+    if lch is not None:
+        lum = lch[:, 0]
+        chroma = lch[:, 1]
+        hue = lch[:, 2]
+
+    elif lab is not None:
+        lum = lab[:, 0]
+        a_sq = np.square(lab[:, 1])
+        b_sq = np.square(lab[:, 2])
+        chroma = np.sqrt(np.add(a_sq, b_sq))
+
+    if implementation == "luebbe":
+        result =  chroma / np.sqrt((chroma ** 2) + (lum ** 2))
+
+    else: # implementation == "pythagoras":
+        result =  np.sqrt(np.square(chroma) + np.square(lum)) - lum
+    np.nan_to_num(result)
+    return result
+
+
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     """
     Converts a Numpy Image array to a QTImage

@@ -382,7 +382,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         elif self.mode == "class-obj":
             self.update_layout_class_obj()
 
-
     def update_layout_class_obj(self):
         self.tab_widget.clear()
         self.tabs = []

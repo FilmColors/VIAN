@@ -1,6 +1,7 @@
 # from PyQt4 import QtCore, QtGui, uic
 
 # from annotation_viewer import AnnotationViewer
+import inspect
 import webbrowser
 import cProfile
 import os
@@ -16,55 +17,59 @@ import threading
 import importlib
 from functools import partial
 
-from core.concurrent.worker_functions import *
-from core.concurrent.worker import MinimalThreadWorker
-from core.data.enums import *
-from core.data.importers import *
-from core.data.project_streaming import ProjectStreamerShelve, NumpyDataManager
-from core.data.settings import UserSettings
-from core.data.vian_updater import VianUpdater, VianUpdaterJob
-from core.data.exporters import *
+from core.analysis.barcode_analysis import BarcodeAnalysisJob
+from core.analysis.colorimetry.colormetry2 import ColormetryJob2
+from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
+from core.analysis.palette_analysis import ColorPaletteAnalysis
 from core.concurrent.auto_screenshot import *
 from core.concurrent.auto_segmentation import *
+from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
+from core.concurrent.worker import MinimalThreadWorker
+from core.concurrent.worker_functions import *
+from core.corpus.client.corpus_client import CorpusClientToolBar, CorpusClient
+from core.corpus.shared.corpusdb import CorpusDB
+from core.corpus.shared.widgets import *
+from core.data.exporters import *
+from core.data.importers import *
+from core.data.settings import UserSettings
+from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
+from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
-from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
 from core.gui.analyses_widget import AnalysisDialog
+from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
+from core.gui.colormetry_widget import *
 from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock
+from core.gui.experiment_editor import ExperimentEditorDock
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
 from core.gui.player_vlc import Player_VLC, PlayerDockWidget
-from core.gui.colormetry_widget import *
-from core.analysis.colorimetry.colormetry2 import ColormetryJob2
-from core.analysis.palette_analysis import ColorPaletteAnalysis
+from core.gui.quick_annotation import QuickAnnotationDock
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, ClassificationWindow
-from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
-from core.gui.quick_annotation import QuickAnnotationWidget, QuickAnnotationDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
-from core.gui.experiment_editor import ExperimentEditorDock
 
-from core.corpus.client.corpus_client import CorpusClientToolBar, CorpusClient
-from core.corpus.shared.widgets import *
-from core.corpus.shared.corpusdb import CorpusDB, DatasetCorpusDB
+try:
+    from core.analysis.deep_learning import *
+    print("KERAS Found, Deep Learning available.")
+    KERAS_AVAILABLE = True
+except Exception as e:
+    print("Could not import Deep-Learning Module, features disabled.")
+    print(e)
+    KERAS_AVAILABLE = False
 
-from core.analysis.colorimetry.colorimetry import ColometricsAnalysis
-from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
-from core.analysis.barcode.barcode_analysis import BarcodeAnalysisJob
-from core.analysis.filmcolors_pipeline.filmcolors_pipeline import FilmColorsPipelineAnalysis
 
 VERSION = "0.6.5"
 
@@ -94,7 +99,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
-
+        print("VIAN: ", __version__)
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
         loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,100))
 
@@ -288,6 +293,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSave.triggered.connect(self.on_save_project)
         self.actionSaveAs.triggered.connect(self.on_save_project_as)
         self.actionBackup.triggered.connect(self.on_backup)
+        self.actionCleanUpRecent.triggered.connect(self.cleanup_recent)
 
         ## IMPORT
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
@@ -360,6 +366,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
         self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
         self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
+
+        # Keras is optional, if available create Actions
+        if KERAS_AVAILABLE:
+            self.actionSemanticSegmentation = self.menuAnalysis.addAction("Semantic Segmentation")
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
@@ -862,13 +872,21 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass
             self.print_message("Project not Found", "Red")
 
+    def cleanup_recent(self):
+        self.settings.clean_up_recent()
+        self.update_recent_menu()
+
     def clear_recent(self):
         self.settings.recent_files_name = []
         self.settings.recent_files_path = []
         self.update_recent_menu()
 
     def update_recent_menu(self):
-        self.menuRecently_Opened.clear()
+        for r in self.menuRecently_Opened.actions():
+            if r.text() not in ["Clean Up", "Clear List"]:
+                self.menuRecently_Opened.removeAction(r)
+
+        self.menuRecently_Opened.addSeparator()
         try:
             for i, recent in enumerate(self.settings.recent_files_name):
                 action = self.menuRecently_Opened.addAction(recent)
@@ -1297,7 +1315,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget.resize_dock(w=800, h=400)
             self.screenshots_manager_dock.resize_dock(h=self.height() / 2)
             self.player_dock_widget.resize_dock(h=self.height() / 2)
-            print("OK")
 
     def changeEvent(self, event):
         if event.type() == QEvent.ActivationChange:
@@ -1842,7 +1859,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_timestep_update(-1)
 
         ready, coloremtry = self.project.get_colormetry()
-        print(ready, coloremtry)
         if not ready:
             run_colormetry = False
             if self.settings.AUTO_START_COLORMETRY:
@@ -1867,9 +1883,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.start_colormetry()
 
             else:
-                print("SetColormetry")
                 self.timeline.timeline.set_colormetry_progress(1.0)
-        print("LOADED:", self.project.name)
+
+        print("\n#### --- Loaded Project --- ####")
+        print("Folder:".rjust(15), self.project.folder)
+        print("Path:".rjust(15),self.project.path)
+        print("Movie Path:".rjust(15),self.project.movie_descriptor.movie_path)
+        if self.project.colormetry_analysis is not None:
+            print("Colorimetry:".rjust(15), self.project.colormetry_analysis.has_finished)
+        print("\n")
 
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is None or not self.allow_dispatch_on_change:

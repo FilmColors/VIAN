@@ -137,7 +137,6 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
     all_n = np.array(all_n, dtype=np.uint16)
 
     i, j = 0, 0
-    print("OK")
     for r in result_lbl:
         if i > 10 and i % n_merge_per_lvl != 0:
             i += 1

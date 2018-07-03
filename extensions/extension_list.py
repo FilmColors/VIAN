@@ -18,12 +18,22 @@ class ExtensionList:
         self.main_window = main_window
         self.load_plugins()
         self.load_analysis()
-        print("Loaded Analyses:", self.analyses)
-        print("Loaded Plugins: ", self.plugins)
+
+        print("\n#### --- Extensions --- #####")
+        if len(self.analyses) > 0:
+            print("Loaded Analyses")
+            for a in self.analyses:
+                print(" --", a.__class__.__name__)
+        if len(self.plugins) > 0:
+            print("Loaded Plugins")
+            for a in self.plugins:
+                print(" --", a.__class__.__name__)
+
+        print("\n")
 
     def load_plugins(self):
         file_list = []
-        print (os.path.abspath(os.path.curdir))
+        # print (os.path.abspath(os.path.curdir))
         for root, dirs, files in os.walk("extensions/plugins/", topdown=False):
             for name in files:
                 if ".py" in name and not "__init__.py" in name and not "__pycache__" in root:
@@ -44,7 +54,7 @@ class ExtensionList:
                         if obj is not GAPlugin and obj is not ExtensionList:
                             self.plugins.append(obj(self.main_window))
             except Exception as e:
-                print(e)
+                # print(e)
                 continue
 
         # for f in glob.glob("extensions" + "/*/*"):
@@ -55,7 +65,7 @@ class ExtensionList:
 
     def load_analysis(self):
         file_list = []
-        print (os.path.abspath(os.path.curdir))
+        # print (os.path.abspath(os.path.curdir))
         for root, dirs, files in os.walk("extensions/analysis/", topdown=False):
             for name in files:
                 if ".py" in name and not "__init__.py" in name and not "__pycache__" in name:
@@ -78,52 +88,17 @@ class ExtensionList:
                             self.import_paths.append([name, f])
 
             except Exception as e:
-                print(e)
+                # print(e)
                 continue
 
-
-    # def load_all_modules_from_dir(self):
-    #     print("## Loading Plugins ##")
-    #
-    #     files = []
-    #
-    #     for f in glob.glob("extensions" + "/*/*"):
-    #         if ".py" in f and (not "__init__" in f)and not ("extension_list" in f) and (not ".pyc" in f) :
-    #             p = f.replace(os.path.abspath(os.path.curdir), "")
-    #             p = p.replace("\\", "/")
-    #             files.append(p.replace("/", ".").replace(".py", ""))
-    #
-    #
-    #     modules = []
-    #
-    #     for f in files:
-    #         try:
-    #             my_module = importlib.import_module(f)
-    #             modules.append(my_module)
-    #
-    #             for name, obj in inspect.getmembers(sys.modules[my_module.__name__]):
-    #                 if inspect.isclass(obj) and issubclass(obj, IAnalysisJob):
-    #                     if obj is not IAnalysisJob and obj is not ExtensionList:
-    #                         self.analyses.append(obj(0))
-    #
-    #                 if inspect.isclass(obj) and issubclass(obj, GAPlugin):
-    #                     if obj is not GAPlugin and obj is not ExtensionList:
-    #                         self.plugins.append(obj(self.main_window))
-    #         except:
-    #             continue
-    #
-    #
-    #     print("Loaded Analyses:", self.analyses)
-    #     print("Loaded Plugins: ", self.plugins)
-
     def get_plugin_menu(self, parent):
+
         result = QMenu("Extensions", parent)
         result.setTitle("Plugins")
 
         for p in self.plugins:
             action = result.addAction(p.plugin_name)
             action.triggered.connect(partial(p.get_window, self.main_window))
-        print("## Done ##")
         return result
 
     def get_analysis_menu(self, parent, main_window):

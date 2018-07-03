@@ -33,7 +33,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
 
             if dispatch:
                 self.dispatch_on_changed(item=self)
-            print("Removed")
+            # print("Removed")
         else:
             print("Not Found")
 

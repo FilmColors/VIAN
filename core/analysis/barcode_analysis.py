@@ -209,6 +209,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         return BarcodeParameterWidget()
 
     def from_json(self, database_data):
+        return np.array(json.loads(database_data)['barcode'], dtype=np.uint8)
         pass
 
     def to_json(self, container_data):

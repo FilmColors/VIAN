@@ -4,3 +4,6 @@ vian_update.zip
 *.pyc
 *.pickle
 VIAN.zip
+*.hdf5
+*.prototxt.txt
+*.caffemodel
