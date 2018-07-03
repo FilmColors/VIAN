@@ -5,7 +5,7 @@ import tensorflow as tf
 from core.analysis.deep_learning.labels import *
 
 DIR_WEIGHTS_BUILT_IN = "/user/models/"
-KERAS_LIP_WEIGHTS = "pretrained/"
+KERAS_LIP_WEIGHTS = "user/models/LIP_PSPNET50_Weights.hdf5"
 
 
 class KerasModel():
@@ -30,7 +30,9 @@ class PSPNetModel(KerasModel):
                 upsample_type="deconv")
 
     def load_weights(self, path):
+        print("Loading Weights...")
         self.model.load_weights(path)
+        print("Done")
 
     def forward(self, frame, threshold = -1.0):
         resized = cv2.resize(frame, (self.input_shape[0], self.input_shape[1]), interpolation=cv2.INTER_CUBIC)[:, :, ::-1]

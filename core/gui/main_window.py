@@ -22,6 +22,7 @@ from core.analysis.colorimetry.colormetry2 import ColormetryJob2
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.palette_analysis import ColorPaletteAnalysis
 from core.analysis.color_feature_extractor import ColorFeatureAnalysis
+from core.analysis.semantic_segmentation import *
 from core.concurrent.auto_screenshot import *
 from core.concurrent.auto_segmentation import *
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
@@ -372,6 +373,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Keras is optional, if available create Actions
         if KERAS_AVAILABLE:
             self.actionSemanticSegmentation = self.menuAnalysis.addAction("Semantic Segmentation")
+            self.actionSemanticSegmentation.triggered.connect(partial(self.analysis_triggered, SemanticSegmentationAnalysis()))
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
@@ -1371,11 +1373,18 @@ class MainWindow(QtWidgets.QMainWindow):
         analysis = result[1]
         result = result[0]
 
-        analysis.modify_project(self.project, result, main_window = self)
-        self.project.add_analysis(result)
+        if isinstance(result, list):
+            for r in result:
+                analysis.modify_project(self.project, r, main_window = self)
+                self.project.add_analysis(r)
+                r.unload_container()
+        else:
+            analysis.modify_project(self.project, result, main_window=self)
+            self.project.add_analysis(result)
+            result.unload_container()
 
         # Unload the analysis from Memory
-        result.unload_container()
+
 
     def on_save_custom_perspective(self):
         setting = QSettings("UniversityOfZurich", "VIAN")
