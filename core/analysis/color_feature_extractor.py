@@ -96,25 +96,31 @@ class ColorFeatureAnalysis(IAnalysisJob):
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.
         """
-        result.target_container = project.get_by_id(result.target_container)
+        result.set_target_container(project.get_by_id(result.target_container))
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
-        view = PaletteWidget(None)
-        view.set_palette(analysis.data['tree'])
-        view.draw_palette()
-        return view
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.data['color_lab']), w))
+        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.data['color_bgr']), w))
+        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.data['saturation_l']), w))
+        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.data['saturation_p']), w))
+        return w
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
         """
         This function should show the complete Visualization
         """
-        view = PaletteWidget(None)
-        view.set_palette(analysis.data['tree'])
-        view.draw_palette()
-        return [VisualizationTab(widget=view, name="Color Palette", use_filter=False, controls=None)]
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.data['color_lab']), w))
+        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.data['color_bgr']), w))
+        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.data['saturation_l']), w))
+        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.data['saturation_p']), w))
+        return [VisualizationTab(widget=w, name="Color-Features", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):
         """

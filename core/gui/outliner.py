@@ -125,6 +125,14 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
                     # self.on_selected(None, self.project().selected)
             self.tree.selection_dispatch = True
+
+            for entry in self.item_list:
+                if entry.has_item:
+                    for i, a in enumerate(entry.get_container().connected_analyses):
+                        analysis_item = AnalyzesOutlinerItem(entry, i, a)
+                        self.item_list.append(analysis_item)
+
+
             self.on_selected(None, self.project().get_selected())
 
         if self.corpus_client.connected:
@@ -137,8 +145,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             for p in sorted(to_add, key= lambda x:x.name):
                 itm = CorpusProjectOutlinerItem(self.tree, 0, p)
                 self.item_list.append(itm)
-
-
 
     def update_tree(self, item):
         found = False
@@ -392,7 +398,6 @@ class AbstractOutlinerItem(QTreeWidgetItem):
         self.is_editable = False
         self.has_item = False
         self.item = None
-
 
     def get_container(self):
         return None

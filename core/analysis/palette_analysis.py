@@ -83,7 +83,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.
         """
-        result.target_container = project.get_by_id(result.target_container)
+        result.set_target_container(project.get_by_id(result.target_container))
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """

@@ -97,12 +97,19 @@ def tpl_bgr_to_lch(tpl):
 
 
 def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
+
     if lch is not None:
+        if len(lch.shape) < 2:
+            lch = np.array([lch])
+        print(lab.shape)
         lum = lch[:, 0]
         chroma = lch[:, 1]
         hue = lch[:, 2]
 
     elif lab is not None:
+        if len(lab.shape) < 2:
+            lab = np.array([lab])
+        print(lab.shape)
         lum = lab[:, 0]
         a_sq = np.square(lab[:, 1])
         b_sq = np.square(lab[:, 2])

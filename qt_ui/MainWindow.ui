@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1083</width>
-    <height>914</height>
+    <height>909</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -185,6 +185,7 @@
     </property>
     <addaction name="actionMovie_Barcode"/>
     <addaction name="actionMovie_Mosaic"/>
+    <addaction name="actionColorFeatures"/>
     <addaction name="actionColor_Palette"/>
     <addaction name="separator"/>
     <addaction name="actionColormetry"/>
@@ -809,6 +810,11 @@
   <action name="actionCleanUpRecent">
    <property name="text">
     <string>Clean Up</string>
+   </property>
+  </action>
+  <action name="actionColorFeatures">
+   <property name="text">
+    <string>Color Features</string>
    </property>
   </action>
  </widget>

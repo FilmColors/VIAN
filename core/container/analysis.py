@@ -187,6 +187,10 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
     def get_type(self):
         return ANALYSIS_JOB_ANALYSIS
 
+    def set_target_container(self, container):
+        self.target_container = container
+        self.target_container.add_analysis(self)
+
     def serialize(self):
 
         t = self.project.main_window.eval_class(self.analysis_job_class)
@@ -224,7 +228,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.data = t().deserialize(streamer.sync_load(self.unique_id))
         self.parameters = serialization['parameters']
 
-        self.target_container = streamer.project.get_by_id(serialization['container'])
+        self.set_target_container(streamer.project.get_by_id(serialization['container']))
 
         return self
 

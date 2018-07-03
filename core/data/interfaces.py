@@ -70,12 +70,21 @@ class IProjectContainer(QObject):
         self.unique_id = -1
         self.notes = ""
 
+        self.connected_analyses = []
+
     def get_id(self):
         return self.unique_id
 
     def set_expanded(self, expanded):
         self.outliner_expanded = expanded
 
+    def add_analysis(self, analysis):
+        self.connected_analyses.append(analysis)
+
+    def remove_analysis(self, analysis):
+        if analysis in self.connected_analyses:
+            self.connected_analyses.remove(analysis)
+    
     def delete(self):
         print("Not Implemented in ", self)
 
