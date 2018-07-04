@@ -29,11 +29,16 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
     def remove_node(self, node, dispatch = True):
         if node in self.nodes:
             self.nodes.remove(node)
+            for conn in self.connections:
+                if conn.input_node == node.unique_id:
+                    self.remove_connection(conn)
+                elif conn.output_node == node.unique_id:
+                    self.remove_connection(conn)
             self.project.remove_from_id_list(node)
 
             if dispatch:
                 self.dispatch_on_changed(item=self)
-            # print("Removed")
+
         else:
             print("Not Found")
 
@@ -208,6 +213,7 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
 
     def delete(self):
         self.node_script.remove_node(self)
+
 
 
 class ConnectionDescriptor(IProjectContainer):

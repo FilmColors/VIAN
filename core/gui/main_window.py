@@ -64,7 +64,7 @@ from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 
 try:
-    from core.analysis.deep_learning import *
+    import keras.backend as K
     print("KERAS Found, Deep Learning available.")
     KERAS_AVAILABLE = True
 except Exception as e:
@@ -980,6 +980,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print(e)
         self.project.inhibit_dispatch = False
         self.dispatch_on_changed()
+
     def update_overlay(self):
         if self.drawing_overlay is not None and self.drawing_overlay.isVisible():
             self.drawing_overlay.update()

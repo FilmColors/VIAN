@@ -233,10 +233,9 @@ class NumpyDataManager(ProjectStreamer):
         dest_file_path = self.project.data_dir + "/" + str(key) + ".npz"
 
         if data_dict is None:
-            print("NumpyDataManager.dump(): Input Data was None, skipped")
+            return
 
         if data_type == NUMPY_NO_OVERWRITE and os.path.isfile(dest_file_path):
-            print("NumpyDataManager.dump(): No Overwrite, file already exists")
             return
 
         try:

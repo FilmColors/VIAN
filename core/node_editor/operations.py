@@ -84,7 +84,7 @@ class Operation(QObject):
         print("")
         print("Exception in Node")
         print(self.__class__.__name__)
-        print(exception.message)
+        print(exception)
         print("")
 
     def reset_result(self):

@@ -42,11 +42,12 @@ class ScriptExecutor(QRunnable):
 
             res = True
         except Exception as e:
-            raise e
             print("")
+            print(n)
             print("Script Executor Failed")
             print(e)
             print("")
+            raise e
 
             res = False
 
@@ -156,6 +157,8 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             self.lbl_compile_status.setStyleSheet("QLabel{color : Red;}")
 
     def run_script(self):
+        self.compile()
+
         if self.is_compiled:
             executor = ScriptExecutor(self.nodes, self.project, self)
             self.thread_pool.start(executor)
@@ -254,7 +257,6 @@ class NodeEditor(QWidget, IProjectChangeNotify):
         for n in self.nodes:
             if n.operation.is_final_node and n.operation.result is not None:
                 self.result_visualizer.visualize(n.operation)
-
 
     def on_changed(self, project, item):
         self.clear()
