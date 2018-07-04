@@ -665,3 +665,10 @@ class Experiment(IProjectContainer, IHasName):
     def delete(self):
         self.project.remove_experiment(self)
 
+
+class MaskAssignment(IProjectContainer):
+    def __init__(self, dataset, labels):
+        IProjectContainer.__init__(self)
+        self.dataset = dataset
+        self.labels = labels
+

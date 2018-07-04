@@ -58,6 +58,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
             if params['model'] == "LIP":
                 model = PSPNetModel(input_shape=(512, 512, 3))
                 model.load_weights(KERAS_LIP_WEIGHTS)
+                model_name = DATASET_NAME_LIP
             else:
                 raise Exception("Model not Found")
 
@@ -80,6 +81,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                     name="Semantic Segmentation",
                     results=dict(mask=np.argmax(masks, axis=2).astype(np.uint8),
                                  frame_sizes=(frame.shape[0], frame.shape[1]),
+                                 dataset=model_name
                                  ),
                     analysis_job_class=self.__class__,
                     parameters=params,

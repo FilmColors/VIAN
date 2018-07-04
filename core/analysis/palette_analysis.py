@@ -111,14 +111,23 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return ColorPaletteParameterWidget()
 
     def serialize(self, data_dict):
-        d = dict(
-            dist = data_dict['dist'],
-            layers = data_dict['tree'][0],
-            all_cols = data_dict['tree'][1],
-            ns=data_dict['tree'][2],
+        dist = data_dict['dist']
+        layers = data_dict['tree'][0]
+        all_cols = data_dict['tree'][1]
+        ns = data_dict['tree'][2]
+        if not isinstance(dist, list): dist = dist.tolist()
+        if not isinstance(layers, list): layers = layers.tolist()
+        if not isinstance(all_cols, list): all_cols = all_cols.tolist()
+        if not isinstance(ns, list): ns = ns.tolist()
 
-                 )
+        d = dict(
+            dist = dist,
+            layers = layers,
+            all_cols = all_cols,
+            ns=ns)
         for i, v in enumerate(data_dict['tree']):
+            if not isinstance(v, list):
+                v = v.tolist()
             d[str(i)] = v
         return d
 
@@ -130,10 +139,10 @@ class ColorPaletteAnalysis(IAnalysisJob):
         ]
         return dict(dist = data_dict['dist'], tree=layers)
 
-    def from_database(self, database_data):
+    def from_json(self, database_data):
         return self.deserialize(json.loads(database_data))
 
-    def to_database(self, container_data):
+    def to_json(self, container_data):
         return json.dumps(self.serialize(container_data)).encode()
 
 

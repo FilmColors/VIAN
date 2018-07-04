@@ -442,15 +442,15 @@ class ColormetryAnalysis(AnalysisContainer):
         return self
 
 
-class MaskAnalysis(AnalysisContainer):
-    def __init__(self, labels, name="Mask Segmentation", results = None):
+class MaskAnalysis(IAnalysisJobAnalysis):
+    def __init__(self, labels, analysis_job_class, parameters, container, name="Mask Segmentation", results = None):
         """
         :param name: The Name of the Segmentation as it should appear in the Outliner
         :param labels: A List of labels sorted by label index (implicit)
         :param results: 
         """
 
-        super(MaskAnalysis, self).__init__(name=name, data=results)
+        super(MaskAnalysis, self).__init__(name=name, results = None, analysis_job_class=analysis_job_class, parameters=parameters, container=container)
         self.masks = []
         self.time_ms = []
         self.frame_pos = []
@@ -467,7 +467,6 @@ class MaskAnalysis(AnalysisContainer):
         idx = self.frame_pos.index(data['frame_pos'])
         self.time_ms.insert(idx, data['time_ms'])
         self.masks.insert(idx, data['mask'])
-
 
     def serialize(self):
         data = dict(

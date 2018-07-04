@@ -1,7 +1,9 @@
 from enum import Enum
 
+DATASET_NAME_LIP = "LIP_Dataset"
+
 class LIPLabels(Enum):
-    Background = 0
+    Background      = 0
     Hat             = 1
     Hair            = 2
     Glove           = 3

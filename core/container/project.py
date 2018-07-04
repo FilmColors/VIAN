@@ -488,12 +488,12 @@ class VIANProject(IHasName, IClassifiable):
             self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
             self.dispatch_changed()
 
-    def get_analyzes_of_item(self, item):
-        result = []
-        for a in self.analysis:
-            if isinstance(a, IAnalysisJobAnalysis) and item.unique_id in a.parameters.target_items:
-                result.append(item)
-        return item
+    # def get_analyzes_of_item(self, item):
+    #     result = []
+    #     for a in self.analysis:
+    #         if isinstance(a, IAnalysisJobAnalysis) and item.unique_id in a.parameters.target_items:
+    #             result.append(item)
+    #     return item
 
     def get_job_analyses(self):
         result = []
