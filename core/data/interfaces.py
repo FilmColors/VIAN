@@ -224,10 +224,12 @@ class IAnalysisJob(ILiveWidgetExposing):
         self.version = version
         self.multiple_result = multiple_result
 
+        self.target_class_obj = None
+
     def get_name(self):
         return self.name
 
-    def prepare(self, project, targets, parameters, fps):
+    def prepare(self, project, targets, parameters, fps, class_objs = None):
         """
         A step that should be performed in the main-thread before the processing takes place. 
         This is a good point to fetch all necessary data from the project and pack it to your needs.
@@ -236,9 +238,11 @@ class IAnalysisJob(ILiveWidgetExposing):
         :param targets: The Target IProjectContainer Objects
         :param parameters: Additional Parameters as returned from your ParameterWidget.get_parameters()
         :param fps: The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)
+        :param class_objs: The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)
         :return: A List of packed Data which will be handed to the IAnalysisJob.process()
         """
-        print("prepare not implemented by", self)
+        self.target_class_obj = class_objs
+
         return None
 
     def process(self, args, sign_progress):

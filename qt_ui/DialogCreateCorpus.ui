@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>488</width>
-    <height>469</height>
+    <width>567</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,83 +106,102 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="cB_ConstrSegmentation">
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QCheckBox" name="cB_ConstrSegmentation">
+         <property name="text">
+          <string>Segmentation</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cB_ConstrAnnotationLayers">
+         <property name="text">
+          <string>Annotation Layers</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cB_ConstrAnalyses">
+         <property name="text">
+          <string>Analyses</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QCheckBox" name="cB_ConstrExperiments">
+         <property name="text">
+          <string>Experiments</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cB_ConstrClassObj">
+         <property name="text">
+          <string>Classification Objects</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cB_ConstrVocabularies">
+         <property name="text">
+          <string>Vocabularies</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>Segmentation</string>
+      <string>&lt;b&gt; Default Values</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="wc_segm" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_4"/>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Segmentation</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QWidget" name="wc_segm" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_4"/>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Annotation Layers</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QWidget" name="wc_ann" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_5"/>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Experiments</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4"/>
+     </widget>
     </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cB_ConstrAnnotationLayers">
-     <property name="text">
-      <string>Annotation Layers</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="wc_ann" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_5"/>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cB_ConstrExperiments">
-     <property name="text">
-      <string>Experiments</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cB_ConstrClassObj">
-     <property name="text">
-      <string>Classification Objects</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cB_ConstrVocabularies">
-     <property name="text">
-      <string>Vocabularies</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cB_ConstrAnalyses">
-     <property name="text">
-      <string>Analyses</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">

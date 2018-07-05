@@ -17,7 +17,8 @@ class MovieMosaicAnalysis(IAnalysisJob):
                                                   version = "0.0.1",
                                                   multiple_result=True)
 
-    def prepare(self, project, targets, parameters, fps):
+    def prepare(self, project, targets, parameters, fps, class_objs = None):
+        super(MovieMosaicAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
         args = []
         for t in targets:
             if t.get_type() == MOVIE_DESCRIPTOR:

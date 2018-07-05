@@ -23,12 +23,13 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                                                  version="1.0.0",
                                                  multiple_result=False)
 
-    def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps):
+    def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
         This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
         and gather all data we need.
 
         """
+        super(SemanticSegmentationAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
 
         args = []
         fps = project.movie_descriptor.fps
@@ -96,8 +97,8 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.
         """
-        print(result)
         result.set_target_container(project.get_by_id(result.target_container))
+        result.set_target_classification_obj(self.target_class_obj)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """

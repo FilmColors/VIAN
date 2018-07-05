@@ -42,8 +42,6 @@ class AnalysisDialog(EDialogWidget):
         self.lbl_Version.setText(self.analysis.version)
         self.setWindowTitle("Analysis: " + self.analysis.name)
 
-
-
     def remove_selected(self):
         selected = self.list_Targets.selectedItems()
         for s in selected:
@@ -72,7 +70,8 @@ class AnalysisDialog(EDialogWidget):
         message = dict(
             analysis = self.analysis,
             targets = self.targets,
-            parameters = parameters
+            parameters = parameters,
+            classification_objs = None
         )
         self.onAnalyse.emit(message)
         self.close()

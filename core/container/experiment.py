@@ -6,6 +6,7 @@ from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, 
 from core.data.interfaces import IProjectContainer, IHasName, IClassifiable
 from core.gui.vocabulary import VocabularyItem
 
+
 class Vocabulary(IProjectContainer, IHasName):
     """
     :var name: The Name of the Vocabulary
@@ -325,6 +326,7 @@ class ClassificationObject(IProjectContainer, IHasName):
     :var classification_vocabularies: A List of Vocabularies attached to thsi ClassificationObject
     :var unique_keywords: A List of Unique Keywords generated from this ClassificationObjects and its Vocabularies
     :var target_container: A List of Target Containers to classify with this Classification Object
+    :var semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple ("<Name of Dataset>", [Indices of assigned Mask layers])
 
     """
     def __init__(self, name, experiment, parent = None):
@@ -336,6 +338,7 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.classification_vocabularies = []
         self.unique_keywords = []
         self.target_container = []
+        self.semantic_segmentation_labels = ("", [])
 
     def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None):
         if voc not in self.classification_vocabularies:
@@ -355,7 +358,6 @@ class ClassificationObject(IProjectContainer, IHasName):
                 if r.voc_obj == voc:
                     keywords.append(r)
             return keywords
-
 
     def remove_vocabulary(self, voc):
         self.classification_vocabularies.remove(voc)
@@ -392,6 +394,20 @@ class ClassificationObject(IProjectContainer, IHasName):
             for c in self.children:
                 c.get_children_plain(list)
 
+    def set_dataset(self, dataset_name):
+        if dataset_name == None:
+            self.semantic_segmentation_labels = ("", [])
+        else:
+            self.semantic_segmentation_labels = (dataset_name, [])
+
+    def add_dataset_label(self, value):
+        if value not in self.semantic_segmentation_labels[1]:
+            self.semantic_segmentation_labels[1].append(value)
+
+    def remove_dataset_label(self, value):
+        if value in self.semantic_segmentation_labels[1]:
+            self.semantic_segmentation_labels[1].remove(value)
+
     def get_type(self):
         return CLASSIFICATION_OBJECT
 
@@ -405,6 +421,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             unique_keywords =  [k.serialize() for k in self.unique_keywords],
             target_container = [k.unique_id for k in self.target_container],
             children = [c.unique_id for c in self.children],
+            semantic_segmentation_labels = self.semantic_segmentation_labels
         )
 
         return serialization
@@ -424,6 +441,12 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.classification_vocabularies = [project.get_by_id(uid) for uid in serialization['classification_vocabularies']]
         self.unique_keywords = [UniqueKeyword(self.experiment).deserialize(ser, project) for ser in serialization['unique_keywords']]
         self.target_container = [project.get_by_id(uid) for uid in serialization['target_container']]
+
+        # VERSION > 0.6.8
+        try:
+            self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
+        except Exception as e:
+            print(e)
 
         return self
 
@@ -494,7 +517,6 @@ class Experiment(IProjectContainer, IHasName):
         self.name = name
         self.classification_objects = []
         self.analyses = []
-        self.analyses_parameters = []
 
         # This is a list of [IClassifiable, UniqueKeyword]
         self.classification_results = []
@@ -574,19 +596,19 @@ class Experiment(IProjectContainer, IHasName):
             root.get_children_plain(result)
         return result
 
-    def add_analysis(self, analysis:AnalysisContainer, parameters:AnalysisParameters = None):
+    def add_analysis_to_pipeline(self, analysis:AnalysisContainer, parameters:AnalysisParameters = None, classification_object = None):
         if analysis not in self.analyses:
-            self.analyses.append(analysis)
+            self.analyses.append(
+                dict(
+                    class_name = analysis,
+                    params = parameters,
+                    class_obj = classification_object
+                )
+            )
 
-            if parameters is None:
-                parameters = AnalysisParameters()
-            self.analyses_parameters.append(parameters)
-
-    def remove_analysis(self, analysis):
-        if analysis in self.analyses:
-            idx = self.analyses.index(analysis)
-            self.analyses.remove(analysis)
-            self.analyses_parameters.pop(idx)
+    def remove_analysis_from_pipeline(self, idx):
+        if idx < len(self.analyses):
+            self.analyses.pop(idx)
 
     def toggle_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         tag = [container, keyword]
@@ -666,9 +688,6 @@ class Experiment(IProjectContainer, IHasName):
         self.project.remove_experiment(self)
 
 
-class MaskAssignment(IProjectContainer):
-    def __init__(self, dataset, labels):
-        IProjectContainer.__init__(self)
-        self.dataset = dataset
-        self.labels = labels
+
+
 

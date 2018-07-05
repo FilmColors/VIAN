@@ -1357,9 +1357,10 @@ class MainWindow(QtWidgets.QMainWindow):
         analysis = from_dialog['analysis']
         targets = from_dialog['targets']
         parameters = from_dialog['parameters']
+        class_objs = from_dialog['classification_objs']
         fps = self.player.get_fps()
 
-        args = analysis.prepare(self.project, targets, parameters, fps)
+        args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
 
         if analysis.multiple_result:
             for arg in args:

@@ -153,7 +153,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
 
 
 class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
-    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None):
+    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
         super(IAnalysisJobAnalysis, self).__init__(name, results)
         self.target_container = container
         if analysis_job_class is not None:
@@ -165,6 +165,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.parameters = parameters
         else:
             self.parameters = []
+        self.target_classification_object = target_classification_object
 
     def get_preview(self):
         try:
@@ -191,6 +192,9 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.target_container = container
         self.target_container.add_analysis(self)
 
+    def set_target_classification_obj(self, class_obj):
+        self.target_classification_object = class_obj
+
     def serialize(self):
 
         t = self.project.main_window.eval_class(self.analysis_job_class)
@@ -202,6 +206,11 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             t = self.project.main_window.eval_class(self.analysis_job_class)
             self.project.main_window.numpy_data_manager.sync_store(self.unique_id, t().serialize(self.data), data_type=NUMPY_NO_OVERWRITE)
 
+        if self.target_classification_object is not None:
+            class_obj_id = self.target_classification_object.unique_id
+        else:
+            class_obj_id = -1
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
@@ -211,7 +220,8 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             # data_dtypes=data_dtypes,
             # data_json=data_json,
             notes=self.notes,
-            container = self.target_container.unique_id
+            container = self.target_container.unique_id,
+            classification_obj = class_obj_id
         )
 
 
@@ -222,6 +232,13 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.unique_id = serialization['unique_id']
         self.analysis_job_class = serialization['analysis_job_class']
         self.notes = serialization['notes']
+
+        # VERSION > 0.6.8
+        try:
+            if serialization['classification_obj'] > 0:
+                self.target_classification_object = streamer.project.get_by_id(serialization['classification_obj'])
+        except:
+            pass
 
         self.data = []
         t = streamer.project.main_window.eval_class(self.analysis_job_class)

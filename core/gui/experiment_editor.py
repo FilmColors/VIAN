@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import *
 
 from core.container.project import *
-
+from core.analysis.deep_learning.labels import VIAN_SEGMENTATION_DATASETS
 TGT_ENTRIES = [ 'All',
                 "All Segments",
                 "All Annotations" ,
@@ -40,20 +40,45 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
         self.curr_parameter_widget = None
 
+        for ds in VIAN_SEGMENTATION_DATASETS:
+            self.comboBox_Dataset.addItem(ds[0])
+
         # This contains all current option of the ComboBox Target Container
         self.target_container_options = []
+        self.classification_object_index = dict()
 
-        self.lineEdit_ExperimentName.textChanged.connect(self.name_changed)
+        self.lineEdit_ExperimentName.textChanged.connect(self.experiment_name_changed)
         self.lineEdit_ObjectName.returnPressed.connect(self.add_class_object)
 
         # self.treeWidget_Objects = QTreeWidget()
         self.treeWidget_Objects.itemSelectionChanged.connect(self.on_class_selection_changed)
         self.listView_Vocabularies.itemChanged.connect(self.update_vocabulary_list_in_object)
         self.listTargets.itemChanged.connect(self.update_target_list_in_object)
-        self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
-        self.listWidget_Analyses.itemSelectionChanged.connect(self.on_selected_analysis_changed)
         self.btn_AddObject.clicked.connect(self.add_class_object)
         self.btn_RemoveObject.clicked.connect(self.remove_class_object)
+
+        self.comboBox_Dataset.currentTextChanged.connect(self.on_dataset_changed)
+        self.pushButton_SelectAllLabel.clicked.connect(partial(self.select_all_labels, True))
+        self.pushButton_DeselectAllLabel.clicked.connect(partial(self.select_all_labels, False))
+        self.listWidget_Labels.itemChanged.connect(self.update_dataset_in_object)
+        self.current_dataset_label_checkboxes = []
+
+        # Analysis
+        self.comboBox_AnalysisClassificationObject.currentTextChanged.connect(self.on_analysis_classification_object_changed)
+        self.comboBox_AnalysisClass.currentTextChanged.connect(self.on_analysis_combobox_changed)
+        self.btn_AddAnalysis.clicked.connect(self.on_add_analysis)
+        self.btn_RemoveAnalysis.clicked.connect(self.on_remove_analysis)
+        self.btn_ApplyAnalysisChanges.clicked.connect(self.on_apply_analysis_changes)
+        self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
+        self.listWidget_Analyses.itemSelectionChanged.connect(self.on_selected_analysis_changed)
+
+        self.analysis_index = dict()
+        for a in self.main_window.analysis_list:
+            self.comboBox_AnalysisClass.addItem(a.__name__)
+            self.analysis_index[a.__name__] = a
+
+        # Disable all controls that need a selected Classification Object:
+        self.on_class_selection_changed()
 
     def update_ui(self):
         if self.current_experiment is None or self.main_window.project is None:
@@ -67,6 +92,12 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.update_analysis_list()
             self.update_target_container_combobox()
 
+    def experiment_name_changed(self):
+        if self.inhibit_ui_signals:
+            return
+        self.current_experiment.set_name(self.lineEdit_ExperimentName.text())
+
+    #region Classification_objects
     def update_vocabulary_view(self):
         self.listView_Vocabularies.clear()
         self.voc_items = []
@@ -80,12 +111,20 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
     def update_classification_object_tree(self):
         self.treeWidget_Objects.clear()
+        self.comboBox_AnalysisClassificationObject.currentTextChanged.disconnect(
+            self.on_analysis_classification_object_changed)
+        self.comboBox_AnalysisClassificationObject.clear()
+        self.comboBox_AnalysisClassificationObject.addItem("None")
+        self.classification_object_index = dict()
+
         for root in self.current_experiment.classification_objects:
             plain = []
             root.get_children_plain(plain)
 
             item_index_list = []
             for i, obj in enumerate(plain):
+                self.comboBox_AnalysisClassificationObject.addItem(obj.name)
+                self.classification_object_index[obj.name] = obj
                 if i == 0:
                     itm = ClassificationObjectItem(self.treeWidget_Objects, obj)
                     self.treeWidget_Objects.addTopLevelItem(itm)
@@ -101,6 +140,8 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
                 item_index_list.append([obj, itm])
         self.treeWidget_Objects.expandAll()
+        self.comboBox_AnalysisClassificationObject.currentTextChanged.connect(
+            self.on_analysis_classification_object_changed)
 
     def update_target_container_combobox(self):
         self.listTargets.clear()
@@ -135,24 +176,27 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
     def on_class_selection_changed(self):
         self.inhibit_ui_signals = True
         if len(self.treeWidget_Objects.selectedItems()) > 0:
+            self.listTargets.setEnabled(True)
+            self.listView_Vocabularies.setEnabled(True)
+            self.lineEdit_ObjectNameDetails.setEnabled(True)
+            self.listWidget_Labels.setEnabled(True)
+            self.pushButton_SelectAllLabel.setEnabled(True)
+            self.pushButton_DeselectAllLabel.setEnabled(True)
+
             self.selected_class_object = self.treeWidget_Objects.selectedItems()[0]
             self.lineEdit_ObjectNameDetails.setText(self.selected_class_object.obj.name)
             self.update_vocabulary_view()
             self.update_target_container_combobox()
         else:
             self.selected_class_object = None
+            self.listTargets.setEnabled(False)
+            self.listView_Vocabularies.setEnabled(False)
+            self.lineEdit_ObjectNameDetails.setEnabled(False)
+            self.listWidget_Labels.setEnabled(False)
+            self.pushButton_SelectAllLabel.setEnabled(False)
+            self.pushButton_DeselectAllLabel.setEnabled(False)
+
         self.inhibit_ui_signals = False
-
-    def on_selected_analysis_changed(self):
-        if self.curr_parameter_widget is not None:
-            self.widgetParam.layout().removeWidget(self.curr_parameter_widget)
-            self.curr_parameter_widget.deleteLater()
-
-        if len(self.listWidget_Analyses.selectedItems()) > 0:
-            self.widgetParam.layout()
-            curr_itm = self.listWidget_Analyses.selectedItems()[0]
-            self.curr_parameter_widget = curr_itm.analysis_class().get_parameter_widget()
-            self.widgetParam.layout().addWidget(self.curr_parameter_widget)
 
     def add_class_object(self):
         name = self.lineEdit_ObjectName.text()
@@ -175,6 +219,17 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 self.current_experiment.remove_class_object(self.selected_class_object.obj)
         self.update_classification_object_tree()
 
+    def update_vocabulary_list_in_object(self):
+        if self.inhibit_ui_signals:
+            return
+        for itm in self.voc_items:
+            if itm.checkState() == Qt.Checked:
+                if itm.voc not in self.selected_class_object.obj.get_vocabularies():
+                    self.selected_class_object.obj.add_vocabulary(itm.voc)
+            else:
+                if itm.voc in self.selected_class_object.obj.get_vocabularies():
+                    self.selected_class_object.obj.remove_vocabulary(itm.voc)
+
     def source_changed(self):
         if self.inhibit_ui_signals:
             return
@@ -193,51 +248,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.current_experiment.classification_sources = sources
         self.update_target_container_combobox()
 
-    def name_changed(self):
-        if self.inhibit_ui_signals:
-            return
-        self.current_experiment.set_name(self.lineEdit_ExperimentName.text())
-
-    def set_enabled(self, state):
-        for c in self.children():
-            if isinstance(c, QWidget):
-                c.setEnabled(state)
-
-    def update_vocabulary_list_in_object(self):
-        if self.inhibit_ui_signals:
-            return
-        for itm in self.voc_items:
-            if itm.checkState() == Qt.Checked:
-                if itm.voc not in self.selected_class_object.obj.get_vocabularies():
-                    self.selected_class_object.obj.add_vocabulary(itm.voc)
-            else:
-                if itm.voc in self.selected_class_object.obj.get_vocabularies():
-                    self.selected_class_object.obj.remove_vocabulary(itm.voc)
-
-    def update_analysis_list(self):
-        self.listWidget_Analyses.clear()
-        self.analysis_items = []
-        for analysis in self.main_window.analysis_list:
-            itm = AnalysisItem(self.listWidget_Analyses, analysis)
-            self.listWidget_Analyses.addItem(itm)
-            self.analysis_items.append(itm)
-            if self.current_experiment is not None:
-                if analysis.__name__ in self.current_experiment.analyses:
-                    itm.setCheckState(Qt.Checked)
-                if self.main_window.project.has_analysis(analysis.__name__):
-                    itm.setForeground(QColor(0, 204, 0))
-                else:
-                    itm.setForeground(QColor(204, 0, 0))
-
-    def update_analysis_list_in_experiment(self):
-        for itm in self.analysis_items:
-            if itm.checkState() == Qt.Checked:
-                if itm.analysis_class.__name__ not in self.current_experiment.analyses:
-                    self.current_experiment.analyses.append(itm.analysis_class.__name__)
-            else:
-                if itm.analysis_class.__name__ in self.current_experiment.analyses:
-                    self.current_experiment.analyses.remove(itm.analysis_class.__name__)
-
     def update_target_list_in_object(self):
         if self.selected_class_object is not None:
             for itm in self.target_items:
@@ -247,6 +257,77 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 else:
                     if itm.target_item in self.selected_class_object.obj.target_container:
                         self.selected_class_object.obj.target_container.remove(itm.target_item)
+
+    #endregion
+
+    #region Analysis Tab
+    def on_add_analysis(self):
+        pass
+
+    def on_remove_analysis(self):
+        pass
+
+    def on_apply_analysis_changes(self):
+        pass
+
+    def on_analysis_classification_object_changed(self):
+        pass
+
+    def on_selected_analysis_changed(self):
+        pass
+
+    def update_analysis_list(self):
+        pass
+
+    def on_analysis_combobox_changed(self):
+        pass
+    #endregion
+
+    # region Semantic Segmentation
+    def select_all_labels(self, state):
+        for s in self.current_dataset_label_checkboxes:
+            if state:
+                s.setCheckState(Qt.Checked)
+            else:
+                s.setCheckState(Qt.Unchecked)
+
+    def on_dataset_changed(self):
+        self.listWidget_Labels.itemChanged.disconnect(self.update_dataset_in_object)
+        self.current_dataset_label_checkboxes = []
+        old_ds = self.selected_class_object.obj.semantic_segmentation_labels
+        idx = self.comboBox_Dataset.currentIndex()
+        if idx == 0:
+            self.listWidget_Labels.setEnabled(False)
+            self.selected_class_object.obj.set_dataset(None)
+        else:
+            self.listWidget_Labels.setEnabled(True)
+            self.listWidget_Labels.clear()
+
+            # Since the First IDX is "None" we need to subtract 1
+            for lbl in VIAN_SEGMENTATION_DATASETS[idx - 1][1]:
+                itm = LabelListItem(self.listWidget_Labels, lbl)
+                self.listWidget_Labels.addItem(itm)
+                self.current_dataset_label_checkboxes.append(itm)
+                if old_ds[0] == VIAN_SEGMENTATION_DATASETS[idx - 1][0]:
+                    if itm.label.value in self.selected_class_object.obj.semantic_segmentation_labels[1]:
+                        itm.setCheckState(Qt.Checked)
+
+        self.listWidget_Labels.itemChanged.connect(self.update_dataset_in_object)
+
+    def update_dataset_in_object(self):
+        if self.selected_class_object is not None:
+            self.selected_class_object.obj.set_dataset(self.comboBox_Dataset.currentText())
+            for cb in self.current_dataset_label_checkboxes:
+                if cb.checkState() == Qt.Checked:
+                    self.selected_class_object.obj.add_dataset_label(cb.label.value)
+            print(self.selected_class_object.obj.semantic_segmentation_labels)
+
+    # endregion
+
+    def set_enabled(self, state):
+        for c in self.children():
+            if isinstance(c, QWidget):
+                c.setEnabled(state)
 
     def on_selected(self, sender, selected):
         self.inhibit_ui_signals = True
@@ -296,6 +377,14 @@ class VocabularyListItem(QListWidgetItem):
         super(VocabularyListItem, self).__init__(parent, Qt.ItemIsUserCheckable)
         self.voc = voc
         self.setText(voc.name)
+        self.setCheckState(Qt.Unchecked)
+
+
+class LabelListItem(QListWidgetItem):
+    def __init__(self, parent, label):
+        super(LabelListItem, self).__init__(parent, Qt.ItemIsUserCheckable)
+        self.label = label
+        self.setText(label.name)
         self.setCheckState(Qt.Unchecked)
 
 

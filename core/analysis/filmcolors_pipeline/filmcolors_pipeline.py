@@ -42,7 +42,8 @@ class FilmColorsPipelineAnalysis(IAnalysisJob):
                                                   version="0.0.1",
                                                   multiple_result=False)
 
-    def prepare(self, project: VIANProject, targets: List[ITimeRange], parameters, fps):
+    def prepare(self, project: VIANProject, targets: List[ITimeRange], parameters, fps, class_objs = None):
+        super(FilmColorsPipelineAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
         path = project.movie_descriptor.get_movie_path()
         resolution = parameters['resolution']
         color_space = cv2.COLOR_BGR2Lab

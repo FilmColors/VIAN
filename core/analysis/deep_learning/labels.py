@@ -1,6 +1,9 @@
 from enum import Enum
 
 DATASET_NAME_LIP = "LIP_Dataset"
+DATASET_NAME_ADE20K = "ADE20K"
+
+
 
 class LIPLabels(Enum):
     Background      = 0
@@ -175,3 +178,8 @@ class ADE20K(Enum):
     glass_lbl = 147
     clock_lbl = 148
     flag_lbl = 149
+
+VIAN_SEGMENTATION_DATASETS = [
+    (DATASET_NAME_LIP, LIPLabels),
+    (DATASET_NAME_ADE20K, ADE20K)
+]
