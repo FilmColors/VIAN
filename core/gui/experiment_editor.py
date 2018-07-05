@@ -64,12 +64,13 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.current_dataset_label_checkboxes = []
 
         # Analysis
+        self.selected_analysis = None
         self.comboBox_AnalysisClassificationObject.currentTextChanged.connect(self.on_analysis_classification_object_changed)
         self.comboBox_AnalysisClass.currentTextChanged.connect(self.on_analysis_combobox_changed)
         self.btn_AddAnalysis.clicked.connect(self.on_add_analysis)
         self.btn_RemoveAnalysis.clicked.connect(self.on_remove_analysis)
         self.btn_ApplyAnalysisChanges.clicked.connect(self.on_apply_analysis_changes)
-        self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
+        # self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
         self.listWidget_Analyses.itemSelectionChanged.connect(self.on_selected_analysis_changed)
 
         self.analysis_index = dict()
@@ -262,7 +263,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
     #region Analysis Tab
     def on_add_analysis(self):
-        pass
+        self.current_experiment.add_analysis_to_pipeline(self.main_window.analysis_list[0], None, None)
 
     def on_remove_analysis(self):
         pass
@@ -271,16 +272,37 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         pass
 
     def on_analysis_classification_object_changed(self):
-        pass
+        if self.selected_analysis is not None:
+            if self.comboBox_AnalysisClassificationObject.currentText == "None":
+                self.selected_analysis['class_obj'] = None
+            else:
+                self.selected_analysis['class_obj'] = self.classification_object_index[self.comboBox_AnalysisClassificationObject.currentText()]
+            print(self.selected_analysis)
+
 
     def on_selected_analysis_changed(self):
-        pass
+        if len(self.listWidget_Analyses.selectedItems()) > 0:
+            itm = self.listWidget_Analyses.selectedItems()[0]
+            self.selected_analysis = itm.entry
+            a_class = itm.analysis_class
+
+            # Add the new Parameter Widget
+            self.curr_parameter_widget.deleteLater()
+            self.curr_parameter_widget = a_class().get_parameter_widget()
+            self.widgetParam.layout().addWidget(self.curr_parameter_widget)
+
+            self.comboBox_AnalysisClass.setCurrentText(self.selected_analysis['class_name'])
+            self.comboBox_AnalysisClassificationObject.setCurrentText(str(self.selected_analysis['class_obj']))
+        else:
+            self.selected_analysis = None
 
     def update_analysis_list(self):
         pass
 
     def on_analysis_combobox_changed(self):
-        pass
+        if self.selected_analysis is not None:
+            self.selected_analysis['class_name'] = self.classification_object_index[self.comboBox_AnalysisClass.currentText()]
+            print(self.selected_analysis)
     #endregion
 
     # region Semantic Segmentation
@@ -389,9 +411,10 @@ class LabelListItem(QListWidgetItem):
 
 
 class AnalysisItem(QListWidgetItem):
-    def __init__(self, parent, analysis_class):
+    def __init__(self, parent, analysis_class, entry):
         super(AnalysisItem, self).__init__(parent, Qt.ItemIsUserCheckable)
         self.analysis_class = analysis_class
+        self.analysis_entry = entry
         self.setText(self.analysis_class().name)
         self.setCheckState(Qt.Unchecked)
 

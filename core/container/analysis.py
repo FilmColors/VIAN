@@ -196,7 +196,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.target_classification_object = class_obj
 
     def serialize(self):
-
         t = self.project.main_window.eval_class(self.analysis_job_class)
         self.data = t().deserialize(self.project.main_window.project_streamer.sync_load(self.unique_id))
         # Store the data as numpy if it does not already exist (since it is immutable)

@@ -157,6 +157,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.current_perspective = Perspective.Annotation.name
 
+        self.analysis_list = []
+        self.create_analysis_list()
+
         # DockWidgets
         self.player_controls = None
         self.elan_status = None
@@ -457,8 +460,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.frame_update_worker.signals.onColormetryUpdate.connect(self.colorimetry_live.update_timestep)
 
-        self.analysis_list = []
-
         loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
         self.update_recent_menu()
@@ -466,7 +467,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.player_controls.setState(False)
 
-        self.create_analysis_list()
+
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
         self.update_vian(False)
 
