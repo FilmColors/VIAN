@@ -51,7 +51,6 @@ MasterDBMapping = dict(
 def get_movie_asset_by_id(movie_assets:List[MovieAsset], fm_id):
     for m in movie_assets:
         if m.fm_id[0] == fm_id:
-            print("Found")
             return m
     raise Exception("Movie with id: " + str(fm_id) + " is not in MovieAssets")
 
@@ -78,7 +77,6 @@ def load_stage(result_dir, stage = 0, movie_asset = None, n = 1000)->List[MovieA
         with open(file, "rb") as f:
             result.append(pickle.load(f))
         c += 1
-        print(c)
     return result
 
 
@@ -290,7 +288,7 @@ def parse_masterdb(database_path, glossary_words, glossary_categories, glossary_
     return all_projects
 
 
-def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, result_path, template_path):
+def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, result_path, template_path, cache_dir):
     """
     Parses the given CorpusDB and DatabaseDB file and returns them project sorted project_wise
     :param corpus_path: 
@@ -305,17 +303,17 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
     (movie_results, filmography_result, movie_assets, assignments) = parse_corpus(corpus_path, movie_assets)
 
     # If the MasterDB has not been cached, parse it
-    if not os.path.isfile("all_projects_cache.pickle"):
+    if not os.path.isfile(cache_dir + "all_projects_cache.pickle"):
         # Parse the Glossary and all Keywords
         glossary_words, glossary_ids, glossary_categories, glossary_omit = parse_glossary(glossary_path)
 
         # PARSE ALL SEGMENTS, sort them by FM-ID and Item-ID
         # List of Tuples (<FM_ID>_<ITEM_ID>, [DB_SEGMENT, LIST[KeywordIDs]])
         all_projects = parse_masterdb(database_path, glossary_words, glossary_categories, glossary_ids, glossary_omit)
-        with open("all_projects_cache.pickle", "wb") as f:
+        with open(cache_dir + "all_projects_cache.pickle", "wb") as f:
             pickle.dump(all_projects, f)
     else:
-        with open("all_projects_cache.pickle", "rb") as f:
+        with open(cache_dir + "all_projects_cache.pickle", "rb") as f:
             all_projects = pickle.load(f)
 
     # Now, Combine the Projects with their Movie
@@ -361,7 +359,8 @@ def generate_projects(input_dir, result_dir, replace_path = False):
 
             movie_path = masset.movie_path_abs
             if replace_path:
-                movie_path = movie_path.replace("/Volumes/", "\\\\130.60.131.134\\")
+                movie_path = replace_network_path(movie_path)
+
 
             project_folder = result_dir + "/" + project_name + "/"
             vian_project = create_project_headless(project_name, project_folder, movie_path, [], [], move_movie="None", template_path=template_path)
@@ -376,7 +375,6 @@ def generate_projects(input_dir, result_dir, replace_path = False):
 
             # Apply the Classification
             Errors = []
-
             for idx, s in enumerate(data['segments']):
                 segment = s[0]
                 keywords = s[1]
@@ -395,12 +393,13 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                             Errors.append((glossary_words[idx], glossary_categories[idx]))
 
 
-
             # Create Screenshots:
             cap = cv2.VideoCapture(movie_path)
             fps = cap.get(cv2.CAP_PROP_FPS)
 
             scr_groups = [""]
+            mask_files = dict()
+            scr_masks = []
             for i, scr in enumerate(masset.shot_assets):
                 if scr.scr_grp not in scr_groups:
                     grp = vian_project.add_screenshot_group(scr.scr_grp)
@@ -409,14 +408,35 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                     grp = vian_project.screenshot_groups[scr_groups.index(scr.scr_grp)]
                 shot = vian_project.create_screenshot_headless("SCR_" + str(i), scr.frame_pos, fps = fps)
                 grp.add_screenshots([shot])
+                mask_files[shot.unique_id] = scr.mask_file
+                scr_masks.append((shot, scr.mask_file))
+
+            # Analyses
+            # Fg/Bg Segmentation
+            for shot, mask_file in scr_masks:
+                mask = cv2.imread(replace_network_path(mask_file), 0)
+
+                analysis = IAnalysisJobAnalysis(
+                    name="Fg/Bg Segmentation",
+                    results=dict(mask=mask.astype(np.uint8),
+                                 frame_sizes=(mask.shape[0], mask.shape[1]),
+                                 dataset=DATASET_NAME_ADE20K),
+                                analysis_job_class=SemanticSegmentationAnalysis,
+                                parameters=dict(model=DATASET_NAME_ADE20K, resolution=50),
+                                container=shot
+                )
+                vian_project.add_analysis(analysis)
 
 
+            vian_project.unload_all()
             vian_project.store_project(HeadlessUserSettings(), vian_project.path)
             print(" --- ERRORS --- ")
             for r in sorted(Errors, key=lambda x: x[1]):
                 print(r)
 
 
+def replace_network_path(old):
+    return old.replace("\\", "/").replace("//130.60.131.134/", "F:/").replace("/Volumes/", "F:/")
 
 if __name__ == '__main__':
     # corpus_path = "../.."
@@ -431,14 +451,21 @@ if __name__ == '__main__':
     gloss_file = "E:/Programming/Datasets/FilmColors/PIPELINE/_input\\GlossaryDB_WordCount.csv"
     db_file = "E:/Programming/Datasets/FilmColors/PIPELINE/_input\\MasterDB_WordCount.csv"
     outfile = "../../results/counting.csv"
-    asset_path = "\\\\130.60.131.134\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\"
-    result_path = "E:/Programming/Datasets/FilmColors/PIPELINE\\COMBINED/"
-    project_dir = "E:/Programming/Datasets/FilmColors/PIPELINE\\PROJECTS/"
-    template_path = "C:/Users/Gaudenz Halter/Documents/VIAN/templates/ERC_FilmColors.viant"
-    # movie_assets = load_stage(asset_path, 1)
+    asset_path = "F:\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\"
+    result_path = "F:/_output/"
+    project_dir = "F:/_projects/"
+    cache_dir = "F:/_cache/"
+    template_path = "E:/Programming/Git/visual-movie-annotator/user/templates/ERC_FilmColors.viant"
+    # movie_assets = load_stage(asset_path, 2, n=10)
+    # with open("F:\\_cache\\movie_assets_cache.pickle", "wb") as f:
+    #     pickle.dump(movie_assets, f)
 
-    # movie_assets = load_stage("\\\\130.60.131.134\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\", 2, n=10)
-    with open("movie_assets_cache.pickle", "rb") as f:
+    print("Loading Movie Assets...")
+    with open("F:\\_cache\\movie_assets_cache.pickle", "rb") as f:
         movie_assets = pickle.load(f)
-    parse(corpus_path, gloss_file, db_file, outfile, movie_assets, result_path, template_path)
+
+    print("Parsing Corpus...")
+    parse(corpus_path, gloss_file, db_file, outfile, movie_assets, result_path, template_path, cache_dir)
+
+    print("Generating Projects....")
     generate_projects(result_path, project_dir, replace_path=True)

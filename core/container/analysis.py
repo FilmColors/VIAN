@@ -197,6 +197,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
 
     def serialize(self):
         t = self.project.main_window.eval_class(self.analysis_job_class)
+        print(t)
         self.data = t().deserialize(self.project.main_window.project_streamer.sync_load(self.unique_id))
         # Store the data as numpy if it does not already exist (since it is immutable)
         # TODO sync_load may fail from time to time (Not yet known why), so we want to make sure that
@@ -223,7 +224,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             classification_obj = class_obj_id
         )
 
-
         return data
 
     def deserialize(self, serialization, streamer:ProjectStreamer):
@@ -249,6 +249,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         return self
 
     def unload_container(self, data = None, sync = False):
+        pass
         if data is not None:
             self.data = data
         if self.data is None:

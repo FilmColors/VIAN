@@ -477,7 +477,6 @@ class AnalysisItem(QListWidgetItem):
         self.setText(self.analysis_entry['name'])
 
 
-
 class TargetItem(QListWidgetItem):
     def __init__(self, parent, target_item, text):
         super(TargetItem, self).__init__(parent, Qt.ItemIsUserCheckable)

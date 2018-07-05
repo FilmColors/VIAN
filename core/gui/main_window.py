@@ -909,7 +909,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 for c in self.extension_list.get_importables():
                     if c[0] == class_name:
                         module = importlib.import_module(c[1])
-                        print(getattr(module, class_name))
                         return getattr(module, class_name)
             except Exception as e:
                 print(e)

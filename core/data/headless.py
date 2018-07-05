@@ -24,6 +24,7 @@ class HeadlessMainWindow(QObject):
         self.numpy_data_manager = NumpyDataManager(self)
         self.project_streamer = ProjectStreamerShelve(self)
         self.version = VERSION
+        self.project = None
 
 
     def print_message(self, msg, color):
@@ -31,8 +32,10 @@ class HeadlessMainWindow(QObject):
 
     def dispatch_on_changed(self, receiver=None, item=None):
         pass
-    def dispatch_on__loaded(self, *args):
-        pass
+    def dispatch_on_loaded(self, *args):
+        if self.project is not None:
+            self.project_streamer.on_loaded(self.project)
+            self.numpy_data_manager.on_loaded(self.project)
     def dispatch_on_closed(self, *args):
         pass
 
@@ -71,7 +74,10 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
             print("Movie Not found: ", movie_path)
             return
 
-        project = VIANProject(HeadlessMainWindow(), name=name, folder=location, path=location + "/" + name)
+        mw = HeadlessMainWindow()
+        project = VIANProject(mw, name=name, folder=location, path=location + "/" + name)
+        mw.project = project
+        mw.dispatch_on_loaded()
         project.inhibit_dispatch = False
 
         os.mkdir(project.folder)
@@ -120,7 +126,6 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
 
         # Store the project
         project.store_project(HeadlessUserSettings(), project.path)
-
         return project
     except Exception as e:
         try:
