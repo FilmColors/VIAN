@@ -157,11 +157,14 @@ class SemanticSegmentationParameterWidget(ParameterWidget):
         l3.addWidget(self.cb_dataset)
 
         self.layout().addItem(l2)
+        self.layout().addItem(l3)
 
     def get_parameters(self):
         resolution = self.spin_frame.value()
         if (self.cb_dataset.currentText() == "Look into Persons"):
             model = "LIP"
+        elif (self.cb_dataset.currentText() == "ADE20K"):
+            model = "ADE20K"
         else:
             return
 

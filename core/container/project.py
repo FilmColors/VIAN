@@ -219,7 +219,7 @@ class VIANProject(IHasName, IClassifiable):
     def unload_all(self):
         for c in self.get_all_containers():
             if isinstance(c, IStreamableContainer):
-                c.unload_container(sync=True)
+                c.unload_container(sync=False)
 
     def print_all(self, type = None):
         for c in self.get_all_containers():
@@ -917,7 +917,6 @@ class VIANProject(IHasName, IClassifiable):
         if scripts:
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
-
         if experiment:
             for e in self.experiments:
                 experiments.append(e.to_template())

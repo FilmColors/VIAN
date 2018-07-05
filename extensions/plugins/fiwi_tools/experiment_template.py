@@ -5,7 +5,8 @@ from core.container.project import EXPERIMENT, VIANProject
 from core.container.experiment import Vocabulary, VocabularyWord, ClassificationObject, Experiment
 from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
 from core.gui.ewidgetbase import *
-
+from core.analysis.analysis_import import *
+from core.analysis.deep_learning.labels import *
 # TODO Implement the Plugin
 class FiwiGlossary2Template(GAPlugin):
     def __init__(self, main_window):
@@ -126,8 +127,19 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
 
     # Create the Classification Object Tree
     glob = exp.create_class_object("Global", exp)
+    glob.set_dataset(DATASET_NAME_ADE20K)
+    for lbl in ADE20K: glob.add_dataset_label(lbl.value)
+
     fg = exp.create_class_object("Foreground", exp)
+    fg.set_dataset(DATASET_NAME_ADE20K)
+    fg.add_dataset_label(ADE20K.person_lbl.value)
+
     bg = exp.create_class_object("Background", exp)
+    bg.set_dataset(DATASET_NAME_ADE20K)
+    for lbl in ADE20K:
+        if lbl != ADE20K.person_lbl:
+            bg.add_dataset_label(lbl.value)
+
     intert = exp.create_class_object("Intertitle", exp)
     env = exp.create_class_object("Environment", exp)
     light = exp.create_class_object("Lighting", exp)
@@ -273,6 +285,21 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
             to_count.append(x)
     print(len(to_count))
     print(len(exp.get_unique_keywords()))
+
+    # Add Analyses
+    sem_seg_params = dict(model="ADE20K", resolution=50)
+    palette_params = dict(resolution=50)
+    feature_params = dict(resolution=50)
+    exp.add_analysis_to_pipeline("Fg/Bg Segmentation", SemanticSegmentationAnalysis, sem_seg_params)
+
+    exp.add_analysis_to_pipeline("ColorPalette FG", ColorPaletteAnalysis, palette_params, fg)
+    exp.add_analysis_to_pipeline("ColorPalette BG", ColorPaletteAnalysis, palette_params, bg)
+    exp.add_analysis_to_pipeline("ColorPalette GLOB", ColorPaletteAnalysis, palette_params, glob)
+
+    exp.add_analysis_to_pipeline("ColorPalette FG", ColorFeatureAnalysis, feature_params, fg)
+    exp.add_analysis_to_pipeline("ColorPalette BG", ColorFeatureAnalysis, feature_params, bg)
+    exp.add_analysis_to_pipeline("ColorPalette GLOB", ColorFeatureAnalysis, feature_params, glob)
+
     # Export the Vocabularies if the path is set
     if export_voc_dir is not None:
         for v in exp.get_vocabularies():

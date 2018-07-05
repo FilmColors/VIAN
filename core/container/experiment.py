@@ -596,10 +596,11 @@ class Experiment(IProjectContainer, IHasName):
             root.get_children_plain(result)
         return result
 
-    def add_analysis_to_pipeline(self, analysis:AnalysisContainer, parameters:AnalysisParameters = None, classification_object = None):
+    def add_analysis_to_pipeline(self, name, analysis:AnalysisContainer, parameters:AnalysisParameters = None, classification_object = None):
         if analysis not in self.analyses:
             self.analyses.append(
                 dict(
+                    name = name,
                     class_name = analysis,
                     params = parameters,
                     class_obj = classification_object
@@ -644,12 +645,14 @@ class Experiment(IProjectContainer, IHasName):
         for a in self.analyses:
             if a['class_obj'] is not None:
                 analyses.append(dict(
+                    name = a['name'],
                     class_name=str(a['class_name'].__name__),
                     params=a['params'],
                     class_obj=a['class_obj'].unique_id
                 ))
             else:
                 analyses.append(dict(
+                    name=a['name'],
                     class_name=str(a['class_name'].__name__),
                     params=a['params'],
                     class_obj=None
@@ -665,11 +668,28 @@ class Experiment(IProjectContainer, IHasName):
         return data
 
     def to_template(self):
+        analyses = []
+        for a in self.analyses:
+            if a['class_obj'] is not None:
+                analyses.append(dict(
+                    name=a['name'],
+                    class_name=str(a['class_name'].__name__),
+                    params=a['params'],
+                    class_obj=a['class_obj'].unique_id
+                ))
+            else:
+                analyses.append(dict(
+                    name=a['name'],
+                    class_name=str(a['class_name'].__name__),
+                    params=a['params'],
+                    class_obj=None
+                ))
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
-            analyses=self.analyses,
+            analyses=analyses,
             classification_results=[]
         )
         return data
@@ -693,12 +713,14 @@ class Experiment(IProjectContainer, IHasName):
                     for a in analyses:
                         if a['class_obj'] != None:
                             self.analyses.append(dict(
+                                name=a['name'],
                                 class_name = project.main_window.eval_class(a['class_name']),
                                 params = a['params'],
                                 class_obj = project.get_by_id(a['class_obj'])
                             ))
                         else:
                             self.analyses.append(dict(
+                                name=a['name'],
                                 class_name=project.main_window.eval_class(a['class_name']),
                                 params=a['params'],
                                 class_obj=None
