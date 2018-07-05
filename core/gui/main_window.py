@@ -22,7 +22,6 @@ from core.analysis.colorimetry.colormetry2 import ColormetryJob2
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.palette_analysis import ColorPaletteAnalysis
 from core.analysis.color_feature_extractor import ColorFeatureAnalysis
-from core.analysis.semantic_segmentation import *
 from core.concurrent.auto_screenshot import *
 from core.concurrent.auto_segmentation import *
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
@@ -65,9 +64,11 @@ from extensions.extension_list import ExtensionList
 
 try:
     import keras.backend as K
+    from core.analysis.semantic_segmentation import *
     print("KERAS Found, Deep Learning available.")
     KERAS_AVAILABLE = True
 except Exception as e:
+    from core.analysis.deep_learning.labels import *
     print("Could not import Deep-Learning Module, features disabled.")
     print(e)
     KERAS_AVAILABLE = False

@@ -263,45 +263,63 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
     #region Analysis Tab
     def on_add_analysis(self):
-        self.current_experiment.add_analysis_to_pipeline(self.main_window.analysis_list[0], None, None)
+        if self.current_experiment is not None:
+            self.current_experiment.add_analysis_to_pipeline(self.main_window.analysis_list[0], None, None)
+            print(self.current_experiment.analyses)
+            self.update_analysis_list()
 
     def on_remove_analysis(self):
-        pass
+        if self.current_experiment is not None and self.selected_analysis is not None:
+            self.current_experiment.remove_analysis_from_pipeline(self.selected_analysis)
+            self.update_analysis_list()
 
     def on_apply_analysis_changes(self):
-        pass
+        if self.selected_analysis is not None and self.curr_parameter_widget is not None:
+            self.selected_analysis['params'] = self.curr_parameter_widget.get_parameters()
 
     def on_analysis_classification_object_changed(self):
         if self.selected_analysis is not None:
             if self.comboBox_AnalysisClassificationObject.currentText == "None":
-                self.selected_analysis['class_obj'] = None
+                self.selected_analysis['class_obj'] = "None"
             else:
                 self.selected_analysis['class_obj'] = self.classification_object_index[self.comboBox_AnalysisClassificationObject.currentText()]
             print(self.selected_analysis)
 
-
     def on_selected_analysis_changed(self):
         if len(self.listWidget_Analyses.selectedItems()) > 0:
             itm = self.listWidget_Analyses.selectedItems()[0]
-            self.selected_analysis = itm.entry
+            self.selected_analysis = itm.analysis_entry
             a_class = itm.analysis_class
 
             # Add the new Parameter Widget
-            self.curr_parameter_widget.deleteLater()
+            if self.curr_parameter_widget is not None:
+                self.curr_parameter_widget.deleteLater()
             self.curr_parameter_widget = a_class().get_parameter_widget()
             self.widgetParam.layout().addWidget(self.curr_parameter_widget)
 
-            self.comboBox_AnalysisClass.setCurrentText(self.selected_analysis['class_name'])
-            self.comboBox_AnalysisClassificationObject.setCurrentText(str(self.selected_analysis['class_obj']))
+            print("Selecting: ",self.selected_analysis['class_name'], str(self.selected_analysis['class_obj']))
+            self.comboBox_AnalysisClass.setCurrentText(str(self.selected_analysis['class_name'].__name__))
+            if self.selected_analysis['class_obj'] is not None:
+                self.comboBox_AnalysisClassificationObject.setCurrentText(str(self.selected_analysis['class_obj'].name))
         else:
             self.selected_analysis = None
 
     def update_analysis_list(self):
-        pass
+        self.listWidget_Analyses.clear()
+        if self.current_experiment is not None:
+            for a in self.current_experiment.analyses:
+                itm = AnalysisItem(self.listWidget_Analyses, a['class_name'], a)
+                self.listWidget_Analyses.addItem(itm)
+
 
     def on_analysis_combobox_changed(self):
         if self.selected_analysis is not None:
-            self.selected_analysis['class_name'] = self.classification_object_index[self.comboBox_AnalysisClass.currentText()]
+            self.selected_analysis['class_name'] = self.analysis_index[self.comboBox_AnalysisClass.currentText()]
+
+            if self.curr_parameter_widget is not None:
+                self.curr_parameter_widget.deleteLater()
+            self.curr_parameter_widget = self.selected_analysis['class_name']().get_parameter_widget()
+            self.widgetParam.layout().addWidget(self.curr_parameter_widget)
             print(self.selected_analysis)
     #endregion
 
