@@ -22,7 +22,8 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
                                                  author="Gaudenz Halter",
                                                  version="1.0.0",
-                                                 multiple_result=False)
+                                                 multiple_result=False,
+                                                 data_serialization=DataSerialization.PICKLE)
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -52,6 +53,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         results = []
         tot = len(args)
         counter = 0
+
         with tf.Graph().as_default():
             session = tf.Session('')
             KTF.set_session(session)
@@ -126,7 +128,6 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         return SemanticSegmentationParameterWidget()
 
     def serialize(self, data_dict):
-        print("Serializing")
         data = dict(
             mask = pickle.dumps(data_dict['mask']),
             frame_sizes = data_dict['frame_sizes'],
@@ -143,10 +144,12 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         return data
 
     def from_json(self, database_data):
-        return json.loads(database_data)
+        # return json.loads(database_data)
+        return pickle.loads(database_data.encode())
 
     def to_json(self, container_data):
-        return json.dumps(self.serialize(container_data))
+        return pickle.dumps(container_data).decode()
+        # return json.dumps(self.serialize(container_data))
 
 
 class SemanticSegmentationParameterWidget(ParameterWidget):

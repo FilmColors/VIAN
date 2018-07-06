@@ -6,6 +6,7 @@ from random import randint
 from collections import namedtuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QObject, pyqtSlot
+from core.data.enums import DataSerialization
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
 VisualizationTab = namedtuple("VisualizationTab", ["name", "widget", "use_filter", "controls"])
@@ -206,7 +207,7 @@ class IAnalysisJob(ILiveWidgetExposing):
     Subclass it to implement your own Analyses. 
     
     """
-    def __init__(self, name, source_types, help_path = "", author="No Author", version = "0.0.1", multiple_result = False):
+    def __init__(self, name, source_types, help_path = "", author="No Author", version = "0.0.1", multiple_result = False, data_serialization = DataSerialization.JSON):
         """
         
         :param name: The name of the Analysis, used in the UI.
@@ -223,6 +224,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         self.author = author
         self.version = version
         self.multiple_result = multiple_result
+        self.data_serialization = data_serialization
 
         self.target_class_obj = None
 
@@ -328,6 +330,9 @@ class IAnalysisJob(ILiveWidgetExposing):
         :return: 
         """
         return self.source_types
+
+    def serialization_type(self):
+        return self.data_serialization
 
     def to_json(self, container_data):
         """

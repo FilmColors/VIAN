@@ -1388,8 +1388,6 @@ class MainWindow(QtWidgets.QMainWindow):
             result.unload_container()
 
         # Unload the analysis from Memory
-
-
     def on_save_custom_perspective(self):
         setting = QSettings("UniversityOfZurich", "VIAN")
         setting.setValue("geometry", self.saveGeometry())

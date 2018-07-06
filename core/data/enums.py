@@ -26,6 +26,9 @@ MEDIA_OBJECT = 16
 
 FILE_EXT_PROJECT = ".eext"
 
+class DataSerialization(Enum):
+    JSON = 0
+    PICKLE = 1
 
 def get_type_as_string(type):
     if type == PROJECT:
