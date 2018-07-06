@@ -30,7 +30,11 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
 
     def set_project(self, project):
         IProjectContainer.set_project(self, project)
-        self.set_adata(self.data)
+
+        # The data is only set when the container is created,
+        # else it should already be in the SQLite Database
+        if self.data is not None:
+            self.set_adata(self.data)
 
     def unload_container(self, data=None, sync=False):
         super(AnalysisContainer, self).unload_container(self.get_adata(), sync=sync)
@@ -209,15 +213,16 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.target_classification_object = class_obj
 
     def serialize(self):
-        t = self.project.main_window.eval_class(self.analysis_job_class)
-        print(t)
-        self.data = t().deserialize(self.project.main_window.project_streamer.sync_load(self.unique_id))
-        # Store the data as numpy if it does not already exist (since it is immutable)
-        # TODO sync_load may fail from time to time (Not yet known why), so we want to make sure that
-        # TODO the file is not overwritten if the loaded data is None
-        if self.data is not None:
-            t = self.project.main_window.eval_class(self.analysis_job_class)
-            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, t().serialize(self.data), data_type=NUMPY_NO_OVERWRITE)
+        # t = self.project.main_window.eval_class(self.analysis_job_class)
+
+        # self.data = t().deserialize(self.project.main_window.project_streamer.sync_load(self.unique_id))
+        # # Store the data as numpy if it does not already exist (since it is immutable)
+        #
+        # # TODO sync_load may fail from time to time (Not yet known why), so we want to make sure that
+        # # TODO the file is not overwritten if the loaded data is None
+        # if self.data is not None:
+        #     t = self.project.main_window.eval_class(self.analysis_job_class)
+        #     self.project.main_window.numpy_data_manager.sync_store(self.unique_id, t().serialize(self.data), data_type=NUMPY_NO_OVERWRITE)
 
         if self.target_classification_object is not None:
             class_obj_id = self.target_classification_object.unique_id
@@ -252,9 +257,9 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         except:
             pass
 
-        self.data = []
-        t = streamer.project.main_window.eval_class(self.analysis_job_class)
-        self.data = t().deserialize(streamer.sync_load(self.unique_id))
+        # self.data = []
+        # t = streamer.project.main_window.eval_class(self.analysis_job_class)
+        # self.data = t().deserialize(streamer.sync_load(self.unique_id))
         self.parameters = serialization['parameters']
 
         self.set_target_container(streamer.project.get_by_id(serialization['container']))

@@ -820,7 +820,8 @@ class VIANProject(IHasName, IClassifiable):
                     else:
                         self.add_analysis(new)
                 except Exception as e:
-                    print("Exception in Load Analyses", e)
+                    raise e
+                    print("Exception in Load Analyses", str(e))
 
         try:
             old = self.screenshot_groups
@@ -1182,6 +1183,9 @@ class VIANProject(IHasName, IClassifiable):
         for ids in self.id_list:
             string += str(ids[0]).ljust(20) + str(ids[1]) + "\n"
         return string
+
+    def get_all_ids(self):
+        return [itm[0] for itm in self.id_list]
 
     def get_by_id(self, item_id):
         """

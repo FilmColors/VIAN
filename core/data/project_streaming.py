@@ -224,7 +224,7 @@ class AsyncShelveStream(QObject):
 
 #endregion
 
-SQ_ANALYSIS = "TABLE_ANALYSIS"
+SQ_TABLE_ANALYSIS = "TABLE_ANALYSIS"
 
 class SQLiteStreamer(ProjectStreamer):
     def __init__(self, main_window):
@@ -248,10 +248,10 @@ class SQLiteStreamer(ProjectStreamer):
         if self.db is not None:
             try:
                 self.db.begin()
-                if self.db[SQ_ANALYSIS].find_one(key=id) == None:
-                    self.db[SQ_ANALYSIS].insert(dict(key=id, json=obj))
+                if self.db[SQ_TABLE_ANALYSIS].find_one(key=id) == None:
+                    self.db[SQ_TABLE_ANALYSIS].insert(dict(key=id, json=obj))
                 else:
-                    self.db[SQ_ANALYSIS].update(dict(key=id, json=obj), ['key'])
+                    self.db[SQ_TABLE_ANALYSIS].update(dict(key=id, json=obj), ['key'])
                 self.db.commit()
             except Exception as e:
                 print("SQLite Exception", str(e))
@@ -260,7 +260,7 @@ class SQLiteStreamer(ProjectStreamer):
     def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
         if self.db is not None:
             try:
-                ret = self.db[SQ_ANALYSIS].find_one(key=id)
+                ret = self.db[SQ_TABLE_ANALYSIS].find_one(key=id)
                 return dict(ret)['json']
             except Exception as e:
                 print("SQLite Exception", str(e))
@@ -268,10 +268,21 @@ class SQLiteStreamer(ProjectStreamer):
             return None
 
     def clean_up(self):
-        pass
+        if self.project is not None and self.db is not None:
+            project_all = self.project.get_all_ids()
+            for t in [SQ_TABLE_ANALYSIS]:
+                all = t.all()
+                for t in all:
+                    if t['key'] not in project_all:
+                        print("Not Found")
+                    else:
+                        print("Found")
+
 
     #region IProjectChangeNotify
     def on_loaded(self, project):
+        self.clean_up()
+
         self.store_path = "sqlite:///" + project.data_dir + "/" + "database.sqlite"
         self.db = ds.connect(self.store_path)
         pass
