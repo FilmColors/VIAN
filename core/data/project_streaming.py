@@ -5,7 +5,7 @@ import glob
 import sqlite3
 from core.data.interfaces import IConcurrentJob, IProjectChangeNotify
 from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, QThread, Qt
-
+import dataset as ds
 STREAM_DATA_IPROJECT_CONTAINER = 0
 STREAM_DATA_ARBITRARY = 1
 NUMPY_NO_OVERWRITE = 2
@@ -223,6 +223,71 @@ class AsyncShelveStream(QObject):
         pass
 
 #endregion
+
+SQ_ANALYSIS = "TABLE_ANALYSIS"
+
+class SQLiteStreamer(ProjectStreamer):
+    def __init__(self, main_window):
+        super(SQLiteStreamer, self).__init__(main_window)
+        self.signals = ProjectStreamerSignals()
+        self.store_dir = ""
+        self.store_path = ""
+        self.db = None
+
+    def set_store_dir(self, store_dir):
+        self.store_dir = store_dir + "/"
+
+    def async_store(self, id: int, data_dict, data_type = STREAM_DATA_IPROJECT_CONTAINER, proceed_slot = None, proceed_slot_args = None):
+        self.sync_store(id, data_dict, data_type)
+        proceed_slot(proceed_slot_args)
+
+    def async_load(self, id: int, proceed_slot, proceed_slot_args = None, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        self.signals.on_async_load.emit(str(id), data_type, proceed_slot, proceed_slot_args)
+
+    def sync_store(self,  id: int, obj,data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        if self.db is not None:
+            try:
+                self.db.begin()
+                if self.db[SQ_ANALYSIS].find_one(key=id) == None:
+                    self.db[SQ_ANALYSIS].insert(dict(key=id, json=obj))
+                else:
+                    self.db[SQ_ANALYSIS].update(dict(key=id, json=obj), ['key'])
+                self.db.commit()
+            except Exception as e:
+                print("SQLite Exception", str(e))
+                self.db.rollback()
+
+    def sync_load(self, id: int, data_type = STREAM_DATA_IPROJECT_CONTAINER):
+        if self.db is not None:
+            try:
+                ret = self.db[SQ_ANALYSIS].find_one(key=id)
+                return dict(ret)['json']
+            except Exception as e:
+                print("SQLite Exception", str(e))
+        else:
+            return None
+
+    def clean_up(self):
+        pass
+
+    #region IProjectChangeNotify
+    def on_loaded(self, project):
+        self.store_path = "sqlite:///" + project.data_dir + "/" + "database.sqlite"
+        self.db = ds.connect(self.store_path)
+        pass
+
+    def on_changed(self, project, item):
+        pass
+
+    def on_selected(self, sender, selected):
+        pass
+
+    def on_closed(self):
+        pass
+    #endregion
+
+
+
 class NumpyDataManager(ProjectStreamer):
     def __init__(self, main_window):
         super(NumpyDataManager, self).__init__(main_window)

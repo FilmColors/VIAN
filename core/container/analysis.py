@@ -28,15 +28,25 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.notes = ""
         self.data = data
 
+    def set_project(self, project):
+        IProjectContainer.set_project(self, project)
+        self.set_adata(self.data)
+
     def unload_container(self, data=None, sync=False):
-        super(AnalysisContainer, self).unload_container(self.data, sync=sync)
+        super(AnalysisContainer, self).unload_container(self.get_adata(), sync=sync)
         self.data = None
 
+    def get_adata(self):
+        return self.data
+
+    def set_adata(self, d):
+        self.data = d
+
     def apply_loaded(self, obj):
-        self.data = obj
+        self.set_adata(obj)
 
     def sync_load(self):
-        self.data = self.project.main_window.project_streamer.sync_load(self.unique_id)
+        self.set_adata(self.project.main_window.project_streamer.sync_load(self.unique_id))
 
     def get_name(self):
         return self.name
@@ -46,7 +56,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
 
     def serialize(self):
         data_json = []
-        for d in self.data:
+        for d in self.get_adata():
             data_json.append(np.array(d).tolist())
 
 
@@ -167,6 +177,9 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.parameters = []
         self.target_classification_object = target_classification_object
 
+        # Evaluated self.analysis-job_class
+        self.a_class = None
+
     def get_preview(self):
         try:
             return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
@@ -261,7 +274,18 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.project.main_window.project_streamer.async_store(self.unique_id, self.project.main_window.eval_class(self.analysis_job_class)().serialize(self.data))
 
     def apply_loaded(self, obj):
-        self.data = self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj)
+        self.set_adata( self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj))
+
+    def get_adata(self):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+        return self.a_class().from_json(self.project.main_window.project_streamer.sync_load(self.unique_id))
+
+    def set_adata(self, d):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+        self.project.main_window.project_streamer.sync_store(self.unique_id, self.a_class().to_json(d))
+        self.data = None
 
 
 class ColormetryAnalysis(AnalysisContainer):

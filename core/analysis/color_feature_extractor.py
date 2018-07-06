@@ -105,10 +105,10 @@ class ColorFeatureAnalysis(IAnalysisJob):
         """
         w = QWidget()
         w.setLayout(QVBoxLayout())
-        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.data['color_lab']), w))
-        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.data['color_bgr']), w))
-        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.data['saturation_l']), w))
-        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.data['saturation_p']), w))
+        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.get_adata()['color_lab']), w))
+        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.get_adata()['color_bgr']), w))
+        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.get_adata()['saturation_l']), w))
+        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.get_adata()['saturation_p']), w))
         return w
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
@@ -117,10 +117,10 @@ class ColorFeatureAnalysis(IAnalysisJob):
         """
         w = QWidget()
         w.setLayout(QVBoxLayout())
-        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.data['color_lab']), w))
-        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.data['color_bgr']), w))
-        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.data['saturation_l']), w))
-        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.data['saturation_p']), w))
+        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.get_adata()['color_lab']), w))
+        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.get_adata()['color_bgr']), w))
+        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.get_adata()['saturation_l']), w))
+        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.get_adata()['saturation_p']), w))
         return [VisualizationTab(widget=w, name="Color-Features", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):
@@ -130,11 +130,19 @@ class ColorFeatureAnalysis(IAnalysisJob):
         """
         return ColorFeatureParameterWidget()
 
-    def from_database(self, database_data):
+    def serialize(self, data_dict):
+        d = dict(color_lab=data_dict["color_lab"].tolist(),
+                color_bgr=data_dict["color_bgr"].tolist(),
+                saturation_l=data_dict["saturation_l"].tolist(),
+                saturation_p=data_dict["saturation_p"].tolist()
+             )
+        return d
+
+    def from_json(self, database_data):
         return json.loads(database_data)
 
-    def to_database(self, container_data):
-        return json.dumps(self.serialize(container_data)).encode()
+    def to_json(self, container_data):
+        return json.dumps(self.serialize(container_data))
 
 
 class ColorFeatureParameterWidget(ParameterWidget):

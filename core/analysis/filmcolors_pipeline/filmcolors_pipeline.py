@@ -131,7 +131,7 @@ class FilmColorsPipelineAnalysis(IAnalysisJob):
     #endregion
 
     def get_visualization(self, analysis: IAnalysisJobAnalysis, result_path, data_path, project:VIANProject, main_window: QMainWindow):
-        data = analysis.data
+        data = analysis.get_adata()
 
         cs_plots = ColorSpaceVis(None, data)
         feature_plot = FeaturePlotWidget(None, project)

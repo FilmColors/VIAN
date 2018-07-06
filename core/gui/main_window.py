@@ -152,7 +152,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                    QColor(200,200,200,100))
 
         self.numpy_data_manager = NumpyDataManager(self)
-        self.project_streamer = ProjectStreamerShelve(self)
+        # self.project_streamer = ProjectStreamerShelve(self)
+        self.project_streamer = SQLiteStreamer(self)
 
         self.video_capture = None
 

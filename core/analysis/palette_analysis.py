@@ -91,7 +91,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
         view = PaletteWidget(None)
-        view.set_palette(analysis.data['tree'])
+        view.set_palette(analysis.get_adata()['tree'])
         view.draw_palette()
         return view
 
@@ -100,7 +100,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         This function should show the complete Visualization
         """
         view = PaletteWidget(None)
-        view.set_palette(analysis.data['tree'])
+        view.set_palette(analysis.get_adata()['tree'])
         view.draw_palette()
         return [VisualizationTab(widget=view, name="Color Palette", use_filter=False, controls=None)]
 
@@ -144,7 +144,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return self.deserialize(json.loads(database_data))
 
     def to_json(self, container_data):
-        return json.dumps(self.serialize(container_data)).encode()
+        return json.dumps(self.serialize(container_data))
 
 
 class ColorPaletteParameterWidget(ParameterWidget):

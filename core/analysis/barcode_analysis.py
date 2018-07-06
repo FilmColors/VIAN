@@ -153,8 +153,8 @@ class BarcodeAnalysisJob(IAnalysisJob):
         Since this function is called within the Main-Thread, we can modify our project here.
         """
         # We want to create an Image Annotation with the Barcode in the upper part of the Display
-        barcode_colors = result.data["barcode"]
-        image_width = result.data["width"]
+        barcode_colors = result.get_adata()["barcode"]
+        image_width = result.get_adata()["width"]
 
         if result.parameters['interpolation'] == "Cubic":
             interpolation = cv2.INTER_CUBIC
@@ -179,7 +179,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         else:
             interpolation = cv2.INTER_LINEAR
 
-        image = self.barcode_to_image(analysis.data['barcode'], 400, image_height=50, interpolation=interpolation)
+        image = self.barcode_to_image(analysis.get_adata()['barcode'], 400, image_height=50, interpolation=interpolation)
         barcode_pixm = numpy_to_pixmap(image)
         view = QGraphicsView(QGraphicsScene())
         view.scene().addPixmap(barcode_pixm)
@@ -190,7 +190,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         This function should show the complete Visualization
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(self.barcode_to_image(analysis.data['barcode'])))
+        widget.set_image(numpy_to_pixmap(self.barcode_to_image(analysis.get_adata()['barcode'])))
         return [VisualizationTab(widget=widget,name="Barcode", use_filter=False,controls=None)]
 
     def barcode_to_image(self, barcode_colors, image_width = 4096, image_height=1024, interpolation=cv2.INTER_CUBIC):
@@ -214,7 +214,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         pass
 
     def to_json(self, container_data):
-        return json.dumps(dict(name="barcode")).encode()
+        return json.dumps(dict(name="barcode"))
 
 
 class BarcodeParameterWidget(ParameterWidget):
