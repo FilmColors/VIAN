@@ -27,8 +27,14 @@ MEDIA_OBJECT = 16
 FILE_EXT_PROJECT = ".eext"
 
 class DataSerialization(Enum):
+    """
+    This Enum defines how an object is stored in the sqlite file of the Project. 
+    see :module:~'core.data.project_streaming.SQLiteStreamer'
+    """
     JSON = 0
-    PICKLE = 1
+    MASKS = 1
+    IMAGE = 2
+
 
 def get_type_as_string(type):
     if type == PROJECT:

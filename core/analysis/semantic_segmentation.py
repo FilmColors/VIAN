@@ -20,10 +20,10 @@ from core.analysis.deep_learning.models import *
 class SemanticSegmentationAnalysis(IAnalysisJob):
     def __init__(self):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
-                                                 author="Gaudenz Halter",
-                                                 version="1.0.0",
-                                                 multiple_result=False,
-                                                 data_serialization=DataSerialization.PICKLE)
+                                                           author="Gaudenz Halter",
+                                                           version="1.0.0",
+                                                           multiple_result=False,
+                                                           data_serialization=DataSerialization.MASKS)
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -117,7 +117,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This function should show the complete Visualization
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.data['mask'], cv2.COLOR_GRAY2BGR)))
+        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata()['mask'], cv2.COLOR_GRAY2BGR)))
         return [VisualizationTab(widget=widget, name="Semantic Segmentation Mask", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):
@@ -145,10 +145,10 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
 
     def from_json(self, database_data):
         # return json.loads(database_data)
-        return pickle.loads(database_data.encode())
+        return pickle.loads(database_data)
 
     def to_json(self, container_data):
-        return pickle.dumps(container_data).decode()
+        return pickle.dumps(container_data)
         # return json.dumps(self.serialize(container_data))
 
 

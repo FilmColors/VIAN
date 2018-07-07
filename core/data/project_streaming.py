@@ -226,7 +226,7 @@ class AsyncShelveStream(QObject):
 #endregion
 
 SQ_TABLE_JSON = "TABLE_ANALYSIS_JSON"
-SQ_TABLE_PICKLE = "TABLE_ANALYSIS_PICKLE"
+SQ_TABLE_MASKS = "TABLE_ANALYSIS_MASKS"
 
 class SQLiteStreamer(ProjectStreamer):
     def __init__(self, main_window):
@@ -251,8 +251,8 @@ class SQLiteStreamer(ProjectStreamer):
             try:
                 self.db.begin()
 
-                if data_type == DataSerialization.PICKLE:
-                    table = SQ_TABLE_PICKLE
+                if data_type == DataSerialization.MASKS:
+                    table = SQ_TABLE_MASKS
                 else:
                     table = SQ_TABLE_JSON
 
@@ -268,8 +268,8 @@ class SQLiteStreamer(ProjectStreamer):
 
     def sync_load(self, id: int, data_type = DataSerialization.JSON):
         if self.db is not None:
-            if data_type == DataSerialization.PICKLE:
-                table = SQ_TABLE_PICKLE
+            if data_type == DataSerialization.MASKS:
+                table = SQ_TABLE_MASKS
             else:
                 table = SQ_TABLE_JSON
             try:
