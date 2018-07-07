@@ -3,12 +3,19 @@ This File contains all classes that are related to Importing into VIAN.
 """
 
 import csv
+import cv2
+
 import pickle
 import xml.dom.minidom
 
 from core.analysis.filmcolors_pipeline.filmcolors_pipeline import *
 from core.container.analysis import IAnalysisJobAnalysis
-
+from core.data.interfaces import *
+from core.data.computation import *
+from core.container.segmentation import Segment
+from core.container.project import *
+from core.visualization.feature_plot import *
+from core.visualization.image_plots import *
 
 class ELANProjectImporter():
     def __init__(self, main_window, remote_movie = False, import_screenshots = False, movie_formats = None):
@@ -290,36 +297,36 @@ class ScreenshotImporter(IConcurrentJob):
         project.dispatch_changed()
 
 
-class FilmColorsPipelineImporter():
-    def import_pipeline(self, path, project: VIANProject):
-
-        try:
-            with open(path, "rb") as file:
-                data = pickle.load(file)
-            #region #--- Import Analysis ---
-            analysis = IAnalysisJobAnalysis("FilmColors Pipeline",
-                                            results=data,
-                                            analysis_job_class=FilmColorsPipelineAnalysis().__class__,
-                                            parameters= FilmColorsPipelinePreferences().get_parameters())
-
-
-            # thumb_fg = []
-            # for img in data["thumbnails_fg"]:
-            #     thumb_fg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
-            # thumb_bg = []
-            # for img in data["thumbnails_bg"]:
-            #     thumb_bg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
-
-            # data['thumbnails_fg'] = thumb_fg
-            # data['thumbnails_bg'] = thumb_bg
-
-            project.add_analysis(analysis)
-            analysis.unload_container()
-            #endregion
-
-            return analysis
-        except Exception as e:
-            print(e)
+# class FilmColorsPipelineImporter():
+#     def import_pipeline(self, path, project: VIANProject):
+#
+#         try:
+#             with open(path, "rb") as file:
+#                 data = pickle.load(file)
+#             #region #--- Import Analysis ---
+#             analysis = IAnalysisJobAnalysis("FilmColors Pipeline",
+#                                             results=data,
+#                                             analysis_job_class=FilmColorsPipelineAnalysis().__class__,
+#                                             parameters= FilmColorsPipelinePreferences().get_parameters())
+#
+#
+#             # thumb_fg = []
+#             # for img in data["thumbnails_fg"]:
+#             #     thumb_fg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
+#             # thumb_bg = []
+#             # for img in data["thumbnails_bg"]:
+#             #     thumb_bg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
+#
+#             # data['thumbnails_fg'] = thumb_fg
+#             # data['thumbnails_bg'] = thumb_bg
+#
+#             project.add_analysis(analysis)
+#             analysis.unload_container()
+#             #endregion
+#
+#             return analysis
+#         except Exception as e:
+#             print(e)
 
 
 class FileMakerVocImporter():

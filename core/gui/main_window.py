@@ -959,6 +959,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.store(self.dock_widgets)
 
         self.frame_update_thread.quit()
+        self.abortAllConcurrentThreads.emit()
 
         if PROFILE:
             self.profiler.disable()

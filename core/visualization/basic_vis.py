@@ -1,4 +1,4 @@
-import pyqtgraph as pg
+# import pyqtgraph as pg
 from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -22,35 +22,35 @@ class IVIANVisualization():
         return image
 
 
-class HistogramVis(QWidget, IVIANVisualization):
-    def __init__(self, parent):
-        super(HistogramVis, self).__init__(parent)
-        self.view = pg.PlotWidget()
-
-        self.setLayout(QVBoxLayout(self))
-        self.layout().addWidget(self.view)
-        self.items = []
-        # self.plt = pg.PlotItem()
-        # self.view.addItem(self.plt)
-
-
-    def plot(self, ys, colors, width = 1):
-        for i in self.items:
-            self.view.removeItem(i)
-        self.items.clear()
-
-        for i in range(len(ys)):
-            item = pg.BarGraphItem(x = [i], height=[ys[i]], width=[width],
-                                   brush=QColor(colors[i][0], colors[i][1], colors[i][2]),
-                                   pen=QPen(QColor(colors[i][0],colors[i][1],colors[i][2])))
-
-            self.view.addItem(item)
-            self.items.append(item)
-        self.view.updateMatrix()
-
-    def update_plot(self, ys):
-        for i, itm in enumerate(self.items):
-            itm.setOpts(height=[ys[i]])
+# class HistogramVis(QWidget, IVIANVisualization):
+#     def __init__(self, parent):
+#         super(HistogramVis, self).__init__(parent)
+#         self.view = pg.PlotWidget()
+#
+#         self.setLayout(QVBoxLayout(self))
+#         self.layout().addWidget(self.view)
+#         self.items = []
+#         # self.plt = pg.PlotItem()
+#         # self.view.addItem(self.plt)
+#
+#
+#     def plot(self, ys, colors, width = 1):
+#         for i in self.items:
+#             self.view.removeItem(i)
+#         self.items.clear()
+#
+#         for i in range(len(ys)):
+#             item = pg.BarGraphItem(x = [i], height=[ys[i]], width=[width],
+#                                    brush=QColor(colors[i][0], colors[i][1], colors[i][2]),
+#                                    pen=QPen(QColor(colors[i][0],colors[i][1],colors[i][2])))
+#
+#             self.view.addItem(item)
+#             self.items.append(item)
+#         self.view.updateMatrix()
+#
+#     def update_plot(self, ys):
+#         for i, itm in enumerate(self.items):
+#             itm.setOpts(height=[ys[i]])
 
 
 class PaletteVis(QWidget, IVIANVisualization):

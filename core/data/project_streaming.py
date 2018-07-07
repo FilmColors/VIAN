@@ -291,7 +291,6 @@ class SQLiteStreamer(ProjectStreamer):
                     else:
                         print("Found")
 
-
     #region IProjectChangeNotify
     def on_loaded(self, project):
         self.clean_up()
