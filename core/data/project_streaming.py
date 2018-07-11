@@ -294,8 +294,8 @@ class SQLiteStreamer(ProjectStreamer):
     #region IProjectChangeNotify
     def on_loaded(self, project):
         self.clean_up()
-
         self.store_path = "sqlite:///" + project.data_dir + "/" + "database.sqlite"
+        print("SQLite Database Path:", self.store_path)
         self.db = ds.connect(self.store_path)
         pass
 

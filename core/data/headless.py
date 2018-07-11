@@ -22,7 +22,7 @@ class HeadlessMainWindow(QObject):
         super(HeadlessMainWindow, self).__init__()
         self.thread_pool = QThreadPool()
         self.numpy_data_manager = NumpyDataManager(self)
-        self.project_streamer = ProjectStreamerShelve(self)
+        self.project_streamer = SQLiteStreamer(self)
         self.version = VERSION
         self.project = None
 
@@ -32,10 +32,12 @@ class HeadlessMainWindow(QObject):
 
     def dispatch_on_changed(self, receiver=None, item=None):
         pass
+
     def dispatch_on_loaded(self, *args):
         if self.project is not None:
             self.project_streamer.on_loaded(self.project)
             self.numpy_data_manager.on_loaded(self.project)
+
     def dispatch_on_closed(self, *args):
         pass
 
@@ -77,7 +79,6 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         mw = HeadlessMainWindow()
         project = VIANProject(mw, name=name, folder=location, path=location + "/" + name)
         mw.project = project
-        mw.dispatch_on_loaded()
         project.inhibit_dispatch = False
 
         os.mkdir(project.folder)
@@ -98,6 +99,8 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         # Apply Template if set
         if template_path is not None:
             project.apply_template(template_path)
+
+        mw.dispatch_on_loaded()
 
         # Import Segmentation
         if segmentations is not None:

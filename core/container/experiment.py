@@ -596,6 +596,12 @@ class Experiment(IProjectContainer, IHasName):
             root.get_children_plain(result)
         return result
 
+    def get_classification_object_by_name(self, name):
+        for obj in self.get_classification_objects_plain():
+            if obj.name == name:
+                return obj
+        return None
+
     def add_analysis_to_pipeline(self, name, analysis:AnalysisContainer, parameters:AnalysisParameters = None, classification_object = None):
         if analysis not in self.analyses:
             self.analyses.append(
