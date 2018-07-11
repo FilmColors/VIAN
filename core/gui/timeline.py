@@ -1897,7 +1897,7 @@ class SelectorContextMenu(QtWidgets.QMenu):
         self.a_add_text.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_text,
                                                        [255, 255, 255], 12, 12, start=self.selector.start, end=self.selector.end))
         self.a_add_image.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_image,
-                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
+                                                       image_path=None, start=self.selector.start, end=self.selector.end))
         self.a_add_free_hand.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_freehand,
                                                        [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
 

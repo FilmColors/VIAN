@@ -366,7 +366,8 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self):
         if self.current_idx - 1 < len(self.time_ms):
-            if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - (frame2ms(2*self.resolution, self.project.movie_descriptor.fps)):
+            print(self.time_ms[self.current_idx - 1],  self.project.movie_descriptor.duration - (frame2ms(5 * self.resolution, self.project.movie_descriptor.fps)))
+            if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - (frame2ms(5 * self.resolution, self.project.movie_descriptor.fps)):
                 if not isinstance(self.palette_cols, np.ndarray):
                     self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
                 if not isinstance(self.palette_layers, np.ndarray):

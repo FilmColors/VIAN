@@ -422,7 +422,7 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                 # Add it to the Shot Index for later lookup
                 if scr.segm_id not in shot_index:
                     shot_index[scr.segm_id] = dict()
-                shot_index[scr.segm_id][scr.segm_shot_id] = scr
+
 
                 if scr.scr_grp not in scr_groups:
                     grp = vian_project.add_screenshot_group(scr.scr_grp)
@@ -430,6 +430,7 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                 else:
                     grp = vian_project.screenshot_groups[scr_groups.index(scr.scr_grp)]
                 shot = vian_project.create_screenshot_headless("SCR_" + str(i), scr.frame_pos, fps = fps)
+                shot_index[scr.segm_id][scr.segm_shot_id] = shot
                 grp.add_screenshots([shot])
                 mask_files[shot.unique_id] = scr.mask_file
                 scr_masks.append((shot, scr.mask_file))
@@ -464,7 +465,7 @@ def generate_projects(input_dir, result_dir, replace_path = False):
             for p in masset.palette_assets:
                 shot = shot_index[p[0]][p[1]]
                 fg_palette = IAnalysisJobAnalysis(
-                    name="Color-Palette",
+                    name="Color-Palette_" + shot.get_name() + "_FG",
                     results=dict(tree=p[2].tree, dist=p[2].merge_dists),
                     analysis_job_class=ColorPaletteAnalysis,
                     parameters=palette_params,
@@ -472,7 +473,7 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                     target_classification_object=fg_c_object
                 )
                 bg_palette = IAnalysisJobAnalysis(
-                    name="Color-Palette",
+                    name="Color-Palette_" + shot.get_name() + "_BG",
                     results=dict(tree=p[3].tree, dist=p[3].merge_dists),
                     analysis_job_class=ColorPaletteAnalysis,
                     parameters=palette_params,
@@ -480,7 +481,7 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                     target_classification_object=bg_c_object
                 )
                 glob_palette = IAnalysisJobAnalysis(
-                    name="Color-Palette",
+                    name="Color-Palette_" + shot.get_name() + "_GLOB",
                     results=dict(tree=p[4].tree, dist=p[4].merge_dists),
                     analysis_job_class=ColorPaletteAnalysis,
                     parameters=palette_params,
