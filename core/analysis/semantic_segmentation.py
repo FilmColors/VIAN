@@ -6,6 +6,7 @@ June 2018
 """
 
 from typing import List
+import pickle
 
 from core.data.computation import ms_to_frames, numpy_to_pixmap
 from core.container.project import *
@@ -19,9 +20,10 @@ from core.analysis.deep_learning.models import *
 class SemanticSegmentationAnalysis(IAnalysisJob):
     def __init__(self):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
-                                                 author="Gaudenz Halter",
-                                                 version="1.0.0",
-                                                 multiple_result=False)
+                                                           author="Gaudenz Halter",
+                                                           version="1.0.0",
+                                                           multiple_result=False,
+                                                           data_serialization=DataSerialization.MASKS)
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -51,6 +53,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         results = []
         tot = len(args)
         counter = 0
+
         with tf.Graph().as_default():
             session = tf.Session('')
             KTF.set_session(session)
@@ -92,6 +95,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         sign_progress(1.0)
         return results
 
+
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
         """
         This Function will be called after the processing is completed. 
@@ -105,7 +109,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.data['mask'], cv2.COLOR_GRAY2BGR)))
+        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata()['mask'], cv2.COLOR_GRAY2BGR)))
         return widget
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
@@ -113,7 +117,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This function should show the complete Visualization
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.data['mask'], cv2.COLOR_GRAY2BGR)))
+        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata()['mask'], cv2.COLOR_GRAY2BGR)))
         return [VisualizationTab(widget=widget, name="Semantic Segmentation Mask", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):
@@ -123,11 +127,29 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         """
         return SemanticSegmentationParameterWidget()
 
-    def from_database(self, database_data):
-        return json.loads(database_data)
+    def serialize(self, data_dict):
+        data = dict(
+            mask = pickle.dumps(data_dict['mask']),
+            frame_sizes = data_dict['frame_sizes'],
+            dataset = data_dict['dataset']
+        )
+        return data
 
-    def to_database(self, container_data):
-        return json.dumps(self.serialize(container_data)).encode()
+    def deserialize(self, data_dict):
+        data = dict(
+            mask=pickle.loads(data_dict['mask']),
+            frame_sizes=data_dict['frame_size'],
+            dataset=data_dict['dataset']
+        )
+        return data
+
+    def from_json(self, database_data):
+        # return json.loads(database_data)
+        return pickle.loads(database_data)
+
+    def to_json(self, container_data):
+        return pickle.dumps(container_data)
+        # return json.dumps(self.serialize(container_data))
 
 
 class SemanticSegmentationParameterWidget(ParameterWidget):

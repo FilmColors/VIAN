@@ -5,7 +5,8 @@ import glob
 import sqlite3
 from core.data.interfaces import IConcurrentJob, IProjectChangeNotify
 from PyQt5.QtCore import pyqtSignal, QObject, pyqtSlot, QThread, Qt
-
+import dataset as ds
+from core.data.enums import DataSerialization
 STREAM_DATA_IPROJECT_CONTAINER = 0
 STREAM_DATA_ARBITRARY = 1
 NUMPY_NO_OVERWRITE = 2
@@ -223,6 +224,92 @@ class AsyncShelveStream(QObject):
         pass
 
 #endregion
+
+SQ_TABLE_JSON = "TABLE_ANALYSIS_JSON"
+SQ_TABLE_MASKS = "TABLE_ANALYSIS_MASKS"
+
+class SQLiteStreamer(ProjectStreamer):
+    def __init__(self, main_window):
+        super(SQLiteStreamer, self).__init__(main_window)
+        self.signals = ProjectStreamerSignals()
+        self.store_dir = ""
+        self.store_path = ""
+        self.db = None
+
+    def set_store_dir(self, store_dir):
+        self.store_dir = store_dir + "/"
+
+    def async_store(self, id: int, data_dict, data_type =  DataSerialization.JSON, proceed_slot = None, proceed_slot_args = None):
+        self.sync_store(id, data_dict, data_type)
+        proceed_slot(proceed_slot_args)
+
+    def async_load(self, id: int, proceed_slot, proceed_slot_args = None, data_type =  DataSerialization.JSON):
+        self.signals.on_async_load.emit(str(id), data_type, proceed_slot, proceed_slot_args)
+
+    def sync_store(self,  id: int, obj,data_type =  DataSerialization.JSON):
+        if self.db is not None:
+            try:
+                self.db.begin()
+
+                if data_type == DataSerialization.MASKS:
+                    table = SQ_TABLE_MASKS
+                else:
+                    table = SQ_TABLE_JSON
+
+                if self.db[table].find_one(key=id) == None:
+                    self.db[table].insert(dict(key=id, json=obj))
+                else:
+                    self.db[table].update(dict(key=id, json=obj), ['key'])
+
+                self.db.commit()
+            except Exception as e:
+                print("SQLite Exception", str(e))
+                self.db.rollback()
+
+    def sync_load(self, id: int, data_type = DataSerialization.JSON):
+        if self.db is not None:
+            if data_type == DataSerialization.MASKS:
+                table = SQ_TABLE_MASKS
+            else:
+                table = SQ_TABLE_JSON
+            try:
+                ret = self.db[table].find_one(key=id)
+                return dict(ret)['json']
+            except Exception as e:
+                print("SQLite Exception", str(e))
+        else:
+            return None
+
+    def clean_up(self):
+        if self.project is not None and self.db is not None:
+            project_all = self.project.get_all_ids()
+            for t in [SQ_TABLE_JSON]:
+                all = t.all()
+                for t in all:
+                    if t['key'] not in project_all:
+                        print("Not Found")
+                    else:
+                        print("Found")
+
+    #region IProjectChangeNotify
+    def on_loaded(self, project):
+        self.clean_up()
+        self.store_path = "sqlite:///" + project.data_dir + "/" + "database.sqlite"
+        print("SQLite Database Path:", self.store_path)
+        self.db = ds.connect(self.store_path)
+        pass
+
+    def on_changed(self, project, item):
+        pass
+
+    def on_selected(self, sender, selected):
+        pass
+
+    def on_closed(self):
+        pass
+    #endregion
+
+
 class NumpyDataManager(ProjectStreamer):
     def __init__(self, main_window):
         super(NumpyDataManager, self).__init__(main_window)

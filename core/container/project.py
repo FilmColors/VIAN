@@ -219,7 +219,7 @@ class VIANProject(IHasName, IClassifiable):
     def unload_all(self):
         for c in self.get_all_containers():
             if isinstance(c, IStreamableContainer):
-                c.unload_container(sync=False)
+                c.unload_container(sync=True)
 
     def print_all(self, type = None):
         for c in self.get_all_containers():
@@ -820,7 +820,8 @@ class VIANProject(IHasName, IClassifiable):
                     else:
                         self.add_analysis(new)
                 except Exception as e:
-                    print("Exception in Load Analyses", e)
+                    raise e
+                    print("Exception in Load Analyses", str(e))
 
         try:
             old = self.screenshot_groups
@@ -917,6 +918,7 @@ class VIANProject(IHasName, IClassifiable):
         if scripts:
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
+
         if experiment:
             for e in self.experiments:
                 experiments.append(e.to_template())
@@ -1181,6 +1183,9 @@ class VIANProject(IHasName, IClassifiable):
         for ids in self.id_list:
             string += str(ids[0]).ljust(20) + str(ids[1]) + "\n"
         return string
+
+    def get_all_ids(self):
+        return [itm[0] for itm in self.id_list]
 
     def get_by_id(self, item_id):
         """

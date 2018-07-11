@@ -23,6 +23,8 @@ A Mapping of Filmography Column Names to their respective attribute name in the 
 """
 
 ERROR_LIST = []
+PROJECT_PATHS = []
+PROJECT_FILE_PATH = "F:\\_projects\\all_projects.txt"
 
 CorpusDBMapping = dict(
     imdb_id = "IMDb ID",
@@ -48,12 +50,17 @@ MasterDBMapping = dict(
     end = "exp_End",
     annotation = "exp_Annotation"
 )
+
+def progress(stage, movie, progress, sub_progress):
+    console.write("\r" + stage.rjust(15) + "\t" + "".join(["#"] * int(sub_progress * 10)).ljust(10) + "\t" + str(round(sub_progress, 2)))
+
+
 def get_movie_asset_by_id(movie_assets:List[MovieAsset], fm_id):
     for m in movie_assets:
         if m.fm_id[0] == fm_id:
-            print("Found")
             return m
     raise Exception("Movie with id: " + str(fm_id) + " is not in MovieAssets")
+
 
 def filemaker_timestamp2ms(a):
     a = a.zfill(8)
@@ -61,7 +68,7 @@ def filemaker_timestamp2ms(a):
     return ts_to_ms(a[0], a[1], a[2], a[3])
 
 
-def load_stage(result_dir, stage = 0, movie_asset = None, n = 1000)->List[MovieAsset]:
+def load_stage(result_dir, stage = 0, movie_asset = None, n = 1000, idx = 0)->List[MovieAsset]:
     """
     Loads the Movie-Assets from a specific Stage of the Pipeline
     :param result_dir:
@@ -72,14 +79,20 @@ def load_stage(result_dir, stage = 0, movie_asset = None, n = 1000)->List[MovieA
     files = glob.glob(result_dir + "stage_" + str(stage).zfill(2) + "*")
     result = []
     c = 0
-    for file in files:
+
+    for file in files[idx:]:
         if n < c:
             break
         with open(file, "rb") as f:
             result.append(pickle.load(f))
         c += 1
-        print(c)
     return result
+
+
+def store_project_list():
+    with open(PROJECT_FILE_PATH, "w") as f:
+        for l in PROJECT_PATHS:
+            f.write(l + "\n")
 
 
 def parse_glossary(glossary_path):
@@ -290,7 +303,7 @@ def parse_masterdb(database_path, glossary_words, glossary_categories, glossary_
     return all_projects
 
 
-def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, result_path, template_path):
+def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, result_path, template_path, cache_dir):
     """
     Parses the given CorpusDB and DatabaseDB file and returns them project sorted project_wise
     :param corpus_path: 
@@ -305,17 +318,17 @@ def parse(corpus_path, glossary_path, database_path, outfile, movie_assets, resu
     (movie_results, filmography_result, movie_assets, assignments) = parse_corpus(corpus_path, movie_assets)
 
     # If the MasterDB has not been cached, parse it
-    if not os.path.isfile("all_projects_cache.pickle"):
+    if not os.path.isfile(cache_dir + "all_projects_cache.pickle"):
         # Parse the Glossary and all Keywords
         glossary_words, glossary_ids, glossary_categories, glossary_omit = parse_glossary(glossary_path)
 
         # PARSE ALL SEGMENTS, sort them by FM-ID and Item-ID
         # List of Tuples (<FM_ID>_<ITEM_ID>, [DB_SEGMENT, LIST[KeywordIDs]])
         all_projects = parse_masterdb(database_path, glossary_words, glossary_categories, glossary_ids, glossary_omit)
-        with open("all_projects_cache.pickle", "wb") as f:
+        with open(cache_dir + "all_projects_cache.pickle", "wb") as f:
             pickle.dump(all_projects, f)
     else:
-        with open("all_projects_cache.pickle", "rb") as f:
+        with open(cache_dir + "all_projects_cache.pickle", "rb") as f:
             all_projects = pickle.load(f)
 
     # Now, Combine the Projects with their Movie
@@ -358,13 +371,14 @@ def generate_projects(input_dir, result_dir, replace_path = False):
             fm_id_str = "_".join([data['fm_id'][0].zfill(3), data['fm_id'][1], data['fm_id'][2]])
             project_name = fm_id_str + "_" + dbmovie.movie_name + "_" +dbmovie.year
 
-
+            print("### ---" , project_name, "--- ###")
             movie_path = masset.movie_path_abs
             if replace_path:
-                movie_path = movie_path.replace("/Volumes/", "\\\\130.60.131.134\\")
+                movie_path = replace_network_path(movie_path)
 
             project_folder = result_dir + "/" + project_name + "/"
             vian_project = create_project_headless(project_name, project_folder, movie_path, [], [], move_movie="None", template_path=template_path)
+            vian_project.inhibit_dispatch = True
 
             #Create an Experiment and a Main Segmentation
             experiment = vian_project.experiments[0]
@@ -375,8 +389,8 @@ def generate_projects(input_dir, result_dir, replace_path = False):
             glossary_ids = [k.external_id for k in exp_keywords]
 
             # Apply the Classification
+            progress("Classification:", dbmovie.movie_name + "_" + str(dbmovie.movie_id), 0.1, 0.0)
             Errors = []
-
             for idx, s in enumerate(data['segments']):
                 segment = s[0]
                 keywords = s[1]
@@ -395,13 +409,21 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                             Errors.append((glossary_words[idx], glossary_categories[idx]))
 
 
-
             # Create Screenshots:
             cap = cv2.VideoCapture(movie_path)
             fps = cap.get(cv2.CAP_PROP_FPS)
 
             scr_groups = [""]
+            mask_files = dict()
+            scr_masks = []
+            shot_index = dict()
             for i, scr in enumerate(masset.shot_assets):
+
+                # Add it to the Shot Index for later lookup
+                if scr.segm_id not in shot_index:
+                    shot_index[scr.segm_id] = dict()
+                shot_index[scr.segm_id][scr.segm_shot_id] = scr
+
                 if scr.scr_grp not in scr_groups:
                     grp = vian_project.add_screenshot_group(scr.scr_grp)
                     scr_groups.append(scr.scr_grp)
@@ -409,14 +431,78 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                     grp = vian_project.screenshot_groups[scr_groups.index(scr.scr_grp)]
                 shot = vian_project.create_screenshot_headless("SCR_" + str(i), scr.frame_pos, fps = fps)
                 grp.add_screenshots([shot])
+                mask_files[shot.unique_id] = scr.mask_file
+                scr_masks.append((shot, scr.mask_file))
 
+            # Analyses
+            # Fg/Bg Segmentation
+            a_class = SemanticSegmentationAnalysis
+            c = 0
+            for shot, mask_file in scr_masks:
+                mask = cv2.imread(replace_network_path(mask_file), 0)
+
+                analysis = IAnalysisJobAnalysis(
+                    name="Fg/Bg Segmentation",
+                    results=dict(mask=mask.astype(np.uint8),
+                                 frame_sizes=(mask.shape[0], mask.shape[1]),
+                                 dataset=DATASET_NAME_ADE20K),
+                                 analysis_job_class=SemanticSegmentationAnalysis,
+                                 parameters=dict(model=DATASET_NAME_ADE20K, resolution=50),
+                                 container=shot
+                )
+                progress("Masks:", dbmovie.movie_name + "_" + str(dbmovie.movie_id), 0.1, c/len(scr_masks))
+                analysis.a_class = a_class
+                vian_project.add_analysis(analysis)
+                c += 1
+
+            # Palettes:
+            palette_params = dict(resolution=50)
+            fg_c_object = experiment.get_classification_object_by_name("Foreground")
+            bg_c_object = experiment.get_classification_object_by_name("Background")
+            glob_c_object = experiment.get_classification_object_by_name("Global")
+
+            for p in masset.palette_assets:
+                shot = shot_index[p[0]][p[1]]
+                fg_palette = IAnalysisJobAnalysis(
+                    name="Color-Palette",
+                    results=dict(tree=p[2].tree, dist=p[2].merge_dists),
+                    analysis_job_class=ColorPaletteAnalysis,
+                    parameters=palette_params,
+                    container=shot,
+                    target_classification_object=fg_c_object
+                )
+                bg_palette = IAnalysisJobAnalysis(
+                    name="Color-Palette",
+                    results=dict(tree=p[3].tree, dist=p[3].merge_dists),
+                    analysis_job_class=ColorPaletteAnalysis,
+                    parameters=palette_params,
+                    container=shot,
+                    target_classification_object=bg_c_object
+                )
+                glob_palette = IAnalysisJobAnalysis(
+                    name="Color-Palette",
+                    results=dict(tree=p[4].tree, dist=p[4].merge_dists),
+                    analysis_job_class=ColorPaletteAnalysis,
+                    parameters=palette_params,
+                    container=shot,
+                    target_classification_object=glob_c_object
+                )
+                vian_project.add_analysis(fg_palette)
+                vian_project.add_analysis(bg_palette)
+                vian_project.add_analysis(glob_palette)
 
             vian_project.store_project(HeadlessUserSettings(), vian_project.path)
-            print(" --- ERRORS --- ")
-            for r in sorted(Errors, key=lambda x: x[1]):
-                print(r)
+            PROJECT_PATHS.append(vian_project.path + "\t" + fm_id_str)
+            store_project_list()
+            print("\n\n\n")
+
+        print(" --- ERRORS --- ")
+        for r in sorted(Errors, key=lambda x: x[1]):
+            print(r)
 
 
+def replace_network_path(old):
+    return old.replace("\\", "/").replace("//130.60.131.134/", "F:/").replace("/Volumes/", "F:/")
 
 if __name__ == '__main__':
     # corpus_path = "../.."
@@ -431,14 +517,29 @@ if __name__ == '__main__':
     gloss_file = "E:/Programming/Datasets/FilmColors/PIPELINE/_input\\GlossaryDB_WordCount.csv"
     db_file = "E:/Programming/Datasets/FilmColors/PIPELINE/_input\\MasterDB_WordCount.csv"
     outfile = "../../results/counting.csv"
-    asset_path = "\\\\130.60.131.134\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\"
-    result_path = "E:/Programming/Datasets/FilmColors/PIPELINE\\COMBINED/"
-    project_dir = "E:/Programming/Datasets/FilmColors/PIPELINE\\PROJECTS/"
-    template_path = "C:/Users/Gaudenz Halter/Documents/VIAN/templates/ERC_FilmColors.viant"
-    # movie_assets = load_stage(asset_path, 1)
+    asset_path = "F:\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\"
+    result_path = "F:/_output/"
+    project_dir = "F:/_projects/"
+    cache_dir = "F:/_cache/"
+    template_path = "E:/Programming/Git/visual-movie-annotator/user/templates/ERC_FilmColors.viant"
 
-    # movie_assets = load_stage("\\\\130.60.131.134\\fiwi_datenbank\\PIPELINE_RESULTS\\ASSETS\\", 2, n=10)
-    with open("movie_assets_cache.pickle", "rb") as f:
-        movie_assets = pickle.load(f)
-    parse(corpus_path, gloss_file, db_file, outfile, movie_assets, result_path, template_path)
-    generate_projects(result_path, project_dir, replace_path=True)
+#    movie_assets = load_stage(asset_path, 1)
+#    with open("F:\\_cache\\movie_assets_cache.pickle", "wb") as f:
+#        pickle.dump(movie_assets, f)
+
+    has_more = True
+    idx, n = 0, 10
+    while has_more:
+        print("Loading Movie Assets...")
+        movie_assets = load_stage(asset_path, 2, n=10, idx = idx)
+
+        print("Parsing Corpus...")
+        parse(corpus_path, gloss_file, db_file, outfile, movie_assets, result_path, template_path, cache_dir)
+
+        print("Generating Projects....")
+        generate_projects(result_path, project_dir, replace_path=True)
+
+        if len(movie_assets < n):
+            has_more = False
+        else:
+            idx += n

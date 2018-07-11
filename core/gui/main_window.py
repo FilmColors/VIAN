@@ -152,7 +152,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                    QColor(200,200,200,100))
 
         self.numpy_data_manager = NumpyDataManager(self)
-        self.project_streamer = ProjectStreamerShelve(self)
+        # self.project_streamer = ProjectStreamerShelve(self)
+        self.project_streamer = SQLiteStreamer(self)
 
         self.video_capture = None
 
@@ -909,7 +910,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 for c in self.extension_list.get_importables():
                     if c[0] == class_name:
                         module = importlib.import_module(c[1])
-                        print(getattr(module, class_name))
                         return getattr(module, class_name)
             except Exception as e:
                 print(e)
@@ -959,6 +959,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.store(self.dock_widgets)
 
         self.frame_update_thread.quit()
+        self.abortAllConcurrentThreads.emit()
 
         if PROFILE:
             self.profiler.disable()
@@ -1388,8 +1389,6 @@ class MainWindow(QtWidgets.QMainWindow):
             result.unload_container()
 
         # Unload the analysis from Memory
-
-
     def on_save_custom_perspective(self):
         setting = QSettings("UniversityOfZurich", "VIAN")
         setting.setValue("geometry", self.saveGeometry())

@@ -28,15 +28,29 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.notes = ""
         self.data = data
 
+    def set_project(self, project):
+        IProjectContainer.set_project(self, project)
+
+        # The data is only set when the container is created,
+        # else it should already be in the SQLite Database
+        if self.data is not None:
+            self.set_adata(self.data)
+
     def unload_container(self, data=None, sync=False):
-        super(AnalysisContainer, self).unload_container(self.data, sync=sync)
+        super(AnalysisContainer, self).unload_container(self.get_adata(), sync=sync)
         self.data = None
 
+    def get_adata(self):
+        return self.data
+
+    def set_adata(self, d):
+        self.data = d
+
     def apply_loaded(self, obj):
-        self.data = obj
+        self.set_adata(obj)
 
     def sync_load(self):
-        self.data = self.project.main_window.project_streamer.sync_load(self.unique_id)
+        self.set_adata(self.project.main_window.project_streamer.sync_load(self.unique_id))
 
     def get_name(self):
         return self.name
@@ -46,7 +60,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
 
     def serialize(self):
         data_json = []
-        for d in self.data:
+        for d in self.get_adata():
             data_json.append(np.array(d).tolist())
 
 
@@ -167,6 +181,9 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.parameters = []
         self.target_classification_object = target_classification_object
 
+        # Evaluated self.analysis-job_class
+        self.a_class = None
+
     def get_preview(self):
         try:
             return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
@@ -196,15 +213,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.target_classification_object = class_obj
 
     def serialize(self):
-        t = self.project.main_window.eval_class(self.analysis_job_class)
-        self.data = t().deserialize(self.project.main_window.project_streamer.sync_load(self.unique_id))
-        # Store the data as numpy if it does not already exist (since it is immutable)
-        # TODO sync_load may fail from time to time (Not yet known why), so we want to make sure that
-        # TODO the file is not overwritten if the loaded data is None
-        if self.data is not None:
-            t = self.project.main_window.eval_class(self.analysis_job_class)
-            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, t().serialize(self.data), data_type=NUMPY_NO_OVERWRITE)
-
         if self.target_classification_object is not None:
             class_obj_id = self.target_classification_object.unique_id
         else:
@@ -216,13 +224,11 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             analysis_container_class=self.__class__.__name__,
             analysis_job_class=self.analysis_job_class,
             parameters=self.parameters,
-            # data_dtypes=data_dtypes,
-            # data_json=data_json,
+
             notes=self.notes,
             container = self.target_container.unique_id,
             classification_obj = class_obj_id
         )
-
 
         return data
 
@@ -239,9 +245,9 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         except:
             pass
 
-        self.data = []
-        t = streamer.project.main_window.eval_class(self.analysis_job_class)
-        self.data = t().deserialize(streamer.sync_load(self.unique_id))
+        # self.data = []
+        # t = streamer.project.main_window.eval_class(self.analysis_job_class)
+        # self.data = t().deserialize(streamer.sync_load(self.unique_id))
         self.parameters = serialization['parameters']
 
         self.set_target_container(streamer.project.get_by_id(serialization['container']))
@@ -249,6 +255,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         return self
 
     def unload_container(self, data = None, sync = False):
+        pass
         if data is not None:
             self.data = data
         if self.data is None:
@@ -260,7 +267,18 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.project.main_window.project_streamer.async_store(self.unique_id, self.project.main_window.eval_class(self.analysis_job_class)().serialize(self.data))
 
     def apply_loaded(self, obj):
-        self.data = self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj)
+        self.set_adata(self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj))
+
+    def get_adata(self):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+        return self.a_class().from_json(self.project.main_window.project_streamer.sync_load(self.unique_id, data_type=self.a_class().serialization_type()))
+
+    def set_adata(self, d):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+        self.project.main_window.project_streamer.sync_store(self.unique_id, self.a_class().to_json(d), data_type=self.a_class().serialization_type())
+        self.data = None
 
 
 class ColormetryAnalysis(AnalysisContainer):

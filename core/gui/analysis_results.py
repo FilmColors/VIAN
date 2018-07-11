@@ -51,11 +51,12 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
     def activate_analysis(self, analysis: IAnalysisJobAnalysis):
         self.clear_analysis_widget()
         self.current_analysis = analysis
-        self.current_analysis.load_container(self.apply_analysis, sync=True)
+        # self.current_analysis.load_container(self.apply_analysis, sync=True)
+        self.apply_analysis()
 
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()
-        self.current_analysis.unload_container()
+        # self.current_analysis.unload_container()
         if visualizations is not None:
             self.analysis_widget.layout().addWidget(visualizations[0].widget)
             self.current_visualization = visualizations

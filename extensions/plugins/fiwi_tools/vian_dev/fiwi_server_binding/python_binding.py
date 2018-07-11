@@ -68,6 +68,7 @@ class MovieAsset(object):
     def __str__(self):
         return str(self.fm_id[0]) + "_" + str(self.fm_id[1]) + "_" + str(self.fm_id[1])
 
+
 class ScreenshotAsset(object):
     def __init__(self, filename):
         self.path = filename
@@ -92,6 +93,7 @@ class ScreenshotAsset(object):
 
     def __str__(self):
         return str(self.segm_id) + "_" + str(self.segm_shot_id)
+
 
 class Fetcher(object):
     def __init__(self, root_path, cache_path="fetcher_cache.pickle"):
