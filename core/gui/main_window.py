@@ -74,7 +74,7 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.6.5"
+VERSION = "0.6.6"
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
@@ -512,7 +512,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.colormetry_running == False:
             job = ColormetryJob2(30, self)
             args = job.prepare(self.project)
-            self.project.colormetry_analysis.has_finished = False
             self.actionColormetry.setText("Pause Colormetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)
             worker.signals.callback.connect(self.on_colormetry_push_back)
@@ -1946,8 +1945,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 for a in l.annotations:
                     a.widget.hide()
                     a.widget.is_active = False
-
-
         else:
             for l in self.project.annotation_layers:
                 if l.is_visible:
@@ -1961,6 +1958,7 @@ class MainWindow(QtWidgets.QMainWindow):
                             if a.widget is not None:
                                 a.is_visible = False
                                 a.widget.hide()
+            self.drawing_overlay.update()
 
     def dispatch_on_closed(self):
         self.autosave_timer.stop()

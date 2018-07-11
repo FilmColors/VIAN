@@ -618,7 +618,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         s = self.main_window.player.movie_size
         # aspect =self.main_window.player.get_aspect_ratio()
 
-
         if s[0] == 0 or s[1] == 0:
             return
 
@@ -987,7 +986,6 @@ class DrawingBase(QtWidgets.QWidget):
 
         if dispatch:
             self.overlay.project.set_selected(None, self.annotation_object)
-
 
     def mouseReleaseEvent(self, QMouseEvent):
         if self.is_active and not self.overlay.main_window.player.is_playing():

@@ -282,7 +282,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
 
 
 class ColormetryAnalysis(AnalysisContainer):
-    def __init__(self, results = None):
+    def __init__(self, results = None, resolution = 30):
         super(ColormetryAnalysis, self).__init__(name = "Colormetry", data = results)
         self.curr_location = 0
         self.time_ms = []
@@ -294,7 +294,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.palette_cols = []
         self.palette_layers = []
 
-        self.resolution = 30
+        self.resolution = resolution
         self.has_finished = False
 
         self.current_idx = 0
@@ -366,7 +366,7 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def set_finished(self):
         if self.current_idx - 1 < len(self.time_ms):
-            if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - 1000:
+            if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - (frame2ms(2*self.resolution, self.project.movie_descriptor.fps)):
                 if not isinstance(self.palette_cols, np.ndarray):
                     self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
                 if not isinstance(self.palette_layers, np.ndarray):
@@ -374,6 +374,7 @@ class ColormetryAnalysis(AnalysisContainer):
                 if not isinstance(self.palette_bins, np.ndarray):
                     self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
                 self.has_finished = True
+                print("LOG: Colorimetry finished")
 
                 data = dict(
                     curr_location=self.curr_location,
