@@ -1,3 +1,7 @@
+"""
+:author Gaudenz Halter
+"""
+
 import cv2
 import numpy as np
 import bisect
@@ -13,6 +17,8 @@ from core.data.computation import *
 
 class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableContainer):
     """
+    This is the BaseClass of all AnalysisContainers in the VIAN Project.
+
     Member Attributes:
         :self.name : The Name of the Container (not the analysis)
         :self.notes : Additional Notes added in the Inspector
@@ -179,8 +185,8 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.parameters = parameters
         else:
             self.parameters = []
-        self.target_classification_object = target_classification_object
 
+        self.target_classification_object = target_classification_object
         # Evaluated self.analysis-job_class
         self.a_class = None
 

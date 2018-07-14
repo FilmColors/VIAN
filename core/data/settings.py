@@ -27,8 +27,14 @@ palette_gray = Palette(palette_name="Gray", palette_colors=[[0,0,0],[50,50,50],[
 
 
 class UserSettings():
-    def __init__(self, path = "settings.json"):
+    """
+    The UserSettings File contains information that persists over projects,
+    this includes setings in the QDockWidgets, Contributor information, Default settings etc.
+    Settings are serialized into the Documents directory of the user.
+    If it does not exist it will be created.
 
+    """
+    def __init__(self, path = "settings.json"):
         self.PROJECT_FILE_EXTENSION = ".eext"
         self.SCREENSHOTS_EXPORT_NAMING_DEFAULT = [
             naming.Scene_ID.name,
@@ -39,7 +45,7 @@ class UserSettings():
             naming.Movie_Source.name,
 
         ]
-        self.USER_NAME = ""#"User Name"
+        self.CONTRIBUTOR = None
         self.CORPUS_IP = "127.0.0.1"
         self.COPRUS_PORT = 5006
         self.COPRUS_PW = "CorpusPassword"
@@ -97,6 +103,9 @@ class UserSettings():
         self.USE_ELAN = False
 
         self.dock_widgets_data = []
+
+    def set_contributor(self, contributor):
+        self.CONTRIBUTOR = contributor
 
     def get_qt_color(self, color):
         """
@@ -214,6 +223,9 @@ class UserSettings():
             self.dock_widgets_data.append(data)
 
         ddict = vars(self)
+        if ddict["CONTRIBUTOR"] is not None:
+            print(ddict['CONTRIBUTOR'])
+            ddict['CONTRIBUTOR'] = ddict["CONTRIBUTOR"].serialize()
         try:
             with open(self.store_path, 'w') as f:
                 json.dump(ddict, f)
@@ -230,8 +242,18 @@ class UserSettings():
             with open(self.store_path ,"r") as f:
                 data = json.load(f)
                 for attr, value in data.items():
-                    if not attr == "PALETTES" and not attr=="MAIN_FONT":
+
+                    # Palettes and MAIN_FONT should not be taken into Account,
+                    # CONTRIBUTOR needs special treatment
+                    if not attr == "PALETTES" and not attr =="MAIN_FONT" and not attr == "CONTRIBUTOR":
                         setattr(self, attr, value)
+
+                    # If this attribute is the contributor deserialize it and apply it to the settings
+                    elif attr == "CONTRIBUTOR":
+                        if value is not None:
+                            print("SERIALIZIBG CONTRIBUTOR", value)
+                            self.CONTRIBUTOR = Contributor().deserialize(value)
+                            print("Loaded:", self.CONTRIBUTOR)
         except IOError as e:
             print("No Settings found", e)
 
@@ -274,4 +296,23 @@ class UserSettings():
     #         self.store_path = files[0]
     #         self.load()
 
+
+class Contributor():
+    """
+    This class contains the user information currently using VIAN.
+    It is used to sign a created project and is stored in the VIANProject History
+    """
+    def __init__(self, full_name = "", user_name = "", email = "", password = ""):
+        self.full_name = full_name
+        self.user_name = user_name
+        self.email = email
+        self.password = password
+
+    def serialize(self):
+        return self.__dict__
+
+    def deserialize(self, serialization):
+        for attr, value in serialization.items():
+                setattr(self, attr, value)
+        return self
 

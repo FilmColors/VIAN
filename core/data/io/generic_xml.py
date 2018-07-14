@@ -8,6 +8,7 @@ from core.container.screenshot import *
 from core.container.annotation import *
 from core.container.media_objects import *
 
+from core.analysis.analysis_import import *
 class GenericXMLDevice():
     def __init__(self):
         pass
@@ -15,8 +16,6 @@ class GenericXMLDevice():
     #region EXPORT
     def build_document(self, author = "author", format = "2.8", version = "2.8"):
         root = et.Element("ANNOTATION_DOCUMENT")
-        root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        root.set("xmlns:noNamespaceSchemaLocation", "http://www.mpi.nl/tools/elan/EAFv2.8.xsd")
         root.set("AUTHOR", author)
         root.set("FORMAT", format)
         root.set("VERSION", version)
@@ -24,9 +23,8 @@ class GenericXMLDevice():
         return root
 
     def build_header(self, root, project:VIANProject, media: MovieDescriptor, time_units = "milliseconds"):
-        d = dict(MEDIA_FILE = media.movie_path,
-                 TIME_UNITS = time_units,
-                 PROJECT_NAME = project.name
+        d = dict(
+                PROJECT_NAME = project.name
                  )
 
         header = et.SubElement(root, "HEADER",  d)
@@ -106,7 +104,7 @@ class GenericXMLDevice():
     def add_screenshots(self, root, screenshots: Screenshot, screenshot_groups: List[ScreenshotGroup], time_mapping):
         grp = et.SubElement(root, "SCREENSHOTS")
         for a in screenshots:
-            # a = Screenshot()
+            a = Screenshot()
             (ref_start, ref_end) = self.to_time_mapping(time_mapping, a)
             d = dict(
                 ID = str(a.unique_id),
@@ -133,16 +131,26 @@ class GenericXMLDevice():
             ID = str(experiment.unique_id)
         )
         grp = et.SubElement(root, "EXPERIMENT", d)
-        for t in experiment.classification_objects:
+        grp_c = et.SubElement(grp, "CLASSIFICATION_OBJECTS")
+        for t in experiment.get_classification_objects_plain():
             # t = ClassificationObject()
+            # If this is a root object we set the ID to -1
+            parent_id = -1
+
+            if t.parent.unique_id != experiment.unique_id:
+                parent_id = t.parent.unique_id
+
             d = dict(
                 NAME = t.name,
                 ID = str(t.unique_id),
+                PARENT = str(parent_id),
+
             )
-            elem = et.SubElement(grp, "CLASSIFICATION_OBJECT", d)
+            elem = et.SubElement(grp_c, "CLASSIFICATION_OBJECT", d)
             for tgt in t.target_container:
                 et.SubElement(elem, "TARGET", ID = str(tgt.unique_id))
 
+        grp_v = et.SubElement(grp, "VOCABULARIES")
         for v in experiment.get_vocabularies():
             d = dict(
                 NAME=v.name,
@@ -150,7 +158,7 @@ class GenericXMLDevice():
                 CATEGORY = v.category,
                 INFO_URL = v.info_url
             )
-            elem = et.SubElement(grp, "VOCABULARY", d)
+            elem = et.SubElement(grp_v, "VOCABULARY", d)
             for word in v.words_plain:
                 et.SubElement(elem, "VOCABULARY_WORD", ID=str(word.unique_id), NAME = word.name, INFO_URL = word.info_url)
 
@@ -183,27 +191,54 @@ class GenericXMLDevice():
             et.SubElement(grp, "EXTERNAL_MEDIA", d)
             copy2(a[0].file_path, out_path + path)
 
-    def add_analysis(self, root, analyses, out_path, in_path):
+    def add_analysis(self, root, analyses, out_path, in_path, export_analysis_objects = True):
         grp = et.SubElement(root, "ANALYSES")
         for a in analyses:
             # a = ColormetryAnalysis()
-            path = str(a.unique_id) + ".npz"
+            path = str(a.unique_id)
             if isinstance(a, ColormetryAnalysis):
+                if not export_analysis_objects:
+                    path = "No Export"
+                else:
+                    path += ".npz"
                 d = dict(
                     ID=str(a.unique_id),
                     NAME = a.name,
-                    PATH = path
+                    PATH = path,
                 )
                 et.SubElement(grp, "COLORIMETRY_ANALSIS", d)
-                copy2(in_path +"/" + path, out_path + path)
+                if path != "No Export":
+                    copy2(in_path +"/" + path, out_path + path)
             elif isinstance(a, IAnalysisJobAnalysis):
+                ser_type = eval(a.analysis_job_class)().serialization_type()
+                if ser_type == DataSerialization.JSON:
+                    if not export_analysis_objects:
+                        path = "No Export"
+                    else:
+                        path += ".json"
+                        data_string = eval(a.analysis_job_class)().to_json(a.get_adata())
+                        with open(out_path + path, "w") as f:
+                            f.write(data_string)
+
+                elif ser_type == DataSerialization.MASKS:
+                    if not export_analysis_objects:
+                        path = "No Export"
+                    else:
+                        path += ".png"
+                        cv2.imwrite(out_path + path, a.get_adata()['mask'])
+                target_c_obj = a.target_classification_object
+                if target_c_obj is None:
+                    target_c_obj = str(-1)
+                else:
+                    target_c_obj = target_c_obj.unique_id
                 d = dict(
                     ID=str(a.unique_id),
                     NAME=a.analysis_job_class,
-                    PATH=path
+                    PATH=path,
+                    TYPE=ser_type.name,
+                    CLASSIFICATION_OBJECT_REF=target_c_obj
                 )
                 et.SubElement(grp, "JOB_ANALYSIS", d)
-                copy2(in_path + "/" + path, out_path + path)
 
     def xsd_element(self, p, name):
         return et.SubElement(p, "xsd:element", name=name)
@@ -215,7 +250,7 @@ class GenericXMLDevice():
         reparsed = md.parseString(rough_string)
         return reparsed.toprettyxml(indent="/t")
 
-    def export(self, project: VIANProject, out_path):
+    def export(self, project: VIANProject, out_path, export_analysis_objects = True):
 
         root = self.build_document()
         self.build_header(root, project, project.movie_descriptor)
@@ -238,13 +273,15 @@ class GenericXMLDevice():
 
         self.add_external_media(root, external_media, project.data_dir, out_path)
 
-        self.add_analysis(root, project.analysis, out_path, project.data_dir)
+        self.add_analysis(root, project.analysis, out_path, project.data_dir, export_analysis_objects)
 
         self.add_time_slots(root, time_mapping)
         tree = et.ElementTree(root)
 
         with open(out_path + "out.xml", "w") as f:
-            f.write(self.prettify(root))
+            rough_string = et.tostring(root, 'utf-8')
+            reparsed = md.parseString(rough_string)
+            f.write(reparsed.toprettyxml())
 
     #endregion
 
@@ -319,7 +356,7 @@ class GenericXMLDevice():
 
 if __name__ == '__main__':
     from core.data.headless import *
-    project = load_project_headless("C:/Users/Gaudenz Halter/Documents/VIAN/3774_1_1_Blade_Runner_1900_DVD/3774_1_1_Blade_Runner_1900_DVD.eext")
-    GenericXMLDevice().export(project, "../../../test/")
+    project = load_project_headless("C:/Users/Gaudenz/Desktop/vian_demo/project/107_1_1_Leave Her to Heaven_1945/107_1_1_Leave Her to Heaven_1945.eext")
+    GenericXMLDevice().export(project, "C:/Users/Gaudenz/Desktop/vian_demo/export/", False)
     # project = VIANProject(HeadlessMainWindow())
     # GenericXMLDevice().import_("../../../test/out.xml", project)

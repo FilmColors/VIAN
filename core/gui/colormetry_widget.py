@@ -42,16 +42,24 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.vis_tab.addTab(self.palette, "Tree-Palette")
         self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
         self.vis_tab.addTab(self.time_palette, "Time Palette")
+        self.vis_tab.currentChanged.connect(self.on_tab_changed)
         # self.vis_tab.addTab(self.histogram, "Histogram")
 
     def update_timestep(self, data):
         if data is not None:
+            self.palette.set_palette(data['palette'])
+            self.lab_palette.set_palette(data['palette'])
             if self.vis_tab.currentIndex() == 0:
-                self.palette.set_palette(data['palette'])
                 self.palette.draw_palette()
             elif self.vis_tab.currentIndex() == 1:
-                self.lab_palette.set_palette(data['palette'])
                 self.lab_palette.draw_palette()
+
+    def on_tab_changed(self):
+        if self.vis_tab.currentIndex() == 0:
+            self.palette.draw_palette()
+        elif self.vis_tab.currentIndex() == 1:
+            self.lab_palette.draw_palette()
+
 
     def plot_time_palette(self, data):
         try:

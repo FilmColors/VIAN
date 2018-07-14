@@ -32,7 +32,7 @@ from core.corpus.shared.corpusdb import CorpusDB
 from core.corpus.shared.widgets import *
 from core.data.exporters import *
 from core.data.importers import *
-from core.data.settings import UserSettings
+from core.data.settings import UserSettings,Contributor
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
@@ -61,7 +61,7 @@ from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, Class
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-
+from core.data.io.web_annotation import WebAnnotationDevice
 try:
     import keras.backend as K
     from core.analysis.semantic_segmentation import *
@@ -495,18 +495,18 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.SHOW_WELCOME:
             self.show_welcome()
 
-        if self.settings.USER_NAME == "":
+        if self.settings.CONTRIBUTOR is None:
             self.show_first_start()
+        else:
+            print("Contributor:", self.settings.CONTRIBUTOR.full_name)
+            print("Contributor:", self.settings.CONTRIBUTOR.email)
 
     def print_time(self, segment):
         print(segment)
 
     def test_function(self):
-        for a in self.project.analysis:
-            a.sync_load()
-            t = DBAnalysis().from_project(a)
-            q = t.to_database()
-            t.from_database(q)
+        if self.project is not None:
+            WebAnnotationDevice().export("test_file.json", self.project, DBContributor("Gaudenz"))
 
     def start_colormetry(self):
         if self.colormetry_running == False:
@@ -1991,16 +1991,40 @@ class DialogFirstStart(QtWidgets.QDialog):
         self.settings.USER_NAME = name
 
     def check_if_finished(self):
-        if self.settings.USER_NAME != "":
-            self.may_proceed = True
+        finished = False
+        if self.lineEdit_UserName.text() != "":
+            self.lineEdit_UserName.setStyleSheet("QLineEdit{color:green;}")
+            if self.lineEdit_FullName.text() != "":
+                self.lineEdit_FullName.setStyleSheet("QLineEdit{color:green;}")
+                if self.lineEdit_EMail.text() != "":
+                    self.lineEdit_EMail.setStyleSheet("QLineEdit{color:green;}")
+                    return True
+                else:
+                    self.lineEdit_EMail.setStyleSheet("QLineEdit{color:red;}")
+                    return False
+            else:
+                self.lineEdit_FullName.setStyleSheet("QLineEdit{color:red;}")
+                return False
+        else:
+            self.lineEdit_UserName.setStyleSheet("QLineEdit{color:red;}")
+            return False
+
 
     def on_ok(self):
-        self.check_if_finished()
-        self.settings.store(self.main_window.dock_widgets)
-        if self.may_proceed:
+        if self.check_if_finished():
+            c = Contributor(full_name = self.lineEdit_FullName.text(),
+                            user_name = self.lineEdit_UserName.text(),
+                            email=self.lineEdit_EMail.text())
+            self.settings.set_contributor(c)
+            self.settings.store(self.main_window.dock_widgets)
             self.close()
         else:
-            QMessageBox.warning(self.main_window, "Please Fill out the Form", "Some information seems to be missing, please fill out the Form.")
+            QMessageBox.warning(self.main_window, "Please Fill out the Form",
+                                "Some information seems to be missing, please fill out the Form.")
+
+
+
+
 
 
 

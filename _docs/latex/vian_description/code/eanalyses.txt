@@ -1,6 +1,6 @@
 <ANALYSES>
 	<COLORIMETRY_ANALSIS ID="8908799312" NAME="Colorimetry" PATH="8908799312.npz"/>
-	<JOB_ANALYSIS ID="1105697457" NAME="ColorPaletteAnalysis" PATH="1105697457.npz"/>
+	<JOB_ANALYSIS CLASSIFICATION_OBJECT_REF="-1" ID="1522242163" NAME="SemanticSegmentationAnalysis" PATH="No Export" TYPE="MASKS"/>
 </ANALYSES>
 
 ## COLORIMETRY_ANALSIS 
@@ -11,5 +11,6 @@
 ## JOB_ANALYSIS
 @ID: The unique id of this analysis object
 @NAME: The name of the JobAnalysis Class (can be used in an python::eval() statement)
-@PATH: The path to the numpy numeric serialized data
+@PATH: The path to the numpy numeric serialized data or "No Export" if data export has been turned off
+@CLASSIFICATION_OBJECT_REF: The unique id of the classification object this analysis has been performed of or -1 if None
 

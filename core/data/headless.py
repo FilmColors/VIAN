@@ -52,12 +52,15 @@ def load_project_headless(path) -> VIANProject:
     :return: a loaded VIANProject or None if failed
     """
     try:
-        project = VIANProject(HeadlessMainWindow())
+        mw = HeadlessMainWindow()
+        project = VIANProject(mw)
+        mw.project = project
         project.inhibit_dispatch = True
         project.load_project(HeadlessUserSettings(), path)
-        project.print_all()
+        mw.dispatch_on_loaded()
         return project
     except Exception as e:
+        print(e)
         return None
 
 
