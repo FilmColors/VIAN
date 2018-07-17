@@ -502,7 +502,6 @@ def integrity_check(input_dir):
 
 
 
-
 def generate_projects(input_dir, result_dir, replace_path = False):
     files = glob.glob(input_dir + "*")
     glossary_words, glossary_ids2, glossary_categories, glossary_omit = parse_glossary("E:/Programming/Datasets/FilmColors/PIPELINE/_input\\GlossaryDB_WordCount.csv")
@@ -713,7 +712,6 @@ def perform(start, end, id_tuple = None):
 
 
 
-
 def fetch_missing_segmentations(fm_id, database_path):
     res = []
     with open(database_path, 'r') as input_file:
@@ -742,6 +740,8 @@ def fetch_missing_segmentations(fm_id, database_path):
         res = list(set(res))
         res = sorted(res, key=lambda x:x[0])
         return res
+
+
 
 # python extensions/plugins/fiwi_tools/filemaker2database.py -start_idx 0 -end_idx=40
 if __name__ == '__main__':
