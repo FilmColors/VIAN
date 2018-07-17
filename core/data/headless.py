@@ -26,10 +26,51 @@ class HeadlessMainWindow(QObject):
         self.version = VERSION
         self.project = None
 
+        self.thread_pool = QThreadPool(self)
 
     def print_message(self, msg, color):
         print(msg)
 
+    #region Analysis
+    def start_worker(self, worker, name = "New Task"):
+        self.thread_pool.start(worker)
+
+    def run_analysis(self, analysis:IAnalysisJob, targets:List[IProjectContainer], parameters:Dict, class_objs:List[ClassificationObject], fps):
+        args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
+
+        if analysis.multiple_result:
+            for arg in args:
+                worker = Worker(analysis.process, self, self.analysis_result, arg,
+                                msg_finished=analysis.name + " Finished", target_id=None, i_analysis_job=analysis)
+                self.start_worker(worker, analysis.get_name())
+        else:
+            worker = Worker(analysis.process, self, self.analysis_result, args,
+                            msg_finished=analysis.name + " Finished", target_id=None, i_analysis_job=analysis)
+            self.start_worker(worker, analysis.get_name())
+
+    def analysis_result(self, result):
+        analysis = result[1]
+        result = result[0]
+
+        if isinstance(result, list):
+            for r in result:
+                analysis.modify_project(self.project, r, main_window=self)
+                self.project.add_analysis(r)
+                r.unload_container()
+        else:
+            analysis.modify_project(self.project, result, main_window=self)
+            self.project.add_analysis(result)
+            result.unload_container()
+
+    def worker_progress(self, tpl):
+        print(tpl[0], tpl[1])
+    def worker_error(self, args):
+        print("Error", args)
+    def worker_finished(self, args):
+        print("Error", args)
+    #endregion
+
+    #region Dispatcher
     def dispatch_on_changed(self, receiver=None, item=None):
         pass
 
@@ -40,12 +81,13 @@ class HeadlessMainWindow(QObject):
 
     def dispatch_on_closed(self, *args):
         pass
+    #endregion
 
     def eval_class(self, name):
         return eval(name)
 
 
-def load_project_headless(path) -> VIANProject:
+def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
     """
     Loads a VIAN project without needing a VIAN instance running by emulating VIAN. 
     :param path: The path to the project to load
@@ -58,7 +100,7 @@ def load_project_headless(path) -> VIANProject:
         project.inhibit_dispatch = True
         project.load_project(HeadlessUserSettings(), path)
         mw.dispatch_on_loaded()
-        return project
+        return project, mw
     except Exception as e:
         print(e)
         return None
@@ -135,25 +177,18 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         return project
     except Exception as e:
         try:
-            shutil.rmtree(location)
+            pass
+            # shutil.rmtree(location)
         except:
             print("Could not remove folder: ", location)
         raise e
-        return None
-
 
 
 
 if __name__ == '__main__':
-    # p = load_project_headless("C:/Users/Gaudenz Halter/Documents/VIAN/229_1_1_Jigokumon_1953_BF/229_1_1_Jigokumon_1953_BF.eext")
-    segmentations = [
-        ["Main", [
-            [0, 1000, "Hello"],
-            [1001, 5000, "World"]
-            ]
-         ]
-    ]
-    screenshots = [300, 500, 800]
-    p = create_project_headless("TestHeadlessCreation", "C:/Users/Gaudenz Halter/Documents/VIAN/TestHeadlessCreation/",
-                                "C:/Users/Gaudenz Halter/Desktop/229_1_1_Jigokumon_1953_DVD.mov",
-                                screenshots, segmentations)
+    pass
+    # Analysis Example
+    # (p, mw) = load_project_headless("F:/_projects//107_1_1_Leave Her to Heaven_1945//107_1_1_Leave Her to Heaven_1945.eext")
+    # obj_fg = p.experiments[0].get_classification_object_by_name("Foreground")
+    # mw.run_analysis(ColorFeatureAnalysis(), p.screenshots, dict(resolution=50), class_objs=[obj_fg], fps = p.movie_descriptor.fps)
+    # mw.thread_pool.waitForDone()

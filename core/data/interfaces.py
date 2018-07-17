@@ -85,7 +85,23 @@ class IProjectContainer(QObject):
     def remove_analysis(self, analysis):
         if analysis in self.connected_analyses:
             self.connected_analyses.remove(analysis)
-    
+
+    def get_connected_analysis(self, class_type=None):
+        """
+        Returns a List of AnalysesResults that are of class_type, and attached to this container
+        
+        :param class_type: 
+        :return: 
+        """
+        if class_type is None:
+            return self.connected_analyses
+
+        result = []
+        for r in self.connected_analyses:
+            if r.analysis_job_class == class_type.__name__:
+                result.append(r)
+        return result
+
     def delete(self):
         print("Not Implemented in ", self)
 

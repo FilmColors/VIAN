@@ -94,14 +94,11 @@ def tpl_bgr_to_lch(tpl):
     return lch
 
 
-
-
 def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
 
     if lch is not None:
         if len(lch.shape) < 2:
             lch = np.array([lch])
-        print(lab.shape)
         lum = lch[:, 0]
         chroma = lch[:, 1]
         hue = lch[:, 2]
@@ -109,7 +106,6 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
     elif lab is not None:
         if len(lab.shape) < 2:
             lab = np.array([lab])
-        print(lab.shape)
         lum = lab[:, 0]
         a_sq = np.square(lab[:, 1])
         b_sq = np.square(lab[:, 2])
@@ -471,3 +467,16 @@ def images_to_movie(imgs, out_file, time_scale = 20, fps = 20.0, size = (640,480
     writer.release()
 
 
+def labels_to_binary_mask(multi_mask, labels):
+    """
+    Converts a Label Mask to a binary mask with all indices that have a value which is in labels are 1
+    else 0. 
+    
+    :param multi_mask: 
+    :param labels: 
+    :return: 
+    """
+    result = np.zeros_like(multi_mask)
+    for i in labels:
+        result[np.where(multi_mask == i)] = 1
+    return result

@@ -478,8 +478,23 @@ class VIANProject(IHasName, IClassifiable):
     def add_analysis(self, analysis):
         analysis.set_project(self)
         self.analysis.append(analysis)
+
         self.undo_manager.to_undo((self.add_analysis, [analysis]), (self.remove_analysis, [analysis]))
         self.dispatch_changed()
+
+    def add_analyses(self, analyses):
+        ids = []
+        objs = []
+        data_types = []
+
+        for a in analyses:
+            objs.append(eval(a.analysis_job_class)().to_json(a.data))
+            a.data = None
+            a.set_project(self)
+            ids.append(a.unique_id)
+            data_types.append(eval(a.analysis_job_class)().serialization_type())
+        self.main_window.project_streamer.bulk_store(ids, objs, data_types)
+
 
     def remove_analysis(self, analysis):
         if analysis in self.analysis:

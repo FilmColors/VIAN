@@ -30,11 +30,11 @@ class ColorFeatureAnalysis(IAnalysisJob):
 
         """
         super(ColorFeatureAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
+
         args = []
         fps = project.movie_descriptor.fps
         for tgt in targets:
             args.append([ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps), project.movie_descriptor.movie_path, parameters, tgt.get_id()])
-
         return args
 
     def process(self, args, sign_progress):
@@ -59,7 +59,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
                 c += 1
                 continue
             sign_progress((c - start) / ((stop - start) + 1))
-
             cap.set(cv2.CAP_PROP_POS_FRAMES, c)
             ret, frame = cap.read()
             colors_bgr.append(np.mean(frame, axis = (0, 1)))

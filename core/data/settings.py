@@ -224,7 +224,6 @@ class UserSettings():
 
         ddict = vars(self)
         if ddict["CONTRIBUTOR"] is not None:
-            print(ddict['CONTRIBUTOR'])
             ddict['CONTRIBUTOR'] = ddict["CONTRIBUTOR"].serialize()
         try:
             with open(self.store_path, 'w') as f:
@@ -251,9 +250,8 @@ class UserSettings():
                     # If this attribute is the contributor deserialize it and apply it to the settings
                     elif attr == "CONTRIBUTOR":
                         if value is not None:
-                            print("SERIALIZIBG CONTRIBUTOR", value)
                             self.CONTRIBUTOR = Contributor().deserialize(value)
-                            print("Loaded:", self.CONTRIBUTOR)
+
         except IOError as e:
             print("No Settings found", e)
 
@@ -269,7 +267,6 @@ class UserSettings():
                 new_paths.append(self.recent_files_path[i])
         self.recent_files_name = new_names
         self.recent_files_path = new_paths
-
 
     def apply_dock_widgets_settings(self, dock_widgets):
         """
@@ -288,13 +285,6 @@ class UserSettings():
                 print(e)
                 pass
 
-# @OC
-    # def load_last(self):
-    #     files = glob.glob(self.DIR_PROJECT)
-    #     if len(files) > 0:
-    #         files.sort(key=os.path.getmtime, reverse=True)
-    #         self.store_path = files[0]
-    #         self.load()
 
 
 class Contributor():

@@ -12,7 +12,7 @@ class MovieAsset(object):
         self.shot_paths_abs = shot_paths_abs
 
         self.shot_assets = sorted([ScreenshotAsset(p) for p in self.shot_paths_abs], key=lambda x:(x.segm_id, x.segm_shot_id))
-        self.palette_assets = []
+        self.palette_assets = [] # [sasset.segm_id, sasset.segm_shot_id, p_asset_fg, p_asset_bg, p_asset_glob]
 
         self.has_error = False
         self.error_stage = -1

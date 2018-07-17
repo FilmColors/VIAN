@@ -65,6 +65,28 @@ class MovieAsset(object):
             print (e)
             return None
 
+    def inspect(self, return_state=False, check_palettes = True):
+        c = 0
+        for s in self.shot_assets:
+            if s.frame_pos is None:
+                c+= 1
+
+        if return_state:
+            if c > 0 or (check_palettes and len(self.palette_assets) == 0):
+                return False
+            else:
+                return True
+        else:
+            print("Inspecting:", self.fm_id)
+            print(self.movie_path_abs)
+            print("Screenshots", len(self.shot_assets), "\t(None: " + str(c) + ")")
+            if len(self.palette_assets) > 0:
+                print("Palette Assets:", len(self.palette_assets[0]))
+            else:
+                print("Palette Assets:", "None")
+
+
+
     def __str__(self):
         return str(self.fm_id[0]) + "_" + str(self.fm_id[1]) + "_" + str(self.fm_id[1])
 

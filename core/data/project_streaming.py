@@ -266,6 +266,27 @@ class SQLiteStreamer(ProjectStreamer):
                 print("SQLite Exception", str(e))
                 self.db.rollback()
 
+    def bulk_store(self, ids, objs, data_types):
+        if self.db is not None:
+            try:
+                self.db.begin()
+
+                for i in range(len(ids)):
+                    if data_types[i] == DataSerialization.MASKS:
+                        table = SQ_TABLE_MASKS
+                    else:
+                        table = SQ_TABLE_JSON
+
+                    if self.db[table].find_one(key=id) == None:
+                        self.db[table].insert(dict(key=id, json=objs[i]))
+                    else:
+                        self.db[table].update(dict(key=id, json=objs[i]), ['key'])
+
+                self.db.commit()
+            except Exception as e:
+                print("SQLite Exception", str(e))
+                self.db.rollback()
+
     def sync_load(self, id: int, data_type = DataSerialization.JSON):
         if self.db is not None:
             if data_type == DataSerialization.MASKS:

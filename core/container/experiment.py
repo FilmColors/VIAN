@@ -596,7 +596,7 @@ class Experiment(IProjectContainer, IHasName):
             root.get_children_plain(result)
         return result
 
-    def get_classification_object_by_name(self, name):
+    def get_classification_object_by_name(self, name) -> ClassificationObject:
         for obj in self.get_classification_objects_plain():
             if obj.name == name:
                 return obj

@@ -356,7 +356,7 @@ class GenericXMLDevice():
 
 if __name__ == '__main__':
     from core.data.headless import *
-    project = load_project_headless("C:/Users/Gaudenz/Desktop/vian_demo/project/107_1_1_Leave Her to Heaven_1945/107_1_1_Leave Her to Heaven_1945.eext")
+    project, mw = load_project_headless("C:/Users/Gaudenz/Desktop/vian_demo/project/107_1_1_Leave Her to Heaven_1945/107_1_1_Leave Her to Heaven_1945.eext")
     GenericXMLDevice().export(project, "C:/Users/Gaudenz/Desktop/vian_demo/export/", False)
     # project = VIANProject(HeadlessMainWindow())
     # GenericXMLDevice().import_("../../../test/out.xml", project)
