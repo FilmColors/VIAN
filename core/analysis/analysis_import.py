@@ -7,7 +7,7 @@ try:
     from core.analysis.semantic_segmentation import *
 except:
     from core.data.enums import DataSerialization
-
+    from core.analysis.deep_learning.labels import *
 
     class SemanticSegmentationAnalysis(IAnalysisJob):
         def __init__(self):

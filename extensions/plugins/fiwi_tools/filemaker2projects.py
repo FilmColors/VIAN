@@ -746,6 +746,7 @@ def fetch_missing_segmentations(fm_id, database_path):
 # python extensions/plugins/fiwi_tools/filemaker2database.py -start_idx 0 -end_idx=40
 if __name__ == '__main__':
     integrity_check(result_path)
+    generate_projects(input_dir, project_dir)
     # has_more = True
     # n = 10
     # idx = 0
