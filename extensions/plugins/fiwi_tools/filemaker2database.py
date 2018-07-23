@@ -14,11 +14,14 @@ cache_dir = "F:/_cache/"
 template_path = "E:/Programming/Git/visual-movie-annotator/user/templates/ERC_FilmColors.viant"
 
 
+<<<<<<< HEAD
 
 def filemaker_timestamp2ms(a):
     a = a.zfill(8)
     a = [a[i:i + 2] for i in range(0, len(a), 2)]
     return ts_to_ms(a[0], a[1], a[2], a[3])
+=======
+>>>>>>> 1ee51163d6c5ffdb752e240193cccd9a4217a068
 
 def handle_error(fm_id, e):
     pass
@@ -165,6 +168,7 @@ def parse_masterdb(database_path, glossary_words, glossary_categories, glossary_
                     current_film = [current_id, []]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                 # Create a new Segment
                 dbsegment = DBSegment()
                 dbsegment.segm_start = filemaker_timestamp2ms(row[idx_start])
@@ -195,6 +199,8 @@ def parse_masterdb(database_path, glossary_words, glossary_categories, glossary_
 
                         if word == "" or word == " ":
 =======
+=======
+>>>>>>> 1ee51163d6c5ffdb752e240193cccd9a4217a068
                 try:
                     # Create a new Segment
                     dbsegment = DBSegment()
@@ -207,6 +213,9 @@ def parse_masterdb(database_path, glossary_words, glossary_categories, glossary_
                     column_counter = 0
                     for c in row:
                         if column_counter in [idx_start, idx_end, idx_annotation, idx_id, idx_FMID]:
+<<<<<<< HEAD
+>>>>>>> 1ee51163d6c5ffdb752e240193cccd9a4217a068
+=======
 >>>>>>> 1ee51163d6c5ffdb752e240193cccd9a4217a068
                             continue
 
