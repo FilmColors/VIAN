@@ -124,6 +124,14 @@ class IProjectContainer(QObject):
         self.notes = notes
         # self.dispatch_on_changed(item=self)
 
+    def copy_event(self, target):
+        """
+        This Event is raised when the user wants to copy this container into some. 
+        :param containers: 
+        :return: 
+        """
+        pass
+
     def get_type(self):
         return -1
 

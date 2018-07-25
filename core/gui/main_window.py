@@ -132,6 +132,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings = UserSettings()
         self.settings.load()
 
+        self.clipboard_data = []
         loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
 
@@ -321,6 +322,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
         self.actionRedo.triggered.connect(self.on_redo)
+        self.actionCopy.triggered.connect(self.on_copy)
+        self.actionPaste.triggered.connect(self.on_paste)
         self.actionDelete.triggered.connect(self.on_delete)
 
         # Tab Windows
@@ -543,6 +546,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.colormetry_job.abort()
                 self.project.colormetry_analysis.clear()
             self.timeline.timeline.set_colormetry_progress(0.0)
+
+    def on_copy(self):
+
+        if self.project is not None:
+            self.clipboard_data = self.project.selected
+        print("Copy:", self.clipboard_data)
+
+    def on_paste(self):
+        print("Paste:", self.clipboard_data, self.project, len(self.clipboard_data))
+        if self.project is not None and len(self.clipboard_data) > 0:
+            for s in self.clipboard_data:
+                s.copy_event(self.project.selected[0])
 
 
     #region WidgetCreation

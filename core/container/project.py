@@ -97,6 +97,8 @@ class VIANProject(IHasName, IClassifiable):
 
         self.id_list = []
 
+        self.meta_data = None
+
         self.annotation_layers = []
         self.current_annotation_layer = None
         self.screenshots = []
@@ -488,11 +490,12 @@ class VIANProject(IHasName, IClassifiable):
         data_types = []
 
         for a in analyses:
-            objs.append(eval(a.analysis_job_class)().to_json(a.data))
+            objs.append(self.main_window.eval_class(a.analysis_job_class)().to_json(a.data))
             a.data = None
             a.set_project(self)
             ids.append(a.unique_id)
-            data_types.append(eval(a.analysis_job_class)().serialization_type())
+            data_types.append(self.main_window.eval_class(a.analysis_job_class)().serialization_type())
+            self.analysis.append(a)
         self.main_window.project_streamer.bulk_store(ids, objs, data_types)
 
 
@@ -718,8 +721,8 @@ class VIANProject(IHasName, IClassifiable):
             screenshot_groups=screenshot_groups,
             scripts=scripts,
             vocabularies=vocabularies,
-            experiments=experiments
-
+            experiments=experiments,
+            meta_data = project.meta_data
         )
         if path is None:
             path = project.path
@@ -761,6 +764,11 @@ class VIANProject(IHasName, IClassifiable):
             self.notes = my_dict['notes']
         except:
             self.notes = ""
+
+        try:
+            self.meta_data = my_dict['meta_data']
+        except:
+            pass
 
         splitted = path.split("/")[0:len(path.split("/")) - 1]
         self.folder = ""
@@ -1273,6 +1281,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.notes = ""
         self.fps = fps
         self.is_relative = False
+        self.meta_data = None
 
     def serialize(self):
         data = dict(
@@ -1284,7 +1293,8 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             source=self.source,
             duration=self.duration,
             notes=self.notes,
-            is_relative = self.is_relative
+            is_relative = self.is_relative,
+            meta_data = self.meta_data
         )
 
         return data

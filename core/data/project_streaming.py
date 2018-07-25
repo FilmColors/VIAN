@@ -277,10 +277,10 @@ class SQLiteStreamer(ProjectStreamer):
                     else:
                         table = SQ_TABLE_JSON
 
-                    if self.db[table].find_one(key=id) == None:
-                        self.db[table].insert(dict(key=id, json=objs[i]))
+                    if self.db[table].find_one(key=ids[i]) == None:
+                        self.db[table].insert(dict(key=ids[i], json=objs[i]))
                     else:
-                        self.db[table].update(dict(key=id, json=objs[i]), ['key'])
+                        self.db[table].update(dict(key=ids[i], json=objs[i]), ['key'])
 
                 self.db.commit()
             except Exception as e:

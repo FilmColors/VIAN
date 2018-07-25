@@ -130,10 +130,11 @@ class ColorFeatureAnalysis(IAnalysisJob):
         return ColorFeatureParameterWidget()
 
     def serialize(self, data_dict):
-        d = dict(color_lab=data_dict["color_lab"].tolist(),
-                color_bgr=data_dict["color_bgr"].tolist(),
-                saturation_l=data_dict["saturation_l"].tolist(),
-                saturation_p=data_dict["saturation_p"].tolist()
+
+        d = dict(color_lab=np.array(data_dict["color_lab"]).tolist(),
+                 color_bgr=np.array(data_dict["color_bgr"]).tolist(),
+                 saturation_l=np.array(data_dict["saturation_l"]).tolist(),
+                 saturation_p=np.array(data_dict["saturation_p"]).tolist()
              )
         return d
 

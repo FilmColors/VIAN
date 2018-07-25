@@ -12,7 +12,9 @@ import csv
 import pickle
 from sys import stdout as console
 
+import core.corpus as VIANCorpus
 from core.corpus.shared.entities import *
+
 from core.data.headless import *
 from core.data.computation import *
 from extensions.plugins.fiwi_tools.vian_dev.fiwi_server_binding.python_binding import MovieAsset, ScreenshotAsset
@@ -743,31 +745,11 @@ def fetch_missing_segmentations(fm_id, database_path):
 
 
 
+
 # python extensions/plugins/fiwi_tools/filemaker2database.py -start_idx 0 -end_idx=40
 if __name__ == '__main__':
-    integrity_check(result_path)
-    generate_projects(input_dir, project_dir)
-    # has_more = True
-    # n = 10
-    # idx = 0
-    # while has_more:
-    #     movie_assets = load_stage(asset_path, 2, n=n, idx=idx)
-    #     parse(corpus_path, gloss_file, db_file, outfile, movie_assets, result_path, template_path, cache_dir)
-    #
-    #     if len(movie_assets) < n:
-    #         has_more = False
-    #     else:
-    #         idx += n + 1
-    # # total = 0
-    # for i in range(4):
-    #         movie_assets = load_stage(asset_path, 1, n=100, idx=i*100)
-    #         for m in movie_assets:
-    #             if m.inspect(True, check_palettes=False) == False:
-    #                 total+= 1
-    #                 m.inspect()
-    #
-    #     except Exception as e:
-    #         print(m)
-    #         print(e)
+    with open(cache_dir + "/" + "test_set_cache.pickle", "rb") as file3:
+        to_compute = pickle.load(file3)
 
-    # fetch_missing_segmentations("", db_file)
+    for k in to_compute.keys():
+        print(to_compute[k])

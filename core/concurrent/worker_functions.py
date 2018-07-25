@@ -101,7 +101,8 @@ def store_project_concurrent(args, sign_progress):
         screenshot_groups=screenshot_groups,
         scripts = scripts,
         vocabularies=vocabularies,
-        experiments = experiments
+        experiments = experiments,
+        meta_data = project.meta_data
 
     )
     sign_progress(0.6)

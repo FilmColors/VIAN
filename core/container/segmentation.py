@@ -38,110 +38,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return s
         return None
 
-    # @OC
-    # def create_segment(self, start, stop, ID = None, from_last_threshold = 1, forward_segmenting = False,
-    #                    inhibit_overlap = True,  dispatch = True, annotation_body = ""):
-    #     """
-    #     Creates a new Segment
-    #     :param start:
-    #     :param stop:
-    #     :param ID:
-    #     :param from_last_threshold:
-    #     :param forward_segmenting:
-    #     :param inhibit_overlap:
-    #     :param dispatch:
-    #     :param annotation_body:
-    #     :return:
-    #     """
-    #
-    #     # Is the Segment longer than the minimal Threshold (in ms)?
-    #     if stop - start < from_last_threshold:
-    #
-    #         # Forward Segmentation: Create a Segment from Position to next Segment or End
-    #         # If the new overlaps with the last: shorten the last
-    #         if forward_segmenting:
-    #             # Find the next Segment if there is one and create a segment from start to the next segment start
-    #
-    #             next = None
-    #             last = None
-    #             for s in self.segments:
-    #                 if s.start < start:
-    #                     last = s
-    #                 if s.start > start and next is None:
-    #                     next = s
-    #                 if last is not None and next is not None:
-    #                     break
-    #
-    #             if next is None:
-    #                 stop = self.project.movie_descriptor.duration
-    #             else:
-    #                 stop = next.get_start() - 1
-    #
-    #             if last is not None and last.end > start:
-    #                 last.set_end(start - 1)
-    #
-    #         # Backwards Segmentation: Create a Segment from the Last to current Position
-    #         else:
-    #             last = None
-    #             for i, s in enumerate(self.segments):
-    #                 if s.start < start:
-    #                     last = s
-    #             if last is not None:
-    #                 start = last.end
-    #             else:
-    #                 start = 0
-    #
-    #     if inhibit_overlap:
-    #         last = None
-    #         next = None
-    #
-    #         for i, s in enumerate(self.segments):
-    #             if s.start < start:
-    #                 last = s
-    #                 if len(self.segments) > i + 1:
-    #                     next = self.segments[i + 1]
-    #                 else:
-    #                     next = None
-    #
-    #         if last is not None and last.end > start:
-    #             start = last.end
-    #         if next is not None and next.start < stop:
-    #             stop = next.start - 1
-    #
-    #     if ID is None:
-    #         ID = len(self.segments) + 1
-    #
-    #     # IF the Segment is to small, we don't want to create it
-    #     if start > stop - 100:
-    #         return
-    #
-    #     # if the Segment does still overlap, we don't want to create it
-    #     last = None
-    #     next = None
-    #     for i, s in enumerate(self.segments):
-    #         if s.start < start:
-    #             last = s
-    #             if len(self.segments) > i + 1:
-    #                 next = self.segments[i + 1]
-    #             else:
-    #                 next = None
-    #
-    #     if last is not None and last.end > start:
-    #         return
-    #     if next is not None and next.start < stop:
-    #         return
-    #
-    #     new_seg = Segment(ID = ID, start = start, end = stop, name=str(ID),
-    #                       segmentation = self, annotation_body=annotation_body)
-    #     new_seg.set_project(self.project)
-    #
-    #     self.add_segment(new_seg, dispatch)
-    #
-    #     return new_seg
-
-
-    # TODO repace old create_segment method
-
     def create_segment2(self, start, stop, mode:SegmentCreationMode = SegmentCreationMode.BACKWARD,
                         body = "",
                         dispatch  = True,
@@ -394,6 +290,19 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 return "Invalid Property"
         return ""
 
+    def copy_event(self, target = None):
+        """
+        This Event is raised when the user wants to copy this container into some target. 
+        :param containers: 
+        :return: 
+        """
+        if target is None or target == self.project or target == self or not isinstance(target, Segmentation):
+            new_seg = self.project.create_segmentation(self.name)
+            for s in self.segments:
+                new_seg.create_segment2(s.get_start(), s.get_end(), body=s.annotation_body)
+        else:
+            for s in self.segments:
+                target.create_segment2(s.get_start(), s.get_end(), body=s.annotation_body)
 
 class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject):
     """

@@ -126,6 +126,13 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         mw.project = project
         project.inhibit_dispatch = False
 
+
+        if os.path.isdir(project.folder):
+            c = 0
+            while(os.path.isdir(project.folder + "_" +str(c).zfill(2))):
+                c += 1
+            project.folder = project.folder + "_" +str(c).zfill(2)
+
         os.mkdir(project.folder)
         project.create_file_structure()
 

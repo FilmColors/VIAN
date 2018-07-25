@@ -177,6 +177,8 @@
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
@@ -815,6 +817,22 @@
   <action name="actionColorFeatures">
    <property name="text">
     <string>Color Features</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>
