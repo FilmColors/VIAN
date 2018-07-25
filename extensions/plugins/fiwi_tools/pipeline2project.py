@@ -88,6 +88,8 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
 
         vian_project.inhibit_dispatch = True
 
+        vian_project.movie_descriptor.meta_data['ERC_FilmColorsFilmography'] = filmography
+
         # Create an Experiment and a Main Segmentation
         experiment = vian_project.experiments[0]
         main_segm = vian_project.segmentation[0]
@@ -313,13 +315,11 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
         vian_project.store_project(HeadlessUserSettings(), vian_project.path)
         PROJECT_PATHS.append(vian_project.path + "\t" + fm_id_str)
 
-
+        return vian_project
         print("\n\n\n")
     except Exception as e:
         raise e
         print(e)
-
-
 
 
 if __name__ == '__main__':

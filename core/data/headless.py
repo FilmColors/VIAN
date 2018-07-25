@@ -8,8 +8,10 @@ from core.container.project import *
 from core.data.settings import UserSettings
 from core.data.project_streaming import *
 from shutil import copy2, move
-from core.gui.main_window import *
+# from core.gui.main_window import *
 from typing import Dict, Tuple
+from core.analysis.analysis_import import *
+
 
 VERSION = "0.6.6"
 class HeadlessUserSettings():
@@ -26,8 +28,10 @@ class HeadlessMainWindow(QObject):
         self.project_streamer = SQLiteStreamer(self)
         self.version = VERSION
         self.project = None
+        self.settings = HeadlessUserSettings()
 
         self.thread_pool = QThreadPool(self)
+        # self.corpus_interface = LocalCorpusInterface()
 
     def print_message(self, msg, color):
         print(msg)
@@ -73,6 +77,13 @@ class HeadlessMainWindow(QObject):
     def worker_finished(self, args):
         print("Error", args)
     #endregion
+
+    # #region Corpus
+    # def connect_local_corpus(self, user, path):
+    #     self.corpus_interface.connect_user(user, path)
+    # def commit_local(self, user, project):
+    #     self.corpus_interface.commit_project(user, project)
+    # #endregion
 
     #region Dispatcher
     def dispatch_on_changed(self, receiver=None, item=None):

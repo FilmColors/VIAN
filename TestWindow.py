@@ -12,7 +12,7 @@ from visualizer.vis_main_window import *
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = StringList(self)
+        self.t = VIANVisualizer(self)
         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
 
         self.setCentralWidget(self.t)

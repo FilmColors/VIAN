@@ -770,11 +770,12 @@ class VIANProject(IHasName, IClassifiable):
         except:
             pass
 
-        splitted = path.split("/")[0:len(path.split("/")) - 1]
-        self.folder = ""
-        for f in splitted:
-            self.folder += f + "/"
-
+        print(path)
+        # splitted = path.split("/")[0:len(path.split("/")) - 1]
+        # self.folder = ""
+        # for f in splitted:
+        #     self.folder += f + "/"
+        self.folder = os.path.split(path)[0]
         self.results_dir = self.folder + "/results"
         self.export_dir = self.folder + "/export"
         self.shots_dir = self.folder + "/shots"
@@ -1279,7 +1280,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.notes = ""
         self.fps = fps
         self.is_relative = False
-        self.meta_data = None
+        self.meta_data = dict()
 
     def serialize(self):
         data = dict(
