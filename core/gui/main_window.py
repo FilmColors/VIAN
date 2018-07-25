@@ -22,6 +22,7 @@ from core.analysis.colorimetry.colormetry2 import ColormetryJob2
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
 from core.analysis.palette_analysis import ColorPaletteAnalysis
 from core.analysis.color_feature_extractor import ColorFeatureAnalysis
+from core.analysis.analysis_import import *
 from core.concurrent.auto_screenshot import *
 from core.concurrent.auto_segmentation import *
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
@@ -97,6 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onOpenCVFrameVisibilityChanged = pyqtSignal(bool)
     onCorpusConnected = pyqtSignal(object)
     onCorpusDisconnected = pyqtSignal(object)
+
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -190,7 +192,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.experiment_dock = None
         self.corpus_client_toolbar = None
 
-
+        self.progress_popup = None
         self.quick_annotation_dock = None
         self.colorimetry_live = None
 
@@ -880,6 +882,15 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+    @pyqtSlot(float, str)
+    def on_progress_popup(self, value, str):
+        if self.progress_popup is None:
+            self.progress_popup = EProgressPopup(self)
+            self.progress_popup.show()
+        self.progress_popup.on_progress(value, str)
+        if value == 1.0:
+            self.progress_popup.close()
+            self.progress_popup = None
 
     def open_recent(self, index):
         path = self.settings.recent_files_path[index]

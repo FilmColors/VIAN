@@ -29,6 +29,18 @@ def line_separator(Orientation):
     return frame
 
 
+class EProgressPopup(QDialog):
+    def __init__(self, parent):
+        super(EProgressPopup, self).__init__(parent)
+        path = os.path.abspath("qt_ui/ProgressPopup.ui")
+        uic.loadUi(path, self)
+        self.setWindowModality(Qt.ApplicationModal)
+
+    @pyqtSlot(float, str)
+    def on_progress(self, value, info):
+        self.labelInfo.setText(info)
+        self.progressBar.setValue(value * 100)
+
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()

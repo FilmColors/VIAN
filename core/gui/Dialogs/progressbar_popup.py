@@ -16,7 +16,7 @@ class DialogProgress(EDialogWidget):
         self.show()
 
     def on_progress(self, value):
-        self.progressBar.setValue(value)
+        self.progressBar.setValue(value * 100)
         if value == 100:
             self.deleteLater()
 

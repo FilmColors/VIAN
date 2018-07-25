@@ -7,10 +7,11 @@ this it can be used to perform operations in a batch process without having the 
 from core.container.project import *
 from core.data.settings import UserSettings
 from core.data.project_streaming import *
-from core.gui.main_window import VERSION
 from shutil import copy2, move
 from core.gui.main_window import *
+from typing import Dict, Tuple
 
+VERSION = "0.6.6"
 class HeadlessUserSettings():
     def __init__(self):
         self.PROJECT_FILE_EXTENSION = ".eext"
@@ -30,6 +31,9 @@ class HeadlessMainWindow(QObject):
 
     def print_message(self, msg, color):
         print(msg)
+
+    def close(self):
+        self.project = None
 
     #region Analysis
     def start_worker(self, worker, name = "New Task"):
@@ -103,7 +107,7 @@ def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
         return project, mw
     except Exception as e:
         print(e)
-        return None
+        return None, None
 
 
 def create_project_headless(name, location, movie_path, screenshots_frame_pos = None, segmentations = None, move_movie="None", template_path = "") -> VIANProject:

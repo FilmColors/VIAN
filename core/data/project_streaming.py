@@ -312,6 +312,12 @@ class SQLiteStreamer(ProjectStreamer):
                     else:
                         print("Found")
 
+    def manual_connect(self, path):
+        self.clean_up()
+        self.store_path = "sqlite:///" + path
+        print("SQLite Database Path:", self.store_path)
+        self.db = ds.connect(self.store_path)
+
     #region IProjectChangeNotify
     def on_loaded(self, project):
         self.clean_up()

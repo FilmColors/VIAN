@@ -832,7 +832,6 @@ class VIANProject(IHasName, IClassifiable):
             if d is not None:
                 try:
                     new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
-
                     if isinstance(new, ColormetryAnalysis):
                         # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
                         if int(version[1]) < 6:
@@ -843,7 +842,6 @@ class VIANProject(IHasName, IClassifiable):
                     else:
                         self.add_analysis(new)
                 except Exception as e:
-                    raise e
                     print("Exception in Load Analyses", str(e))
 
         try:
