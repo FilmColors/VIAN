@@ -26,9 +26,17 @@ class S(BaseHTTPRequestHandler):
         self._set_headers()
 
     def do_POST(self):
+        print(self.headers)
+        print(self.rfile)
+        print(self.headers)
+        print(self.headers['Content-Type'])
+        msg = self.rfile.read(int(self.headers['Content-Length']))
+        with open("test.zip", 'wb') as fh:
+            fh.write(msg)
+
         # Doesn't do anything with posted data
         self._set_headers()
-        self.wfile.write(b"<html><body><h1>POST!</h1></body></html>")
+        self.wfile.write("OK")
 
 
 def run(server_class=HTTPServer, handler_class=S, port=80):

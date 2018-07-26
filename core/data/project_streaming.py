@@ -325,6 +325,9 @@ class SQLiteStreamer(ProjectStreamer):
         self.store_path = "sqlite:///" + project.data_dir + "/" + "database.sqlite"
         print("SQLite Database Path:", self.store_path)
         self.db = ds.connect(self.store_path)
+        self.db.begin()
+        self.db["INITIALIZING_TABLE"].insert(dict(project_name = project.name))
+        self.db.commit()
         pass
 
     def on_changed(self, project, item):

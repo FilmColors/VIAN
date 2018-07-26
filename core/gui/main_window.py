@@ -884,13 +884,16 @@ class MainWindow(QtWidgets.QMainWindow):
     #region MainWindow Event Handlers
     @pyqtSlot(float, str)
     def on_progress_popup(self, value, str):
-        if self.progress_popup is None:
-            self.progress_popup = EProgressPopup(self)
-            self.progress_popup.show()
-        self.progress_popup.on_progress(value, str)
-        if value == 1.0:
-            self.progress_popup.close()
-            self.progress_popup = None
+        try:
+            if self.progress_popup is None:
+                self.progress_popup = EProgressPopup(self)
+                self.progress_popup.show()
+            self.progress_popup.on_progress(value, str)
+            if value == 1.0:
+                self.progress_popup.close()
+                self.progress_popup = None
+        except:
+            pass
 
     def open_recent(self, index):
         path = self.settings.recent_files_path[index]
@@ -1835,7 +1838,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportELANSegmentation.setDisabled(not state)
         self.actionImportVocabulary.setDisabled(not state)
         self.actionImportCSVVocabulary.setDisabled(not state)
-
+        self.screenshot_toolbar.setDisabled(not state)
+        self.annotation_toolbar.setDisabled(not state)
 
         for i in range(2, len(self.menus_list)): # The First two should also be active if no project is opened
             m = self.menus_list[i]
