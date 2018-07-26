@@ -12,6 +12,7 @@ STREAM_DATA_ARBITRARY = 1
 NUMPY_NO_OVERWRITE = 2
 NUMPY_OVERWRITE = 3
 
+import gc
 
 class ProjectStreamer(IProjectChangeNotify, QObject):
     def __init__(self, main_window):
@@ -333,6 +334,9 @@ class SQLiteStreamer(ProjectStreamer):
         pass
 
     def on_closed(self):
+        self.db = None
+        # We want to make sure the db is garbadge collected
+        gc.collect()
         pass
     #endregion
 

@@ -3,9 +3,73 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 import os
+from core.corpus.shared.entities import *
 
 from visualizer.presentation.presentation_widget import *
 
 class VisHomeWidget(PresentationWidget):
     def __init__(self, parent, visualizer):
         super(VisHomeWidget, self).__init__(parent, visualizer, "qt_ui/visualizer/VisStartLayout.ui")
+        self.contribution_list = ContributionListWidget(self, visualizer)
+        self.hbox_Lower.addWidget(self.contribution_list)
+
+
+class ContributionListWidget(QScrollArea):
+    def __init__(self, parent, visualizer):
+        super(ContributionListWidget, self).__init__(parent)
+        self.visualizer = visualizer
+        self.entries = []
+        self.end_spacer = None
+
+        self.inner = QWidget()
+        self.inner.setLayout(QVBoxLayout(self))
+        self.setWidget(self.inner)
+        self.setWidgetResizable(True)
+
+        self.add_entry(None, None)
+        self.add_entry(None, None)
+        self.add_entry(None, None)
+
+    def add_entry(self, dbcontributor:DBContributor, dbproject:DBProject):
+        entry = ContributionListEntry(self.inner, self.visualizer, dbcontributor, dbproject)
+        self.inner.layout().addWidget(entry)
+        self.entries.append(entry)
+        if self.end_spacer is not None:
+            self.inner.layout().removeItem(self.end_spacer)
+        self.end_spacer = QSpacerItem(10,10,QSizePolicy.Fixed, QSizePolicy.Expanding)
+
+        self.inner.layout().addItem(self.end_spacer)
+        entry.show()
+
+
+class ContributionListEntry(QWidget):
+    def __init__(self, parent, visualizer, dbcontributor, dbproject):
+        super(ContributionListEntry, self).__init__(parent)
+        path = os.path.abspath("qt_ui/visualizer/ContributionEntry.ui")
+        uic.loadUi(path, self)
+        self.visualizer = visualizer
+        self.setStyleSheet("QWidget{background:transparent;}")
+
+        self.hovered = False
+
+    def enterEvent(self, a0: QtCore.QEvent):
+        self.hovered = True
+    def leaveEvent(self, a0: QtCore.QEvent):
+        self.hovered = False
+
+    def paintEvent(self, a0: QtGui.QPaintEvent):
+        if self.hovered:
+            qp = QPainter()
+            pen = QPen()
+
+            qp.begin(self)
+            pen.setColor(QColor(255, 160, 47, 100))
+            qp.setPen(pen)
+            qp.fillRect(self.rect(), QColor(255, 160, 47, 50))
+            qp.drawRect(self.rect())
+
+            qp.end()
+
+
+
+

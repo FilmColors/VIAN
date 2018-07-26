@@ -38,6 +38,7 @@ class HeadlessMainWindow(QObject):
 
     def close(self):
         self.project = None
+        self.project_streamer.on_closed()
 
     #region Analysis
     def start_worker(self, worker, name = "New Task"):
@@ -101,6 +102,17 @@ class HeadlessMainWindow(QObject):
     def eval_class(self, name):
         return eval(name)
 
+    def load_screenshots(self):
+        if self.project is None:
+            return
+        cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
+        for i, s in enumerate(self.project.screenshots):
+            if i % 10 == 0:
+                sys.stdout.write("\r" + str(round(i / len(self.project.screenshots), 2) * 100) + "% Loaded Screenshots")
+            cap.set(cv2.CAP_PROP_POS_FRAMES, s.frame_pos)
+            ret, frame = cap.read()
+            s.img_movie = frame
+        print("Loaded")
 
 def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
     """

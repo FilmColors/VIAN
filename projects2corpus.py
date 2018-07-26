@@ -34,25 +34,44 @@ def create_corpus(path):
     return database
 
 
-def commit_project(vian_project_path, corpus_path = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\TestCorpus_01\\TestCorpus_01.vian_corpus"):
+def commit_project(vian_project_path, corpus_path = "F:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"):
     user = DBContributor(name = "Gaudenz", image_path="C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\user_img.jpg", affiliation="Nahh")
     project, mw = load_project_headless(vian_project_path)
+    mw.load_screenshots()
     local_corpus = LocalCorpusInterface()
     local_corpus.connect_user(user, corpus_path)
     local_corpus.commit_project(user, project)
 
 
+def commit_no_prepare( file, corpus_path = "F:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"):
+    user = DBContributor(name="Gaudenz", image_path="C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\user_img.jpg",
+                         affiliation="Nahh")
+    local_corpus = DatasetCorpusDB()
+    local_corpus.load(corpus_path)
+    local_corpus.commit_project(file, user)
+
 CORPUS_ROOT = "F:\\_corpus\\"
 USER_CSV = "F:\\_input\\Accounts.csv"
 if __name__ == '__main__':
 
-    db = create_corpus(CORPUS_ROOT)
-    # Create Users
-    users = parse_users(USER_CSV)
-    for u in users:
-        db.add_user(DBContributor(u['name'], "", u['affiliation'], u['password'], u['email']))
+    # db = create_corpus(CORPUS_ROOT)
+    # # Create Users
+    # users = parse_users(USER_CSV)
+    # for u in users:
+    #     db.add_user(DBContributor(u['name'], "", u['affiliation'], u['password'], u['email']))
+    # # c = 0
+    zipped = glob.glob("F:/_projects/*.zip")
 
-    # print(glob.glob("F:/_projects/*"))
-    # for f in glob.glob("F:/_projects/*/*.eext"):
-    #     print(f)
-    #     commit_project(f)
+    for f in glob.glob("F:/_projects/*/*.eext"):
+        print("#### ---", f, "---####")
+        direct = False
+        for q in zipped:
+            if f.replace("\\", "/").split("/").pop().replace(".eext", "") in q:
+                print("Already Prepared")
+                commit_no_prepare(q)
+                direct = True
+                break
+
+        if not direct:
+            commit_project(f)
+    print("#### --- DONE --- ####")
