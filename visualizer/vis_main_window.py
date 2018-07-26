@@ -10,12 +10,21 @@ from visualizer.presentation.vis_screenshot_widget import *
 from visualizer.presentation.vis_search_widget import *
 from visualizer.presentation.vis_segment_widget import *
 from visualizer.widgets.header_bar import *
+from visualizer.data.query_worker import QueryWorker
 
 class VIANVisualizer(QMainWindow):
+    onQuery = pyqtSignal(str, object, object, object)
+
     def __init__(self, parent = None):
         super(VIANVisualizer, self).__init__(parent)
         path = os.path.abspath("qt_ui/visualizer/VisMainWindow.ui")
         uic.loadUi(path, self)
+
+        self.query_worker = QueryWorker()
+        self.query_thread = QThread()
+        self.query_worker.moveToThread(self.query_thread)
+        self.query_thread.start()
+        self.onQuery.connect(self.query_worker.on_query)
 
         #region Layout
         self.center = QWidget(self)
@@ -49,6 +58,8 @@ class VIANVisualizer(QMainWindow):
 
         self.connected = False
         self.show()
+        self.on_query("projects")
+        self.on_query("keywords")
 
     def set_layout(self, index):
         print(index)
@@ -69,4 +80,5 @@ class VIANVisualizer(QMainWindow):
             self.header.show()
             self.stack.setCurrentIndex(4)
 
-
+    def on_query(self, query_type, filter_filmography=None, filter_keywords=None, filter_classification_objects=None):
+        self.onQuery.emit(query_type, filter_filmography, filter_keywords, filter_classification_objects)

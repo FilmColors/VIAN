@@ -555,27 +555,32 @@ class DBClassificationObject(DBEntity):
 class DBVocabulary(DBEntity):
     def __init__(self):
         self.vocabulary_id = -1
+        self.category = ""
         self.name = ""
 
     def from_project(self, obj: Vocabulary):
         self.name = obj.name
+        self.category = obj.category
         return self
 
     def to_database(self, include_id=False):
         if include_id:
             result = dict(
                 id=self.vocabulary_id,
-                name=self.name
+                name=self.name,
+                category=self.category
             )
         else:
             result = dict(
-                name=self.name
+                name=self.name,
+                category=self.category
             )
         return result
 
     def from_database(self, entry):
         self.vocabulary_id = entry['id']
         self.name = entry['name']
+        self.category = entry['category']
         return self
 
 

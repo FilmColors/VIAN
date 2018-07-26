@@ -13,6 +13,13 @@ class VisHomeWidget(PresentationWidget):
         self.contribution_list = ContributionListWidget(self, visualizer)
         self.hbox_Lower.addWidget(self.contribution_list)
 
+    @pyqtSlot(object)
+    def on_query_result(self, obj):
+        if obj['type'] == "projects":
+            for p in obj['data']['projects'].keys():
+                dbproject = obj['data']['projects'][p]
+                self.contribution_list.add_entry(None, dbproject=dbproject)
+
 
 class ContributionListWidget(QScrollArea):
     def __init__(self, parent, visualizer):
@@ -25,10 +32,6 @@ class ContributionListWidget(QScrollArea):
         self.inner.setLayout(QVBoxLayout(self))
         self.setWidget(self.inner)
         self.setWidgetResizable(True)
-
-        self.add_entry(None, None)
-        self.add_entry(None, None)
-        self.add_entry(None, None)
 
     def add_entry(self, dbcontributor:DBContributor, dbproject:DBProject):
         entry = ContributionListEntry(self.inner, self.visualizer, dbcontributor, dbproject)
@@ -49,11 +52,18 @@ class ContributionListEntry(QWidget):
         uic.loadUi(path, self)
         self.visualizer = visualizer
         self.setStyleSheet("QWidget{background:transparent;}")
-
         self.hovered = False
+        self.lbl_ProjectName.setText(dbproject.name)
+
+        self.dbproject = dbproject
+        if dbcontributor is not None:
+            self.contributor = dbcontributor
+            self.lbl_Contributor.setText(dbcontributor.name + "\"" + dbcontributor.affiliation)
+        self.lbl_Year.setText(dbproject.last_modified)
 
     def enterEvent(self, a0: QtCore.QEvent):
         self.hovered = True
+
     def leaveEvent(self, a0: QtCore.QEvent):
         self.hovered = False
 

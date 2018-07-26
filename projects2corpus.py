@@ -54,12 +54,12 @@ CORPUS_ROOT = "F:\\_corpus\\"
 USER_CSV = "F:\\_input\\Accounts.csv"
 if __name__ == '__main__':
 
-    # db = create_corpus(CORPUS_ROOT)
-    # # Create Users
-    # users = parse_users(USER_CSV)
-    # for u in users:
-    #     db.add_user(DBContributor(u['name'], "", u['affiliation'], u['password'], u['email']))
-    # # c = 0
+    db = create_corpus(CORPUS_ROOT)
+    # Create Users
+    users = parse_users(USER_CSV)
+    for u in users:
+        db.add_user(DBContributor(u['name'], "", u['affiliation'], u['password'], u['email']))
+    # c = 0
     zipped = glob.glob("F:/_projects/*.zip")
 
     for f in glob.glob("F:/_projects/*/*.eext"):

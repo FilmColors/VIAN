@@ -1038,12 +1038,50 @@ class DatasetCorpusDB(CorpusDB):
             result.append(DBMovie().from_database(entry))
         return result
 
+    def get_contributors(self, filters = None)->List[DBContributor]:
+        if filters is None:
+            query = self.db[TABLE_CONTRIBUTORS].all()
+        else:
+            query = self.db[TABLE_CONTRIBUTORS].find(**filters)
+
+        result = []
+        for entry in query:
+            result.append(DBContributor().from_database(entry))
+        return result
+
     def parse_query(self, query:QueryRequestData):
         if query.query_type == "projects":
+            filters = None
+            print("Query Projects")
+            dbprojects = self.get_projects(filters)
+            r = dict()
+            for d in dbprojects:
+                r[d.project_id] = d
+            contributors = self.get_contributors()
+            c = dict()
+            for d in contributors:
+                c[d.contributor_id] = d
+
+            return dict(type=query.query_type, data=dict(projects=r, contributors=c))
             # We want to return a list of Projects
-            pass
+
         elif query.query_type == "keywords":
-            pass
+            filters = None
+            keywords = self.get_keywords(filters)
+            cl_objs = self.get_classification_objects(filters)
+            vocabularies = self.get_vocabularies()
+            vocabulary_words = self.get_vocabulary_words()
+            hashm_cl_objs = dict()
+            hashm_vocabulary_words = dict()
+            hashm_vocabularies = dict()
+            for c in cl_objs: hashm_cl_objs[c.classification_object_id] = c
+            for c in vocabularies: hashm_cl_objs[c.vocabulary_id] = c
+            for c in vocabulary_words: hashm_cl_objs[c.word_id] = c
+            return dict(type=query.query_type, data=dict(keywords=keywords,
+                                                         cl_objs=hashm_cl_objs,
+                                                         vocabularies=hashm_vocabularies,
+                                                         hashm_vocabulary_words=hashm_vocabulary_words))
+
         elif query.query_type == "movies":
             pass
         elif query.query_type == "segments":
@@ -1052,6 +1090,11 @@ class DatasetCorpusDB(CorpusDB):
             pass
         else:
             return None
+
+        return None
+
+    def project_query(self, query:QueryRequestData):
+        pass
     #endregion
 
     #region IO

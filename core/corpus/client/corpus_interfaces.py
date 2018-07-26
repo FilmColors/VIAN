@@ -220,7 +220,6 @@ class CorpusInterface(QObject):
         pass
 
 
-
 class LocalCorpusInterface(CorpusInterface):
     def __init__(self):
         super(LocalCorpusInterface, self).__init__()
@@ -310,6 +309,7 @@ class LocalCorpusInterface(CorpusInterface):
     def submit_query(self, query_data:QueryRequestData):
         result = self.local_corpus.parse_query(query_data)
         self.onQueryResult.emit(result)
+        return result
 
 
 class RemoteCorpusInterface(CorpusInterface):

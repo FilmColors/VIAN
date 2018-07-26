@@ -1,10 +1,13 @@
 from PyQt5.QtCore import *
 from core.corpus.shared.entities import *
+from core.corpus.client.corpus_interfaces import *
 
 class QueryWorkerSignals(QObject):
     onQueryResult = pyqtSignal(object)
     onMessage = pyqtSignal(str)
 
+
+CORPUS_PATH = "F:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"
 class QueryWorker(QObject):
     def __init__(self):
         super(QueryWorker, self).__init__()
@@ -13,13 +16,28 @@ class QueryWorker(QObject):
 
         self.active = True
         self.wait = True
+        self.corpus = LocalCorpusInterface()
+        self.user = None
+
+    def initialize(self):
+        self.user = DBContributor(name="Gaudenz",
+                                  image_path="C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\user_img.jpg",
+                                  affiliation="Nahh")
+        self.corpus.connect_user(self.user, CORPUS_PATH)
+        self.corpus.onQueryResult.connect(self.on_query_result)
+
 
     @pyqtSlot(str, object, object, object)
     def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects):
+        if self.user is None:
+            self.initialize()
         try:
-            QueryRequestData(query_type, filter_filmography, filter_keywords, filter_classification_objects)
+            query = QueryRequestData(query_type, filter_filmography, filter_keywords, filter_classification_objects)
+            self.corpus.submit_query(query)
         except Exception as e:
             raise e
 
-
+    @pyqtSlot(object)
+    def on_query_result(self, result):
+        self.signals.onQueryResult.emit(result)
 

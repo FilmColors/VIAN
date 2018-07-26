@@ -17,3 +17,7 @@ class VisMovieLayout(PresentationWidget):
         self.vbox_Upper.addWidget(self.plot_color_dt)
         self.vbox_LowerRight.addWidget(self.plot_network)
         self.vbox_LowerLeft.addWidget(self.plot_features)
+
+    def on_query_result(self, obj):
+        if obj['type'] == "movie":
+            pass

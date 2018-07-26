@@ -11,3 +11,8 @@ class PresentationWidget(QWidget):
         if path != "":
             path = os.path.abspath(path)
             uic.loadUi(path, self)
+        self.visualizer.query_worker.signals.onQueryResult.connect(self.on_query_result)
+
+    @pyqtSlot(object)
+    def on_query_result(self, obj):
+        pass
