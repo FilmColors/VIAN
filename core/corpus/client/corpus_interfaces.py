@@ -77,7 +77,7 @@ class CorpusInterface(QObject):
         project_archive = None
         if create_project_archive:
             p = "/".join(project.folder.replace("\\", "/").split("/")[:-2]) + "/"
-            project_archive = shutil.make_archive(p + project.name + "_project", 'zip', project.folder,)
+            project_archive = shutil.make_archive(p + project.name + "_project", 'zip', project.folder)
         export_root = project.folder + "/corpus_export/"
         scr_dir = export_root + "/scr/"
         mask_dir = export_root + "/masks/"

@@ -529,10 +529,9 @@ class ImagePlotTime(ImagePlot):
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
                                          hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
         else:
-            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=None, with_alpha=True),
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True),
                                          hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
         self.scene().addItem(itm)
-
         itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
         self.images.append(itm)

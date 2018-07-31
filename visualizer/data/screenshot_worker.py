@@ -24,7 +24,7 @@ class ScreenshotWorker(QObject):
     def on_load_screenshots(self, dbscreenshots:List[DBScreenshot]):
         for s in dbscreenshots:
             if os.path.isfile(self.db_root + s.file_path):
-                img = cv2.imread(self.db_root + s.file_path)
+                img = cv2.imread(self.db_root + s.file_path, cv2.IMREAD_UNCHANGED)
                 self.signals.onScreenshotLoaded.emit(dict(screenshot_id = s.screenshot_id, image=img))
         self.signals.onScreenshotLoaded.disconnect()
 

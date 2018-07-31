@@ -382,66 +382,66 @@ if __name__ == '__main__':
     c = 0
     n = 5
     threads = []
-    for k in data['assets'].keys():
-        entry = data['assets'][k]
-        dbmovie = DBMovie().from_database(entry['dbmovie'])
-        masset = entry['movie_asset']
-        fm_id_str = "_".join([masset['fm_id'][0].zfill(3), masset['fm_id'][1], masset['fm_id'][2]])
-
-        # Skip this movie if it is already in the projects
-        project_name = fm_id_str + "_" + dbmovie.movie_name + "_" + dbmovie.year
-        project_name = project_name.replace(":", "").replace("\'", "").replace("?", "")
-
-        project_folder = project_dir + "/" + project_name + "/"
-        print(project_folder)
-        if os.path.isdir(project_folder):
-            print("Skipped")
-            continue
-
-        c += 1
-        if c % n == 0:
-            for t in threads:
-                t.join()
-            threads = []
-            print(c, "/", len(data['assets'].keys()))
-        else:
-            thread = Thread(target=generate_project, args=(data['assets'][k], project_dir, glossary_words,glossary_ids, glossary_categories,glossary_omit))
-            thread.start()
-            threads.append(thread)
-
-
-    # not_created = 0
-    # no_experiment = 0
-    # no_analyses = 0
-    # todo = []
-    # c = 0
     # for k in data['assets'].keys():
-    #     sys.stdout.write("\r" + str(c) + "/" + str(len(data['assets'].keys())))
-    #     r = check_integrity(data['assets'][k], project_dir)
-    #     print(r)
-    #     if r == "Not Created":
-    #         not_created += 1
-    #         todo.append(k)
-    #     elif r == "No Experiment":
-    #         no_experiment += 1
-    #         todo.append(k)
-    #     elif r == "No Analyses":
-    #         no_analyses += 1
-    #         todo.append(k)
+    #     entry = data['assets'][k]
+    #     dbmovie = DBMovie().from_database(entry['dbmovie'])
+    #     masset = entry['movie_asset']
+    #     fm_id_str = "_".join([masset['fm_id'][0].zfill(3), masset['fm_id'][1], masset['fm_id'][2]])
+    #
+    #     # Skip this movie if it is already in the projects
+    #     project_name = fm_id_str + "_" + dbmovie.movie_name + "_" + dbmovie.year
+    #     project_name = project_name.replace(":", "").replace("\'", "").replace("?", "")
+    #
+    #     project_folder = project_dir + "/" + project_name + "/"
+    #     print(project_folder)
+    #     if os.path.isdir(project_folder):
+    #         print("Skipped")
+    #         continue
+    #
     #     c += 1
+    #     if c % n == 0:
+    #         for t in threads:
+    #             t.join()
+    #         threads = []
+    #         print(c, "/", len(data['assets'].keys()))
+    #     else:
+    #         thread = Thread(target=generate_project, args=(data['assets'][k], project_dir, glossary_words,glossary_ids, glossary_categories,glossary_omit))
+    #         thread.start()
+    #         threads.append(thread)
     #
-    # print("Not Created:", not_created)
-    # print("No Experiment:", no_experiment)
-    # print("No Analyses:", no_analyses)
+    # for t in threads:
+    #     t.join()
 
-    # with open(cache_dir + "/errors_pipeline2project.pickle", "wb") as f:
-    #     pickle.dump(todo, f)
+    not_created = 0
+    no_experiment = 0
+    no_analyses = 0
+    todo = []
+    c = 0
+    for k in data['assets'].keys():
+        sys.stdout.write("\r" + str(c) + "/" + str(len(data['assets'].keys())))
+        r = check_integrity(data['assets'][k], project_dir)
+        print(r)
+        if r == "Not Created":
+            not_created += 1
+            todo.append(k)
+        elif r == "No Experiment":
+            no_experiment += 1
+            todo.append(k)
+        elif r == "No Analyses":
+            no_analyses += 1
+            todo.append(k)
+        c += 1
 
+    print("Not Created:", not_created)
+    print("No Experiment:", no_experiment)
+    print("No Analyses:", no_analyses)
 
-    #
-    # # REMOVE error projects:
-    # with open(cache_dir + "/errors_pipeline2project.pickle", "rb") as f:
-    #     todo = pickle.load(f)
-    #
-    # for t in todo:
-    #     remove_project(data['assets'][t], project_dir)
+    with open(cache_dir + "/errors_pipeline2project.pickle", "wb") as f:
+        pickle.dump(todo, f)
+
+    # REMOVE error projects:
+    with open(cache_dir + "/errors_pipeline2project.pickle", "rb") as f:
+        todo = pickle.load(f)
+
+    for t in todo:
+        remove_project(data['assets'][t], project_dir)

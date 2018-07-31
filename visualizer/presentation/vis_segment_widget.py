@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import uic
 import os
 
+from core.visualization.image_plots import *
 from visualizer.presentation.presentation_widget import *
 
 class VisSegmentLayout(PresentationWidget):
@@ -14,10 +15,16 @@ class VisSegmentLayout(PresentationWidget):
         self.layout().addWidget(self.vsplit)
         self.upper_widget = QSplitter(self)
         self.lower_widget = QSplitter(self)
-        self.lower_right = QSplitter(self.lower_widget)
-        self.lower_left = QSplitter(self.lower_widget)
-        self.lower_widget.addWidget(self.lower_left)
-        self.lower_widget.addWidget(self.lower_right)
+        # self.lower_right = QSplitter(self.lower_widget)
+        # self.lower_left = QSplitter(self.lower_widget)
+        # self.lower_widget.addWidget(self.lower_left)
+        # self.lower_widget.addWidget(self.lower_right)
+
+        self.plot_la_space = ImagePlotPlane(self)
+        self.plot_ab_space = ImagePlotCircular(self)
+
+        self.upper_widget.addWidget(VisualizerVisualization(self, self.plot_la_space, self.plot_ab_space.get_param_widget()))
+        self.upper_widget.addWidget(VisualizerVisualization(self, self.plot_ab_space, self.plot_ab_space.get_param_widget()))
 
         self.vsplit.addWidget(self.upper_widget)
         self.vsplit.addWidget(self.lower_widget)
@@ -31,4 +38,5 @@ class VisSegmentLayout(PresentationWidget):
         pass
 
     def on_query_result(self, obj):
-        pass
+        if obj['type'] == "segments":
+            self.clear()

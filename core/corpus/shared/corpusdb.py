@@ -10,6 +10,7 @@ except:
 
 import glob
 import shutil
+from random import sample
 from core.data.headless import *
 from core.data.headless import load_project_headless
 from core.corpus.shared.sql_queries import *
@@ -132,6 +133,7 @@ class CorpusDB():
         os.mkdir(root + EXPERIMENTS_DIR)
         os.mkdir(root + MASK_DIR)
         os.mkdir(root + FTP_DIR)
+        os.mkdir(root + THUMBNAILS)
 
     def connect(self, path):
         pass
@@ -298,6 +300,7 @@ class DatasetCorpusDB(CorpusDB):
             with open(unpack_dir + "/" + "image_linker.json", "r") as f:
                 image_linker = json.load(f)
 
+
         mw.project_streamer.manual_connect(unpack_dir + "/database.sqlite")
 
         log = []
@@ -335,7 +338,8 @@ class DatasetCorpusDB(CorpusDB):
             #region Zip the Project
             #and store it in the projects directory
             archive_file = self.root_dir + PROJECTS_DIR + project.name
-            project_obj = DBProject().from_project(project)
+            thumbnail_path = self.root_dir + THUMBNAILS + project.name + ".jpg"
+            project_obj = DBProject().from_project(project, thumbnail_path)
             # shutil.make_archive(archive_file, 'zip', project.folder)
             # project_obj.archive = archive_file + ".zip"
             #endregion
@@ -366,12 +370,11 @@ class DatasetCorpusDB(CorpusDB):
                 project_obj.project_id = res['id']
                 project_id = res['id']
 
+
                 # Adding the Filmography, .from_project() will return none if the meta-data is not in the project
                 filmography = DBFilmographicalData().from_project(project, project_id)
                 if filmography is not None:
-                    self.db[TABLE_FILMOGRAPHY].insert(filmography)
-
-
+                    self.db[TABLE_FILMOGRAPHY].insert(filmography.to_database(False))
 
             #Copy the Screenshots and Masks into the File Systems
             mask_path_dir = MASK_DIR + str(project_id)
@@ -387,6 +390,18 @@ class DatasetCorpusDB(CorpusDB):
             shutil.copytree(unpack_dir + "/scr/", self.root_dir + scr_path_dir)
             shutil.copytree(unpack_dir + "/masks/", self.root_dir + mask_path_dir)
 
+            #THUMBNAIL
+            if os.path.isfile(unpack_dir + "/thumbnail.jpg"):
+                cv2.imwrite(thumbnail_path, cv2.imread(unpack_dir + "/thumbnail.jpg"))
+            else:
+                if len(image_linker['scrs'].keys()) > 0:
+                    t = sample(image_linker['scrs'].keys(), 1)[0]
+                    t_path = self.root_dir + image_linker['scrs'][t]['path'].replace("\\", "/").replace("//", "/").replace("/corpus_export/scr/", scr_path_dir + "/")
+                    print(t_path)
+                    print(os.path.isfile(t_path))
+                    cv2.imwrite(thumbnail_path, cv2.imread(t_path))
+
+
             print("Committing...")
 
             #region Movie
@@ -398,6 +413,7 @@ class DatasetCorpusDB(CorpusDB):
                 movie_id = dbmovies[0].movie_id_db
             else:
                 movie_id = self.db[TABLE_MOVIES].insert(dbentry.to_database(False))
+
 
             #endregion
 
@@ -475,6 +491,7 @@ class DatasetCorpusDB(CorpusDB):
             # TUPLE (SHOT, CLASSIFICATION_OBJ)
             # We have to insert he Classification Object Key Later
             all_masked_shots = []
+            masked_shots_index = dict()
             for scr_grp in project.screenshot_groups:
                 if self.constrain_screenshot_grps:
                     db_scr_grp = self.get_screenshot_groups(dict(name=scr_grp.get_name()))
@@ -515,15 +532,19 @@ class DatasetCorpusDB(CorpusDB):
                                 if segm.segm_start <= dbscr.time_ms < segm.segm_end:
                                     mapped_segments.append([segm.segment_id, segm.segmentation_id])
                                     break
-
                         all_db_scr_mapped_segments.append(mapped_segments)
-                        for masked_scr in image_linker['masked_shots_index'][str(scr.unique_id)]:
-                            path = masked_scr['path'].replace("\\", "/").replace("//", "/").replace("/corpus_export/scr/", scr_path_dir + "/")
-                            dbscr = DBScreenshot().from_project(scr, project_id, movie_id, scr_grp_id, self.root_dir, path)
-                            dbscr.screenshot_id = self.db[TABLE_SCREENSHOTS].insert(dbscr.to_database(False))
-                            all_masked_shots.append((dbscr, masked_scr['class_obj']))
+
 
                         all_ids_mapping[scr.unique_id] = dbscr.screenshot_id
+
+                        masked_shots_index[dbscr.screenshot_id] = []
+                        for masked_scr in image_linker['masked_shots_index'][str(scr.unique_id)]:
+                            path = masked_scr['path'].replace("\\", "/").replace("//", "/").replace("/corpus_export/scr/", scr_path_dir + "/")
+                            dbscr_2 = DBScreenshot().from_project(scr, project_id, movie_id, scr_grp_id, self.root_dir, path)
+                            dbscr_2.screenshot_id = self.db[TABLE_SCREENSHOTS].insert(dbscr_2.to_database(False))
+                            all_masked_shots.append((dbscr_2, masked_scr['class_obj']))
+                            masked_shots_index[dbscr.screenshot_id].append(dbscr_2)
+
 
                     except Exception as e:
                         print(e)
@@ -538,6 +559,17 @@ class DatasetCorpusDB(CorpusDB):
                     )
                     self.db[TABLE_SCEENSHOT_GROUPS_MAPPING].insert(d)
 
+                    # Adding all Masked Screenshots with the same information as the Base Screenshot
+                    for k in masked_shots_index[dbscr.screenshot_id]:
+                        dbscr_2 = k
+                        d = dict(
+                            screenshot_id=dbscr_2.screenshot_id,
+                            sceenshot_group_id=grp,
+                            project_id=project_id
+                        )
+                        self.db[TABLE_SCEENSHOT_GROUPS_MAPPING].insert(d)
+
+
                 for segm in all_db_scr_mapped_segments[idx]:
                     d = dict(
                         screenshot_id=dbscr.screenshot_id,
@@ -546,6 +578,18 @@ class DatasetCorpusDB(CorpusDB):
                         project_id = project_id
                     )
                     self.db[TABLE_SCEENSHOT_SEGMENTS_MAPPING].insert(d)
+
+                    # Adding all Masked Screenshots with the same information as the Base Screenshot
+                    for k in masked_shots_index[dbscr.screenshot_id]:
+                        dbscr_2 = k
+                        d = dict(
+                            screenshot_id=dbscr_2.screenshot_id,
+                            segment_id=segm[0],
+                            segmentation_id=segm[1],
+                            project_id=project_id
+                        )
+                        self.db[TABLE_SCEENSHOT_SEGMENTS_MAPPING].insert(d)
+
             #endregion
 
             #region Experiment
@@ -759,6 +803,15 @@ class DatasetCorpusDB(CorpusDB):
                             class_obj_id = all_cl_objs_db[all_cl_objs_proj.index(a.target_classification_object)].classification_object_id
                         if a.target_container is not None and a.target_container.unique_id in all_ids_mapping:
                             target_id = all_ids_mapping[a.target_container.unique_id]
+
+                        # If the Analysis Targets a Screenshot, and has a classification object, we want to
+                        # replace the original target screenshot with the masked one
+                        if a.target_classification_object is not None and a.target_container is not None and isinstance(a.target_container, Screenshot) and a.target_container.unique_id in all_ids_mapping:
+                            masked_db_scr = self.db[TABLE_SCREENSHOTS].find_one(project_id = project_id,
+                                                                                     classification_object_id = class_obj_id,
+                                                                                     time_ms = a.target_container.movie_timestamp)
+                            if masked_db_scr is not None:
+                                target_id = masked_db_scr['id']
 
                     db_analysis = DBAnalysis().from_project(a, project_id, class_obj_id, target_id)
                     db_analysis.analysis_id = self.db[TABLE_ANALYSES].insert(db_analysis.to_database(False))
@@ -1126,7 +1179,7 @@ class DatasetCorpusDB(CorpusDB):
             return self.get_movie_info(query)
 
         elif query.query_type == "segments":
-            pass
+            return self.get_segment_info(query)
 
         elif query.query_type == "screenshots":
             pass
@@ -1134,6 +1187,30 @@ class DatasetCorpusDB(CorpusDB):
             return None
 
         return None
+
+    def get_segment_info(self, query:QueryRequestData):
+        include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
+        exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
+        result = self.db.query(Q_ALL_SEGMENTS_KEYWORD[0] + include_args + Q_ALL_SEGMENTS_KEYWORD[1] + exclude_args)
+        db_segments = dict()
+        db_shots = dict()
+        shot_ids = []
+
+        for r in result:
+            segm = DBSegment().from_database(r)
+            segm.segment_id = r['segment_id']
+
+            shot = DBScreenshot().from_database(r)
+            shot.screenshot_id = r['screenshot_id']
+
+            db_segments[segm.segment_id] = segm
+            db_shots[shot.screenshot_id] = shot
+            shot_ids.append(shot.screenshot_id)
+
+        features = self.get_color_ab_info(shot_ids)
+        # db_segments = self.get_segments(dict(id=result))
+
+        return dict(type=query.query_type, data=None)
 
     def get_movie_info(self, query:QueryRequestData):
         project_id = query.project_filter[0]
@@ -1167,8 +1244,13 @@ class DatasetCorpusDB(CorpusDB):
             features.append(dbanalysis)
         return (result_shots, features)
 
-    def get_color_ab_info(self, query:QueryRequestData):
-        pass
+
+    def get_color_ab_info(self, screenshot_ids):
+        include_args = '(' + ','.join(map(str, screenshot_ids)) + ')'
+        print(include_args)
+        out = self.db.query(Q_FEATURES_OF_SHOTS + include_args)
+        for o in out:
+            print(o)
 
     #endregion
 

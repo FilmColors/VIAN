@@ -43,6 +43,9 @@ class VisualizerVisualization(QMainWindow):
             self.set_visualization(visualization)
         self.show()
 
+    def get_current_classification_object(self):
+        return 7
+
     def on_settings_opened(self):
         self.settings_window.show()
 

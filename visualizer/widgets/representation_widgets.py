@@ -31,6 +31,7 @@ class ProjectListWidget(QScrollArea):
         entry.show()
 
 
+
 class ProjectListEntry(QWidget):
     onClicked = pyqtSignal(object)
 
@@ -51,6 +52,15 @@ class ProjectListEntry(QWidget):
 
         if connect_slot:
             self.onClicked.connect(self.visualizer.on_project_selected)
+
+        img = cv2.imread(self.dbproject.thumbnail_path)
+
+        self.image_preview = EGraphicsView(self.widget)
+        self.widget.layout().addWidget(self.image_preview)
+        if img is not None:
+            self.image_preview.set_image(numpy_to_pixmap(img))
+
+
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent):
         self.onClicked.emit(self.dbproject)

@@ -40,26 +40,22 @@ class VisMovieLayout(PresentationWidget):
         self.lower_right.addWidget(self.vis_plot_network)
         self.lower_left.addWidget(self.vis_plot_features)
 
-        self.screenshots = dict() # TUPLE (DBScreenshot, Image)
+        self.screenshots = dict() # TUPLE (DBScreenshot, Image, Used)
         self.color_features = dict()
+
 
     @pyqtSlot(object)
     def on_screenshot_loaded(self, scr):
         self.screenshots[scr['screenshot_id']][1] = scr['image']
         if scr['screenshot_id'] in self.color_features and scr['screenshot_id'] in self.screenshots:
             x = self.screenshots[scr['screenshot_id']][0].time_ms
-            # This is an Error in the Database, in the Globa Analyses the Features are switched.... DAMN
-            if len(self.color_features[scr['screenshot_id']].analysis_data['saturation_p']) > 1:
-                y = self.color_features[scr['screenshot_id']].analysis_data['color_bgr']
-            else:
-                y = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
-
-            self.plot_color_dt.add_image(x, y, self.screenshots[scr['screenshot_id']][1])
-            # x = scr[]
-            # self.plot_color_dt.add_image()
+            y = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
+            if self.screenshots[scr['screenshot_id']][2] == True:
+                self.plot_color_dt.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False)
 
     def clear(self):
         self.plot_color_dt.clear_view()
+        self.plot_features.clear_view()
 
     def on_query_result(self, obj):
         if obj['type'] == "movie_info":
@@ -78,25 +74,35 @@ class VisMovieLayout(PresentationWidget):
             for f in obj['data']['keywords']:
                 if f.keyword_id not in feature_index:
                     feature_index[f.keyword_id] = FeatureTuple(self.visualizer.all_keywords[f.keyword_id]['word'].name, [])
-                if f.entry_id in segment_index:
-                    feature_index[f.keyword_id].segment_ids.append(segment_index[f.entry_id])
+                if f.target_id in segment_index:
+                    feature_index[f.keyword_id].segment_ids.append(segment_index[f.target_id])
 
-            self.plot_features.clear_view()
             self.plot_features.create_timeline(segments)
             for f in feature_index.keys():
-
                 self.plot_features.create_feature(feature_index[f])
 
             # COLOR-D
-            if len(obj['data']['screenshots']) > 0:
-                if len(obj['data']['screenshots']) < 50:
-                    k = len(obj['data']['screenshots'])
-                else:
-                    k = 50
-
-                self.visualizer.on_load_screenshots(sample(obj['data']['screenshots'], k), self.on_screenshot_loaded)
+            to_sort = dict()
             for scr in obj['data']['screenshots']:
-                self.screenshots[scr.screenshot_id] = [scr, None]
+                if scr.classification_object_id not in to_sort:
+                    to_sort[scr.classification_object_id] = []
+                to_sort[scr.classification_object_id].append(scr)
+
+            to_load = []
+            for t in to_sort:
+                scrs = to_sort[t]
+                if len(obj['data']['screenshots']) > 0:
+                    if len(obj['data']['screenshots']) < 50:
+                        k = len(obj['data']['screenshots'])
+                    else:
+                        k = 150
+                    to_load.extend(sample(scrs, k))
+            self.visualizer.on_load_screenshots(to_load, self.on_screenshot_loaded)
+
+            for scr in obj['data']['screenshots']:
+                self.screenshots[scr.screenshot_id] = [scr, None, False]
+                if self.vis_plot_color_dt.get_current_classification_object() == scr.classification_object_id:
+                    self.screenshots[scr.screenshot_id][2] = True
 
             if len(obj['data']['features']) > 0:
                 for o in obj['data']['features']:

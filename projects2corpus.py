@@ -36,9 +36,10 @@ def create_corpus(path):
     database.initialize("ERC_FilmColorsCorpus", path)
     return database
 
-def prepare_project(vian_project_path):
+def prepare_project(vian_project_path, a):
     local_corpus = LocalCorpusInterface()
     project, mw = load_project_headless(vian_project_path)
+    mw.load_screenshots()
     local_corpus.prepare_project(project, True)
 
 
@@ -61,11 +62,11 @@ def commit_no_prepare( file, corpus_path = "F:\\_corpus\\ERC_FilmColorsCorpus\\E
 
 CORPUS_ROOT = "F:\\_corpus\\"
 USER_CSV = "F:\\_input\\Accounts.csv"
-
+N_PROJECT = 20
 
 if __name__ == '__main__':
     # Create a Corpus if it does not already exist
-    if not os.path.isdir(CORPUS_ROOT):
+    if not os.path.isdir(CORPUS_ROOT + "\\ERC_FilmColorsCorpus\\"):
         db = create_corpus(CORPUS_ROOT)
         # Create Users
         users = parse_users(USER_CSV)
@@ -89,20 +90,28 @@ if __name__ == '__main__':
         if prepare:
             to_prepare.append(f)
 
-    n_threads  = 5
+    n_threads  = 7
     threads = []
+    c = 0
     for i, file in enumerate(to_prepare):
+        c += 1
+        if i > N_PROJECT:
+            break
+
         if c % n_threads == 0:
             for t in threads:
                 t.join()
             threads = []
             print(c, "/", len(to_prepare))
         else:
-            thread = Thread(target=prepare_project, args=file)
+            thread = Thread(target=prepare_project, args=(file, None))
             thread.start()
             threads.append(thread)
+    for t in threads:
+        t.join()
 
     # Commit all Projects to the Corpus
     zipped = glob.glob("F:/_projects/*.zip")
-    for f in zipped:
+    for i, f in enumerate(zipped):
+        print(i, "/", len(zipped))
         commit_no_prepare(f)

@@ -32,6 +32,7 @@ PROJECTS_DIR = "/projects/"
 EXPERIMENTS_DIR = "/experiments/"
 FTP_DIR = "/ftp/"
 MASK_DIR = "/masks/"
+THUMBNAILS = "/thumbnails/"
 
 # region Functions
 
@@ -92,8 +93,11 @@ class DBProject(DBEntity):
         self.path = ""
         self.archive = ""
 
-    def from_project(self, project: VIANProject):
+    def from_project(self, project: VIANProject, thumbnail_path = ""):
         self.name = project.name
+
+        if isinstance(project.movie_descriptor.movie_id, list):
+            project.movie_descriptor.movie_id = "_".join(project.movie_descriptor.movie_id)
 
         self.project_id = project.movie_descriptor.movie_id.split("_")[0]
         self.manifestation_id = project.movie_descriptor.movie_id.split("_")[1]
@@ -104,6 +108,7 @@ class DBProject(DBEntity):
         self.path = project.path
         self.folder = project.folder
         self.archive = project.folder + ".zip"
+        self.thumbnail_path = thumbnail_path
         return self
 
     def from_database(self, movie_entry):
@@ -116,6 +121,7 @@ class DBProject(DBEntity):
         self.folder = movie_entry['folder']
         self.archive = movie_entry['archive']
         self.checked_out_user = movie_entry['checked_out_user']
+        self.thumbnail_path = movie_entry['thumbnail_path']
         return self
 
     def to_database(self, include_id = False):
@@ -129,7 +135,8 @@ class DBProject(DBEntity):
                 last_modified = self.last_modified,
                 path = self.path,
                 folder = self.folder,
-                archive = self.archive
+                archive = self.archive,
+                thumbnail_path = self.thumbnail_path
             )
         else:
             result =  dict(
@@ -140,7 +147,8 @@ class DBProject(DBEntity):
                 last_modified = self.last_modified,
                 path = self.path,
                 folder = self.folder,
-                archive = self.archive
+                archive = self.archive,
+                thumbnail_path=self.thumbnail_path
             )
 
         return result
@@ -963,10 +971,10 @@ class DBFilmographicalData(DBEntity):
         self.country = ""
 
     def from_project(self, obj: VIANProject, project_id):
-        if obj.meta_data is None:
+        if obj.movie_descriptor.meta_data is None:
             return None
-        if "ERC_FilmColorsFilmography" in obj.meta_data.keys():
-            for attr, val in obj.meta_data['ERC_FilmColorsFilmography'].items():
+        if "ERC_FilmColorsFilmography" in obj.movie_descriptor.meta_data.keys():
+            for attr, val in obj.movie_descriptor.meta_data['ERC_FilmColorsFilmography'].items():
                 setattr(self, attr, val)
             self.project_id = project_id
             return self
