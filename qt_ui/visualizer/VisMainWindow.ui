@@ -32,6 +32,8 @@
     <addaction name="actionSegments"/>
     <addaction name="actionScreenshots"/>
     <addaction name="actionMovie"/>
+    <addaction name="separator"/>
+    <addaction name="actionLast"/>
    </widget>
    <addaction name="menuWindow"/>
   </widget>
@@ -74,6 +76,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+3</string>
+   </property>
+  </action>
+  <action name="actionLast">
+   <property name="text">
+    <string>Go Back</string>
+   </property>
+   <property name="shortcut">
+    <string>Backspace</string>
    </property>
   </action>
  </widget>

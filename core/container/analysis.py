@@ -243,12 +243,12 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.unique_id = serialization['unique_id']
         self.analysis_job_class = serialization['analysis_job_class']
         self.notes = serialization['notes']
-
         # VERSION > 0.6.8
         try:
             if serialization['classification_obj'] > 0:
                 self.target_classification_object = streamer.project.get_by_id(serialization['classification_obj'])
-        except:
+        except Exception as e:
+            print(e)
             pass
 
         # self.data = []

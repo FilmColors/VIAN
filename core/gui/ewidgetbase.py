@@ -153,6 +153,8 @@ class EDialogWidget(QDialog):
 
 
 class EGraphicsView(QGraphicsView):
+    onScaleEvent = pyqtSignal(float)
+
     def __init__(self, parent, auto_frame = True, main_window = None, has_context_menu=True):
         super(EGraphicsView, self).__init__(parent)
         self.gscene = QGraphicsScene()
@@ -192,6 +194,7 @@ class EGraphicsView(QGraphicsView):
         elif event.key() == Qt.Key_F:
             self.setSceneRect(QRectF())
             self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+            self.curr_scale = 1.0
         else:
             event.ignore()
 
@@ -222,15 +225,16 @@ class EGraphicsView(QGraphicsView):
             # viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
             # self.curr_scale = round(self.pixmap.pixmap().width() / (viewport_size.x()), 4)
 
-            if event.angleDelta().y() > 0.0 and self.curr_scale < 10:
+            if event.angleDelta().y() > 0.0 and self.curr_scale < 100000:
                 self.scale(h_factor, h_factor)
-                # self.curr_scale *= h_factor
+                self.curr_scale *= h_factor
 
-            elif event.angleDelta().y() < 0.0 and self.curr_scale > 0.01:
-                # self.curr_scale *= l_factor
+            elif event.angleDelta().y() < 0.0 and self.curr_scale > 0.00001:
                 self.scale(l_factor, l_factor)
+                self.curr_scale *= l_factor
 
             cursor_pos = self.mapToScene(event.pos()) - old_pos
+            self.onScaleEvent.emit(self.curr_scale)
 
             self.translate(cursor_pos.x(), cursor_pos.y())
 

@@ -12,6 +12,7 @@ SOURCE_FOREGROUND = 0
 SOURCE_BACKGROUND = 1
 SOURCE_COMPLETE = 2
 
+
 class ImagePlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
         super(ImagePlot, self).__init__(parent)
@@ -84,7 +85,8 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
 
     def set_image_scale(self, scale):
         for img in self.images:
-            img.setScale(img.scale() + scale)
+            img.setScale(scale)
+        self.img_scale = scale
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
@@ -161,7 +163,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             self.translate(cursor_pos.x(), cursor_pos.y())
 
             for itm in self.images:
-                itm.setScale(self.img_scale * (1.0 - self.curr_scale))
+                itm.setScale(self.img_scale)
 
         else:
             super(QGraphicsView, self).wheelEvent(event)
@@ -512,7 +514,6 @@ class ImagePlotTime(ImagePlot):
         super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
         self.font_size = 60
 
-
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
         self.pixel_size_y = pixel_size_y
@@ -522,7 +523,6 @@ class ImagePlotTime(ImagePlot):
         self.base_line = y_max
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
-
 
     def add_image(self, x, y, img, convert=True):
         if convert:
@@ -571,17 +571,20 @@ class ImagePlotTime(ImagePlot):
         # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
         self.add_grid(False)
 
-
     def set_x_scale(self, value):
         self.x_scale = value
-        self.x_scale = self.pixel_size_x / np.clip((len(self.images) * ((500 - value) / 100)), 0.00001, None)
+        # self.x_scale = self.pixel_size_x / np.clip((len(self.images) * ((500 - value) / 100)), 0.00001, None)
+        self.x_scale = 0.01
         self.update_position()
 
     def set_y_scale(self, value):
-        self.y_scale = value
-        self.y_scale = self.pixel_size_y / np.clip((100 * (value / 100)), 0.00001, None)
+        self.y_scale = value * 2
         self.update_position()
-
+    
+    def set_image_scale(self, scale):
+        scale = scale / 500
+        super(ImagePlotTime, self).set_image_scale(scale)
+    
     def update_position(self):
         for idx, v in enumerate(self.values):
             itm = self.images[idx]
@@ -594,16 +597,16 @@ class ImagePlotTime(ImagePlot):
         w = QWidget()
         w.setLayout(QVBoxLayout())
         hl1 = QHBoxLayout(w)
-        hl1.addWidget(QLabel("X-Scale:", w))
+        hl1.addWidget(QLabel("Image-Scale", w))
         hl2 = QHBoxLayout(w)
         hl2.addWidget(QLabel("Y-Scale:", w))
 
         slider_xscale = QSlider(Qt.Horizontal, w)
-        slider_xscale.setRange(1, 500)
+        slider_xscale.setRange(1, 1000)
         slider_xscale.setValue(self.x_scale)
-        slider_xscale.valueChanged.connect(self.set_x_scale)
+        slider_xscale.valueChanged.connect(self.set_image_scale)
         slider_yscale = QSlider(Qt.Horizontal, w)
-        slider_yscale.setRange(1, 500)
+        slider_yscale.setRange(1, 1000)
         slider_xscale.setValue(self.y_scale)
         slider_yscale.valueChanged.connect(self.set_y_scale)
 
@@ -611,14 +614,14 @@ class ImagePlotTime(ImagePlot):
         hl2.addWidget(slider_yscale)
 
         x_scale_line = QSpinBox(w)
-        x_scale_line.setRange(1, 500)
+        x_scale_line.setRange(1, 1000)
         x_scale_line.setValue(self.x_scale)
         x_scale_line.valueChanged.connect(slider_xscale.setValue)
         slider_xscale.valueChanged.connect(x_scale_line.setValue)
         hl1.addWidget(x_scale_line)
 
         y_scale_line = QSpinBox(w)
-        y_scale_line.setRange(1, 500)
+        y_scale_line.setRange(1, 1000)
         y_scale_line.setValue(self.y_scale)
         y_scale_line.valueChanged.connect(slider_yscale.setValue)
         slider_yscale.valueChanged.connect(y_scale_line.setValue)

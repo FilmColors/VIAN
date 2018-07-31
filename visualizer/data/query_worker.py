@@ -7,7 +7,7 @@ class QueryWorkerSignals(QObject):
     onMessage = pyqtSignal(str)
 
 
-CORPUS_PATH = "F:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"
+CORPUS_PATH = "F:\\_corpus\\Backup\\ERC_FilmColorsCorpus_03\\ERC_FilmColorsCorpus.vian_corpus"
 class QueryWorker(QObject):
     def __init__(self):
         super(QueryWorker, self).__init__()
@@ -27,17 +27,18 @@ class QueryWorker(QObject):
         self.corpus.onQueryResult.connect(self.on_query_result)
 
 
-    @pyqtSlot(str, object, object, object)
-    def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects):
+    @pyqtSlot(str, object, object, object, object)
+    def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters):
         if self.user is None:
             self.initialize()
         try:
-            query = QueryRequestData(query_type, filter_filmography, filter_keywords, filter_classification_objects)
+            query = QueryRequestData(query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters)
             self.corpus.submit_query(query)
         except Exception as e:
             raise e
 
     @pyqtSlot(object)
     def on_query_result(self, result):
+        if result is None: return
         self.signals.onQueryResult.emit(result)
 

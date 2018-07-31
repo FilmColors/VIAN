@@ -51,7 +51,7 @@
      </property>
      <item>
       <property name="text">
-       <string>Movie</string>
+       <string>Movies</string>
       </property>
      </item>
      <item>
@@ -61,7 +61,7 @@
      </item>
      <item>
       <property name="text">
-       <string>Stills</string>
+       <string>Screenshots</string>
       </property>
      </item>
     </widget>

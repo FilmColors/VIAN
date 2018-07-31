@@ -68,10 +68,10 @@ class GraphNode(QGraphicsEllipseItem):
             return
 
     def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
-        super(GraphNode, self).mousePressEvent(event)
         if self.is_selectable:
             self.view.on_selection(self)
-
+        else:
+            event.ignore()
 
     def set_selected(self, state):
         self.current_order = 1
@@ -117,9 +117,10 @@ class GraphEdge(QGraphicsLineItem):
         self.label = None
 
     def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
-        super(GraphEdge, self).mousePressEvent(event)
         if self.is_selectable:
             self.view.on_selection(self)
+        else:
+            event.ignore()
 
     def set_selected(self, state):
         if state:
@@ -164,6 +165,7 @@ class VocabularyGraph(QWidget):
         super(VocabularyGraph, self).__init__(parent)
         self.view = EGraphicsView(self)
         self.view.setScene(QGraphicsScene(self))
+        self.view.onScaleEvent.connect(self.on_scale)
 
         self.setLayout(QHBoxLayout(self))
         self.layout().addWidget(self.view)
@@ -171,20 +173,21 @@ class VocabularyGraph(QWidget):
         self.node_labels = None
         self.context_objects = None
 
-        self.text_size = 15
-        self.node_threshold = 1000
-        self.edge_threshold = 800
+        self.text_size = 8
+        self.node_threshold = 10
+        self.edge_threshold = 10
         self.selection_graph_depth = 2
 
         self.nodes = []
         self.edges = []
         self.labels = []
+        self.node_weights = []
+
 
         self.node_words_model = QStandardItemModel()
         self.current_labels = []
         self.controls = None
         self.current_selection = None
-
 
     def on_selection(self, obj):
         for n in self.nodes:
@@ -260,6 +263,7 @@ class VocabularyGraph(QWidget):
 
         node_sums = np.sum(m, axis=1).astype(np.float32)
         node_sums = np.divide(node_sums, np.amax(node_sums))
+        node_max = np.amax(node_sums)
         node_sums = np.multiply(node_sums, dot_size)
 
         # Filter the Input by the Node Threshold
@@ -351,9 +355,13 @@ class VocabularyGraph(QWidget):
                 lbl.setPos(itm[0] * scale + (dot_size * s / 2) - lbl.textWidth(),
                            itm[1] * scale + (dot_size * s / 2))
                 lbl.setDefaultTextColor(QColor(200,200,200))
+                lbl.setFlag(QGraphicsItem.ItemIgnoresTransformations)
                 self.labels.append(lbl)
+                self.node_weights.append(s)
                 self.nodes[counter].label = lbl
                 counter += 1
+
+
 
         ok = 0
         errors = 0
@@ -394,6 +402,7 @@ class VocabularyGraph(QWidget):
             completer.setCompletionMode(QCompleter.PopupCompletion)
             self.controls.node_query_line.setCompleter(completer)
 
+
         # print("Errors:", errors, " OK:", ok)
 
     def get_node_by_context(self, context_obj):
@@ -404,6 +413,8 @@ class VocabularyGraph(QWidget):
     def mousePressEvent(self, a0: QMouseEvent):
         if a0.button() == Qt.RightButton:
             self.on_selection(None)
+        else:
+            a0.ignore()
 
     def get_controls(self):
         self.controls = GraphControls(self)
@@ -423,6 +434,30 @@ class VocabularyGraph(QWidget):
             if n.label.toPlainText() == label:
                 self.on_selection(n)
                 break
+
+    @pyqtSlot(float)
+    def on_scale(self, scale):
+        pass
+        # for lbl in self.labels:
+        #     lbl.show()
+        #
+        # for i in range(len(self.node_weights)):
+        #     lbla = self.labels[i]
+        #     done = False
+        #
+        #     if lbla.isVisible() == False:
+        #         continue
+        #
+        #     for j in range(len(self.node_weights)):
+        #         lblb = self.labels[j]
+        #         if lblb.isVisible() and lbla.collidesWithItem(lblb, Qt.IntersectsItemBoundingRect):
+        #             if self.node_weights[i] < self.node_weights[j]:
+        #                 lbla.hide()
+        #                 break
+        #             else:
+        #                 lblb.hide()
+
+
 
 
 class GraphControls(QWidget):

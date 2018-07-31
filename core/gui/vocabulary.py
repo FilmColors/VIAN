@@ -283,7 +283,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
-
     def on_changed(self, project, item):
         self.comboBox_Experiment.clear()
         if len(project.experiments) > 0:
@@ -519,7 +518,7 @@ class CheckBoxGroupWidget(QWidget):
 
     def add_checkbox(self, checkbox):
         self.items.append(checkbox)
-        self.items = sorted(self.items, key = lambda x: x.word.get_name())
+        self.items = sorted(self.items, key = lambda x: x.word.name)
         size = len(self.items)
         n_rows = np.ceil(size/self.n_columns)
 

@@ -781,15 +781,28 @@ class KeywordMappingEntry(DBEntity):
 
         self.project_id = project_id
         self.container_type = container_type
+        self.target_id = -1
         self.keyword_id = keyword_id
 
     def from_database(self, entry):
-        self.entry_id = entry['id']
+        try:
+            self.entry_id = entry['id']
+            self.target_id = entry['segment_id']
+            self.container_type = "SegmentMapping"
+        except Exception as e:
+            try:
+                self.target_id = entry['screenshot_id']
+                self.container_type = "ScreenshotMapping"
+            except:
+                print("Mapping not found", entry['id'], e)
+
         self.project_id = entry['project_id']
-        self.container_type = entry['container_type']
+        # self.container_type = entry['container_type']
         self.keyword_id = entry['keyword_id']
+        return self
 
     def to_database(self, include_id=False):
+        # TODO How the differentiate the Target
         if include_id:
             result = dict(
                 id=self.entry_id,
@@ -815,25 +828,37 @@ class DBAnalysis(DBEntity):
         self.analysis_class_name = ""
         self.analysis_data = ""
         self.analysis_type = -1 # 0: JobAnalysis, 1: ScriptAnalysis
-
+        self.target_container_type = ""
+        self.target_container_id = -1
 
     def from_database(self, entry):
-        self.analysis_id = entry['analysis_id']
+        self.analysis_id = entry['id']
         self.project_id = entry['project_id']
         self.analysis_class_name = entry['analysis_name']
         self.analysis_type = entry['analysis_type']
         if self.analysis_type == 0:
-            self.analysis_data = eval(self.analysis_class_name)().from_json(entry['data'])
+            try:
+                self.analysis_data = eval(self.analysis_class_name)().from_json(entry['data'])
+            except:
+                self.analysis_data = None
         else:
             self.analysis_data = entry['data']
+        self.target_container_type = entry['target_container_type']
+        self.target_container_id = entry['target_container_id']
+        self.classification_obj_id = entry['classification_object_id']
+        return self
 
-    def from_project(self, obj: AnalysisContainer, project_id, class_obj_id = -1):
+    def from_project(self, obj: AnalysisContainer, project_id, class_obj_id = -1, target_container_id = -1):
         self.project_id = project_id
         self.classification_obj_id = class_obj_id
+        self.target_container_id = target_container_id
+
         if isinstance(obj, IAnalysisJobAnalysis):
             self.analysis_class_name = obj.analysis_job_class
             self.analysis_data = obj.get_adata()
             self.analysis_type = 0
+            if obj.target_container is not None:
+                self.target_container_type = obj.target_container.__class__.__name__
 
         elif isinstance(obj, NodeScriptAnalysis):
             self.analysis_class_name = obj.project.get_by_id(obj.script_id).get_name()
@@ -870,6 +895,9 @@ class DBAnalysis(DBEntity):
                 project_id = self.project_id,
                 analysis_name=self.analysis_class_name,
                 analysis_type=self.analysis_type,
+                target_container_type = self.target_container_type,
+                target_container_id = self.target_container_id,
+                classification_object_id = self.classification_obj_id,
                 data = data
             )
         else:
@@ -877,6 +905,9 @@ class DBAnalysis(DBEntity):
                 project_id=self.project_id,
                 analysis_name=self.analysis_class_name,
                 analysis_type=self.analysis_type,
+                target_container_type=self.target_container_type,
+                target_container_id=self.target_container_id,
+                classification_object_id=self.classification_obj_id,
                 data=data
             )
         return result
@@ -916,7 +947,7 @@ class DBSemanticSegmentationDatasetLabel(DBEntity):
 class DBFilmographicalData(DBEntity):
     def __init__(self):
         self.filmography_id = -1
-        self.movie_id = -1
+        self.project_id = -1
 
         # FIWI FIELDS
         self.imdb_id = -1
@@ -931,11 +962,22 @@ class DBFilmographicalData(DBEntity):
         self.production_company = ""
         self.country = ""
 
+    def from_project(self, obj: VIANProject, project_id):
+        if obj.meta_data is None:
+            return None
+        if "ERC_FilmColorsFilmography" in obj.meta_data.keys():
+            for attr, val in obj.meta_data['ERC_FilmColorsFilmography'].items():
+                setattr(self, attr, val)
+            self.project_id = project_id
+            return self
+        else:
+            return None
+
     def to_database(self, include_id=False):
         if include_id:
             result = dict(
                 id=self.filmography_id,
-                movie_id=self.movie_id,
+                project_id=self.project_id,
 
                 imdb_id=self.imdb_id,
                 color_process=self.color_process,
@@ -950,7 +992,7 @@ class DBFilmographicalData(DBEntity):
             )
         else:
             result = dict(
-                movie_id=self.movie_id,
+                project_id=self.project_id,
 
                 imdb_id=self.imdb_id,
                 color_process=self.color_process,
@@ -995,8 +1037,16 @@ class QueryRequestData():
     :ivar filter_keywords: A dict of Keyword IDS assigned to the container
     :ivar filter_classification_objects: A List of ClassificationObject IDS to filter
     """
-    def __init__(self, query_type, filter_filmography = None, filter_keywords = None, filter_classification_objects = None):
+    def __init__(self, query_type, filter_filmography = None, filter_keywords = None, filter_classification_objects = None, project_filter = None):
+        """
+        
+        :param query_type: 
+        :param filter_filmography: dict(include:[] exclude:[])
+        :param filter_keywords: dict(include:[] exclude:[])
+        :param filter_classification_objects: dict(include:[] exclude:[])
+        """
         self.query_type = query_type
+        self.project_filter = project_filter
         self.filter_filmography = filter_filmography
         self.filter_keywords = filter_keywords
         self.filter_classification_objects = filter_classification_objects

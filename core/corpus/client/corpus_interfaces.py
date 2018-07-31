@@ -113,8 +113,6 @@ class CorpusInterface(QObject):
             grp_name = scr.screenshot_group
             if grp_name in ["All Shots", ""]:
                 grp_name = "glob"
-
-
             name = scr_dir + "Global_" + str(scr.scene_id) + "_" + str(scr.shot_id_segm) + "_" + grp_name + ".jpg"
             img = scr.img_movie
             if img.shape[1] > PAL_WIDTH:
@@ -142,13 +140,13 @@ class CorpusInterface(QObject):
 
                     mask = None
                     img = cv2.cvtColor(scr.img_movie, cv2.COLOR_BGR2BGRA)
-
                     # Find the correct Mask Analysis
                     for a in scr.connected_analyses:
                         if isinstance(a, IAnalysisJobAnalysis) and a.analysis_job_class == SemanticSegmentationAnalysis.__name__:
                             table = SQ_TABLE_MASKS
                             data = dict(db[table].find_one(key=a.unique_id))['json']
                             data = project.main_window.eval_class(a.analysis_job_class)().from_json(data)
+
                             if data['dataset'] in masks_to_export_names:
                                 mask = cv2.resize(data['mask'].astype(np.uint8), (img.shape[1], img.shape[0]),
                                                   interpolation=cv2.INTER_NEAREST)

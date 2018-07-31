@@ -282,8 +282,6 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
                                        QPen(), QBrush(QColor(100, 113, 122, 150)))
             self.scene().addItem(itm)
             self.scene().addItem(itm)
-
-
             itms.append(itm)
 
         label = self.scene().addText(feature.name.rjust(50), self.font)

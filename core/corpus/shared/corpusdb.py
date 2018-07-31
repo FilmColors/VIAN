@@ -12,7 +12,7 @@ import glob
 import shutil
 from core.data.headless import *
 from core.data.headless import load_project_headless
-
+from core.corpus.shared.sql_queries import *
 TABLE_PROJECTS = "PROJECTS"
 TABLE_MOVIES = "MOVIES"
 TABLE_SEGMENTS = "SEGMENTS"
@@ -330,6 +330,8 @@ class DatasetCorpusDB(CorpusDB):
 
             self.db.begin()
 
+            all_ids_mapping = dict()
+
             #region Zip the Project
             #and store it in the projects directory
             archive_file = self.root_dir + PROJECTS_DIR + project.name
@@ -364,6 +366,12 @@ class DatasetCorpusDB(CorpusDB):
                 project_obj.project_id = res['id']
                 project_id = res['id']
 
+                # Adding the Filmography, .from_project() will return none if the meta-data is not in the project
+                filmography = DBFilmographicalData().from_project(project, project_id)
+                if filmography is not None:
+                    self.db[TABLE_FILMOGRAPHY].insert(filmography)
+
+
 
             #Copy the Screenshots and Masks into the File Systems
             mask_path_dir = MASK_DIR + str(project_id)
@@ -376,8 +384,8 @@ class DatasetCorpusDB(CorpusDB):
                 if os.path.isdir(self.root_dir + mask_path_dir):
                     shutil.rmtree(self.root_dir + mask_path_dir)
                 print("Copying Screenshots and Masks...")
-                shutil.copytree(unpack_dir + "/scr/", self.root_dir + scr_path_dir)
-                shutil.copytree(unpack_dir + "/masks/", self.root_dir + mask_path_dir)
+            shutil.copytree(unpack_dir + "/scr/", self.root_dir + scr_path_dir)
+            shutil.copytree(unpack_dir + "/masks/", self.root_dir + mask_path_dir)
 
             print("Committing...")
 
@@ -425,7 +433,9 @@ class DatasetCorpusDB(CorpusDB):
                     classifiable_containers_db.append(dbsegm)
                     classifiable_containers_proj.append(segm)
 
+                    all_ids_mapping[segm.unique_id] = dbsegm.segment_id
                 db_segmentations.append(all_db_segments)
+                all_ids_mapping[s.unique_id] = segmentation_id
 
             #endregion
 
@@ -449,10 +459,11 @@ class DatasetCorpusDB(CorpusDB):
 
                 for ann in layer.annotations:
                     dbann = DBAnnotation().from_project(project_id, ann, movie_id, layer_id)
-                    self.db[TABLE_ANNOTATIONS].insert(dbann.to_database(False))
+                    dbann.annotation_id = self.db[TABLE_ANNOTATIONS].insert(dbann.to_database(False))
                     # We Will later need these two array to map the Classification Results
                     classifiable_containers_db.append(dbann)
                     classifiable_containers_proj.append(ann)
+                    all_ids_mapping[ann.unique_id] = dbann.annotation_id
             #endregion
 
             #region Screenshots
@@ -512,6 +523,7 @@ class DatasetCorpusDB(CorpusDB):
                             dbscr.screenshot_id = self.db[TABLE_SCREENSHOTS].insert(dbscr.to_database(False))
                             all_masked_shots.append((dbscr, masked_scr['class_obj']))
 
+                        all_ids_mapping[scr.unique_id] = dbscr.screenshot_id
 
                     except Exception as e:
                         print(e)
@@ -740,9 +752,15 @@ class DatasetCorpusDB(CorpusDB):
                     continue
                 else:
                     class_obj_id = -1
-                    if isinstance(a, IAnalysisJobAnalysis) and a.target_classification_object is not None:
-                        class_obj_id = all_cl_objs_db[all_cl_objs_proj.index(a.target_classification_object)].classification_object_id
-                    db_analysis = DBAnalysis().from_project(a, project_id, class_obj_id)
+                    target_id = -1
+
+                    if isinstance(a, IAnalysisJobAnalysis):
+                        if a.target_classification_object is not None:
+                            class_obj_id = all_cl_objs_db[all_cl_objs_proj.index(a.target_classification_object)].classification_object_id
+                        if a.target_container is not None and a.target_container.unique_id in all_ids_mapping:
+                            target_id = all_ids_mapping[a.target_container.unique_id]
+
+                    db_analysis = DBAnalysis().from_project(a, project_id, class_obj_id, target_id)
                     db_analysis.analysis_id = self.db[TABLE_ANALYSES].insert(db_analysis.to_database(False))
             #endregion
 
@@ -914,7 +932,7 @@ class DatasetCorpusDB(CorpusDB):
             result.append(DBSegmentation().from_database(q))
         return result
 
-    def get_segments(self, filters = None):
+    def get_segments(self, filters = None) ->List[DBSegment]:
         if filters is None:
             query = self.db[TABLE_SEGMENTS].all()
         else:
@@ -1027,6 +1045,17 @@ class DatasetCorpusDB(CorpusDB):
             result.append(DBUniqueKeyword().from_database(q))
         return result
 
+    def get_keyword_mapping(self, filters = None, table = TABLE_KEYWORD_MAPPING_SEGMENTS) ->List[KeywordMappingEntry]:
+        if filters is None:
+            query = self.db[table].all()
+        else:
+            query = self.db[table].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(KeywordMappingEntry().from_database(q))
+        return result
+
     def get_movies(self, filters = None):
         if filters is None:
             query = self.db[TABLE_MOVIES].all()
@@ -1062,7 +1091,7 @@ class DatasetCorpusDB(CorpusDB):
             for d in contributors:
                 c[d.contributor_id] = d
 
-            return dict(type=query.query_type, data=dict(projects=r, contributors=c))
+            return dict(type=query.query_type, data=dict(projects=r, contributors=c, root = self.root_dir))
             # We want to return a list of Projects
 
         elif query.query_type == "keywords":
@@ -1074,18 +1103,31 @@ class DatasetCorpusDB(CorpusDB):
             hashm_cl_objs = dict()
             hashm_vocabulary_words = dict()
             hashm_vocabularies = dict()
+            print("Voc Result", len(vocabularies))
+            print("VocWord Result", len(vocabulary_words))
+            print("cl_objs Result", len(cl_objs))
             for c in cl_objs: hashm_cl_objs[c.classification_object_id] = c
-            for c in vocabularies: hashm_cl_objs[c.vocabulary_id] = c
-            for c in vocabulary_words: hashm_cl_objs[c.word_id] = c
+            for c in vocabularies: hashm_vocabularies[c.vocabulary_id] = c
+            for c in vocabulary_words: hashm_vocabulary_words[c.word_id] = c
             return dict(type=query.query_type, data=dict(keywords=keywords,
                                                          cl_objs=hashm_cl_objs,
                                                          vocabularies=hashm_vocabularies,
-                                                         hashm_vocabulary_words=hashm_vocabulary_words))
+                                                         vocabulary_words=hashm_vocabulary_words))
 
         elif query.query_type == "movies":
-            pass
+            include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
+            exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
+            result = [r['id'] for r in self.db.query(Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args +
+                                                     Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args)]
+            result = self.get_projects(dict(id=result))
+            return dict(type=query.query_type, data=result)
+
+        elif query.query_type == "movie_info":
+            return self.get_movie_info(query)
+
         elif query.query_type == "segments":
             pass
+
         elif query.query_type == "screenshots":
             pass
         else:
@@ -1093,8 +1135,41 @@ class DatasetCorpusDB(CorpusDB):
 
         return None
 
-    def project_query(self, query:QueryRequestData):
+    def get_movie_info(self, query:QueryRequestData):
+        project_id = query.project_filter[0]
+
+        rsegms = self.get_segments(dict(project_id = project_id))
+        rkeyw = self.get_keyword_mapping(dict(project_id = project_id))
+        rmovie = self.get_movies(dict(project_id = project_id))
+        (scrs, features) = self.get_color_dt_info(project_id=project_id)
+        if len(rmovie) > 0:
+            rmovie = rmovie[0]
+        else:
+            rmovie = None
+
+        return dict(type="movie_info", data = dict(segments=rsegms, keywords=rkeyw, movie=rmovie, screenshots=scrs, features=features))
+
+    def get_color_dt_info(self, project_id):
+        query = "select *, ANALYSES.id as \"analysis_id\" from ANALYSES " \
+                "inner join SHOTS on SHOTS.id = ANALYSES.target_container_id " \
+                "where ANALYSES.analysis_name = \"ColorFeatureAnalysis\" and  " \
+                "ANALYSES.project_id = " + str(project_id)
+        out = self.db.query(query)
+        result_shots = []
+        features = []
+        for o in out:
+            dbscr = DBScreenshot()
+            dbscr.from_database(dict(o))
+            dbscr.screenshot_id = o['target_container_id']
+            dbanalysis = DBAnalysis().from_database(o)
+            dbanalysis.analysis_id = o['analysis_id']
+            result_shots.append(dbscr)
+            features.append(dbanalysis)
+        return (result_shots, features)
+
+    def get_color_ab_info(self, query:QueryRequestData):
         pass
+
     #endregion
 
     #region IO

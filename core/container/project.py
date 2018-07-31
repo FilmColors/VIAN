@@ -805,7 +805,6 @@ class VIANProject(IHasName, IClassifiable):
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
-        print(self.movie_descriptor.movie_path)
         # Attempt to load the Vocabularies, this might fail if the save is from VIAN 0.1.1
         try:
             self.vocabularies = []
@@ -829,21 +828,7 @@ class VIANProject(IHasName, IClassifiable):
             new = Segmentation().deserialize(c, self)
             self.add_segmentation(new)
 
-        for d in my_dict['analyzes']:
-            if d is not None:
-                try:
-                    new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
-                    if isinstance(new, ColormetryAnalysis):
-                        # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
-                        if int(version[1]) < 6:
-                            new = ColormetryAnalysis()
-                        self.colormetry_analysis = new
-                        self.add_analysis(new)
-                        new.set_finished()
-                    else:
-                        self.add_analysis(new)
-                except Exception as e:
-                    print("Exception in Load Analyses", str(e))
+
 
         try:
             old = self.screenshot_groups
@@ -860,7 +845,6 @@ class VIANProject(IHasName, IClassifiable):
 
         except Exception as e:
             self.screenshot_groups = old
-            print(e)
             self.main_window.print_message("Loading Screenshot Group failed.", "Red")
 
         try:
@@ -886,6 +870,21 @@ class VIANProject(IHasName, IClassifiable):
         except Exception as e:
             print(e)
 
+        for d in my_dict['analyzes']:
+            if d is not None:
+                try:
+                    new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
+                    if isinstance(new, ColormetryAnalysis):
+                        # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
+                        if int(version[1]) < 6:
+                            new = ColormetryAnalysis()
+                        self.colormetry_analysis = new
+                        self.add_analysis(new)
+                        new.set_finished()
+                    else:
+                        self.add_analysis(new)
+                except Exception as e:
+                    print("Exception in Load Analyses", str(e))
         # Finalizing the Project, Hooking up the ID Connections
         # Connecting the NodeScriptAnalysis Objects to their Final Nodes
         for a in self.analysis:

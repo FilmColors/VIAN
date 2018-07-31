@@ -140,6 +140,7 @@ class ColorSpacePlots(QWidget):
         elif idx == 2:
             self.info_dock.set_widget(self.gl_view.get_param_widget(), "Color-AB Global")
 
+
 class ColorSpaceLPlanePlots(QWidget):
     def __init__(self, parent, visualizer):
         super(ColorSpaceLPlanePlots, self).__init__(parent)
