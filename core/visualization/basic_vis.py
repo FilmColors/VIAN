@@ -7,6 +7,12 @@ import numpy as np
 from core.gui.tools import ExportImageDialog
 
 class IVIANVisualization():
+    def set_heads_up_widget(self, widget):
+        pass
+
+    def get_heads_up_widget(self):
+        pass
+
     def export(self, main_window = None):
         if not isinstance(main_window, QWidget):
             main_window = None

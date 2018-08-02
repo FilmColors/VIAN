@@ -19,7 +19,7 @@ class VisHomeWidget(PresentationWidget):
         if obj['type'] == "projects":
             for p in obj['data']['projects'].keys():
                 dbproject = obj['data']['projects'][p]
-                self.contribution_list.add_entry(None, dbproject=dbproject)
+                self.contribution_list.add_entry(None, dbproject=dbproject, filmography = obj['data']['filmographies'][dbproject.project_id])
             self.visualizer.db_root = obj['data']['root']
             self.visualizer.screenshot_loader.initialize(self.visualizer.db_root)
 

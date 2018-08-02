@@ -992,6 +992,8 @@ class DBFilmographicalData(DBEntity):
                 director=self.director,
                 genre=self.genre,
                 cinematography=self.cinematography,
+                color_consultant = self.color_consultant,
+                art_director=self.art_director,
                 production_design=self.production_design,
                 costum_design=self.costum_design,
                 production_company=self.production_company,
@@ -1007,6 +1009,8 @@ class DBFilmographicalData(DBEntity):
                 director=self.director,
                 genre=self.genre,
                 cinematography=self.cinematography,
+                color_consultant=self.color_consultant,
+                art_director = self.art_director,
                 production_design=self.production_design,
                 costum_design=self.costum_design,
                 production_company=self.production_company,
@@ -1024,12 +1028,15 @@ class DBFilmographicalData(DBEntity):
         self.director = entry['director']
         self.genre = entry['genre']
         self.cinematography = entry['cinematography']
-        self.color_consultant = entry['color_consultant']
+        try:
+            self.color_consultant = entry['color_consultant']
+            self.art_director = entry['art_director']
+        except:
+            pass
         self.production_design = entry['production_design']
-        self.art_director = entry['art_director']
         self.costum_design = entry['costum_design']
         self.production_company = entry['production_company']
-        self.country = ['country']
+        self.country = entry['country']
         return self
 
     def __str__(self):
@@ -1045,7 +1052,7 @@ class QueryRequestData():
     :ivar filter_keywords: A dict of Keyword IDS assigned to the container
     :ivar filter_classification_objects: A List of ClassificationObject IDS to filter
     """
-    def __init__(self, query_type, filter_filmography = None, filter_keywords = None, filter_classification_objects = None, project_filter = None):
+    def __init__(self, query_type, filter_filmography = None, filter_keywords = None, filter_classification_objects = None, project_filter = None, segment_filters = None):
         """
         
         :param query_type: 
@@ -1058,6 +1065,7 @@ class QueryRequestData():
         self.filter_filmography = filter_filmography
         self.filter_keywords = filter_keywords
         self.filter_classification_objects = filter_classification_objects
+        self.segment_filters = segment_filters
 
 #
 # class QueryResult:

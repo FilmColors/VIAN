@@ -17,6 +17,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
         super(ImagePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
+        self.heads_up_widget = None
         if range_x is None:
             range_x = [-128, 128]
         if range_y is None:
@@ -37,7 +38,6 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.range_y = range_y
         self.font_size = 4
         self.title = title
-
 
         self.left_button_pressed = False
         self.last_mouse_pos = QPoint()
@@ -203,6 +203,16 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
 
         return image
 
+    def set_heads_up_widget(self, widget:QWidget):
+        self.heads_up_widget = widget
+        widget.setParent(self)
+        widget.move(5,5)
+        widget.resize(150, 20)
+        widget.show()
+
+    def get_heads_up_widget(self):
+        return self.heads_up_widget
+
     @pyqtSlot(int)
     def on_high_cut(self, value):
         for tpl in self.luminances:
@@ -255,7 +265,7 @@ class ImagePlotCircular(ImagePlot):
                 itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img))
             else:
                 # itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None,  with_alpha = True))
-                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=None, with_alpha=True))
+                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
             self.scene().addItem(itm)
 
             if to_float:
@@ -361,7 +371,7 @@ class ImagePlotPlane(ImagePlot):
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img))
         else:
-            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=None, with_alpha=True))
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
         self.scene().addItem(itm)
 
         itm.setPos(np.nan_to_num(x * self.magnification),np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification))
@@ -542,7 +552,6 @@ class ImagePlotTime(ImagePlot):
         self.luminances.append([np.nan_to_num(y), itm])
         self.values.append([x, np.nan_to_num(y)])
         itm.show()
-
     def clear_view(self):
         super(ImagePlotTime, self).clear_view()
         self.x_end = 0
@@ -550,16 +559,17 @@ class ImagePlotTime(ImagePlot):
         self.lines = []
 
     def add_grid(self, set_scene_rect = True):
-        pen = QPen()
-        pen.setWidth(10)
-        pen.setColor(QColor(200, 200, 200, 150))
-
-        font = QFont()
-        font.setPointSize(self.font_size)
-        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
-        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
-        if set_scene_rect:
-            self.setSceneRect(self.scene().itemsBoundingRect())
+        pass
+        # pen = QPen()
+        # pen.setWidth(10)
+        # pen.setColor(QColor(200, 200, 200, 150))
+        #
+        # font = QFont()
+        # font.setPointSize(self.font_size)
+        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
+        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
+        # if set_scene_rect:
+        #     self.setSceneRect(self.scene().itemsBoundingRect())
 
     def update_grid(self):
         for l in self.lines:

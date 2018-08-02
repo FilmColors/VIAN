@@ -41,6 +41,7 @@ class EProgressPopup(QDialog):
         self.labelInfo.setText(info)
         self.progressBar.setValue(value * 100)
 
+
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
@@ -125,6 +126,7 @@ class EDockWidget(QDockWidget):
 
     def apply_settings(self, settings):
         pass
+
 
 class EDialogWidget(QDialog):
     def __init__(self,  parent = None,  main_window = None, help_path = None):
@@ -240,6 +242,117 @@ class EGraphicsView(QGraphicsView):
 
         else:
             super(EGraphicsView, self).wheelEvent(event)
+
+    def create_context_menu(self, pos):
+        menu = QMenu(self.main_window)
+        a_export = menu.addAction("Export Image")
+        a_export.triggered.connect(self.on_export_image)
+        menu.popup(self.mapToGlobal(pos))
+
+    def on_export_image(self):
+        img = pixmap_to_numpy(self.pixmap.pixmap())
+        file_name = QFileDialog.getSaveFileName(self.main_window,
+                                                directory = self.main_window.project.export_dir,
+                                                filter ="*.png *.jpg")[0]
+        cv2.imwrite(file_name, img)
+
+
+class EMultiGraphicsView(QGraphicsView):
+    onScaleEvent = pyqtSignal(float)
+
+    def __init__(self, parent, auto_frame = True, main_window = None, has_context_menu=True):
+        super(EMultiGraphicsView, self).__init__(parent)
+        self.gscene = QGraphicsScene()
+        self.setScene(self.gscene)
+        self.auto_frame = auto_frame
+        self.ctrl_is_pressed = False
+        self.curr_scale = 1.0
+        self.main_window = main_window
+        self.has_context_menu = has_context_menu
+        self.pixmaps = []
+        self.curr_x = 0
+        self.margin = 50
+
+    def add_image(self, pixmap, clear = False, frame = True):
+        if clear:
+            self.gscene.clear()
+        itm = self.gscene.addPixmap(pixmap)
+        itm.setPos(self.curr_x, 0)
+        self.curr_x += (pixmap.width() + self.margin)
+        self.pixmaps.append(itm)
+
+        if frame:
+            rect = self.scene().itemsBoundingRect()
+            self.fitInView(rect, Qt.KeepAspectRatio)
+
+    def resizeEvent(self, event: QResizeEvent):
+        super(EMultiGraphicsView, self).resizeEvent(event)
+        if len(self.pixmaps) > 0 and self.auto_frame:
+            rect = self.scene().itemsBoundingRect()
+            self.fitInView(rect, Qt.KeepAspectRatio)
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.RightButton:
+            if self.has_context_menu:
+                self.create_context_menu(event.pos())
+        else:
+            super(EMultiGraphicsView, self).mousePressEvent(event)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Control:
+            self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
+            self.ctrl_is_pressed = True
+            event.ignore()
+
+        elif event.key() == Qt.Key_F:
+            self.setSceneRect(QRectF())
+            self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+            self.curr_scale = 1.0
+        else:
+            event.ignore()
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if len(self.pixmaps) > 0 and self.auto_frame:
+            rect = self.scene().itemsBoundingRect()
+            self.fitInView(rect, Qt.KeepAspectRatio)
+        else:
+            event.ignore()
+
+    def keyReleaseEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Control:
+            self.viewport().setCursor(QCursor(Qt.ArrowCursor))
+            self.ctrl_is_pressed = False
+        else:
+            event.ignore()
+
+    def wheelEvent(self, event: QWheelEvent):
+        if self.ctrl_is_pressed:
+            self.setTransformationAnchor(QGraphicsView.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.NoAnchor)
+
+            old_pos = self.mapToScene(event.pos())
+
+            h_factor = 1.1
+            l_factor = 0.9
+
+            # viewport_size = self.mapToScene(QPoint(self.width(), self.height())) - self.mapToScene(QPoint(0, 0))
+            # self.curr_scale = round(self.pixmap.pixmap().width() / (viewport_size.x()), 4)
+
+            if event.angleDelta().y() > 0.0 and self.curr_scale < 100000:
+                self.scale(h_factor, h_factor)
+                self.curr_scale *= h_factor
+
+            elif event.angleDelta().y() < 0.0 and self.curr_scale > 0.00001:
+                self.scale(l_factor, l_factor)
+                self.curr_scale *= l_factor
+
+            cursor_pos = self.mapToScene(event.pos()) - old_pos
+            self.onScaleEvent.emit(self.curr_scale)
+
+            self.translate(cursor_pos.x(), cursor_pos.y())
+
+        else:
+            super(EMultiGraphicsView, self).wheelEvent(event)
 
     def create_context_menu(self, pos):
         menu = QMenu(self.main_window)

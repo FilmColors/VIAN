@@ -10,6 +10,7 @@ from visualizer.presentation.presentation_widget import *
 from core.visualization.graph_plots import VocabularyGraph
 from core.visualization.feature_plot import *
 from core.corpus.shared.entities import *
+from visualizer.widgets.segment_visualization import *
 
 class VisMovieLayout(PresentationWidget):
     def __init__(self, parent, visualizer):
@@ -31,18 +32,25 @@ class VisMovieLayout(PresentationWidget):
         self.plot_color_dt = ImagePlotTime(self)
         self.plot_network = VocabularyGraph(self)
         self.plot_features = GenericFeaturePlot(self)
+        self.plot_segments = SegmentVisualization(self, self.visualizer)
 
         self.vis_plot_color_dt = VisualizerVisualization(None, self.plot_color_dt, self.plot_color_dt.get_param_widget())
         self.vis_plot_network = VisualizerVisualization(None, self.plot_network, self.plot_network.get_controls())
         self.vis_plot_features = VisualizerVisualization(None, self.plot_features, self.plot_features.get_param_widget())
 
+        self.classification_object_filter_cbs = [QComboBox(), QComboBox()]
+        self.classification_object_filter_indices = dict()
+        self.plot_color_dt.set_heads_up_widget(self.classification_object_filter_cbs[0])
+        self.classification_object_filter_cbs[0].currentTextChanged.connect(self.on_classification_object_changed)
+
+
         self.upper_widget.addWidget(self.vis_plot_color_dt)
+        self.upper_widget.addWidget(self.plot_segments)
         self.lower_right.addWidget(self.vis_plot_network)
         self.lower_left.addWidget(self.vis_plot_features)
 
         self.screenshots = dict() # TUPLE (DBScreenshot, Image, Used)
         self.color_features = dict()
-
 
     @pyqtSlot(object)
     def on_screenshot_loaded(self, scr):
@@ -52,10 +60,30 @@ class VisMovieLayout(PresentationWidget):
             y = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
             if self.screenshots[scr['screenshot_id']][2] == True:
                 self.plot_color_dt.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False)
+                self.plot_segments.add_item_to_segment(scr['screenshot_id'], self.screenshots[scr['screenshot_id']][1])
+
+    def on_classification_object_changed(self, name):
+        if name in self.classification_object_filter_indices:
+            idx = self.classification_object_filter_indices[name]
+        else:
+            return
+
+        self.plot_color_dt.clear_view()
+        for k in self.screenshots:
+            scr = self.screenshots[k][0]
+            if idx == scr.classification_object_id:
+                self.screenshots[k][2] = True
+                x = self.screenshots[k][0].time_ms
+                y = self.color_features[k].analysis_data['saturation_p']
+                if self.screenshots[k][1] is not None:
+                    self.plot_color_dt.add_image(x, y, self.screenshots[k][1], False)
+            else:
+                self.screenshots[k][2] = False
 
     def clear(self):
         self.plot_color_dt.clear_view()
         self.plot_features.clear_view()
+        self.plot_segments.clear_view()
 
     def on_query_result(self, obj):
         if obj['type'] == "movie_info":
@@ -81,7 +109,7 @@ class VisMovieLayout(PresentationWidget):
             for f in feature_index.keys():
                 self.plot_features.create_feature(feature_index[f])
 
-            # COLOR-D
+            # COLOR-dT
             to_sort = dict()
             for scr in obj['data']['screenshots']:
                 if scr.classification_object_id not in to_sort:
@@ -92,12 +120,11 @@ class VisMovieLayout(PresentationWidget):
             for t in to_sort:
                 scrs = to_sort[t]
                 if len(scrs) > 0:
-                    if len(scrs) < 50:
+                    if len(scrs) < self.visualizer.K:
                         k = len(scrs)
                     else:
-                        k = 150
+                        k = self.visualizer.K
                     to_load.extend(sample(scrs, k))
-            self.visualizer.on_load_screenshots(to_load, self.on_screenshot_loaded)
 
             for scr in obj['data']['screenshots']:
                 self.screenshots[scr.screenshot_id] = [scr, None, False]
@@ -108,7 +135,32 @@ class VisMovieLayout(PresentationWidget):
                 for o in obj['data']['features']:
                     self.color_features[o.target_container_id] = o
 
-            print("OK")
+            shot_per_segment = dict()
+            for s in obj['data']['screenshot_segm_mapping'].keys():
+                if s in self.screenshots:
+                    new_key = obj['data']['screenshot_segm_mapping'][s]
+                    if new_key not in shot_per_segment:
+                        shot_per_segment[new_key] = []
+                    shot_per_segment[new_key].append(self.screenshots[s][0])
+
+            for s in dbsegments:
+                if s.segment_id in shot_per_segment:
+                    self.plot_segments.add_entry(obj['data']['project'], s, shot_per_segment[s.segment_id])
+                else:
+                    self.plot_segments.add_entry(obj['data']['project'], s, [])
+            self.visualizer.on_load_screenshots(to_load, self.on_screenshot_loaded)
+
+        elif obj['type'] == "keywords":
+            cl_objs = []
+            for k in obj['data']['cl_objs'].keys():
+                cl_objs.append(obj['data']['cl_objs'][k])
+
+            for cb in self.classification_object_filter_cbs:
+                cb.clear()
+                for cl in cl_objs:
+                    cb.addItem(cl.name)
+            for cl in cl_objs:
+                self.classification_object_filter_indices[cl.name] = cl.classification_object_id
 
     def compute_node_matrix(self, key_mapping, keywords):
         labels = []

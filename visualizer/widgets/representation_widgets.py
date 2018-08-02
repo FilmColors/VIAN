@@ -19,8 +19,8 @@ class ProjectListWidget(QScrollArea):
         self.setWidget(self.inner)
         self.setWidgetResizable(True)
 
-    def add_entry(self, dbcontributor:DBContributor, dbproject:DBProject):
-        entry = ProjectListEntry(self.inner, self.visualizer, dbcontributor, dbproject)
+    def add_entry(self, dbcontributor:DBContributor, dbproject:DBProject, filmography:DBFilmographicalData = None):
+        entry = ProjectListEntry(self.inner, self.visualizer, dbcontributor, dbproject, filmography = filmography)
         self.inner.layout().addWidget(entry)
         self.entries.append(entry)
         if self.end_spacer is not None:
@@ -35,7 +35,7 @@ class ProjectListWidget(QScrollArea):
 class ProjectListEntry(QWidget):
     onClicked = pyqtSignal(object)
 
-    def __init__(self, parent, visualizer, dbcontributor, dbproject, connect_slot = True):
+    def __init__(self, parent, visualizer, dbcontributor, dbproject, connect_slot = True, filmography:DBFilmographicalData = None):
         super(ProjectListEntry, self).__init__(parent)
         path = os.path.abspath("qt_ui/visualizer/ContributionEntry.ui")
         uic.loadUi(path, self)
@@ -43,6 +43,13 @@ class ProjectListEntry(QWidget):
         self.setStyleSheet("QWidget{background:transparent;}")
         self.hovered = False
         self.lbl_ProjectName.setText(dbproject.name)
+
+        if filmography is not None:
+            self.lbl_Country.setText(filmography.country)
+            self.lbl_ColorProcess.setText(filmography.color_process)
+        else:
+            self.lbl_Country.setText("")
+            self.lbl_ColorProcess.setText("")
 
         self.dbproject = dbproject
         if dbcontributor is not None:

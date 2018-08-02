@@ -1073,6 +1073,17 @@ class DatasetCorpusDB(CorpusDB):
             result.append(DBExperiment(self.root_dir).from_database(q))
         return result
 
+    def get_filmography(self, filters = None):
+        if filters is None:
+            query = self.db[TABLE_FILMOGRAPHY].all()
+        else:
+            query = self.db[TABLE_FILMOGRAPHY].find(**filters)
+
+        result = []
+        for q in query:
+            result.append(DBFilmographicalData().from_database(q))
+        return result
+
     def get_analyses(self, filters = None):
         if filters is None:
             query = self.db[TABLE_ANALYSES].all()
@@ -1140,11 +1151,15 @@ class DatasetCorpusDB(CorpusDB):
             for d in dbprojects:
                 r[d.project_id] = d
             contributors = self.get_contributors()
+            dbfilmographies = self.get_filmography(dict(project_id = [d.project_id for d in dbprojects]))
+            f = dict()
+            for d in dbfilmographies:
+                f[d.project_id] = d
             c = dict()
             for d in contributors:
                 c[d.contributor_id] = d
 
-            return dict(type=query.query_type, data=dict(projects=r, contributors=c, root = self.root_dir))
+            return dict(type=query.query_type, data=dict(projects=r, contributors=c, root=self.root_dir, filmographies = f))
             # We want to return a list of Projects
 
         elif query.query_type == "keywords":
@@ -1172,8 +1187,9 @@ class DatasetCorpusDB(CorpusDB):
             exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
             result = [r['id'] for r in self.db.query(Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args +
                                                      Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args)]
-            result = self.get_projects(dict(id=result))
-            return dict(type=query.query_type, data=result)
+            dbprojects = self.get_projects(dict(id=result))
+            dbfilmographies = self.get_filmography(dict(project_id=[d.project_id for d in dbprojects]))
+            return dict(type=query.query_type, data=dict(projects=dbprojects, filmographies=dbfilmographies))
 
         elif query.query_type == "movie_info":
             return self.get_movie_info(query)
@@ -1191,26 +1207,35 @@ class DatasetCorpusDB(CorpusDB):
     def get_segment_info(self, query:QueryRequestData):
         include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
         exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
+
         result = self.db.query(Q_ALL_SEGMENTS_KEYWORD[0] + include_args + Q_ALL_SEGMENTS_KEYWORD[1] + exclude_args)
-        db_segments = dict()
-        db_shots = dict()
+        db_segments = []
+        db_shots = []
         shot_ids = []
 
+        segment_mapping = dict()
         for r in result:
             segm = DBSegment().from_database(r)
-            segm.segment_id = r['segment_id']
+            if segm not in db_segments:
+                segm.segment_id = r['segment_id']
+                db_segments.append(segm)
+
 
             shot = DBScreenshot().from_database(r)
             shot.screenshot_id = r['screenshot_id']
 
-            db_segments[segm.segment_id] = segm
-            db_shots[shot.screenshot_id] = shot
+            if segm.segment_id not in segment_mapping:
+                segment_mapping[segm.segment_id] = dict(shot_ids = [])
+
+            # db_segments[segm.segment_id] = segm
+            db_shots.append(shot)
+            segment_mapping[segm.segment_id]['shot_ids'].append(shot.screenshot_id)
             shot_ids.append(shot.screenshot_id)
 
-        features = self.get_color_ab_info(shot_ids)
-        # db_segments = self.get_segments(dict(id=result))
+        db_features = self.get_color_ab_info(shot_ids)
+        return dict(type=query.query_type, data=dict(segments = db_segments, screenshots = db_shots, features = db_features, segment_mapping = segment_mapping))
 
-        return dict(type=query.query_type, data=None)
+
 
     def get_movie_info(self, query:QueryRequestData):
         project_id = query.project_filter[0]
@@ -1219,12 +1244,24 @@ class DatasetCorpusDB(CorpusDB):
         rkeyw = self.get_keyword_mapping(dict(project_id = project_id))
         rmovie = self.get_movies(dict(project_id = project_id))
         (scrs, features) = self.get_color_dt_info(project_id=project_id)
+        project = self.get_project(project_id)
+        mapping_iter = self.db.query(Q_SCREENSHOT_MAPPING_OF_PROJECT + str(project_id))
+        screenshot_segm_mapping = dict()
+        for m in mapping_iter:
+            screenshot_segm_mapping[m['screenshot_id']] = m['segment_id']
+
         if len(rmovie) > 0:
             rmovie = rmovie[0]
         else:
             rmovie = None
 
-        return dict(type="movie_info", data = dict(segments=rsegms, keywords=rkeyw, movie=rmovie, screenshots=scrs, features=features))
+        return dict(type="movie_info", data = dict(segments=rsegms,
+                                                   keywords=rkeyw,
+                                                   movie=rmovie,
+                                                   screenshots=scrs,
+                                                   features=features,
+                                                   project=project,
+                                                   screenshot_segm_mapping=screenshot_segm_mapping))
 
     def get_color_dt_info(self, project_id):
         query = "select *, ANALYSES.id as \"analysis_id\" from ANALYSES " \
@@ -1244,13 +1281,16 @@ class DatasetCorpusDB(CorpusDB):
             features.append(dbanalysis)
         return (result_shots, features)
 
-
     def get_color_ab_info(self, screenshot_ids):
         include_args = '(' + ','.join(map(str, screenshot_ids)) + ')'
-        print(include_args)
         out = self.db.query(Q_FEATURES_OF_SHOTS + include_args)
+        features = []
         for o in out:
-            print(o)
+            dbanalysis = DBAnalysis().from_database(o)
+            dbanalysis.analysis_id = o['analysis_id']
+            features.append(dbanalysis)
+        return features
+
 
     #endregion
 

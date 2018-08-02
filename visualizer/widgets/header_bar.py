@@ -16,3 +16,10 @@ class VisHeaderBar(QWidget):
         self.visualizer = visualizer
         self.search_bar = VisSearchBar(self, self.visualizer)
         self.widget_SearchLineHolder.addWidget(self.search_bar)
+        self.font = QFont()
+        self.font.setPointSize(18)
+        self.lbl_Layer.setFont(self.font)
+
+    def set_header_name(self, text):
+        self.lbl_Layer.setText(text)
+        self.lbl_Layer.setFont(self.font)

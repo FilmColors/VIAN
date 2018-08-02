@@ -19,5 +19,4 @@ class VisSearchBar(QWidget):
 
     def on_query_clicked(self):
         t = self.comboBox_Type.currentText().lower()
-
         self.onQuery.emit(t, self.lineEdit_Query.text(), self.comboBox_Corpus.currentIndex())

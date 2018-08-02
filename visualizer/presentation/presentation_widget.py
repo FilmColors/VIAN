@@ -41,10 +41,14 @@ class VisualizerVisualization(QMainWindow):
         if visualization is not None:
             self.settings_window.setWindowTitle("Settings: " + visualization.__class__.__name__)
             self.set_visualization(visualization)
+        self.current_classification_object = 1
         self.show()
 
     def get_current_classification_object(self):
-        return 7
+        return self.current_classification_object
+
+    def set_current_classification_object(self, idx):
+        self.current_classification_object = idx
 
     def on_settings_opened(self):
         self.settings_window.show()

@@ -28,6 +28,8 @@ class VisSearchLayout(PresentationWidget):
         self.hbox_Keywords.addWidget(self.lower_stack)
         self.search_widget.onQuery.connect(self.on_query)
 
+        self.all_filmographies = dict()
+
     def on_query_result(self, obj):
         if obj['type'] == "keywords":
             self.keyword_widget.clear()
@@ -41,8 +43,14 @@ class VisSearchLayout(PresentationWidget):
 
         elif obj['type'] == "movies":
             self.query_result_widget.clear()
-            for dbproject in obj['data']:
-                self.query_result_widget.add_result(dbproject)
+            filmographies = dict()
+            for dbfilmography in obj['data']['filmographies']:
+                filmographies[dbfilmography.project_id] = dbfilmography
+            for dbproject in obj['data']['projects']:
+                if dbproject.project_id in filmographies:
+                    self.query_result_widget.add_result(dbproject,filmographies[dbproject.project_id])
+                else:
+                    self.query_result_widget.add_result(dbproject, None)
             self.lower_stack.setCurrentIndex(1)
 
     @pyqtSlot(str, str, int)
@@ -50,6 +58,7 @@ class VisSearchLayout(PresentationWidget):
         cl_obj_filters = self.keyword_widget.get_classification_object_filters()
         keyword_filters = self.keyword_widget.get_keyword_filters()
         self.visualizer.on_query(qtype, None, keyword_filters, cl_obj_filters, None)
+
 
 class KeywordWidget(QWidget):
     def __init__(self,parent, visualizer):
@@ -146,6 +155,7 @@ class KeywordWidget(QWidget):
                 result.append(item[0].classification_object_id)
         return result
 
+
 class WordCheckBox(QCheckBox):
     def __init__(self, parent, word, unique_keyword):
         super(WordCheckBox, self).__init__(parent)
@@ -153,6 +163,7 @@ class WordCheckBox(QCheckBox):
         self.setText(word.name)
         self.unique_keyword = unique_keyword
         self.setTristate(True)
+
 
 class ClassificationObjectList(QListWidget):
     def __init__(self, parent):
@@ -193,10 +204,10 @@ class QueryResultWidget(QWidget):
             e.deleteLater()
         self.entries = []
 
-    def add_result(self, r):
+    def add_result(self, r, filmography):
         w = None
         if isinstance(r, DBProject):
-            w = ProjectListEntry(self.widget, self.visualizer, None, r)
+            w = ProjectListEntry(self.widget, self.visualizer, None, r, filmography=filmography)
 
         if w is not None:
             lt = self.widget.layout()
