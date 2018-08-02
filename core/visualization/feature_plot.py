@@ -205,6 +205,8 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
 
 
 class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
+    onFeatureAdded = pyqtSignal(object)
+
     def __init__(self, parent, title =""):
         super(GenericFeaturePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
@@ -231,6 +233,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
         self.images = []
         self.features = []
+        self.all_possible_features = []
         self.segments = []
         self.segment_items = []
         self.segment_label = []
@@ -268,7 +271,12 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
             self.segment_items.append(itm)
             self.segments = segments
 
-    def create_feature(self, feature:FeatureTuple):
+    def create_feature(self, feature:FeatureTuple, show = False):
+        if feature not in self.all_possible_features:
+            self.all_possible_features.append(feature)
+            self.onFeatureAdded.emit(self.all_possible_features)
+        if not show:
+            return
         y = (self.feature_base_height - self.segment_height) - ((self.feature_height + self.spacing) * (len(self.features)))
         itms = []
         for sid in feature.segment_ids:
@@ -369,6 +377,16 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_items.clear()
         self.feature_labels.clear()
 
+    def clear_features(self):
+        for q in self.feature_items:
+            for f in q:
+                self.scene().removeItem(f)
+        for f in self.feature_labels:
+            self.scene().removeItem(f)
+        self.feature_items = []
+        self.feature_labels = []
+        self.features = []
+
     def render_to_image(self, background: QColor, size: QSize):
         """
                 Renders the scene content to an image, alternatively if return iamge is set to True, 
@@ -390,6 +408,18 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         return image
 
 
+    def on_filter_update(self, features):
+        self.clear_features()
+        for f in features:
+            self.create_feature(f, True)
+
+    def get_param_widget(self):
+        w = FeaturesParamWidget(None, [])
+        self.onFeatureAdded.connect(w.on_features_changed)
+        w.onFeatureActivated.connect(self.on_filter_update)
+        return w
+
+
 class FeatureRectItem(QGraphicsRectItem):
     def __init__(self, x, y, w, h, pen, brush):
         super(FeatureRectItem, self).__init__(x, y, w, h)
@@ -408,3 +438,35 @@ class FeatureRectItem(QGraphicsRectItem):
         self.setBrush(self.c_unhovered)
         self.scene().update(self.scene().itemsBoundingRect())
         super(FeatureRectItem, self).hoverLeaveEvent(event)
+
+
+class FeaturesParamWidget(QWidget):
+    onFeatureActivated = pyqtSignal(object)
+
+    def __init__(self, parent, features):
+        super(FeaturesParamWidget, self).__init__(parent)
+        self.setLayout(QVBoxLayout())
+        self.param_list = QListWidget(self)
+        self.layout().addWidget(self.param_list)
+        self.param_list.itemChanged.connect(self.on_clicked)
+        self.features = []
+        self.show()
+
+    @pyqtSlot(object)
+    def on_features_changed(self, features):
+        self.param_list.clear()
+        self.features.clear()
+        for f in features:
+            itm = QListWidgetItem(f.name)
+            itm.setCheckState(Qt.Unchecked)
+
+            self.param_list.addItem(itm)
+            self.features.append((itm, f))
+
+
+    def on_clicked(self):
+        result = []
+        for f in self.features:
+            if f[0].checkState() == Qt.Checked:
+                result.append(f[1])
+        self.onFeatureActivated.emit(result)

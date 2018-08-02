@@ -24,7 +24,6 @@ class QueryWorker(QObject):
                                   image_path="C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\user_img.jpg",
                                   affiliation="Nahh")
         self.corpus.connect_user(self.user, CORPUS_PATH)
-        print(self.corpus.local_corpus.db.tables)
         self.corpus.onQueryResult.connect(self.on_query_result)
 
 

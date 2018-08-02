@@ -34,7 +34,7 @@ class VisMovieLayout(PresentationWidget):
 
         self.vis_plot_color_dt = VisualizerVisualization(None, self.plot_color_dt, self.plot_color_dt.get_param_widget())
         self.vis_plot_network = VisualizerVisualization(None, self.plot_network, self.plot_network.get_controls())
-        self.vis_plot_features = VisualizerVisualization(None, self.plot_features)
+        self.vis_plot_features = VisualizerVisualization(None, self.plot_features, self.plot_features.get_param_widget())
 
         self.upper_widget.addWidget(self.vis_plot_color_dt)
         self.lower_right.addWidget(self.vis_plot_network)
@@ -91,9 +91,9 @@ class VisMovieLayout(PresentationWidget):
             to_load = []
             for t in to_sort:
                 scrs = to_sort[t]
-                if len(obj['data']['screenshots']) > 0:
-                    if len(obj['data']['screenshots']) < 50:
-                        k = len(obj['data']['screenshots'])
+                if len(scrs) > 0:
+                    if len(scrs) < 50:
+                        k = len(scrs)
                     else:
                         k = 150
                     to_load.extend(sample(scrs, k))
