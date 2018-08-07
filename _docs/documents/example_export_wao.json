@@ -1,0 +1,124 @@
+
+
+[
+    {
+        "@context": "http://www.w3.org/ns/anno.jsonld",
+        "id": "http://example.com/annotations/collection1",
+        "type": "AnnotationCollection",
+        "label": "Tier 1",
+        "creator": {
+            "type": "Person",
+            "nickname": "John Bell",
+            "email_sha1": "2bb2a925eb5ac9fd97fc4c041fabc050f194392d"
+        },
+        "total": 1,
+        "first": {
+            "id": "Tier 1 Set 1",
+            "type": "AnnotationPage",
+            "startIndex": 0,
+            "items": [
+                {
+                    "id": "http://example.com/annotations/195",
+                    "type": "Annotation"
+                }
+            ]
+        }
+    },
+    {
+        "context": "http://www.w3.org/ns/anno.jsonld",
+        "id": "http://example.com/annotations/195",
+        "created": "2018-07-10T17:30:04.639Z",
+        "generated": "2018-07-14T15:13:28Z",
+        "motivation": "highlighting",
+        "type": "Annotation",
+        "rights": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "creator": {
+            "type": "Person",
+            "nickname": "John Bell",
+            "email_sha1": "2bb2a925eb5ac9fd97fc4c041fabc050f194392d"
+        },
+        "generator": {
+            "id": "http://example.org/waldorf",
+            "type": "Software",
+            "name": "Waldorf.js v1.0",
+            "homepage": "http://github.com/novomancy/Waldorf"
+        },
+        "body": [
+            {
+                "id": "http://example.com/vocabulary/1/example",
+                "value": [
+                    {
+                        "value": "Example",
+                        "language": "en"
+                    },
+                    {
+                        "value": "Beispiel",
+                        "language": "de"
+                    }
+                ],
+                "purpose": "tagging",
+                "format": "text/plain",
+                "type": "TextualBody"
+            },
+            {
+                "id": "http://example.com/annotations/195#text",
+                "value": "This is an example of an annotation with both time-based and svg-based selectors. This svgSelector includes an animation property, which is technically not recommended but seems like a practical solution for time-based annotations with moving geometric targets.",
+                "language": "en",
+                "purpose": "describing",
+                "format": "text/plain",
+                "type": "TextualBody"
+            },
+            {
+                "id": "http://example.com/annotations/195#viandata",
+                "type": "Dataset"
+            },
+            {
+                "id": "http://example.com/annotations/195#clariahdata",
+                "type": "Dataset"
+            }
+        ],
+        "target": {
+            "id": "http://mediaecology.dartmouth.edu/other/KTLAEulaLove.mp4",
+            "type": "Video",
+            "selector": {
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "type": "FragmentSelector",
+                "value": "t=2.019,13.007",
+                "refinedBy": {
+                    "type": "SvgSelector",
+                    "value": "<svg:svg viewBox='0 0 100 100' preserveAspectRatio='none'> <rect x='20' y='20' width='40' height='40' style='stroke: #ff00ff; fill: none;' > <animateTransform attributeName='transform' type='scale' from='1 1' to='2 2' begin='2.019s' dur='10.988s' repeatCount='0' /> <animateMotion path='M10,50 q60,50 100,0 q60,-50 100,0' begin='2.019s' dur='10.988s' repeatCount='0' /></rect></svg:svg>"
+                }
+            }
+        }
+    },
+    {
+        "id": "http://example.com/annotations/195#viandata",
+        "context": "http://myns.example.com/VIAN",
+        "type": "ColorProfile",
+        "body":[
+            {
+                "foregroundColor": "#ff0011",
+                "backgroundColor": "#000000"
+            }
+        ]
+    },
+    {
+        "id": "http://example.com/annotations/195#clariahdata",
+        "context": "http://myns.example.com/CLARIAH",
+        "type": "KeyValuePairs",
+        "body":[
+            {
+                "value": "Een interessant programma",
+                "key": "title"
+            },
+            {
+                "value": "We kijken met plezier",
+                "key": "description"
+            },
+            {
+                "value": "1980-03-04",
+                "key": "date"
+            }
+        ]
+    }
+]
