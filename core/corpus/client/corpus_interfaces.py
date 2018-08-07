@@ -2,8 +2,8 @@ from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
 
 from core.container.project import VIANProject
-from core.analysis.semantic_segmentation import SemanticSegmentationAnalysis, DATASET_NAME_LIP, LIPLabels
-
+# from core.analysis.semantic_segmentation import SemanticSegmentationAnalysis, DATASET_NAME_LIP, LIPLabels
+from core.analysis.analysis_import import *
 from core.corpus.shared.entities import *
 from core.corpus.shared.corpusdb import *
 
