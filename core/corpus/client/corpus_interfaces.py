@@ -2,11 +2,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
 
 from core.container.project import VIANProject
-<<<<<<< HEAD
-from core.analysis.semantic_segmentation import SemanticSegmentationAnalysis, DATASET_NAME_LIP, LIPLabels
-=======
-# from core.analysis.semantic_segmentation import SemanticSegmentationAnalysis, DATASET_NAME_LIP, LIPLabels
->>>>>>> bbe46f8bb59ac711e0655ae51e656dcdf84cc16c
+
 from core.analysis.analysis_import import *
 from core.corpus.shared.entities import *
 from core.corpus.shared.corpusdb import *
