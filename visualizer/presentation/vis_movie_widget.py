@@ -5,7 +5,7 @@ from PyQt5 import uic
 import os
 from random import sample
 
-from core.visualization.image_plots import ImagePlotTime
+from core.visualization.image_plots import ImagePlotTime, ImagePlotCircular, ImagePlotPlane
 from visualizer.presentation.presentation_widget import *
 from core.visualization.graph_plots import VocabularyGraph
 from core.visualization.feature_plot import *
@@ -33,6 +33,14 @@ class VisMovieLayout(PresentationWidget):
         self.plot_network = VocabularyGraph(self)
         self.plot_features = GenericFeaturePlot(self)
         self.plot_segments = SegmentVisualization(self, self.visualizer)
+        self.plot_la_space = ImagePlotPlane(self)
+        self.plot_ab_space = ImagePlotCircular(self)
+        self.vis_plot_la_space = VisualizerVisualization(self, self.plot_la_space,
+                                                         self.plot_ab_space.get_param_widget())
+        self.vis_plot_ab_space = VisualizerVisualization(self, self.plot_ab_space,
+                                                         self.plot_ab_space.get_param_widget())
+        self.lower_widget.addWidget(self.vis_plot_la_space)
+        self.lower_widget.addWidget(self.vis_plot_ab_space)
 
         self.vis_plot_color_dt = VisualizerVisualization(None, self.plot_color_dt, self.plot_color_dt.get_param_widget())
         self.vis_plot_network = VisualizerVisualization(None, self.plot_network, self.plot_network.get_controls())
@@ -42,7 +50,6 @@ class VisMovieLayout(PresentationWidget):
         self.classification_object_filter_indices = dict()
         self.plot_color_dt.set_heads_up_widget(self.classification_object_filter_cbs[0])
         self.classification_object_filter_cbs[0].currentTextChanged.connect(self.on_classification_object_changed)
-
 
         self.upper_widget.addWidget(self.vis_plot_color_dt)
         self.upper_widget.addWidget(self.plot_segments)
@@ -56,11 +63,19 @@ class VisMovieLayout(PresentationWidget):
     def on_screenshot_loaded(self, scr):
         self.screenshots[scr['screenshot_id']][1] = scr['image']
         if scr['screenshot_id'] in self.color_features and scr['screenshot_id'] in self.screenshots:
-            x = self.screenshots[scr['screenshot_id']][0].time_ms
-            y = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
+            l = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][0]
+            tx = self.screenshots[scr['screenshot_id']][0].time_ms
+            ty = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
+            x = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][1] - 128
+            y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
             if self.screenshots[scr['screenshot_id']][2] == True:
-                self.plot_color_dt.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False)
+                self.plot_color_dt.add_image(tx, ty, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
                 self.plot_segments.add_item_to_segment(scr['screenshot_id'], self.screenshots[scr['screenshot_id']][1])
+                self.plot_ab_space.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
+                self.plot_la_space.add_image(x, l, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
+            self.plot_color_dt.frame_default()
+            self.plot_ab_space.frame_default()
+            self.plot_la_space.frame_default()
 
     def on_classification_object_changed(self, name):
         if name in self.classification_object_filter_indices:
@@ -69,21 +84,41 @@ class VisMovieLayout(PresentationWidget):
             return
 
         self.plot_color_dt.clear_view()
+        self.plot_la_space.clear_view()
+        self.plot_ab_space.clear_view()
+        self.plot_ab_space.add_grid()
+        self.plot_la_space.add_grid()
+
         for k in self.screenshots:
             scr = self.screenshots[k][0]
             if idx == scr.classification_object_id:
                 self.screenshots[k][2] = True
-                x = self.screenshots[k][0].time_ms
-                y = self.color_features[k].analysis_data['saturation_p']
+                # x = self.screenshots[k][0].time_ms
+                # y = self.color_features[k].analysis_data['saturation_p']
+                l = self.color_features[k].analysis_data['color_lab'][0]
+                tx = self.screenshots[k][0].time_ms
+                ty = self.color_features[k].analysis_data['saturation_p']
+                x = self.color_features[k].analysis_data['color_lab'][1] - 128
+                y = self.color_features[k].analysis_data['color_lab'][2] - 128
+
                 if self.screenshots[k][1] is not None:
-                    self.plot_color_dt.add_image(x, y, self.screenshots[k][1], False)
+                    self.plot_color_dt.add_image(tx, ty, self.screenshots[k][1], False, mime_data=self.screenshots[k][0])
+                    self.plot_ab_space.add_image(x, y, self.screenshots[k][1], False, mime_data=self.screenshots[k][0])
+                    self.plot_la_space.add_image(x, l, self.screenshots[k][1], False, mime_data=self.screenshots[k][0])
             else:
                 self.screenshots[k][2] = False
+        self.plot_color_dt.frame_default()
+        self.plot_ab_space.frame_default()
+        self.plot_la_space.frame_default()
 
     def clear(self):
         self.plot_color_dt.clear_view()
         self.plot_features.clear_view()
         self.plot_segments.clear_view()
+        self.plot_la_space.clear_view()
+        self.plot_ab_space.clear_view()
+        self.plot_ab_space.add_grid()
+        self.plot_la_space.add_grid()
 
     def on_query_result(self, obj):
         if obj['type'] == "movie_info":

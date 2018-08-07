@@ -264,7 +264,10 @@ class SQLiteStreamer(ProjectStreamer):
 
                 self.db.commit()
             except Exception as e:
-                print("SQLite Exception", str(e))
+                try:
+                    print("SQLite Exception", str(e))
+                except:
+                    print("SQLite Exception")
                 self.db.rollback()
 
     def bulk_store(self, ids, objs, data_types):

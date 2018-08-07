@@ -166,6 +166,7 @@ class VocabularyGraph(QWidget):
         self.view = EGraphicsView(self)
         self.view.setScene(QGraphicsScene(self))
         self.view.onScaleEvent.connect(self.on_scale)
+        self.view.setBackgroundBrush(QColor(30, 30, 30))
 
         self.setLayout(QHBoxLayout(self))
         self.layout().addWidget(self.view)
@@ -182,7 +183,6 @@ class VocabularyGraph(QWidget):
         self.edges = []
         self.labels = []
         self.node_weights = []
-
 
         self.node_words_model = QStandardItemModel()
         self.current_labels = []

@@ -261,7 +261,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         return self
 
     def unload_container(self, data = None, sync = False):
-        pass
         if data is not None:
             self.data = data
         if self.data is None:

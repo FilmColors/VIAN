@@ -17,6 +17,8 @@ import threading
 import importlib
 from functools import partial
 
+from visualizer.vis_main_window import *
+
 from core.analysis.barcode_analysis import BarcodeAnalysisJob
 from core.analysis.colorimetry.colormetry2 import ColormetryJob2
 from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
@@ -402,6 +404,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
         self.actionOpenLocal.triggered.connect(self.open_local_corpus)
         self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
+
+        self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -1406,15 +1410,18 @@ class MainWindow(QtWidgets.QMainWindow):
         analysis = result[1]
         result = result[0]
 
-        if isinstance(result, list):
-            for r in result:
-                analysis.modify_project(self.project, r, main_window = self)
-                self.project.add_analysis(r)
-                r.unload_container()
-        else:
-            analysis.modify_project(self.project, result, main_window=self)
-            self.project.add_analysis(result)
-            result.unload_container()
+        try:
+            if isinstance(result, list):
+                for r in result:
+                    analysis.modify_project(self.project, r, main_window = self)
+                    self.project.add_analysis(r)
+                    r.unload_container()
+            else:
+                analysis.modify_project(self.project, result, main_window=self)
+                self.project.add_analysis(result)
+                result.unload_container()
+        except Exception as e:
+            print("Exception in MainWindow.analysis_result", str(e))
 
         # Unload the analysis from Memory
     def on_save_custom_perspective(self):
@@ -1492,6 +1499,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_reload_movie(self):
         if self.project is not None:
             self.player.on_loaded(self.project)
+
+    def on_start_visualizer(self):
+        visualizer = VIANVisualizer()
+        visualizer.show()
 
     # endregion
 

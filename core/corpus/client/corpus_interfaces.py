@@ -171,10 +171,13 @@ class CorpusInterface(QObject):
                         print("None")
                         continue
 
+
                     mask_name = entry['obj_name']
                     mask_labels = entry['labels']
                     masked_img = np.copy(img)
+                    mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
                     temp_mask = np.zeros_like(mask)
+                    print(mask.shape, temp_mask.shape, masked_img.shape)
                     for lbl in mask_labels:
                         temp_mask[np.where(mask == lbl)] = 255
                     masked_img[np.where(temp_mask != 255)] = [0, 0, 0, 0]
@@ -228,11 +231,10 @@ class LocalCorpusInterface(CorpusInterface):
         try:
             self.local_corpus = DatasetCorpusDB().load(options)
             self.name = self.local_corpus.name
-
             user = self.local_corpus.connect_user(user)
-
             self.onConnected.emit(True, self.local_corpus.get_projects(), user)
-        except:
+        except Exception as e:
+            print("Exception in LocalCorpusInterface.connect_user()", str(e))
             self.onConnected.emit(False, None, None)
 
     @pyqtSlot(object)

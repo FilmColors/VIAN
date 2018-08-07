@@ -230,6 +230,8 @@
     <addaction name="separator"/>
     <addaction name="actionCommitProject"/>
     <addaction name="actionCheckoutProject"/>
+    <addaction name="separator"/>
+    <addaction name="actionCorpus_Visualizer"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -833,6 +835,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCorpus_Visualizer">
+   <property name="text">
+    <string>Corpus Visualizer</string>
    </property>
   </action>
  </widget>

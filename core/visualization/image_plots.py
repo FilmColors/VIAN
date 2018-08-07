@@ -61,7 +61,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         #                  (range_x[1] - range_x[0]) * self.magnification/ 12,
         #                  (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
 
-    def add_image(self, x, y, img, convert = True, luminance = None):
+    def add_image(self, x, y, img, convert = True, luminance = None, mime_data = None):
         pass
 
     def sort_images(self):
@@ -233,12 +233,16 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
 class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
     onItemSelection = pyqtSignal(object)
 
-    def __init__(self, pixmap, hover_text = None):
+    def __init__(self, pixmap, hover_text = None, mime_data = None):
         super(VIANPixmapGraphicsItem, self).__init__(pixmap)
         if hover_text != None:
             self.setToolTip(hover_text)
         self.abs_pos = None
         self.pos_scale = 1.0
+        self.mime_data = mime_data
+
+        self.setAcceptHoverEvents(True)
+        # self.hovered = False
 
     def scale_pos(self, scale):
         self.pos_scale = scale
@@ -251,21 +255,23 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
     def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
         super(VIANPixmapGraphicsItem, self).mousePressEvent(event)
-        # self.onItemSelection.emit(self)
+        self.onItemSelection.emit(self.mime_data)
+
+
 
 
 class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
 
-    def add_image(self, x, y, img, convert = True, luminance = None, to_float = False):
+    def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None):
         try:
             if convert:
                 # itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
-                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img))
+                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img), mime_data=mime_data)
             else:
                 # itm = QGraphicsPixmapItem(numpy_to_pixmap(img, cvt=None,  with_alpha = True))
-                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
+                itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True), mime_data=mime_data)
             self.scene().addItem(itm)
 
             if to_float:
@@ -281,9 +287,11 @@ class ImagePlotCircular(ImagePlot):
                 self.luminances.append([luminance, itm])
 
             itm.show()
+            return itm
 
         except Exception as e:
             print(e)
+            return None
 
     def add_grid(self):
         pen = QPen()
@@ -367,11 +375,11 @@ class ImagePlotPlane(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None, title=""):
         super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
 
-    def add_image(self, x, y, img, convert = True):
+    def add_image(self, x, y, img, convert = True, mime_data = None):
         if convert:
-            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img))
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img), mime_data=mime_data)
         else:
-            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True), mime_data=mime_data)
         self.scene().addItem(itm)
 
         itm.setPos(np.nan_to_num(x * self.magnification),np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification))
@@ -380,6 +388,7 @@ class ImagePlotPlane(ImagePlot):
         self.luminances.append([y, itm])
 
         itm.show()
+        return itm
 
     def add_grid(self):
         pen = QPen()
@@ -534,13 +543,14 @@ class ImagePlotTime(ImagePlot):
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
 
-    def add_image(self, x, y, img, convert=True):
+    def add_image(self, x, y, img, convert=True, mime_data = None):
+        timestamp = ms_to_string(x)
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
-                                         hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
+                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
         else:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True),
-                                         hover_text=str(round(x, 2))+ "\t" + str(round(y, 2)))
+                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
         self.scene().addItem(itm)
         itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
@@ -552,6 +562,8 @@ class ImagePlotTime(ImagePlot):
         self.luminances.append([np.nan_to_num(y), itm])
         self.values.append([x, np.nan_to_num(y)])
         itm.show()
+        return itm
+
     def clear_view(self):
         super(ImagePlotTime, self).clear_view()
         self.x_end = 0

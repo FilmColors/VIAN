@@ -53,8 +53,8 @@ class VisSegmentLayout(PresentationWidget):
             y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
             if self.screenshot_data[scr['screenshot_id']][2] == True:
                 if self.screenshot_data[scr['screenshot_id']][1] is not None:
-                    self.plot_ab_space.add_image(x, y, self.screenshot_data[scr['screenshot_id']][1], False)
-                    self.plot_la_space.add_image(x, l, self.screenshot_data[scr['screenshot_id']][1], False)
+                    self.plot_ab_space.add_image(x, y, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0])
+                    self.plot_la_space.add_image(x, l, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0])
                     self.segment_view.add_item_to_segment(scr['screenshot_id'], self.screenshot_data[scr['screenshot_id']][1])
 
     def on_classification_object_changed(self, name):

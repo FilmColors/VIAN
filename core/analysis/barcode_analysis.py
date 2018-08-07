@@ -153,22 +153,23 @@ class BarcodeAnalysisJob(IAnalysisJob):
         Since this function is called within the Main-Thread, we can modify our project here.
         """
         # We want to create an Image Annotation with the Barcode in the upper part of the Display
-        barcode_colors = result.get_adata()["barcode"]
-        image_width = result.get_adata()["width"]
-
-        if result.parameters['interpolation'] == "Cubic":
-            interpolation = cv2.INTER_CUBIC
-        else:
-            interpolation = cv2.INTER_LINEAR
-
-        # Creating an Image from the Color Array
-        image = self.barcode_to_image(barcode_colors, image_width, image_height=50, interpolation=interpolation)
-
-        # Storing the Image to Disc
-        dir = project.results_dir
-
-        path  = dir + "/" + result.get_name() + ".png"
-        cv2.imwrite(path, image)
+        # barcode_colors = result.get_adata()["barcode"]
+        # image_width = result.get_adata()["width"]
+        #
+        # if result.parameters['interpolation'] == "Cubic":
+        #     interpolation = cv2.INTER_CUBIC
+        # else:
+        #     interpolation = cv2.INTER_LINEAR
+        #
+        # # Creating an Image from the Color Array
+        # image = self.barcode_to_image(barcode_colors, image_width, image_height=50, interpolation=interpolation)
+        #
+        # # Storing the Image to Disc
+        # dir = project.results_dir
+        #
+        # path  = dir + "/" + result.get_name() + ".png"
+        # cv2.imwrite(path, image)
+        pass
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """

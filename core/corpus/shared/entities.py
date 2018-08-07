@@ -600,6 +600,9 @@ class DBVocabularyWord(DBEntity):
 
         self.name = ""
 
+    def get_name(self):
+        return self.name
+
     def from_project(self, obj:VocabularyWord, vocabulary_id):
         self.vocabulary_id = vocabulary_id
         self.name = obj.name

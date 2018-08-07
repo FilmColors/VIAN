@@ -1143,66 +1143,69 @@ class DatasetCorpusDB(CorpusDB):
         return result
 
     def parse_query(self, query:QueryRequestData):
-        if query.query_type == "projects":
-            filters = None
-            print("Query Projects")
-            dbprojects = self.get_projects(filters)
-            r = dict()
-            for d in dbprojects:
-                r[d.project_id] = d
-            contributors = self.get_contributors()
-            dbfilmographies = self.get_filmography(dict(project_id = [d.project_id for d in dbprojects]))
-            f = dict()
-            for d in dbfilmographies:
-                f[d.project_id] = d
-            c = dict()
-            for d in contributors:
-                c[d.contributor_id] = d
+        try:
+            if query.query_type == "projects":
+                filters = None
+                print("Query Projects")
+                dbprojects = self.get_projects(filters)
+                r = dict()
+                for d in dbprojects:
+                    r[d.project_id] = d
+                contributors = self.get_contributors()
+                dbfilmographies = self.get_filmography(dict(project_id = [d.project_id for d in dbprojects]))
+                f = dict()
+                for d in dbfilmographies:
+                    f[d.project_id] = d
+                c = dict()
+                for d in contributors:
+                    c[d.contributor_id] = d
 
-            return dict(type=query.query_type, data=dict(projects=r, contributors=c, root=self.root_dir, filmographies = f))
-            # We want to return a list of Projects
+                return dict(type=query.query_type, data=dict(projects=r, contributors=c, root=self.root_dir, filmographies = f))
+                # We want to return a list of Projects
 
-        elif query.query_type == "keywords":
-            filters = None
-            keywords = self.get_keywords(filters)
-            cl_objs = self.get_classification_objects(filters)
-            vocabularies = self.get_vocabularies()
-            vocabulary_words = self.get_vocabulary_words()
-            hashm_cl_objs = dict()
-            hashm_vocabulary_words = dict()
-            hashm_vocabularies = dict()
-            print("Voc Result", len(vocabularies))
-            print("VocWord Result", len(vocabulary_words))
-            print("cl_objs Result", len(cl_objs))
-            for c in cl_objs: hashm_cl_objs[c.classification_object_id] = c
-            for c in vocabularies: hashm_vocabularies[c.vocabulary_id] = c
-            for c in vocabulary_words: hashm_vocabulary_words[c.word_id] = c
-            return dict(type=query.query_type, data=dict(keywords=keywords,
-                                                         cl_objs=hashm_cl_objs,
-                                                         vocabularies=hashm_vocabularies,
-                                                         vocabulary_words=hashm_vocabulary_words))
+            elif query.query_type == "keywords":
+                filters = None
+                keywords = self.get_keywords(filters)
+                cl_objs = self.get_classification_objects(filters)
+                vocabularies = self.get_vocabularies()
+                vocabulary_words = self.get_vocabulary_words()
+                hashm_cl_objs = dict()
+                hashm_vocabulary_words = dict()
+                hashm_vocabularies = dict()
+                print("Voc Result", len(vocabularies))
+                print("VocWord Result", len(vocabulary_words))
+                print("cl_objs Result", len(cl_objs))
+                for c in cl_objs: hashm_cl_objs[c.classification_object_id] = c
+                for c in vocabularies: hashm_vocabularies[c.vocabulary_id] = c
+                for c in vocabulary_words: hashm_vocabulary_words[c.word_id] = c
+                return dict(type=query.query_type, data=dict(keywords=keywords,
+                                                             cl_objs=hashm_cl_objs,
+                                                             vocabularies=hashm_vocabularies,
+                                                             vocabulary_words=hashm_vocabulary_words))
 
-        elif query.query_type == "movies":
-            include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
-            exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
-            result = [r['id'] for r in self.db.query(Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args +
-                                                     Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args)]
-            dbprojects = self.get_projects(dict(id=result))
-            dbfilmographies = self.get_filmography(dict(project_id=[d.project_id for d in dbprojects]))
-            return dict(type=query.query_type, data=dict(projects=dbprojects, filmographies=dbfilmographies))
+            elif query.query_type == "movies":
+                include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
+                exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
+                result = [r['id'] for r in self.db.query(Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args +
+                                                         Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args)]
+                dbprojects = self.get_projects(dict(id=result))
+                dbfilmographies = self.get_filmography(dict(project_id=[d.project_id for d in dbprojects]))
+                return dict(type=query.query_type, data=dict(projects=dbprojects, filmographies=dbfilmographies))
 
-        elif query.query_type == "movie_info":
-            return self.get_movie_info(query)
+            elif query.query_type == "movie_info":
+                return self.get_movie_info(query)
 
-        elif query.query_type == "segments":
-            return self.get_segment_info(query)
+            elif query.query_type == "segments":
+                return self.get_segment_info(query)
 
-        elif query.query_type == "screenshots":
-            pass
-        else:
-            return None
+            elif query.query_type == "screenshots":
+                pass
+            else:
+                return None
 
-        return None
+            return dict(type="invalid")
+        except:
+            return dict(type="error")
 
     def get_segment_info(self, query:QueryRequestData):
         include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
@@ -1326,7 +1329,7 @@ class DatasetCorpusDB(CorpusDB):
             self.connect(self.sql_path)
         except Exception as e:
 
-            print(e)
+            print("Exception in DatasetCorpusDB.load()", str(e))
             return False
         return self
     #endregion

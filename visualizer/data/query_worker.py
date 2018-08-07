@@ -8,6 +8,7 @@ class QueryWorkerSignals(QObject):
 
 
 CORPUS_PATH = "F:\\_corpus\\Backup\\ERC_FilmColorsCorpus_03\\ERC_FilmColorsCorpus.vian_corpus"
+CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
 class QueryWorker(QObject):
     def __init__(self):
         super(QueryWorker, self).__init__()

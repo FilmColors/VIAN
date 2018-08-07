@@ -5,6 +5,7 @@ from PyQt5 import uic
 import os
 
 from visualizer.presentation.presentation_widget import *
+from core.visualization.palette_plot import PaletteLABView
 
 class VisScreenshotLayout(PresentationWidget):
     def __init__(self, parent, visualizer):
