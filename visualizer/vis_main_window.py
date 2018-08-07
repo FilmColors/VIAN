@@ -10,7 +10,7 @@ from visualizer.presentation.vis_screenshot_widget import *
 from visualizer.presentation.vis_search_widget import *
 from visualizer.presentation.vis_segment_widget import *
 from visualizer.widgets.header_bar import *
-from visualizer.data.query_worker import QueryWorker
+from visualizer.data.query_worker import QueryWorker, CORPUS_PATH
 from visualizer.data.screenshot_worker import ScreenshotWorker
 
 class VIANVisualizer(QMainWindow):
@@ -23,7 +23,11 @@ class VIANVisualizer(QMainWindow):
         path = os.path.abspath("qt_ui/visualizer/VisMainWindow.ui")
         uic.loadUi(path, self)
 
-        self.query_worker = QueryWorker()
+        if not os.path.isfile(CORPUS_PATH):
+            path = QFileDialog.getOpenFileName(self, filter="*.vian_corpus")[0]
+        else:
+            path = CORPUS_PATH
+        self.query_worker = QueryWorker(path)
         self.query_thread = QThread()
         self.query_worker.moveToThread(self.query_thread)
         self.query_thread.start()

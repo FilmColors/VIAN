@@ -10,7 +10,7 @@ class QueryWorkerSignals(QObject):
 CORPUS_PATH = "F:\\_corpus\\Backup\\ERC_FilmColorsCorpus_03\\ERC_FilmColorsCorpus.vian_corpus"
 CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
 class QueryWorker(QObject):
-    def __init__(self):
+    def __init__(self, path):
         super(QueryWorker, self).__init__()
         self.signals = QueryWorkerSignals()
         self.project = None
@@ -19,12 +19,13 @@ class QueryWorker(QObject):
         self.wait = True
         self.corpus = LocalCorpusInterface()
         self.user = None
+        self.path = path
 
     def initialize(self):
         self.user = DBContributor(name="Gaudenz",
                                   image_path="C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\user_img.jpg",
                                   affiliation="Nahh")
-        self.corpus.connect_user(self.user, CORPUS_PATH)
+        self.corpus.connect_user(self.user, self.path)
         self.corpus.onQueryResult.connect(self.on_query_result)
 
 

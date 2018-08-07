@@ -19,11 +19,11 @@ from functools import partial
 
 from visualizer.vis_main_window import *
 
-from core.analysis.barcode_analysis import BarcodeAnalysisJob
-from core.analysis.colorimetry.colormetry2 import ColormetryJob2
-from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
-from core.analysis.palette_analysis import ColorPaletteAnalysis
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
+# from core.analysis.barcode_analysis import BarcodeAnalysisJob
+# from core.analysis.colorimetry.colormetry2 import ColormetryJob2
+# from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
+# from core.analysis.palette_analysis import ColorPaletteAnalysis
+# from core.analysis.color_feature_extractor import ColorFeatureAnalysis
 from core.analysis.analysis_import import *
 from core.concurrent.auto_screenshot import *
 from core.concurrent.auto_segmentation import *
