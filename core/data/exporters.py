@@ -49,10 +49,8 @@ class ScreenshotsExporter():
                 cv2.imwrite(file_name + ".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, quality])
 
             if image_type.value == ImageType.PNG.value:
-                compression = np.clip(int(float(100 - quality) / 10),0,9)
+                compression = int(np.clip(float(100 - quality) / 10,0,9))
                 cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
-
-            print(file_name)
 
 
 class SegmentationExporter(IConcurrentJob):
@@ -162,6 +160,7 @@ class XMLExchangeExporter():
 
     def export(self, project:VIANProject):
         pass
+
 
 def build_file_name(naming, screenshot, movie_descriptor):
     """

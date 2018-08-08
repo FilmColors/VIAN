@@ -218,6 +218,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
     def on_image_size_changed(self):
         self.ab_view.set_image_scale(self.slider_image_size.value())
 
+
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
@@ -788,6 +789,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def mouseDoubleClickEvent(self, *args, **kwargs):
         if len(self.selected) > 0:
             popup = ImagePreviewPopup(self, self.selected[0].pixmap())
+            self.main_window.player.set_media_time(self.selected[0].screenshot_obj.movie_timestamp)
             # self.frame_image(self.selected[0])
         else:
             self.center_images()
@@ -805,7 +807,6 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         self.manager = manager
         self.screenshot_obj = obj
         self.selection_rect = selection_rect
-
 
     def mousePressEvent(self, *args, **kwargs):
         self.setSelected(True)

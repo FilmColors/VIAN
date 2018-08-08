@@ -241,6 +241,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.update_timer.timeout.connect(self.update_time)
         # self.update_timer.start()
 
+        self.scroll_block = False
+        self.scroll_h_timer = QTimer()
+        self.scroll_h_timer.setInterval(30)
+        self.scroll_h_timer.timeout.connect(self.on_scroll_h_timeout)
         self.show()
 
     def func_tes(self, WheelEvent):
@@ -367,7 +371,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_screenshots.append(item)
         self.items.append(item)
 
-
     def add_bar(self):
         b = TimelineBar(self.frame_Bars, self)
         return b
@@ -402,6 +405,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         if self.show_time_indicator or not bool:
             self.time_label.setVisible(bool)
 
+    def on_scroll_h_timeout(self):
+        self.scroll_block = False
+        self.scroll_h_timer.stop()
+
     def move_scrubber(self, pos):
         pos = np.clip(pos, 0, self.duration / self.scale)
         self.time_scrubber.move(pos, 0)
@@ -409,6 +416,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.time_label.setText(ms_to_string(pos * self.scale, True))
         self.time_label.move(pos + 20 + self.controls_width - self.scrollArea.horizontalScrollBar().value(), 5)
+
+        self.check_auto_scroll(pos)
+    def check_auto_scroll(self, pos):
+        if pos - self.scrollArea.horizontalScrollBar().value() > self.width() - self.controls_width - 50 and self.scroll_block is False:
+            self.scrollArea.horizontalScrollBar().setValue(self.scrollArea.horizontalScrollBar().value() + 5)
+            self.scroll_h_timer.start()
+        elif pos - self.scrollArea.horizontalScrollBar().value() < 50 and self.scroll_block is False:
+            self.scrollArea.horizontalScrollBar().setValue(self.scrollArea.horizontalScrollBar().value() - 5)
+            self.scroll_h_timer.start()
 
     def paintEvent(self, QPaintEvent):
         super(Timeline, self).paintEvent(QPaintEvent)
@@ -776,6 +792,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
             time = dx * self.scale
             self.main_window.player.set_media_time(time)
+            self.check_auto_scroll(np.clip(pos.x(), 0, self.duration / self.scale))
 
     def end_selector(self):
         if self.is_selecting and self.selector_context is None:
@@ -796,6 +813,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                                               mode=SegmentCreationMode.INTERVAL,
                                               inhibit_overlap=self.inhibit_overlap)
                 # self.selected.create_segment(self.selector.start, self.selector.stop, forward_segmenting=False, inhibit_overlap=self.inhibit_overlap)
+
+    def set_current_time(self, time):
+        self.main_window.player.set_media_time(time)
 
     def close_selector(self):
         if self.selector is not None:
@@ -1453,7 +1473,7 @@ class ScreenshotBar(TimelineBar):
 
 
 class TimebarPicture(QtWidgets.QWidget):
-    def __init__(self, parent, screenshot, timeline, height = 43):
+    def __init__(self, parent, screenshot:Screenshot, timeline, height = 43):
         super(TimebarPicture, self).__init__(parent)
         self.item = screenshot
         self.timeline = timeline
@@ -1503,6 +1523,7 @@ class TimebarPicture(QtWidgets.QWidget):
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
         preview = ImagePreviewPopup(self.timeline.main_window, numpy_to_pixmap(self.item.img_movie))
         preview.show()
+        self.timeline.set_current_time(self.item.movie_timestamp)
 
     def leaveEvent(self, QEvent):
         self.is_hovered = False
