@@ -484,6 +484,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             else:
                 ctrl.resize(self.controls_width - 4, loc_y - bar_start)
 
+            ctrl.onHeightChanged.emit(ctrl.height())
+
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
@@ -893,6 +895,11 @@ class TimelineControl(QtWidgets.QWidget):
         self.is_resizing = False
         self.resize_offset = 0
         self.show()
+        if self.item.strip_height == -1:
+            self.resize(self.width(), 45)
+        else:
+            self.resize(self.width(), self.item.strip_height)
+
 
     def set_name(self):
         if self.item is not None:
@@ -909,6 +916,7 @@ class TimelineControl(QtWidgets.QWidget):
                 self.resize(self.width(), a0.pos().y() + self.resize_offset)
                 self.timeline.update_ui()
                 self.onHeightChanged.emit(self.height())
+                self.item.strip_height = self.height()
 
         else:
             if a0.pos().y() > self.height() - 15:
