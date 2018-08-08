@@ -205,6 +205,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         self.screenshots = []
         self.notes = ""
         self.is_current = False
+        self.strip_height = -1
 
     def get_name(self):
         return self.name

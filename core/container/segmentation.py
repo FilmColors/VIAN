@@ -23,6 +23,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.timeline_visibility = True
         self.notes = ""
         self.is_main_segmentation = False
+        self.strip_height = -1
+
         for s in self.segments:
             s.segmentation = self
 

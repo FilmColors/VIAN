@@ -164,12 +164,21 @@ class AttributesMovieDescriptor(QWidget):
 
 
         self.lbl_movie_path.setText(self.descriptor.movie_path)
-        self.lineEdit_MovieID.setText(str(self.descriptor.movie_id))
         self.lineEdit_MovieYear.setText(str(self.descriptor.year))
         self.lbl_Duration.setText(ms_to_string(self.descriptor.duration))
 
         self.lineEdit_MovieYear.editingFinished.connect(self.on_movie_year_changed)
-        self.lineEdit_MovieID.editingFinished.connect(self.on_movie_id_changed)
+
+        try:
+            self.spinBox_ID_0.setValue(int(self.descriptor.movie_id.split("_")[0]))
+            self.spinBox_ID_1.setValue(int(self.descriptor.movie_id.split("_")[1]))
+            self.spinBox_ID_2.setValue(int(self.descriptor.movie_id.split("_")[2]))
+        except:
+            pass
+
+        self.spinBox_ID_0.valueChanged.connect(self.on_desc_id_changed)
+        self.spinBox_ID_1.valueChanged.connect(self.on_desc_id_changed)
+        self.spinBox_ID_2.valueChanged.connect(self.on_desc_id_changed)
 
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
@@ -178,8 +187,8 @@ class AttributesMovieDescriptor(QWidget):
         self.comboBox_Source.currentTextChanged.connect(self.on_source_changed)
         self.show()
 
-    def on_movie_id_changed(self):
-        self.descriptor.movie_id = self.lineEdit_MovieID.text()
+    def on_desc_id_changed(self):
+        self.descriptor.movie_id = str(self.spinBox_ID_0.value()) + "_" + str(self.spinBox_ID_1.value()) + "_" + str(self.spinBox_ID_2.value())
 
     def on_movie_year_changed(self):
         try:

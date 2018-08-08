@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>412</width>
-    <height>138</height>
+    <width>421</width>
+    <height>140</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -56,7 +56,7 @@
         </size>
        </property>
        <property name="text">
-        <string>hkjahkjdhkjhkhkkkjkjhkhkhkhkhkhkhkahkddadadadadadahka</string>
+        <string/>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -81,26 +81,41 @@
          <height>0</height>
         </size>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Movie ID:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_MovieID">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>300</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QSpinBox" name="spinBox_ID_0">
+         <property name="toolTip">
+          <string>The Medium's ID</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="spinBox_ID_1">
+         <property name="toolTip">
+          <string>The Manifestation of the Medium (i.e. Director's Cut, A/B Negativ)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="spinBox_ID_2">
+         <property name="toolTip">
+          <string>The Copy of the Media (i.e. DVD 1 of 2)</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -114,6 +129,12 @@
          <height>0</height>
         </size>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Year:</string>
        </property>
@@ -122,7 +143,7 @@
      <item>
       <widget class="QLineEdit" name="lineEdit_MovieYear">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>1</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -147,6 +168,12 @@
          <height>0</height>
         </size>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Source:</string>
        </property>
@@ -155,7 +182,7 @@
      <item>
       <widget class="QComboBox" name="comboBox_Source">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>1</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -180,6 +207,12 @@
          <height>0</height>
         </size>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Duration:</string>
        </property>
@@ -200,7 +233,7 @@
         </size>
        </property>
        <property name="text">
-        <string>hkjahkjdhkjhkhkkkjkjhkhkhkhkhkhkhkahkddadadadadadahka</string>
+        <string/>
        </property>
        <property name="scaledContents">
         <bool>true</bool>

@@ -375,6 +375,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         self.is_visible = True
         self.timeline_visibility = True
         self.notes = ""
+        self.strip_height = -1
 
     def set_name(self, name):
         self.name = name

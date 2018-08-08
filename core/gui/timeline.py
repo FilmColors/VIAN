@@ -164,13 +164,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.is_cutting = False
         self.is_merging = False
 
-
         self.item_segments = []
         self.item_screenshots = []
         self.item_ann_layers = []
         self.items = []
 
-        self.bar_height = 45
+        self.bar_height_min = 10
         self.group_height = 25
         self.controls_width = 200
         self.time_bar_height = 50
@@ -278,10 +277,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def add_segmentation(self, segmentation):
         control = TimelineControl(self.frame_Controls,self, segmentation)
-        bars = TimelineBar(self.frame_Bars, self)
+        bars = TimelineBar(self.frame_Bars, self, control=control)
         for i, s in enumerate(segmentation.segments):
             bars.add_slice(s)
-        item = [control, [bars], self.bar_height]
+        item = [control, [bars], self.bar_height_min]
         self.item_segments.append(item)
         self.items.append(item)
         self.update_ui()
@@ -322,10 +321,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def add_annotation_layer(self, layer):
         control = TimelineControl(self.frame_Controls, self, layer)
-        height = self.bar_height
+        height = self.bar_height_min
         bars = []
         for i, a in enumerate(layer.annotations):
-            new = TimelineBar(self.frame_Bars, self, self.group_height)
+            new = TimelineBar(self.frame_Bars, self, control, self.group_height)
             new.add_slice(a)
             keys = []
             for k in a.keys:
@@ -333,7 +332,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             new.add_annotation(a, keys)
             control.add_group(a)
             bars.append(new)
-            if i * self.group_height + self.group_height > self.bar_height:
+            if i * self.group_height + self.group_height > self.bar_height_min:
                 height += self.group_height
 
         height += self.group_height
@@ -347,7 +346,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         control = TimelineControl(self.frame_Controls,self, layer)
         bars = TimelineBar(self.frame_Bars, self)
         bars.add_slice(layer)
-        height = self.bar_height
+        height = self.bar_height_min
         for i, a in enumerate(layer.annotations):
             keys = []
             for k in a.keys:
@@ -355,7 +354,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             bars.add_annotation(a, keys)
             control.add_group(a)
 
-            if i * self.group_height + self.group_height > self.bar_height:
+            if i * self.group_height + self.group_height > self.bar_height_min:
                 height += self.group_height
         height += self.group_height
 
@@ -366,8 +365,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def add_screenshots(self, screenshots, screenshot_group, grp_name = "Screenshots", ):
         control = TimelineControl(self.frame_Controls, self, name = grp_name, item=screenshot_group)
-        bars = ScreenshotBar(self.frame_Bars, self, screenshots)
-        item = [control, [bars], self.bar_height]
+        bars = ScreenshotBar(self.frame_Bars, self, screenshots, control)
+        item = [control, [bars], self.bar_height_min]
         self.item_screenshots.append(item)
         self.items.append(item)
 
@@ -418,6 +417,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_label.move(pos + 20 + self.controls_width - self.scrollArea.horizontalScrollBar().value(), 5)
 
         self.check_auto_scroll(pos)
+
     def check_auto_scroll(self, pos):
         if pos - self.scrollArea.horizontalScrollBar().value() > self.width() - self.controls_width - 50 and self.scroll_block is False:
             self.scrollArea.horizontalScrollBar().setValue(self.scrollArea.horizontalScrollBar().value() + 5)
@@ -428,6 +428,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def paintEvent(self, QPaintEvent):
         super(Timeline, self).paintEvent(QPaintEvent)
+
+    # @pyqtSlot()
+    # def on_strip_hight_changed(self):
+    #     for itm in self.items:
+    #
 
     def update_time_bar(self):
         if self.time_bar is None:
@@ -461,21 +466,21 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             ctrl_height = 6
             ctrl = i[0]
             bars = i[1]
-            item_height = i[2]
+            item_height = ctrl.height()
             ctrl.move(2, loc_y)
 
             if len(bars) >= 1 and len(bars[0].annotations) > 0:
                 loc_y += self.group_height
             for b in bars:
                 b.move(0, loc_y)
-                b.resize(self.duration/self.scale, b.height())#item_height)
-                loc_y += b.height() #item_height
-                ctrl_height += b.height() + 4 # + item_height
+                b.resize(self.duration/self.scale, item_height)#item_height)
+                loc_y += item_height #item_height
+                ctrl_height += item_height + 4 # + item_height
                 b.rescale()
 
-            if loc_y - bar_start < self.bar_height:
-                loc_y = self.bar_height + bar_start
-                ctrl.resize(self.controls_width - 4, self.bar_height)
+            if loc_y - bar_start < self.bar_height_min:
+                loc_y = self.bar_height_min + bar_start
+                ctrl.resize(self.controls_width - 4, self.bar_height_min)
             else:
                 ctrl.resize(self.controls_width - 4, loc_y - bar_start)
 
@@ -870,6 +875,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
 
 class TimelineControl(QtWidgets.QWidget):
+    onHeightChanged = pyqtSignal(int)
+
     def __init__(self, parent,timeline, item = None, name = "No Name"):
         super(TimelineControl, self).__init__(parent)
         self.timeline =  timeline
@@ -879,9 +886,12 @@ class TimelineControl(QtWidgets.QWidget):
         self.name = name
         self.set_name()
         self.groups = []
-
+        self.setMouseTracking(True)
         self.is_selected = False
 
+        self.size_grip_hovered = False
+        self.is_resizing = False
+        self.resize_offset = 0
         self.show()
 
     def set_name(self):
@@ -893,13 +903,39 @@ class TimelineControl(QtWidgets.QWidget):
         text = annotation.get_name()
         self.groups.append([annotation, text])
 
+    def mouseMoveEvent(self, a0: QtGui.QMouseEvent):
+        if self.is_resizing:
+            if not a0.pos().y() + self.resize_offset < self.timeline.bar_height_min:
+                self.resize(self.width(), a0.pos().y() + self.resize_offset)
+                self.timeline.update_ui()
+                self.onHeightChanged.emit(self.height())
+
+        else:
+            if a0.pos().y() > self.height() - 15:
+                self.size_grip_hovered = True
+            else:
+                self.size_grip_hovered = False
+            self.update()
+            super(TimelineControl, self).mouseMoveEvent(a0)
+
+    def leaveEvent(self, a0: QtCore.QEvent):
+        self.size_grip_hovered = False
+        super(TimelineControl, self).leaveEvent(a0)
+
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
-            self.timeline.select(self)
+            if QMouseEvent.pos().y() > self.height() - 15:
+                self.is_resizing = True
+                self.resize_offset = self.height() - QMouseEvent.pos().y()
+            else:
+                self.timeline.select(self)
 
         if QMouseEvent.button() == Qt.RightButton:
             context = open_context_menu(self.timeline.main_window,self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
             context.show()
+
+    def mouseReleaseEvent(self, a0: QtGui.QMouseEvent):
+        self.is_resizing = False
 
     def paintEvent(self, QPaintEvent):
         super(TimelineControl, self).paintEvent(QPaintEvent)
@@ -946,8 +982,6 @@ class TimelineControl(QtWidgets.QWidget):
         qp.drawLine(QtCore.QPoint(0,0), QtCore.QPoint(self.width(), 0))
 
         # Title of the Control
-
-
         qp.drawText(QRect(5, 5, self.width(), 25), Qt.AlignVCenter | Qt.AlignLeft, self.name)
 
         if isinstance(self.item, ILockable):
@@ -957,18 +991,25 @@ class TimelineControl(QtWidgets.QWidget):
             if self.item.is_visible == False:
                 qp.drawPixmap(QtCore.QRect(self.width() - 40, 9, 16, 16), QPixmap("qt_ui/icons/icon_hidden.png"))
         # qp.drawLine(QtCore.QPoint(0, self.height()), QtCore.QPoint(self.width(), self.height()))
-
+        if self.size_grip_hovered:
+            pen.setColor(QtGui.QColor(164, 7, 0, 200))
+            pen.setWidth(4)
+            qp.setPen(pen)
+            qp.drawLine(0, self.height() - 2, self.width(), self.height() - 2)
         qp.end()
 
 
 class TimelineBar(QtWidgets.QFrame):
-    def __init__(self, parent, timeline, height = 45):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, control, height = 45):
         super(TimelineBar, self).__init__(parent)
         self.resize(parent.width(), height)
         self.timeline = timeline
         self.orig_height = height
         self.setMouseTracking(True)
-
+        self.control = control
+        self.control.onHeightChanged.connect(self.on_height_changed)
         self.is_selected = False
 
         self.setFrameStyle(QFrame.Box)
@@ -988,8 +1029,20 @@ class TimelineBar(QtWidgets.QFrame):
             tb_key.show()
         self.annotations.append([annotation, tb_keys])
 
+    @pyqtSlot(int)
+    def on_height_changed(self, height):
+        """
+        This is called when the User drags the size handle into one direction in the control widget, 
+        usually it does not have to be used since the resizing is done in the timeline update_ui() directly. 
+        Screenshots override it to resize he pixmaps as well
+        :param height: 
+        :return: 
+        """
+        self.onHeightChanged.emit(height)
+
     def add_slice(self, item):
         slice = TimebarSlice(self, item, self.timeline)
+        self.onHeightChanged.connect(slice.on_height_changed)
         slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
         slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
         self.slices.append(slice)
@@ -1252,6 +1305,10 @@ class TimebarSlice(QtWidgets.QWidget):
                     self.item.set_end(int(round(((self.pos().x() + self.width()) * self.timeline.scale),0)))
                     return
 
+    @pyqtSlot(int)
+    def on_height_changed(self, int_height):
+        self.resize(self.width(), int_height)
+
     def dragEnterEvent(self, a0: QtGui.QDragEnterEvent):
         a0.acceptProposedAction()
 
@@ -1454,14 +1511,15 @@ class TimebarKey(QtWidgets.QWidget):
 
 
 class ScreenshotBar(TimelineBar):
-    def __init__(self, parent, timeline, screenshots, height=45):
-        super(ScreenshotBar, self).__init__(parent, timeline, height=45)
+    def __init__(self, parent, timeline, screenshots, control, height=45):
+        super(ScreenshotBar, self).__init__(parent, timeline, control, height=45)
         self.screenshots = []
         self.pictures = []
         self.timeline = timeline
 
         for s in screenshots:
             pic = TimebarPicture(self, s, timeline)
+            self.onHeightChanged.connect(pic.on_height_changed)
             pic.move(s.get_start()//timeline.scale, 0)
             self.pictures.append(pic)
 
@@ -1488,6 +1546,12 @@ class TimebarPicture(QtWidgets.QWidget):
         self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
         self.resize(width, self.pic_height)
         self.show()
+
+    def on_height_changed(self, height):
+        self.pic_height = height
+        width = self.size[1] * self.pic_height // self.size[0]
+        self.resize(width, self.pic_height)
+        self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
 
     def paintEvent(self, QPaintEvent):
         if self.is_hovered:
