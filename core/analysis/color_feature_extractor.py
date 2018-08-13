@@ -87,7 +87,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
                            saturation_p = saturation_p
                            ),
             analysis_job_class=self.__class__,
-            parameters=params, container=args[4]
+            parameters=params,
+            container=args[4]
         )
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):

@@ -77,7 +77,7 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.6.6"
+VERSION = "0.6.7"
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"

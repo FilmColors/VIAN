@@ -23,6 +23,7 @@ BARCODE_MODE_HORIZONTAL = 1
 # from bokeh.plotting import figure,save
 # from bokeh.layouts import layout
 # from bokeh.colors import RGB
+import pickle
 
 class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
@@ -61,7 +62,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
             else:
                 segments.append([ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps)])
 
-            args.append([segments, parameters, movie_path, name])
+            args.append([segments, parameters, movie_path, name, tgt.get_id()])
 
         return args
 
@@ -142,7 +143,8 @@ class BarcodeAnalysisJob(IAnalysisJob):
         analysis = IAnalysisJobAnalysis(name="Barcode_" + name,
                                         results=dict(barcode=barcode, width=width),
                                         analysis_job_class=self.__class__,
-                                        parameters=parameters)
+                                        parameters=parameters,
+                                        container=args[4])
 
         sign_progress(1.0)
         return analysis
@@ -211,11 +213,10 @@ class BarcodeAnalysisJob(IAnalysisJob):
         return BarcodeParameterWidget()
 
     def from_json(self, database_data):
-        return np.array(json.loads(database_data)['barcode'], dtype=np.uint8)
-        pass
+        return pickle.loads(database_data)
 
     def to_json(self, container_data):
-        return json.dumps(dict(name="barcode"))
+        return pickle.dumps(container_data)
 
 
 class BarcodeParameterWidget(ParameterWidget):

@@ -2,6 +2,7 @@ from core.container.project import *
 import cv2
 import numpy as np
 from PyQt5 import uic
+import pickle
 
 from core.analysis.colorimetry.computation import *
 from core.data.computation import ms_to_frames
@@ -15,7 +16,8 @@ class MovieMosaicAnalysis(IAnalysisJob):
                                                   help_path = "",
                                                   author="Gaudenz Halter",
                                                   version = "0.0.1",
-                                                  multiple_result=True)
+                                                  multiple_result=True,
+                                                  data_serialization=DataSerialization.MASKS)
 
     def prepare(self, project, targets, parameters, fps, class_objs = None):
         super(MovieMosaicAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
@@ -27,7 +29,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
             else:
                 start = ms_to_frames(t.get_start(), fps)
                 end = ms_to_frames(t.get_end(), fps)
-            args.append([start, end, project.movie_descriptor.get_movie_path(), parameters])
+            args.append([start, end, project.movie_descriptor.get_movie_path(), parameters, t.get_id()])
 
         return args
 
@@ -46,7 +48,11 @@ class MovieMosaicAnalysis(IAnalysisJob):
         else:
             result = self.mosaic_frame_patches(start, end, path, resolution, per_row, sign_progress)
 
-        analysis = IAnalysisJobAnalysis("Mosaic", result, self.__class__, parameters=param)
+        analysis = IAnalysisJobAnalysis(name="Mosaic",
+                                        results = result,
+                                        analysis_job_class=self.__class__,
+                                        parameters=param,
+                                        container=args[4])
         return analysis
 
 
@@ -128,25 +134,23 @@ class MovieMosaicAnalysis(IAnalysisJob):
 
     def get_preview(self, analysis):
         gw = EGraphicsView(None, main_window=analysis.project.main_window)
-        gw.set_image(numpy_to_pixmap(analysis.data["mosaic"]))
+        gw.set_image(numpy_to_pixmap(analysis.get_adata()["mosaic"]))
         return gw
-
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
         view = EGraphicsView(None, False, main_window)
-        view.set_image(numpy_to_pixmap(analysis.data["mosaic"]))
+        view.set_image(numpy_to_pixmap(analysis.get_adata()["mosaic"]))
         return [VisualizationTab("Mosaic", widget=view, use_filter=False, controls=None)]
-
 
     def get_parameter_widget(self):
         return MovieMosaicPreferences()
 
+    def from_json(self, database_data):
+        s =  pickle.loads(database_data)
+        return s
 
-    def from_database(self, database_data):
-        return np.array(eval(database_data.decode()))
-
-    def to_database(self, container_data):
-        return np.array2string(container_data['mosaic'], separator=",").encode()
+    def to_json(self, container_data):
+        return pickle.dumps(container_data)
 
 
 class MovieMosaicPreferences(ParameterWidget):
@@ -154,8 +158,6 @@ class MovieMosaicPreferences(ParameterWidget):
         super(MovieMosaicPreferences, self).__init__()
         path = os.path.abspath("qt_ui/Analysis_MovieMosaic.ui")
         uic.loadUi(path, self)
-
-
         self.comboBox_Method.addItems(["Average Color Patches", "Frames"])
         self.show()
 

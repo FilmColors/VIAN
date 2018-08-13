@@ -1,91 +1,91 @@
 name: vian_osx3
 channels:
-- anaconda
-- conda-forge
-- defaults
+  - conda-forge
+  - anaconda
+  - defaults
 dependencies:
-- asn1crypto=0.23.0=py35ha0e154b_0
-- ca-certificates=2017.08.26=ha1e5d58_0
-- cairo=1.14.10=h913ea44_6
-- certifi=2017.11.5=py35hd00889a_0
-- cffi=1.11.2=py35h5806a83_0
-- chardet=3.0.4=py35h16a84c2_1
-- cryptography=2.1.4=py35hbbb57dc_0
-- dbus=1.10.22=h50d9ad6_0
-- decorator=4.2.1=py35_0
-- expat=2.2.5=hb8e80ba_0
-- ffmpeg=3.4=h766ddd1_0
-- fontconfig=2.12.4=hffb9db1_2
-- freetype=2.8=h12048fb_1
-- glib=2.53.6=h33f6a65_2
-- graphite2=1.3.10=h233cf8b_0
-- harfbuzz=1.5.0=h6db888e_0
-- idna=2.6=py35h01aacb0_1
-- intel-openmp=2018.0.0=h8158457_8
-- libcxx=4.0.1=h579ed51_0
-- libcxxabi=4.0.1=hebd6815_0
-- libedit=3.1=hb4e282d_0
-- libffi=3.2.1=h475c297_4
-- libgfortran=3.0.1=h93005f0_2
-- libopus=1.2.1=h169cedb_0
-- libpng=1.6.32=hd1e8b91_4
-- libprotobuf=3.4.1=h326466f_0
-- libtiff=4.0.9=h0dac147_0
-- libvpx=1.6.1=h057a404_0
-- mkl=2018.0.1=hfbd8650_4
-- ncurses=6.0=hd04f020_2
-- networkx=2.1=py35_0
-- opencv=3.3.1=py35h60a5f38_1
-- openssl=1.0.2n=hdbc3d79_0
-- pip=9.0.1=py35h33ce766_4
-- pycparser=2.18=py35hab820b0_1
-- pyopenssl=17.5.0=py35h4065cf8_0
-- pyqt=5.6.0=py35hbd126f6_6
-- pyqtgraph=0.10.0=py35_0
-- pysocks=1.6.7=py35h3cfcbe1_1
-- python=3.5.4=he720263_23
-- qt=5.6.2=h9975529_14
-- readline=7.0=hc1231fa_4
-- requests=2.18.4=py35h0d65e6b_1
-- scikit-learn=0.19.1=py35h2b554eb_0
-- scipy=1.0.0=py35h8b35106_0
-- setuptools=36.5.0=py35h52cde6a_0
-- sip=4.18.1=py35h79e1f92_2
-- six=1.11.0=py35h39a4c60_1
-- sqlite=3.20.1=h7e4c145_2
-- tk=8.6.7=h35a86e2_3
-- urllib3=1.22=py35he002d57_0
-- wheel=0.30.0=py35h5c0b906_1
-- xz=5.2.3=h0278029_2
-- zlib=1.2.11=hf3cbc9b_2
-- blas=1.1=openblas
-- bzip2=1.0.6=1
-- gettext=0.19.8.1=0
-- giflib=5.1.4=0
-- hdf5=1.10.1=1
-- icu=58.2=0
-- jasper=1.900.1=4
-- jpeg=9b=2
-- libiconv=1.15=0
-- libwebp=0.5.2=7
-- libxml2=2.9.5=2
-- numpy=1.14.0=py35_blas_openblas_200
-- openblas=0.2.20=6
-- pcre=8.39=0
-- pixman=0.34.0=1
-- x264=20131217=3
-- pip:
-  - alembic==0.9.8
-  - banal==0.3.3
-  - dataset==1.0.6
-  - fastcluster==1.1.24
-  - imdbpy==6.4.1
-  - lxml==4.2.1
-  - mako==1.0.7
-  - markupsafe==1.0
-  - normality==0.5.11
-  - python-dateutil==2.6.1
-  - python-editor==1.0.3
-  - sqlalchemy==1.2.3
-prefix: /Users/Kris/anaconda/envs/vian_osx3
+  - asn1crypto=0.23.0=py35ha0e154b_0
+  - ca-certificates=2017.08.26=ha1e5d58_0
+  - cairo=1.14.10=h913ea44_6
+  - certifi=2017.11.5=py35hd00889a_0
+  - cffi=1.11.2=py35h5806a83_0
+  - chardet=3.0.4=py35h16a84c2_1
+  - cryptography=2.1.4=py35hbbb57dc_0
+  - dbus=1.10.22=h50d9ad6_0
+  - decorator=4.2.1=py35_0
+  - expat=2.2.5=hb8e80ba_0
+  - ffmpeg=3.4=h766ddd1_0
+  - fontconfig=2.12.4=hffb9db1_2
+  - freetype=2.8=h12048fb_1
+  - glib=2.53.6=h33f6a65_2
+  - graphite2=1.3.10=h233cf8b_0
+  - harfbuzz=1.5.0=h6db888e_0
+  - idna=2.6=py35h01aacb0_1
+  - intel-openmp=2018.0.0=h8158457_8
+  - libcxx=4.0.1=h579ed51_0
+  - libcxxabi=4.0.1=hebd6815_0
+  - libedit=3.1=hb4e282d_0
+  - libffi=3.2.1=h475c297_4
+  - libgfortran=3.0.1=h93005f0_2
+  - libiconv=1.15=hdd342a3_7
+  - libopus=1.2.1=h169cedb_0
+  - libpng=1.6.32=hd1e8b91_4
+  - libprotobuf=3.4.1=h326466f_0
+  - libtiff=4.0.9=h0dac147_0
+  - libvpx=1.6.1=h057a404_0
+  - mkl=2018.0.1=hfbd8650_4
+  - ncurses=6.0=hd04f020_2
+  - networkx=2.1=py35_0
+  - opencv=3.3.1=py35h60a5f38_1
+  - openssl=1.0.2n=hdbc3d79_0
+  - pip=9.0.1=py35h33ce766_4
+  - pycparser=2.18=py35hab820b0_1
+  - pyopenssl=17.5.0=py35h4065cf8_0
+  - pyqt=5.6.0=py35hbd126f6_6
+  - pyqtgraph=0.10.0=py35_0
+  - pysocks=1.6.7=py35h3cfcbe1_1
+  - python=3.5.4=he720263_23
+  - qt=5.6.2=h9975529_14
+  - readline=7.0=hc1231fa_4
+  - requests=2.18.4=py35h0d65e6b_1
+  - scikit-learn=0.19.1=py35h2b554eb_0
+  - scipy=1.0.0=py35h8b35106_0
+  - setuptools=36.5.0=py35h52cde6a_0
+  - sip=4.18.1=py35h79e1f92_2
+  - six=1.11.0=py35h39a4c60_1
+  - sqlite=3.20.1=h7e4c145_2
+  - tk=8.6.7=h35a86e2_3
+  - urllib3=1.22=py35he002d57_0
+  - wheel=0.30.0=py35h5c0b906_1
+  - xz=5.2.3=h0278029_2
+  - zlib=1.2.11=hf3cbc9b_2
+  - blas=1.1=openblas
+  - bzip2=1.0.6=1
+  - gettext=0.19.8.1=0
+  - giflib=5.1.4=0
+  - hdf5=1.10.1=1
+  - icu=58.2=0
+  - jasper=1.900.1=4
+  - jpeg=9b=2
+  - libwebp=0.5.2=7
+  - libxml2=2.9.5=2
+  - numpy=1.14.0=py35_blas_openblas_200
+  - openblas=0.2.20=6
+  - pcre=8.39=0
+  - pixman=0.34.0=1
+  - x264=20131217=3
+  - pip:
+    - alembic==0.9.8
+    - banal==0.3.3
+    - dataset==1.0.6
+    - fastcluster==1.1.24
+    - imdbpy==6.4.1
+    - lxml==4.2.1
+    - mako==1.0.7
+    - markupsafe==1.0
+    - normality==0.5.11
+    - python-dateutil==2.6.1
+    - python-editor==1.0.3
+    - sqlalchemy==1.2.3
+prefix: /Users/PhD/anaconda3/envs/vian_osx3
 
