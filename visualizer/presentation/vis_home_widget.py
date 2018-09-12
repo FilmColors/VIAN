@@ -12,7 +12,14 @@ class VisHomeWidget(PresentationWidget):
     def __init__(self, parent, visualizer):
         super(VisHomeWidget, self).__init__(parent, visualizer, "qt_ui/visualizer/VisStartLayout.ui")
         self.contribution_list = ProjectListWidget(self, visualizer)
-        self.hbox_Lower.addWidget(self.contribution_list)
+
+        lbl_Contributions = QLabel("Recent Contributions", self)
+        lbl_Contributions.setStyleSheet("QLabel{font-size: 30px;}")
+
+        self.vbox_contributions = QVBoxLayout(self)
+        self.vbox_contributions.addWidget(lbl_Contributions)
+        self.vbox_contributions.addWidget(self.contribution_list)
+        self.hbox_Lower.addItem(self.vbox_contributions)
 
     @pyqtSlot(object)
     def on_query_result(self, obj):
@@ -27,6 +34,8 @@ class VisHomeWidget(PresentationWidget):
                 self.contribution_list.add_entry(None, dbproject=dbproject, filmography = filmography)
             self.visualizer.db_root = obj['data']['root']
             self.visualizer.screenshot_loader.initialize(self.visualizer.db_root)
+
+
 
 
 

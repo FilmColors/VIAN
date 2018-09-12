@@ -35,16 +35,16 @@ class VisMovieLayout(PresentationWidget):
         self.plot_segments = SegmentVisualization(self, self.visualizer)
         self.plot_la_space = ImagePlotPlane(self)
         self.plot_ab_space = ImagePlotCircular(self)
-        self.vis_plot_la_space = VisualizerVisualization(self, self.plot_la_space,
-                                                         self.plot_ab_space.get_param_widget())
-        self.vis_plot_ab_space = VisualizerVisualization(self, self.plot_ab_space,
+        self.vis_plot_la_space = VisualizerVisualization(self, self.visualizer, self.plot_la_space,
+                                                         self.plot_la_space.get_param_widget())
+        self.vis_plot_ab_space = VisualizerVisualization(self, self.visualizer, self.plot_ab_space,
                                                          self.plot_ab_space.get_param_widget())
         self.lower_widget.addWidget(self.vis_plot_la_space)
         self.lower_widget.addWidget(self.vis_plot_ab_space)
 
-        self.vis_plot_color_dt = VisualizerVisualization(None, self.plot_color_dt, self.plot_color_dt.get_param_widget())
-        self.vis_plot_network = VisualizerVisualization(None, self.plot_network, self.plot_network.get_controls())
-        self.vis_plot_features = VisualizerVisualization(None, self.plot_features, self.plot_features.get_param_widget())
+        self.vis_plot_color_dt = VisualizerVisualization(None, self.visualizer, self.plot_color_dt, self.plot_color_dt.get_param_widget())
+        self.vis_plot_network = VisualizerVisualization(None, self.visualizer, self.plot_network, self.plot_network.get_param_widget())
+        self.vis_plot_features = VisualizerVisualization(None, self.visualizer, self.plot_features, self.plot_features.get_param_widget())
 
         self.classification_object_filter_cbs = [QComboBox(), QComboBox()]
         self.classification_object_filter_indices = dict()
@@ -71,8 +71,8 @@ class VisMovieLayout(PresentationWidget):
             if self.screenshots[scr['screenshot_id']][2] == True:
                 self.plot_color_dt.add_image(tx, ty, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
                 self.plot_segments.add_item_to_segment(scr['screenshot_id'], self.screenshots[scr['screenshot_id']][1])
-                self.plot_ab_space.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
-                self.plot_la_space.add_image(x, l, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
+                self.plot_ab_space.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = l)
+                self.plot_la_space.add_image(x, l, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = y)
             self.plot_color_dt.frame_default()
             self.plot_ab_space.frame_default()
             self.plot_la_space.frame_default()
@@ -133,12 +133,15 @@ class VisMovieLayout(PresentationWidget):
                 segment_index[s.segment_id] = s.movie_segm_id
 
             feature_index = dict()
-            self.compute_node_matrix(obj['data']['keywords'], self.visualizer.all_keywords)
-            for f in obj['data']['keywords']:
-                if f.keyword_id not in feature_index:
-                    feature_index[f.keyword_id] = FeatureTuple(self.visualizer.all_keywords[f.keyword_id]['word'].name, [])
-                if f.target_id in segment_index:
-                    feature_index[f.keyword_id].segment_ids.append(segment_index[f.target_id])
+            try:
+                # self.compute_node_matrix(obj['data']['keywords'], self.visualizer.all_keywords)
+                for f in obj['data']['keywords']:
+                    if f.keyword_id not in feature_index:
+                        feature_index[f.keyword_id] = FeatureTuple(self.visualizer.all_keywords[f.keyword_id]['word'].name, [])
+                    if f.target_id in segment_index:
+                        feature_index[f.keyword_id].segment_ids.append(segment_index[f.target_id])
+            except Exception as e:
+                print(e)
 
             self.plot_features.create_timeline(segments)
             for f in feature_index.keys():

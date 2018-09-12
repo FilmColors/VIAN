@@ -20,8 +20,8 @@ class VisSegmentLayout(PresentationWidget):
 
         self.plot_la_space = ImagePlotPlane(self)
         self.plot_ab_space = ImagePlotCircular(self)
-        self.vis_plot_la_space = VisualizerVisualization(self, self.plot_la_space, self.plot_ab_space.get_param_widget())
-        self.vis_plot_ab_space = VisualizerVisualization(self, self.plot_ab_space, self.plot_ab_space.get_param_widget())
+        self.vis_plot_la_space = VisualizerVisualization(self, self.visualizer, self.plot_la_space, self.plot_la_space.get_param_widget())
+        self.vis_plot_ab_space = VisualizerVisualization(self, self.visualizer, self.plot_ab_space, self.plot_ab_space.get_param_widget())
         self.segment_view = SegmentVisualization(self, self.visualizer)
         self.lower_widget.addWidget(self.segment_view)
 
@@ -53,8 +53,8 @@ class VisSegmentLayout(PresentationWidget):
             y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
             if self.screenshot_data[scr['screenshot_id']][2] == True:
                 if self.screenshot_data[scr['screenshot_id']][1] is not None:
-                    self.plot_ab_space.add_image(x, y, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0])
-                    self.plot_la_space.add_image(x, l, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0])
+                    self.plot_ab_space.add_image(x, y, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0], z = l)
+                    self.plot_la_space.add_image(x, l, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0], z = y)
                     self.segment_view.add_item_to_segment(scr['screenshot_id'], self.screenshot_data[scr['screenshot_id']][1])
 
     def on_classification_object_changed(self, name):
@@ -96,6 +96,7 @@ class VisSegmentLayout(PresentationWidget):
     def on_query_result(self, obj):
         if obj['type'] == "segments":
             self.clear()
+            print(obj)
             for s in obj['data']['segments']:
                 self.segment_data[s.segment_id] = dict(segment=s, shots = [], features = [])
 

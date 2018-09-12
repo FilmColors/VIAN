@@ -34,7 +34,6 @@ class SegmentVisualization(QScrollArea):
         if scr_id in self.screenshot_segm_mapping:
             self.entries[self.screenshot_segm_mapping[scr_id]].screenshot_view.add_image(numpy_to_pixmap(img))
 
-
 class SegmentVisualizationItem(QWidget):
     onSelected = pyqtSignal(object)
 

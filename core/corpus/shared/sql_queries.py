@@ -1,3 +1,4 @@
+from core.corpus.shared.entities import FilmographyQuery
 #region SQL QUERIES
 Q_ALL_PROJECTS_KEYWORD =    ("select * from KEYWORD_MAPPING_SEGMENTS " \
                             "inner join PROJECTS on PROJECTS.id = KEYWORD_MAPPING_SEGMENTS.project_id " \
@@ -25,5 +26,43 @@ Q_SCREENSHOT_MAPPING_OF_PROJECT = "select * from SHOTS " \
                                   "inner join SEGMENTS on SEGMENTS.id = SCREENSHOT_SEGM_MAPPING.segment_id " \
                                   "where SHOTS.project_id = "
 
+Q_FILMOGRAPHY = ("select * from FILMOGRAPHY "
+                 "inner join PROJECTS on PROJECTS.id = FILMOGRAPHY.id " 
+                 "inner join MOVIES on MOVIES.id = FILMOGRAPHY.id ",
+                 "where FILMOGRAPHY.", " in ",
+                 " and FILMOGRAPHY.", " in ")
 
+def create_filmography_query(query:FilmographyQuery):
+    q = Q_FILMOGRAPHY[0]
+    c = 0
+    isQuery = False
+    if query is None:
+        return None
+
+    for key, val in query.__dict__.items():
+        if val is not None and "year" not in key:
+            if not isinstance(val, list):
+                val = [val]
+            if c == 0:
+                q += Q_FILMOGRAPHY[1] + key + Q_FILMOGRAPHY[2] + '(' + ','.join(map(str, val)) + ')'
+                c += 1
+            else:
+                q += Q_FILMOGRAPHY[3] + key + Q_FILMOGRAPHY[2] + '(' + ','.join(map(str, val)) + ')'
+            isQuery = True
+
+    if query.year_start is not None:
+        q += " and MOVIES.year >= " + str(query.year_start)
+        isQuery = True
+    if query.year_end is not None:
+        q += " and MOVIES.year <= " + str(query.year_end)
+        isQuery = True
+
+    if isQuery:
+        print("Query: ", q)
+        return q
+    else:
+        return None
+
+if __name__ == '__main__':
+    print(create_filmography_query(FilmographyQuery(1234, color_process="Color Process 2", color_consultant="Henry Ford", year_end=1950, year_start=1930)))
 #endregion

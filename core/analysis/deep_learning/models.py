@@ -80,7 +80,6 @@ class RealTimeHumanExtractor:
         # show the output image
 
 
-
 if __name__ == '__main__':
     import glob
     from core.analysis.deep_learning.labels import LIPLabels

@@ -42,10 +42,11 @@ def my_exception_hook(exctype, value, traceback):
         sys.exit(1)
     else:
         global MAIN_WINDOW
+        # print("CRASH")
+        # sys._excepthook(exctype, value, traceback)
         QMessageBox.warning(MAIN_WINDOW, "Error occured", "Oups, there has gone something wrong.\n"
                                                           "Probably you can just work on, probably not.\n"
                                                           "Best you make a backup of your project now. ")
-
 
 def handler(msg_type, msg_log_context, msg_string):
     pass

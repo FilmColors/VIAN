@@ -1,10 +1,16 @@
 """
+###
+OBSOLETE
+
+
 
 This file the frequency of a word per film 
 using the exported GlossarDB and MasterDB from Filemaker
 
 This script is included into VIAN. 
 
+
+OBSOLETE
 @author: Gaudenz Halter
 """
 
@@ -509,7 +515,7 @@ def generate_projects(input_dir, result_dir, replace_path = False):
     glossary_words, glossary_ids2, glossary_categories, glossary_omit = parse_glossary("E:/Programming/Datasets/FilmColors/PIPELINE/_input\\GlossaryDB_WordCount.csv")
 
     project_list = generate_project_list(result_dir)
-
+    Errors = []
     for file in files:
         data = None
         with open(file, "rb") as f:
@@ -520,11 +526,12 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                 masset = data['movie_asset']
                 fm_id_str = "_".join([data['fm_id'][0].zfill(3), data['fm_id'][1], data['fm_id'][2]])
 
+                project_name = fm_id_str + "_" + dbmovie.movie_name + "_" + dbmovie.year
+
                 # Skip this movie if it is already in the projects
                 if fm_id_str in project_list:
-                    return
-
-                project_name = fm_id_str + "_" + dbmovie.movie_name + "_" + dbmovie.year
+                    print("### --- SKIPPED: ", project_name, "--- ###")
+                    continue
 
                 print("### ---", project_name, "--- ###")
                 movie_path = masset.movie_path_abs
@@ -549,7 +556,6 @@ def generate_projects(input_dir, result_dir, replace_path = False):
 
                 # Apply the Classification
                 progress("Classification:", dbmovie.movie_name + "_" + str(dbmovie.movie_id), 0.1, 0.0)
-                Errors = []
                 for idx, s in enumerate(data['segments']):
                     segment = s[0]
                     keywords = s[1]
@@ -656,11 +662,12 @@ def generate_projects(input_dir, result_dir, replace_path = False):
                 store_project_list()
                 print("\n\n\n")
             except Exception as e:
+                raise e
                 print(e)
 
-        print(" --- ERRORS --- ")
-        for r in sorted(Errors, key=lambda x: x[1]):
-            print(r)
+    print(" --- ERRORS --- ")
+    for r in sorted(Errors, key=lambda x: x[1]):
+        print(r)
 
 
 
@@ -748,8 +755,9 @@ def fetch_missing_segmentations(fm_id, database_path):
 
 # python extensions/plugins/fiwi_tools/filemaker2database.py -start_idx 0 -end_idx=40
 if __name__ == '__main__':
-    with open(cache_dir + "/" + "test_set_cache.pickle", "rb") as file3:
-        to_compute = pickle.load(file3)
-
-    for k in to_compute.keys():
-        print(to_compute[k])
+    # with open(cache_dir + "/" + "test_set_cache.pickle", "rb") as file3:
+    #     to_compute = pickle.load(file3)
+    #
+    # for k in to_compute.keys():
+    #     print(to_compute[k])
+    perform(0, 400)

@@ -177,7 +177,6 @@ class CorpusInterface(QObject):
                     masked_img = np.copy(img)
                     mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
                     temp_mask = np.zeros_like(mask)
-                    print(mask.shape, temp_mask.shape, masked_img.shape)
                     for lbl in mask_labels:
                         temp_mask[np.where(mask == lbl)] = 255
                     masked_img[np.where(temp_mask != 255)] = [0, 0, 0, 0]

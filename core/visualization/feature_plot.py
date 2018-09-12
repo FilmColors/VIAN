@@ -217,7 +217,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.ctrl_is_pressed = False
         self.img_width = 192
         self.curr_scale = 1.0
-        self.magnification = 0.01
+        self.magnification = 0.005
         self.spacing = 10
 
         self.range_x = [0, 1000]
@@ -226,7 +226,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
         self.font_family = "Consolas"
         self.text_color = QColor(255,255,255,200)
-        self.font_size = 40
+        self.font_size = 128
         self.title = title
 
         self.font = QFont(self.font_family, self.font_size)
@@ -240,7 +240,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_items = []
         self.feature_labels = []
         self.feature_base_height = 900
-        self.feature_height = 100
+        self.feature_height = 400
 
         self.segment_height = 150
 
@@ -407,7 +407,6 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
         return image
 
-
     def on_filter_update(self, features):
         self.clear_features()
         for f in features:
@@ -418,6 +417,14 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.onFeatureAdded.connect(w.on_features_changed)
         w.onFeatureActivated.connect(self.on_filter_update)
         return w
+
+    def get_raw_data(self):
+        return dict(segments=self.segments, features = self.features)
+
+    def apply_raw_data(self, raw_data):
+        self.create_timeline(raw_data['segments'])
+        for f in raw_data['features']:
+            self.create_feature(f)
 
 
 class FeatureRectItem(QGraphicsRectItem):

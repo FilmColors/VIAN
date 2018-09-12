@@ -10,7 +10,7 @@ import numpy as np
 import networkx as nx
 
 from core.gui.ewidgetbase import EGraphicsView, line_separator
-
+from core.visualization.basic_vis import IVIANVisualization
 #region DEFINITIONS
 DATA_SET = "../../results/result_fm_db_parser.pickle"
 
@@ -158,7 +158,7 @@ class GraphText(QGraphicsTextItem):
 
 #region -- Classes --
 
-class VocabularyGraph(QWidget):
+class VocabularyGraph(QWidget, IVIANVisualization):
     onSelectionChanged = pyqtSignal(object)
 
     def __init__(self, parent):
@@ -457,6 +457,8 @@ class VocabularyGraph(QWidget):
         #             else:
         #                 lblb.hide()
 
+    def get_param_widget(self):
+        return self.get_controls()
 
 
 

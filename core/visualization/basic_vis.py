@@ -13,6 +13,12 @@ class IVIANVisualization():
     def get_heads_up_widget(self):
         pass
 
+    def get_raw_data(self):
+        pass
+
+    def apply_raw_data(self, raw_data):
+        pass
+
     def export(self, main_window = None):
         if not isinstance(main_window, QWidget):
             main_window = None

@@ -16,6 +16,7 @@ import os
 import webbrowser
 import shutil
 from zipfile import ZipFile
+import math
 
 def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
     """
@@ -480,3 +481,17 @@ def labels_to_binary_mask(multi_mask, labels):
     for i in labels:
         result[np.where(multi_mask == i)] = 1
     return result
+
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+    return qx, qy

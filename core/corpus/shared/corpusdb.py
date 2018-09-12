@@ -260,7 +260,7 @@ class DatasetCorpusDB(CorpusDB):
         print("\n\n")
         self.save(self.file_path)
 
-    def commit_project(self, zip_path_export, contributor: DBContributor):
+    def commit_project(self, zip_path_export, contributor: DBContributor, omit_existing = False):
         """
         
         :param project: 
@@ -320,6 +320,9 @@ class DatasetCorpusDB(CorpusDB):
             print("Project Exists")
             existing = True
         #endregion
+
+        if existing and omit_existing:
+            return True, project_obj
 
         # Is Project Checked Out by another User?
         if existing and local_project.is_checked_out:
@@ -1186,8 +1189,12 @@ class DatasetCorpusDB(CorpusDB):
             elif query.query_type == "movies":
                 include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
                 exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
-                result = [r['id'] for r in self.db.query(Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args +
-                                                         Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args)]
+                sqlquery =  Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args + \
+                            Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args + \
+                            self.parse_filmography_query(query.filter_filmography)
+
+                result = [r['id'] for r in self.db.query(sqlquery)]
+
                 dbprojects = self.get_projects(dict(id=result))
                 dbfilmographies = self.get_filmography(dict(project_id=[d.project_id for d in dbprojects]))
                 return dict(type=query.query_type, data=dict(projects=dbprojects, filmographies=dbfilmographies))
@@ -1207,6 +1214,21 @@ class DatasetCorpusDB(CorpusDB):
         except:
             return dict(type="error")
 
+    def parse_filmography_query(self, query:FilmographyQuery):
+        sql = create_filmography_query(query)
+        project_ids = []
+        if sql is not None:
+            result = self.db.query(sql)
+            for r in result:
+                project_ids.append(r['id'])
+
+        if len(project_ids) == 0:
+            project_sql =  ""
+        else:
+            project_sql = " and PROJECTS.id in " + '(' + ','.join(map(str, project_ids)) + ')'
+        return project_sql
+
+
     def get_segment_info(self, query:QueryRequestData):
         include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
         exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
@@ -1223,22 +1245,18 @@ class DatasetCorpusDB(CorpusDB):
                 segm.segment_id = r['segment_id']
                 db_segments.append(segm)
 
-
             shot = DBScreenshot().from_database(r)
             shot.screenshot_id = r['screenshot_id']
 
             if segm.segment_id not in segment_mapping:
                 segment_mapping[segm.segment_id] = dict(shot_ids = [])
 
-            # db_segments[segm.segment_id] = segm
             db_shots.append(shot)
             segment_mapping[segm.segment_id]['shot_ids'].append(shot.screenshot_id)
             shot_ids.append(shot.screenshot_id)
 
         db_features = self.get_color_ab_info(shot_ids)
         return dict(type=query.query_type, data=dict(segments = db_segments, screenshots = db_shots, features = db_features, segment_mapping = segment_mapping))
-
-
 
     def get_movie_info(self, query:QueryRequestData):
         project_id = query.project_filter[0]

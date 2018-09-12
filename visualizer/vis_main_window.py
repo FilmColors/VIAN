@@ -12,6 +12,7 @@ from visualizer.presentation.vis_segment_widget import *
 from visualizer.widgets.header_bar import *
 from visualizer.data.query_worker import QueryWorker, CORPUS_PATH
 from visualizer.data.screenshot_worker import ScreenshotWorker
+from visualizer.presentation.vis_favorites import VisFavoritesWindow
 
 class VIANVisualizer(QMainWindow):
     onQuery = pyqtSignal(str, object, object, object, object, object)
@@ -46,8 +47,10 @@ class VIANVisualizer(QMainWindow):
         self.setCentralWidget(self.center)
 
         self.stack = QStackedWidget()
-        self.header = VisHeaderBar(self.center, self)
+        self.vis_favorites = VisFavoritesWindow(self, self)
 
+        self.header = VisHeaderBar(self.center, self)
+        self.header.onShowPlots.connect(self.show_favorites)
         self.home_widget = VisHomeWidget(self.stack, self)
         self.movie_widget = VisMovieLayout(self.stack, self)
         self.screenshot_widget = VisScreenshotLayout(self.stack, self)
@@ -69,6 +72,7 @@ class VIANVisualizer(QMainWindow):
         self.actionScreenshots.triggered.connect(partial(self.set_current_perspective, 3))
         self.actionSegments.triggered.connect(partial(self.set_current_perspective, 4))
         self.actionLast.triggered.connect(self.on_last_view)
+        self.actionFavorites.triggered.connect(self.show_favorites)
         #endregion
 
         self.last_views = []
@@ -123,6 +127,9 @@ class VIANVisualizer(QMainWindow):
             self.stack.setCurrentIndex(4)
             self.header.set_header_name("Segments")
 
+    def show_favorites(self):
+        self.vis_favorites.show()
+
     def on_last_view(self):
         """
         Sets the current view to the last we have switched from
@@ -135,7 +142,6 @@ class VIANVisualizer(QMainWindow):
         # if query_type in ["segments", "movie", "movie-movie_info"]:
         #     self.onAbortAllWorker.emit()
         self.onQuery.emit(query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters)
-
 
     def on_load_screenshots(self, db_shots, callback):
         self.screenshot_loader.signals.onScreenshotLoaded.connect(callback)

@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import typing
+from collections import namedtuple
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter
 from PyQt5.QtWidgets import *
@@ -11,6 +12,8 @@ from core.visualization.basic_vis import IVIANVisualization
 SOURCE_FOREGROUND = 0
 SOURCE_BACKGROUND = 1
 SOURCE_COMPLETE = 2
+
+ImagePlotRawData = namedtuple("ImagePlotRawData", ["image", "x", "y", "z"])
 
 
 class ImagePlot(QGraphicsView, IVIANVisualization):
@@ -43,6 +46,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.last_mouse_pos = QPoint()
 
         self.luminances = []
+        self.raw_data = []
 
         self.n_grid = 12
         self.controls_itm = None
@@ -229,6 +233,13 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             else:
                 tpl[1].show()
 
+    def get_raw_data(self):
+        return self.raw_data
+
+    def apply_raw_data(self, raw_data):
+        for itm in raw_data:
+            self.add_image(x=itm.x, y = itm.y, img=itm.image)
+
 
 class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
     onItemSelection = pyqtSignal(object)
@@ -258,13 +269,11 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.onItemSelection.emit(self.mime_data)
 
 
-
-
 class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
 
-    def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None):
+    def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None, z = 0):
         try:
             if convert:
                 # itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
@@ -278,6 +287,8 @@ class ImagePlotCircular(ImagePlot):
                 itm.setPos(np.nan_to_num((x -128) * self.magnification),np.nan_to_num((y -128) * self.magnification))
             else:
                 itm.setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(y * self.magnification))
+
+            self.raw_data.append(ImagePlotRawData(img, x, y, 0))
 
             itm.setScale(self.img_scale)
             itm.scale_pos(self.pos_scale)
@@ -375,20 +386,33 @@ class ImagePlotPlane(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None, title=""):
         super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
 
-    def add_image(self, x, y, img, convert = True, mime_data = None):
+    def add_image(self, x, y, img, convert = True, mime_data = None, z = 0):
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img), mime_data=mime_data)
         else:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True), mime_data=mime_data)
         self.scene().addItem(itm)
 
+        self.raw_data.append(ImagePlotRawData(img, x, y, z))
         itm.setPos(np.nan_to_num(x * self.magnification),np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification))
         self.images.append(itm)
+        itm.setZValue(z)
 
         self.luminances.append([y, itm])
 
         itm.show()
         return itm
+
+    def rotate_view(self, angle_rad):
+        angle = (angle_rad / 360 * np.pi) * 2
+        for idx, itm in enumerate(self.raw_data):
+            x,z = rotate((0,0), (itm.x, itm.z), angle)
+            try:
+                self.images[idx].setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification))
+                self.images[idx].setZValue(z)
+            except: continue
+
+
 
     def add_grid(self):
         pen = QPen()
@@ -418,6 +442,59 @@ class ImagePlotPlane(ImagePlot):
                 text = self.scene().addText(str(round(((self.range_y[1] * self.magnification - x) / self.magnification), 0)), font)
                 text.setPos(self.range_x[0] * self.magnification, x)
                 text.setDefaultTextColor(QColor(200, 200, 200, 200))
+
+    def get_param_widget(self):
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        hl1 = QHBoxLayout(w)
+        hl1.addWidget(QLabel("Range Scale:", w))
+        hl2 = QHBoxLayout(w)
+        hl2.addWidget(QLabel("Image Scale:", w))
+        hl3 = QHBoxLayout(w)
+        hl3.addWidget(QLabel("View Angle:", w))
+
+        slider_xscale = QSlider(Qt.Horizontal, w)
+        slider_xscale.setRange(1, 1000)
+        slider_xscale.setValue(100)
+        slider_xscale.valueChanged.connect(self.scale_pos)
+        slider_yscale = QSlider(Qt.Horizontal, w)
+        slider_yscale.setRange(1, 1000)
+        slider_xscale.setValue(100)
+        slider_yscale.valueChanged.connect(self.set_image_scale)
+
+        slider_angle = QSlider(Qt.Horizontal, w)
+        slider_angle.setRange(0, 360)
+
+        hl1.addWidget(slider_xscale)
+        x_scale_line = QSpinBox(w)
+        x_scale_line.setRange(1, 1000)
+        x_scale_line.setValue(100)
+        x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        hl1.addWidget(x_scale_line)
+
+        hl2.addWidget(slider_yscale)
+        y_scale_line = QSpinBox(w)
+        y_scale_line.setRange(1, 1000)
+        y_scale_line.setValue(100)
+        y_scale_line.valueChanged.connect(slider_yscale.setValue)
+        slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        slider_angle.valueChanged.connect(self.rotate_view)
+        hl2.addWidget(y_scale_line)
+        hl3.addWidget(slider_angle)
+
+        angle_sp = QSpinBox(w)
+        angle_sp.setRange(1, 360)
+        angle_sp.setValue(0)
+        angle_sp.valueChanged.connect(slider_yscale.setValue)
+        slider_yscale.valueChanged.connect(slider_angle.setValue)
+        hl3.addWidget(angle_sp)
+
+        w.layout().addItem(hl1)
+        w.layout().addItem(hl2)
+        w.layout().addItem(hl3)
+
+        return w
 
 
 class ImagePlotControls(QWidget):
@@ -515,7 +592,7 @@ class ImagePlotControls(QWidget):
 
 
 class ImagePlotTime(ImagePlot):
-    def __init__(self, parent, range_x = None, range_y = None, title=""):
+    def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100):
         self.x_scale = 0.001
         self.y_scale = 200 #50 default
         self.base_line = 1000
@@ -532,6 +609,8 @@ class ImagePlotTime(ImagePlot):
         self.values = []
         super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
         self.font_size = 60
+        self.set_y_scale(y_scale)
+        self.set_image_scale(image_scale)
 
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
@@ -543,7 +622,7 @@ class ImagePlotTime(ImagePlot):
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
 
-    def add_image(self, x, y, img, convert=True, mime_data = None):
+    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0):
         timestamp = ms_to_string(x)
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
@@ -554,6 +633,7 @@ class ImagePlotTime(ImagePlot):
         self.scene().addItem(itm)
         itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
+        self.raw_data.append(ImagePlotRawData(img, x, y, z))
         self.images.append(itm)
 
         if self.x_end < x * self.x_scale:
@@ -622,6 +702,7 @@ class ImagePlotTime(ImagePlot):
         hl2 = QHBoxLayout(w)
         hl2.addWidget(QLabel("Y-Scale:", w))
 
+
         slider_xscale = QSlider(Qt.Horizontal, w)
         slider_xscale.setRange(1, 1000)
         slider_xscale.setValue(self.x_scale)
@@ -647,6 +728,7 @@ class ImagePlotTime(ImagePlot):
         y_scale_line.valueChanged.connect(slider_yscale.setValue)
         slider_yscale.valueChanged.connect(y_scale_line.setValue)
         hl2.addWidget(y_scale_line)
+
 
         w.layout().addItem(hl1)
         w.layout().addItem(hl2)

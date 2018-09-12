@@ -32,6 +32,7 @@
     <addaction name="actionSegments"/>
     <addaction name="actionScreenshots"/>
     <addaction name="actionMovie"/>
+    <addaction name="actionFavorites"/>
     <addaction name="separator"/>
     <addaction name="actionLast"/>
    </widget>
@@ -84,6 +85,14 @@
    </property>
    <property name="shortcut">
     <string>Backspace</string>
+   </property>
+  </action>
+  <action name="actionFavorites">
+   <property name="text">
+    <string>Favorites</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+6</string>
    </property>
   </action>
  </widget>

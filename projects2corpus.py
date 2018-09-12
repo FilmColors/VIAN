@@ -37,10 +37,16 @@ def create_corpus(path):
     return database
 
 def prepare_project(vian_project_path, a):
-    local_corpus = LocalCorpusInterface()
-    project, mw = load_project_headless(vian_project_path)
-    mw.load_screenshots()
-    local_corpus.prepare_project(project, True)
+    try:
+        local_corpus = LocalCorpusInterface()
+        project, mw = load_project_headless(vian_project_path)
+        if project is None or mw is None:
+            return
+        mw.load_screenshots()
+        local_corpus.prepare_project(project, True)
+    except Exception as e:
+        print("ERROR", vian_project_path)
+
 
 
 def commit_project(vian_project_path, corpus_path = "F:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"):
@@ -57,12 +63,13 @@ def commit_no_prepare( file, corpus_path = "F:\\_corpus\\ERC_FilmColorsCorpus\\E
                          affiliation="Nahh")
     local_corpus = DatasetCorpusDB()
     local_corpus.load(corpus_path)
-    local_corpus.commit_project(file, user)
+    local_corpus.commit_project(file, user, omit_existing=True)
 
 
 CORPUS_ROOT = "F:\\_corpus\\"
 USER_CSV = "F:\\_input\\Accounts.csv"
-N_PROJECT = 20
+N_PROJECT = 500
+
 
 if __name__ == '__main__':
     # Create a Corpus if it does not already exist
@@ -79,9 +86,7 @@ if __name__ == '__main__':
 
     project_files = glob.glob("F:/_projects/*/*.eext")
     to_prepare = []
-
     for f in project_files:
-        print("\n#### ---", (str(c) + "/" + str(len(project_files))).rjust(6), f, "---####")
         prepare = True
         for q in zipped:
             if f.replace("\\", "/").split("/").pop().replace(".eext", "") in q:
@@ -90,9 +95,10 @@ if __name__ == '__main__':
         if prepare:
             to_prepare.append(f)
 
-    n_threads  = 7
+    print("To Prepare:", len(to_prepare), "of", len(project_files))
     threads = []
     c = 0
+    n_threads = 8
     for i, file in enumerate(to_prepare):
         c += 1
         if i > N_PROJECT:
@@ -103,10 +109,12 @@ if __name__ == '__main__':
                 t.join()
             threads = []
             print(c, "/", len(to_prepare))
-        else:
-            thread = Thread(target=prepare_project, args=(file, None))
-            thread.start()
-            threads.append(thread)
+        print("\n#### ---", (str(c) + "/" + str(len(project_files))).rjust(6), f, "---####")
+
+        thread = Thread(target=prepare_project, args=(file, None))
+        thread.start()
+        threads.append(thread)
+
     for t in threads:
         t.join()
 

@@ -57,7 +57,8 @@ class VisSearchLayout(PresentationWidget):
     def on_query(self, qtype, search_string, corpus_id):
         cl_obj_filters = self.keyword_widget.get_classification_object_filters()
         keyword_filters = self.keyword_widget.get_keyword_filters()
-        self.visualizer.on_query(qtype, None, keyword_filters, cl_obj_filters, None)
+        filmography = self.keyword_widget.filmography_widget.get_filmography_query()
+        self.visualizer.on_query(qtype, filmography, keyword_filters, cl_obj_filters, None)
 
 
 class KeywordWidget(QWidget):
@@ -69,6 +70,7 @@ class KeywordWidget(QWidget):
         self.class_obj_list.setMaximumWidth(300)
         self.class_obj_list.currentItemChanged.connect(self.on_classification_object_changed)
         self.stack_widget = QStackedWidget(self)
+        # self.stack_widget.setStyleSheet("QWidget{background: rgb(30,30,30);}")
 
         self.stack_map = dict()
         self.tabs_map = dict()
@@ -77,12 +79,20 @@ class KeywordWidget(QWidget):
         self.keyword_cl_obj_map = dict()
         self.layout().addWidget(self.class_obj_list)
         self.layout().addWidget(self.stack_widget)
+        self.filmography_widget = None
+        self.add_filmography_widget()
+
+    def add_filmography_widget(self):
+        stack = FilmographyWidget(self, self.visualizer)
+        self.stack_map["Filmography"] = stack
+        self.stack_widget.addWidget(stack)
+        self.filmography_widget = stack
 
     def on_classification_object_changed(self):
         self.stack_widget.setCurrentIndex(self.class_obj_list.currentIndex().row())
 
     def clear(self):
-        self.class_obj_list.clear()
+        self.class_obj_list.clear_list()
         for s in self.stack_map.keys():
             self.stack_map[s].deleteLater()
         self.stack_map = dict()
@@ -91,13 +101,14 @@ class KeywordWidget(QWidget):
         self.keyword_map = dict()
         self.keyword_cl_obj_map = dict()
 
+        self.add_filmography_widget()
+
     def add_spacers(self):
         for x in self.tabs_map.keys():
             for y in self.tabs_map[x].keys():
                 self.tabs_map[x][y].widget().layout().addItem(QSpacerItem(2,2,QSizePolicy.Fixed, QSizePolicy.Expanding))
 
     def add_unique_keyword(self, ukw:DBUniqueKeyword, cl_obj:DBClassificationObject, voc:DBVocabulary, voc_word:DBVocabularyWord):
-        pass
         if cl_obj.name not in self.tabs_map:
             stack = QTabWidget()
             self.stack_map[cl_obj.name] = stack
@@ -156,6 +167,45 @@ class KeywordWidget(QWidget):
         return result
 
 
+class FilmographyWidget(QWidget):
+    def __init__(self,parent, visualizer):
+        super(FilmographyWidget, self).__init__(parent)
+        path = os.path.abspath("qt_ui/visualizer/FilmographyQueryWidget.ui")
+        uic.loadUi(path, self)
+
+    def get_filmography_query(self):
+        query = FilmographyQuery()
+        if self.lineEdit_IMDB.text() != "":
+            query.imdb_id = self.lineEdit_IMDB.text().split(",")
+        if self.spinBox_Corpus_A.value() > 0:
+            query.corpus_id = [self.spinBox_Corpus_A.value(), self.spinBox_Corpus_B.value(), self.spinBox_Corpus_C.value()]
+        if self.lineEdit_Genre.text() != "":
+            query.genre = self.lineEdit_Genre.text().split(",")
+        if self.comboBox_ColorProcess.currentText() != "":
+            query.color_process = self.comboBox_ColorProcess.text().split(",")
+        if self.lineEdit_Director.text() != "":
+            query.director = self.lineEdit_Director.text().split(",")
+        if self.lineEdit_Cinematography.text() != "":
+            query.cinematography = self.lineEdit_Cinematography.text().split(",")
+        if self.lineEdit_ColorConsultant.text() != "":
+            query.color_consultant = self.lineEdit_ColorConsultant.text().split(",")
+        if self.lineEdit_ProductionDesign.text() != "":
+            query.production_design = self.lineEdit_ProductionDesign.text().split(",")
+        if self.lineEdit_ArtDirector.text() != "":
+            query.art_director = self.lineEdit_ArtDirector.text().split(",")
+        if self.lineEdit_CostumDesign.text() != "":
+            query.costum_design = self.lineEdit_CostumDesign.text().split(",")
+        if self.lineEdit_ProductionCompany.text() != "":
+            query.production_company = self.lineEdit_ProductionCompany.text().split(",")
+        if self.lineEdit_ProductionCountry.text() != "":
+            query.country = self.lineEdit_ProductionCountry.text().split(",")
+        if self.spinBox_YearA.value() > 0:
+            query.year_start = self.spinBox_YearA.value()
+        if self.spinBox_YearB.value() > 0:
+            query.year_end = self.spinBox_YearB.value()
+
+        return query
+
 class WordCheckBox(QCheckBox):
     def __init__(self, parent, word, unique_keyword):
         super(WordCheckBox, self).__init__(parent)
@@ -169,6 +219,13 @@ class ClassificationObjectList(QListWidget):
     def __init__(self, parent):
         super(ClassificationObjectList, self).__init__(parent)
         self.item_entries = []
+
+        self.clear_list()
+
+    def clear_list(self):
+        self.clear()
+        itm = QListWidgetItem("Filmography")
+        self.addItem(itm)
 
     def get_item(self, cl_obj):
         for item in self.item_entries:

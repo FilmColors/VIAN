@@ -3,6 +3,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 import os
+from visualizer.data.cache import *
+from functools import partial
 
 class PresentationWidget(QWidget):
     def __init__(self, parent, visualizer, path = ""):
@@ -19,10 +21,13 @@ class PresentationWidget(QWidget):
 
 
 class VisualizerVisualization(QMainWindow):
-    def __init__(self, parent, visualization = None, settings_widget = None):
+    onToFavorites = pyqtSignal(object, str)
+
+    def __init__(self, parent, visualizer, visualization = None, settings_widget = None, inhibit_favorites = False):
         super(VisualizerVisualization, self).__init__(parent)
         self.visualization = None
         self.hovered = False
+        self.visualizer = visualizer
 
         self.settings_widget = settings_widget
         self.settings_window = QMainWindow(self, Qt.Tool)
@@ -31,11 +36,16 @@ class VisualizerVisualization(QMainWindow):
 
         self.toolbar = QToolBar("Visualization Toolbar")
         self.a_magnify = self.toolbar.addAction(QIcon("qt_ui/icons/icon_magnification.png"), "")
-        self.a_to_plot_list = self.toolbar.addAction(QIcon("qt_ui/icons/icon_favorites.png"), "")
         self.a_settings = self.toolbar.addAction(QIcon("qt_ui/icons/icon_settings_plot.png"), "")
+
+        if not inhibit_favorites:
+            self.a_to_plot_list = self.toolbar.addAction(QIcon("qt_ui/icons/icon_favorites.png"), "")
+            self.a_to_plot_list.triggered.connect(self.on_to_favorites)
 
         self.a_magnify.triggered.connect(self.on_focus_visualization)
         self.a_settings.triggered.connect(self.on_settings_opened)
+
+        self.onToFavorites.connect(self.visualizer.vis_favorites.on_to_favorites)
 
         self.addToolBar(Qt.LeftToolBarArea, self.toolbar)
         if visualization is not None:
@@ -57,12 +67,21 @@ class VisualizerVisualization(QMainWindow):
         self.setCentralWidget(vis)
         self.visualization = vis
 
-    def to_plot_list(self):
-        pass
+    def on_to_favorites(self):
+        menu = QMenu(self)
+        for k in self.visualizer.vis_favorites.get_sheet_names():
+            a = menu.addAction(k)
+            a.triggered.connect(partial(self.to_favorites, k))
+        menu.popup(self.mapToGlobal(QPoint(0,0)))
+
+    def to_favorites(self, name):
+        cache = VisualizationCache(self.visualization.__class__, self.visualization.get_raw_data())
+        self.onToFavorites.emit(cache, name)
 
     def on_focus_visualization(self):
         dialog = FocusVisualizationWindow(self, self.visualization, self)
         dialog.showFullScreen()
+
 
 class FocusVisualizationWindow(QMainWindow):
     def __init__(self, parent, visualization, old_parent:VisualizerVisualization):
