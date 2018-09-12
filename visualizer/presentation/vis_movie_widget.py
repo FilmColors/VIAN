@@ -59,6 +59,7 @@ class VisMovieLayout(PresentationWidget):
         self.plot_color_dt.onImageClicked.connect(self.on_images_clicked)
         self.plot_la_space.onImageClicked.connect(self.on_images_clicked)
         self.plot_ab_space.onImageClicked.connect(self.on_images_clicked)
+        self.plot_segments.onSegmentSelected.connect(self.on_segments_selected)
 
         self.screenshots = dict() # TUPLE (DBScreenshot, Image, Used)
         self.color_features = dict()
@@ -231,6 +232,17 @@ class VisMovieLayout(PresentationWidget):
                     node_matrix[x][y] += 1
 
         self.plot_network.create_graph(node_matrix, labels)
+
+    @pyqtSlot(object, object)
+    def on_segments_selected(self, obj:DBSegment, scrs:List[DBScreenshot]):
+        indices = []
+        for idx, img in enumerate(self.plot_color_dt.images):
+            if img.mime_data in scrs:
+                indices.append(idx)
+        self.plot_color_dt.set_highlighted(indices)
+        self.plot_ab_space.set_highlighted(indices)
+        self.plot_la_space.set_highlighted(indices)
+
 
     @pyqtSlot(object)
     def on_images_clicked(self, mime_data):

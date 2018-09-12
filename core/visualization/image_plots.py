@@ -13,7 +13,7 @@ SOURCE_FOREGROUND = 0
 SOURCE_BACKGROUND = 1
 SOURCE_COMPLETE = 2
 
-ImagePlotRawData = namedtuple("ImagePlotRawData", ["image", "x", "y", "z"])
+ImagePlotRawData = namedtuple("ImagePlotRawData", ["image", "x", "y", "z", "mime_data"])
 
 
 class ImagePlot(QGraphicsView, IVIANVisualization):
@@ -219,6 +219,20 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
     def get_heads_up_widget(self):
         return self.heads_up_widget
 
+    def set_highlighted(self, indices):
+        if len(indices) > 0:
+            for idx, img in enumerate(self.images):
+                if idx in indices:
+                    img.set_transparency(1.0)
+                    img.setZValue(0.0)
+                else:
+                    img.set_transparency(0.2)
+                    img.setZValue(-10.0)
+        else:
+            for idx, img in enumerate(self.images):
+                img.set_transparency(1.0)
+                img.setZValue(0.0)
+
     @pyqtSlot(int)
     def on_high_cut(self, value):
         for tpl in self.luminances:
@@ -242,14 +256,17 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         for itm in raw_data:
             self.add_image(x=itm.x, y = itm.y, img=itm.image)
 
+    def reset_view(self):
+        self.set_highlighted([])
 
 class VIANPixmapGraphicsItemSignals(QObject):
     onItemSelection = pyqtSignal(object)
     def __init__(self, parent = None):
         super(VIANPixmapGraphicsItemSignals, self).__init__(parent)
 
+
 class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
-    def __init__(self, pixmap, hover_text = None, mime_data = None):
+    def __init__(self, pixmap:QPixmap, hover_text = None, mime_data = None):
         super(VIANPixmapGraphicsItem, self).__init__(pixmap)
         if hover_text != None:
             self.setToolTip(hover_text)
@@ -257,6 +274,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.pos_scale = 1.0
         self.mime_data = mime_data
         self.signals = VIANPixmapGraphicsItemSignals()
+        self.pixmap = pixmap
 
         self.setAcceptHoverEvents(True)
         # self.hovered = False
@@ -273,6 +291,16 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
     def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
         # super(VIANPixmapGraphicsItem, self).mousePressEvent(event)
         self.signals.onItemSelection.emit(self.mime_data)
+
+    def set_transparency(self, alpha):
+        img = QImage(self.pixmap.size(), QImage.Format_ARGB32_Premultiplied)
+        img.fill(Qt.transparent)
+        qp = QPainter(img)
+        qp.begin(img)
+        qp.setOpacity(alpha)
+        qp.drawPixmap(0,0, self.pixmap)
+        qp.end()
+        self.setPixmap(QPixmap(img))
 
 
 class ImagePlotCircular(ImagePlot):
@@ -294,7 +322,7 @@ class ImagePlotCircular(ImagePlot):
             else:
                 itm.setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(y * self.magnification))
 
-            self.raw_data.append(ImagePlotRawData(img, x, y, 0))
+            self.raw_data.append(ImagePlotRawData(img, x, y, 0, mime_data))
 
             itm.setScale(self.img_scale)
             itm.scale_pos(self.pos_scale)
@@ -400,7 +428,7 @@ class ImagePlotPlane(ImagePlot):
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True), mime_data=mime_data)
         self.scene().addItem(itm)
 
-        self.raw_data.append(ImagePlotRawData(img, x, y, z))
+        self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
         itm.setPos(np.nan_to_num(x * self.magnification),np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification))
         self.images.append(itm)
         itm.setZValue(z)
@@ -452,52 +480,53 @@ class ImagePlotPlane(ImagePlot):
     def get_param_widget(self):
         w = QWidget()
         w.setLayout(QVBoxLayout())
-        hl1 = QHBoxLayout(w)
-        hl1.addWidget(QLabel("Range Scale:", w))
-        hl2 = QHBoxLayout(w)
-        hl2.addWidget(QLabel("Image Scale:", w))
+        # hl1 = QHBoxLayout(w)
+        # hl1.addWidget(QLabel("Range Scale:", w))
+        # hl2 = QHBoxLayout(w)
+        # hl2.addWidget(QLabel("Image Scale:", w))
         hl3 = QHBoxLayout(w)
         hl3.addWidget(QLabel("View Angle:", w))
 
-        slider_xscale = QSlider(Qt.Horizontal, w)
-        slider_xscale.setRange(1, 1000)
-        slider_xscale.setValue(100)
-        slider_xscale.valueChanged.connect(self.scale_pos)
-        slider_yscale = QSlider(Qt.Horizontal, w)
-        slider_yscale.setRange(1, 1000)
-        slider_xscale.setValue(100)
-        slider_yscale.valueChanged.connect(self.set_image_scale)
+        # slider_xscale = QSlider(Qt.Horizontal, w)
+        # slider_xscale.setRange(1, 1000)
+        # slider_xscale.setValue(100)
+        # slider_xscale.valueChanged.connect(self.scale_pos)
+        # slider_yscale = QSlider(Qt.Horizontal, w)
+        # slider_yscale.setRange(1, 1000)
+        # slider_xscale.setValue(100)
+        # slider_yscale.valueChanged.connect(self.set_image_scale)
 
         slider_angle = QSlider(Qt.Horizontal, w)
         slider_angle.setRange(0, 360)
 
-        hl1.addWidget(slider_xscale)
-        x_scale_line = QSpinBox(w)
-        x_scale_line.setRange(1, 1000)
-        x_scale_line.setValue(100)
-        x_scale_line.valueChanged.connect(slider_xscale.setValue)
-        slider_xscale.valueChanged.connect(x_scale_line.setValue)
-        hl1.addWidget(x_scale_line)
+        # hl1.addWidget(slider_xscale)
+        # x_scale_line = QSpinBox(w)
+        # x_scale_line.setRange(1, 1000)
+        # x_scale_line.setValue(100)
+        # x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        # slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        # hl1.addWidget(x_scale_line)
+        #
+        # hl2.addWidget(slider_yscale)
+        # y_scale_line = QSpinBox(w)
+        # y_scale_line.setRange(1, 1000)
+        # y_scale_line.setValue(100)
+        # y_scale_line.valueChanged.connect(slider_yscale.setValue)
+        # slider_yscale.valueChanged.connect(y_scale_line.setValue)
 
-        hl2.addWidget(slider_yscale)
-        y_scale_line = QSpinBox(w)
-        y_scale_line.setRange(1, 1000)
-        y_scale_line.setValue(100)
-        y_scale_line.valueChanged.connect(slider_yscale.setValue)
-        slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        # hl2.addWidget(y_scale_line)
         slider_angle.valueChanged.connect(self.rotate_view)
-        hl2.addWidget(y_scale_line)
         hl3.addWidget(slider_angle)
 
         angle_sp = QSpinBox(w)
         angle_sp.setRange(1, 360)
         angle_sp.setValue(0)
-        angle_sp.valueChanged.connect(slider_yscale.setValue)
-        slider_yscale.valueChanged.connect(slider_angle.setValue)
+        angle_sp.valueChanged.connect(slider_angle.setValue)
+        slider_angle.valueChanged.connect(angle_sp.setValue)
         hl3.addWidget(angle_sp)
 
-        w.layout().addItem(hl1)
-        w.layout().addItem(hl2)
+        # w.layout().addItem(hl1)
+        # w.layout().addItem(hl2)
         w.layout().addItem(hl3)
 
         return w
@@ -639,7 +668,7 @@ class ImagePlotTime(ImagePlot):
         self.scene().addItem(itm)
         itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
-        self.raw_data.append(ImagePlotRawData(img, x, y, z))
+        self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
         self.images.append(itm)
 
         if self.x_end < x * self.x_scale:
@@ -649,6 +678,10 @@ class ImagePlotTime(ImagePlot):
         self.values.append([x, np.nan_to_num(y)])
         itm.signals.onItemSelection.connect(self.onImageClicked.emit)
         itm.show()
+
+        self.set_x_scale(100)
+        self.set_y_scale(150)
+        self.set_image_scale(250)
         return itm
 
     def clear_view(self):
@@ -675,14 +708,14 @@ class ImagePlotTime(ImagePlot):
             self.scene().removeItem(l)
         self.lines = []
         self.setSceneRect(self.scene().itemsBoundingRect())
-        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+        # self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
         # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
         self.add_grid(False)
 
     def set_x_scale(self, value):
-        self.x_scale = value
+        self.x_scale = (value / 50) * 0.001
         # self.x_scale = self.pixel_size_x / np.clip((len(self.images) * ((500 - value) / 100)), 0.00001, None)
-        self.x_scale = 0.01
+        # self.x_scale = 0.01
         self.update_position()
 
     def set_y_scale(self, value):
@@ -708,26 +741,33 @@ class ImagePlotTime(ImagePlot):
         hl1.addWidget(QLabel("Image-Scale", w))
         hl2 = QHBoxLayout(w)
         hl2.addWidget(QLabel("Y-Scale:", w))
+        hl3 = QHBoxLayout(w)
+        hl3.addWidget(QLabel("X-Scale:", w))
 
+
+        slider_imagescale = QSlider(Qt.Horizontal, w)
+        slider_imagescale.setRange(1, 1000)
+        slider_imagescale.setValue(self.x_scale)
+        slider_imagescale.valueChanged.connect(self.set_image_scale)
+        slider_yscale = QSlider(Qt.Horizontal, w)
+        slider_yscale.setRange(1, 1000)
+        slider_imagescale.setValue(self.y_scale)
+        slider_yscale.valueChanged.connect(self.set_y_scale)
 
         slider_xscale = QSlider(Qt.Horizontal, w)
         slider_xscale.setRange(1, 1000)
-        slider_xscale.setValue(self.x_scale)
-        slider_xscale.valueChanged.connect(self.set_image_scale)
-        slider_yscale = QSlider(Qt.Horizontal, w)
-        slider_yscale.setRange(1, 1000)
-        slider_xscale.setValue(self.y_scale)
-        slider_yscale.valueChanged.connect(self.set_y_scale)
+        slider_xscale.valueChanged.connect(self.set_x_scale)
 
-        hl1.addWidget(slider_xscale)
+        hl1.addWidget(slider_imagescale)
         hl2.addWidget(slider_yscale)
+        hl3.addWidget(slider_xscale)
 
-        x_scale_line = QSpinBox(w)
-        x_scale_line.setRange(1, 1000)
-        x_scale_line.setValue(self.x_scale)
-        x_scale_line.valueChanged.connect(slider_xscale.setValue)
-        slider_xscale.valueChanged.connect(x_scale_line.setValue)
-        hl1.addWidget(x_scale_line)
+        image_scale_line = QSpinBox(w)
+        image_scale_line.setRange(1, 1000)
+        image_scale_line.setValue(self.x_scale)
+        image_scale_line.valueChanged.connect(slider_imagescale.setValue)
+        slider_imagescale.valueChanged.connect(image_scale_line.setValue)
+        hl1.addWidget(image_scale_line)
 
         y_scale_line = QSpinBox(w)
         y_scale_line.setRange(1, 1000)
@@ -736,8 +776,15 @@ class ImagePlotTime(ImagePlot):
         slider_yscale.valueChanged.connect(y_scale_line.setValue)
         hl2.addWidget(y_scale_line)
 
+        x_scale_line = QSpinBox(w)
+        x_scale_line.setRange(1, 1000)
+        x_scale_line.setValue(self.x_scale)
+        x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        hl3.addWidget(x_scale_line)
 
         w.layout().addItem(hl1)
         w.layout().addItem(hl2)
+        w.layout().addItem(hl3)
 
         return w

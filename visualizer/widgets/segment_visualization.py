@@ -4,7 +4,7 @@ from core.corpus.shared.entities import *
 from core.gui.ewidgetbase import EMultiGraphicsView
 
 class SegmentVisualization(QScrollArea):
-    onSegmentSelected = pyqtSignal(object)
+    onSegmentSelected = pyqtSignal(object, object) # (BDSegment, List of DBScreenshots)
 
     def __init__(self, parent, visualizer = None):
         super(SegmentVisualization, self).__init__(parent)
@@ -35,7 +35,7 @@ class SegmentVisualization(QScrollArea):
             self.entries[self.screenshot_segm_mapping[scr_id]].screenshot_view.add_image(numpy_to_pixmap(img))
 
 class SegmentVisualizationItem(QWidget):
-    onSelected = pyqtSignal(object)
+    onSelected = pyqtSignal(object, object)
 
     def __init__(self, db_project:DBProject, db_segment:DBSegment, db_screenshots = None, imgs = None):
         super(SegmentVisualizationItem, self).__init__()
@@ -47,6 +47,7 @@ class SegmentVisualizationItem(QWidget):
         self.info_widget.setLayout(QVBoxLayout())
         self.info_widget.setFixedWidth(200)
         self.db_segment = db_segment
+        self.db_screenshots = db_screenshots
         self.setStyleSheet("QWidget{background:transparent;}")
 
 
@@ -61,7 +62,7 @@ class SegmentVisualizationItem(QWidget):
         self.hovered = False
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent):
-        self.onSelected.emit(self.db_segment)
+        self.onSelected.emit(self.db_segment, self.db_screenshots)
 
     def enterEvent(self, a0: QEvent):
         self.hovered = True

@@ -42,8 +42,11 @@ class VisualizerVisualization(QMainWindow):
             self.a_to_plot_list = self.toolbar.addAction(QIcon("qt_ui/icons/icon_favorites.png"), "")
             self.a_to_plot_list.triggered.connect(self.on_to_favorites)
 
+        self.a_reset = self.toolbar.addAction(QIcon("qt_ui/icons/icon_reset.png"), "")
+
         self.a_magnify.triggered.connect(self.on_focus_visualization)
         self.a_settings.triggered.connect(self.on_settings_opened)
+        self.a_reset.triggered.connect(self.on_reset)
 
         self.onToFavorites.connect(self.visualizer.vis_favorites.on_to_favorites)
 
@@ -82,6 +85,11 @@ class VisualizerVisualization(QMainWindow):
         dialog = FocusVisualizationWindow(self, self.visualization, self)
         dialog.showFullScreen()
 
+    def on_reset(self):
+        try:
+            self.visualization.reset_view()
+        except Exception as e:
+            print(e)
 
 class FocusVisualizationWindow(QMainWindow):
     def __init__(self, parent, visualization, old_parent:VisualizerVisualization):

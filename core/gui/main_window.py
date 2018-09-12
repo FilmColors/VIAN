@@ -478,7 +478,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.player_controls.setState(False)
 
-
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
         self.update_vian(False)
 

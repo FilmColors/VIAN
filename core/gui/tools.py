@@ -226,7 +226,7 @@ class ExportImageDialog(EDialogWidget):
 
             cv2.imwrite(file_name, img)
         except Exception as e:
-            raise e
+            print(e)
             pass
 
 

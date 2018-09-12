@@ -25,11 +25,14 @@ class VisSegmentLayout(PresentationWidget):
         self.segment_view = SegmentVisualization(self, self.visualizer)
         self.lower_widget.addWidget(self.segment_view)
 
-
         self.classification_object_filter_cbs = [QComboBox(), QComboBox()]
         self.classification_object_filter_indices = dict()
         self.plot_ab_space.set_heads_up_widget(self.classification_object_filter_cbs[0])
         self.classification_object_filter_cbs[0].currentTextChanged.connect(self.on_classification_object_changed)
+
+        self.segment_view.onSegmentSelected.connect(self.on_segments_selected)
+        self.plot_la_space.onImageClicked.connect(self.on_images_clicked)
+        self.plot_ab_space.onImageClicked.connect(self.on_images_clicked)
 
         self.upper_widget.addWidget(self.vis_plot_la_space)
         self.upper_widget.addWidget(self.vis_plot_ab_space)
@@ -159,3 +162,17 @@ class VisSegmentLayout(PresentationWidget):
             for p in obj['data']['projects'].keys():
                 dbproject = obj['data']['projects'][p]
                 self.db_projects[dbproject.project_id] = dbproject
+
+    @pyqtSlot(object, object)
+    def on_segments_selected(self, obj:DBSegment, scrs:List[DBScreenshot]):
+        indices = []
+        for idx, img in enumerate(self.plot_ab_space.images):
+            if img.mime_data in scrs:
+                indices.append(idx)
+        self.plot_ab_space.set_highlighted(indices)
+        self.plot_la_space.set_highlighted(indices)
+
+
+    @pyqtSlot(object)
+    def on_images_clicked(self, mime_data):
+        self.visualizer.on_screenshot_inspector(mime_data)
