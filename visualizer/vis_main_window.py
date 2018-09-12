@@ -27,6 +27,8 @@ class VIANVisualizer(QMainWindow):
 
         if not os.path.isfile(CORPUS_PATH):
             path = QFileDialog.getOpenFileName(self, filter="*.vian_corpus")[0]
+            if not os.path.isfile(path):
+                raise FileExistsError("No Corpus File Selected")
         else:
             path = CORPUS_PATH
         self.query_worker = QueryWorker(path)

@@ -1504,6 +1504,10 @@ class MainWindow(QtWidgets.QMainWindow):
             visualizer = VIANVisualizer()
             visualizer.show()
         except Exception as e:
+            try:
+                visualizer.deleteLater()
+            except:
+                pass
             print(e)
 
 
