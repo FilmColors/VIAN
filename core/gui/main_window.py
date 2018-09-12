@@ -1500,8 +1500,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player.on_loaded(self.project)
 
     def on_start_visualizer(self):
-        visualizer = VIANVisualizer()
-        visualizer.show()
+        try:
+            visualizer = VIANVisualizer()
+            visualizer.show()
+        except Exception as e:
+            print(e)
+
 
     # endregion
 
