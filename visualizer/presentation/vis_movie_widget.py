@@ -56,26 +56,33 @@ class VisMovieLayout(PresentationWidget):
         self.lower_right.addWidget(self.vis_plot_network)
         self.lower_left.addWidget(self.vis_plot_features)
 
+        self.plot_color_dt.onImageClicked.connect(self.on_images_clicked)
+        self.plot_la_space.onImageClicked.connect(self.on_images_clicked)
+        self.plot_ab_space.onImageClicked.connect(self.on_images_clicked)
+
         self.screenshots = dict() # TUPLE (DBScreenshot, Image, Used)
         self.color_features = dict()
 
     @pyqtSlot(object)
     def on_screenshot_loaded(self, scr):
-        self.screenshots[scr['screenshot_id']][1] = scr['image']
-        if scr['screenshot_id'] in self.color_features and scr['screenshot_id'] in self.screenshots:
-            l = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][0]
-            tx = self.screenshots[scr['screenshot_id']][0].time_ms
-            ty = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
-            x = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][1] - 128
-            y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
-            if self.screenshots[scr['screenshot_id']][2] == True:
-                self.plot_color_dt.add_image(tx, ty, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
-                self.plot_segments.add_item_to_segment(scr['screenshot_id'], self.screenshots[scr['screenshot_id']][1])
-                self.plot_ab_space.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = l)
-                self.plot_la_space.add_image(x, l, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = y)
-            self.plot_color_dt.frame_default()
-            self.plot_ab_space.frame_default()
-            self.plot_la_space.frame_default()
+        try:
+            self.screenshots[scr['screenshot_id']][1] = scr['image']
+            if scr['screenshot_id'] in self.color_features and scr['screenshot_id'] in self.screenshots:
+                l = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][0]
+                tx = self.screenshots[scr['screenshot_id']][0].time_ms
+                ty = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
+                x = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][1] - 128
+                y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
+                if self.screenshots[scr['screenshot_id']][2] == True:
+                    self.plot_color_dt.add_image(tx, ty, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
+                    self.plot_segments.add_item_to_segment(scr['screenshot_id'], self.screenshots[scr['screenshot_id']][1])
+                    self.plot_ab_space.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = l)
+                    self.plot_la_space.add_image(x, l, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = y)
+                self.plot_color_dt.frame_default()
+                self.plot_ab_space.frame_default()
+                self.plot_la_space.frame_default()
+        except Exception as e:
+            print(e)
 
     def on_classification_object_changed(self, name):
         if name in self.classification_object_filter_indices:
@@ -225,6 +232,9 @@ class VisMovieLayout(PresentationWidget):
 
         self.plot_network.create_graph(node_matrix, labels)
 
+    @pyqtSlot(object)
+    def on_images_clicked(self, mime_data):
+        self.visualizer.on_screenshot_inspector(mime_data)
 
 
 

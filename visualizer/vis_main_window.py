@@ -13,9 +13,10 @@ from visualizer.widgets.header_bar import *
 from visualizer.data.query_worker import QueryWorker, CORPUS_PATH
 from visualizer.data.screenshot_worker import ScreenshotWorker
 from visualizer.presentation.vis_favorites import VisFavoritesWindow
+from visualizer.presentation.screenshot_inspector import ScreenshotInspectorPopup
 
 class VIANVisualizer(QMainWindow):
-    onQuery = pyqtSignal(str, object, object, object, object, object)
+    onQuery = pyqtSignal(str, object, object, object, object, object, object)
     onAbortAllWorker = pyqtSignal()
     onLoadScreenshots = pyqtSignal(object)
 
@@ -33,6 +34,7 @@ class VIANVisualizer(QMainWindow):
         self.query_worker.moveToThread(self.query_thread)
         self.query_thread.start()
         self.onQuery.connect(self.query_worker.on_query)
+        self.query_worker.signals.onQueryResult.connect(self.on_query_result)
 
         self.screenshot_loader = ScreenshotWorker()
         self.screenshot_loader_thread = QThread()
@@ -82,6 +84,7 @@ class VIANVisualizer(QMainWindow):
 
         self.K = 300
 
+        self.classification_object_filter_indices = dict()
         # This is set during startup in the vis_search_widget #TUPLE (kwd, voc, cl_obj, word)
         self.all_keywords = dict()
         self.on_query("projects")
@@ -138,11 +141,27 @@ class VIANVisualizer(QMainWindow):
         if len(self.last_views) > 0:
             self.stack.setCurrentIndex(self.last_views.pop())
 
-    def on_query(self, query_type, filter_filmography=None, filter_keywords=None, filter_classification_objects=None, project_filters = None, segment_filters = None):
+    def on_query(self, query_type, filter_filmography=None, filter_keywords=None, filter_classification_objects=None, project_filters = None, segment_filters = None, shot_id = None):
         # if query_type in ["segments", "movie", "movie-movie_info"]:
         #     self.onAbortAllWorker.emit()
-        self.onQuery.emit(query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters)
+        self.onQuery.emit(query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id)
+
+    @pyqtSlot(object)
+    def on_query_result(self, obj):
+        if obj['type'] == "keywords":
+            cl_objs = []
+            for k in obj['data']['cl_objs'].keys():
+                cl_objs.append(obj['data']['cl_objs'][k])
+
+            for cl in cl_objs:
+                self.classification_object_filter_indices[cl.name] = cl.classification_object_id
 
     def on_load_screenshots(self, db_shots, callback):
         self.screenshot_loader.signals.onScreenshotLoaded.connect(callback)
         self.onLoadScreenshots.emit(db_shots)
+
+    def on_screenshot_inspector(self, db_screenshot:DBScreenshot):
+        print(self.db_root + db_screenshot.file_path)
+        img = cv2.imread(self.db_root + db_screenshot.file_path)
+        screenshot_inspector = ScreenshotInspectorPopup(self, db_screenshot, img, None, self.classification_object_filter_indices)
+        screenshot_inspector.show()

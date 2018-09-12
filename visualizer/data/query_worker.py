@@ -29,12 +29,12 @@ class QueryWorker(QObject):
         self.corpus.onQueryResult.connect(self.on_query_result)
 
 
-    @pyqtSlot(str, object, object, object, object, object)
-    def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters):
+    @pyqtSlot(str, object, object, object, object, object, object)
+    def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id):
         if self.user is None:
             self.initialize()
         try:
-            query = QueryRequestData(query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters)
+            query = QueryRequestData(query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id)
             self.corpus.submit_query(query)
         except Exception as e:
             raise e

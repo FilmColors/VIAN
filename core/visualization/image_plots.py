@@ -5,7 +5,7 @@ from collections import namedtuple
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF
+from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
 
 from core.data.computation import *
 from core.visualization.basic_vis import IVIANVisualization
@@ -17,6 +17,8 @@ ImagePlotRawData = namedtuple("ImagePlotRawData", ["image", "x", "y", "z"])
 
 
 class ImagePlot(QGraphicsView, IVIANVisualization):
+    onImageClicked = pyqtSignal(object)
+
     def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
         super(ImagePlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
@@ -241,9 +243,12 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             self.add_image(x=itm.x, y = itm.y, img=itm.image)
 
 
-class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
+class VIANPixmapGraphicsItemSignals(QObject):
     onItemSelection = pyqtSignal(object)
+    def __init__(self, parent = None):
+        super(VIANPixmapGraphicsItemSignals, self).__init__(parent)
 
+class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
     def __init__(self, pixmap, hover_text = None, mime_data = None):
         super(VIANPixmapGraphicsItem, self).__init__(pixmap)
         if hover_text != None:
@@ -251,6 +256,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.abs_pos = None
         self.pos_scale = 1.0
         self.mime_data = mime_data
+        self.signals = VIANPixmapGraphicsItemSignals()
 
         self.setAcceptHoverEvents(True)
         # self.hovered = False
@@ -265,8 +271,8 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.abs_pos = pos
 
     def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
-        super(VIANPixmapGraphicsItem, self).mousePressEvent(event)
-        self.onItemSelection.emit(self.mime_data)
+        # super(VIANPixmapGraphicsItem, self).mousePressEvent(event)
+        self.signals.onItemSelection.emit(self.mime_data)
 
 
 class ImagePlotCircular(ImagePlot):
@@ -292,6 +298,7 @@ class ImagePlotCircular(ImagePlot):
 
             itm.setScale(self.img_scale)
             itm.scale_pos(self.pos_scale)
+            itm.signals.onItemSelection.connect(self.onImageClicked.emit)
             self.images.append(itm)
 
             if luminance is not None:
@@ -397,6 +404,7 @@ class ImagePlotPlane(ImagePlot):
         itm.setPos(np.nan_to_num(x * self.magnification),np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification))
         self.images.append(itm)
         itm.setZValue(z)
+        itm.signals.onItemSelection.connect(self.onImageClicked.emit)
 
         self.luminances.append([y, itm])
 
@@ -411,8 +419,6 @@ class ImagePlotPlane(ImagePlot):
                 self.images[idx].setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification))
                 self.images[idx].setZValue(z)
             except: continue
-
-
 
     def add_grid(self):
         pen = QPen()
@@ -641,6 +647,7 @@ class ImagePlotTime(ImagePlot):
 
         self.luminances.append([np.nan_to_num(y), itm])
         self.values.append([x, np.nan_to_num(y)])
+        itm.signals.onItemSelection.connect(self.onImageClicked.emit)
         itm.show()
         return itm
 

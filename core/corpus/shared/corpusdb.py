@@ -1205,14 +1205,14 @@ class DatasetCorpusDB(CorpusDB):
             elif query.query_type == "segments":
                 return self.get_segment_info(query)
 
-            elif query.query_type == "screenshots":
-                pass
+            elif query.query_type == "single_screenshot":
+                return self.get_single_screenshot_info(query)
             else:
                 return None
 
             return dict(type="invalid")
-        except:
-            return dict(type="error")
+        except Exception as e:
+            return dict(type="error" + str(e))
 
     def parse_filmography_query(self, query:FilmographyQuery):
         sql = create_filmography_query(query)
@@ -1283,6 +1283,14 @@ class DatasetCorpusDB(CorpusDB):
                                                    features=features,
                                                    project=project,
                                                    screenshot_segm_mapping=screenshot_segm_mapping))
+
+    def get_single_screenshot_info(self, query:QueryRequestData):
+        result = self.db.query(Q_SCREENSHOT_PALETTE_ALL_COBJ + str(query.shot_id))
+        data = dict()
+        for r in result:
+            data[r['classification_object_id']] = dict(r)
+        return dict(type="single_screenshot", data_by_classification_object=data)
+
 
     def get_color_dt_info(self, project_id):
         query = "select *, ANALYSES.id as \"analysis_id\" from ANALYSES " \

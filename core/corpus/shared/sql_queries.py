@@ -32,6 +32,19 @@ Q_FILMOGRAPHY = ("select * from FILMOGRAPHY "
                  "where FILMOGRAPHY.", " in ",
                  " and FILMOGRAPHY.", " in ")
 
+Q_SCREENSHOT_PALETTE = "select * from SHOTS " \
+                       "inner join ANALYSES on ANALYSES.target_container_id = SHOTS.id " \
+                       "where ANALYSES.target_container_type = \"Screenshot\" " \
+                       "and ANALYSES.analysis_name = \"ColorPaletteAnalysis\" " \
+                       "and SHOTS.id = "
+
+Q_SCREENSHOT_PALETTE_ALL_COBJ = "select MAIN_SHOTS.*, ANALYSES.* from SHOTS as MAIN_SHOTS " \
+                                "inner join SHOTS on SHOTS.time_ms = MAIN_SHOTS.time_ms and SHOTS.project_id = MAIN_SHOTS.project_id " \
+                                "inner join ANALYSES on ANALYSES.target_container_id = MAIN_SHOTS.id " \
+                                "where ANALYSES.target_container_type = \"Screenshot\" " \
+                                "and ANALYSES.analysis_name = \"ColorPaletteAnalysis\" " \
+                                "and SHOTS.id = "
+
 def create_filmography_query(query:FilmographyQuery):
     q = Q_FILMOGRAPHY[0]
     c = 0

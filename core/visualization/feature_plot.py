@@ -206,6 +206,7 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
 
 class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     onFeatureAdded = pyqtSignal(object)
+    onSegmentClicked = pyqtSignal(object)
 
     def __init__(self, parent, title =""):
         super(GenericFeaturePlot, self).__init__(parent)
@@ -242,7 +243,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_base_height = 900
         self.feature_height = 400
 
-        self.segment_height = 150
+        self.segment_height = 600
 
         self.n_grid = 12
         self.controls_itm = None
@@ -265,11 +266,28 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
     def create_timeline(self, segments: List[SegmentTuple]):
         for s in segments:
-            itm = self.scene().addRect(s.start * self.magnification, self.feature_base_height,
-                                       (s.end - s.start) * self.magnification, - self.segment_height,
-                                       QPen(), QBrush(QColor(0, 113, 122)))
+            # itm = self.scene().addRect(s.start * self.magnification, self.feature_base_height,
+            #                            (s.end - s.start) * self.magnification, - self.segment_height,
+            #                            QPen(), QBrush(QColor(0, 113, 122)))
+
+            itm = SegmentRectItem(s.start * self.magnification, self.feature_base_height,
+                                                                  (s.end - s.start) * self.magnification, - self.segment_height,
+                                                                  QPen(), QBrush(QColor(0, 113, 122)), s)
+            self.scene().addItem(itm)
             self.segment_items.append(itm)
-            self.segments = segments
+
+        self.segments = segments
+
+    def on_x_scale(self, new_scale):
+        for s in self.segment_items:
+            s.set_x_scale(new_scale)
+        for f in self.feature_items:
+            for s in f:
+                s.set_x_scale(new_scale)
+        rect = self.scene().itemsBoundingRect()
+        rect.adjust(-1000,-1000,2000,2000)
+        self.scene().setSceneRect(rect)
+
 
     def create_feature(self, feature:FeatureTuple, show = False):
         if feature not in self.all_possible_features:
@@ -281,14 +299,13 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         itms = []
         for sid in feature.segment_ids:
             if sid >= len(self.segments):
-                return
+                continue
 
             s = self.segments[sid]
             itm = FeatureRectItem(s.start * self.magnification, y - self.spacing,
                                        (s.end - s.start) * self.magnification,
                                        - self.feature_height,
                                        QPen(), QBrush(QColor(100, 113, 122, 150)))
-            self.scene().addItem(itm)
             self.scene().addItem(itm)
             itms.append(itm)
 
@@ -303,6 +320,12 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         rect.adjust(-1000,-1000,2000,2000)
         self.scene().setSceneRect(rect)
 
+    def frame_default(self):
+        rect = self.scene().itemsBoundingRect()
+        rect.adjust(-1000,-1000,2000,2000)
+        self.scene().setSceneRect(rect)
+        self.fitInView(rect, Qt.KeepAspectRatio)
+
     def create_title(self):
         if self.title == "":
             return
@@ -316,6 +339,8 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         if event.key() == Qt.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
+        elif event.key() == Qt.Key_F:
+            self.frame_default()
         else:
             event.ignore()
 
@@ -378,11 +403,17 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_labels.clear()
 
     def clear_features(self):
-        for q in self.feature_items:
-            for f in q:
-                self.scene().removeItem(f)
-        for f in self.feature_labels:
-            self.scene().removeItem(f)
+        # for q in self.feature_items:
+        #     for f in q:
+        #         self.scene().removeItem(f)
+        #         self.scene().update()
+        # for f in self.feature_labels:
+        #     self.scene().removeItem(f)
+
+        self.scene().clear()
+        self.segment_items = []
+        self.create_timeline(self.segments)
+
         self.feature_items = []
         self.feature_labels = []
         self.features = []
@@ -416,6 +447,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         w = FeaturesParamWidget(None, [])
         self.onFeatureAdded.connect(w.on_features_changed)
         w.onFeatureActivated.connect(self.on_filter_update)
+        w.onXScale.connect(self.on_x_scale)
         return w
 
     def get_raw_data(self):
@@ -431,10 +463,12 @@ class FeatureRectItem(QGraphicsRectItem):
     def __init__(self, x, y, w, h, pen, brush):
         super(FeatureRectItem, self).__init__(x, y, w, h)
         self.setAcceptHoverEvents(True)
+        self.init_pos = QPoint(x, y)
+        self.init_size = QSize(w, h)
         self.c_unhovered = QBrush(QColor(100, 113, 122, 150))
         self.c_hovered = QBrush(QColor(100, 113, 122, 250))
         self.setPen(pen)
-        self.setBrush(brush)
+        self.setBrush(QBrush(QColor(100, 113, 122, 150)))
 
     def hoverEnterEvent(self, event: 'QGraphicsSceneHoverEvent'):
         self.setBrush(self.c_hovered)
@@ -446,15 +480,65 @@ class FeatureRectItem(QGraphicsRectItem):
         self.scene().update(self.scene().itemsBoundingRect())
         super(FeatureRectItem, self).hoverLeaveEvent(event)
 
+    def set_x_scale(self, scale):
+        x = self.init_pos.x() * scale
+        w = self.init_size.width() * scale
+        self.setRect(x, self.init_pos.y(), w, self.init_size.height())
+
+class QGraphicsItemSignals(QObject):
+    onSegmentClicked = pyqtSignal(object)
+
+    def __init__(self):
+        super(QGraphicsItemSignals, self).__init__()
+
+class SegmentRectItem(QGraphicsRectItem):
+    def __init__(self, x, y, w, h, pen, brush, segment):
+        super(SegmentRectItem, self).__init__(x, y, w, h)
+        self.setAcceptHoverEvents(True)
+        self.init_pos = QPoint(x, y)
+        self.init_size = QSize(w, h)
+        self.c_unhovered = QBrush(QColor(0, 113, 122, 150))
+        self.c_hovered = QBrush(QColor(0, 113, 122, 250))
+        self.setPen(pen)
+        self.setBrush(QBrush(QColor(0, 113, 122, 150)))
+        self.segment = segment
+        self.signals = QGraphicsItemSignals()
+        self.setToolTip("Double Click to inspect Segment")
+
+    def hoverEnterEvent(self, event: 'QGraphicsSceneHoverEvent'):
+        self.setBrush(self.c_hovered)
+        self.scene().update(self.scene().itemsBoundingRect())
+        super(SegmentRectItem, self).hoverEnterEvent(event)
+
+    def hoverLeaveEvent(self, event: 'QGraphicsSceneHoverEvent'):
+        self.setBrush(self.c_unhovered)
+        self.scene().update(self.scene().itemsBoundingRect())
+        super(SegmentRectItem, self).hoverLeaveEvent(event)
+
+    def mouseDoubleClickEvent(self, event: 'QGraphicsSceneMouseEvent'):
+        self.signals.onSegmentClicked.emit(self.segment)
+
+    def set_x_scale(self, scale):
+        x = self.init_pos.x() * scale
+        w = self.init_size.width() * scale
+        self.setRect(x, self.init_pos.y(), w, self.init_size.height())
 
 class FeaturesParamWidget(QWidget):
     onFeatureActivated = pyqtSignal(object)
+    onXScale = pyqtSignal(float)
 
     def __init__(self, parent, features):
         super(FeaturesParamWidget, self).__init__(parent)
         self.setLayout(QVBoxLayout())
         self.param_list = QListWidget(self)
         self.layout().addWidget(self.param_list)
+        self.sl_x_scale = QSlider(Qt.Horizontal, self)
+        self.sl_x_scale.setRange(1, 100)
+        self.hb_x_scale = QHBoxLayout(self)
+        self.hb_x_scale.addWidget(QLabel("x-Scale", self))
+        self.hb_x_scale.addWidget(self.sl_x_scale)
+        self.sl_x_scale.valueChanged.connect(self.on_slider_x_scale)
+        self.layout().addItem(self.hb_x_scale)
         self.param_list.itemChanged.connect(self.on_clicked)
         self.features = []
         self.show()
@@ -470,6 +554,9 @@ class FeaturesParamWidget(QWidget):
             self.param_list.addItem(itm)
             self.features.append((itm, f))
 
+    def on_slider_x_scale(self):
+        v = self.sl_x_scale.value() / 10
+        self.onXScale.emit(v)
 
     def on_clicked(self):
         result = []

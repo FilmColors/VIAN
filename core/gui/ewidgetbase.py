@@ -162,6 +162,8 @@ class EGraphicsView(QGraphicsView):
         self.gscene = QGraphicsScene()
         self.setScene(self.gscene)
         self.pixmap = None
+        self.heads_up_widget = None
+
         self.auto_frame = auto_frame
         self.ctrl_is_pressed = False
         self.curr_scale = 1.0
@@ -255,6 +257,13 @@ class EGraphicsView(QGraphicsView):
                                                 directory = self.main_window.project.export_dir,
                                                 filter ="*.png *.jpg")[0]
         cv2.imwrite(file_name, img)
+
+    def set_heads_up_widget(self, widget:QWidget):
+        self.heads_up_widget = widget
+        widget.setParent(self)
+        widget.move(5,5)
+        widget.resize(150, 20)
+        widget.show()
 
 
 class EMultiGraphicsView(QGraphicsView):

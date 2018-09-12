@@ -1056,7 +1056,7 @@ class QueryRequestData():
     :ivar filter_classification_objects: A List of ClassificationObject IDS to filter
     """
     def __init__(self, query_type, filter_filmography = None, filter_keywords = None,
-                 filter_classification_objects = None, project_filter = None, segment_filters = None):
+                 filter_classification_objects = None, project_filter = None, segment_filters = None, shot_id = None):
         """
         
         :param query_type: 
@@ -1070,6 +1070,7 @@ class QueryRequestData():
         self.filter_keywords = filter_keywords
         self.filter_classification_objects = filter_classification_objects
         self.segment_filters = segment_filters
+        self.shot_id = shot_id
 
 
 class FilmographyQuery():
