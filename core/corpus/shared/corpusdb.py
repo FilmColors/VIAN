@@ -224,6 +224,7 @@ class DatasetCorpusDB(CorpusDB):
     def connect(self, path):
         self.path = path
         self.db = ds.connect(path)
+        self.root_dir = os.path.split(self.path)[0].replace("sqlite:///", "") + "/"
         print("Database Root:", self.root_dir)
 
     def disconnect(self):
@@ -1352,9 +1353,11 @@ class DatasetCorpusDB(CorpusDB):
                 for attr, value in data.items():
                     setattr(self, attr, value)
             self.ftp_dir = self.root_dir + FTP_DIR
+            self.sql_path = "sqlite:///" + path.replace(".vian_corpus", ".vian_corpus_sql")
+
+            print(self.sql_path)
             self.connect(self.sql_path)
         except Exception as e:
-
             print("Exception in DatasetCorpusDB.load()", str(e))
             return False
         return self

@@ -33,6 +33,7 @@ class VisHomeWidget(PresentationWidget):
 
                 self.contribution_list.add_entry(None, dbproject=dbproject, filmography = filmography)
             self.visualizer.db_root = obj['data']['root']
+            print(self.visualizer.db_root)
             self.visualizer.screenshot_loader.initialize(self.visualizer.db_root)
 
 

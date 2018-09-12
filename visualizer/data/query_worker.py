@@ -23,7 +23,7 @@ class QueryWorker(QObject):
 
     def initialize(self):
         self.user = DBContributor(name="Gaudenz",
-                                  image_path="C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\user_img.jpg",
+                                  image_path="C:/Users/Gaudenz Halter/Documents/VIAN/corpora/user_img.jpg",
                                   affiliation="Nahh")
         self.corpus.connect_user(self.user, self.path)
         self.corpus.onQueryResult.connect(self.on_query_result)

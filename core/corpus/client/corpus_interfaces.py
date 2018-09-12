@@ -233,6 +233,7 @@ class LocalCorpusInterface(CorpusInterface):
             user = self.local_corpus.connect_user(user)
             self.onConnected.emit(True, self.local_corpus.get_projects(), user)
         except Exception as e:
+            print("Tries", options)
             print("Exception in LocalCorpusInterface.connect_user()", str(e))
             self.onConnected.emit(False, None, None)
 
