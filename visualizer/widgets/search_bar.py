@@ -14,9 +14,11 @@ class VisSearchBar(QWidget):
         path = os.path.abspath("qt_ui/visualizer/VisSearchBar.ui")
         uic.loadUi(path, self)
 
+        self.comboBox_History.addItem("History")
         self.visualizer = visualizer
         self.btn_Search.clicked.connect(self.on_query_clicked)
 
     def on_query_clicked(self):
         t = self.comboBox_Type.currentText().lower()
-        self.onQuery.emit(t, self.lineEdit_Query.text(), self.comboBox_Corpus.currentIndex())
+        # self.lineEdit_Query.text()
+        self.onQuery.emit(t, "", self.comboBox_Corpus.currentIndex())

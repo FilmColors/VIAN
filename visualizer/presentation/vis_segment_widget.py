@@ -13,17 +13,17 @@ class VisSegmentLayout(PresentationWidget):
     def __init__(self, parent, visualizer):
         super(VisSegmentLayout, self).__init__(parent, visualizer)#, "qt_ui/visualizer/VisSegmentsLayout.ui")
         self.setLayout(QVBoxLayout())
-        self.vsplit = QSplitter(Qt.Vertical, self)
+        self.vsplit = QSplitter(Qt.Horizontal, self)
         self.layout().addWidget(self.vsplit)
-        self.upper_widget = QSplitter(self)
-        self.lower_widget = QSplitter(self)
+        self.left_widget = QSplitter(Qt.Vertical, self)
+        self.right_widget = QSplitter(Qt.Vertical, self)
 
         self.plot_la_space = ImagePlotPlane(self)
         self.plot_ab_space = ImagePlotCircular(self)
         self.vis_plot_la_space = VisualizerVisualization(self, self.visualizer, self.plot_la_space, self.plot_la_space.get_param_widget())
         self.vis_plot_ab_space = VisualizerVisualization(self, self.visualizer, self.plot_ab_space, self.plot_ab_space.get_param_widget())
         self.segment_view = SegmentVisualization(self, self.visualizer)
-        self.lower_widget.addWidget(self.segment_view)
+        self.right_widget.addWidget(self.segment_view)
 
         self.classification_object_filter_cbs = [QComboBox(), QComboBox()]
         self.classification_object_filter_indices = dict()
@@ -33,12 +33,14 @@ class VisSegmentLayout(PresentationWidget):
         self.segment_view.onSegmentSelected.connect(self.on_segments_selected)
         self.plot_la_space.onImageClicked.connect(self.on_images_clicked)
         self.plot_ab_space.onImageClicked.connect(self.on_images_clicked)
+        self.segment_view.onSegmentSelected.connect(self.on_segments_selected)
+        self.segment_view.onSegmentHovered.connect(self.on_segments_selected)
 
-        self.upper_widget.addWidget(self.vis_plot_la_space)
-        self.upper_widget.addWidget(self.vis_plot_ab_space)
+        self.left_widget.addWidget(self.vis_plot_la_space)
+        self.left_widget.addWidget(self.vis_plot_ab_space)
 
-        self.vsplit.addWidget(self.upper_widget)
-        self.vsplit.addWidget(self.lower_widget)
+        self.vsplit.addWidget(self.left_widget)
+        self.vsplit.addWidget(self.right_widget)
         self.segment_data = dict()
         self.screenshot_data = dict()
         self.color_features = dict()
@@ -48,18 +50,19 @@ class VisSegmentLayout(PresentationWidget):
     def on_screenshot_loaded(self, scr):
         if scr['screenshot_id'] not in self.screenshot_data:
             return
-
-        self.screenshot_data[scr['screenshot_id']][1] = scr['image']
-        if scr['screenshot_id'] in self.color_features and scr['screenshot_id'] in self.screenshot_data:
-            l = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][0]
-            x = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][1] - 128
-            y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
-            if self.screenshot_data[scr['screenshot_id']][2] == True:
-                if self.screenshot_data[scr['screenshot_id']][1] is not None:
-                    self.plot_ab_space.add_image(x, y, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0], z = l)
-                    self.plot_la_space.add_image(x, l, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0], z = y)
-                    self.segment_view.add_item_to_segment(scr['screenshot_id'], self.screenshot_data[scr['screenshot_id']][1])
-
+        try:
+            self.screenshot_data[scr['screenshot_id']][1] = scr['image']
+            if scr['screenshot_id'] in self.color_features and scr['screenshot_id'] in self.screenshot_data:
+                l = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][0]
+                x = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][1] - 128
+                y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
+                if self.screenshot_data[scr['screenshot_id']][2] == True:
+                    if self.screenshot_data[scr['screenshot_id']][1] is not None:
+                        self.plot_ab_space.add_image(x, y, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0], z = l)
+                        self.plot_la_space.add_image(x, l, self.screenshot_data[scr['screenshot_id']][1], False, mime_data=self.screenshot_data[scr['screenshot_id']][0], z = y)
+                        self.segment_view.add_item_to_segment(scr['screenshot_id'], self.screenshot_data[scr['screenshot_id']][1])
+        except:
+            pass
     def on_classification_object_changed(self, name):
         if name in self.classification_object_filter_indices:
             idx = self.classification_object_filter_indices[name]

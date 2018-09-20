@@ -67,9 +67,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="lineEdit_Query">
+    <widget class="QComboBox" name="comboBox_History">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -78,12 +78,6 @@
       <size>
        <width>0</width>
        <height>30</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>1000</width>
-       <height>16777215</height>
       </size>
      </property>
     </widget>

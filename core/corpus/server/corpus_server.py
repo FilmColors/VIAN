@@ -21,9 +21,6 @@ try:
 except:
     def load_project_headless(*args, **kwargs): pass
 
-from pyftpdlib.authorizers import DummyAuthorizer
-from pyftpdlib.handlers import FTPHandler
-from pyftpdlib.servers import FTPServer
 
 from core.corpus.server.corpus_server_http import *
 import dataset as ds

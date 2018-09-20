@@ -72,70 +72,81 @@ N_PROJECT = 500
 
 
 if __name__ == '__main__':
-    if not os.path.isdir(CORPUS_ROOT + "\\DemoCorpus\\"):
-        db = create_corpus(CORPUS_ROOT, name="DemoCorpus")
+    ##TEst Corpus
+    # if not os.path.isdir(CORPUS_ROOT + "\\DemoCorpus\\"):
+    #     db = create_corpus(CORPUS_ROOT, name="DemoCorpus")
+    #     # Create Users
+    #     users = parse_users(USER_CSV)
+    #     for u in users:
+    #         db.add_user(DBContributor(u['name'], "", u['affiliation'], u['password'], u['email']))
+    # # Commit all Projects to the Corpus
+    # zipped = glob.glob("F:/_projects/*.zip")
+    # to_add = ["329", "272", "200", "217", "415", "3100", "207"]
+    # for i, f in enumerate(zipped):
+    #     for a in to_add:
+    #         if a in f:
+    #             print(i, "/", len(zipped))
+    #             commit_no_prepare(f, corpus_path="F:\\_corpus\\DemoCorpus\\DemoCorpus.vian_corpus")
+
+    # True SCRIPT begins Here, upper is for Pajarola
+    # Create a Corpus if it does not already exist
+    if not os.path.isdir(CORPUS_ROOT + "\\ERC_FilmColorsCorpus\\"):
+        db = create_corpus(CORPUS_ROOT)
         # Create Users
         users = parse_users(USER_CSV)
         for u in users:
             db.add_user(DBContributor(u['name'], "", u['affiliation'], u['password'], u['email']))
 
-    # True SCRIPT begins Here, upper is for Pajarola
-    # Create a Corpus if it does not already exist
-    # if not os.path.isdir(CORPUS_ROOT + "\\ERC_FilmColorsCorpus\\"):
-    #     db = create_corpus(CORPUS_ROOT)
-    #     # Create Users
-    #     users = parse_users(USER_CSV)
-    #     for u in users:
-    #         db.add_user(DBContributor(u['name'], "", u['affiliation'], u['password'], u['email']))
-
-    # # Prepare All Projects (Export it's masks and screenshots, create a Zip file)
-    # c = 0
-    # zipped = glob.glob("F:/_projects/*.zip")
-    #
-    # project_files = glob.glob("F:/_projects/*/*.eext")
-    # to_prepare = []
-    # for f in project_files:
-    #     prepare = True
-    #     for q in zipped:
-    #         if f.replace("\\", "/").split("/").pop().replace(".eext", "") in q:
-    #             prepare = False
-    #             break
-    #     if prepare:
-    #         to_prepare.append(f)
-    #
-    # print("To Prepare:", len(to_prepare), "of", len(project_files))
-    # threads = []
-    # c = 0
-    # n_threads = 8
-    # for i, file in enumerate(to_prepare):
-    #     c += 1
-    #     if i > N_PROJECT:
-    #         break
-    #
-    #     if c % n_threads == 0:
-    #         for t in threads:
-    #             t.join()
-    #         threads = []
-    #         print(c, "/", len(to_prepare))
-    #     print("\n#### ---", (str(c) + "/" + str(len(project_files))).rjust(6), f, "---####")
-    #
-    #     thread = Thread(target=prepare_project, args=(file, None))
-    #     thread.start()
-    #     threads.append(thread)
-    #
-    # for t in threads:
-    #     t.join()
-    # zipped = glob.glob("F:/_projects/*.zip")
-    # for i, f in enumerate(zipped):
-    #     print(i, "/", len(zipped))
-    #     commit_no_prepare(f)
-
-
-    # Commit all Projects to the Corpus
+    # Prepare All Projects (Export it's masks and screenshots, create a Zip file)
+    c = 0
     zipped = glob.glob("F:/_projects/*.zip")
-    to_add = ["329", "272", "200", "217", "415", "3100", "207"]
+
+    project_files = glob.glob("F:/_projects/*/*.eext")
+    to_prepare = []
+    for f in project_files:
+        prepare = True
+        for q in zipped:
+            if f.replace("\\", "/").split("/").pop().replace(".eext", "") in q:
+                prepare = False
+                break
+        if prepare:
+            to_prepare.append(f)
+
+    print("To Prepare:", len(to_prepare), "of", len(project_files))
+    threads = []
+    c = 0
+    n_threads = 8
+    for i, file in enumerate(to_prepare):
+        c += 1
+        if i > N_PROJECT:
+            break
+
+        if c % n_threads == 0:
+            for t in threads:
+                t.join()
+            threads = []
+            print(c, "/", len(to_prepare))
+        print("\n#### ---", (str(c) + "/" + str(len(project_files))).rjust(6), f, "---####")
+
+        thread = Thread(target=prepare_project, args=(file, None))
+        thread.start()
+        threads.append(thread)
+
+    for t in threads:
+        t.join()
+    zipped = glob.glob("F:/_projects/*.zip")
+    errors = []
     for i, f in enumerate(zipped):
-        for a in to_add:
-            if a in f:
-                print(i, "/", len(zipped))
-                commit_no_prepare(f, corpus_path="F:\\_corpus\\DemoCorpus\\DemoCorpus.vian_corpus")
+        print(i, "/", len(zipped))
+        try:
+            commit_no_prepare(f)
+        except:
+            print("Error", f)
+            print("\n")
+            errors.append(f)
+
+    for f in errors:
+        print(f)
+
+
+

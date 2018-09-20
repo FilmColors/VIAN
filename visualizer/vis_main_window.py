@@ -37,6 +37,8 @@ class VIANVisualizer(QMainWindow):
         self.query_thread.start()
         self.onQuery.connect(self.query_worker.on_query)
         self.query_worker.signals.onQueryResult.connect(self.on_query_result)
+        self.query_worker.signals.onStartQuery.connect(self.on_query_started)
+        self.query_worker.signals.onFinishedQuery.connect(self.on_query_finished)
 
         self.screenshot_loader = ScreenshotWorker()
         self.screenshot_loader_thread = QThread()
@@ -44,6 +46,12 @@ class VIANVisualizer(QMainWindow):
         self.screenshot_loader_thread.start()
         self.onLoadScreenshots.connect(self.screenshot_loader.on_load_screenshots)
         self.onAbortAllWorker.connect(self.screenshot_loader.abort)
+
+
+        self.stbar = QStatusBar(self)
+        self.stlabel = QLabel(self)
+        self.stbar.addPermanentWidget(self.stlabel)
+        self.setStatusBar(self.stbar)
 
         #region Layout
         self.center = QWidget(self)
@@ -91,6 +99,18 @@ class VIANVisualizer(QMainWindow):
         self.all_keywords = dict()
         self.on_query("projects")
         self.on_query("keywords")
+
+    @pyqtSlot(str)
+    def on_query_started(self, string):
+        print("Querying, " + string)
+        self.stlabel.setText("Querying, " + string)
+        self.stlabel.setStyleSheet("QLabel{color: orange;}")
+
+    @pyqtSlot(str)
+    def on_query_finished(self, string):
+        print("Finished, " + string)
+        self.stlabel.setText("Finished, " + string)
+        self.stlabel.setStyleSheet("QLabel{color: green;}")
 
     @pyqtSlot(object)
     def on_project_selected(self, dbproject):

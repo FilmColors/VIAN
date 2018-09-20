@@ -53,7 +53,6 @@ def get_current_time():
 
 #endregion
 
-
 #region Entities
 class DBEntity():
 
@@ -92,6 +91,7 @@ class DBProject(DBEntity):
         self.folder = ""
         self.path = ""
         self.archive = ""
+        self.thumbnail_path = ""
 
     def from_project(self, project: VIANProject, thumbnail_path = ""):
         self.name = project.name
@@ -121,7 +121,10 @@ class DBProject(DBEntity):
         self.folder = movie_entry['folder']
         self.archive = movie_entry['archive']
         self.checked_out_user = movie_entry['checked_out_user']
-        self.thumbnail_path = movie_entry['thumbnail_path']
+        try:
+            self.thumbnail_path = movie_entry['thumbnail_path']
+        except:
+            pass
         return self
 
     def to_database(self, include_id = False):
@@ -1044,6 +1047,37 @@ class DBFilmographicalData(DBEntity):
 
     def __str__(self):
         return (str(self.__dict__))
+
+
+class DBContributorMapping(DBEntity):
+    def __init__(self, project_id=-1, contributor_id=-1):
+        self.entry_id = -1
+
+        self.project_id = project_id
+        self.contributor_id = contributor_id
+
+    def from_database(self, entry):
+        try:
+            self.entry_id = entry['id']
+            self.project_id = entry['project_id']
+            self.contributor_id = entry['contributor_id']
+        except Exception as e:
+            print("Mapping not found", entry['id'], e)
+        return self
+
+    def to_database(self, include_id=False):
+        if include_id:
+            result = dict(
+                id=self.entry_id,
+                project_id=self.project_id,
+                contributor_id=self.contributor_id,
+            )
+        else:
+            result = dict(
+                project_id=self.project_id,
+                contributor_id=self.contributor_id,
+            )
+        return result
 
 #endregion
 

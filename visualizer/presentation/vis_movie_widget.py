@@ -60,6 +60,8 @@ class VisMovieLayout(PresentationWidget):
         self.plot_la_space.onImageClicked.connect(self.on_images_clicked)
         self.plot_ab_space.onImageClicked.connect(self.on_images_clicked)
         self.plot_segments.onSegmentSelected.connect(self.on_segments_selected)
+        self.plot_segments.onSegmentHovered.connect(self.on_segments_selected)
+        self.plot_segments.onSegmentLeave.connect(self.on_reset_hover)
 
         self.screenshots = dict() # TUPLE (DBScreenshot, Image, Used)
         self.color_features = dict()
@@ -79,6 +81,7 @@ class VisMovieLayout(PresentationWidget):
                     self.plot_segments.add_item_to_segment(scr['screenshot_id'], self.screenshots[scr['screenshot_id']][1])
                     self.plot_ab_space.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = l)
                     self.plot_la_space.add_image(x, l, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = y)
+                    self.plot_features.add_image(tx, 0, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
                 self.plot_color_dt.frame_default()
                 self.plot_ab_space.frame_default()
                 self.plot_la_space.frame_default()
@@ -248,5 +251,10 @@ class VisMovieLayout(PresentationWidget):
     def on_images_clicked(self, mime_data):
         self.visualizer.on_screenshot_inspector(mime_data)
 
+    @pyqtSlot(object, object)
+    def on_reset_hover(self, a, b):
+        self.vis_plot_ab_space.on_reset()
+        self.vis_plot_color_dt.on_reset()
+        self.vis_plot_la_space.on_reset()
 
 

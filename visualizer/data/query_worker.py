@@ -5,9 +5,11 @@ from core.corpus.client.corpus_interfaces import *
 class QueryWorkerSignals(QObject):
     onQueryResult = pyqtSignal(object)
     onMessage = pyqtSignal(str)
+    onStartQuery = pyqtSignal(str)
+    onFinishedQuery = pyqtSignal(str)
 
 
-CORPUS_PATH = "F:\\_corpus\\Backup\\ERC_FilmColorsCorpus_03\\ERC_FilmColorsCorpus.vian_corpus"
+CORPUS_PATH = "F:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"
 # CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
 class QueryWorker(QObject):
     def __init__(self, path):
@@ -31,6 +33,7 @@ class QueryWorker(QObject):
 
     @pyqtSlot(str, object, object, object, object, object, object)
     def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id):
+        self.signals.onStartQuery.emit(query_type)
         if self.user is None:
             self.initialize()
         try:
@@ -41,6 +44,7 @@ class QueryWorker(QObject):
 
     @pyqtSlot(object)
     def on_query_result(self, result):
+        self.signals.onFinishedQuery.emit("Done")
         if result is None: return
         self.signals.onQueryResult.emit(result)
 

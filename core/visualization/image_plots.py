@@ -219,7 +219,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
     def get_heads_up_widget(self):
         return self.heads_up_widget
 
-    def set_highlighted(self, indices):
+    def set_highlighted(self, indices, reset = False):
         if len(indices) > 0:
             for idx, img in enumerate(self.images):
                 if idx in indices:
@@ -229,9 +229,10 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
                     img.set_transparency(0.2)
                     img.setZValue(-10.0)
         else:
-            for idx, img in enumerate(self.images):
-                img.set_transparency(1.0)
-                img.setZValue(0.0)
+            if reset:
+                for idx, img in enumerate(self.images):
+                    img.set_transparency(1.0)
+                    img.setZValue(0.0)
 
     @pyqtSlot(int)
     def on_high_cut(self, value):
@@ -257,7 +258,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             self.add_image(x=itm.x, y = itm.y, img=itm.image)
 
     def reset_view(self):
-        self.set_highlighted([])
+        self.set_highlighted([], True)
 
 class VIANPixmapGraphicsItemSignals(QObject):
     onItemSelection = pyqtSignal(object)
@@ -275,13 +276,16 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.mime_data = mime_data
         self.signals = VIANPixmapGraphicsItemSignals()
         self.pixmap = pixmap
-
+        self.curr_alpha = 1.0
         self.setAcceptHoverEvents(True)
         # self.hovered = False
 
-    def scale_pos(self, scale):
-        self.pos_scale = scale
-        super(VIANPixmapGraphicsItem, self).setPos(self.abs_pos * self.pos_scale)
+    def scale_pos(self, scale, scale_y = None):
+        if scale_y is None:
+            self.pos_scale = scale
+            super(VIANPixmapGraphicsItem, self).setPos(self.abs_pos * self.pos_scale)
+        else:
+            super(VIANPixmapGraphicsItem, self).setPos(QPointF(self.abs_pos.x() * scale, self.abs_pos.y() * scale_y))
 
     def setPos(self, x, y):
         pos = QPointF(x, y)
@@ -293,14 +297,17 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.signals.onItemSelection.emit(self.mime_data)
 
     def set_transparency(self, alpha):
-        img = QImage(self.pixmap.size(), QImage.Format_ARGB32_Premultiplied)
-        img.fill(Qt.transparent)
-        qp = QPainter(img)
-        qp.begin(img)
-        qp.setOpacity(alpha)
-        qp.drawPixmap(0,0, self.pixmap)
-        qp.end()
-        self.setPixmap(QPixmap(img))
+        if self.curr_alpha != alpha:
+            img = QImage(self.pixmap.size(), QImage.Format_ARGB32_Premultiplied)
+            img.fill(Qt.transparent)
+            qp = QPainter(img)
+            qp.begin(img)
+            qp.setOpacity(alpha)
+            qp.drawPixmap(0,0, self.pixmap)
+            qp.end()
+            self.setPixmap(QPixmap(img))
+            self.curr_alpha = alpha
+
 
 
 class ImagePlotCircular(ImagePlot):

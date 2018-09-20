@@ -8,11 +8,13 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from core.visualization.basic_vis import IVIANVisualization
+from core.visualization.image_plots import VIANPixmapGraphicsItem, VIANPixmapGraphicsItemSignals, ImagePlotRawData
 from core.data.computation import *
 from typing import *
 
 FeatureTuple = namedtuple("FeatureTuple", ["name", "segment_ids"])
 SegmentTuple = namedtuple("SegmentTuple", ['id', "start", "end"])
+
 
 class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, project: VIANProject, title =""):
@@ -242,6 +244,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_labels = []
         self.feature_base_height = 900
         self.feature_height = 400
+        self.raw_data = []
 
         self.segment_height = 600
 
@@ -264,6 +267,28 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     def remove_feature(self, feature):
         pass
 
+    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0):
+        timestamp = ms_to_string(x)
+        if convert:
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
+                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
+        else:
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True),
+                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
+        self.scene().addItem(itm)
+        itm.setPos(np.nan_to_num(x * self.magnification), self.feature_base_height + self.segment_height)
+
+        self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
+        self.images.append(itm)
+
+        # if self.x_end < x * self.x_scale:
+        #     self.x_end = x * self.x_scale
+
+        itm.signals.onItemSelection.connect(self.onImageClicked.emit)
+        itm.show()
+
+        return itm
+
     def create_timeline(self, segments: List[SegmentTuple]):
         for s in segments:
             # itm = self.scene().addRect(s.start * self.magnification, self.feature_base_height,
@@ -284,10 +309,11 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         for f in self.feature_items:
             for s in f:
                 s.set_x_scale(new_scale)
+        for s in self.images:
+            s.scale_pos(new_scale, 1.0)
         rect = self.scene().itemsBoundingRect()
         rect.adjust(-1000,-1000,2000,2000)
         self.scene().setSceneRect(rect)
-
 
     def create_feature(self, feature:FeatureTuple, show = False):
         if feature not in self.all_possible_features:
@@ -402,15 +428,15 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_items.clear()
         self.feature_labels.clear()
 
-    def clear_features(self):
-        # for q in self.feature_items:
-        #     for f in q:
-        #         self.scene().removeItem(f)
-        #         self.scene().update()
-        # for f in self.feature_labels:
-        #     self.scene().removeItem(f)
 
-        self.scene().clear()
+    def clear_features(self):
+        for q in self.feature_items:
+            for f in q:
+                self.scene().removeItem(f)
+        for f in self.feature_labels:
+            self.scene().removeItem(f)
+
+        # self.scene().clear()
         self.segment_items = []
         self.create_timeline(self.segments)
 
@@ -485,11 +511,13 @@ class FeatureRectItem(QGraphicsRectItem):
         w = self.init_size.width() * scale
         self.setRect(x, self.init_pos.y(), w, self.init_size.height())
 
+
 class QGraphicsItemSignals(QObject):
     onSegmentClicked = pyqtSignal(object)
 
     def __init__(self):
         super(QGraphicsItemSignals, self).__init__()
+
 
 class SegmentRectItem(QGraphicsRectItem):
     def __init__(self, x, y, w, h, pen, brush, segment):
@@ -522,6 +550,7 @@ class SegmentRectItem(QGraphicsRectItem):
         x = self.init_pos.x() * scale
         w = self.init_size.width() * scale
         self.setRect(x, self.init_pos.y(), w, self.init_size.height())
+
 
 class FeaturesParamWidget(QWidget):
     onFeatureActivated = pyqtSignal(object)

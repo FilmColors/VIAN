@@ -28,7 +28,19 @@ class VisSearchLayout(PresentationWidget):
         self.hbox_Keywords.addWidget(self.lower_stack)
         self.search_widget.onQuery.connect(self.on_query)
 
+        self.search_widget.comboBox_History.currentTextChanged.connect(self.on_history_select)
         self.all_filmographies = dict()
+        self.history = dict()
+
+        self.file_path = os.path.expanduser("~") + "/" + "documents/VIAN/" + "search_queries.pickle"
+        if os.path.isfile(self.file_path):
+            try:
+                with open(self.file_path, "rb") as f:
+                    self.history = pickle.load(f)
+            except:
+                self.history = dict()
+        for k in self.history.keys():
+            self.search_widget.comboBox_History.addItem(k)
 
     def on_query_result(self, obj):
         if obj['type'] == "keywords":
@@ -53,12 +65,29 @@ class VisSearchLayout(PresentationWidget):
                     self.query_result_widget.add_result(dbproject, None)
             self.lower_stack.setCurrentIndex(1)
 
+        elif obj['type'] == "segments":
+            self.visualizer.set_current_perspective(4)
+
     @pyqtSlot(str, str, int)
     def on_query(self, qtype, search_string, corpus_id):
         cl_obj_filters = self.keyword_widget.get_classification_object_filters()
         keyword_filters = self.keyword_widget.get_keyword_filters()
         filmography = self.keyword_widget.filmography_widget.get_filmography_query()
         self.visualizer.on_query(qtype, filmography, keyword_filters, cl_obj_filters, None)
+
+        itm = [qtype + " " + str(datetime.datetime.strftime(datetime.datetime.now(), "%d-%m-%Y %H:%M:%S")), (qtype, filmography, keyword_filters, cl_obj_filters, None)]
+        self.history[itm[0]] = itm[1]
+        self.search_widget.comboBox_History.addItem(itm[0])
+        with open(self.file_path, "wb") as f:
+            pickle.dump(self.history, f)
+
+    def on_history_select(self, text):
+        text = self.search_widget.comboBox_History.currentText()
+        print(text)
+        if text in self.history:
+            d = self.history[text]
+            self.visualizer.on_query(d[0], d[1], d[2], d[3], d[4])
+
 
 
 class KeywordWidget(QWidget):

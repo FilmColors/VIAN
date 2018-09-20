@@ -8,6 +8,7 @@ try:
 except:
     def is_subdir(*args, **kwargs): pass
 
+import time
 import glob
 import shutil
 from random import sample
@@ -37,6 +38,9 @@ TABLE_ANALYSES = "ANALYSES"
 TABLE_MASKS = "MASKS"
 TABLE_SEMANTIC_DATASET_LABELS = "SEMANTIC_DATASET_LABELS"
 TABLE_SEMANTIC_LABELS_MAPPING = "SEMANTIC_LABEL_MAPPING"
+TABLE_CONTRIBUTOR_MAPPING = "CONTRIBUTOR_MAPPING"
+TABLE_SUBCORPORA = "SUBCORPORA_INFO"
+TABLE_SUBCORPORA_MAPPING = "SUBCORPORA_MAPPING"
 
 # ERC Specific
 TABLE_FILMOGRAPHY = "FILMOGRAPHY"
@@ -1147,10 +1151,10 @@ class DatasetCorpusDB(CorpusDB):
         return result
 
     def parse_query(self, query:QueryRequestData):
+        print("Recieved Query", query)
         try:
             if query.query_type == "projects":
                 filters = None
-                print("Query Projects")
                 dbprojects = self.get_projects(filters)
                 r = dict()
                 for d in dbprojects:
@@ -1188,12 +1192,18 @@ class DatasetCorpusDB(CorpusDB):
                                                              vocabulary_words=hashm_vocabulary_words))
 
             elif query.query_type == "movies":
-                include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
-                exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
-                sqlquery =  Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args + \
-                            Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args + \
-                            self.parse_filmography_query(query.filter_filmography)
+                sqlquery = Q_ALL_PROJECTS_KEYWORD_DISTINCT[0]
+                if len(query.filter_keywords['include']) > 0:
+                    include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
+                    sqlquery += Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + include_args
 
+                if len(query.filter_keywords['exclude'])>0:
+                    exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
+                    sqlquery += Q_ALL_PROJECTS_KEYWORD_DISTINCT[2] + exclude_args
+                # sqlquery =  Q_ALL_PROJECTS_KEYWORD_DISTINCT[0] + include_args + \
+                #             Q_ALL_PROJECTS_KEYWORD_DISTINCT[1] + exclude_args + \
+                #             self.parse_filmography_query(query.filter_filmography)
+                sqlquery += self.parse_filmography_query(query.filter_filmography)
                 result = [r['id'] for r in self.db.query(sqlquery)]
 
                 dbprojects = self.get_projects(dict(id=result))
@@ -1209,11 +1219,11 @@ class DatasetCorpusDB(CorpusDB):
             elif query.query_type == "single_screenshot":
                 return self.get_single_screenshot_info(query)
             else:
-                return None
+                return dict(type="error", data="invalid query type")
 
-            return dict(type="invalid")
         except Exception as e:
-            return dict(type="error" + str(e))
+            print(e)
+            return dict(type="error", data="exception: " + str(e))
 
     def parse_filmography_query(self, query:FilmographyQuery):
         sql = create_filmography_query(query)
@@ -1229,12 +1239,18 @@ class DatasetCorpusDB(CorpusDB):
             project_sql = " and PROJECTS.id in " + '(' + ','.join(map(str, project_ids)) + ')'
         return project_sql
 
-
     def get_segment_info(self, query:QueryRequestData):
-        include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
-        exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
+        sqlquery = Q_ALL_SEGMENTS_KEYWORD[0]
+        if len(query.filter_keywords['include']) > 0:
+            include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
+            sqlquery += Q_ALL_SEGMENTS_KEYWORD[1] + include_args + " "
 
-        result = self.db.query(Q_ALL_SEGMENTS_KEYWORD[0] + include_args + Q_ALL_SEGMENTS_KEYWORD[1] + exclude_args)
+        if len(query.filter_keywords['exclude']) > 0:
+            exclude_args = '(' + ','.join(map(str, query.filter_keywords['exclude'])) + ')'
+            sqlquery += Q_ALL_SEGMENTS_KEYWORD[2] + exclude_args + " "
+        sqlquery += self.parse_filmography_query(query.filter_filmography)
+
+        result = self.db.query(sqlquery)
         db_segments = []
         db_shots = []
         shot_ids = []
@@ -1261,11 +1277,11 @@ class DatasetCorpusDB(CorpusDB):
 
     def get_movie_info(self, query:QueryRequestData):
         project_id = query.project_filter[0]
-
         rsegms = self.get_segments(dict(project_id = project_id))
         rkeyw = self.get_keyword_mapping(dict(project_id = project_id))
         rmovie = self.get_movies(dict(project_id = project_id))
         (scrs, features) = self.get_color_dt_info(project_id=project_id)
+
         project = self.get_project(project_id)
         mapping_iter = self.db.query(Q_SCREENSHOT_MAPPING_OF_PROJECT + str(project_id))
         screenshot_segm_mapping = dict()
@@ -1292,15 +1308,17 @@ class DatasetCorpusDB(CorpusDB):
             data[r['classification_object_id']] = dict(r)
         return dict(type="single_screenshot", data_by_classification_object=data)
 
-
     def get_color_dt_info(self, project_id):
         query = "select *, ANALYSES.id as \"analysis_id\" from ANALYSES " \
                 "inner join SHOTS on SHOTS.id = ANALYSES.target_container_id " \
                 "where ANALYSES.analysis_name = \"ColorFeatureAnalysis\" and  " \
                 "ANALYSES.project_id = " + str(project_id)
+        t = time.time()
         out = self.db.query(query)
+        t = time.time()
         result_shots = []
         features = []
+
         for o in out:
             dbscr = DBScreenshot()
             dbscr.from_database(dict(o))

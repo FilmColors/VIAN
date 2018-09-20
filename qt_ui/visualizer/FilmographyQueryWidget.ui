@@ -57,7 +57,11 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QComboBox" name="comboBox_ColorProcess"/>
+    <widget class="QComboBox" name="comboBox_ColorProcess">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_3">
@@ -67,7 +71,11 @@
     </widget>
    </item>
    <item row="8" column="1">
-    <widget class="QLineEdit" name="lineEdit_ColorConsultant"/>
+    <widget class="QLineEdit" name="lineEdit_ColorConsultant">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="8" column="0">
     <widget class="QLabel" name="label_7">
@@ -77,7 +85,11 @@
     </widget>
    </item>
    <item row="9" column="1">
-    <widget class="QLineEdit" name="lineEdit_ProductionDesign"/>
+    <widget class="QLineEdit" name="lineEdit_ProductionDesign">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="7" column="0">
     <widget class="QLabel" name="label_6">
@@ -87,10 +99,18 @@
     </widget>
    </item>
    <item row="6" column="1">
-    <widget class="QLineEdit" name="lineEdit_Director"/>
+    <widget class="QLineEdit" name="lineEdit_Director">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="13" column="1">
-    <widget class="QLineEdit" name="lineEdit_ProductionCountry"/>
+    <widget class="QLineEdit" name="lineEdit_ProductionCountry">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="9" column="0">
     <widget class="QLabel" name="label_8">
@@ -100,10 +120,18 @@
     </widget>
    </item>
    <item row="11" column="1">
-    <widget class="QLineEdit" name="lineEdit_CostumDesign"/>
+    <widget class="QLineEdit" name="lineEdit_CostumDesign">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="10" column="1">
-    <widget class="QLineEdit" name="lineEdit_ArtDirector"/>
+    <widget class="QLineEdit" name="lineEdit_ArtDirector">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="11" column="0">
     <widget class="QLabel" name="label_10">
@@ -134,10 +162,18 @@
     </widget>
    </item>
    <item row="12" column="1">
-    <widget class="QLineEdit" name="lineEdit_ProductionCompany"/>
+    <widget class="QLineEdit" name="lineEdit_ProductionCompany">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="7" column="1">
-    <widget class="QLineEdit" name="lineEdit_Cinematography"/>
+    <widget class="QLineEdit" name="lineEdit_Cinematography">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="4" column="0">
     <widget class="QLabel" name="label_13">
