@@ -48,7 +48,7 @@ from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.colormetry_widget import *
 from core.gui.concurrent_tasks import ConcurrentTaskDock
-from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock
+from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, tuple2point
 from core.gui.experiment_editor import ExperimentEditorDock
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
@@ -1118,7 +1118,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def key_annotation(self, s):
         time = self.player.get_media_time()
-        pos = s.get_position()
+        pos = tuple2point(s.get_position())
         s.add_key(time, [pos.x(), pos.y()])
         self.print_message("Key added", "Green")
         self.dispatch_on_changed([self.drawing_overlay, self.timeline.timeline])

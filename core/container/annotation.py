@@ -1,5 +1,5 @@
 import cv2
-from PyQt5 import QtGui, QtCore
+# from PyQt5 import QtGui, QtCore
 
 from core.data.computation import numpy_to_qt_image
 from core.container.media_objects import FileMediaObject, DataMediaObject
@@ -155,12 +155,12 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 
     def set_position(self, qpoint):
         self.project.undo_manager.to_undo((self.set_position, [qpoint]),
-                                          (self.set_position, [QtCore.QPoint(self.orig_position[0], self.orig_position[1])]))
+                                          (self.set_position, [(self.orig_position[0], self.orig_position[1])]))
         self.orig_position = (qpoint.x(), qpoint.y())
         # self.dispatch_on_changed()
 
     def get_position(self):
-        return QtCore.QPoint(self.orig_position[0],self.orig_position[1])
+        return (self.orig_position[0],self.orig_position[1])
 
     def transform(self, size, position, old_pos, old_size):
 
@@ -199,7 +199,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         """
         if self.color is None:
             self.color = [255, 255, 255]
-        return QtGui.QColor(self.color[0], self.color[1], self.color[2])
+        return (self.color[0], self.color[1], self.color[2])
 
 
     def add_path(self, path, color, width):

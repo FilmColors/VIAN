@@ -26,6 +26,9 @@ ALWAYS_VLC = 0
 ALWAYS_OPENCV = 1
 TIMELINE_SCALE_DEPENDENT = 2
 
+def tuple2point(tpl):
+    return QtCore.QPoint(tpl[0], tpl[1])
+
 class AnnotationToolbar(EToolBar):
     def __init__(self, main_window, drawing_widget):
         super(AnnotationToolbar, self).__init__(main_window, "Annotation Toolbar")
@@ -466,7 +469,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         qp = QtGui.QPainter(qimage)
 
         for a in self.project.current_annotation_layer.annotations:
-            offset = a.get_position()
+            offset = tuple2point(a.get_position())
             x = offset.x() * scale
             y = offset.y() * scale
 
@@ -510,32 +513,32 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
         if annotation.a_type == AnnotationType.Rectangle:
             rect = DrawingRectangle(self.centralWidget(), annotation)
-            rect.move(annotation.get_position())
+            rect.move(tuple2point(annotation.get_position()))
             annotation.widget = rect
             return
 
         if annotation.a_type == AnnotationType.Ellipse:
             ellipse = DrawingEllipse(self.centralWidget(), annotation)
-            ellipse.move(annotation.get_position())
+            ellipse.move(tuple2point(annotation.get_position()))
             annotation.widget = ellipse
             return
 
         if annotation.a_type == AnnotationType.Text:
             text = DrawingText(self.centralWidget(), annotation)
-            text.move(annotation.get_position())
+            text.move(tuple2point(annotation.get_position()))
             text.set_text(annotation.text)
             annotation.widget = text
             return
 
         if annotation.a_type == AnnotationType.Image:
             image = DrawingImage(self.centralWidget(), annotation)
-            image.move(annotation.get_position())
+            image.move(tuple2point(annotation.get_position()))
             annotation.widget = image
             return
 
         if annotation.a_type == AnnotationType.FreeHand:
             hand = DrawingFreeHand(self.centralWidget(), annotation)
-            hand.move(annotation.get_position())
+            hand.move(tuple2point(annotation.get_position()))
             annotation.widget = hand
             return
 
@@ -731,7 +734,8 @@ class DrawingBase(QtWidgets.QWidget):
         self.offset = QtCore.QPoint(0,0)
 
         # The current color, this can be set for instance if a drawing is selected
-        self.curr_col = annotation_object.get_color()
+        c = annotation_object.get_color()
+        self.curr_col = QtGui.QColor(c[0], c[1], c[2])
 
 
         # The thickness color, this can be set for instance if a drawing is selected
@@ -755,7 +759,7 @@ class DrawingBase(QtWidgets.QWidget):
                                        s.height() - 2 * l - 2 * self.inner_rect_delta  * self.scale)
 
     def set_location(self, location):
-        self.annotation_object.set_position(location)
+        self.annotation_object.set_position((location.x(), location.y()))
         self.move(location)
 
     def set_size(self, height, width):
@@ -763,7 +767,8 @@ class DrawingBase(QtWidgets.QWidget):
         self.resize(height, width)
 
     def createPainter(self):
-        self.curr_col = self.annotation_object.get_color()
+        c = self.annotation_object.get_color()
+        self.curr_col = QtGui.QColor(c[0], c[1], c[2])
         self.curr_line_thickness = self.annotation_object.line_w
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
@@ -1135,7 +1140,8 @@ class DrawingBase(QtWidgets.QWidget):
         self.curr_line_thickness = self.annotation_object.line_w + 2
 
     def leaveEvent(self, QEvent):
-        self.curr_col = self.annotation_object.get_color()
+        c = self.annotation_object.get_color()
+        self.curr_col = QtGui.QColor(c[0], c[1], c[2])
         self.curr_line_thickness = self.annotation_object.line_w
 
     def mouseDoubleClickEvent(self, QMouseEvent):
