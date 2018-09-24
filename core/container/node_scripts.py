@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5.QtCore import QPoint, QSize
+# from PyQt5.QtCore import QPoint, QSize
 
 from core.data.enums import NODE_SCRIPT
 from core.data.interfaces import IProjectContainer, IHasName, ISelectable
@@ -151,10 +151,10 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
         self.node_size = (qsize.width(), qsize.height())
 
     def get_position(self):
-        return QPoint(self.node_pos[0], self.node_pos[1])
+        return (self.node_pos[0], self.node_pos[1])
 
     def get_size(self):
-        return QSize(self.node_size[0], self.node_size[1])
+        return (self.node_size[0], self.node_size[1])
 
     #region IProjectContainer
     def get_type(self):

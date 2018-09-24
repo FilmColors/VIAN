@@ -5,6 +5,7 @@ These operations can be of arbitrary type and are not categorized.
 
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
+import PyQt5.QtCore as QtCore
 import subprocess
 import cv2
 # import matplotlib.pyplot as plt
@@ -17,6 +18,9 @@ import webbrowser
 import shutil
 from zipfile import ZipFile
 import math
+
+def tuple2point(tpl):
+    return QtCore.QPoint(tpl[0], tpl[1])
 
 def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
     """

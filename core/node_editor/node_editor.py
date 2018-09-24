@@ -8,6 +8,7 @@ from core.node_editor.operations import *
 from core.node_editor.datatypes import *
 from core.gui.ewidgetbase import EDockWidget
 from core.data.interfaces import *
+from core.data.computation import tuple2point
 
 
 import json
@@ -225,7 +226,7 @@ class NodeEditor(QWidget, IProjectChangeNotify):
             else:
                 new = Node(self, self, node)
             node.node_widget = new
-            self.add_node(new, node.get_position())
+            self.add_node(new, tuple2point(node.get_position()))
 
         for conn in self.current_script.connections:
             new = Connection(self)
@@ -805,8 +806,8 @@ class Node(QWidget, IHasName):
 
     #region Events
     def scale(self, scale):
-        self.resize(self.node_object.get_size().width() * scale, self.node_object.get_size().height() * scale)
-        self.move(self.node_object.get_position() * scale + self.node_editor.relative_corner)
+        self.resize(self.node_object.get_size()[0]* scale, self.node_object.get_size()[1] * scale)
+        self.move(tuple2point(self.node_object.get_position()) * scale + self.node_editor.relative_corner)
 
         font = self.lbl_title.font()
         font.setPointSize(self.font_size * scale)

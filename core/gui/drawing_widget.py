@@ -26,9 +26,6 @@ ALWAYS_VLC = 0
 ALWAYS_OPENCV = 1
 TIMELINE_SCALE_DEPENDENT = 2
 
-def tuple2point(tpl):
-    return QtCore.QPoint(tpl[0], tpl[1])
-
 class AnnotationToolbar(EToolBar):
     def __init__(self, main_window, drawing_widget):
         super(AnnotationToolbar, self).__init__(main_window, "Annotation Toolbar")
