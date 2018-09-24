@@ -1,4 +1,3 @@
-
 import cv2
 import json
 import datetime
@@ -7,7 +6,6 @@ try:
     from core.analysis.analysis_import import *
     from core.container.project import *
 except Exception as e:
-    print(e)
     class IProjectContainer: pass
     class VIANProject: pass
     class AnnotationLayer: pass
@@ -1084,7 +1082,36 @@ class DBContributorMapping(DBEntity):
 #region Query
 class QueryRequestData():
     """
-    :ivar query_type: Defines the result of the query, can be "segments", "movies", "screenshots", "projects", "keywords"
+    A container for query parameters in the DatasetDB. 
+    
+    An instance of QueryRequestData can be passed to the DatasetDB.parse_query() function to perform a query. 
+    
+    The type of information that is retrieved can be set by the query_type field. 
+    The return is as follows:
+        projects -> dict(query.query_type, data=dict(projects=r:Dict, 
+                                                     contributors=c:Dict, 
+                                                     root=self.root_dir:str, 
+                                                     filmographies = f:Dict))
+                                                     
+        keywords -> dict(type=query.query_type, data=dict(keywords=keywords,
+                                                             cl_objs=hashm_cl_objs: Dict(key: cl_obj_id, val: cl_obj),
+                                                             vocabularies=hashm_vocabularies: Dict(key: voc_id, val: voc),
+                                                             vocabulary_words=hashm_vocabulary_words: Dict(key: word_id, val: word)))
+                                                             
+        movies ->  dict(type=query.query_type, data=dict(projects=dbprojects, 
+                                                         filmographies=dbfilmographies))    
+        
+        movie-info -> dict(type="movie_info", data = dict(segments=rsegms,
+                                                   keywords=rkeyw,
+                                                   movie=rmovie,
+                                                   screenshots=scrs,
+                                                   features=features,
+                                                   project=project,
+                                                   screenshot_segm_mapping=screenshot_segm_mapping))
+                                                                                         
+    
+    :ivar query_type: Defines the result of the query, can be "projects", "segments", "movies", "screenshots", 
+                      "projects", "keywords", "movie_info", "screenshot_info"
     :ivar filter_filmography: A dict of filter options for the filmography
     :ivar filter_keywords: A dict of Keyword IDS assigned to the container
     :ivar filter_classification_objects: A List of ClassificationObject IDS to filter
@@ -1159,5 +1186,6 @@ class FilmographyQuery():
 #         self.db_screenshots = []
 #         self.db_segments = []
 #
+
 #endregion
 

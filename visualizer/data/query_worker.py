@@ -23,10 +23,8 @@ class QueryWorker(QObject):
         self.user = None
         self.path = path
 
-    def initialize(self):
-        self.user = DBContributor(name="Gaudenz",
-                                  image_path="C:/Users/Gaudenz Halter/Documents/VIAN/corpora/user_img.jpg",
-                                  affiliation="Nahh")
+    def initialize(self, contributor:DBContributor):
+        self.user = contributor
         self.corpus.connect_user(self.user, self.path)
         self.corpus.onQueryResult.connect(self.on_query_result)
 
@@ -34,8 +32,8 @@ class QueryWorker(QObject):
     @pyqtSlot(str, object, object, object, object, object, object)
     def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id):
         self.signals.onStartQuery.emit(query_type)
-        if self.user is None:
-            self.initialize()
+        # if self.user is None:
+        #     self.initialize()
         try:
             query = QueryRequestData(query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id)
             self.corpus.submit_query(query)

@@ -122,14 +122,10 @@ def cleanup_screenshots(db_root = "F:\\_corpus\\ERC_FilmColorsCorpus"):
     # for t in to_delete:
     #     print("Remove_IMG:", db_root + t['file_path'])
 
-
-
-
-
 if __name__ == '__main__':
     movie_results, filmography_result, assignments = parse_corpus("F:/_input/CorpusDB_02.csv")
-    cleanup_screenshots()
-    # inspect_filmography(filmography_result)
+    # cleanup_screenshots()
+    inspect_filmography(filmography_result)
     # insert_editors(assignments)
 
     # for f in glob.glob("F:\\_corpus\\ERC_FilmColorsCorpus\\screenshots\\*\\_glob.png*"):

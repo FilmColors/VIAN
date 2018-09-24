@@ -947,7 +947,7 @@ class DatasetCorpusDB(CorpusDB):
 
     #endregion
 
-    #region Query
+    #region VIAN Query
     def get_project(self, project_id):
         project = self.db[TABLE_PROJECTS].find_one(id=project_id)
         if project is None:
@@ -1150,7 +1150,20 @@ class DatasetCorpusDB(CorpusDB):
             result.append(DBContributor().from_database(entry))
         return result
 
+    #endregion
+
+    #region Visualizer Query
     def parse_query(self, query:QueryRequestData):
+        """
+        Executes a query based on a QueryRequestData object that 
+        could be handed by the visualizer, or WebApp. 
+        
+        Based on the query.query_type string a query is performed and the result is generated. 
+        
+        @DEV: Currently the loading of the analysis objects from json string in the db is the bottleneck
+        :param query: 
+        :return: 
+        """
         print("Recieved Query", query)
         try:
             if query.query_type == "projects":
@@ -1216,7 +1229,7 @@ class DatasetCorpusDB(CorpusDB):
             elif query.query_type == "segments":
                 return self.get_segment_info(query)
 
-            elif query.query_type == "single_screenshot":
+            elif query.query_type == "screenshot_info":
                 return self.get_single_screenshot_info(query)
             else:
                 return dict(type="error", data="invalid query type")

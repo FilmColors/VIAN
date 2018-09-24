@@ -15,7 +15,7 @@ class ScreenshotInspectorPopup(QMainWindow):
         self.visualizer.query_worker.signals.onQueryResult.connect(self.on_query_result)
         self.setWindowFlags(Qt.Popup|Qt.FramelessWindowHint)
 
-        self.visualizer.on_query(query_type="single_screenshot", shot_id=screenshot_info.screenshot_id)
+        self.visualizer.on_query(query_type="screenshot_info", shot_id=screenshot_info.screenshot_id)
 
         self.screenshot_info = screenshot_info
         self.img = img

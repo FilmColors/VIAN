@@ -20,7 +20,7 @@ class VIANVisualizer(QMainWindow):
     onAbortAllWorker = pyqtSignal()
     onLoadScreenshots = pyqtSignal(object)
 
-    def __init__(self, parent = None):
+    def __init__(self, parent = None, contributor=None):
         super(VIANVisualizer, self).__init__(parent)
         path = os.path.abspath("qt_ui/visualizer/VisMainWindow.ui")
         uic.loadUi(path, self)
@@ -32,6 +32,11 @@ class VIANVisualizer(QMainWindow):
         else:
             path = CORPUS_PATH
         self.query_worker = QueryWorker(path)
+        if contributor is None:
+            contributor = DBContributor(name="Dummy",
+                                  image_path="qt_ui/images/Blank_woman_placeholder.png",
+                                  affiliation="ToyotaCrashTest")
+        self.query_worker.initialize(contributor)
         self.query_thread = QThread()
         self.query_worker.moveToThread(self.query_thread)
         self.query_thread.start()

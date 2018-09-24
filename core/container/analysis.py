@@ -6,12 +6,11 @@ import cv2
 import numpy as np
 import bisect
 from typing import List
-from PyQt5.QtWidgets import QMessageBox
+# from PyQt5.QtWidgets import QMessageBox
 
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
 from core.data.interfaces import IProjectContainer, IHasName, ISelectable
 from core.data.project_streaming import *
-
 from core.data.computation import *
 
 
@@ -205,8 +204,8 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
                                                                                              self.project.main_window)
         except Exception as e:
             print("Exception in get_visualization()", e)
-            QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
-                                " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
+            # QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
+            #                     " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 
     def get_type(self):
         return ANALYSIS_JOB_ANALYSIS

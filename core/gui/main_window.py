@@ -1501,7 +1501,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_start_visualizer(self):
         try:
-            visualizer = VIANVisualizer()
+            visualizer = VIANVisualizer(contributor=self.settings.CONTRIBUTOR)
             visualizer.show()
         except Exception as e:
             try:
