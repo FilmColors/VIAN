@@ -65,6 +65,7 @@ class VisMovieLayout(PresentationWidget):
 
         self.screenshots = dict() # TUPLE (DBScreenshot, Image, Used)
         self.color_features = dict()
+        self.shot_counter = 0
 
     @pyqtSlot(object)
     def on_screenshot_loaded(self, scr):
@@ -82,9 +83,13 @@ class VisMovieLayout(PresentationWidget):
                     self.plot_ab_space.add_image(x, y, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = l)
                     self.plot_la_space.add_image(x, l, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0], z = y)
                     self.plot_features.add_image(tx, 0, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
-                self.plot_color_dt.frame_default()
-                self.plot_ab_space.frame_default()
-                self.plot_la_space.frame_default()
+
+                if self.shot_counter == 10:
+                    self.plot_color_dt.frame_default()
+                    self.plot_ab_space.frame_default()
+                    self.plot_la_space.frame_default()
+                    self.shot_counter = 0
+                self.shot_counter += 1
         except Exception as e:
             print(e)
 

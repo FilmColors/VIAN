@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
-from PyQt5.QtCore import pyqtSlot
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from core.data.interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
 from core.data.computation import numpy_to_qt_image
 import datetime
+
 
 class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable):
     """
@@ -63,10 +63,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         obj = project.streamer.from_stream(self.unique_id)
 
-    pyqtSlot(object)
-    def on_images_loaded(self, obj):
-        self.img_movie = cv2.resize(obj['img_movie'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
-        self.img_blend = cv2.resize(obj['img_blend'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
+    # pyqtSlot(object)
+    # def on_images_loaded(self, obj):
+    #     self.img_movie = cv2.resize(obj['img_movie'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
+    #     self.img_blend = cv2.resize(obj['img_blend'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
 
     def set_title(self, title):
         self.title = title

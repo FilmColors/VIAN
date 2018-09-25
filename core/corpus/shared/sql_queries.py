@@ -54,7 +54,7 @@ def create_filmography_query(query:FilmographyQuery):
         return None
 
     for key, val in query.__dict__.items():
-        if val is not None and "year" not in key:
+        if val is not None and "year" not in key and "corpus_id" not in key:
             if not isinstance(val, list):
                 val = [val]
             if c == 0:
@@ -67,8 +67,17 @@ def create_filmography_query(query:FilmographyQuery):
     if query.year_start is not None:
         q += " and MOVIES.year >= " + str(query.year_start)
         isQuery = True
+
     if query.year_end is not None:
         q += " and MOVIES.year <= " + str(query.year_end)
+        isQuery = True
+
+    if query.corpus_id is not None:
+        q += " and MOVIES.movie_id_a = " + str(query.corpus_id[0])
+        if query.corpus_id[1] > 0:
+            q += " and MOVIES.movie_id_b = " + str(query.corpus_id[1])
+        if query.corpus_id[2] > 0:
+            q += " and MOVIES.movie_id_c = " + str(query.corpus_id[2])
         isQuery = True
 
     if isQuery:

@@ -35,6 +35,7 @@
     <addaction name="actionFavorites"/>
     <addaction name="separator"/>
     <addaction name="actionLast"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuWindow"/>
   </widget>
@@ -93,6 +94,11 @@
    </property>
    <property name="shortcut">
     <string>Alt+6</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>

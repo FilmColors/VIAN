@@ -9,24 +9,12 @@ from core.node_editor.datatypes import *
 from core.node_editor.script_results import *
 from core.data.enums import *
 
-# from bokeh.plotting import figure
-# from bokeh.layouts import layout
-# from bokeh.resources import CDN
-# from bokeh.embed import file_html
-
-
-# DT_IMAGE = (0, QColor(255,255,199))
-# DT_COLOR = (1, QColor(252,170,103))
-# DT_ARRAY = (2, QColor(71,51,53))
-# DT_NUMERIC = (3, QColor(3,63,99))
-
 class Slot():
     def __init__(self, name, data_type, default_value):
         self.name = name
         self.data_type = data_type
         self.default_value = default_value
         self.default_data_type = data_type
-
 
 class Operation(QObject):
     onProgress = pyqtSignal(float)
@@ -140,7 +128,6 @@ class OperationVector2(OperationValue):
 
     def perform(self, args, progress_signal, project):
         self.result = [self.spin_box_1.value(), self.spin_box_2.value()]
-
 
 #region InputNodes
 class OperationFrameReader(Operation):

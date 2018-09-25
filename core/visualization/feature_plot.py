@@ -209,6 +209,7 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
 class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     onFeatureAdded = pyqtSignal(object)
     onSegmentClicked = pyqtSignal(object)
+    onImageClicked = pyqtSignal(object)
 
     def __init__(self, parent, title =""):
         super(GenericFeaturePlot, self).__init__(parent)

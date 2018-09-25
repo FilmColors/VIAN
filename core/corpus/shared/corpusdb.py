@@ -44,7 +44,6 @@ TABLE_SUBCORPORA_MAPPING = "SUBCORPORA_MAPPING"
 
 # ERC Specific
 TABLE_FILMOGRAPHY = "FILMOGRAPHY"
-
 ALL_PROJECT_TABLES = [
     TABLE_PROJECTS,
     TABLE_MOVIES,
@@ -64,7 +63,6 @@ ALL_PROJECT_TABLES = [
     TABLE_SEMANTIC_DATASET_LABELS,
     TABLE_SEMANTIC_LABELS_MAPPING
 ]
-
 ALL_TABLES = [
     TABLE_PROJECTS,
     TABLE_MOVIES,
@@ -89,6 +87,7 @@ ALL_TABLES = [
     TABLE_SEMANTIC_DATASET_LABELS,
     TABLE_SEMANTIC_LABELS_MAPPING
 ]
+
 
 class CorpusDB():
     def __init__(self):
@@ -1235,7 +1234,7 @@ class DatasetCorpusDB(CorpusDB):
                 return dict(type="error", data="invalid query type")
 
         except Exception as e:
-            print(e)
+            print("Exception in Query", e)
             return dict(type="error", data="exception: " + str(e))
 
     def parse_filmography_query(self, query:FilmographyQuery):

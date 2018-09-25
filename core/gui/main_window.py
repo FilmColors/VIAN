@@ -1501,13 +1501,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_start_visualizer(self):
         try:
-            visualizer = VIANVisualizer(contributor=self.settings.CONTRIBUTOR)
+            contributor = DBContributor(self.settings.CONTRIBUTOR.full_name, "", email=self.settings.CONTRIBUTOR.email)
+            visualizer = VIANVisualizer(self, contributor=contributor)
             visualizer.show()
         except Exception as e:
-            try:
-                visualizer.deleteLater()
-            except:
-                pass
             print(e)
 
 

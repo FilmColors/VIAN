@@ -28,30 +28,28 @@ class VIANVisualizer(QMainWindow):
         if not os.path.isfile(CORPUS_PATH):
             path = QFileDialog.getOpenFileName(self, filter="*.vian_corpus")[0]
             if not os.path.isfile(path):
+                print("No Corpus File Selected")
                 raise FileExistsError("No Corpus File Selected")
         else:
             path = CORPUS_PATH
-        self.query_worker = QueryWorker(path)
-        if contributor is None:
-            contributor = DBContributor(name="Dummy",
-                                  image_path="qt_ui/images/Blank_woman_placeholder.png",
-                                  affiliation="ToyotaCrashTest")
-        self.query_worker.initialize(contributor)
+        self.query_worker = QueryWorker(path, contributor)
+
         self.query_thread = QThread()
         self.query_worker.moveToThread(self.query_thread)
         self.query_thread.start()
         self.onQuery.connect(self.query_worker.on_query)
+
         self.query_worker.signals.onQueryResult.connect(self.on_query_result)
         self.query_worker.signals.onStartQuery.connect(self.on_query_started)
         self.query_worker.signals.onFinishedQuery.connect(self.on_query_finished)
+        # self.query_worker.initialize(contributor)
 
-        self.screenshot_loader = ScreenshotWorker()
+        self.screenshot_loader = ScreenshotWorker(self)
         self.screenshot_loader_thread = QThread()
         self.screenshot_loader.moveToThread(self.screenshot_loader_thread)
         self.screenshot_loader_thread.start()
         self.onLoadScreenshots.connect(self.screenshot_loader.on_load_screenshots)
         self.onAbortAllWorker.connect(self.screenshot_loader.abort)
-
 
         self.stbar = QStatusBar(self)
         self.stlabel = QLabel(self)
@@ -90,6 +88,7 @@ class VIANVisualizer(QMainWindow):
         self.actionSegments.triggered.connect(partial(self.set_current_perspective, 4))
         self.actionLast.triggered.connect(self.on_last_view)
         self.actionFavorites.triggered.connect(self.show_favorites)
+        self.actionPreferences.triggered.connect(self.on_preferences)
         #endregion
 
         self.last_views = []
@@ -97,7 +96,10 @@ class VIANVisualizer(QMainWindow):
         self.show()
         self.db_root = None
 
+
         self.K = 300
+        self.K_IMAGES = 300
+        self.MAX_WIDTH = 500
 
         self.classification_object_filter_indices = dict()
         # This is set during startup in the vis_search_widget #TUPLE (kwd, voc, cl_obj, word)
@@ -108,14 +110,20 @@ class VIANVisualizer(QMainWindow):
     @pyqtSlot(str)
     def on_query_started(self, string):
         print("Querying, " + string)
-        self.stlabel.setText("Querying, " + string)
-        self.stlabel.setStyleSheet("QLabel{color: orange;}")
+        try:
+            self.stlabel.setText("Querying, " + string)
+            self.stlabel.setStyleSheet("QLabel{color: orange;}")
+        except:
+            pass
 
     @pyqtSlot(str)
     def on_query_finished(self, string):
         print("Finished, " + string)
-        self.stlabel.setText("Finished, " + string)
-        self.stlabel.setStyleSheet("QLabel{color: green;}")
+        try:
+            self.stlabel.setText("Finished, " + string)
+            self.stlabel.setStyleSheet("QLabel{color: green;}")
+        except:
+            pass
 
     @pyqtSlot(object)
     def on_project_selected(self, dbproject):
@@ -192,3 +200,28 @@ class VIANVisualizer(QMainWindow):
         img = cv2.imread(self.db_root + db_screenshot.file_path)
         screenshot_inspector = ScreenshotInspectorPopup(self, db_screenshot, img, None, self.classification_object_filter_indices)
         screenshot_inspector.show()
+
+    def on_preferences(self):
+        dialog = VisualizerPreferences(self)
+        dialog.show()
+
+class VisualizerPreferences(QDialog):
+    def __init__(self, visualizer):
+        super(VisualizerPreferences, self).__init__(visualizer)
+        path = os.path.abspath("qt_ui/visualizer/VisPreferences.ui")
+        uic.loadUi(path, self)
+        self.visualizer = visualizer
+        self.spinBox_KSegments.setValue(self.visualizer.K)
+        self.spinBox_KImages.setValue(self.visualizer.K_IMAGES)
+        self.spinBox_ImageWidth.setValue(self.visualizer.MAX_WIDTH)
+
+        self.btn_OK.clicked.connect(self.on_values_changed)
+        self.btn_Cancel.clicked.connect(self.close)
+
+    def on_values_changed(self):
+        self.visualizer.K = self.spinBox_KSegments.value()
+        self.visualizer.K_IMAGES = self.spinBox_KImages.value()
+        self.visualizer.MAX_WIDTH = self.spinBox_ImageWidth.value()
+        self.close()
+
+
