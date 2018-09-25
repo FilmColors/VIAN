@@ -102,7 +102,6 @@ class VisSegmentLayout(PresentationWidget):
     def on_query_result(self, obj):
         if obj['type'] == "segments":
             self.clear()
-            print(obj)
             for s in obj['data']['segments']:
                 self.segment_data[s.segment_id] = dict(segment=s, shots = [], features = [])
 

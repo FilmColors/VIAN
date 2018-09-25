@@ -1,6 +1,4 @@
-# from PyQt4 import QtCore, QtGui, uic
 
-# from annotation_viewer import AnnotationViewer
 import inspect
 import webbrowser
 import cProfile
@@ -77,7 +75,7 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.6.7"
+VERSION = "0.7.0"
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"

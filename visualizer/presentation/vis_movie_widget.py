@@ -137,6 +137,7 @@ class VisMovieLayout(PresentationWidget):
         self.plot_la_space.add_grid()
 
     def on_query_result(self, obj):
+        print("Recieved Answer")
         if obj['type'] == "movie_info":
             # COLOR FEATURES
             segments = []
@@ -193,6 +194,7 @@ class VisMovieLayout(PresentationWidget):
             for s in obj['data']['screenshot_segm_mapping'].keys():
                 if s in self.screenshots:
                     new_key = obj['data']['screenshot_segm_mapping'][s]
+                    self.screenshots[s][0].segment_id = new_key
                     if new_key not in shot_per_segment:
                         shot_per_segment[new_key] = []
                     shot_per_segment[new_key].append(self.screenshots[s][0])

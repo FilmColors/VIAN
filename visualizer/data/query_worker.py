@@ -9,7 +9,7 @@ class QueryWorkerSignals(QObject):
     onFinishedQuery = pyqtSignal(str)
 
 
-CORPUS_PATH = "Q:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"
+CORPUS_PATH = "F:\\_corpus\\ERC_FilmColorsCorpus\\ERC_FilmColorsCorpus.vian_corpus"
 # CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
 class QueryWorker(QObject):
     def __init__(self, path, user = None):

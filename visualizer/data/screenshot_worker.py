@@ -24,8 +24,9 @@ class ScreenshotWorker(QObject):
 
     @pyqtSlot(object)
     def on_load_screenshots(self, dbscreenshots:List[DBScreenshot]):
-        dbscreenshots = sample(dbscreenshots, self.visualizer.K_IMAGES)
-        for s in dbscreenshots:
+        dbscreenshots = self.create_subsample(dbscreenshots)
+        print("Loading Shots...")
+        for i, s in enumerate(dbscreenshots):
             if self.aborted:
                 break
             if os.path.isfile(self.db_root + s.file_path):
@@ -36,9 +37,38 @@ class ScreenshotWorker(QObject):
                 self.signals.onScreenshotLoaded.emit(dict(screenshot_id = s.screenshot_id, image=img))
         try:
             self.signals.onScreenshotLoaded.disconnect()
-        except:
+        except Exception as e:
+            print(e)
             pass
+        print("Done")
         self.aborted = False
+
+    def create_subsample(self, scrs:List[DBScreenshot]):
+        print("N-Shots:", len(scrs))
+        samples = dict()
+        for scr in scrs:
+            if scr.segment_id not in samples:
+                samples[scr.segment_id] = []
+            samples[scr.segment_id].append(scr)
+
+        samples = [samples[s] for s in samples.keys()]
+        n_segments = len(samples)
+        if n_segments > 0:
+            n_per_segment = int(self.visualizer.K_IMAGES / n_segments)
+
+            result = []
+            for smpl in samples:
+                if len(smpl) < n_per_segment:
+                    result.extend(smpl)
+                else:
+                    n = n_per_segment
+                    result.extend(sample(smpl, n))
+
+            print("Shots to load:", len(result))
+            return result
+        else:
+            return scrs
+
 
     @pyqtSlot()
     def abort(self):

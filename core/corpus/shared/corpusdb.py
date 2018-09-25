@@ -1325,9 +1325,8 @@ class DatasetCorpusDB(CorpusDB):
                 "inner join SHOTS on SHOTS.id = ANALYSES.target_container_id " \
                 "where ANALYSES.analysis_name = \"ColorFeatureAnalysis\" and  " \
                 "ANALYSES.project_id = " + str(project_id)
-        t = time.time()
+
         out = self.db.query(query)
-        t = time.time()
         result_shots = []
         features = []
 
