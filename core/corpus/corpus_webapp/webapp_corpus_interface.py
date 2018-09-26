@@ -95,7 +95,7 @@ class WebAppCorpusInterface(CorpusInterface):
                 if not os.path.isdir(export_project_dir):
                     os.mkdir(export_project_dir)
             except Exception as e:
-                QMessageBox.Error("Commit Error", "Could not modify \\corpus_export\\ directory."
+                QMessageBox.Information("Commit Error", "Could not modify \\corpus_export\\ directory."
                                                   "\nPlease make sure the Folder is not open in the Explorer/Finder.")
                 return False, None
 
