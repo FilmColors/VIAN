@@ -297,6 +297,8 @@ class PaletteLABWidget(QWidget):
         self.view.palette_layer = self.palette_tree
 
     def draw_palette(self):
+        if self.palette_tree is None:
+            return
         self.lbl_depth.setText(str(np.amax(self.palette_tree[0]) - np.unique(self.palette_tree[0])[self.slider.value()]))
         self.view.mode = self.cb_mode.currentText()
         self.view.depth = self.slider.value()
@@ -307,6 +309,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
     def __init__(self, parent):
         super(PaletteLABView, self).__init__(parent)
         self.palette_layer = None
+        self.view = parent
         self.depth = 0
         self.image = None
         self.dot_size = 10
@@ -415,6 +418,18 @@ class PaletteLABView(QWidget, IVIANVisualization):
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
             menu.popup(self.mapToGlobal(event.pos()))
+
+    def wheelEvent(self, a0: QWheelEvent):
+        if a0.angleDelta().y() > 0:
+            self.scale += 1
+            self.view.slider_scale.setValue(self.scale)
+        elif a0.angleDelta().y() < 0:
+            self.scale -= 1
+            self.view.slider_scale.setValue(self.scale)
+        else:
+            a0.ignore()
+
+        print(self.scale)
 
     def render_to_image(self, background: QColor, size: QSize):
         image = super(PaletteLABView, self).render_to_image(background, size)

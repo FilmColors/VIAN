@@ -75,7 +75,7 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.7.0"
+VERSION = "0.7.1"
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
@@ -86,9 +86,8 @@ __maintainer__ = "Gaudenz Halter"
 __email__ = "gaudenz.halter@uzh.ch"
 __status__ = "Development, (BETA)"
 
+
 PROFILE = False
-
-
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
     onUpdateFrame = pyqtSignal(int, int)

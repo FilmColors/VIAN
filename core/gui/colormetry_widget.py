@@ -72,6 +72,10 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             print("Exception in ColorimetryLiveWidget::plot_time_palette()")
             pass
 
+    def resizeEvent(self, *args, **kwargs):
+        super(ColorimetryLiveWidget, self).resizeEvent(*args, **kwargs)
+        self.on_tab_changed()
+
     def on_selected(self, sender, selected):
         pass
 
