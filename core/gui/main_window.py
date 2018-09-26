@@ -99,7 +99,6 @@ class MainWindow(QtWidgets.QMainWindow):
     onCorpusConnected = pyqtSignal(object)
     onCorpusDisconnected = pyqtSignal(object)
 
-
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")

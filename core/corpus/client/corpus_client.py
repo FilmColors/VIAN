@@ -12,6 +12,7 @@ from core.corpus.shared.enums import *
 from core.corpus.shared.entities import *
 from core.corpus.shared.widgets import CorpusUserDialog
 from core.corpus.client.corpus_interfaces import *
+from core.corpus.corpus_webapp.webapp_corpus_interface import *
 
 try:
     from core.data.interfaces import IConcurrentJob
@@ -57,6 +58,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.metadata_path = parent.settings.DIR_CORPORA + "corpora_metadata.json"
         self.metadata = CorpusMetaDataList(self.metadata_path)
         self.metadata.load(self.metadata_path)
+        self.on_connect_webapp("http://127.0.0.1:5000/vian_login")
 
     @pyqtSlot()
     def connect(self, remote = False):
@@ -88,6 +90,16 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
         except Exception as e:
             print(e)
+
+    @pyqtSlot(str)
+    def on_connect_webapp(self, endpoint):
+        self.is_remote = True
+        self.corpus_interface = WebAppCorpusInterface(self.main_window.settings.DIR_CORPORA)
+        self.connect_signals()
+        self.execution_thread = QThread()
+        self.corpus_interface.moveToThread(self.execution_thread)
+        self.execution_thread.start()
+        self.onConnectUser.emit(self.metadata.contributor, endpoint)
 
     def connect_signals(self):
         try:
@@ -358,6 +370,8 @@ class CorpusClientWidget(QWidget):
         self.btn_Commit.setEnabled(False)
         self.btn_CheckOut.setEnabled(False)
         self.btn_Update.setEnabled(False)
+
+        self.comboBox_Corpora.addItem("ERC FilmColors")
 
         #  self.btn_.clicked.connect(self.corpus_client.connect)
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>214</width>
-    <height>62</height>
+    <height>79</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -94,6 +94,9 @@
         <set>Qt::AlignCenter</set>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox_Corpora"/>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
