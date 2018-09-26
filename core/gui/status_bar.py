@@ -122,7 +122,6 @@ class StatusVideoSource(QtWidgets.QWidget):
         self.layout.addWidget(self.lbl_source)
         self.setStyleSheet("QWiget{background: transparent;}")
 
-
     @pyqtSlot(str)
     def on_source_changed(self, source):
         if source == "VLC":

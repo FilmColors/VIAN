@@ -1,4 +1,3 @@
-
 import inspect
 import webbrowser
 import cProfile
@@ -9,19 +8,10 @@ from core.concurrent.worker import Worker
 import time
 import inspect
 import sys
-
 import threading
-
 import importlib
 from functools import partial
-
 from visualizer.vis_main_window import *
-
-# from core.analysis.barcode_analysis import BarcodeAnalysisJob
-# from core.analysis.colorimetry.colormetry2 import ColormetryJob2
-# from core.analysis.movie_mosaic.movie_mosaic import MovieMosaicAnalysis
-# from core.analysis.palette_analysis import ColorPaletteAnalysis
-# from core.analysis.color_feature_extractor import ColorFeatureAnalysis
 from core.analysis.analysis_import import *
 from core.concurrent.auto_screenshot import *
 from core.concurrent.auto_segmentation import *
@@ -46,7 +36,7 @@ from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.colormetry_widget import *
 from core.gui.concurrent_tasks import ConcurrentTaskDock
-from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, tuple2point
+from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, tuple2point, ALWAYS_VLC
 from core.gui.experiment_editor import ExperimentEditorDock
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
@@ -456,7 +446,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
-        self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
+        # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
+        self.player.stopped.connect(self.on_pause)
 
         self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, False))
         self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, True))
@@ -560,6 +551,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 s.copy_event(self.project.selected[0])
 
 
+    def on_pause(self):
+        if self.settings.OPENCV_PER_FRAME != ALWAYS_VLC:
+            self.frame_update_worker.set_opencv_frame(True)
+            self.dispatch_on_timestep_update(self.player.get_media_time())
+            self.set_overlay_visibility(True)
     #region WidgetCreation
 
     def show_welcome(self):
