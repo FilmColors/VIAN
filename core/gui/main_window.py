@@ -372,7 +372,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionAuto_Screenshots.triggered.connect(self.on_auto_screenshot)
 
 
-        self.actionColormetry.triggered.connect(self.start_colormetry)
+        self.actionColormetry.triggered.connect(self.toggle_colormetry)
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
         self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
         self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
@@ -513,7 +513,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None:
             WebAnnotationDevice().export("test_file.json", self.project, DBContributor("Gaudenz"))
 
-    def start_colormetry(self):
+    def toggle_colormetry(self):
         if self.colormetry_running == False:
             job = ColormetryJob2(30, self)
             args = job.prepare(self.project)
@@ -538,19 +538,18 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_colormetry_finished(self, res):
         try:
             self.project.colormetry_analysis.set_finished()
-            # self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
         except Exception as e:
             print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
     def clear_colormetry(self):
         if self.project is not None:
             if self.colormetry_job is not None:
-                self.colormetry_job.abort()
+                self.toggle_colormetry()
+            if self.project.colormetry_analysis is not None:
                 self.project.colormetry_analysis.clear()
             self.timeline.timeline.set_colormetry_progress(0.0)
 
     def on_copy(self):
-
         if self.project is not None:
             self.clipboard_data = self.project.selected
         print("Copy:", self.clipboard_data)
@@ -1420,6 +1419,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Exception in MainWindow.analysis_result", str(e))
 
         # Unload the analysis from Memory
+
     def on_save_custom_perspective(self):
         setting = QSettings("UniversityOfZurich", "VIAN")
         setting.setValue("geometry", self.saveGeometry())
@@ -1488,9 +1488,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_set_movie_path(self):
         if self.project is not None:
             path = parse_file_path(QFileDialog.getOpenFileName(self)[0])
-            self.project.movie_descriptor.set_movie_path(path)
-            self.player.open_movie(path)
-            self.dispatch_on_changed()
+            if os.path.isfile(path):
+                self.project.movie_descriptor.set_movie_path(path)
+                self.player.open_movie(path)
+                self.dispatch_on_changed()
 
     def on_reload_movie(self):
         if self.project is not None:
@@ -1503,8 +1504,6 @@ class MainWindow(QtWidgets.QMainWindow):
             visualizer.show()
         except Exception as e:
             print(e)
-
-
     # endregion
 
     #region Project Management
@@ -1575,7 +1574,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.set_overlay_visibility(False)
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
-
         if self.current_perspective == (Perspective.Segmentation.name or Perspective.Annotation.name):
             self.set_overlay_visibility(True)
         path = path[0]
@@ -1839,6 +1837,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onCorpusDisconnected.emit(corpus)
 
     #endregion
+
     def set_ui_enabled(self, state):
         self.actionSave.setDisabled(not state)
         self.actionSaveAs.setDisabled(not state)
@@ -1935,7 +1934,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if run_colormetry:
             ready, col = self.project.get_colormetry()
             if not ready:
-                self.start_colormetry()
+                self.toggle_colormetry()
 
             else:
                 self.timeline.timeline.set_colormetry_progress(1.0)

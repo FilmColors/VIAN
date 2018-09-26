@@ -47,12 +47,15 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
     def update_timestep(self, data):
         if data is not None:
-            self.palette.set_palette(data['palette'])
-            self.lab_palette.set_palette(data['palette'])
-            if self.vis_tab.currentIndex() == 0:
-                self.palette.draw_palette()
-            elif self.vis_tab.currentIndex() == 1:
-                self.lab_palette.draw_palette()
+            try:
+                self.palette.set_palette(data['palette'])
+                self.lab_palette.set_palette(data['palette'])
+                if self.vis_tab.currentIndex() == 0:
+                    self.palette.draw_palette()
+                elif self.vis_tab.currentIndex() == 1:
+                    self.lab_palette.draw_palette()
+            except Exception as e:
+                print("Exception in ColormetryWidget.update_timestep()", str(e))
 
     def on_tab_changed(self):
         if self.vis_tab.currentIndex() == 0:

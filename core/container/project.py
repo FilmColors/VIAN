@@ -228,6 +228,17 @@ class VIANProject(IHasName, IClassifiable):
             if type is not None and type == c.get_type():
                 print(str(c.unique_id).ljust(20), c)
 
+    def sanitize_paths(self):
+        self.path = os.path.normpath(self.path)
+        self.name = os.path.normpath(self.name)
+        self.folder = os.path.normpath(self.folder)
+        self.data_dir = os.path.normpath(self.data_dir)
+        self.results_dir = os.path.normpath(self.results_dir)
+        self.shots_dir = os.path.normpath(self.shots_dir)
+        self.export_dir = os.path.normpath(self.export_dir)
+        self.movie_descriptor.movie_path = os.path.normpath(self.movie_descriptor.movie_path)
+        print(self.folder)
+
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):
         s = Segmentation(name)
@@ -498,7 +509,6 @@ class VIANProject(IHasName, IClassifiable):
             self.analysis.append(a)
         self.main_window.project_streamer.bulk_store(ids, objs, data_types)
 
-
     def remove_analysis(self, analysis):
         if analysis in self.analysis:
             self.analysis.remove(analysis)
@@ -748,6 +758,7 @@ class VIANProject(IHasName, IClassifiable):
             print("File not Found: ", path)
             return
 
+        print("Reading From", os.path.abspath(path))
         with open(path) as f:
             my_dict = json.load(f)
 
@@ -770,7 +781,6 @@ class VIANProject(IHasName, IClassifiable):
         except:
             pass
 
-        print(path)
         # splitted = path.split("/")[0:len(path.split("/")) - 1]
         # self.folder = ""
         # for f in splitted:
@@ -894,6 +904,7 @@ class VIANProject(IHasName, IClassifiable):
                     if node is not None:
                         node.operation.result = res
 
+        self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
         # Migrating the Project to the new FileSystem
         if move_project_to_directory_project:
             answer = QMessageBox.question(self.main_window, "Project Migration", "This Project seems to be older than 0.2.9.\n\n"
@@ -918,6 +929,7 @@ class VIANProject(IHasName, IClassifiable):
 
         self.sort_screenshots()
         self.undo_manager.clear()
+        self.sanitize_paths()
 
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
@@ -1337,7 +1349,15 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 
     def get_movie_path(self):
         if self.is_relative:
-            return self.project.folder + self.movie_path
+            abs_path = os.path.normpath(self.project.folder + "/" + self.movie_path)
+            if os.path.isfile(abs_path):
+                return abs_path
+            elif os.path.isfile(self.movie_path):
+                self.is_relative = False
+                return self.movie_path
+            else:
+                return ""
+
         else:
             return self.movie_path
 
@@ -1348,17 +1368,25 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         :param path: 
         :return: 
         """
-        try:
-            if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
-                self.movie_path = os.path.basename(path)
-                self.is_relative = True
-            else:
-                self.movie_path = path
-                self.is_relative = False
-        except Exception as e:
-            print(e)
-            self.movie_path = path
+        if self.project.folder in path:
+            common = os.path.commonpath([self.project.path, path])
+            self.movie_path = path.replace(common, "/")
+            self.is_relative = True
+        else:
+            self.movie_path = os.path.normpath(path)
             self.is_relative = False
+        print("New Final Moviepath", self.movie_path, "Relative:", self.is_relative)
+        # try:
+        #     if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
+        #         self.movie_path = os.path.basename(path)
+        #         self.is_relative = True
+        #     else:
+        #         self.movie_path = path
+        #         self.is_relative = False
+        # except Exception as e:
+        #     print(e)
+        #     self.movie_path = path
+        #     self.is_relative = False
 
         cap = cv2.VideoCapture(self.get_movie_path())
         self.fps = cap.get(cv2.CAP_PROP_FPS)

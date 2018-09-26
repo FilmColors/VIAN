@@ -141,6 +141,7 @@ class NewProjectDialog(EDialogWidget):
 
     def on_browse_project_path(self):
         path = QFileDialog.getExistingDirectory(directory=self.project_dir)
+        print(path)
         self.project_dir = path
         self.lineEdit_ProjectPath.setText(self.project.folder)
 
@@ -186,16 +187,21 @@ class NewProjectDialog(EDialogWidget):
     def on_ok(self):
         template = self.templates[self.comboBox_Template.currentIndex()]
         copy_movie = self.comboBox_Move.currentText()
+
         # Checking if the project dir is existing
         if not os.path.isdir(self.project_dir):
             self.settings.integritiy_check()
             self.project_dir = self.settings.DIR_PROJECT
         try:
-            os.mkdir(self.project_dir + "/" + self.project_name)
+            if not os.path.isdir(self.project_dir + "/" + self.project_name):
+                try:
+                    os.mkdir(self.project_dir + "/" + self.project_name)
+                except Exception as e:
+                    raise Exception("Access denied, the directory is probably locked.")
+            else:
+                raise Exception("Directory already exists.")
         except Exception as e:
-            print(e)
-            QMessageBox.warning(self, "Could not Find Root Directory",
-                                "The Root directory of your projects could not be found, please set it manually.")
+            QMessageBox.warning(self, str(e),"The Root directory of your project could not be created because the " + str(e) +", please set it manually.")
             self.project_dir = QFileDialog.getExistingDirectory()
             try:
                 os.mkdir(self.project_dir + "/" + self.project_name)
@@ -226,6 +232,7 @@ class NewProjectDialog(EDialogWidget):
             self.lineEdit_MoviePath.setText(path)
 
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
+
         print(self.project.folder, "\n",
               self.project.path, "\n",
               self.settings.DIR_PROJECT)

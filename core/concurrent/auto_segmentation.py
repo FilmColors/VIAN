@@ -70,7 +70,7 @@ class DialogAutoSegmentation(EDialogWidget):
                                     "The progress is indicated by the green line on the Timeline.")
         self.lbl_not_ready.setStyleSheet("QLabel{foreground: red;}")
         self.btn_start_colormetry = QPushButton("Start Colormetry")
-        self.btn_start_colormetry.clicked.connect(self.main_window.start_colormetry)
+        self.btn_start_colormetry.clicked.connect(self.main_window.toggle_colormetry)
 
         self.widget_colorhist.layout().addWidget(self.lbl_not_ready)
         self.widget_colorhist.layout().addWidget(self.btn_start_colormetry)
