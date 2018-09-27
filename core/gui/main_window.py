@@ -103,6 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setAcceptDrops(True)
         self.has_open_project = False
         self.version = __version__
+        self.forced_overlay_hidden = False
 
         self.extension_list = ExtensionList(self)
         self.is_darwin = False
@@ -1684,13 +1685,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_editor.close()
             self.drawing_editor = None
 
-    def set_overlay_visibility(self, visibility):
+    def set_overlay_visibility(self, visibility, toggle_keep_hidden = False):
+        if self.forced_overlay_hidden and not toggle_keep_hidden:
+            return
         if visibility:
             self.drawing_overlay.show()
         else:
             self.drawing_overlay.hide()
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
         self.update_overlay()
+        if toggle_keep_hidden:
+            self.forced_overlay_hidden = not self.forced_overlay_hidden
 
     def create_analysis_list(self):
         self.analysis_list = []
@@ -1913,6 +1918,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.settings.AUTO_START_COLORMETRY:
                 run_colormetry = True
             else:
+                self.set_overlay_visibility(False, True)
                 answer = QMessageBox.question(self, "Colormetry",
                                               "Do you want to start the Colormetry Analysis now?"
                                               "\n\n"
@@ -1920,6 +1926,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                               "but will need quite some resources of your computer.")
                 if answer == QMessageBox.Yes:
                     run_colormetry = True
+                self.set_overlay_visibility(True, True)
         else:
             run_colormetry = ready
 

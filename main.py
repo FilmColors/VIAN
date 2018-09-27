@@ -29,7 +29,7 @@ from PyQt5.QtGui import QPixmap
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow
 
-DEBUG = True
+DEBUG = False
 MAIN_WINDOW = None
 
 
