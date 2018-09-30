@@ -191,8 +191,12 @@ class KeywordWidget(QWidget):
     def get_classification_object_filters(self):
         result = []
         for item in self.class_obj_list.item_entries:
-            if item[2].checkState() == Qt.Checked:
-                result.append(item[0].classification_object_id)
+            try:
+                if item[2].checkState() == Qt.Checked:
+                    result.append(item[0].classification_object_id)
+                print("ok")
+            except Exception as e:
+                print(e)
         return result
 
 
@@ -253,6 +257,7 @@ class ClassificationObjectList(QListWidget):
 
     def clear_list(self):
         self.clear()
+        self.item_entries = []
         itm = QListWidgetItem("Filmography")
         self.addItem(itm)
 

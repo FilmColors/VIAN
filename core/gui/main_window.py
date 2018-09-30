@@ -502,7 +502,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def test_function(self):
         if self.project is not None:
-            WebAnnotationDevice().export("test_file.json", self.project, DBContributor("Gaudenz"))
+            WebAnnotationDevice().export("test_file.json", self.project, self.settings.CONTRIBUTOR, VERSION)
 
     def toggle_colormetry(self):
         if self.colormetry_running == False:
