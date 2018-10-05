@@ -460,6 +460,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_changed()
 
         self.frame_update_worker.signals.onColormetryUpdate.connect(self.colorimetry_live.update_timestep)
+        self.player_dock_widget.onTextureComplexityChanged.connect(self.frame_update_worker.toggle_texture_complexity)
 
         loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))

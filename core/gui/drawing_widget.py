@@ -580,7 +580,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 pen.setColor(QtGui.QColor(105,143,63))
                 qp.setPen(pen)
                 qp.drawText(QtCore.QRect(self.width() - 100, self.height() - 50, 100, 50), 12, "OpenCV")
-
             qp.end()
         else:
             pass

@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 import cv2
 from core.data.computation import *
+from core.analysis.texture_complexity import get_texture_complexity_heatmap
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
@@ -27,10 +28,18 @@ class TimestepUpdateWorkerSingle(QObject):
         self.opencv_frame = False
         self.update_colormetry = True
 
-    @pyqtSlot()
+        self.update_texture_complexity = False
+
+    @pyqtSlot(str)
     def set_movie_path(self, movie_path):
         self.movie_path = movie_path
         self.video_capture = cv2.VideoCapture(movie_path)
+
+
+    @pyqtSlot(bool)
+    def toggle_texture_complexity(self, state):
+        self.update_texture_complexity = state
+        self.run()
 
     def set_project(self, project):
         self.project = project
@@ -71,6 +80,8 @@ class TimestepUpdateWorkerSingle(QObject):
                     if data is not False:
                         self.signals.onColormetryUpdate.emit(data)
 
+
+
         except Exception as e:
             self.signals.onError.emit([e])
 
@@ -78,6 +89,9 @@ class TimestepUpdateWorkerSingle(QObject):
         if self.video_capture is not None:
             self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, time_frame)
             ret, frame = self.video_capture.read()
+            if self.update_texture_complexity:
+                heatmap, mask = get_texture_complexity_heatmap(frame)
+                frame = heatmap
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap
         else:

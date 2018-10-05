@@ -15,12 +15,21 @@ import os
 
 
 class PlayerDockWidget(EDockWidget):
+    onTextureComplexityChanged = pyqtSignal(bool)
+
     def __init__(self, main_window):
         super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
         self.setWindowTitle("Player")
         self.video_player = None
         self.setMinimumWidth(100)
         self.setMinimumHeight(100)
+        self.vis_menu = self.inner.menuBar().addMenu("Visualization")
+        self.a_texture_complexity = self.vis_menu.addAction("Texture Complexity")
+        self.a_texture_complexity.setCheckable(True)
+        self.a_texture_complexity.triggered.connect(self.on_texture_complexity_changed)
+
+    def on_texture_complexity_changed(self):
+        self.onTextureComplexityChanged.emit(self.a_texture_complexity.isChecked())
 
     def set_player(self, video_player):
         self.setWidget(video_player)
