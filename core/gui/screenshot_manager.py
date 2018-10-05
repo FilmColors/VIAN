@@ -37,8 +37,7 @@ class ScreenshotsToolbar(EToolBar):
         self.show()
 
     def on_export(self):
-        self.exporter_dialog = DialogScreenshotExporter( self.main_window, self.manager)
-        self.exporter_dialog.show()
+        self.main_window.on_export_screenshots()
 
     def on_toggle_annotations(self):
         self.manager.toggle_annotations()

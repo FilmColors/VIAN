@@ -191,13 +191,6 @@ class VIANProject(IHasName, IClassifiable):
             self.main_window.project_streamer.on_loaded(self)
 
     def create_file_structure(self):
-        root = self.folder
-
-        self.data_dir = root + "/data"
-        self.results_dir = root + "/results"
-        self.shots_dir = root + "/shots"
-        self.export_dir = root + "/export"
-
         if not os.path.isdir(self.data_dir):
             os.mkdir(self.data_dir)
         if not os.path.isdir(self.results_dir):
@@ -785,14 +778,13 @@ class VIANProject(IHasName, IClassifiable):
         # self.folder = ""
         # for f in splitted:
         #     self.folder += f + "/"
-        self.folder = os.path.split(path)[0]
-        self.results_dir = self.folder + "/results"
-        self.export_dir = self.folder + "/export"
-        self.shots_dir = self.folder + "/shots"
-        self.data_dir = self.folder + "/data"
+        self.folder = os.path.split(path)[0] + "/"
+        self.results_dir = self.folder + "/results/"
+        self.export_dir = self.folder + "/export/"
+        self.shots_dir = self.folder + "/shots/"
+        self.data_dir = self.folder + "/data/"
 
         self.main_window.numpy_data_manager.project = self
-
 
         move_project_to_directory_project = False
         version = [0,0,0]
@@ -1168,7 +1160,8 @@ class VIANProject(IHasName, IClassifiable):
         self.main_window.numpy_data_manager.clean_up([f[0] for f in self.id_list])
         for l in self.annotation_layers:
             for w in l.annotations:
-                w.widget.close()
+                if w.widget is not None:
+                    w.widget.close()
 
     def get_time_ranges_of_selected(self):
         result = []

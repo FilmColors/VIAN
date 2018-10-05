@@ -68,7 +68,9 @@
      <addaction name="actionExportExperiment"/>
      <addaction name="actionExportVocabulary"/>
      <addaction name="separator"/>
+     <addaction name="actionScreenshotsExport"/>
      <addaction name="action_ExportSegmentation"/>
+     <addaction name="separator"/>
      <addaction name="actionZip_Project"/>
     </widget>
     <widget class="QMenu" name="menuRecently_Opened">
@@ -840,6 +842,11 @@
   <action name="actionCorpus_Visualizer">
    <property name="text">
     <string>Corpus Visualizer</string>
+   </property>
+  </action>
+  <action name="actionScreenshotsExport">
+   <property name="text">
+    <string>Screenshots</string>
    </property>
   </action>
  </widget>

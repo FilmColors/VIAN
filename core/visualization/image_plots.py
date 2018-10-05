@@ -3,7 +3,7 @@ import cv2
 import typing
 from collections import namedtuple
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter
+from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter, QPainterPath, QTransform
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
 
@@ -67,7 +67,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         #                  (range_x[1] - range_x[0]) * self.magnification/ 12,
         #                  (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
 
-    def add_image(self, x, y, img, convert = True, luminance = None, mime_data = None):
+    def add_image(self, x, y, img, convert = True, luminance = None, mime_data = None, z = 0):
         pass
 
     def sort_images(self):
@@ -180,6 +180,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.scene().clear()
         self.images.clear()
         self.luminances.clear()
+        self.raw_data = []
 
     def frame_default(self):
         # self.tipp_label.setPos(QPointF())
@@ -255,10 +256,11 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
 
     def apply_raw_data(self, raw_data):
         for itm in raw_data:
-            self.add_image(x=itm.x, y = itm.y, img=itm.image)
+            self.add_image(x=itm.x, y = itm.y, img=itm.image, z=itm.z, mime_data=itm.mime_data)
 
     def reset_view(self):
         self.set_highlighted([], True)
+
 
 class VIANPixmapGraphicsItemSignals(QObject):
     onItemSelection = pyqtSignal(object)
@@ -426,7 +428,10 @@ class ImagePlotCircular(ImagePlot):
 
 class ImagePlotPlane(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None, title=""):
+        self.curr_angle = 0.0
+        self.compass = None
         super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
+
 
     def add_image(self, x, y, img, convert = True, mime_data = None, z = 0):
         if convert:
@@ -446,14 +451,49 @@ class ImagePlotPlane(ImagePlot):
         itm.show()
         return itm
 
+    def draw_compass(self):
+        m = self.magnification
+        p = QPen()
+        p.setColor(QColor(100,100,100,200))
+        p.setWidth(0.1)
+        f = QFont()
+        f.setPointSize(5* m)
+
+
+        path = QPainterPath(QPointF(0,0))
+        path.addEllipse(QRectF(95 * m,95* m,30* m,30* m))
+        path.moveTo(110* m, 95* m)
+        path.lineTo(110* m, 125* m)
+        path.addText(105* m, 93* m, f, "+B")
+        path.addText(105* m, 133* m, f, "-B")
+        path.addText(85* m, 112* m, f, "+A")
+        path.addText(127* m, 112* m, f, "-A")
+
+        pitem = self.scene().addPath(path, p)
+        self.compass = pitem
+        t = QTransform()
+        x, y = -110* m, -110* m
+        t.translate(-x, -y)
+        t.rotate(self.curr_angle)
+        t.translate(x, y)
+
     def rotate_view(self, angle_rad):
         angle = (angle_rad / 360 * np.pi) * 2
+        self.curr_angle = angle_rad
+
         for idx, itm in enumerate(self.raw_data):
             x,z = rotate((0,0), (itm.x, itm.z), angle)
             try:
                 self.images[idx].setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification))
                 self.images[idx].setZValue(z)
             except: continue
+
+        t = QTransform()
+        x, y = -110 * self.magnification, -110 * self.magnification
+        t.translate(-x, -y)
+        t.rotate(self.curr_angle)
+        t.translate(x, y)
+        self.compass.setTransform(t)
 
     def add_grid(self):
         pen = QPen()
@@ -483,6 +523,8 @@ class ImagePlotPlane(ImagePlot):
                 text = self.scene().addText(str(round(((self.range_y[1] * self.magnification - x) / self.magnification), 0)), font)
                 text.setPos(self.range_x[0] * self.magnification, x)
                 text.setDefaultTextColor(QColor(200, 200, 200, 200))
+
+        self.draw_compass()
 
     def get_param_widget(self):
         w = QWidget()

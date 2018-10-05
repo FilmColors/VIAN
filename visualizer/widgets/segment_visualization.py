@@ -29,12 +29,15 @@ class SegmentVisualization(QWidget):
         #     self.onSegmentSelected.connect(visualizer.on_segment_selected)
 
     def add_entry(self, db_project:DBProject, db_segment:DBSegment, db_screenshots = None, imgs = None):
+        if db_segment.segment_id in self.entries:
+            return
         itm = SegmentVisualizationItem(db_project, db_segment, db_screenshots, imgs)
         itm.onSelected.connect(self.onSegmentSelected)
         itm.onHovered.connect(self.onSegmentHovered)
         itm.onLeave.connect(self.onSegmentLeave)
-        for scr in db_screenshots:
-            self.screenshot_segm_mapping[scr.screenshot_id] = db_segment.segment_id
+        if db_screenshots is not None:
+            for scr in db_screenshots:
+                self.screenshot_segm_mapping[scr.screenshot_id] = db_segment.segment_id
         self.entries[db_segment.segment_id] = itm
         self.scrollArea.widget().layout().addWidget(itm)
 
@@ -50,6 +53,13 @@ class SegmentVisualization(QWidget):
     def add_item_to_segment(self, scr_id, img):
         if scr_id in self.screenshot_segm_mapping:
             self.entries[self.screenshot_segm_mapping[scr_id]].screenshot_view.add_image(numpy_to_pixmap(img))
+
+    def add_by_segment_id(self, db_segment, db_screenshot, img):
+        if db_segment.segment_id in self.entries:
+            if not db_screenshot.screenshot_id in self.screenshot_segm_mapping:
+                self.entries[db_segment.segment_id].screenshot_view.add_image(numpy_to_pixmap(img))
+                self.screenshot_segm_mapping[db_screenshot.screenshot_id] = db_segment.segment_id
+                self.entries[db_segment.segment_id].db_screenshots.append(db_screenshot)
 
 class SegmentVisualizationItem(QWidget):
     onSelected = pyqtSignal(object, object)
@@ -68,7 +78,6 @@ class SegmentVisualizationItem(QWidget):
         self.db_segment = db_segment
         self.db_screenshots = db_screenshots
         self.setStyleSheet("QWidget{background:transparent;}")
-
 
         self.lbl_movie = QLabel(db_project.name, self)
         self.lbl_segment_id = QLabel(str(db_segment.segment_id), self)

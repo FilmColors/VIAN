@@ -46,6 +46,8 @@ Q_SCREENSHOT_PALETTE_ALL_COBJ = "select MAIN_SHOTS.*, ANALYSES.* from SHOTS as M
                                 "and ANALYSES.analysis_name = \"ColorPaletteAnalysis\" " \
                                 "and SHOTS.id = "
 
+
+#
 def create_filmography_query(query:FilmographyQuery):
     q = Q_FILMOGRAPHY[0]
     c = 0

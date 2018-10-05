@@ -43,7 +43,7 @@ class DialogScreenshotExporter(EDialogWidget):
 
         self.QualitySlider.valueChanged.connect(self.on_quality_changed)
 
-        self.folder_path = self.main_window.project.folder + self.main_window.settings.DIR_SCREENSHOTS
+        self.folder_path = self.main_window.project.shots_dir
         self.lineEdit_Folder.setText(self.folder_path)
         self.lineEdit_Folder.editingFinished.connect(self.on_edit_path_finished)
 

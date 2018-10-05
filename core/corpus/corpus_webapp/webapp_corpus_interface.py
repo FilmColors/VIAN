@@ -1,4 +1,5 @@
 from core.corpus.client.corpus_interfaces import *
+import threading
 
 class WebAppCorpusInterface(CorpusInterface):
     def __init__(self, corpora_dir):
@@ -83,8 +84,8 @@ class WebAppCorpusInterface(CorpusInterface):
             print(project.folder)
             export_root = project.folder + "/corpus_export/"
             export_project_dir = export_root + "project/"
-            scr_dir = export_root + "/scr/"
-            mask_dir = export_root + "/masks/"
+            scr_dir = export_project_dir + "/scr/"
+            mask_dir = export_project_dir + "/masks/"
 
             # Create the temporary directories
             try:
@@ -94,25 +95,108 @@ class WebAppCorpusInterface(CorpusInterface):
                     os.mkdir(export_root)
                 if not os.path.isdir(export_project_dir):
                     os.mkdir(export_project_dir)
+                if not os.path.isdir(scr_dir):
+                    os.mkdir(scr_dir)
+                if not os.path.isdir(mask_dir):
+                    os.mkdir(mask_dir)
             except Exception as e:
                 QMessageBox.Information("Commit Error", "Could not modify \\corpus_export\\ directory."
                                                   "\nPlease make sure the Folder is not open in the Explorer/Finder.")
                 return False, None
 
-            project.store_project(UserSettings(), os.path.join(export_project_dir, project.name + ".eext"))
+            # -- Thumbnail --
+            if len(project.screenshots) > 0:
+                thumb = sample(project.screenshots, 1)[0].img_movie
+                cv2.imwrite(export_project_dir + "thumbnail.jpg", thumb)
 
+            # -- Export all Screenshots --
+            #Connect to the Analyses Database of the Project
+            db = ds.connect("sqlite:///" + project.data_dir + "/" + "database.sqlite")
+
+            # Maps the unique ID of the screenshot to it's mask path -> dict(key:unique_id, val:dict(scene_id, segm_shot_id, group, path))
+            mask_index = dict()
+            shots_index = dict()
+            for i, scr in enumerate(project.screenshots):
+                sys.stdout.write("\r" + str(round(i / len(project.screenshots), 2) * 100).rjust(3) + "%\t Baking Screenshots")
+                self.onEmitProgress.emit(i / len(project.screenshots), "Baking Screenshots")
+
+                img = cv2.cvtColor(scr.img_movie, cv2.COLOR_BGR2BGRA)
+                # # Export the Screenshot as extracted from the movie
+                grp_name = scr.screenshot_group
+                name = scr_dir + grp_name + "_" \
+                       + str(scr.scene_id) + "_" \
+                       + str(scr.shot_id_segm) + ".png"
+                if img.shape[1] > PAL_WIDTH:
+                    fx = PAL_WIDTH / img.shape[1]
+                    img = cv2.resize(img, None, None, fx, fx, cv2.INTER_CUBIC)
+
+                cv2.imwrite(name, img, [cv2.IMWRITE_PNG_COMPRESSION, PNG_COMPRESSION_RATE])
+
+                shots_index[scr.unique_id] = dict(
+                    scene_id=scr.scene_id,
+                    shot_id_segm=scr.shot_id_segm,
+                    group=grp_name,
+                    path=name.replace(project.folder, "")
+                )
+
+                # Export the Screenshots with all masks applied
+                for e in project.experiments:
+                    # First we have to find all experiments that have Classification Objects with Mask Labels
+                    masks_to_export = []
+                    for cobj in e.get_classification_objects_plain():
+                        sem_labels = cobj.semantic_segmentation_labels[1]
+                        ds_name = cobj.semantic_segmentation_labels[0]
+                        if ds_name != "":
+                            masks_to_export.append(dict(obj_name=cobj.name, ds_name=ds_name, labels=sem_labels))
+                    masks_to_export_names = [m['ds_name'] for m in masks_to_export]
+
+                    for counter, entry in enumerate(masks_to_export):
+                        # Find the correct Mask Analysis
+                        for a in scr.connected_analyses:
+                            if isinstance(a, IAnalysisJobAnalysis) and a.analysis_job_class == SemanticSegmentationAnalysis.__name__:
+                                table = SQ_TABLE_MASKS
+                                data = dict(db[table].find_one(key=a.unique_id))['json']
+                                data = project.main_window.eval_class(a.analysis_job_class)().from_json(data)
+
+                                if data['dataset'] in masks_to_export_names:
+                                    mask = cv2.resize(data['mask'].astype(np.uint8), (img.shape[1], img.shape[0]),
+                                                      interpolation=cv2.INTER_NEAREST)
+
+                                    mask_path = mask_dir + data['dataset'] + "_" +str(scr.scene_id) + "_" + str(scr.shot_id_segm) + ".png"
+                                    cv2.imwrite(mask_path, mask, [cv2.IMWRITE_PNG_COMPRESSION, PNG_COMPRESSION_RATE])
+
+                                    if scr.unique_id not in mask_index:
+                                        mask_index[scr.unique_id] = []
+
+                                    mask_index[scr.unique_id].append((dict(
+                                        scene_id=scr.scene_id,
+                                        dataset=data['dataset'],
+                                        shot_id_segm=scr.shot_id_segm,
+                                        group=grp_name,
+                                        path=mask_path.replace(project.folder, "") )
+                                    ))
+
+            with open(export_project_dir + "image_linker.json", "w") as f:
+                json.dump(dict(masks=mask_index, shots=shots_index), f)
+
+            for scr in project.screenshots:
+                print(scr.unique_id in mask_index.keys(), scr.unique_id in shots_index.keys())
+
+            # -- Creating the Archive --
             print("Export to:", export_project_dir)
+            project.store_project(UserSettings(), os.path.join(export_project_dir, project.name + ".eext"))
             archive_file = os.path.join(export_root, project.name)
             shutil.make_archive(archive_file, 'zip', export_project_dir)
-            fin = open(archive_file + ".zip", 'rb')
-            files = {'file': fin}
-            try:
-                r = requests.post(self.endpoint_adress, files=files, headers=dict(type="upload")).text
-                print("Redceived", r)
-                # file_name = json.loads(r)['path']
-                # print(file_name)
-            finally:
-                fin.close()
+
+
+            # --- Sending the File --
+            # fin = open(archive_file + ".zip", 'rb')
+            # files = {'file': fin}
+            # try:
+            #     r = requests.post(self.endpoint_adress, files=files, headers=dict(type="upload")).text
+            #     print("Redceived", r)
+            # finally:
+            #     fin.close()
 
             commit_result = dict(success=True, dbproject=DBProject().to_database(True))
             if commit_result['success']:
@@ -128,27 +212,10 @@ class WebAppCorpusInterface(CorpusInterface):
     @pyqtSlot(object, object)
     def checkout_project(self, user, project: DBProject):
         pass
-        # try:
-        #     if False:#TODO
-        #         self.onCheckedOut.emit(True, self.to_project_list(result['dbprojects']))
-        #     else:
-        #         self.onCheckedOut.emit(False, None)
-        # except Exception as e:
-        #     print("Exception in RemoteCorpusClient.checkout_project(): ", str(e))
-        #     self.onCheckedOut.emit(False, None)
-
 
     @pyqtSlot(object, object)
     def checkin_project(self, user, project: DBProject):
         pass
-        # try:
-        #     if result['success']:
-        #         self.onCheckedIn.emit(True,  self.to_project_list(result['dbprojects']))
-        #     else:
-        #         self.onCheckedIn.emit(False, None)
-        # except Exception as e:
-        #     print("Exception in RemoteCorpusClient.checkin_project(): ", str(e))
-        #     self.onCheckedIn.emit(False, None)
 
     @pyqtSlot(object, object)
     def get_projects(self, user):
@@ -157,31 +224,7 @@ class WebAppCorpusInterface(CorpusInterface):
     @pyqtSlot(object, object)
     def download_project(self, user, project):
         pass
-        # try:
-        #
-        #         if archive is not None:
-        #             self.onReadyForExtraction.emit(True, project, archive)
-        #         self.onReadyForExtraction.emit(False, None, None)
-        # except Exception as e:
-        #     print("Exception in RemoteCorpusClient.download_project(): ", str(e))
-        #     self.onReadyForExtraction.emit(False, None, None)
 
     @pyqtSlot(object, object)
     def check_checkout_state(self, user, dbproject):
         pass
-        # result = json.loads(self.send_message(ServerCommands.Get_CheckOut_State,
-        #                                       dict(
-        #                                           user=user.to_database(True),
-        #                                           dbproject=dbproject.to_database(True)
-        #                                       )).decode())
-        #
-        # if result['success'] is not False:
-        #     proj  = DBProject().from_database(result['dbproject'])
-        #     if proj.is_checked_out == True and proj.checked_out_user != user.contributor_id:
-        #         self.onCheckOutStateRecieved.emit(CHECK_OUT_OTHER)
-        #     elif proj.is_checked_out == True and proj.checked_out_user == user.contributor_id:
-        #         self.onCheckOutStateRecieved.emit(CHECK_OUT_SELF)
-        #     else:
-        #         self.onCheckOutStateRecieved.emit(CHECK_OUT_NO)
-        # else:
-        #     self.onCheckOutStateRecieved.emit(CHECK_OUT_NOT_IN_DB)

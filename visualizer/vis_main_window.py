@@ -18,7 +18,7 @@ from visualizer.presentation.screenshot_inspector import ScreenshotInspectorPopu
 class VIANVisualizer(QMainWindow):
     onQuery = pyqtSignal(str, object, object, object, object, object, object)
     onAbortAllWorker = pyqtSignal()
-    onLoadScreenshots = pyqtSignal(object)
+    onLoadScreenshots = pyqtSignal(object, bool)
 
     def __init__(self, parent = None, contributor=None):
         super(VIANVisualizer, self).__init__(parent)
@@ -97,7 +97,7 @@ class VIANVisualizer(QMainWindow):
         self.db_root = None
 
 
-        self.K = 300
+        self.K = 10000
         self.K_IMAGES = 300
         self.MAX_WIDTH = 500
 
@@ -118,7 +118,6 @@ class VIANVisualizer(QMainWindow):
 
     @pyqtSlot(str)
     def on_query_finished(self, string):
-        print("Finished, " + string)
         try:
             self.stlabel.setText("Finished, " + string)
             self.stlabel.setStyleSheet("QLabel{color: green;}")
@@ -191,9 +190,9 @@ class VIANVisualizer(QMainWindow):
             for cl in cl_objs:
                 self.classification_object_filter_indices[cl.name] = cl.classification_object_id
 
-    def on_load_screenshots(self, db_shots, callback):
+    def on_load_screenshots(self, db_shots, callback, by_segment=True):
         self.screenshot_loader.signals.onScreenshotLoaded.connect(callback)
-        self.onLoadScreenshots.emit(db_shots)
+        self.onLoadScreenshots.emit(db_shots, by_segment)
 
     def on_screenshot_inspector(self, db_screenshot:DBScreenshot):
         print(self.db_root + db_screenshot.file_path)

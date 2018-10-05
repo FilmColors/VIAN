@@ -63,6 +63,7 @@ class DBEntity():
     def from_dict(self, d):
         for key, value in d.items():
             setattr(self, key, value)
+        return self
 
     def to_dict(self):
         pass

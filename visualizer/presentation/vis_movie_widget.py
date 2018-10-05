@@ -66,6 +66,7 @@ class VisMovieLayout(PresentationWidget):
         self.screenshots = dict() # TUPLE (DBScreenshot, Image, Used)
         self.color_features = dict()
         self.shot_counter = 0
+        self.already_processed = []
 
     @pyqtSlot(object)
     def on_screenshot_loaded(self, scr):
@@ -75,7 +76,7 @@ class VisMovieLayout(PresentationWidget):
                 l = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][0]
                 tx = self.screenshots[scr['screenshot_id']][0].time_ms
                 ty = self.color_features[scr['screenshot_id']].analysis_data['saturation_p']
-                x = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][1] - 128
+                x = -self.color_features[scr['screenshot_id']].analysis_data['color_lab'][1] + 128
                 y = self.color_features[scr['screenshot_id']].analysis_data['color_lab'][2] - 128
                 if self.screenshots[scr['screenshot_id']][2] == True:
                     self.plot_color_dt.add_image(tx, ty, self.screenshots[scr['screenshot_id']][1], False, mime_data=self.screenshots[scr['screenshot_id']][0])
@@ -114,13 +115,13 @@ class VisMovieLayout(PresentationWidget):
                 l = self.color_features[k].analysis_data['color_lab'][0]
                 tx = self.screenshots[k][0].time_ms
                 ty = self.color_features[k].analysis_data['saturation_p']
-                x = self.color_features[k].analysis_data['color_lab'][1] - 128
+                x = - self.color_features[k].analysis_data['color_lab'][1] + 128
                 y = self.color_features[k].analysis_data['color_lab'][2] - 128
 
                 if self.screenshots[k][1] is not None:
                     self.plot_color_dt.add_image(tx, ty, self.screenshots[k][1], False, mime_data=self.screenshots[k][0])
-                    self.plot_ab_space.add_image(x, y, self.screenshots[k][1], False, mime_data=self.screenshots[k][0])
-                    self.plot_la_space.add_image(x, l, self.screenshots[k][1], False, mime_data=self.screenshots[k][0])
+                    self.plot_ab_space.add_image(x, y, self.screenshots[k][1], False, mime_data=self.screenshots[k][0], z=l)
+                    self.plot_la_space.add_image(x, l, self.screenshots[k][1], False, mime_data=self.screenshots[k][0], z=y)
             else:
                 self.screenshots[k][2] = False
         self.plot_color_dt.frame_default()
@@ -137,7 +138,9 @@ class VisMovieLayout(PresentationWidget):
         self.plot_la_space.add_grid()
 
     def on_query_result(self, obj):
-        print("Recieved Answer")
+        if id(obj) in self.already_processed:
+            return
+        self.already_processed.append(id(obj))
         if obj['type'] == "movie_info":
             # COLOR FEATURES
             segments = []
@@ -174,12 +177,20 @@ class VisMovieLayout(PresentationWidget):
             to_load = []
             for t in to_sort:
                 scrs = to_sort[t]
-                if len(scrs) > 0:
-                    if len(scrs) < self.visualizer.K:
-                        k = len(scrs)
-                    else:
-                        k = self.visualizer.K
-                    to_load.extend(sample(scrs, k))
+                k = np.clip(self.visualizer.K_IMAGES, 0, len(scrs))
+                segment_groups = dict()
+                for s in scrs:
+                    if s.segment_id not in segment_groups:
+                        segment_groups[s.segment_id] = []
+                    segment_groups[s.segment_id].append(s)
+
+                n_remaining = k
+                n_segments_rem = len(list(segment_groups.keys()))
+                for s in segment_groups.keys():
+                    k_sub = np.clip(n_remaining / n_segments_rem, 0 , len(segment_groups[s]))
+                    to_load.extend(sample(segment_groups[s], int(k_sub)))
+                    n_remaining -= k_sub
+                    n_segments_rem -= 1
 
             for scr in obj['data']['screenshots']:
                 self.screenshots[scr.screenshot_id] = [scr, None, False]

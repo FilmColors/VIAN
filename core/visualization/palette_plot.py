@@ -136,7 +136,7 @@ class PaletteView(QWidget, IVIANVisualization):
             x = 0
 
             if self.sorting == "Frequency":
-                new_sort = np.argsort(bins_to_draw)
+                new_sort = np.argsort(bins_to_draw)[::-1]
                 cols_to_draw = cols_to_draw[new_sort]
                 bins_to_draw = bins_to_draw[new_sort]
 

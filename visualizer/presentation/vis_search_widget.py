@@ -39,7 +39,8 @@ class VisSearchLayout(PresentationWidget):
                     self.history = pickle.load(f)
             except:
                 self.history = dict()
-        for k in self.history.keys():
+
+        for k in sorted(self.history.keys(),reverse=True):
             self.search_widget.comboBox_History.addItem(k)
 
     def on_query_result(self, obj):

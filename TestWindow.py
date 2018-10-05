@@ -8,11 +8,22 @@ from PyQt5.QtCore import Qt
 
 from core.gui.tools import StringList
 from visualizer.vis_main_window import *
+from core.visualization.dot_plot import DotPlot
+from core.visualization.bar_plot import BarPlot
 
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = VIANVisualizer(self)
+        self.t = DotPlot(self)
+        self.t.clear_view()
+        self.t.add_grid("LA")
+        names = ["hello", "a very long name", "cool", "super", "another very long text"]
+        for x in range(-128, 128):
+            self.t.add_point(x, x)
+
+        self.t.draw_compass()
+        self.ctrl = self.t.get_param_widget()
+        self.ctrl.show()
         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
 
         self.setCentralWidget(self.t)
@@ -38,6 +49,6 @@ if __name__ == '__main__':
     sys.excepthook = my_exception_hook
     app = QApplication(sys.argv)
     set_style_sheet(app)
-    main = VIANVisualizer()
+    main = TWindow()
     sys.exit(app.exec_())
 

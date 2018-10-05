@@ -32,6 +32,7 @@ from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
 from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
+from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.colormetry_widget import *
@@ -65,7 +66,7 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.7.1"
+VERSION = "0.7.4"
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2017, Gaudenz Halter"
@@ -309,6 +310,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClose_Project.triggered.connect(self.close_project)
         self.actionZip_Project.triggered.connect(self.on_zip_project)
         self.actionExit.triggered.connect(self.on_exit)
+        self.actionScreenshotsExport.triggered.connect(self.on_export_screenshots)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -529,6 +531,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_colormetry_finished(self, res):
         try:
             self.project.colormetry_analysis.set_finished()
+            self.timeline.timeline.set_colormetry_progress(1.0)
         except Exception as e:
             print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
@@ -551,12 +554,12 @@ class MainWindow(QtWidgets.QMainWindow):
             for s in self.clipboard_data:
                 s.copy_event(self.project.selected[0])
 
-
     def on_pause(self):
         if self.settings.OPENCV_PER_FRAME != ALWAYS_VLC:
             self.frame_update_worker.set_opencv_frame(True)
             self.dispatch_on_timestep_update(self.player.get_media_time())
             self.set_overlay_visibility(True)
+
     #region WidgetCreation
 
     def show_welcome(self):
@@ -1500,6 +1503,10 @@ class MainWindow(QtWidgets.QMainWindow):
             visualizer.show()
         except Exception as e:
             print(e)
+
+    def on_export_screenshots(self):
+        dialog = DialogScreenshotExporter(self, self.screenshots_manager)
+        dialog.show()
     # endregion
 
     #region Project Management

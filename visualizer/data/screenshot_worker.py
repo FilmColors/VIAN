@@ -22,9 +22,9 @@ class ScreenshotWorker(QObject):
     def initialize(self, db_root):
         self.db_root = db_root
 
-    @pyqtSlot(object)
-    def on_load_screenshots(self, dbscreenshots:List[DBScreenshot]):
-        dbscreenshots = self.create_subsample(dbscreenshots)
+    @pyqtSlot(object, bool)
+    def on_load_screenshots(self, dbscreenshots:List[DBScreenshot], by_segment = True):
+        # dbscreenshots = self.create_subsample(dbscreenshots, by_segment)
         print("Loading Shots...")
         for i, s in enumerate(dbscreenshots):
             if self.aborted:
@@ -43,31 +43,38 @@ class ScreenshotWorker(QObject):
         print("Done")
         self.aborted = False
 
-    def create_subsample(self, scrs:List[DBScreenshot]):
+    def create_subsample(self, scrs:List[DBScreenshot], by_segment = True):
         print("N-Shots:", len(scrs))
         samples = dict()
-        for scr in scrs:
-            if scr.segment_id not in samples:
-                samples[scr.segment_id] = []
-            samples[scr.segment_id].append(scr)
+        if by_segment:
+            # sort them by segment
+            for scr in scrs:
+                if scr.segment_id not in samples:
+                    samples[scr.segment_id] = []
+                samples[scr.segment_id].append(scr)
 
-        samples = [samples[s] for s in samples.keys()]
-        n_segments = len(samples)
-        if n_segments > 0:
-            n_per_segment = int(self.visualizer.K_IMAGES / n_segments)
+            samples = [samples[s] for s in samples.keys()]
+            n_segments = len(samples)
+            if n_segments > 0:
+                n_per_segment = int(self.visualizer.K_IMAGES / n_segments)
+                result = []
+                for smpl in samples:
 
-            result = []
-            for smpl in samples:
-                if len(smpl) < n_per_segment:
-                    result.extend(smpl)
-                else:
-                    n = n_per_segment
-                    result.extend(sample(smpl, n))
+                    if len(smpl) < n_per_segment:
+                        result.extend(smpl)
+                    else:
+                        n = n_per_segment
+                        result.extend(sample(smpl, n))
 
+                print("Shots to load:", len(result))
+                return result
+            else:
+                return scrs
+        else:
+            k = np.clip(self.visualizer.K_IMAGES, 0, len(scrs))
+            result = sample(scrs, k)
             print("Shots to load:", len(result))
             return result
-        else:
-            return scrs
 
 
     @pyqtSlot()

@@ -94,12 +94,13 @@ class VisualizerVisualization(QMainWindow):
 class FocusVisualizationWindow(QMainWindow):
     def __init__(self, parent, visualization, old_parent:VisualizerVisualization):
         super(FocusVisualizationWindow, self).__init__(parent)
-        self.visualization = visualization
+        self.visualization = visualization.__class__(self)
+        self.visualization.apply_raw_data(visualization.get_raw_data())
         self.old_parent = old_parent
         self.setWindowFlags(Qt.Window)
         self.setCentralWidget(self.visualization)
 
-        self.settings_widget = self.old_parent.settings_widget
+        self.settings_widget = self.visualization.get_param_widget()
         self.settings_window = QMainWindow(self, Qt.Tool)
         if self.settings_widget is not None:
             self.settings_window.setCentralWidget(self.settings_widget)
@@ -121,6 +122,5 @@ class FocusVisualizationWindow(QMainWindow):
             a0.ignore()
 
     def closeEvent(self, a0: QCloseEvent):
-        self.old_parent.setCentralWidget(self.visualization)
-        self.old_parent.settings_window.setCentralWidget(self.settings_widget)
+        self.settings_window.close()
         super(FocusVisualizationWindow, self).closeEvent(a0)

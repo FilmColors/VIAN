@@ -1252,6 +1252,8 @@ class DatasetCorpusDB(CorpusDB):
         return project_sql
 
     def get_segment_info(self, query:QueryRequestData):
+        K_SHOTS = 1000
+
         sqlquery = Q_ALL_SEGMENTS_KEYWORD[0]
         if len(query.filter_keywords['include']) > 0:
             include_args = '(' + ','.join(map(str, query.filter_keywords['include'])) + ')'
@@ -1262,28 +1264,36 @@ class DatasetCorpusDB(CorpusDB):
             sqlquery += Q_ALL_SEGMENTS_KEYWORD[2] + exclude_args + " "
         sqlquery += self.parse_filmography_query(query.filter_filmography)
 
-        result = self.db.query(sqlquery)
+        result = list(self.db.query(sqlquery))
+        print("Segment Query Done")
         db_segments = []
         db_shots = []
         shot_ids = []
 
         segment_mapping = dict()
-        for r in result:
+        segm_ids = []
+        c = 0
+        last = 0
+
+        print("Computing Segments and Screenshots")
+        for r in sample(result, np.clip(K_SHOTS, 0, len(result))):
+            c += 1
             segm = DBSegment().from_database(r)
-            if segm not in db_segments:
+            if r['segment_id'] > last:
                 segm.segment_id = r['segment_id']
                 db_segments.append(segm)
+                segm_ids.append(segm.segment_id)
+                segment_mapping[segm.segment_id] = dict(shot_ids=[])
 
             shot = DBScreenshot().from_database(r)
             shot.screenshot_id = r['screenshot_id']
-
-            if segm.segment_id not in segment_mapping:
-                segment_mapping[segm.segment_id] = dict(shot_ids = [])
+            shot.segment_id = segm.segment_id
 
             db_shots.append(shot)
             segment_mapping[segm.segment_id]['shot_ids'].append(shot.screenshot_id)
             shot_ids.append(shot.screenshot_id)
 
+        print("Computing Analyses")
         db_features = self.get_color_ab_info(shot_ids)
         return dict(type=query.query_type, data=dict(segments = db_segments, screenshots = db_shots, features = db_features, segment_mapping = segment_mapping))
 
