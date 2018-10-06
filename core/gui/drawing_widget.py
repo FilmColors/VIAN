@@ -603,12 +603,14 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         if visibility:
             if not self.settings.OPENCV_PER_FRAME == ALWAYS_VLC:
                 if self.opencv_image_visible == False:
+                    self.opencv_pixmap = None
                     self.opencv_image_visible = True
                     self.update()
                 self.onSourceChanged.emit("OPENCV")
         else:
             if self.opencv_image_visible == True:
                 self.opencv_image_visible = False
+                self.opencv_pixmap = None
                 self.update()
             self.onSourceChanged.emit("VLC")
 
@@ -714,7 +716,10 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
     def assign_opencv_image(self, qpixmap):
         self.opencv_pixmap = qpixmap.scaled(self.size(), Qt.KeepAspectRatio)
         self.update()
-
+    
+    def hideEvent(self, a0: QtGui.QHideEvent):
+        self.opencv_pixmap = None
+        super(DrawingOverlay, self).hideEvent(a0)
 
 class DrawingBase(QtWidgets.QWidget):
     def __init__(self, parent, annotation_object):

@@ -22,6 +22,7 @@ from core.corpus.client.corpus_client import CorpusClientToolBar, CorpusClient
 from core.corpus.shared.corpusdb import CorpusDB
 from core.corpus.shared.widgets import *
 from core.data.exporters import *
+from core.data.computation import ms_to_frames
 from core.data.importers import *
 from core.data.settings import UserSettings,Contributor
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
@@ -460,7 +461,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_changed()
 
         self.frame_update_worker.signals.onColormetryUpdate.connect(self.colorimetry_live.update_timestep)
-        self.player_dock_widget.onTextureComplexityChanged.connect(self.frame_update_worker.toggle_texture_complexity)
+        self.player_dock_widget.onSpacialFrequencyChanged.connect(self.frame_update_worker.toggle_spacial_frequency)
 
         loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
@@ -558,7 +559,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_pause(self):
         if self.settings.OPENCV_PER_FRAME != ALWAYS_VLC:
             self.frame_update_worker.set_opencv_frame(True)
-            self.dispatch_on_timestep_update(self.player.get_media_time())
+            self.onUpdateFrame.emit(self.player.get_media_time(), self.player.get_frame_pos_by_time(self.player.get_media_time()))
             self.set_overlay_visibility(True)
 
     #region WidgetCreation
@@ -1364,13 +1365,15 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).changeEvent(event)
 
     def on_application_lost_focus(self, arg):
-        if self.current_perspective == Perspective.Annotation.name:
-            if arg is None:
-                # self.set_darwin_player_visibility(False)
-                self.drawing_overlay.hide()
-            else:
-                # self.set_darwin_player_visibility(True)
-                self.drawing_overlay.show()
+        print(arg)
+        if arg is None:
+            # self.set_darwin_player_visibility(False)
+            self.set_overlay_visibility(False)
+        else:
+            # self.set_darwin_player_visibility(True)
+            self.set_overlay_visibility(True)
+            self.onOpenCVFrameVisibilityChanged.emit(True)
+
 
     def analysis_triggered(self, analysis):
 

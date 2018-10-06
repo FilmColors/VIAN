@@ -6,7 +6,6 @@ def neighborhood_mean_cv(img, wlen):
     wmean = cv2.boxFilter(img, -1, (wlen, wlen), borderType=cv2.BORDER_REFLECT)
     return wmean
 
-
 def get_heatmap_rgb(img, to_blend = None):
     result = np.zeros(shape=(img.shape[0], img.shape[1], 3), dtype=np.uint8)
     result[:, :, 2] = ((np.clip(img, 0.5, 1.0) - 0.5) / 0.5) * 255
@@ -19,7 +18,7 @@ def get_heatmap_rgb(img, to_blend = None):
     else:
         return result
 
-def get_texture_complexity_heatmap(input_img, blur = False, x2=20, x3=20):
+def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20):
     # input_img = cv2.resize(input_img, None, None, 0.5,0.5, cv2.INTER_CUBIC)
     lab = cv2.cvtColor(input_img, cv2.COLOR_BGR2LAB)
     edges = cv2.Canny(lab, x2, x3).astype(np.float32)

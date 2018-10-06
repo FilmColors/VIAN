@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 import cv2
 from core.data.computation import *
-from core.analysis.texture_complexity import get_texture_complexity_heatmap
+from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
@@ -28,17 +28,16 @@ class TimestepUpdateWorkerSingle(QObject):
         self.opencv_frame = False
         self.update_colormetry = True
 
-        self.update_texture_complexity = False
+        self.update_spacial_frequency = False
 
     @pyqtSlot(str)
     def set_movie_path(self, movie_path):
         self.movie_path = movie_path
         self.video_capture = cv2.VideoCapture(movie_path)
 
-
     @pyqtSlot(bool)
-    def toggle_texture_complexity(self, state):
-        self.update_texture_complexity = state
+    def toggle_spacial_frequency(self, state):
+        self.update_spacial_frequency = state
         self.run()
 
     def set_project(self, project):
@@ -89,8 +88,10 @@ class TimestepUpdateWorkerSingle(QObject):
         if self.video_capture is not None:
             self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, time_frame)
             ret, frame = self.video_capture.read()
-            if self.update_texture_complexity:
-                heatmap, mask = get_texture_complexity_heatmap(frame)
+
+            # Calculate Spacial Frequency if necessary
+            if self.update_spacial_frequency:
+                heatmap, mask = get_spacial_frequency_heatmap(frame)
                 frame = heatmap
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap

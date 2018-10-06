@@ -15,7 +15,7 @@ import os
 
 
 class PlayerDockWidget(EDockWidget):
-    onTextureComplexityChanged = pyqtSignal(bool)
+    onSpacialFrequencyChanged = pyqtSignal(bool)
 
     def __init__(self, main_window):
         super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
@@ -24,12 +24,12 @@ class PlayerDockWidget(EDockWidget):
         self.setMinimumWidth(100)
         self.setMinimumHeight(100)
         self.vis_menu = self.inner.menuBar().addMenu("Visualization")
-        self.a_texture_complexity = self.vis_menu.addAction("Texture Complexity")
-        self.a_texture_complexity.setCheckable(True)
-        self.a_texture_complexity.triggered.connect(self.on_texture_complexity_changed)
+        self.a_spacial_frequency = self.vis_menu.addAction("Spacial Frequency")
+        self.a_spacial_frequency.setCheckable(True)
+        self.a_spacial_frequency.triggered.connect(self.on_spacial_frequency_changed)
 
-    def on_texture_complexity_changed(self):
-        self.onTextureComplexityChanged.emit(self.a_texture_complexity.isChecked())
+    def on_spacial_frequency_changed(self):
+        self.onSpacialFrequencyChanged.emit(self.a_spacial_frequency.isChecked())
 
     def set_player(self, video_player):
         self.setWidget(video_player)
