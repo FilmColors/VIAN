@@ -478,8 +478,88 @@ class TextEditPopup(QMainWindow):
             self.close()
 
 
+class EditableListWidget(QWidget):
+    onSelectionChanged = pyqtSignal(object)
+    onItemAdded = pyqtSignal(str, object)
+    onItemDeleted = pyqtSignal(str, object)
+
+    def __init__(self, parent):
+        super(EditableListWidget, self).__init__(parent)
+        self.setLayout(QVBoxLayout())
+        self.list = QListWidget(self)
+
+        self.edit_layout = QHBoxLayout()
+        self.btn_Add = QPushButton("+", self)
+        self.btn_Remove = QPushButton("-", self)
+        self.lineEdit_Name = QLineEdit(self)
+        self.edit_layout.addWidget(self.btn_Remove)
+        self.edit_layout.addWidget(self.lineEdit_Name)
+        self.edit_layout.addWidget(self.btn_Add)
+        self.layout().addWidget(self.list)
+        self.layout().addItem(self.edit_layout)
+
+        self.items = []
+
+        self.list.itemSelectionChanged.connect(self.on_selected)
+        self.btn_Add.clicked.connect(self.on_add)
+        self.btn_Remove.clicked.connect(self.on_remove)
+
+    def add_item(self, name, meta):
+        itm = EditableListWidgetItem(self.list, name, meta)
+        self.list.addItem(itm)
+        self.items.append(itm)
+        return itm
+
+    def on_selected(self):
+        selected = [s for s in self.list.selectedItems()]
+        self.onSelectionChanged.emit(selected)
+
+    def on_add(self):
+        name = self.lineEdit_Name.text()
+        if name != "":
+            itm = self.add_item(name, None)
+            self.onItemAdded.emit(name, itm)
+        self.lineEdit_Name.setText("")
+
+    def on_remove(self):
+        for idx, itm in zip(self.list.selectedIndexes(), self.list.selectedItems()):
+            self.list.takeItem(idx.row())
+            self.onItemDeleted.emit(itm.name, itm)
+            self.items.remove(itm)
+
+class EditableListWidgetItem(QListWidgetItem):
+    def __init__(self, parent, name, meta):
+        super(EditableListWidgetItem, self).__init__(parent)
+        self.setText(name)
+        self.name = name
+        self.meta = meta
 
 
+class VIANMoveableGraphicsItemSignals(QObject):
+    hasBeenMoved = pyqtSignal(object)
+
+class VIANMovableGraphicsItem(QGraphicsPixmapItem):
+    def __init__(self, pixmap: QPixmap, hover_text=None, mime_data=None):
+        super(VIANMovableGraphicsItem, self).__init__(pixmap)
+        if hover_text != None:
+            self.setToolTip(hover_text)
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.abs_pos = None
+        self.signals = VIANMoveableGraphicsItemSignals()
+        self.pos_scale = 1.0
+        self.mime_data = mime_data
+        self.pixmap = pixmap
+        self.curr_alpha = 1.0
+
+    def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent'):
+        super(VIANMovableGraphicsItem, self).mouseReleaseEvent(event)
+        self.signals.hasBeenMoved.emit(self)
+
+    def paint(self, painter: QPainter, option: 'QStyleOptionGraphicsItem', widget: QWidget):
+        super(VIANMovableGraphicsItem, self).paint(painter, option, widget)
+        if self.isSelected():
+            painter.setPen(QPen(QColor(255,0,0,200)))
+            painter.drawRect(QRectF(0,0, self.sceneBoundingRect().width(), self.sceneBoundingRect().height()))
 
 
 

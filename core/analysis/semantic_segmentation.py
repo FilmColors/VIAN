@@ -95,7 +95,6 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         sign_progress(1.0)
         return results
 
-
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
         """
         This Function will be called after the processing is completed. 

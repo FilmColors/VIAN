@@ -499,3 +499,23 @@ def rotate(origin, point, angle):
     qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
     qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
     return qx, qy
+
+
+def overlap_rect(r1, r2):
+    '''Overlapping rectangles overlap both horizontally & vertically
+    '''
+
+    if (r1[0] > r2[0] + r2[2]) or (r1[0] + r1[2] < r2[0]):
+        return True
+
+    if (r1[1] < r2[1] + r2[3]) or (r1[1] + r1[3] < r2[1]):
+        return True
+    return False
+
+def contains_rect(r1, r2):
+    if (r1[0] > r2[0]) and r1[1] > r2[1] and r1[2] < r2[2] and r1[3] < r2[3]:
+        return True
+
+    if (r2[0] > r1[0]) and r2[1] > r1[1] and r2[2] < r1[2] and r2[3] < r1[3]:
+        return True
+    return False

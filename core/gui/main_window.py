@@ -51,6 +51,7 @@ from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToo
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, ClassificationWindow
+from core.gui.face_identificator import FaceIdentificatorDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
@@ -182,6 +183,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_results_widget_dock = None
         self.experiment_dock = None
         self.corpus_client_toolbar = None
+        self.facial_identification_dock = None
 
         self.progress_popup = None
         self.quick_annotation_dock = None
@@ -376,6 +378,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if KERAS_AVAILABLE:
             self.actionSemanticSegmentation = self.menuAnalysis.addAction("Semantic Segmentation")
             self.actionSemanticSegmentation.triggered.connect(partial(self.analysis_triggered, SemanticSegmentationAnalysis()))
+            self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
+            self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
+            self.create_facial_identification_dock()
+            self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
@@ -817,7 +823,14 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.screenshot_toolbar.show()
 
+    def create_facial_identification_dock(self):
+        if self.facial_identification_dock is None:
+            self.facial_identification_dock = FaceIdentificatorDock(self)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
+            self.facial_identification_dock.show()
 
+        else:
+            self.facial_identification_dock.show()
     #endregion
 
     #region QEvent Overrides
@@ -1194,6 +1207,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
+            if self.facial_identification_dock is not None:
+                self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
             self.screenshots_manager_dock.raise_()
             self.elan_status.stage_selector.set_stage(0, False)
@@ -1374,7 +1389,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_overlay_visibility(True)
             self.onOpenCVFrameVisibilityChanged.emit(True)
 
-
     def analysis_triggered(self, analysis):
 
         targets = []
@@ -1511,6 +1525,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_export_screenshots(self):
         dialog = DialogScreenshotExporter(self, self.screenshots_manager)
         dialog.show()
+
+    def on_facial_reconition(self):
+        if self.facial_identification_dock is None:
+            self.facial_identification_dock.raise_()
+
     # endregion
 
     #region Project Management

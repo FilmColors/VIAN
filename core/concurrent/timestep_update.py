@@ -2,6 +2,7 @@ from PyQt5.QtCore import *
 import cv2
 from core.data.computation import *
 from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
+from core.analysis.deep_learning.face_identification import FaceRecognitionModel
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
@@ -28,7 +29,11 @@ class TimestepUpdateWorkerSingle(QObject):
         self.opencv_frame = False
         self.update_colormetry = True
 
+        self.update_face_rec = False
         self.update_spacial_frequency = False
+
+        self.face_rec_model = FaceRecognitionModel()
+
 
     @pyqtSlot(str)
     def set_movie_path(self, movie_path):
@@ -38,6 +43,11 @@ class TimestepUpdateWorkerSingle(QObject):
     @pyqtSlot(bool)
     def toggle_spacial_frequency(self, state):
         self.update_spacial_frequency = state
+        self.run()
+
+    @pyqtSlot(bool)
+    def toggle_face_recognition(self, state):
+        self.update_face_rec = state
         self.run()
 
     def set_project(self, project):
@@ -82,17 +92,22 @@ class TimestepUpdateWorkerSingle(QObject):
 
 
         except Exception as e:
+            print(e)
+            raise e
             self.signals.onError.emit([e])
 
     def get_opencv_frame(self, time_frame):
         if self.video_capture is not None:
             self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, time_frame)
             ret, frame = self.video_capture.read()
-
+            if frame is None:
+                return None
             # Calculate Spacial Frequency if necessary
             if self.update_spacial_frequency:
                 heatmap, mask = get_spacial_frequency_heatmap(frame)
                 frame = heatmap
+            if self.update_face_rec:
+                frame = self.face_rec_model.draw_faces(frame)
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap
         else:

@@ -16,6 +16,7 @@ import os
 
 class PlayerDockWidget(EDockWidget):
     onSpacialFrequencyChanged = pyqtSignal(bool)
+    onFaceRecognitionChanged = pyqtSignal(bool)
 
     def __init__(self, main_window):
         super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
@@ -28,8 +29,15 @@ class PlayerDockWidget(EDockWidget):
         self.a_spacial_frequency.setCheckable(True)
         self.a_spacial_frequency.triggered.connect(self.on_spacial_frequency_changed)
 
+        self.a_face_rec = self.vis_menu.addAction("Face Recognition")
+        self.a_face_rec.setCheckable(True)
+        self.a_face_rec.triggered.connect(self.on_face_rec_changed)
+
     def on_spacial_frequency_changed(self):
         self.onSpacialFrequencyChanged.emit(self.a_spacial_frequency.isChecked())
+
+    def on_face_rec_changed(self):
+        self.onFaceRecognitionChanged.emit(self.a_face_rec.isChecked())
 
     def set_player(self, video_player):
         self.setWidget(video_player)

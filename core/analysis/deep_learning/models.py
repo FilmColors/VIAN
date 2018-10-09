@@ -1,4 +1,4 @@
-from core.analysis.deep_learning.PSPNet import *
+from core.analysis.deep_learning.pspnet import *
 import cv2
 import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
