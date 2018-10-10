@@ -18,7 +18,6 @@ from core.data.project_streaming import IStreamableContainer
 
 from core.node_editor.node_editor import *
 from shutil import copy2
-import h5py
 from enum import Enum
 # from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -93,8 +92,6 @@ class VIANProject(IHasName, IClassifiable):
         self.results_dir = ""
         self.shots_dir = ""
         self.export_dir = ""
-        self.h5file = None
-        self.h5file_path = ""
 
         self.corpus_id = -1
 
@@ -189,9 +186,8 @@ class VIANProject(IHasName, IClassifiable):
         self.results_dir = root + "/results"
         self.shots_dir = root + "/shots"
         self.export_dir = root + "/export"
-        self.h5file_path = self.data_dir + "/numeric.hdf5"
 
-        if main_window is not None:
+        if self.main_window is not None:
             self.main_window.project_streamer.on_loaded(self)
 
     def create_file_structure(self):
@@ -203,7 +199,6 @@ class VIANProject(IHasName, IClassifiable):
             os.mkdir(self.shots_dir)
         if not os.path.isdir(self.export_dir):
             os.mkdir(self.export_dir)
-        self.h5file_path = self.data_dir + "/numeric.hdf5"
 
     def get_all_containers(self, types = None):
         result = []
@@ -229,14 +224,13 @@ class VIANProject(IHasName, IClassifiable):
     def sanitize_paths(self):
         self.path = os.path.normpath(self.path)
         self.name = os.path.normpath(self.name)
-        self.folder = os.path.normpath(self.folder) + "/"
-        self.data_dir = os.path.normpath(self.data_dir) + "/"
-        self.results_dir = os.path.normpath(self.results_dir) + "/"
-        self.shots_dir = os.path.normpath(self.shots_dir) + "/"
-        self.export_dir = os.path.normpath(self.export_dir) + "/"
+        self.folder = os.path.normpath(self.folder)
+        self.data_dir = os.path.normpath(self.data_dir)
+        self.results_dir = os.path.normpath(self.results_dir)
+        self.shots_dir = os.path.normpath(self.shots_dir)
+        self.export_dir = os.path.normpath(self.export_dir)
         self.movie_descriptor.movie_path = os.path.normpath(self.movie_descriptor.movie_path)
-        self.h5file_path = os.path.normpath(self.h5file_path)
-
+        print(self.folder)
 
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):
@@ -789,11 +783,8 @@ class VIANProject(IHasName, IClassifiable):
         self.export_dir = self.folder + "/export/"
         self.shots_dir = self.folder + "/shots/"
         self.data_dir = self.folder + "/data/"
-        self.h5file_path = os.path.normpath(self.data_dir + "numeric.hdf5")
 
         self.main_window.numpy_data_manager.project = self
-
-        self.connect_hdf5()
 
         move_project_to_directory_project = False
         version = [0,0,0]
@@ -905,7 +896,6 @@ class VIANProject(IHasName, IClassifiable):
                     if node is not None:
                         node.operation.result = res
 
-
         self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
         # Migrating the Project to the new FileSystem
         if move_project_to_directory_project:
@@ -933,11 +923,6 @@ class VIANProject(IHasName, IClassifiable):
         self.undo_manager.clear()
         self.sanitize_paths()
 
-    def connect_hdf5(self):
-        # if file does not yet exist, we create it in the write path and open it in the readwrite
-        if not os.path.isfile(self.h5file_path):
-            self.h5file = h5py.File(self.h5file_path, 'w')
-        self.h5file = h5py.File(self.h5file_path, 'r+')
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
         segmentations = []
