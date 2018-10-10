@@ -1552,7 +1552,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
         dialog.show()
 
-    def new_project(self, project, template_path = None, vocabularies = None, copy_movie = "None", finish_callback = None):
+    def new_project(self, project:VIANProject, template_path = None, vocabularies = None, copy_movie = "None", finish_callback = None):
         if self.project is not None:
             self.close_project()
 
@@ -1565,7 +1565,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if template_path is not None:
             self.project.apply_template(template_path)
 
+        self.project.reset_file_paths(self.project.folder, self.project.path, main_window = None)
         self.project.create_file_structure()
+        self.project.connect_hdf5()
 
         # Importing all Vocabularies
         if vocabularies is not None:

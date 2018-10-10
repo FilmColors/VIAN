@@ -85,7 +85,7 @@ class TimestepUpdateWorkerSingle(QObject):
                 if frame_pixmap is not None:
                     self.signals.onOpenCVFrameUpdate.emit(frame_pixmap)
             if self.update_colormetry:
-                if self.project is not None:
+                if self.project is not None and self.project.colormetry_analysis is not None:
                     data = self.project.colormetry_analysis.get_update(self.position_ms)
                     if data is not False:
                         self.signals.onColormetryUpdate.emit(data)
@@ -93,8 +93,6 @@ class TimestepUpdateWorkerSingle(QObject):
 
 
         except Exception as e:
-            print(e)
-            raise e
             self.signals.onError.emit([e])
 
     def get_opencv_frame(self, time_frame):

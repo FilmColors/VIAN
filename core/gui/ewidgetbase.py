@@ -46,6 +46,10 @@ class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
         self.main_window = main_window
+        # Currently VLC breaks the DockWidgets under OSX, we disable it therefore
+        if self.main_window.is_darwin:
+            self.setFeatures(QDockWidget.NoDockWidgetFeatures|QDockWidget.DockWidgetClosable)
+
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
         self.limit_size = limit_size
         self.setLayout(QVBoxLayout(self))
@@ -64,9 +68,7 @@ class EDockWidget(QDockWidget):
 
         self.main_window.dock_widgets.append(self)
 
-        # Currently VLC breaks the DockWidgets under OSX, we disable it therefore
-        if self.main_window.is_darwin:
-            self.setFeatures(QDockWidget.NoDockWidgetFeatures|QDockWidget.DockWidgetClosable)
+
 
     def resizeEvent(self, *args, **kwargs):
         # Keeping the size of the Dockwidgets

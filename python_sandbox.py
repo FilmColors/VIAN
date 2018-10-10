@@ -35,13 +35,40 @@ mask = cv2.imread("C:\\Users\\Gaudenz Halter\\Pictures\\vlcsnap-error665.png")
 # print("Pickle", time.time() - t, (time.time() - t) / 1000)
 
 t = time.time()
+cap = cv2.VideoCapture("/Users/gaudenz/Desktop/sintel-1280-surround.mp4")
+length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+range_min = 0
+range_max = 255
+mask_size = (500, 500)
 with h5py.File("testdb.hdf5", "w") as f:
-    s = (1000, mask.shape[0], mask.shape[1], mask.shape[2])
-    hds = f.create_dataset("masks", s, mask.dtype)
-    for i in range(1000):
-        hds[i] = mask
+    hd_histograms = f.create_dataset("histograms", (length, 16, 16, 16), np.float16)
+    s = (length, mask_size[0], mask_size[1])
+    hd_masks = f.create_dataset("masks", s, np.uint8)
+    print(hd_masks.size / 1000000)
+    print(hd_histograms.size / 1000000)
 
-    for i in range(1000):
-        d = hds[i]
-        cv2.imshow("", d)
+    ret = True
+    c = 0
+    while ret:
+
+        ret, frame = cap.read()
+        hist = cv2.calcHist([frame[:, 0], frame[:, 1], frame[:, 2]], [0, 1, 2], None,
+                            [16, 16, 16],
+                            [range_min, range_max, range_min, range_max,
+                             range_min, range_max])
+        hd_histograms[c] = hist.astype(np.float16)
+        hd_masks[c] = cv2.cvtColor(cv2.resize(frame, mask_size, interpolation=cv2.INTER_CUBIC), cv2.COLOR_BGR2GRAY)
+
+        c += 1
+        print(c)
+
+
+    # for i in range(1000):
+    #     hds[i] = mask
+    #
+    # for i in range(1000):
+    #     d = hds[i]
+    #     cv2.imshow("", d)
 print("HDF5", time.time() - t)
