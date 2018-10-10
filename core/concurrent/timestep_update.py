@@ -2,7 +2,8 @@ from PyQt5.QtCore import *
 import cv2
 from core.data.computation import *
 from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
-from core.analysis.deep_learning.face_identification import FaceRecognitionModel
+
+from core.analysis.analysis_import import FaceRecognitionModel
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)

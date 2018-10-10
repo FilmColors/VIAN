@@ -59,9 +59,18 @@ class FaceRecognitionModel():
                  predictor_path = "user/models/face_identification/shape_predictor_68_face_landmarks.dat",
                  weights_path = "user/models/face_identification/weights.hdf5",
                  cascPathside="user/models/face_identification/haarcascade_profileface.xml"):
-        self.cascade = cv2.CascadeClassifier(cascPath)
-        self.cascade_side = cv2.CascadeClassifier(cascPathside)
-        self.predictor = dlib.shape_predictor(predictor_path)
+        self.disabled = False
+        if os.path.isfile(cascPath) and os.path.isfile(cascPathside) and os.path.isfile(predictor_path):
+            self.cascade = cv2.CascadeClassifier(cascPath)
+            self.cascade_side = cv2.CascadeClassifier(cascPathside)
+            self.predictor = dlib.shape_predictor(predictor_path)
+        else:
+            self.cascade = None
+            self.cascade_side = None
+            self.predictor = None
+            self.disabled = True
+            print("FaceRecognitionModel Error: weights not found")
+
         self.weights_path = weights_path
         self.detector = dlib.get_frontal_face_detector()
         self.dnn_model = None
@@ -71,6 +80,8 @@ class FaceRecognitionModel():
         self.dnn_model = FaceRecKeras(n_classes, dropout)
 
     def extract_faces(self, frame_bgr, preview = False):
+        if self.disabled:
+            return []
         gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
         gray = cv2.equalizeHist(gray)
         rects = self.cascade.detectMultiScale(
@@ -108,6 +119,9 @@ class FaceRecognitionModel():
         return rects
 
     def draw_faces(self, frame_bgr):
+        if self.disabled:
+            return frame_bgr
+
         subimgs = self.extract_faces(frame_bgr)
         for r in subimgs:
             print(r)
@@ -125,6 +139,9 @@ class FaceRecognitionModel():
         return frame_bgr
 
     def get_vector(self, img, preview = True):
+        if self.disabled:
+            return []
+
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         dets = self.detector(img)
         if len(dets) == 0:
