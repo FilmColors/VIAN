@@ -131,7 +131,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
         return ColorFeatureParameterWidget()
 
     def serialize(self, data_dict):
-
         d = dict(color_lab=np.array(data_dict["color_lab"]).tolist(),
                  color_bgr=np.array(data_dict["color_bgr"]).tolist(),
                  saturation_l=np.array(data_dict["saturation_l"]).tolist(),
@@ -144,6 +143,26 @@ class ColorFeatureAnalysis(IAnalysisJob):
 
     def to_json(self, container_data):
         return json.dumps(self.serialize(container_data))
+
+    def from_hdf5(self, database_data):
+        return dict(    color_lab = database_data[:, 0:3],
+                        color_bgr = database_data[:, 3:6],
+                        saturation_l = database_data[:, 6],
+                        saturation_p = database_data[:, 7])
+
+
+    def to_hdf5(self, container_data):
+        ser = dict(color_lab=np.array(container_data["color_lab"]),
+                 color_bgr=np.array(container_data["color_bgr"]),
+                 saturation_l=np.array(container_data["saturation_l"]),
+                 saturation_p=np.array(container_data["saturation_p"])
+             )
+        d = np.zeros(shape = (ser['color_lab'].shape[0], 8))
+        d[:, 0:3] = ser['color_lab']
+        d[:, 3:6] = ser['color_bgr']
+        d[:, 6] = ser['saturation_l']
+        d[:, 7] = ser['saturation_p']
+        return d
 
 
 class ColorFeatureParameterWidget(ParameterWidget):

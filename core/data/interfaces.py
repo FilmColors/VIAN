@@ -396,6 +396,12 @@ class IAnalysisJob(ILiveWidgetExposing):
         """
         return data_dict
 
+    def from_hdf5(self, database_data):
+        return database_data
+
+    def to_hdf5(self, container_data):
+        return container_data
+
     def abort(self):
         pass
 
