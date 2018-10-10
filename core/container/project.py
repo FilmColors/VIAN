@@ -31,7 +31,6 @@ from core.container.experiment import *
 from core.container.analysis import *
 from core.container.media_objects import *
 from core.container.node_scripts import *
-from core.data.hdf5_binding import HDF5Database
 
 
 class VIANProject(IHasName, IClassifiable):
@@ -936,10 +935,9 @@ class VIANProject(IHasName, IClassifiable):
 
     def connect_hdf5(self):
         # if file does not yet exist, we create it in the write path and open it in the readwrite
-        self.h5file = HDF5Database(self.h5file_path)
-
-#    def to_hdf5(self, ndarray, dataset):
-#        self.h5file = HDF5Database(self.h5file_path)
+        if not os.path.isfile(self.h5file_path):
+            self.h5file = h5py.File(self.h5file_path, 'w')
+        self.h5file = h5py.File(self.h5file_path, 'r+')
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
         segmentations = []

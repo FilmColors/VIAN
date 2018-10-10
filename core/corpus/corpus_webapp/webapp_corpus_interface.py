@@ -41,7 +41,6 @@ class WebAppCorpusInterface(CorpusInterface):
 
     def verify_project(self):
         return True
-
     @pyqtSlot(object)
     def disconnect_user(self, user):
         pass

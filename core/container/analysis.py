@@ -172,8 +172,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
 
 
 class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
-    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None,
-                 parameters = None, container = None, target_classification_object = None, hdf5_dataset=""):
+    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
         super(IAnalysisJobAnalysis, self).__init__(name, results)
         self.target_container = container
         if analysis_job_class is not None:
@@ -189,8 +188,6 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.target_classification_object = target_classification_object
         # Evaluated self.analysis-job_class
         self.a_class = None
-        self.hdf5_dataset = hdf5_dataset
-        self.hdf5_index = 0
 
     def get_preview(self):
         try:
@@ -276,26 +273,16 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
     def apply_loaded(self, obj):
         self.set_adata(self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj))
 
-    def get_data_deprecated_(self):
+    def get_adata(self):
         if self.a_class is None:
             self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
         return self.a_class().from_json(self.project.main_window.project_streamer.sync_load(self.unique_id, data_type=self.a_class().serialization_type()))
 
-    def set_data_deprecated(self, d):
+    def set_adata(self, d):
         if self.a_class is None:
             self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
         self.project.main_window.project_streamer.sync_store(self.unique_id, self.a_class().to_json(d), data_type=self.a_class().serialization_type())
         self.data = None
-
-    def get_adata(self):
-        if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
-        return self.a_class().from_hdf5(self.project.h5file.load(self.unique_id))
-
-    def set_adata(self, d):
-        if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
-        self.project.h5file.store(self.a_class().to_hdf5(d, self.hdf5_dataset, self.unique_id))
 
 
 class ColormetryAnalysis(AnalysisContainer):

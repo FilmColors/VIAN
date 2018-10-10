@@ -215,8 +215,8 @@ class BarcodeAnalysisJob(IAnalysisJob):
     def from_json(self, database_data):
         return pickle.loads(database_data)
 
-
-
+    def to_json(self, container_data):
+        return pickle.dumps(container_data)
 
 
 class BarcodeParameterWidget(ParameterWidget):
