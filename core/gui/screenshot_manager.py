@@ -23,6 +23,8 @@ SCALING_MODE_WIDTH = 1
 SCALING_MODE_HEIGHT = 2
 SCALING_MODE_BOTH = 3
 
+
+#TODO we should move the ProjectChanged Loaded and Closed Dispatcher into the ScreenshotManagerDockWidget
 class ScreenshotsToolbar(EToolBar):
     def __init__(self, main_window, screenshot_manager):
         super(ScreenshotsToolbar, self).__init__(main_window, "Screenshots Toolbar")
@@ -105,6 +107,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.ab_view = None
         self.slider_image_size = None
         self.lbl_slider_size = None
+        self.screenshot_manager = None
 
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 

@@ -28,6 +28,13 @@ def same_face_rect(r1, r2):
     return False
 
 
+def resize_rect(r, dx, dy, clip_space):
+    r[0] = np.clip(r[0] - dx, 0, None)
+    r[1] = np.clip(r[1] - dy, 0, None)
+    r[2] = np.clip(r[2] + (2 * dx), 0, clip_space.shape[1] - r[0])
+    r[3] = np.clip(r[3] + (2 * dx), 0, clip_space.shape[0] - r[1])
+    return r
+
 def FaceRecKeras(n_classes, dropout = 0.25):
     """ Definition of the model """
     model = Sequential()
@@ -96,6 +103,8 @@ class FaceRecognitionModel():
                 if not same_face_rect(r, r2):
                     to_append.append(r2)
         rects.extend(to_append)
+        for r in rects:
+            r = resize_rect(r, 30, 30, frame_bgr)
         return rects
 
     def draw_faces(self, frame_bgr):
