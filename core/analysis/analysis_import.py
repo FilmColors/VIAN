@@ -5,7 +5,6 @@ from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
 try:
     from core.analysis.semantic_segmentation import *
-    from core.analysis.deep_learning.face_identification import *
 except:
     from core.data.enums import DataSerialization
     from core.analysis.deep_learning.labels import *
@@ -95,53 +94,3 @@ except:
         def to_json(self, container_data):
             return pickle.dumps(container_data)
             # return json.dumps(self.serialize(container_data))
-
-
-    class FaceRecognitionModel():
-        def __init__(self, cascPath="user/models/face_identification/haarcascade_frontalface_default.xml",
-                     predictor_path="user/models/face_identification/shape_predictor_68_face_landmarks.dat",
-                     weights_path="user/models/face_identification/weights.hdf5",
-                     cascPathside="user/models/face_identification/haarcascade_profileface.xml"):
-            if os.path.isfile(cascPath):
-                self.cascade = cv2.CascadeClassifier(cascPath)
-            else:
-                self.cascade = None
-            if os.path.isfile(cascPathside):
-                self.cascade_side = cv2.CascadeClassifier(cascPathside)
-            else:
-                self.cascade_side = None
-            if os.path.isfile(predictor_path):
-                self.predictor = dlib.shape_predictor(predictor_path)
-            else:
-                self.predictor = None
-            self.weights_path = weights_path
-            self.detector = dlib.get_frontal_face_detector()
-            self.dnn_model = None
-            self.nose_point_idx = 30
-
-        def init_model(self, n_classes, dropout):
-            pass
-
-        def extract_faces(self, frame_bgr, preview=False):
-            pass
-
-        def draw_faces(self, frame_bgr):
-            return frame_bgr
-
-        def get_vector(self, img, preview=True):
-            pass
-
-        def cluster_faces(self, eucl_dist_vecs, n_clusters=30):
-            pass
-
-        def load_weights(self, path=None):
-            pass
-
-        def store_weights(self, path=None):
-            pass
-
-        def train_model(self, X_train, y_train, X_test, y_test, load=False, callback=None):
-            pass
-
-        def predict(self, face_vec):
-            pass
