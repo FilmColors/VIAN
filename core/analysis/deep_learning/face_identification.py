@@ -7,11 +7,12 @@ from keras.callbacks import ModelCheckpoint
 from keras.layers import Activation, Dense, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
+import keras.backend as K
 from sklearn.cluster.hierarchical import AgglomerativeClustering
 
 from core.analysis.deep_learning.keras_callback import VIANKerasCallback
 from core.data.computation import overlap_rect, contains_rect
-
+import json
 
 def sub_image(img, r):
     return img[int(r[1]):int(r[3]), int(r[0]):int(r[2])]
@@ -34,6 +35,7 @@ def resize_rect(r, dx, dy, clip_space):
     r[2] = np.clip(r[2] + (2 * dx), 0, clip_space.shape[1] - r[0])
     r[3] = np.clip(r[3] + (2 * dx), 0, clip_space.shape[0] - r[1])
     return r
+
 
 def FaceRecKeras(n_classes, dropout = 0.25):
     """ Definition of the model """
@@ -75,9 +77,15 @@ class FaceRecognitionModel():
         self.detector = dlib.get_frontal_face_detector()
         self.dnn_model = None
         self.nose_point_idx = 30
+        self.dropout = 0.25
+        self.n_classes = 3
+        self.session = None
 
     def init_model(self, n_classes, dropout):
+        self.session = K.get_session()
         self.dnn_model = FaceRecKeras(n_classes, dropout)
+        self.dropout = dropout
+        self.n_classes = n_classes
 
     def extract_faces(self, frame_bgr, preview = False):
         if self.disabled:
@@ -118,18 +126,22 @@ class FaceRecognitionModel():
             r = resize_rect(r, 30, 30, frame_bgr)
         return rects
 
-    def draw_faces(self, frame_bgr):
+    def draw_faces(self, frame_bgr, identify= False):
         if self.disabled:
             return frame_bgr
 
         subimgs = self.extract_faces(frame_bgr)
         for r in subimgs:
-            print(r)
             img = sub_image(frame_bgr, [r[0], r[1], r[0] + r[2], r[1] + r[3]])
             vecs = self.get_vector(img)
             cv2.rectangle(frame_bgr, (r[0], r[1]), (r[0] + r[2], r[1] + r[3]), (0, 180, 235), 2)
             for v in vecs:
                 try:
+                    if identify and self.dnn_model is not None:
+                        class_idx, prob = self.predict(v[2])
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        print(class_idx)
+                        cv2.putText(img, str(class_idx), (v[0][0], v[0][1]), font, 4, (255, 255, 255), 2, cv2.LINE_AA)
                     vec = np.add(v[1], [r[0], r[1]])
                     for i in range(68):
                         cv2.circle(frame_bgr, (int(vec[i][0]), int(vec[i][1])), 1, (0, 235, 235), thickness=2)
@@ -192,23 +204,32 @@ class FaceRecognitionModel():
 
         return clustering.labels_
 
-    def load_weights(self, path = None):
+    def load_weights(self, path = None, init_model = True):
+        if path is None:
+            path = self.weights_path
+        jsonp = path.replace(".hdf5", ".json")
+
+        if not os.path.isfile(path) or not os.path.isfile(jsonp):
+            print("No Weights and json descriptor found")
+            return
+        if init_model:
+            with open(path.replace(".hdf5", ".json"), "r") as f:
+                d = json.load(f)
+                self.init_model(d['n_classes'], d['dropout'])
         if self.dnn_model is None:
             raise RuntimeError("Model not initialized")
-
-        if path is None:
-            self.dnn_model.load_weights(self.weights_path)
-        else:
-            self.dnn_model.load_weights(path)
+        self.dnn_model.load_weights(path)
 
     def store_weights(self, path = None):
         if self.dnn_model is None:
             raise RuntimeError("Model not initialized")
 
         if path is None:
-            self.dnn_model.save_weights(self.weights_path)
-        else:
-            self.dnn_model.save_weights(path)
+            path = self.weights_path
+
+        with open(path.replace(".hdf5", ".json"), "w") as f:
+            json.dump(dict(n_classes = self.n_classes, dropout= self.dropout), f)
+        self.dnn_model.save_weights(path)
 
     def train_model(self, X_train, y_train, X_test, y_test, load=False, callback=None):
         if self.dnn_model is None:
@@ -248,18 +269,19 @@ class FaceRecognitionModel():
         if self.dnn_model is None:
             raise RuntimeError("Model not initialized")
 
+        if face_vec.shape != (68, 1):
+            face_vec = np.reshape(face_vec, newshape=(68, 1))
         X = face_vec
 
         X = np.expand_dims(X, axis=0)
         X = np.array(X).astype('float64')
 
-        try:
-            self.dnn_model.load_weights(self.weights_path)
-        except OSError:
-            print("creating new weights file")
+        # try:
+        #     self.dnn_model.load_weights(self.weights_path)
+        # except OSError:
+        #     print("creating new weights file")
 
         pred = self.dnn_model.predict(X, batch_size=1, verbose=0)[0]
-
         class_idx = np.argmax(pred)
         prob = pred[class_idx]
         return class_idx, prob

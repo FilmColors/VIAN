@@ -32,9 +32,14 @@ class TimestepUpdateWorkerSingle(QObject):
 
         self.update_face_rec = False
         self.update_spacial_frequency = False
+        self.update_face_identification = True
 
         self.face_rec_model = FaceRecognitionModel()
 
+    @pyqtSlot(str)
+    def load_face_rec_model(self, str):
+        self.face_rec_model.load_weights(str)
+        self.face_rec_model.session.graph.finalize()
 
     @pyqtSlot(str)
     def set_movie_path(self, movie_path):
@@ -85,7 +90,7 @@ class TimestepUpdateWorkerSingle(QObject):
                 if frame_pixmap is not None:
                     self.signals.onOpenCVFrameUpdate.emit(frame_pixmap)
             if self.update_colormetry:
-                if self.project is not None:
+                if self.project is not None and self.project.colormetry_analysis is not None:
                     data = self.project.colormetry_analysis.get_update(self.position_ms)
                     if data is not False:
                         self.signals.onColormetryUpdate.emit(data)
@@ -108,7 +113,8 @@ class TimestepUpdateWorkerSingle(QObject):
                 heatmap, mask = get_spacial_frequency_heatmap(frame)
                 frame = heatmap
             if self.update_face_rec:
-                frame = self.face_rec_model.draw_faces(frame)
+                frame = self.face_rec_model.draw_faces(frame, identify=self.update_face_identification)
+
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap
         else:

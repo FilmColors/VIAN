@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>464</width>
-    <height>164</height>
+    <width>501</width>
+    <height>202</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,6 +74,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_LoadWeights">
+       <property name="text">
+        <string>Load Weights</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btn_Collect">

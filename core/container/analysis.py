@@ -32,6 +32,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.name = name
         self.notes = ""
         self.data = data
+        self.analysis_job_class = "Generic"
 
     def set_project(self, project):
         IProjectContainer.set_project(self, project)
@@ -92,6 +93,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
         super(NodeScriptAnalysis, self).__init__(name, results)
         self.script_id = script_id
         self.final_node_ids = final_nodes_ids
+        self.analysis_job_class = "NodeScript"
 
     def get_type(self):
         return ANALYSIS_NODE_SCRIPT
@@ -294,6 +296,8 @@ class ColormetryAnalysis(AnalysisContainer):
         self.histograms = []
         self.avg_colors = []
 
+        self.analysis_job_class = "Colormetry"
+
         self.palette_bins = []
         self.palette_cols = []
         self.palette_layers = []
@@ -494,6 +498,7 @@ class MaskAnalysis(IAnalysisJobAnalysis):
         self.time_ms = []
         self.frame_pos = []
         self.labels = labels
+
 
     def insert(self, data):
         """

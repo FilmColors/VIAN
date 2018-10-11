@@ -95,8 +95,12 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
 
             self.analyzes_group = AnalyzesOutlinerRootItem(self.project_item, 3)
-            for i, a in enumerate(self.main_window.project.analysis):
-                analysis_item = AnalyzesOutlinerItem(self.analyzes_group, i, a)
+            a_name = ""
+            for i, a in enumerate(sorted(self.main_window.project.analysis, key=lambda x:x.analysis_job_class)):
+                if a.analysis_job_class != a_name:
+                    a_grp = AnalyzesOutlinerGroupItem(self.analyzes_group, 3, a.analysis_job_class)
+                    a_name = a.analysis_job_class
+                analysis_item = AnalyzesOutlinerItem(a_grp, i, a)
                 self.item_list.append(analysis_item)
 
             self.node_scripts_group = NodeScriptsRootItem(self.project_item, 4)
@@ -692,6 +696,19 @@ class AnalyzesOutlinerItem(AbstractOutlinerItem):
     def update_item(self):
         self.setText(0, self.item.name)
 
+
+class AnalyzesOutlinerGroupItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, name):
+        super(AnalyzesOutlinerGroupItem, self).__init__(parent, index)
+        self.name = name
+        self.update_item()
+
+    def set_name(self, name):
+        "Not implemented"
+
+    def update_item(self):
+        self.setText(0, self.name)
+        self.setForeground(0, QtGui.QColor(9, 170, 60)) #7,133,47
 
 class NodeScriptsRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):

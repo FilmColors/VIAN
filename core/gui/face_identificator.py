@@ -19,12 +19,15 @@ try:
 except:
     class FaceReconitionModel(): pass
     def to_categorical(): return []
+
+
 class IdentificationWorkerSignals(QObject):
     onFacesFound = pyqtSignal(object, object, object)
     onClusteringDone = pyqtSignal()
     onRecognitionDone = pyqtSignal()
     onProgress = pyqtSignal(float)
-    onTrainingDone = pyqtSignal()
+    onTrainingDone = pyqtSignal(str)
+
 
 class IdentificationWorker(QObject):
     def __init__(self):
@@ -32,6 +35,7 @@ class IdentificationWorker(QObject):
         self.signals = IdentificationWorkerSignals()
         self.model = FaceRecognitionModel()
         self.n_epochs = 100
+        self.aborted = False
 
     @pyqtSlot(str, dict)
     def find_faces(self, movie_path, settings):
@@ -55,6 +59,9 @@ class IdentificationWorker(QObject):
                 for r in res:
                     result_features.append([i, r])
                     images.append(sub_image(frame, r[0]))
+            if self.aborted:
+                self.aborted = False
+                break
 
         euclidian = np.zeros(shape=(len(result_features), 68))
         for idx, r in enumerate(result_features): euclidian[idx] = r[1][2][0]
@@ -93,13 +100,24 @@ class IdentificationWorker(QObject):
                 ex[idx - n_train] = np.reshape(vec[1][2], newshape=(68, 1))
                 ey[idx - n_train] = c
         self.model.train_model(tx, ty, ex, ey, callback=self.on_keras_callback)
-        self.signals.onTrainingDone.emit()
+        self.model.store_weights()
+        self.signals.onTrainingDone.emit(settings['path'])
 
     def on_keras_callback(self, obj):
         self.signals.onProgress.emit(obj / np.clip(self.n_epochs, 1, None))
 
     def cluster_faces(self):
         pass
+
+    @pyqtSlot(str)
+    def load_weights(self, path):
+        self.model.load_weights(path)
+
+    @pyqtSlot(bool)
+    def abort(self, b):
+        print("Aborted")
+        self.aborted = True
+
 
 class FaceIdentificatorDock(EDockWidget):
     def __init__(self, parent):
@@ -112,6 +130,9 @@ class FaceIdentificatorDock(EDockWidget):
 class FaceIdentificatorWidget(QWidget):
     onCollectFaces = pyqtSignal(str, dict)
     onTrainModel = pyqtSignal(object, dict)
+    onAbort = pyqtSignal(bool)
+    onModelTrained = pyqtSignal(str)
+    onLoadWeights = pyqtSignal(str)
 
     def __init__(self, parent, main_window):
         super(FaceIdentificatorWidget, self).__init__(parent)
@@ -120,15 +141,18 @@ class FaceIdentificatorWidget(QWidget):
         self.worker = IdentificationWorker()
         self.worker_thread = QThread(self)
         self.worker.moveToThread(self.worker_thread)
-        self.worker_thread.start()
-
-        self.final_dataset = None
 
         self.onCollectFaces.connect(self.worker.find_faces, Qt.QueuedConnection)
         self.worker.signals.onProgress.connect(self.on_progress, Qt.QueuedConnection)
         self.worker.signals.onFacesFound.connect(self.on_collect_faces_finished, Qt.QueuedConnection)
-        self.onTrainModel.connect(self.worker.train_model)
+        self.worker.signals.onTrainingDone.connect(self.on_training_finished, Qt.QueuedConnection)
+        self.onTrainModel.connect(self.worker.train_model, Qt.QueuedConnection)
+        self.onLoadWeights.connect(self.worker.load_weights)
+        self.onAbort.connect(self.worker.abort, Qt.QueuedConnection)
 
+        self.worker_thread.start()
+
+        self.final_dataset = None
         self.current_stage = 0
 
         self.setLayout(QVBoxLayout(self))
@@ -155,6 +179,8 @@ class FaceIdentificatorWidget(QWidget):
         self.btn_create_dataset = QPushButton("Create Dataset",  self.train_window)
         self.cluster_hbox.addWidget(self.btn_create_dataset)
 
+        self.collection_window.pushButton_LoadWeights.clicked.connect(self.on_browse_weights)
+
         self.btn_create_dataset.clicked.connect(self.on_create_dataset)
 
         self.tab_widget.addTab(self.train_window, "Training Data")
@@ -171,12 +197,21 @@ class FaceIdentificatorWidget(QWidget):
         settings = self.collection_window.get_settings()
         self.onCollectFaces.emit(self.main_window.project.movie_descriptor.movie_path, settings)
 
+        self.collection_window.btn_Collect.disconnect()
+        self.collection_window.btn_Collect.clicked.connect(self.on_abort)
+        self.collection_window.btn_Collect.setText("Abort")
+
     @pyqtSlot(object, object, object)
     def on_collect_faces_finished(self, result, images, result_features):
         self.set_stage(1)
         self.progress_bar.setValue(0)
         self.cluster_selector.setRange(np.amin(list(result.keys())), np.amax(list(result.keys())))
         self.cluster_view.add_clustering(result, images, result_features)
+
+        self.collection_window.btn_Collect.disconnect()
+        self.collection_window.btn_Collect.clicked.connect(self.collect_faces)
+        self.collection_window.btn_Collect.setText("Collect Faces")
+
         # self.cluster_selector.shot()
 
     def on_create_dataset(self):
@@ -185,10 +220,21 @@ class FaceIdentificatorWidget(QWidget):
 
     def set_stage(self, v):
         self.current_stage = v
-        self.tab_widget.setTabEnabled(v, True)
+        for x in range(v + 1):
+            self.tab_widget.setTabEnabled(x, True)
         self.tab_widget.setCurrentIndex(v)
         # if v >= 1:
         #     self.ta
+
+    def on_browse_weights(self):
+        hdf5 = QFileDialog.getOpenFileName(directory=self.main_window.project.folder, filter="*.hdf5")
+        print(hdf5)
+        if os.path.isfile(hdf5[0]) and os.path.isfile(hdf5[0].replace(".hdf5", ".json")):
+            # self.onLoadWeights.emit(hdf5[0])
+            self.onModelTrained.emit(hdf5[0])
+            self.fine_adjusting_window.settings.btn_Train.setText("Retrain")
+            self.set_stage(2)
+
 
     def on_finetune(self):
         self.cluster_selector.hide()
@@ -197,12 +243,22 @@ class FaceIdentificatorWidget(QWidget):
         if self.final_dataset is not None:
             s = self.fine_adjusting_window.settings.get_settings()
             s['path'] = self.main_window.project.data_dir + s['path']
+            print(s['path'], self.main_window.project.data_dir + s['path'])
             self.onTrainModel.emit(self.final_dataset, s)
 
+    @pyqtSlot(str)
+    def on_training_finished(self, model_path):
+        self.progress_bar.setValue(0)
+        self.fine_adjusting_window.settings.btn_Train.setText("Retrain")
+        self.onModelTrained.emit(model_path)
 
     @pyqtSlot(float)
     def on_progress(self, f):
         self.progress_bar.setValue(f * 100)
+
+    @pyqtSlot()
+    def on_abort(self):
+        self.worker.aborted = True
 
 
 class FaceIdentificationSettingsWidget(QWidget):
@@ -315,7 +371,7 @@ class FaceClusteringView(QGraphicsView):
             for img_idx in self.clusters[self.curr_cluster_idx][lbl]:
                 labels.append(lbl)
                 vectors.append(self.result_features[img_idx])
-        return dict(vectors=vectors, labels=labels, n_classes=len(self.clusters[self.curr_cluster_idx].keys()))
+        return dict(vectors=vectors, labels=labels, n_classes=len(list(set(labels))))
 
     @pyqtSlot(object)
     def update_arrangement(self, args):

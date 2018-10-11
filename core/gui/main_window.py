@@ -382,6 +382,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
             self.create_facial_identification_dock()
             self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
+            self.facial_identification_dock.identificator.onModelTrained.connect(self.frame_update_worker.load_face_rec_model)
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
@@ -1380,7 +1381,6 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).changeEvent(event)
 
     def on_application_lost_focus(self, arg):
-        print(arg)
         if arg is None:
             # self.set_darwin_player_visibility(False)
             self.set_overlay_visibility(False)
