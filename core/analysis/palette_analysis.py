@@ -152,9 +152,9 @@ class ColorPaletteAnalysis(IAnalysisJob):
     def to_hdf5(self, data):
         d = np.zeros(shape=(COLOR_PALETTES_MAX_LENGTH, 6))
         count = COLOR_PALETTES_MAX_LENGTH
-        if len(data['dist']) < COLOR_PALETTES_MAX_LENGTH:
-            count = len(data['dist'])
-        d[:count, 0] = data['dist'][:count]
+        if len(data['tree'][0]) < COLOR_PALETTES_MAX_LENGTH:
+            count = len(data['tree'][0])
+        d[:len(data['dist']), 0] = data['dist']
         d[:count, 1] = data['tree'][0][:count]
         d[:count, 2:5] = data['tree'][1][:count]
         d[:count, 5] = data['tree'][2][:count]

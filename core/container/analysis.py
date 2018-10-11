@@ -297,8 +297,9 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
 
+
 class ColormetryAnalysis(AnalysisContainer):
-    def __init__(self, results = None, resolution = 30):
+    def __init__(self, results = None, resolution = 10):
         super(ColormetryAnalysis, self).__init__(name = "Colormetry", data = results)
         self.curr_location = 0
         self.time_ms = []
@@ -349,16 +350,17 @@ class ColormetryAnalysis(AnalysisContainer):
                     print("Could not Convert Colormetry data to list in append_data()", e)
 
             self.time_ms.append(data['time_ms'])
-            self.histograms.append(data['hist'])
-            self.frame_pos.append(data['frame_pos'])
-            self.avg_colors.append(data['avg_color'])
+            # self.histograms.append(data['hist'])
+            # self.frame_pos.append(data['frame_pos'])
+            # self.avg_colors.append(data['avg_color'])
+            #
+            # self.palette_bins.append(data['palette'].tree[2])
+            # self.palette_cols.append(data['palette'].tree[1])
+            # self.palette_layers.append(data['palette'].tree[0])
+            #
+            # self.current_idx = len(self.time_ms)
 
-            self.palette_bins.append(data['palette'].tree[2])
-            self.palette_cols.append(data['palette'].tree[1])
-            self.palette_layers.append(data['palette'].tree[0])
-
-            self.current_idx = len(self.time_ms)
-
+            self.project.hdf5_manager.dump_colorimetry(data, len(self.time_ms) - 1)
         except Exception as e:
             print("ColormetryAnalysis.append_data() raised ", str(e))
 
@@ -368,8 +370,15 @@ class ColormetryAnalysis(AnalysisContainer):
             if frame_idx == self.last_idx:
                 return False
             self.last_idx = frame_idx
-            return dict(palette = [np.array(self.palette_layers[frame_idx]), np.array(self.palette_cols[frame_idx]), np.array(self.palette_bins[frame_idx])])
+            d = self.project.hdf5_manager.get_colorimetry_pal(frame_idx)
+            layers = [
+                d[:, 1].astype(np.int),
+                d[:, 2:5].astype(np.uint8),
+                d[:, 5].astype(np.int)
+            ]
+            return dict(palette = layers)
         except Exception as e:
+            print(e)
             pass
 
     def get_time_palette(self):
@@ -408,6 +417,7 @@ class ColormetryAnalysis(AnalysisContainer):
                 self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
 
     def clear(self):
+        self.project.hdf5_manager.initialize_colorimetry(int(np.floor(self.project.movie_descriptor.duration / self.resolution)))
         self.curr_location = 0
         self.time_ms = []
         self.frame_pos = []
@@ -418,7 +428,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.palette_layers = []
         self.palette_bins = []
 
-        self.resolution = 30
+        self.resolution = 10
         self.has_finished = False
         self.current_idx = 0
 

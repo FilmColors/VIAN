@@ -517,7 +517,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def toggle_colormetry(self):
         if self.colormetry_running == False:
-            job = ColormetryJob2(30, self)
+            job = ColormetryJob2(10, self)
             args = job.prepare(self.project)
             self.actionColormetry.setText("Pause Colormetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)

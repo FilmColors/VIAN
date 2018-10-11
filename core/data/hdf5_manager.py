@@ -6,6 +6,7 @@ import numpy as np
 import inspect
 from core.data.interfaces import IAnalysisJob
 
+
 def load_analysis():
     file_list = []
     for root, dirs, files in os.walk("core/analysis/", topdown=False):
@@ -31,7 +32,10 @@ def load_analysis():
     return analyses
 
 
-DEFAULT_SIZE = (5,)
+DEFAULT_SIZE = (50,)
+DS_COL_HIST = "col_histograms"
+DS_COL_PAL = "col_palettes"
+DS_COL_FEAT = "col_features"
 
 class HDF5Manager():
     def __init__(self):
@@ -40,6 +44,7 @@ class HDF5Manager():
         self._index = dict()
         self._uid_index = dict()
 
+    #region -- Generic --
     def set_path(self, path):
         self.path = path
         if not os.path.isfile(self.path):
@@ -78,7 +83,29 @@ class HDF5Manager():
 
         for k, v in dict(d['uidmapping']).items():
             self._uid_index[int(k)] = v
+    #endregion
 
+    #region Colorimetry
+
+    def initialize_colorimetry(self, length):
+        for n in [DS_COL_FEAT, DS_COL_HIST, DS_COL_PAL]:
+            if n in self.h5_file:
+                del self.h5_file[n]
+        self._index['col'] = 0
+
+        self.h5_file.create_dataset(DS_COL_HIST,shape=(length, 16, 16, 16), dtype=np.float16)
+        self.h5_file.create_dataset(DS_COL_FEAT, shape=(length, 8), dtype=np.float16)
+        self.h5_file.create_dataset(DS_COL_PAL, shape=(length, 1000, 6), dtype=np.float16)
+
+    def dump_colorimetry(self, d, idx):
+        self.h5_file[DS_COL_PAL][idx] = d['palette']
+        self.h5_file[DS_COL_HIST][idx] = d['hist']
+        self.h5_file[DS_COL_FEAT][idx] = d['features']
+
+    def get_colorimetry_pal(self, idx):
+        return self.h5_file[DS_COL_PAL][idx]
+
+    #endregion
 
     def get_indices(self):
         return dict(curr_pos=self._index, uidmapping=self._uid_index)
