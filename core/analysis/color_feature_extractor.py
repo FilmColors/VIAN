@@ -19,6 +19,9 @@ from core.visualization.palette_plot import *
 class ColorFeatureAnalysis(IAnalysisJob):
     def __init__(self):
         super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
+                                                   dataset_name="ColorFeatures",
+                                                   dataset_shape=(8,),
+                                                   dataset_dtype=np.float16,
                                                  author="Gaudenz Halter",
                                                  version="1.0.0",
                                                  multiple_result=True)
@@ -144,6 +147,24 @@ class ColorFeatureAnalysis(IAnalysisJob):
 
     def to_json(self, container_data):
         return json.dumps(self.serialize(container_data))
+
+    def to_hdf5(self, data):
+        d = np.zeros(shape=8)
+        d[0:3] = np.array(data["color_lab"])
+        d[3:6] = np.array(data["color_bgr"])
+        d[6] = np.array(data["saturation_l"])
+        d[7] = np.array(data["saturation_p"])
+        return d
+
+    def from_hdf5(self, db_data):
+        d = dict(color_lab=db_data[0:3].tolist(),
+                 color_bgr=db_data[3:6].tolist(),
+                 saturation_l=db_data[6].tolist(),
+                 saturation_p=db_data[7].tolist()
+             )
+        return d
+
+
 
 
 class ColorFeatureParameterWidget(ParameterWidget):

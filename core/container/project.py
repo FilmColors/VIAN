@@ -16,6 +16,8 @@ from core.data.enums import *
 from typing import List
 from core.data.project_streaming import IStreamableContainer
 
+from core.data.hdf5_manager import HDF5Manager
+
 from core.node_editor.node_editor import *
 from shutil import copy2
 from enum import Enum
@@ -92,6 +94,7 @@ class VIANProject(IHasName, IClassifiable):
         self.results_dir = ""
         self.shots_dir = ""
         self.export_dir = ""
+        self.hdf5_path = ""
 
         self.corpus_id = -1
 
@@ -125,6 +128,8 @@ class VIANProject(IHasName, IClassifiable):
         self.colormetry_analysis = None
 
         self.add_vocabulary(get_default_vocabulary())
+
+        self.hdf5_manager = None
 
         self.inhibit_dispatch = False
         self.selected = []
@@ -186,11 +191,13 @@ class VIANProject(IHasName, IClassifiable):
         self.results_dir = root + "/results"
         self.shots_dir = root + "/shots"
         self.export_dir = root + "/export"
+        self.hdf5_path = self.data_dir + "/analyses.hdf5"
 
-        if self.main_window is not None:
+        if main_window is not None:
             self.main_window.project_streamer.on_loaded(self)
 
     def create_file_structure(self):
+        self.reset_file_paths(self.folder, self.path, None)
         if not os.path.isdir(self.data_dir):
             os.mkdir(self.data_dir)
         if not os.path.isdir(self.results_dir):
@@ -231,6 +238,12 @@ class VIANProject(IHasName, IClassifiable):
         self.export_dir = os.path.normpath(self.export_dir)
         self.movie_descriptor.movie_path = os.path.normpath(self.movie_descriptor.movie_path)
         print(self.folder)
+
+    def connect_hdf5(self, initialize = True):
+        self.hdf5_manager = HDF5Manager()
+        self.hdf5_manager.set_path(self.hdf5_path)
+        if initialize:
+            self.hdf5_manager.initialize_all()
 
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):
@@ -783,8 +796,17 @@ class VIANProject(IHasName, IClassifiable):
         self.export_dir = self.folder + "/export/"
         self.shots_dir = self.folder + "/shots/"
         self.data_dir = self.folder + "/data/"
+        self.hdf5_path = self.data_dir + "analyses.hdf5"
 
         self.main_window.numpy_data_manager.project = self
+
+        self.hdf5_manager = HDF5Manager()
+        self.hdf5_manager.set_path(self.hdf5_path)
+        try:
+            self.hdf5_manager.set_indices(my_dict['hdf_indices'])
+        except:
+            self.hdf5_manager.initialize_all()
+
 
         move_project_to_directory_project = False
         version = [0,0,0]
@@ -922,7 +944,6 @@ class VIANProject(IHasName, IClassifiable):
         self.sort_screenshots()
         self.undo_manager.clear()
         self.sanitize_paths()
-
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
         segmentations = []

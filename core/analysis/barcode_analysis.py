@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import *
 BARCODE_MODE_BOTH = 0
 BARCODE_MODE_HORIZONTAL = 1
 
+BARCODE_MAX_LENGTH = 1000
 # from bokeh.plotting import figure,save
 # from bokeh.layouts import layout
 # from bokeh.colors import RGB
@@ -28,6 +29,9 @@ import pickle
 class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
         super(BarcodeAnalysisJob, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION, SEGMENT],
+                                                 dataset_name="Barcodes",
+                                                 dataset_shape=(BARCODE_MAX_LENGTH, 3),
+                                                 dataset_dtype=np.uint8,
                                                  author="Gaudenz Halter",
                                                  version="1.0.0",
                                                  multiple_result=True)

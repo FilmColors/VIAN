@@ -1557,15 +1557,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close_project()
 
         self.project = project
+
+        self.project.inhibit_dispatch = True
+        self.project.create_file_structure()
+        self.project.connect_hdf5()
+
         self.settings.add_to_recent_files(self.project)
         self.update_recent_menu()
 
-        self.project.inhibit_dispatch = True
-
         if template_path is not None:
             self.project.apply_template(template_path)
-
-        self.project.create_file_structure()
 
         # Importing all Vocabularies
         if vocabularies is not None:

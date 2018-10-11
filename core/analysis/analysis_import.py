@@ -13,6 +13,8 @@ except:
     class SemanticSegmentationAnalysis(IAnalysisJob):
         def __init__(self):
             super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
+                                                               dataset_name="SemanticSegementations",
+                                                               dataset_shape=(512, 512),
                                                                author="Gaudenz Halter",
                                                                version="1.0.0",
                                                                multiple_result=False,
@@ -145,3 +147,4 @@ except:
 
         def predict(self, face_vec):
             pass
+

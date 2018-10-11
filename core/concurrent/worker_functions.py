@@ -101,7 +101,8 @@ def store_project_concurrent(args, sign_progress):
         scripts = scripts,
         vocabularies=vocabularies,
         experiments = experiments,
-        meta_data = project.meta_data
+        meta_data = project.meta_data,
+        hdf_indices = project.hdf5_manager.get_indices()
 
     )
     sign_progress(0.6)
