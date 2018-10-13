@@ -1,7 +1,7 @@
 from core.container.project import VIANProject
 from core.data.interfaces import IConcurrentJob
 from core.analysis.colorimetry.computation import calculate_histogram
-from core.data.computation import frame2ms, ms_to_frames
+from core.data.computation import frame2ms, ms_to_frames, lab_to_sat
 from core.analysis.palette_extraction import *
 import cv2
 import numpy as np
@@ -21,6 +21,7 @@ class ColormetryJob2(QObject):
 
     def prepare(self, project:VIANProject):
         if project.colormetry_analysis is None:
+            print("Colormetry was None")
             self.colormetry_analysis = project.create_colormetry()
             start = 0
         else:
@@ -32,7 +33,7 @@ class ColormetryJob2(QObject):
             project.movie_descriptor.get_movie_path(),
             start,
             frame_duration,
-            30,
+            self.resolution,
             project.movie_descriptor.fps
         ]
 
@@ -73,13 +74,31 @@ class ColormetryJob2(QObject):
             # hist = None
             palette = color_palette(frame_lab, n_merge_steps=200, n_merge_per_lvl=20, image_size=150.0, n_pixels=100, seeds_input_width=400)
             # palette = None
-            # AVG Color
-            avg_color = np.mean(frame_lab, axis=(0, 1)).astype(np.uint8)
+
+            # Color Features
+            color_bgr = np.mean(frame, axis = (0, 1))
+            color_lab = np.mean(frame_lab, axis = (0, 1))
+
+            feature_mat = np.zeros(shape=8)
+            feature_mat[0:3] = color_lab
+            feature_mat[3:6] = color_bgr
+            feature_mat[6] = lab_to_sat(lab=color_bgr, implementation="luebbe")
+            feature_mat[7] = lab_to_sat(lab=color_lab, implementation="pythagoras")
 
             if self.aborted:
                 return
 
-            yielded_result = dict(frame_pos=i + start, time_ms=frame2ms(i + start, fps), hist=hist, avg_color=avg_color, palette=palette)
+            max_p_length = 1000
+            palette_mat = np.zeros(shape=(max_p_length, 6))
+            count = max_p_length
+            if len(palette.tree[0]) < max_p_length:
+                count = len(palette.tree[0])
+            palette_mat[:len(palette.merge_dists), 0] = palette.merge_dists
+            palette_mat[:count, 1] = palette.tree[0][:count]
+            palette_mat[:count, 2:5] = palette.tree[1][:count]
+            palette_mat[:count, 5] = palette.tree[2][:count]
+
+            yielded_result = dict(frame_pos=i + start, time_ms=frame2ms(i + start, fps), hist=hist, palette=palette_mat, features=feature_mat)
             callback.emit([yielded_result, (i + start) / end])
 
             hist_counter += 1

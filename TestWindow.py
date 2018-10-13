@@ -9,21 +9,19 @@ from PyQt5.QtCore import Qt
 from core.gui.tools import StringList
 from visualizer.vis_main_window import *
 from core.visualization.dot_plot import DotPlot
+# from core.gui.player_vlc import Player_Qt
 from core.visualization.bar_plot import BarPlot
 
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = DotPlot(self)
-        self.t.clear_view()
-        self.t.add_grid("LA")
-        names = ["hello", "a very long name", "cool", "super", "another very long text"]
-        for x in range(-128, 128):
-            self.t.add_point(x, x)
+        self.t = Player_Qt(self)
+        # self.t.media_player.mediaChanged.connect(self.on_change)
+        self.t.media_player.stateChanged.connect(self.on_change)
+        self.t.open_movie("C:\\Users\\Gaudenz Halter\\Videos\\2018-10-03 17-23-28.flv")
 
-        self.t.draw_compass()
-        self.ctrl = self.t.get_param_widget()
-        self.ctrl.show()
+        # self.t.play()
+
         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
 
         self.setCentralWidget(self.t)
@@ -31,6 +29,9 @@ class TWindow(QtWidgets.QMainWindow):
 
 
         self.show()
+
+    def on_change(self, args):
+        print("Change", args)
 
 def set_style_sheet(app):
     style_sheet = open(os.path.abspath("qt_ui/themes/qt_stylesheet_dark.css"), 'r')

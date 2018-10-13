@@ -20,6 +20,9 @@ from core.analysis.deep_learning.models import *
 class SemanticSegmentationAnalysis(IAnalysisJob):
     def __init__(self):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
+                                                           dataset_name="SemanticSegementations",
+                                                           dataset_shape=(512, 512),
+                                                           dataset_dtype=np.uint8,
                                                            author="Gaudenz Halter",
                                                            version="1.0.0",
                                                            multiple_result=False,
@@ -149,6 +152,12 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
     def to_json(self, container_data):
         return pickle.dumps(container_data)
         # return json.dumps(self.serialize(container_data))
+
+    def to_hdf5(self, data):
+        return cv2.resize(data['mask'], self.dataset_shape, interpolation=cv2.INTER_NEAREST)
+
+    def from_hdf5(self, db_data):
+        return dict(mask=db_data.astype(np.uint8))
 
 
 class SemanticSegmentationParameterWidget(ParameterWidget):

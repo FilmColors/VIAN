@@ -4,7 +4,7 @@ University of Zurich
 June 2018
 
 """
-
+COLOR_PALETTES_MAX_LENGTH = 1000
 from typing import List
 
 from core.data.computation import ms_to_frames, numpy_to_pixmap
@@ -18,6 +18,9 @@ from core.visualization.palette_plot import *
 class ColorPaletteAnalysis(IAnalysisJob):
     def __init__(self):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
+                                                   dataset_name="ColorPalettes",
+                                                   dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6),
+                                                   dataset_dtype=np.float16,
                                                  author="Gaudenz Halter",
                                                  version="1.0.0",
                                                  multiple_result=True)
@@ -145,6 +148,25 @@ class ColorPaletteAnalysis(IAnalysisJob):
 
     def to_json(self, container_data):
         return json.dumps(self.serialize(container_data))
+
+    def to_hdf5(self, data):
+        d = np.zeros(shape=(COLOR_PALETTES_MAX_LENGTH, 6))
+        count = COLOR_PALETTES_MAX_LENGTH
+        if len(data['tree'][0]) < COLOR_PALETTES_MAX_LENGTH:
+            count = len(data['tree'][0])
+        d[:len(data['dist']), 0] = data['dist']
+        d[:count, 1] = data['tree'][0][:count]
+        d[:count, 2:5] = data['tree'][1][:count]
+        d[:count, 5] = data['tree'][2][:count]
+        return d
+
+    def from_hdf5(self, db_data):
+        layers = [
+            np.array(db_data[:, 1]),
+            np.array(db_data[:, 2:5]),
+            np.array(db_data[:, 5])
+        ]
+        return dict(dist=db_data[:, 0], tree=layers)
 
 
 class ColorPaletteParameterWidget(ParameterWidget):

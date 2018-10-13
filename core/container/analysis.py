@@ -275,15 +275,26 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
     def apply_loaded(self, obj):
         self.set_adata(self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj))
 
-    def get_adata(self):
+    def dep_get_adata(self):
         if self.a_class is None:
             self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
         return self.a_class().from_json(self.project.main_window.project_streamer.sync_load(self.unique_id, data_type=self.a_class().serialization_type()))
 
-    def set_adata(self, d):
+    def dep_set_adata(self, d):
         if self.a_class is None:
             self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
         self.project.main_window.project_streamer.sync_store(self.unique_id, self.a_class().to_json(d), data_type=self.a_class().serialization_type())
+        self.data = None
+
+    def get_adata(self):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+        return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
+
+    def set_adata(self, d):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
 
 
@@ -293,14 +304,9 @@ class ColormetryAnalysis(AnalysisContainer):
         self.curr_location = 0
         self.time_ms = []
         self.frame_pos = []
-        self.histograms = []
-        self.avg_colors = []
+        self.end_idx = 0
 
         self.analysis_job_class = "Colormetry"
-
-        self.palette_bins = []
-        self.palette_cols = []
-        self.palette_layers = []
 
         self.resolution = resolution
         self.has_finished = False
@@ -318,7 +324,8 @@ class ColormetryAnalysis(AnalysisContainer):
 
         self.last_idx = 0
 
-    def get_histogram(self, time_ms):
+    def get_histogram(self):
+        return self.project.hdf5_manager.col_histograms()
         pass
 
     def get_palette(self, time_ms):
@@ -326,28 +333,10 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def append_data(self, data):
         try:
-            if not isinstance(self.palette_cols, List):
-                try:
-                    self.time_ms = self.time_ms.tolist()
-                    self.histograms = self.histograms.tolist()
-                    self.frame_pos = self.frame_pos.tolist()
-                    self.avg_colors = self.avg_colors.tolist()
-                    self.palette_cols = self.palette_cols.tolist()
-                    self.palette_layers = self.palette_layers.tolist()
-                    self.palette_bins = self.palette_bins.tolist()
-                except Exception as e:
-                    print("Could not Convert Colormetry data to list in append_data()", e)
-
             self.time_ms.append(data['time_ms'])
-            self.histograms.append(data['hist'])
-            self.frame_pos.append(data['frame_pos'])
-            self.avg_colors.append(data['avg_color'])
-
-            self.palette_bins.append(data['palette'].tree[2])
-            self.palette_cols.append(data['palette'].tree[1])
-            self.palette_layers.append(data['palette'].tree[0])
-
-            self.current_idx = len(self.time_ms)
+            self.current_idx = self.project.hdf5_manager.get_colorimetry_length() - 1
+            self.project.hdf5_manager.dump_colorimetry(data, self.current_idx)
+            self.check_finished()
 
         except Exception as e:
             print("ColormetryAnalysis.append_data() raised ", str(e))
@@ -355,11 +344,18 @@ class ColormetryAnalysis(AnalysisContainer):
     def get_update(self, time_ms):
         try:
             frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
-            if frame_idx == self.last_idx:
+            if frame_idx == self.last_idx or frame_idx > self.current_idx:
                 return False
             self.last_idx = frame_idx
-            return dict(palette = [np.array(self.palette_layers[frame_idx]), np.array(self.palette_cols[frame_idx]), np.array(self.palette_bins[frame_idx])])
+            d = self.project.hdf5_manager.get_colorimetry_pal(frame_idx)
+            layers = [
+                d[:, 1].astype(np.int),
+                d[:, 2:5].astype(np.uint8),
+                d[:, 5].astype(np.int)
+            ]
+            return dict(palette = layers)
         except Exception as e:
+            print(e)
             pass
 
     def get_time_palette(self):
@@ -372,69 +368,35 @@ class ColormetryAnalysis(AnalysisContainer):
             ])
         return [time_palette_data, self.time_ms]
 
-    def set_finished(self):
-        if self.current_idx - 1 < len(self.time_ms):
-            if self.time_ms[self.current_idx - 1] >= self.project.movie_descriptor.duration - (frame2ms(5 * self.resolution, self.project.movie_descriptor.fps)):
-                if not isinstance(self.palette_cols, np.ndarray):
-                    self.palette_cols = np.array(self.palette_cols, dtype=np.uint8)
-                if not isinstance(self.palette_layers, np.ndarray):
-                    self.palette_layers = np.array(self.palette_layers, dtype=np.uint16)
-                if not isinstance(self.palette_bins, np.ndarray):
-                    self.palette_bins = np.array(self.palette_bins, dtype=np.uint16)
-                self.has_finished = True
-                print("LOG: Colorimetry finished")
-
-                data = dict(
-                    curr_location=self.curr_location,
-                    time_ms=self.time_ms,
-                    frame_pos=self.frame_pos,
-                    histograms=self.histograms,
-                    avg_colors=self.avg_colors,
-                    palette_colors=self.palette_cols,
-                    palette_layers=self.palette_layers,
-                    palette_bins=self.palette_bins,
-                    resolution=self.resolution,
-                )
-                self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
+    def check_finished(self):
+        if self.current_idx == self.end_idx - 1:
+            self.has_finished = True
+            print("Check Finished:", self.has_finished)
+        return self.has_finished
 
     def clear(self):
+        print("Clearing COlorimetry")
+        self.resolution = 30
+        n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
+        print(self.resolution, n_frames, self.project.movie_descriptor.fps)
+        self.project.hdf5_manager.initialize_colorimetry(n_frames)
+        self.end_idx = n_frames
         self.curr_location = 0
         self.time_ms = []
         self.frame_pos = []
-        self.histograms = []
-        self.avg_colors = []
 
-        self.palette_cols = []
-        self.palette_layers = []
-        self.palette_bins = []
-
-        self.resolution = 30
         self.has_finished = False
         self.current_idx = 0
 
     def serialize(self):
-        data = dict(
-            curr_location = self.curr_location,
-            time_ms = self.time_ms,
-            frame_pos=self.frame_pos,
-            histograms=self.histograms,
-            avg_colors=self.avg_colors,
-            palette_colors=self.palette_cols,
-            palette_layers=self.palette_layers,
-            palette_bins=self.palette_bins,
-            resolution=self.resolution,
-            current_idx = self.current_idx
-        )
-
-        if self.has_finished:
-            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
-        else:
-            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
-
         serialization = dict(
             name=self.name,
             unique_id=self.unique_id,
             analysis_container_class=self.__class__.__name__,
+            resolution = self.resolution,
+            curr_idx = self.current_idx,
+            time_ms = self.time_ms,
+            end_idx = self.end_idx,
             notes=self.notes,
             has_finished = self.has_finished
 
@@ -448,40 +410,15 @@ class ColormetryAnalysis(AnalysisContainer):
 
         try:
             self.has_finished = serialization['has_finished']
-            data = streamer.sync_load(self.unique_id)
-            if data is not None:
-                # self.current_idx = data['current_idx']
-                self.curr_location = data['curr_location']
-                self.time_ms = data['time_ms']
-
-                self.frame_pos =  data['frame_pos']
-                self.histograms =  data['histograms']
-                self.avg_colors =  data['avg_colors']
-
-                self.palette_cols = data['palette_colors']
-                self.palette_layers = data['palette_layers']
-                self.palette_bins = data['palette_bins']
-
-                self.resolution =  data['resolution']
-
-            else:
-                self.curr_location = 0
-                self.time_ms = []
-                self.frame_pos = []
-                self.histograms = []
-                self.avg_colors = []
-
-                self.palette_cols = []
-                self.palette_layers = []
-                self.palette_bins = []
-
-                self.resolution = 30
-                self.has_finished = False
-                self.current_idx = 0
+            self.resolution = serialization['resolution']
+            self.time_ms = serialization['time_ms']
+            self.current_idx = len(self.time_ms)
+            self.end_idx = serialization['end_idx']
 
         except Exception as e:
             print("Exception in Loading Analysis", str(e))
-        self.current_idx = len(self.time_ms)
+            self.clear()
+        self.check_finished()
         return self
 
 

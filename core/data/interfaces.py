@@ -231,7 +231,10 @@ class IAnalysisJob(ILiveWidgetExposing):
     Subclass it to implement your own Analyses. 
     
     """
-    def __init__(self, name, source_types, help_path = "", author="No Author", version = "0.0.1", multiple_result = False, data_serialization = DataSerialization.JSON):
+    def __init__(self, name, source_types,
+                 dataset_name, dataset_shape, dataset_dtype,
+                 help_path = "", author="No Author", version = "0.0.1",
+                 multiple_result = False, data_serialization = DataSerialization.JSON):
         """
         
         :param name: The name of the Analysis, used in the UI.
@@ -244,6 +247,9 @@ class IAnalysisJob(ILiveWidgetExposing):
         """
         self.name = name
         self.source_types = source_types
+        self.dataset_name = dataset_name
+        self.dataset_shape = dataset_shape
+        self.dataset_dtype = dataset_dtype
         self.help_path = help_path
         self.author = author
         self.version = version
@@ -395,6 +401,12 @@ class IAnalysisJob(ILiveWidgetExposing):
         :return: 
         """
         return data_dict
+
+    def from_hdf5(self, db_data):
+        return db_data
+
+    def to_hdf5(self, data):
+        return data
 
     def abort(self):
         pass
