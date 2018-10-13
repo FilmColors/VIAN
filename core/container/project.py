@@ -239,10 +239,10 @@ class VIANProject(IHasName, IClassifiable):
         self.movie_descriptor.movie_path = os.path.normpath(self.movie_descriptor.movie_path)
         print(self.folder)
 
-    def connect_hdf5(self, initialize = True):
+    def connect_hdf5(self):
         self.hdf5_manager = HDF5Manager()
-        self.hdf5_manager.set_path(self.hdf5_path)
-        if initialize:
+        needs_init = self.hdf5_manager.set_path(self.hdf5_path)
+        if needs_init:
             self.hdf5_manager.initialize_all()
 
     #region Segmentation
@@ -550,9 +550,11 @@ class VIANProject(IHasName, IClassifiable):
             return self.colormetry_analysis.has_finished, self.colormetry_analysis
 
     def create_colormetry(self):
+        print("Create Colorimetry Analysis")
         colormetry = ColormetryAnalysis()
         self.add_analysis(colormetry)
         self.colormetry_analysis = colormetry
+        self.colormetry_analysis.clear()
         return colormetry
 
     #endregion
@@ -802,10 +804,12 @@ class VIANProject(IHasName, IClassifiable):
 
         self.hdf5_manager = HDF5Manager()
         self.hdf5_manager.set_path(self.hdf5_path)
+
         try:
             self.hdf5_manager.set_indices(my_dict['hdf_indices'])
-        except:
+        except Exception as e:
             self.hdf5_manager.initialize_all()
+
 
 
         move_project_to_directory_project = False
@@ -899,12 +903,15 @@ class VIANProject(IHasName, IClassifiable):
                 try:
                     new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
                     if isinstance(new, ColormetryAnalysis):
-                        # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
-                        if int(version[1]) < 6:
-                            new = ColormetryAnalysis()
-                        self.colormetry_analysis = new
-                        self.add_analysis(new)
-                        new.set_finished()
+                        try:
+                            # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
+                            if int(version[1]) < 6:
+                                new = ColormetryAnalysis()
+                            self.colormetry_analysis = new
+                            self.add_analysis(new)
+                            new.check_finished()
+                        except Exception as e:
+                            self.create_colormetry()
                     else:
                         self.add_analysis(new)
                 except Exception as e:
@@ -941,6 +948,11 @@ class VIANProject(IHasName, IClassifiable):
         else:
             self.create_file_structure()
 
+        if self.colormetry_analysis is not None:
+            if not self.hdf5_manager.has_colorimetry():
+                self.colormetry_analysis.clear()
+        else:
+            self.create_colormetry()
         self.sort_screenshots()
         self.undo_manager.clear()
         self.sanitize_paths()
@@ -1183,6 +1195,8 @@ class VIANProject(IHasName, IClassifiable):
             for w in l.annotations:
                 if w.widget is not None:
                     w.widget.close()
+        if self.hdf5_manager is not None:
+            self.hdf5_manager.on_close()
 
     def get_time_ranges_of_selected(self):
         result = []

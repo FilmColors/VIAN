@@ -21,6 +21,7 @@ class ColormetryJob2(QObject):
 
     def prepare(self, project:VIANProject):
         if project.colormetry_analysis is None:
+            print("Colormetry was None")
             self.colormetry_analysis = project.create_colormetry()
             start = 0
         else:
@@ -90,7 +91,6 @@ class ColormetryJob2(QObject):
             max_p_length = 1000
             palette_mat = np.zeros(shape=(max_p_length, 6))
             count = max_p_length
-            print(len( palette.tree[0]))
             if len(palette.tree[0]) < max_p_length:
                 count = len(palette.tree[0])
             palette_mat[:len(palette.merge_dists), 0] = palette.merge_dists

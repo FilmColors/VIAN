@@ -311,7 +311,6 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
             self.curr_alpha = alpha
 
 
-
 class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)

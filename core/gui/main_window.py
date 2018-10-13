@@ -45,7 +45,7 @@ from core.gui.inspector import Inspector
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
-from core.gui.player_vlc import Player_VLC, PlayerDockWidget
+from core.gui.player_vlc import Player_VLC, PlayerDockWidget# , Player_Qt
 from core.gui.quick_annotation import QuickAnnotationDock
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
@@ -137,8 +137,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.screenshots_manager = None
         self.allow_dispatch_on_change = True
 
-        self.thread_pool = QThreadPool()
-        self.thread_pool.setMaxThreadCount(8)
+        self.thread_pool = QThreadPool.globalInstance()
+        # self.thread_pool.setMaxThreadCount(8)
 
         self.colormetry_running = False
         self.colormetry_job = None
@@ -197,6 +197,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.player = Player_VLC(self)
         self.player = Player_VLC(self)
+        # self.player = Player_Qt(self)
         self.player_dock_widget = None
 
         self.project = VIANProject(self, "", "Default Project")
@@ -516,8 +517,8 @@ class MainWindow(QtWidgets.QMainWindow):
             WebAnnotationDevice().export("test_file.json", self.project, self.settings.CONTRIBUTOR, VERSION)
 
     def toggle_colormetry(self):
-        if self.colormetry_running == False:
-            job = ColormetryJob2(10, self)
+        if self.colormetry_running is False:
+            job = ColormetryJob2(30, self)
             args = job.prepare(self.project)
             self.actionColormetry.setText("Pause Colormetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)
@@ -539,7 +540,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_colormetry_finished(self, res):
         try:
-            self.project.colormetry_analysis.set_finished()
+            self.project.colormetry_analysis.check_finished()
             self.timeline.timeline.set_colormetry_progress(1.0)
         except Exception as e:
             print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
@@ -1116,6 +1117,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.allow_dispatch_on_change = True
         self.dispatch_on_changed()
+        # print(self.thread_pool.)
         # progress.deleteLater()
 
     def scale_screenshots(self, scale = 0.1):
@@ -1617,6 +1619,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player.stop()
             self.abortAllConcurrentThreads.emit()
             self.project.cleanup()
+            if self.colormetry_running:
+                self.toggle_colormetry()
 
         self.player_controls.setState(False)
         self.project = None
@@ -1943,7 +1947,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
 
-        ready, coloremtry = self.project.get_colormetry()
+        ready, colorimetry = self.project.get_colormetry()
+        run_colormetry = False
         if not ready:
             run_colormetry = False
             if self.settings.AUTO_START_COLORMETRY:
@@ -1958,19 +1963,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 if answer == QMessageBox.Yes:
                     run_colormetry = True
                 self.set_overlay_visibility(True, True)
-        else:
-            run_colormetry = ready
-
-        # if coloremtry is not None:
-        #     self.colorimetry_live.plot_time_palette(self.project.colormetry_analysis.get_time_palette())
 
         if run_colormetry:
-            ready, col = self.project.get_colormetry()
-            if not ready:
-                self.toggle_colormetry()
-
-            else:
-                self.timeline.timeline.set_colormetry_progress(1.0)
+            self.toggle_colormetry()
+        else:
+            self.timeline.timeline.set_colormetry_progress(1.0)
 
         print("\n#### --- Loaded Project --- ####")
         print("Folder:".rjust(15), self.project.folder)

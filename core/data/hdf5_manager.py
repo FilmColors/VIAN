@@ -6,7 +6,6 @@ import numpy as np
 import inspect
 from core.data.interfaces import IAnalysisJob
 
-
 def load_analysis():
     file_list = []
     for root, dirs, files in os.walk("core/analysis/", topdown=False):
@@ -36,6 +35,7 @@ DEFAULT_SIZE = (50,)
 DS_COL_HIST = "col_histograms"
 DS_COL_PAL = "col_palettes"
 DS_COL_FEAT = "col_features"
+DS_COL_TIME = "col_time_ms"
 
 class HDF5Manager():
     def __init__(self):
@@ -47,9 +47,15 @@ class HDF5Manager():
     #region -- Generic --
     def set_path(self, path):
         self.path = path
+        init = False
+        print("HDF5: ", self.path)
         if not os.path.isfile(self.path):
             h5py.File(self.path, "w")
+            init = True
         self.h5_file = h5py.File(self.path, "r+")
+        print(list(self.h5_file.keys()))
+        return init
+
 
     def initialize_all(self):
         for a in load_analysis():
@@ -86,9 +92,15 @@ class HDF5Manager():
     #endregion
 
     #region Colorimetry
+    def has_colorimetry(self):
+        if DS_COL_HIST in list(self.h5_file) and DS_COL_PAL in list(self.h5_file) and DS_COL_FEAT in list(self.h5_file):
+            return True
+        else:
+            return False
 
     def initialize_colorimetry(self, length):
-        for n in [DS_COL_FEAT, DS_COL_HIST, DS_COL_PAL]:
+        print("Initializing Colorimetry")
+        for n in [DS_COL_FEAT, DS_COL_HIST, DS_COL_PAL, DS_COL_TIME]:
             if n in self.h5_file:
                 del self.h5_file[n]
         self._index['col'] = 0
@@ -96,17 +108,28 @@ class HDF5Manager():
         self.h5_file.create_dataset(DS_COL_HIST,shape=(length, 16, 16, 16), dtype=np.float16)
         self.h5_file.create_dataset(DS_COL_FEAT, shape=(length, 8), dtype=np.float16)
         self.h5_file.create_dataset(DS_COL_PAL, shape=(length, 1000, 6), dtype=np.float16)
+        self.h5_file.create_dataset(DS_COL_TIME, shape=(length, 1), dtype=np.uint64)
+        self.h5_file.flush()
 
     def dump_colorimetry(self, d, idx):
         self.h5_file[DS_COL_PAL][idx] = d['palette']
         self.h5_file[DS_COL_HIST][idx] = d['hist']
         self.h5_file[DS_COL_FEAT][idx] = d['features']
+        self.h5_file[DS_COL_TIME][idx] = d['time_ms']
+        self.h5_file.flush()
+
+    def get_colorimetry_length(self):
+        return np.where(np.array(self.h5_file[DS_COL_TIME])> 0)[0].shape[0] + 1
 
     def get_colorimetry_pal(self, idx):
         return self.h5_file[DS_COL_PAL][idx]
 
+    def col_histograms(self):
+        return self.h5_file[DS_COL_HIST]
     #endregion
 
     def get_indices(self):
         return dict(curr_pos=self._index, uidmapping=self._uid_index)
 
+    def on_close(self):
+        self.h5_file.close()

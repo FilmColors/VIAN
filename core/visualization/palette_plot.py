@@ -150,12 +150,15 @@ class PaletteView(QWidget, IVIANVisualization):
                 bins_to_draw = bins_to_draw[new_sort]
 
             for q in range(cols_to_draw.shape[0]):
-                color = cols_to_draw[q]
-                size = bins_to_draw[q] * width_factor
-                qp.fillRect(x - 0.5, y - 0.5, size + 1.0, height + 1.0, QColor(int(color[2]), int(color[1]), int(color[0])))
-                if self.show_grid:
-                    qp.drawRect(x, y, size, height)
-                x += size
+                try:
+                    color = cols_to_draw[q]
+                    size = bins_to_draw[q] * width_factor
+                    qp.fillRect(x - 0.5, y - 0.5, size + 1.0, height + 1.0, QColor(int(color[2]), int(color[1]), int(color[0])))
+                    if self.show_grid:
+                        qp.drawRect(x, y, size, height)
+                    x += size
+                except Exception as e:
+                    pass
             y += height
         qp.end()
 
