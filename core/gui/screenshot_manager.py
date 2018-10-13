@@ -667,6 +667,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 for s in self.project.screenshots:
                     if str(s.unique_id) not in self.ab_view_mean_cache:
                         mean = np.mean(cv2.cvtColor(s.img_movie, cv2.COLOR_BGR2LAB),axis = (0,1))
+                        mean = np.array([mean[0], 255 - mean[1], mean[2]])
                     else:
                         mean = self.ab_view_mean_cache[str(s.unique_id)]
                     # We have to make sure that we do not cache the place holder before the actual images are loaded

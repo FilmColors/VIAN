@@ -326,9 +326,9 @@ class ImagePlotCircular(ImagePlot):
             self.scene().addItem(itm)
 
             if to_float:
-                itm.setPos(np.nan_to_num((x -128) * self.magnification),np.nan_to_num((y -128) * self.magnification))
+                itm.setPos(np.nan_to_num(-1.0 * (x -128) * self.magnification),np.nan_to_num(-1.0 * (y -128) * self.magnification))
             else:
-                itm.setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(y * self.magnification))
+                itm.setPos(np.nan_to_num(-1.0 * (x * self.magnification)), np.nan_to_num(-1.0 * (y * self.magnification)))
 
             self.raw_data.append(ImagePlotRawData(img, x, y, 0, mime_data))
 
