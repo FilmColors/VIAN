@@ -69,16 +69,16 @@ class ProjectListEntry(QWidget):
 
 
 
-    def mousePressEvent(self, a0: QtGui.QMouseEvent):
+    def mousePressEvent(self, a0: QMouseEvent):
         self.onClicked.emit(self.dbproject)
 
-    def enterEvent(self, a0: QtCore.QEvent):
+    def enterEvent(self, a0: QEvent):
         self.hovered = True
 
-    def leaveEvent(self, a0: QtCore.QEvent):
+    def leaveEvent(self, a0: QEvent):
         self.hovered = False
 
-    def paintEvent(self, a0: QtGui.QPaintEvent):
+    def paintEvent(self, a0: QPaintEvent):
         if self.hovered:
             qp = QPainter()
             pen = QPen()

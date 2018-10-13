@@ -4,6 +4,9 @@ import datetime
 from core.corpus.shared.enums import *
 try:
     from core.analysis.analysis_import import *
+except:
+    pass
+try:
     from core.container.project import *
 except Exception as e:
     class IProjectContainer: pass
@@ -22,6 +25,7 @@ except Exception as e:
     class IAnalysisJobAnalysis: pass
     class NodeScriptAnalysis: pass
     class ColormetryAnalysis: pass
+    class MovieDescriptor: pass
 
 SCR_DIR = "/screenshots/"
 MOVIE_DIR = "/movie/"
