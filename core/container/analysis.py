@@ -378,7 +378,6 @@ class ColormetryAnalysis(AnalysisContainer):
         print("Clearing COlorimetry")
         self.resolution = 30
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
-        print(self.resolution, n_frames, self.project.movie_descriptor.fps)
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
         self.end_idx = n_frames
         self.curr_location = 0
@@ -417,7 +416,6 @@ class ColormetryAnalysis(AnalysisContainer):
 
         except Exception as e:
             print("Exception in Loading Analysis", str(e))
-            self.clear()
         self.check_finished()
         return self
 

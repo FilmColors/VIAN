@@ -554,7 +554,7 @@ class VIANProject(IHasName, IClassifiable):
         colormetry = ColormetryAnalysis()
         self.add_analysis(colormetry)
         self.colormetry_analysis = colormetry
-        self.colormetry_analysis.clear()
+        # self.colormetry_analysis.clear()
         return colormetry
 
     #endregion

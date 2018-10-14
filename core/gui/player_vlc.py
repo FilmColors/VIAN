@@ -309,16 +309,10 @@ class Player_VLC(VideoPlayer):
         self.millis_per_sample = 40
         self.volume = 50
 
-
-        # Uncomment this line to get the old functionality
-        # fps = self.media_player.get_fps()
-        # print("FPS:", self.media_player.get_fps())
         capture = cv2.VideoCapture(self.movie_path)
-        #if fps != 0:
-        #    self.fps = capture.get(cv2.CAP_PROP_FPS)
         self.fps = capture.get(cv2.CAP_PROP_FPS)
         self.main_window.project.movie_descriptor.fps = self.fps
-
+        self.media_descriptor.set_duration(self.duration)
         self.user_fps = self.fps
 
     def get_subtitles(self):
@@ -342,6 +336,7 @@ class Player_VLC(VideoPlayer):
 
         self.movie_path = filename
         self.media = self.vlc_instance.media_new(self.movie_path)
+
         # put the media in the media player
         self.media_player.set_media(self.media)
 
@@ -354,7 +349,7 @@ class Player_VLC(VideoPlayer):
         # Wait for a little
         # time.sleep(0.5)
         self.set_initial_values()
-
+        print("Duration:", self.duration)
         if from_server:
             self.new_movie_loaded = True
 
@@ -563,7 +558,6 @@ class Player_VLC(VideoPlayer):
 
         if success:
             self.open_movie(path)
-            self.media_descriptor.set_duration(self.get_media_duration())
         else:
             raise FileNotFoundError("No Movie Selected")
 

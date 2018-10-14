@@ -541,13 +541,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_colormetry_finished(self, res):
         try:
             self.project.colormetry_analysis.check_finished()
-            self.timeline.timeline.set_colormetry_progress(1.0)
+            if self.project.colormetry_analysis.has_finished():
+                self.timeline.timeline.set_colormetry_progress(1.0)
         except Exception as e:
             print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
     def clear_colormetry(self):
         if self.project is not None:
             if self.colormetry_job is not None:
+                self.colormetry_running = True
                 self.toggle_colormetry()
             if self.project.colormetry_analysis is not None:
                 self.project.colormetry_analysis.clear()

@@ -21,10 +21,13 @@ class ColormetryJob2(QObject):
 
     def prepare(self, project:VIANProject):
         if project.colormetry_analysis is None:
-            print("Colormetry was None")
             self.colormetry_analysis = project.create_colormetry()
+            self.colormetry_analysis.clear()
             start = 0
         else:
+            if project.colormetry_analysis.current_idx == 0:
+                project.colormetry_analysis.clear()
+
             self.colormetry_analysis = project.colormetry_analysis
             start = self.colormetry_analysis.current_idx
         self.duration = project.movie_descriptor.duration

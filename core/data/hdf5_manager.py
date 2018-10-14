@@ -106,7 +106,7 @@ class HDF5Manager():
                 del self.h5_file[n]
         self._index['col'] = 0
 
-        self.h5_file.create_dataset(DS_COL_HIST,shape=(length, 16, 16, 16), dtype=np.float16)
+        self.h5_file.create_dataset(DS_COL_HIST, shape=(length, 16, 16, 16), dtype=np.float16)
         self.h5_file.create_dataset(DS_COL_FEAT, shape=(length, 8), dtype=np.float16)
         self.h5_file.create_dataset(DS_COL_PAL, shape=(length, 1000, 6), dtype=np.float16)
         self.h5_file.create_dataset(DS_COL_TIME, shape=(length, 1), dtype=np.uint64)
