@@ -122,6 +122,10 @@ class HDF5Manager():
     def get_colorimetry_length(self):
         return np.where(np.array(self.h5_file[DS_COL_TIME])> 0)[0].shape[0] + 1
 
+    def get_colorimetry_times(self):
+        t = np.reshape(self.h5_file[DS_COL_TIME], newshape=self.h5_file[DS_COL_TIME].shape[0])
+        return t
+
     def get_colorimetry_pal(self, idx):
         return self.h5_file[DS_COL_PAL][idx]
 

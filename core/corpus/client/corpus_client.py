@@ -27,7 +27,12 @@ import socket
 import json
 import shutil
 
+
 class CorpusClient(QObject, IProjectChangeNotify):
+    """
+    The CorpusClient class manages the specific subclass of corpus_interface.CorpusInterface that is 
+    initialised during connecting. 
+    """
     onCorpusConnected = pyqtSignal(object)
     onCorpusDisconnected = pyqtSignal(object)
     onCorpusChanged = pyqtSignal(object)
@@ -93,6 +98,11 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
     @pyqtSlot(str)
     def on_connect_webapp(self, endpoint):
+        """
+        
+        :param endpoint: The endpoint that is currently hardcoded in the constructor
+        :return: 
+        """
         self.is_remote = True
         self.corpus_interface = WebAppCorpusInterface(self.main_window.settings.DIR_CORPORA)
         self.connect_signals()

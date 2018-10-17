@@ -554,6 +554,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def on_closed(self):
         self.clear()
+        self.set_colormetry_progress(0.0)
         self.setDisabled(True)
 
     def select(self, control = None, item = None, dispatch = True):

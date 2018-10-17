@@ -14,6 +14,8 @@ from collections import namedtuple
 from core.data.enums import ScreenshotNamingConventionOptions as naming
 from PyQt5.QtGui import QFont, QColor
 
+from PyQt5.QtWidgets import QApplication
+
 Font = namedtuple('Font', ['font_family', 'font_size', 'font_color'])
 Palette = namedtuple('Palette', ['palette_name', 'palette_colors'])
 
@@ -93,6 +95,8 @@ class UserSettings():
         # Annotation Viewer
         self.AUTO_COLLAPSE = True
 
+        self.FONT_NAME = "Lucida Console"
+        self.FONT_SIZE = 14
         self.MAIN_FONT = Font(font_family="Lucida Console", font_color=(50,50,50,255), font_size=14)
         self.PALETTES = [palette_sand, palette_grass, palette_difference, palette_beach, palette_earth, palette_gray]
 
@@ -103,6 +107,7 @@ class UserSettings():
         self.USE_ELAN = False
 
         self.dock_widgets_data = []
+
 
     def set_contributor(self, contributor):
         self.CONTRIBUTOR = contributor

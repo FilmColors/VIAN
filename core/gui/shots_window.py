@@ -502,6 +502,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.update_manager()
 
     def on_changed(self, project, item):
+        print("CHANGED")
         self.update_manager()
 
     def on_selected(self, sender, selected):
@@ -513,6 +514,14 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                             if i.screenshot_obj is s:
                                 sel.append(i)
             self.select_image(sel, dispatch=False)
+
+    def on_closed(self):
+        print("OK")
+        self.clear_caption()
+        self.clear_images()
+        self.clear_lines()
+        self.clear_selection()
+        self.scene.clear()
 
     def update_caption(self):
         return

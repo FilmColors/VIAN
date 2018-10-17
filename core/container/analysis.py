@@ -331,6 +331,12 @@ class ColormetryAnalysis(AnalysisContainer):
     def get_palette(self, time_ms):
         pass
 
+    def get_frame_pos(self):
+        times = self.project.hdf5_manager.get_colorimetry_times()
+        frames = np.multiply(np.divide(times, 1000), self.project.movie_descriptor.fps).astype(np.int).tolist()
+        print(times, "\n", frames)
+        return frames
+
     def append_data(self, data):
         try:
             self.time_ms.append(data['time_ms'])
@@ -369,9 +375,9 @@ class ColormetryAnalysis(AnalysisContainer):
         return [time_palette_data, self.time_ms]
 
     def check_finished(self):
-        if self.current_idx == self.end_idx - 1:
+        print("IDX", self.current_idx, self.end_idx, self.current_idx == self.end_idx)
+        if int(self.current_idx) >= int(self.end_idx - 1):
             self.has_finished = True
-            print("Check Finished:", self.has_finished)
         return self.has_finished
 
     def clear(self):

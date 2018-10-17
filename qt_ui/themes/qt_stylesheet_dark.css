@@ -2,13 +2,12 @@
 
 QWidget
 {
-	font-family: "Lucida Console";
-    font-size: 10pt;
+	/*FFAMILY*/font-family: "Lucida Console";/*FFAMILY*/
+    /*FSIZE*/font-size: 10pt;/*FSIZE*/
 	margin: 5pt;
     padding: 1pt;
     color: #b1b1b1;
     background-color: #323232;
-
 }
 
 

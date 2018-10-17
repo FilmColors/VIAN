@@ -411,6 +411,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         for cap in self.captions:
             self.scene.removeItem(cap)
 
+        self.clear_selection_frames()
+        if self.current_segment_frame is not None:
+            self.scene.removeItem(self.current_segment_frame)
+            self.current_segment_frame = None
+
         if self.loading_icon is not None:
             self.scene.removeItem(self.loading_icon)
         if self.loading_text is not None:
@@ -419,6 +424,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.images_plain = []
         self.captions = []
         self.images_segmentation = []
+
 
     def arrange_images(self):
         self.clear_captions()

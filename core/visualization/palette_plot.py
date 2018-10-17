@@ -13,6 +13,7 @@ from core.visualization.basic_vis import IVIANVisualization
 from core.data.computation import *
 import numpy as np
 
+
 class PaletteWidget(QWidget):
     def __init__(self, parent):
         super(PaletteWidget, self).__init__(parent)
@@ -75,6 +76,11 @@ class PaletteWidget(QWidget):
         self.view.mode = self.cb_mode.currentText()
         self.view.depth = self.slider.value()
         self.view.draw_palette()
+        self.view.update()
+
+    def clear_view(self):
+        self.view.palette_layer = None
+        self.view.image = None
         self.view.update()
 
 
@@ -275,7 +281,6 @@ class PaletteLABWidget(QWidget):
         self.w_ctrls2.setVisible(False)
         self.show()
 
-
     def toggle_controls(self):
         v = not self.slider_size.isVisible()
         self.w_ctrls2.setVisible(v)
@@ -306,6 +311,10 @@ class PaletteLABWidget(QWidget):
         self.view.mode = self.cb_mode.currentText()
         self.view.depth = self.slider.value()
         self.on_settings_changed()
+
+    def clear_view(self):
+        self.view.palette_layer = None
+        self.view.update()
 
 
 class PaletteLABView(QWidget, IVIANVisualization):

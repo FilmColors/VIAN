@@ -265,6 +265,11 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 sel.widget.is_selected = True
             self.selected.append(sel)
 
+    def on_closed(self):
+        self.cleanup()
+        self.opencv_pixmap = None
+        self.update()
+
     def create_annotation_layer(self,name, t_start, t_end):
         layer = AnnotationLayer(name, t_start, t_end)
         self.project.add_annotation_layer(layer)

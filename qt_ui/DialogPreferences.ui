@@ -35,7 +35,7 @@
       <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -77,7 +77,11 @@
           <widget class="QComboBox" name="comboBox"/>
          </item>
          <item row="2" column="1">
-          <widget class="QFontComboBox" name="font_Picker"/>
+          <widget class="QFontComboBox" name="font_Picker">
+           <property name="currentText">
+            <string>Lucida Console</string>
+           </property>
+          </widget>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_18">
@@ -94,7 +98,14 @@
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QSpinBox" name="spinBox_FontSize"/>
+          <widget class="QSpinBox" name="spinBox_FontSize">
+           <property name="minimum">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>12</number>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
