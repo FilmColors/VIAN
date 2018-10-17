@@ -8,3 +8,6 @@ VIAN.zip
 *.prototxt.txt
 *.caffemodel
 user/models/*
+.vs/
+*.pyproj
+*.sln
