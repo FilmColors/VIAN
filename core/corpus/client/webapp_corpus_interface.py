@@ -4,7 +4,7 @@ import threading
 class WebAppCorpusInterface(CorpusInterface):
     def __init__(self, corpora_dir):
         super(WebAppCorpusInterface, self).__init__()
-        self.endpoint_adress = 'http://127.0.0.1:5000/vian_upload'
+        self.endpoint_adress = 'http://127.0.0.1:5000/api/upload'
         self.name = "VIAN-WebApp"
 
     @pyqtSlot(object, object)
