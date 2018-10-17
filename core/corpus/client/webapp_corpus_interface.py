@@ -4,19 +4,20 @@ import threading
 class WebAppCorpusInterface(CorpusInterface):
     def __init__(self, corpora_dir):
         super(WebAppCorpusInterface, self).__init__()
-        self.endpoint_adress = 'http://127.0.0.1:5000/vian_upload'
+        self.endpoint_adress = 'http://127.0.0.1:5000/api/upload_debug'
+        self.name = "VIAN-WebApp"
 
     @pyqtSlot(object, object)
     def connect_user(self, user:DBContributor, options):
         try:
-            answer = dict(success = True,
-                          projects = [DBProject().to_database(True), DBProject().to_database(True), DBProject().to_database(True)],
-                          user = DBContributor().to_database(True),
-                          corpus_name = "ERC_FilmColors")
+            success = False
+            #TODO SILAS, Authentification is all your business
 
-            if answer['success']:
-                self.name = answer['corpus_name']
-                self.onConnected.emit(answer['success'], self.to_project_list(answer['projects']), DBContributor().from_database(answer['user']))
+
+            if success:
+                # We don't want VIAN to see all Projects on the WebAppCorpus, thus returning an empty list
+                all_projects = []
+                self.onConnected.emit(success, all_projects, user)
             else:
                 self.onConnected.emit(False, None, None)
         except Exception as e:
@@ -41,47 +42,26 @@ class WebAppCorpusInterface(CorpusInterface):
 
     def verify_project(self):
         return True
+
     @pyqtSlot(object)
     def disconnect_user(self, user):
         pass
 
     @pyqtSlot(object, object)
     def commit_project(self, user, project: VIANProject):
+        """
+        Here we actually commit the project, 
+        this includes to prepare the project, baking screenshots and masks into image files 
+        and upload them to the Server
+        :param user: 
+        :param project: 
+        :return: 
+        """
         try:
-            #OLD CODE
-            # # Export all Screenshots and Masks
-            # if project.main_window is not None:
-            #     # This fails in the Headless Mode, which is exactly what we want
-            #     try:
-            #         self.onEmitProgress.connect(project.main_window.on_progress_popup)
-            #     except:
-            #         pass
-            # res, path = self.prepare_project(project)
-            # if res is False:
-            #     return
-            #
-            # # Create a Zip File
-            # file_name = project.name + ".zip"
-            # archive_file = self.corpora_dir + "/" + project.name
-            # project_obj = DBProject().from_project(project)
-            # shutil.make_archive(archive_file, 'zip', project.folder)
-            # project_obj.archive = archive_file + ".zip"
-            #
-            # fin = open(archive_file + ".zip", 'rb')
-            # files = {'file': fin}
-            # try:
-            #     r = requests.post(self.server_address, files=files, headers=dict(type="upload")).text
-            #     print("Redceived", r)
-            #     file_name = json.loads(r)['path']
-            #     print(file_name)
-            # finally:
-            #     fin.close()
-            #
-            # commit_result = json.loads(self.send_message(ServerCommands.Commit_Finished, dict(archive=file_name, user=user.to_database(True))).decode())
+            #region -- PREPARE --
             if self.verify_project() == False:
                 return
 
-            print(project.folder)
             export_root = project.folder + "/corpus_export/"
             export_project_dir = export_root + "project/"
             scr_dir = export_project_dir + "/scr/"
@@ -110,8 +90,6 @@ class WebAppCorpusInterface(CorpusInterface):
                 cv2.imwrite(export_project_dir + "thumbnail.jpg", thumb)
 
             # -- Export all Screenshots --
-            #Connect to the Analyses Database of the Project
-            db = ds.connect("sqlite:///" + project.data_dir + "/" + "database.sqlite")
 
             # Maps the unique ID of the screenshot to it's mask path -> dict(key:unique_id, val:dict(scene_id, segm_shot_id, group, path))
             mask_index = dict()
@@ -154,23 +132,26 @@ class WebAppCorpusInterface(CorpusInterface):
                         # Find the correct Mask Analysis
                         for a in scr.connected_analyses:
                             if isinstance(a, IAnalysisJobAnalysis) and a.analysis_job_class == SemanticSegmentationAnalysis.__name__:
-                                table = SQ_TABLE_MASKS
-                                data = dict(db[table].find_one(key=a.unique_id))['json']
-                                data = project.main_window.eval_class(a.analysis_job_class)().from_json(data)
+                                # table = SQ_TABLE_MASKS
+                                data = a.get_adata()
+                                dataset = a.dataset
+                                print(dataset, masks_to_export)
+                                # data = dict(db[table].find_one(key=a.unique_id))['json']
+                                # data = project.main_window.eval_class(a.analysis_job_class)().from_json(data)
 
-                                if data['dataset'] in masks_to_export_names:
-                                    mask = cv2.resize(data['mask'].astype(np.uint8), (img.shape[1], img.shape[0]),
+                                if dataset in masks_to_export_names:
+                                    mask = cv2.resize(data.astype(np.uint8), (img.shape[1], img.shape[0]),
                                                       interpolation=cv2.INTER_NEAREST)
 
-                                    mask_path = mask_dir + data['dataset'] + "_" +str(scr.scene_id) + "_" + str(scr.shot_id_segm) + ".png"
+                                    mask_path = mask_dir + dataset + "_" +str(scr.scene_id) + "_" + str(scr.shot_id_segm) + ".png"
                                     cv2.imwrite(mask_path, mask, [cv2.IMWRITE_PNG_COMPRESSION, PNG_COMPRESSION_RATE])
 
                                     if scr.unique_id not in mask_index:
-                                        mask_index[scr.unique_id] = []
+                                        mask_index[int(scr.unique_id)] = []
 
                                     mask_index[scr.unique_id].append((dict(
                                         scene_id=scr.scene_id,
-                                        dataset=data['dataset'],
+                                        dataset=dataset,
                                         shot_id_segm=scr.shot_id_segm,
                                         group=grp_name,
                                         path=mask_path.replace(project.folder, "") )
@@ -188,15 +169,17 @@ class WebAppCorpusInterface(CorpusInterface):
             archive_file = os.path.join(export_root, project.name)
             shutil.make_archive(archive_file, 'zip', export_project_dir)
 
+            #endregion
 
             # --- Sending the File --
-            # fin = open(archive_file + ".zip", 'rb')
-            # files = {'file': fin}
-            # try:
-            #     r = requests.post(self.endpoint_adress, files=files, headers=dict(type="upload")).text
-            #     print("Redceived", r)
-            # finally:
-            #     fin.close()
+            # TODO SILAS, this should already work quite well
+            fin = open(archive_file + ".zip", 'rb')
+            files = {'file': fin}
+            try:
+                r = requests.post(self.endpoint_adress, files=files, headers=dict(type="upload")).text
+                print("Redceived", r)
+            finally:
+                fin.close()
 
             commit_result = dict(success=True, dbproject=DBProject().to_database(True))
             if commit_result['success']:
@@ -205,7 +188,7 @@ class WebAppCorpusInterface(CorpusInterface):
                 self.onCommited.emit(False, None, project)
 
         except Exception as e:
-            raise e
+            raise e ## TODO DEBUG
             print("Exception in RemoteCorpusClient.commit_project(): ", str(e))
             self.onCommited.emit(False, None, project)
 

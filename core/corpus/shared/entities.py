@@ -8,6 +8,7 @@ except:
     pass
 try:
     from core.container.project import *
+    from core.data.settings import Contributor
 except Exception as e:
     class IProjectContainer: pass
     class VIANProject: pass
@@ -711,6 +712,14 @@ class DBContributor(DBEntity):
                 email = self.email
             )
         return result
+
+    def from_vian_user(self, user:Contributor):
+        self.contributor_id = 0
+        self.name = user.full_name
+        self.email = user.email
+        self.affiliation = user.affiliation
+        self.password = user.password
+        return self
 
     def from_database(self, entry):
         self.contributor_id = entry['id']

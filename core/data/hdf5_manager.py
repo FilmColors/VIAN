@@ -70,6 +70,8 @@ class HDF5Manager():
     def dump(self, d, dataset_name, unique_id):
         if self.h5_file is None:
             raise IOError("HDF5 File not opened yet")
+        if dataset_name not in self.h5_file:
+            self.initialize_all()
         pos = self._index[dataset_name]
         if pos > 0 and pos % DEFAULT_SIZE[0] == 0:
             self.h5_file[dataset_name].resize((pos + DEFAULT_SIZE[0], ) + self.h5_file[dataset_name].shape[1:])
@@ -121,6 +123,10 @@ class HDF5Manager():
 
     def get_colorimetry_length(self):
         return np.where(np.array(self.h5_file[DS_COL_TIME])> 0)[0].shape[0] + 1
+
+    def get_colorimetry_times(self):
+        t = np.reshape(self.h5_file[DS_COL_TIME], newshape=self.h5_file[DS_COL_TIME].shape[0])
+        return t
 
     def get_colorimetry_pal(self, idx):
         return self.h5_file[DS_COL_PAL][idx]

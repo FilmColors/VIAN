@@ -1,18 +1,6 @@
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5 import uic
-import os
-
-from typing import List
-
-from core.corpus.shared.corpusdb import DatasetCorpusDB
-from core.corpus.shared.enums import *
-from core.corpus.shared.entities import *
+from core.corpus.client.webapp_corpus_interface import *
 from core.corpus.shared.widgets import CorpusUserDialog
-from core.corpus.client.corpus_interfaces import *
-from core.corpus.corpus_webapp.webapp_corpus_interface import *
+from core.data.settings import Contributor
 
 try:
     from core.data.interfaces import IConcurrentJob
@@ -23,17 +11,24 @@ except:
     def extract_zip(*args, **kwargs): pass
     def create_icon(*args, **kwargs): pass
 
-import socket
 import json
 import shutil
 
+
 class CorpusClient(QObject, IProjectChangeNotify):
+    """
+    The CorpusClient class manages the specific subclass of corpus_interface.CorpusInterface that is 
+    initialised during connecting. 
+    """
+
+    #SIGNALS to the VIAN GUI
     onCorpusConnected = pyqtSignal(object)
     onCorpusDisconnected = pyqtSignal(object)
     onCorpusChanged = pyqtSignal(object)
     onCurrentDBProjectChanged = pyqtSignal(object)
     onCheckOutStateChanged = pyqtSignal(int)
 
+    #SIGNALS to the CorpusInterface subclass
     onConnectUser = pyqtSignal(object, object)
     onDisconnectUser = pyqtSignal(object)
     onCommitProject = pyqtSignal(object, object)
@@ -55,9 +50,11 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
         self.current_dbproject = None
 
+        #Loading the Meta data from previous sessions
         self.metadata_path = parent.settings.DIR_CORPORA + "corpora_metadata.json"
-        self.metadata = CorpusMetaDataList(self.metadata_path)
+        self.metadata = CorpusMetaDataList(self.metadata_path, contributor=self.main_window.settings.CONTRIBUTOR)
         self.metadata.load(self.metadata_path)
+
         self.on_connect_webapp("http://127.0.0.1:5000/vian_login")
 
     @pyqtSlot()
@@ -93,13 +90,34 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
     @pyqtSlot(str)
     def on_connect_webapp(self, endpoint):
+        """
+        Signal Cascade: self.on_connect_webapp() -> CorpusInterface.connect_user() -> self.on_connect_finished()
+        
+        :param endpoint: The endpoint that is currently hardcoded in the constructor
+        :return: 
+        """
+        # TODO @SILAS This is where the WebAppCorpusInterface is initialized and the autentification starts
+        # TODO Remember that the WebAppCorpusInterface is handled by another Thread, no direct invoking of Functions is allowed
+        # TODO everything has to be done with Signal Slots communication, but I think all messages are already setup.
+
         self.is_remote = True
         self.corpus_interface = WebAppCorpusInterface(self.main_window.settings.DIR_CORPORA)
+
+        # Connecting all Signals to the Slots of the WebAppCorpusInterface
         self.connect_signals()
+
+        # Run it on a new Thread
         self.execution_thread = QThread()
         self.corpus_interface.moveToThread(self.execution_thread)
         self.execution_thread.start()
-        self.onConnectUser.emit(self.metadata.contributor, endpoint)
+
+        # Emit the onConnectUser to the WebAppCorpusInterface, this initiates the authentification process
+        # Every thing GUI related to the Login has to happen HERE
+        contributor = self.main_window.settings.CONTRIBUTOR  # type: Contributor
+
+
+
+        self.onConnectUser.emit(contributor, endpoint)
 
     def connect_signals(self):
         try:
@@ -135,18 +153,35 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
     @pyqtSlot(bool, object, object)
     def on_connect_finished(self, success, dbprojects, user):
+        """
+        Signal Cascade: self.on_connect_webapp() -> CorpusInterface.connect_user() -> self.on_connect_finished()
+        
+        This slot is called by the CorpusInterface after an attempt to connect
+        :param success: 
+        :param dbprojects: 
+        :param user: 
+        :return: 
+        """
         if success:
-            self.metadata.contributor.contributor_id = user.contributor_id
+            # OLD From the DBContributor
+            # self.metadata.contributor.contributor_id = user.contributor_id
             self.connected = True
             self.onCorpusConnected.emit(self.corpus_interface)
-            self.metadata.on_connect(self.tcp_ip, self.corpus_interface.name, self.tcp_port, dbprojects, "local")
-            self.synchronize(self.corpus_interface.name, dbprojects)
-            if self.get_project() is not None:
-                self.get_check_out_state()
+
+            # self.metadata.on_connect(self.tcp_ip, self.corpus_interface.name, self.tcp_port, dbprojects, "local")
+            # self.synchronize(self.corpus_interface.name, dbprojects)
+            # if self.get_project() is not None:
+            #     self.get_check_out_state()
         else:
             print("Failed to connect")
 
     def on_commit_project(self, project):
+        """
+        This function is called when the user wants do commit a project. 
+        Signal Cascade: self.on_commit_project() -> CorpusInterface.commit_project() -> self.on_commit_finished()
+        :param project: VIANProject
+        :return: 
+        """
         try:
             self.main_window.on_save_project(sync=True)
             self.onCommitProject.emit(self.metadata.contributor, project)
@@ -169,10 +204,12 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.metadata.store()
         self.onCorpusChanged.emit(self)
 
-
     def on_disconnect_user(self):
         self.onDisconnectUser.emit(self.metadata.contributor)
         self.connected = False
+        if self.execution_thread is not None:
+            self.execution_thread.quit()
+
 
     def on_open_corpus_project(self, dbproject: DBProject):
         if self.connected:
@@ -562,7 +599,6 @@ class CorpusMetaDataList():
 
         with open(path, "w") as f:
             data = dict(
-                contributor = self.contributor.to_database(True),
                 corporas = [c.serialize() for c in self.corporas]
             )
             json.dump(data, f)
@@ -572,7 +608,6 @@ class CorpusMetaDataList():
             with open(path, "r") as f:
                 data = json.load(f)
                 self.corporas = [CorpusMetaData(None, None, None, None).deserialize(s) for s in data['corporas']]
-                self.contributor = DBContributor().from_database(data['contributor'])
         except Exception as e:
             self.corporas = []
             self.contributor = DBContributor("Anonymous", "", "Hogwarts School of Witchcraft and Wizardry")

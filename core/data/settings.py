@@ -14,6 +14,8 @@ from collections import namedtuple
 from core.data.enums import ScreenshotNamingConventionOptions as naming
 from PyQt5.QtGui import QFont, QColor
 
+from PyQt5.QtWidgets import QApplication
+
 Font = namedtuple('Font', ['font_family', 'font_size', 'font_color'])
 Palette = namedtuple('Palette', ['palette_name', 'palette_colors'])
 
@@ -93,6 +95,8 @@ class UserSettings():
         # Annotation Viewer
         self.AUTO_COLLAPSE = True
 
+        self.FONT_NAME = "Lucida Console"
+        self.FONT_SIZE = 14
         self.MAIN_FONT = Font(font_family="Lucida Console", font_color=(50,50,50,255), font_size=14)
         self.PALETTES = [palette_sand, palette_grass, palette_difference, palette_beach, palette_earth, palette_gray]
 
@@ -286,17 +290,20 @@ class UserSettings():
                 pass
 
 
-
 class Contributor():
     """
     This class contains the user information currently using VIAN.
     It is used to sign a created project and is stored in the VIANProject History
     """
-    def __init__(self, full_name = "", user_name = "", email = "", password = ""):
+    def __init__(self, full_name = "", user_name = "", email = "", password = "", image_path = "", affiliation = ""):
         self.full_name = full_name
         self.user_name = user_name
         self.email = email
         self.password = password
+        self.image_path = ""
+        self.affiliation = affiliation
+
+        #TODO @SILAS, This is the entity that represents the user of VIAN, add additional fields here, they get serialized automatically
 
     def serialize(self):
         return self.__dict__
@@ -305,4 +312,3 @@ class Contributor():
         for attr, value in serialization.items():
                 setattr(self, attr, value)
         return self
-

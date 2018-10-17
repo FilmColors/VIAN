@@ -297,6 +297,20 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
             self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
 
+class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
+    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None, dataset = ""):
+        super(SemanticSegmentationAnalysisContainer, self).__init__(name, results , analysis_job_class, parameters, container, target_classification_object)
+        self.dataset = dataset
+
+    def serialize(self):
+        d = super(SemanticSegmentationAnalysisContainer, self).serialize()
+        d['dataset'] = self.dataset
+        return d
+
+    def deserialize(self, serialization, streamer:ProjectStreamer):
+        super(SemanticSegmentationAnalysisContainer, self).deserialize(serialization, streamer)
+        self.dataset = serialization['dataset']
+        return self
 
 class ColormetryAnalysis(AnalysisContainer):
     def __init__(self, results = None, resolution = 30):
@@ -330,6 +344,12 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def get_palette(self, time_ms):
         pass
+
+    def get_frame_pos(self):
+        times = self.project.hdf5_manager.get_colorimetry_times()
+        frames = np.multiply(np.divide(times, 1000), self.project.movie_descriptor.fps).astype(np.int).tolist()
+        print(times, "\n", frames)
+        return frames
 
     def append_data(self, data):
         try:
@@ -369,9 +389,9 @@ class ColormetryAnalysis(AnalysisContainer):
         return [time_palette_data, self.time_ms]
 
     def check_finished(self):
-        if self.current_idx == self.end_idx - 1:
+        # print("IDX", self.current_idx, self.end_idx, self.current_idx == self.end_idx)
+        if int(self.current_idx) >= int(self.end_idx - 1):
             self.has_finished = True
-            print("Check Finished:", self.has_finished)
         return self.has_finished
 
     def clear(self):
@@ -420,61 +440,60 @@ class ColormetryAnalysis(AnalysisContainer):
         return self
 
 
-class MaskAnalysis(IAnalysisJobAnalysis):
-    def __init__(self, labels, analysis_job_class, parameters, container, name="Mask Segmentation", results = None):
-        """
-        :param name: The Name of the Segmentation as it should appear in the Outliner
-        :param labels: A List of labels sorted by label index (implicit)
-        :param results: 
-        """
-
-        super(MaskAnalysis, self).__init__(name=name, results = None, analysis_job_class=analysis_job_class, parameters=parameters, container=container)
-        self.masks = []
-        self.time_ms = []
-        self.frame_pos = []
-        self.labels = labels
-
-
-    def insert(self, data):
-        """
-        Inserts a new mask sorted into the Analysis
-        :param data: a dict(frame_pos, time_ms, mask)
-        :return: 
-        """
-
-        bisect.insort(self.frame_pos, data['frame_pos'])
-        idx = self.frame_pos.index(data['frame_pos'])
-        self.time_ms.insert(idx, data['time_ms'])
-        self.masks.insert(idx, data['mask'])
-
-    def serialize(self):
-        data = dict(
-            masks = self.masks,
-            time_ms = self.time_ms,
-            frame_pos = self.frame_pos
-        )
-
-        self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
-        serialization = dict(
-            name=self.name,
-            unique_id=self.unique_id,
-            analysis_container_class=self.__class__.__name__,
-            notes=self.notes,
-        )
-
-        return serialization
-
-    def deserialize(self, serialization, streamer):
-        self.name = serialization['name']
-        self.unique_id = serialization['unique_id']
-        self.notes = serialization['notes']
-
-        data = streamer.sync_load(self.unique_id)
-        self.frame_pos = data['frame_pos']
-        self.masks = data['masks']
-        self.time_ms = data['time_ms']
-
-        return self
+# class MaskAnalysis(IAnalysisJobAnalysis):
+#     def __init__(self, labels, analysis_job_class, parameters, container, name="Mask Segmentation", results = None):
+#         """
+#         :param name: The Name of the Segmentation as it should appear in the Outliner
+#         :param labels: A List of labels sorted by label index (implicit)
+#         :param results:
+#         """
+#
+#         super(MaskAnalysis, self).__init__(name=name, results = None, analysis_job_class=analysis_job_class, parameters=parameters, container=container)
+#         self.masks = []
+#         self.time_ms = []
+#         self.frame_pos = []
+#         self.labels = labels
+#
+#     def insert(self, data):
+#         """
+#         Inserts a new mask sorted into the Analysis
+#         :param data: a dict(frame_pos, time_ms, mask)
+#         :return:
+#         """
+#
+#         bisect.insort(self.frame_pos, data['frame_pos'])
+#         idx = self.frame_pos.index(data['frame_pos'])
+#         self.time_ms.insert(idx, data['time_ms'])
+#         self.masks.insert(idx, data['mask'])
+#
+#     def serialize(self):
+#         data = dict(
+#             masks = self.masks,
+#             time_ms = self.time_ms,
+#             frame_pos = self.frame_pos
+#         )
+#
+#         self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
+#         serialization = dict(
+#             name=self.name,
+#             unique_id=self.unique_id,
+#             analysis_container_class=self.__class__.__name__,
+#             notes=self.notes,
+#         )
+#
+#         return serialization
+#
+#     def deserialize(self, serialization, streamer):
+#         self.name = serialization['name']
+#         self.unique_id = serialization['unique_id']
+#         self.notes = serialization['notes']
+#
+#         data = streamer.sync_load(self.unique_id)
+#         self.frame_pos = data['frame_pos']
+#         self.masks = data['masks']
+#         self.time_ms = data['time_ms']
+#
+#         return self
 
 
 class AnalysisParameters():

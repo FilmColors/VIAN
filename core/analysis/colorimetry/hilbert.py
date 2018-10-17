@@ -130,7 +130,6 @@ def hilbert_mapping_3d(s, v_data, hilbert_mode, multiplier = 1):
 
 
 def create_hilbert_color_map(s, rgb_multiplier, colorspace):
-    # TODO might not be used anymore!! Check!!
     grad_rgb = []
     grad_bokeh = []
     # Old Code
@@ -138,7 +137,6 @@ def create_hilbert_color_map(s, rgb_multiplier, colorspace):
     hilbert_traversal_3d(np.ones(shape=(s, s, s)), grad_rgb, HilbertMode.Indices_All, s, rgb_multiplier)  # , 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
     cv2.cvtColor(grad_rgb, colorspace)
 
-    # TODO pyqtGraph, is it in use anyway?
     # for bgr in grad_rgb:
     #     grad_bokeh.append(colors.RGB(bgr[2], bgr[1], bgr[0]))
 

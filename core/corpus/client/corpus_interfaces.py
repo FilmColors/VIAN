@@ -228,6 +228,7 @@ class LocalCorpusInterface(CorpusInterface):
     @pyqtSlot(object, object)
     def connect_user(self, user:DBContributor, options):
         try:
+            user = DBContributor().from_vian_user(user)
             self.local_corpus = DatasetCorpusDB().load(options)
             self.name = self.local_corpus.name
             user = self.local_corpus.connect_user(user)
@@ -239,10 +240,11 @@ class LocalCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object)
     def disconnect_user(self, user):
-        pass
+        user = DBContributor().from_vian_user(user)
 
     @pyqtSlot(object, object)
     def commit_project(self, user, project:VIANProject):
+        user = DBContributor().from_vian_user(user)
         if project.main_window is not None:
             # This fails in the Headless Mode, which is exactly what we want
             try:
@@ -264,6 +266,7 @@ class LocalCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object, object)
     def checkout_project(self, user, project:DBProject):
+        user = DBContributor().from_vian_user(user)
         success, archive = self.local_corpus.checkout_project(project.project_id, user)
         if success:
             self.onCheckedOut.emit(True, self.local_corpus.get_projects())
@@ -272,6 +275,7 @@ class LocalCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object, object)
     def checkin_project(self, user, project:DBProject):
+        user = DBContributor().from_vian_user(user)
         success = self.local_corpus.checkin_project(project.project_id, user)
         if success:
             self.onCheckedIn.emit(True, self.local_corpus.get_projects())
@@ -284,6 +288,7 @@ class LocalCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object, object)
     def download_project(self, user, project):
+        user = DBContributor().from_vian_user(user)
         archive = self.local_corpus.get_project_path(project)
         print("Download Project:", project.project_id, archive)
         if archive is not None:
@@ -293,6 +298,7 @@ class LocalCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object, object)
     def check_checkout_state(self, user, dbproject):
+        user = DBContributor().from_vian_user(user)
         result = self.local_corpus.get_project(dbproject.project_id)
         print(result.is_checked_out)
         if result is not None:
@@ -327,6 +333,7 @@ class RemoteCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object, object)
     def connect_user(self, user:DBContributor, options):
+        user = DBContributor().from_vian_user(user)
         try:
             answer_encoded = self.send_message(ServerCommands.Connect, dict(user=user.to_database(True)))
             answer = json.loads(answer_encoded.decode())
@@ -365,6 +372,7 @@ class RemoteCorpusInterface(CorpusInterface):
     @pyqtSlot(object, object)
     def commit_project(self, user, project: VIANProject):
         try:
+            user = DBContributor().from_vian_user(user)
             ftp_path = json.loads(self.send_message(ServerCommands.Commit_Inquiry, dict(user=user.to_database(True))).decode())['path']
 
             # Export all Screenshots and Masks
@@ -419,6 +427,7 @@ class RemoteCorpusInterface(CorpusInterface):
     @pyqtSlot(object, object)
     def checkout_project(self, user, project: DBProject):
         try:
+            user = DBContributor().from_vian_user(user)
             result = json.loads(self.send_message(ServerCommands.Check_Out_Inquiry,
                                                   dict(
                                                       user=user.to_database(True),
@@ -435,6 +444,7 @@ class RemoteCorpusInterface(CorpusInterface):
     @pyqtSlot(object, object)
     def checkin_project(self, user, project: DBProject):
         try:
+            user = DBContributor().from_vian_user(user)
             result = json.loads(self.send_message(ServerCommands.Check_In_Project,
                                   dict(
                                       user=user.to_database(True),
@@ -450,11 +460,13 @@ class RemoteCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object, object)
     def get_projects(self, user):
+        user = DBContributor().from_vian_user(user)
         pass
 
     @pyqtSlot(object, object)
     def download_project(self, user, project):
         try:
+            user = DBContributor().from_vian_user(user)
             result = json.loads(self.send_message(ServerCommands.Download_Project,
                                                   dict(
                                                       user=user.to_database(True),
@@ -487,6 +499,7 @@ class RemoteCorpusInterface(CorpusInterface):
 
     @pyqtSlot(object, object)
     def check_checkout_state(self, user, dbproject):
+        user = DBContributor().from_vian_user(user)
         result = json.loads(self.send_message(ServerCommands.Get_CheckOut_State,
                                               dict(
                                                   user=user.to_database(True),

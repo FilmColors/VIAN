@@ -42,7 +42,7 @@ def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10
              30,
              project.movie_descriptor.fps,
              colormetry.get_histogram(),
-             colormetry.frame_pos,
+             colormetry.get_frame_pos(),
              nth_frame,
              [n_cluster_lb, n_cluster_hb]
              ])
@@ -272,6 +272,7 @@ class ApplySegmentationWindow(QMainWindow):
                 last_idx = i
 
             else:
+                print(len(curr_segment), len(self.indices))
                 curr_segment[1] = self.indices[last_idx]
                 segments.append(curr_segment)
                 curr_segment = [self.indices[last_idx], 0]

@@ -123,6 +123,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
 
         self.dock_widgets = []
+        self.open_dialogs = []
         self.settings = UserSettings()
         self.settings.load()
 
@@ -421,7 +422,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.analysis_results_widget,
                                     self.annotation_options,
                                     self.experiment_dock.experiment_editor,
-                                    self.corpus_client
+                                    self.corpus_client,
+                                    self.colorimetry_live
 
                                           ]
 
@@ -514,7 +516,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def test_function(self):
         if self.project is not None:
-            WebAnnotationDevice().export("test_file.json", self.project, self.settings.CONTRIBUTOR, VERSION)
+            self.corpus_client.on_commit_project(self.project)
 
     def toggle_colormetry(self):
         if self.colormetry_running is False:
@@ -541,7 +543,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_colormetry_finished(self, res):
         try:
             self.project.colormetry_analysis.check_finished()
-            if self.project.colormetry_analysis.has_finished():
+            if self.project.colormetry_analysis.has_finished:
                 self.timeline.timeline.set_colormetry_progress(1.0)
         except Exception as e:
             print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
@@ -1215,6 +1217,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
+            self.screenshot_toolbar.show()
             self.screenshots_manager_dock.raise_()
             self.elan_status.stage_selector.set_stage(0, False)
 
@@ -1354,6 +1357,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget.hide()
         self.annotation_options.hide()
 
+        if self.facial_identification_dock is not None:
+            self.facial_identification_dock.hide()
+
         self.experiment_dock.hide()
         self.quick_annotation_dock.hide()
         self.colorimetry_live.hide()
@@ -1385,7 +1391,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).changeEvent(event)
 
     def on_application_lost_focus(self, arg):
-        if arg is None:
+        if arg is None or len(self.open_dialogs) != 0:
             # self.set_darwin_player_visibility(False)
             self.set_overlay_visibility(False)
         else:
@@ -1437,6 +1443,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.project.add_analysis(result)
                 result.unload_container()
         except Exception as e:
+            raise e
             print("Exception in MainWindow.analysis_result", str(e))
 
         # Unload the analysis from Memory
@@ -1725,12 +1732,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_overlay_visibility(self, visibility, toggle_keep_hidden = False):
         if self.forced_overlay_hidden and not toggle_keep_hidden:
             return
+
         if visibility:
             self.drawing_overlay.show()
         else:
             self.drawing_overlay.hide()
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
         self.update_overlay()
+
         if toggle_keep_hidden:
             self.forced_overlay_hidden = not self.forced_overlay_hidden
 
@@ -2035,10 +2044,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def dispatch_on_closed(self):
         self.autosave_timer.stop()
-        self.set_ui_enabled(False)
-
         for o in self.i_project_notify_reciever:
             o.on_closed()
+
+        self.set_ui_enabled(False)
+
 
     #endregion
     pass

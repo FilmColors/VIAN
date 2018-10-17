@@ -40,8 +40,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.creation_timestamp = str(datetime.datetime.now())
         self.screenshot_group = ""
         self.notes = ""
-        self.annotation_is_visible = False #TODO WRONG
-        self.timeline_visibility = True #TODO WRONG
+        self.annotation_is_visible = False
+        self.timeline_visibility = True
 
         self.preview_cache = None
         self.curr_size = 1.0

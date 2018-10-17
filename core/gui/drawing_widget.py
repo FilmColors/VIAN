@@ -265,6 +265,11 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 sel.widget.is_selected = True
             self.selected.append(sel)
 
+    def on_closed(self):
+        self.cleanup()
+        self.opencv_pixmap = None
+        self.update()
+
     def create_annotation_layer(self,name, t_start, t_end):
         layer = AnnotationLayer(name, t_start, t_end)
         self.project.add_annotation_layer(layer)
@@ -1151,7 +1156,6 @@ class DrawingBase(QtWidgets.QWidget):
         # self.drawing_editor.show()
 
     def update(self, *__args):
-        #TODO Currently disabled for MACOSX
         # if self.overlay.current_time != self.time_last_updated:
         #     self.interpolate_location()
         #     self.time_last_updated = self.overlay.current_time

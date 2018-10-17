@@ -1,4 +1,6 @@
 from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication, QFontComboBox
+from PyQt5.QtGui import QFont
 import os
 
 from PyQt5 import uic
@@ -42,6 +44,8 @@ class DialogPreferences(EDialogWidget):
         self.checkBox_Autosave.setChecked(self.settings.AUTOSAVE)
         self.checkBox_Autosave.stateChanged.connect(self.set_autosave)
         self.spinBox_AutosaveTime.valueChanged.connect(self.set_autosave_time)
+        self.spinBox_FontSize.valueChanged.connect(self.font_changed)
+        self.font_Picker.currentTextChanged.connect(self.font_changed)
 
         self.btn_Ok.clicked.connect(self.on_ok)
         self.btn_Cancel.clicked.connect(self.on_cancel)
@@ -104,6 +108,22 @@ class DialogPreferences(EDialogWidget):
         self.settings.AUTO_START_COLORMETRY = self.checkBox_AutoColormetry.isChecked()
         self.settings.UPDATE_SOURCE = self.lineEdit_UpdateSource.text()
         self.settings.EARLY_STOP = self.spinBox_EarlyStop.value()
+
+    def font_changed(self):
+        family = self.font_Picker.currentText()
+        size = self.spinBox_FontSize.value()
+        with open("qt_ui/themes/qt_stylesheet_dark.css", "r") as f:
+            css = f.read()
+
+        t = css.split("/*FFAMILY*/")
+        print(family)
+        css = "/*FFAMILY*/".join([t[0], "font-family: \""+family+"\";", t[2]])
+
+        t = css.split("/*FSIZE*/")
+        css = "/*FFAMILY*/".join([t[0], "font-size: "+str(size)+"pt;", t[2]])
+
+        # css = "QWidget{ font-family: \""+family+"\"; font-size: "+str(size)+"pt; margin: 5pt;  padding: 1pt; color: #b1b1b1; background-color: #323232;}"
+        QApplication.instance().setStyleSheet(css)
 
     def on_ok(self):
         self.apply_settings()

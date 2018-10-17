@@ -63,7 +63,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         elif self.vis_tab.currentIndex() == 1:
             self.lab_palette.draw_palette()
 
-
     def plot_time_palette(self, data):
         try:
             self.time_palette.set_palette(data[0], data[1])
@@ -80,7 +79,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         pass
 
     def on_closed(self):
-        pass
+        self.palette.clear_view()
+        self.lab_palette.clear_view()
 
     def on_changed(self, project, item):
         pass
