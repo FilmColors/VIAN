@@ -1037,7 +1037,7 @@ class VIANProject(IHasName, IClassifiable):
         while(not_ok):
             has_duplicate = False
             for v in self.vocabularies:
-                if v.name == name and v.derived_vocabulary == False:
+                if v.name == name:
                     name = voc.name + "_" + str(counter).zfill(2)
                     has_duplicate = True
                     counter += 1
@@ -1309,7 +1309,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
                  duration=100, fps = 30):
         IProjectContainer.__init__(self)
         IClassifiable.__init__(self)
-        self.set_project(project) # TODO This should be changed
+        self.set_project(project)
         self.movie_name = movie_name
         self.movie_path = movie_path
         self.movie_id = movie_id

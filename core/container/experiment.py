@@ -16,8 +16,6 @@ class Vocabulary(IProjectContainer, IHasName):
     :var words_plain: A List of All VocabularyWords that are in the Vocabulary
     :var was_expanded: If it is expandend in the VocabularyManager
     :var category: The Category it belongs to
-    :var derived_vocabulary: OBSOLETE
-    :var base_vocabulary: OBSOLETE
     """
     def __init__(self, name):
         IProjectContainer.__init__(self)
@@ -28,9 +26,6 @@ class Vocabulary(IProjectContainer, IHasName):
         self.words_plain = []
         self.was_expanded = False
         self.category = "default"
-
-        self.derived_vocabulary = False  # TODO OBSOLETE
-        self.base_vocabulary = None # TODO OBSOLETE
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
         if name in [w.name for w in self.words_plain]:
@@ -121,18 +116,12 @@ class Vocabulary(IProjectContainer, IHasName):
             )
             words_data.append(data)
 
-        if self.base_vocabulary is not None:
-            base = self.base_vocabulary.unique_id
-        else:
-            base = -1
 
         voc_data = dict(
             name = self.name,
             category = self.category,
             unique_id = self.unique_id,
             words = words_data,
-            derived = self.derived_vocabulary,
-            base = base
         )
 
         return voc_data
@@ -151,12 +140,6 @@ class Vocabulary(IProjectContainer, IHasName):
             else:
                 self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
 
-        try:
-            self.derived_vocabulary = serialization['derived']
-            self.base_vocabulary = project.get_by_id(serialization['base'])
-        except:
-            self.derived_vocabulary = False
-            self.base_vocabulary = None
         return self
 
     def export_vocabulary(self, path):

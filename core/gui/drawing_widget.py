@@ -1156,7 +1156,6 @@ class DrawingBase(QtWidgets.QWidget):
         # self.drawing_editor.show()
 
     def update(self, *__args):
-        #TODO Currently disabled for MACOSX
         # if self.overlay.current_time != self.time_last_updated:
         #     self.interpolate_location()
         #     self.time_last_updated = self.overlay.current_time

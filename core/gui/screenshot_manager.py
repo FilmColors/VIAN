@@ -425,7 +425,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.captions = []
         self.images_segmentation = []
 
-
     def arrange_images(self):
         self.clear_captions()
 

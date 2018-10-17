@@ -8,7 +8,6 @@ import cv2
 import pickle
 import xml.dom.minidom
 
-from core.analysis.filmcolors_pipeline.filmcolors_pipeline import *
 from core.container.analysis import IAnalysisJobAnalysis
 from core.data.interfaces import *
 from core.data.computation import *
@@ -295,38 +294,6 @@ class ScreenshotImporter(IConcurrentJob):
         project.sort_screenshots()
         project.inhibit_dispatch = False
         project.dispatch_changed()
-
-
-# class FilmColorsPipelineImporter():
-#     def import_pipeline(self, path, project: VIANProject):
-#
-#         try:
-#             with open(path, "rb") as file:
-#                 data = pickle.load(file)
-#             #region #--- Import Analysis ---
-#             analysis = IAnalysisJobAnalysis("FilmColors Pipeline",
-#                                             results=data,
-#                                             analysis_job_class=FilmColorsPipelineAnalysis().__class__,
-#                                             parameters= FilmColorsPipelinePreferences().get_parameters())
-#
-#
-#             # thumb_fg = []
-#             # for img in data["thumbnails_fg"]:
-#             #     thumb_fg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
-#             # thumb_bg = []
-#             # for img in data["thumbnails_bg"]:
-#             #     thumb_bg.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGBA))
-#
-#             # data['thumbnails_fg'] = thumb_fg
-#             # data['thumbnails_bg'] = thumb_bg
-#
-#             project.add_analysis(analysis)
-#             analysis.unload_container()
-#             #endregion
-#
-#             return analysis
-#         except Exception as e:
-#             print(e)
 
 
 class FileMakerVocImporter():
