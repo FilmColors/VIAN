@@ -1443,6 +1443,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.project.add_analysis(result)
                 result.unload_container()
         except Exception as e:
+            raise e
             print("Exception in MainWindow.analysis_result", str(e))
 
         # Unload the analysis from Memory

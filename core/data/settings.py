@@ -108,7 +108,6 @@ class UserSettings():
 
         self.dock_widgets_data = []
 
-
     def set_contributor(self, contributor):
         self.CONTRIBUTOR = contributor
 
@@ -291,17 +290,20 @@ class UserSettings():
                 pass
 
 
-
 class Contributor():
     """
     This class contains the user information currently using VIAN.
     It is used to sign a created project and is stored in the VIANProject History
     """
-    def __init__(self, full_name = "", user_name = "", email = "", password = ""):
+    def __init__(self, full_name = "", user_name = "", email = "", password = "", image_path = "", affiliation = ""):
         self.full_name = full_name
         self.user_name = user_name
         self.email = email
         self.password = password
+        self.image_path = ""
+        self.affiliation = affiliation
+
+        #TODO @SILAS, This is the entity that represents the user of VIAN, add additional fields here, they get serialized automatically
 
     def serialize(self):
         return self.__dict__
@@ -310,4 +312,3 @@ class Contributor():
         for attr, value in serialization.items():
                 setattr(self, attr, value)
         return self
-

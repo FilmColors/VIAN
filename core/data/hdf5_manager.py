@@ -70,6 +70,8 @@ class HDF5Manager():
     def dump(self, d, dataset_name, unique_id):
         if self.h5_file is None:
             raise IOError("HDF5 File not opened yet")
+        if dataset_name not in self.h5_file:
+            self.initialize_all()
         pos = self._index[dataset_name]
         if pos > 0 and pos % DEFAULT_SIZE[0] == 0:
             self.h5_file[dataset_name].resize((pos + DEFAULT_SIZE[0], ) + self.h5_file[dataset_name].shape[1:])

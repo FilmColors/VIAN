@@ -10,6 +10,7 @@ import pickle
 
 from core.data.computation import ms_to_frames, numpy_to_pixmap
 from core.container.project import *
+from core.container.analysis import SemanticSegmentationAnalysisContainer
 from core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -56,9 +57,11 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         results = []
         tot = len(args)
         counter = 0
+        config = tf.ConfigProto()
+        config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
         with tf.Graph().as_default():
-            session = tf.Session('')
+            session = tf.Session(config=config)
             KTF.set_session(session)
 
             model = None
@@ -84,15 +87,13 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                 ret, frame = cap.read()
                 masks = model.forward(frame)
 
-                results.append(IAnalysisJobAnalysis(
+                results.append(SemanticSegmentationAnalysisContainer(
                     name="Semantic Segmentation",
-                    results=dict(mask=np.argmax(masks, axis=2).astype(np.uint8),
-                                 frame_sizes=(frame.shape[0], frame.shape[1]),
-                                 dataset=model_name
-                                 ),
+                    results=np.argmax(masks, axis=2).astype(np.uint8),
                     analysis_job_class=self.__class__,
                     parameters=params,
-                    container=arg[4]
+                    container=arg[4],
+                    dataset=model_name
                 ))
 
         sign_progress(1.0)
@@ -111,7 +112,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata()['mask'], cv2.COLOR_GRAY2BGR)))
+        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata(), cv2.COLOR_GRAY2BGR)))
         return widget
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
@@ -119,7 +120,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This function should show the complete Visualization
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata()['mask'], cv2.COLOR_GRAY2BGR)))
+        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata(), cv2.COLOR_GRAY2BGR)))
         return [VisualizationTab(widget=widget, name="Semantic Segmentation Mask", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):
@@ -154,10 +155,10 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         # return json.dumps(self.serialize(container_data))
 
     def to_hdf5(self, data):
-        return cv2.resize(data['mask'], self.dataset_shape, interpolation=cv2.INTER_NEAREST)
+        return cv2.resize(data, self.dataset_shape, interpolation=cv2.INTER_NEAREST)
 
     def from_hdf5(self, db_data):
-        return dict(mask=db_data.astype(np.uint8))
+        return db_data.astype(np.uint8)
 
 
 class SemanticSegmentationParameterWidget(ParameterWidget):
