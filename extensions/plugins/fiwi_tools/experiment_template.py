@@ -7,6 +7,8 @@ from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
 from core.gui.ewidgetbase import *
 from core.analysis.analysis_import import *
 from core.analysis.deep_learning.labels import *
+
+
 # TODO Implement the Plugin
 class FiwiGlossary2Template(GAPlugin):
     def __init__(self, main_window):

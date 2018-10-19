@@ -4,8 +4,8 @@ import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
 from core.analysis.deep_learning.labels import *
 
-DIR_WEIGHTS_BUILT_IN = "/user/models/"
-KERAS_LIP_WEIGHTS = "user/models/LIP_PSPNET50_Weights.hdf5"
+DIR_WEIGHTS_BUILT_IN = "/data/models/"
+KERAS_LIP_WEIGHTS = "data/models/LIP_PSPNET50_Weights.hdf5"
 
 
 class KerasModel():
@@ -46,8 +46,8 @@ class PSPNetModel(KerasModel):
 
 
 class RealTimeHumanExtractor:
-    prototxt = "user/models/MobileNetSSD_deploy.prototxt.txt"
-    model = "user/models/MobileNetSSD_deploy.caffemodel"
+    prototxt = "data/models/MobileNetSSD_deploy.prototxt.txt"
+    model = "data/models/MobileNetSSD_deploy.caffemodel"
 
     def __init__(self, confidence = 0.5):
         self.confidence = confidence

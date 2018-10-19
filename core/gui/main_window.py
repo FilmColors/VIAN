@@ -1557,7 +1557,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.on_save_project()
 
         vocabularies = []
-        built_in = glob.glob("user/vocabularies/*.txt")
+        built_in = glob.glob("data/vocabularies/*.txt")
         vocabularies = built_in
 
         dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
@@ -1820,7 +1820,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def import_vocabulary(self, paths=None):
         if paths is None:
-            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("user/vocabularies/"))[0]
+            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("data/vocabularies/"))[0]
         try:
             self.project.inhibit_dispatch = True
             for p in paths:

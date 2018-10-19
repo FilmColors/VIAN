@@ -4,8 +4,7 @@ import cv2
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QCheckBox, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
-
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
 from core.container.project import VIANProject
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
@@ -43,6 +42,9 @@ class NewProjectDialog(EDialogWidget):
 
         self.find_templates()
 
+        self.tabWidget.removeTab(1)
+        self.filmography_widget = FilmographyWidget(self)
+        self.tabWidget.addTab(self.filmography_widget, "Filmography")
         self.cB_AutomaticNaming.stateChanged.connect(self.on_automatic_naming_changed)
         self.lineEdit_ProjectName.textChanged.connect(self.on_proj_name_changed)
         self.lineEdit_ProjectPath.editingFinished.connect(self.on_proj_path_changed)
@@ -94,7 +96,7 @@ class NewProjectDialog(EDialogWidget):
 
     def find_templates(self):
         templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
-        templates.extend(glob.glob("user/templates/" + "*.viant"))
+        templates.extend(glob.glob("data/templates/" + "*.viant"))
 
         self.templates.append(None)
         self.comboBox_Template.addItem("No Template")
@@ -247,3 +249,38 @@ class NewProjectDialog(EDialogWidget):
             ELANProjectImporter(self.main_window).apply_import(self.project, self.elan_segmentation)
         self.main_window.new_project(self.project, template, copy_movie=copy_movie)
         self.close()
+
+class FilmographyWidget(QWidget):
+    def __init__(self, parent):
+        super(FilmographyWidget, self).__init__(parent)
+        path = os.path.abspath("qt_ui/FilmographyWidget.ui")
+
+        uic.loadUi(path, self)
+
+
+    def get_filmography(self):
+        filmography_meta = dict()
+        if self.lineEdit_IMDB.text() != "":
+            filmography_meta['imdb_id'] = self.lineEdit_IMDB.text().split(",")
+        if self.lineEdit_Genre.text() != "":
+            filmography_meta['genre'] = self.lineEdit_Genre.text().split(",")
+        if self.comboBox_ColorProcess.currentText() != "":
+            filmography_meta['color_process'] = self.comboBox_ColorProcess.text().split(",")
+        if self.lineEdit_Director.text() != "":
+            filmography_meta['director'] = self.lineEdit_Director.text().split(",")
+        if self.lineEdit_Cinematography.text() != "":
+            filmography_meta['cinematography'] = self.lineEdit_Cinematography.text().split(",")
+        if self.lineEdit_ColorConsultant.text() != "":
+            filmography_meta['color_consultant'] = self.lineEdit_ColorConsultant.text().split(",")
+        if self.lineEdit_ProductionDesign.text() != "":
+            filmography_meta['production_design'] = self.lineEdit_ProductionDesign.text().split(",")
+        if self.lineEdit_ArtDirector.text() != "":
+            filmography_meta['art_director'] = self.lineEdit_ArtDirector.text().split(",")
+        if self.lineEdit_CostumDesign.text() != "":
+            filmography_meta['costum_design'] = self.lineEdit_CostumDesign.text().split(",")
+        if self.lineEdit_ProductionCompany.text() != "":
+            filmography_meta['production_company'] = self.lineEdit_ProductionCompany.text().split(",")
+        if self.lineEdit_ProductionCountry.text() != "":
+            filmography_meta['country'] = self.lineEdit_ProductionCountry.text().split(",")
+
+        return filmography_meta

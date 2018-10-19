@@ -22,6 +22,7 @@ import math
 def tuple2point(tpl):
     return QtCore.QPoint(tpl[0], tpl[1])
 
+
 def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
     """
     Converts an Long int MS to a formatted string of type HH:MM:SS:(MS) 
@@ -511,6 +512,7 @@ def overlap_rect(r1, r2):
     if (r1[1] < r2[1] + r2[3]) or (r1[1] + r1[3] < r2[1]):
         return True
     return False
+
 
 def contains_rect(r1, r2):
     if (r1[0] > r2[0]) and r1[1] > r2[1] and r1[2] < r2[2] and r1[3] < r2[3]:

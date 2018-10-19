@@ -72,12 +72,12 @@ class UserSettings():
 
         self.DIR_BASE = (os.path.abspath(".") + "/").replace("\\", "/")
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
-        self.DIR_USER = "user/"
+        self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
         self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
         self.DIR_PLUGINS = self.DIR_PROJECT + "/plugins/"
         self.store_path = self.DIR_PROJECT + path
-        self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
+        self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
         self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
         self.DIR_CORPORA = self.DIR_PROJECT + "/corpora/"
@@ -136,13 +136,13 @@ class UserSettings():
         """
         self.DIR_BASE = (os.path.abspath(".") + "/").replace("\\", "/")
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
-        self.DIR_USER = "user/"
+        self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
         self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
         self.DIR_PLUGINS = self.DIR_PROJECT + "/plugins/"
         self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
         self.store_path = self.DIR_PROJECT + "settings.json"
-        self.MASTERFILE_PATH = self.DIR_USER + "master_file.ems"
+        self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
         self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
         self.DIR_CORPORA = self.DIR_PROJECT + "/corpora/"
 

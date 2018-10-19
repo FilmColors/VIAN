@@ -102,10 +102,10 @@ except:
 
 
     class FaceRecognitionModel():
-        def __init__(self, cascPath="user/models/face_identification/haarcascade_frontalface_default.xml",
-                     predictor_path="user/models/face_identification/shape_predictor_68_face_landmarks.dat",
-                     weights_path="user/models/face_identification/weights.hdf5",
-                     cascPathside="user/models/face_identification/haarcascade_profileface.xml"):
+        def __init__(self, cascPath="data/models/face_identification/haarcascade_frontalface_default.xml",
+                     predictor_path="data/models/face_identification/shape_predictor_68_face_landmarks.dat",
+                     weights_path="data/models/face_identification/weights.hdf5",
+                     cascPathside="data/models/face_identification/haarcascade_profileface.xml"):
             if os.path.isfile(cascPath):
                 self.cascade = cv2.CascadeClassifier(cascPath)
             else:
