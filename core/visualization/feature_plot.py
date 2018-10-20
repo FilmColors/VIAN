@@ -221,7 +221,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.ctrl_is_pressed = False
         self.img_width = 192
         self.curr_scale = 1.0
-        self.magnification = 0.005
+        self.magnification = 1.0#0.005
         self.spacing = 10
 
         self.range_x = [0, 1000]
@@ -230,7 +230,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
         self.font_family = "Consolas"
         self.text_color = QColor(255,255,255,200)
-        self.font_size = 128
+        self.font_size = 50
         self.title = title
 
         self.font = QFont(self.font_family, self.font_size)
@@ -244,12 +244,13 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_items = []
         self.feature_labels = []
         self.feature_base_height = 900
-        self.feature_height = 400
+        self.feature_height = 100
         self.raw_data = []
 
-        self.segment_height = 600
+        self.segment_height = 200
 
         self.n_grid = 12
+        self.stretch = 1.0
         self.controls_itm = None
 
         self.scene_width = 0
@@ -263,7 +264,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     def on_h_scroll(self):
         pos = self.mapToScene(QPoint(0,0))
         for t in self.feature_labels:
-            t.setPos(pos.x(), t.pos().y())
+            t.setPos(np.clip(pos.x(),0, None), t.pos().y())
 
     def remove_feature(self, feature):
         pass
@@ -291,13 +292,19 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         return itm
 
     def create_timeline(self, segments: List[SegmentTuple]):
+        max = 0
+        for s in segments:
+            if s.end > max:
+                max = s.end
+        self.stretch = 2000 / max
         for s in segments:
             # itm = self.scene().addRect(s.start * self.magnification, self.feature_base_height,
             #                            (s.end - s.start) * self.magnification, - self.segment_height,
             #                            QPen(), QBrush(QColor(0, 113, 122)))
 
-            itm = SegmentRectItem(s.start * self.magnification, self.feature_base_height,
-                                                                  (s.end - s.start) * self.magnification, - self.segment_height,
+            itm = SegmentRectItem(s.start * self.magnification * self.stretch, self.feature_base_height,
+                                                                  (s.end - s.start) * self.magnification * self.stretch,
+                                                                - self.segment_height,
                                                                   QPen(), QBrush(QColor(0, 113, 122)), s)
             self.scene().addItem(itm)
             self.segment_items.append(itm)
@@ -329,27 +336,30 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
                 continue
 
             s = self.segments[sid]
-            itm = FeatureRectItem(s.start * self.magnification, y - self.spacing,
-                                       (s.end - s.start) * self.magnification,
+            itm = FeatureRectItem(s.start * self.magnification * self.stretch, y - self.spacing,
+                                       (s.end - s.start) * self.magnification * self.stretch,
                                        - self.feature_height,
                                        QPen(), QBrush(QColor(100, 113, 122, 150)))
             self.scene().addItem(itm)
             itms.append(itm)
 
-        label = self.scene().addText(feature.name.rjust(50), self.font)
+        label = self.scene().addText(feature.name, self.font)
         label.setDefaultTextColor(self.text_color)
-        label.setPos(- self.font_size * 50 * 0.8, y - (self.feature_height * 3 / 4))
+        label.setPos(0, y - self.feature_height - self.spacing)
         self.feature_labels.append(label)
 
         self.features.append(feature)
         self.feature_items.append(itms)
         rect = self.scene().itemsBoundingRect()
-        rect.adjust(-1000,-1000,2000,2000)
+        rect = QRectF(0, 0, 2000, 2000)
+#       rect.adjust(-1000,-1000, 2000 ,2000)
         self.scene().setSceneRect(rect)
 
     def frame_default(self):
         rect = self.scene().itemsBoundingRect()
-        rect.adjust(-1000,-1000,2000,2000)
+
+        rect = QRectF(0, rect.y(), 2000, rect.height())
+        rect.adjust(-100, -100, 200, 200)
         self.scene().setSceneRect(rect)
         self.fitInView(rect, Qt.KeepAspectRatio)
 
@@ -428,7 +438,6 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.segment_label.clear()
         self.feature_items.clear()
         self.feature_labels.clear()
-
 
     def clear_features(self):
         for q in self.feature_items:

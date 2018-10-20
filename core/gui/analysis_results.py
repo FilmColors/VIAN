@@ -9,6 +9,9 @@ import numpy as np
 
 from core.container.analysis import IAnalysisJobAnalysis
 from core.data.interfaces import IProjectChangeNotify
+from core.container.experiment import Experiment
+from core.container.segmentation import Segment
+from core.visualization.feature_plot import GenericFeaturePlot, FeatureTuple, SegmentTuple
 
 FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
 
@@ -41,8 +44,20 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         super(AnalysisResultsWidget, self).__init__(parent)
         self.main_window = main_window
         self.analysis_widget = QWidget(self)
-        self.setLayout(QHBoxLayout(self))
-        self.layout().addWidget(self.analysis_widget)
+        self.tab = QTabWidget(self)
+        self.analysis_tab = QWidget()
+        self.setLayout(QHBoxLayout())
+        self.classification_tab = QWidget()
+        self.classification_tab.setLayout(QHBoxLayout())
+
+        self.feature_plot = GenericFeaturePlot(self.classification_tab)
+        self.classification_tab.layout().addWidget(self.feature_plot)
+
+        self.tab.addTab(self.analysis_tab, "Analyses")
+        self.tab.addTab(self.classification_tab, "Classification")
+        self.layout().addWidget(self.tab)
+        self.analysis_tab.setLayout(QHBoxLayout(self))
+        self.analysis_tab.layout().addWidget(self.analysis_widget)
         self.current_visualization = []
         self.current_analysis = None
         self.fullscreen_view = None
@@ -53,6 +68,24 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.current_analysis = analysis
         # self.current_analysis.load_container(self.apply_analysis, sync=True)
         self.apply_analysis()
+
+    def activate_classification(self, exp:Experiment):
+        self.feature_plot.clear_view()
+        segm = self.main_window.project.get_main_segmentation() #type: Segmentation
+        segment_tuples = [SegmentTuple(s.ID, s.get_start(), s.get_end()) for s in segm.segments]
+        features = dict()
+        for f in exp.classification_results:
+            if isinstance(f[0], Segment):
+                if f[1].get_name() not in features:
+                    features[f[1].get_name()] = []
+                features[f[1].get_name()].append(f[0].ID)
+
+        self.feature_plot.create_timeline(segment_tuples)
+        for k, v in features.items():
+            self.feature_plot.create_feature(FeatureTuple(k, v), True)
+
+
+
 
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()
@@ -95,6 +128,8 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         if len(selected) > 0:
             if isinstance(selected[0], IAnalysisJobAnalysis):
                 self.activate_analysis(selected[0])
+            elif isinstance(selected[0], Experiment):
+                self.activate_classification(selected[0])
 
 
 class AnalysisFullScreenWindow(QMainWindow):
