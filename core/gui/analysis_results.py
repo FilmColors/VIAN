@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+import time
 import numpy as np
 
 from core.container.analysis import IAnalysisJobAnalysis
@@ -12,6 +13,7 @@ from core.data.interfaces import IProjectChangeNotify
 from core.container.experiment import Experiment
 from core.container.segmentation import Segment
 from core.visualization.feature_plot import GenericFeaturePlot, FeatureTuple, SegmentTuple
+from core.visualization.correlation_matrix import CorrelationVisualization, CorrelationVisualization, CorrelationFeatureTuple
 
 FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
 
@@ -56,8 +58,12 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.classification_tab.addWidget(self.feature_plot)
         feature_param.setFixedWidth(200)
 
+        self.correlation_tab = CorrelationVisualization(self)
+
         self.tab.addTab(self.analysis_tab, "Analyses")
         self.tab.addTab(self.classification_tab, "Classification")
+        self.tab.addTab(self.correlation_tab, "Correlation")
+
         self.layout().addWidget(self.tab)
         self.analysis_tab.setLayout(QHBoxLayout(self))
         self.analysis_tab.layout().addWidget(self.analysis_widget)
@@ -65,7 +71,6 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.current_analysis = None
         self.fullscreen_view = None
         self.analysis_widget.setLayout(QHBoxLayout(self))
-
 
     def activate_analysis(self, analysis: IAnalysisJobAnalysis):
         self.clear_analysis_widget()
@@ -88,8 +93,15 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         for k, v in features.items():
             self.feature_plot.create_feature(FeatureTuple(k, v[0].voc_obj.get_name(), v[0].class_obj.get_name(), v[1]), True)
 
-        for scr in self.main_window.project.screenshots:
-            self.feature_plot.add_screenshot(scr.img_movie, scr.movie_timestamp)
+        # for scr in self.main_window.project.screenshots:
+        #     self.feature_plot.add_screenshot(scr.img_movie, scr.movie_timestamp)
+
+        keywords, matrix = exp.get_correlation_matrix()
+        features = []
+        for i, k in enumerate(keywords):
+            # CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
+            features.append(CorrelationFeatureTuple(k.word_obj.get_name(), k.voc_obj.get_name(), k.class_obj.get_name(), i))
+        self.correlation_tab.set_data(features, matrix)
 
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()

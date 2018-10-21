@@ -2,6 +2,7 @@ from core.visualization.basic_vis import IVIANVisualization
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+import numpy as np
 
 class BarPlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, title =""):
@@ -13,6 +14,7 @@ class BarPlot(QGraphicsView, IVIANVisualization):
         self.setScene(QGraphicsScene(self))
         self.curr_scale = 1.0
         self.bar_height = 20
+        self.max_width = 1000
         self.raw_data = []
         self.points = []
         self.ctrl_is_pressed = False
@@ -22,26 +24,45 @@ class BarPlot(QGraphicsView, IVIANVisualization):
         self.raw_data = []
         self.points = []
 
+    def add_title(self, text):
+        f = QFont()
+        f.setPointSize(30)
+        p = self.scene().addText(text, f)
+        p.setPos(0, -30)
+
     def add_bar(self, title, x, col_bar = QColor(255,255,255,100), col_text = QColor(255,255,255,255)):
-        p = QPen()
-        p.setColor(col_bar)
-        p.setWidth(0.1)
-
-        px = 0
-        py = len(self.points) * (self.bar_height + 5)
-
-        point = self.scene().addRect(px, py, x, self.bar_height, p, QBrush(col_bar))
-
-        text = self.scene().addText(title)
-        text.setPos(px - 10 - len(title) * 5, py)
-        text.setDefaultTextColor(col_text)
-
-        self.points.append((point, text))
         self.raw_data.append((title, x, col_bar, col_text))
+
+        xmax = np.amax([t[1] for t in self.raw_data])
+        if xmax == 0:
+            xmax = 1.0
+        self.scene().clear()
+        self.points = []
+        for r in self.raw_data:
+            title = r[0]
+            x = r[1]
+            col_bar = r[2]
+            col_text = r[3]
+
+            p = QPen()
+            p.setColor(col_bar)
+            p.setWidth(0.1)
+
+            px = 0
+            py = len(self.points) * (self.bar_height + 5)
+
+            point = self.scene().addRect(px, py, x / xmax * self.max_width, self.bar_height, p, QBrush(col_bar))
+
+            text = self.scene().addText(title)
+            text.setPos(px - 10 - len(title) * 5, py)
+            text.setDefaultTextColor(col_text)
+
+            self.points.append((point, text))
+
 
     def frame_default(self):
         rect = self.scene().itemsBoundingRect()
-        rect.adjust(-1000, -1000, 2000, 2000)
+        rect.adjust(-50, -50, 100, 100)
         self.scene().setSceneRect(rect)
         self.fitInView(rect, Qt.KeepAspectRatio)
 

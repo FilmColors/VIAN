@@ -226,7 +226,6 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.x_scale = 1.0
         self.image_scale = 0.5
 
-
         self.range_x = [0, 1000]
         self.range_y = [0, 1000]
         self.x_end = 0
@@ -268,7 +267,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     def on_h_scroll(self):
         pos = self.mapToScene(QPoint(0,0))
         for t in self.feature_labels:
-            t.setPos(np.clip(pos.x(),0, None), t.pos().y())
+            t.setPos(np.clip(pos.x(),(-t.sceneBoundingRect().width() + 10), None), t.pos().y())
 
     def remove_feature(self, feature):
         pass
@@ -318,6 +317,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     def on_x_scale(self, new_scale):
         for s in self.segment_items:
             s.set_x_scale(new_scale)
+
         for f in self.feature_items:
             for s in f:
                 s.set_x_scale(new_scale)
@@ -357,7 +357,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
         label = self.scene().addText(feature.name, self.font)
         label.setDefaultTextColor(self.text_color)
-        label.setPos(0, y - self.feature_height - self.spacing)
+        label.setPos(-(label.sceneBoundingRect().width() + 10), y - self.feature_height - self.spacing)
         self.feature_labels.append(label)
 
         self.features.append(feature)
