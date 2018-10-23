@@ -24,7 +24,7 @@ class FiwiGlossary2Template(GAPlugin):
 class FiwiGlossary2TemplateDialog(EDialogWidget):
     def __init__(self, main_window):
         super(FiwiGlossary2TemplateDialog, self).__init__(main_window, main_window)
-        path = os.path.abspath("extensions/plugins/fiwi_tools/gui/fiwi_glossary_evaluation.ui")
+        path = os.path.abspath("extensions/plugins/fiwi_tools/gui/fiwi_glossary_to_template.ui")
         uic.loadUi(path, self)
         self.btn_Glossary.clicked.connect(self.on_browse_gl)
         self.btn_Template.clicked.connect(self.on_browse_template)
@@ -35,7 +35,7 @@ class FiwiGlossary2TemplateDialog(EDialogWidget):
 
     def on_ok(self):
         try:
-            if os.path.isfile(self.lineEdit_Template.text()) and os.path.isfile(self.lineEdit_Glossary.text()) and os.path.isfile(self.lineEdit_Result.text()):
+            if os.path.isfile(self.lineEdit_Template.text()) and os.path.isfile(self.lineEdit_Glossary.text()) and os.path.isdir(self.lineEdit_Vocabulary.text()):
                 exp_dir = None
                 if self.lineEdit_Vocabulary.text() != "":
                     glossary_to_template(self.lineEdit_Glossary.text(),self.lineEdit_Template.text(), exp_dir)

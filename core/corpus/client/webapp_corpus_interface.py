@@ -166,6 +166,7 @@ class WebAppCorpusInterface(CorpusInterface):
             # -- Creating the Archive --
             print("Export to:", export_project_dir)
             project.store_project(UserSettings(), os.path.join(export_project_dir, project.name + ".eext"))
+            shutil.copy2(project.hdf5_path, os.path.join(export_project_dir, os.path.split(project.hdf5_path)[1]))
             archive_file = os.path.join(export_root, project.name)
             shutil.make_archive(archive_file, 'zip', export_project_dir)
 
@@ -188,7 +189,6 @@ class WebAppCorpusInterface(CorpusInterface):
                 self.onCommited.emit(False, None, project)
 
         except Exception as e:
-            raise e ## TODO DEBUG
             print("Exception in RemoteCorpusClient.commit_project(): ", str(e))
             self.onCommited.emit(False, None, project)
 
