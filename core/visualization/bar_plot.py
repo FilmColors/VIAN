@@ -2,6 +2,7 @@ from core.visualization.basic_vis import IVIANVisualization
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+import numpy as np
 
 class BarPlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, title =""):
@@ -13,6 +14,7 @@ class BarPlot(QGraphicsView, IVIANVisualization):
         self.setScene(QGraphicsScene(self))
         self.curr_scale = 1.0
         self.bar_height = 20
+        self.max_width = 1000
         self.raw_data = []
         self.points = []
         self.ctrl_is_pressed = False
@@ -22,26 +24,65 @@ class BarPlot(QGraphicsView, IVIANVisualization):
         self.raw_data = []
         self.points = []
 
+    def add_title(self, text):
+        f = QFont()
+        f.setPointSize(30)
+        p = self.scene().addText(text, f)
+        p.setPos(0, -30)
+
     def add_bar(self, title, x, col_bar = QColor(255,255,255,100), col_text = QColor(255,255,255,255)):
-        p = QPen()
-        p.setColor(col_bar)
-        p.setWidth(0.1)
-
-        px = 0
-        py = len(self.points) * (self.bar_height + 5)
-
-        point = self.scene().addRect(px, py, x, self.bar_height, p, QBrush(col_bar))
-
-        text = self.scene().addText(title)
-        text.setPos(px - 10 - len(title) * 5, py)
-        text.setDefaultTextColor(col_text)
-
-        self.points.append((point, text))
         self.raw_data.append((title, x, col_bar, col_text))
+
+        xmax = np.amax([t[1] for t in self.raw_data])
+        if xmax == 0:
+            xmax = 1.0
+        self.scene().clear()
+        self.points = []
+        py = 0
+        for r in self.raw_data:
+            title = r[0]
+            x = r[1]
+            col_bar = r[2]
+            col_text = r[3]
+
+            p = QPen()
+            p.setColor(col_bar)
+            p.setWidth(0.1)
+
+            px = 0
+            py = len(self.points) * (self.bar_height + 5)
+
+            point = self.scene().addRect(px, py, x / xmax * self.max_width, self.bar_height, p, QBrush(col_bar))
+
+            text = self.scene().addText(title)
+            text.setPos(px - 10 - len(title) * 5, py)
+            text.setDefaultTextColor(col_text)
+
+            self.points.append((point, text))
+
+        p = QPen()
+        p.setColor(QColor(255,255,255,200))
+        f = QFont()
+        f.setPointSize(12)
+        if xmax < 10:
+            label_step = 1
+        else:
+            label_step = xmax / 10
+        for i, val in enumerate(range(int(xmax + 1))):
+
+            x = val / xmax * self.max_width
+            self.scene().addLine(x, py, x, py + 20, p)
+            if int(xmax) % label_step == 0:
+                lbl = self.scene().addText(str(round(val, 2)), f)
+                lbl.setDefaultTextColor(QColor(255,255,255,200))
+                center_delta = lbl.boundingRect().width() / 2
+                lbl.setPos(x - center_delta, py + 20)
+
+        self.frame_default()
 
     def frame_default(self):
         rect = self.scene().itemsBoundingRect()
-        rect.adjust(-1000, -1000, 2000, 2000)
+        rect.adjust(-50, -50, 100, 100)
         self.scene().setSceneRect(rect)
         self.fitInView(rect, Qt.KeepAspectRatio)
 

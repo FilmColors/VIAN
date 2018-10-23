@@ -184,7 +184,10 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
                     self.comboBox_Subs.addItem(str(s[1]))
 
     def on_subs_changed(self, index):
-        if len(self.subs) > 0:
-            self.main_window.player.set_subtitle(self.subs[index - 1][0])
+        try:
+            if len(self.subs) > 0:
+                self.main_window.player.set_subtitle(self.subs[index - 1][0])
+        except Exception as e:
+            print("PlayerControls.on_subs_changed(): Could not set Subtitles:", e)
 
 

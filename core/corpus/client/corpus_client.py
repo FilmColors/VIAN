@@ -55,7 +55,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.metadata = CorpusMetaDataList(self.metadata_path, contributor=self.main_window.settings.CONTRIBUTOR)
         self.metadata.load(self.metadata_path)
 
-        self.on_connect_webapp("http://127.0.0.1:5000/vian_login")
+        # self.on_connect_webapp("http://127.0.0.1:5000/vian_login")
 
     @pyqtSlot()
     def connect(self, remote = False):
@@ -70,7 +70,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
             self.corpus_interface.moveToThread(self.execution_thread)
             self.execution_thread.start()
 
-            self.onConnectUser.emit(self.metadata.contributor, file_path)
+            self.onConnectUser.emit(self.main_window.settings.CONTRIBUTOR, file_path)
         except Exception as e:
             print(e)
 
@@ -83,7 +83,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
             self.execution_thread = QThread()
             self.corpus_interface.moveToThread(self.execution_thread)
             self.execution_thread.start()
-            self.onConnectUser.emit(self.metadata.contributor, [tcp_ip, tcp_port, ftp_ip, ftp_port])
+            self.onConnectUser.emit(self.main_window.settings.CONTRIBUTOR, [tcp_ip, tcp_port, ftp_ip, ftp_port])
 
         except Exception as e:
             print(e)
@@ -114,9 +114,6 @@ class CorpusClient(QObject, IProjectChangeNotify):
         # Emit the onConnectUser to the WebAppCorpusInterface, this initiates the authentification process
         # Every thing GUI related to the Login has to happen HERE
         contributor = self.main_window.settings.CONTRIBUTOR  # type: Contributor
-
-
-
         self.onConnectUser.emit(contributor, endpoint)
 
     def connect_signals(self):
@@ -163,8 +160,6 @@ class CorpusClient(QObject, IProjectChangeNotify):
         :return: 
         """
         if success:
-            # OLD From the DBContributor
-            # self.metadata.contributor.contributor_id = user.contributor_id
             self.connected = True
             self.onCorpusConnected.emit(self.corpus_interface)
 
@@ -184,7 +179,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         """
         try:
             self.main_window.on_save_project(sync=True)
-            self.onCommitProject.emit(self.metadata.contributor, project)
+            self.onCommitProject.emit(self.main_window.settings.CONTRIBUTOR, project)
         except Exception as e:
             print("Exception in CorpusClient::on_commit_project()", e)
 
@@ -205,11 +200,10 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.onCorpusChanged.emit(self)
 
     def on_disconnect_user(self):
-        self.onDisconnectUser.emit(self.metadata.contributor)
+        self.onDisconnectUser.emit(self.main_window.settings.CONTRIBUTOR)
         self.connected = False
         if self.execution_thread is not None:
             self.execution_thread.quit()
-
 
     def on_open_corpus_project(self, dbproject: DBProject):
         if self.connected:
@@ -223,7 +217,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
                 answer = QMessageBox.question(self.main_window, "No Local File Found", "There is no local file of " + dbproject.name + ".\n"
                                       "do you want to download it from the Corpus?")
                 if answer == QMessageBox.Yes:
-                    self.onDownloadProject.emit(self.metadata.contributor, dbproject)
+                    self.onDownloadProject.emit(self.main_window.settings.CONTRIBUTOR, dbproject)
 
     @pyqtSlot(object)
     def on_received_projects(self, dbprojects):
@@ -244,7 +238,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
     def checkout_project(self, dbproject: DBProject):
         if self.connected:
-            self.onCheckOutProject.emit(self.metadata.contributor, dbproject)
+            self.onCheckOutProject.emit(self.main_window.settings.CONTRIBUTOR, dbproject)
 
     @pyqtSlot(bool, object)
     def on_check_out_finished(self, success, dbprojects: List[DBProject]):
@@ -254,7 +248,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
     def checkin_project(self, dbproject:DBProject):
         if self.connected:
-            self.onCheckInProject.emit(self.metadata.contributor, dbproject)
+            self.onCheckInProject.emit(self.main_window.settings.CONTRIBUTOR, dbproject)
 
     @pyqtSlot(bool, object)
     def on_check_in_finished(self, success, project):
@@ -272,7 +266,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
 
     def get_check_out_state(self):
         if self.connected and self.current_dbproject is not None:
-            self.onCheckCheckOutState.emit(self.metadata.contributor, self.current_dbproject)
+            self.onCheckCheckOutState.emit(self.main_window.settings.CONTRIBUTOR, self.current_dbproject)
 
     @pyqtSlot(int)
     def on_check_out_state_recieved(self, value):
@@ -398,7 +392,7 @@ class CorpusClientWidget(QWidget):
         self.corpus_client.onCorpusDisconnected.connect(self.on_disconnected)
         self.corpus_client.onCurrentDBProjectChanged.connect(self.on_project_changed)
         self.corpus_client.onCheckOutStateChanged.connect(self.checkout_state_changed)
-        self.contributor = corpus_client.metadata.contributor
+        self.contributor = self.main_window.settings.CONTRIBUTOR
 
         self.btn_Commit.clicked.connect(self.on_commit)
         self.btn_CheckOut.clicked.connect(self.on_check_out)
@@ -408,11 +402,12 @@ class CorpusClientWidget(QWidget):
         self.btn_CheckOut.setEnabled(False)
         self.btn_Update.setEnabled(False)
 
-        self.comboBox_Corpora.addItem("ERC FilmColors")
+        self.comboBox_Corpora.addItem("ERC FilmColors") #type:QComboBox
+        self.comboBox_Corpora.currentTextChanged.connect(self.on_corpus_changed)
 
         #  self.btn_.clicked.connect(self.corpus_client.connect)
 
-        self.on_contributor_update(self.corpus_client.metadata.contributor)
+        self.on_contributor_update(self.main_window.settings.CONTRIBUTOR)
         self.show()
 
     @pyqtSlot(object)
@@ -431,8 +426,13 @@ class CorpusClientWidget(QWidget):
         self.btn_CheckOut.setEnabled(False)
         self.btn_Update.setEnabled(False)
 
+    def on_corpus_changed(self):
+        name = self.comboBox_Corpora.currentText()
+        if name == "ERC FilmColors":
+            self.corpus_client.on_connect_webapp(None)
+
     def open_contributor_editor(self):
-        dialog = CorpusUserDialog(self.main_window, self.corpus_client.metadata.contributor)
+        dialog = CorpusUserDialog(self.main_window, self.main_window.settings.CONTRIBUTOR)
         dialog.onContributorUpdate.connect(self.on_contributor_update)
         dialog.show()
 
@@ -491,8 +491,8 @@ class CorpusMetaDataList():
     def __init__(self, path, contributor = None):
         self.corporas = []
         self.path = path
-        if contributor is None:
-            contributor = DBContributor("Anonymous", "", "Hogwarts School of Witchcraft and Wizardry")
+        # if contributor is None:
+        #     contributor = DBContributor("Anonymous", "", "Hogwarts School of Witchcraft and Wizardry")
         self.contributor = contributor
 
     def on_connect(self, ip, name, port, dbprojects, c_type):
@@ -610,7 +610,6 @@ class CorpusMetaDataList():
                 self.corporas = [CorpusMetaData(None, None, None, None).deserialize(s) for s in data['corporas']]
         except Exception as e:
             self.corporas = []
-            self.contributor = DBContributor("Anonymous", "", "Hogwarts School of Witchcraft and Wizardry")
             print(e)
 
 

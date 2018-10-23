@@ -12,7 +12,7 @@ from core.visualization.image_plots import VIANPixmapGraphicsItem, VIANPixmapGra
 from core.data.computation import *
 from typing import *
 
-FeatureTuple = namedtuple("FeatureTuple", ["name", "segment_ids"])
+FeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "segment_ids"])
 SegmentTuple = namedtuple("SegmentTuple", ['id', "start", "end"])
 
 
@@ -221,8 +221,10 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.ctrl_is_pressed = False
         self.img_width = 192
         self.curr_scale = 1.0
-        self.magnification = 0.005
+        self.magnification = 1.0#0.005
         self.spacing = 10
+        self.x_scale = 1.0
+        self.image_scale = 0.5
 
         self.range_x = [0, 1000]
         self.range_y = [0, 1000]
@@ -230,7 +232,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
         self.font_family = "Consolas"
         self.text_color = QColor(255,255,255,200)
-        self.font_size = 128
+        self.font_size = 50
         self.title = title
 
         self.font = QFont(self.font_family, self.font_size)
@@ -242,14 +244,16 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.segment_items = []
         self.segment_label = []
         self.feature_items = []
+        self.feature_items_plain = []
         self.feature_labels = []
         self.feature_base_height = 900
-        self.feature_height = 400
+        self.feature_height = 100
         self.raw_data = []
 
-        self.segment_height = 600
+        self.segment_height = 200
 
         self.n_grid = 12
+        self.stretch = 1.0
         self.controls_itm = None
 
         self.scene_width = 0
@@ -263,7 +267,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     def on_h_scroll(self):
         pos = self.mapToScene(QPoint(0,0))
         for t in self.feature_labels:
-            t.setPos(pos.x(), t.pos().y())
+            t.setPos(np.clip(pos.x(),(-t.sceneBoundingRect().width() + 10), None), t.pos().y())
 
     def remove_feature(self, feature):
         pass
@@ -277,9 +281,9 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True),
                                          hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
         self.scene().addItem(itm)
-        itm.setPos(np.nan_to_num(x * self.magnification), self.feature_base_height + self.segment_height)
-
+        itm.setPos(np.nan_to_num(x * self.magnification * self.stretch), self.feature_base_height)
         self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
+        itm.setScale(self.image_scale)
         self.images.append(itm)
 
         # if self.x_end < x * self.x_scale:
@@ -291,13 +295,19 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         return itm
 
     def create_timeline(self, segments: List[SegmentTuple]):
+        max = 0
+        for s in segments:
+            if s.end > max:
+                max = s.end
+        self.stretch = 2000 / max
         for s in segments:
             # itm = self.scene().addRect(s.start * self.magnification, self.feature_base_height,
             #                            (s.end - s.start) * self.magnification, - self.segment_height,
             #                            QPen(), QBrush(QColor(0, 113, 122)))
 
-            itm = SegmentRectItem(s.start * self.magnification, self.feature_base_height,
-                                                                  (s.end - s.start) * self.magnification, - self.segment_height,
+            itm = SegmentRectItem(s.start * self.magnification * self.stretch, self.feature_base_height,
+                                                                  (s.end - s.start) * self.magnification * self.stretch,
+                                                                - self.segment_height,
                                                                   QPen(), QBrush(QColor(0, 113, 122)), s)
             self.scene().addItem(itm)
             self.segment_items.append(itm)
@@ -307,14 +317,23 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     def on_x_scale(self, new_scale):
         for s in self.segment_items:
             s.set_x_scale(new_scale)
+
         for f in self.feature_items:
             for s in f:
                 s.set_x_scale(new_scale)
         for s in self.images:
             s.scale_pos(new_scale, 1.0)
+        self.x_scale = new_scale
         rect = self.scene().itemsBoundingRect()
-        rect.adjust(-1000,-1000,2000,2000)
+        rect = QRectF(0, rect.y(), 2000 * self.x_scale, rect.height())
+        rect.adjust(-100* self.x_scale, -100, 200* self.x_scale, 200)
         self.scene().setSceneRect(rect)
+        self.fitInView(rect, Qt.KeepAspectRatio)
+
+    def scale_images(self, new_scale):
+        for s in self.images:
+            s.setScale(new_scale)
+        self.image_scale = new_scale
 
     def create_feature(self, feature:FeatureTuple, show = False):
         if feature not in self.all_possible_features:
@@ -329,27 +348,37 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
                 continue
 
             s = self.segments[sid]
-            itm = FeatureRectItem(s.start * self.magnification, y - self.spacing,
-                                       (s.end - s.start) * self.magnification,
+            itm = FeatureRectItem(s.start * self.magnification * self.stretch, y - self.spacing,
+                                       (s.end - s.start) * self.magnification * self.stretch,
                                        - self.feature_height,
                                        QPen(), QBrush(QColor(100, 113, 122, 150)))
             self.scene().addItem(itm)
             itms.append(itm)
 
-        label = self.scene().addText(feature.name.rjust(50), self.font)
+        label = self.scene().addText(feature.name, self.font)
         label.setDefaultTextColor(self.text_color)
-        label.setPos(- self.font_size * 50 * 0.8, y - (self.feature_height * 3 / 4))
+        label.setPos(-(label.sceneBoundingRect().width() + 10), y - self.feature_height - self.spacing)
         self.feature_labels.append(label)
 
         self.features.append(feature)
         self.feature_items.append(itms)
+        self.feature_items_plain.extend(itms)
+
+        self.on_x_scale(self.curr_scale)
+
         rect = self.scene().itemsBoundingRect()
-        rect.adjust(-1000,-1000,2000,2000)
+        rect = QRectF(0, rect.y(), 2000 * self.x_scale, rect.height())
+        rect.adjust(-100, -100, 200, 200)
         self.scene().setSceneRect(rect)
+
+    def add_screenshot(self, image, time):
+        self.add_image(time, 0, image)
 
     def frame_default(self):
         rect = self.scene().itemsBoundingRect()
-        rect.adjust(-1000,-1000,2000,2000)
+
+        rect = QRectF(0, rect.y(), 2000 * self.x_scale, rect.height())
+        rect.adjust(-100* self.x_scale, -100, 200* self.x_scale, 200)
         self.scene().setSceneRect(rect)
         self.fitInView(rect, Qt.KeepAspectRatio)
 
@@ -429,19 +458,23 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.feature_items.clear()
         self.feature_labels.clear()
 
-
     def clear_features(self):
-        for q in self.feature_items:
-            for f in q:
+        for f in self.feature_items_plain:
+            try:
                 self.scene().removeItem(f)
+            except:
+                continue
         for f in self.feature_labels:
-            self.scene().removeItem(f)
-
+            try:
+                self.scene().removeItem(f)
+            except:
+                continue
         # self.scene().clear()
-        self.segment_items = []
-        self.create_timeline(self.segments)
+        # self.segment_items = []
+        # self.create_timeline(self.segments)
 
         self.feature_items = []
+        self.feature_items_plain = []
         self.feature_labels = []
         self.features = []
 
@@ -475,6 +508,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.onFeatureAdded.connect(w.on_features_changed)
         w.onFeatureActivated.connect(self.on_filter_update)
         w.onXScale.connect(self.on_x_scale)
+        w.onImageScale.connect(self.scale_images)
         return w
 
     def get_raw_data(self):
@@ -556,41 +590,72 @@ class SegmentRectItem(QGraphicsRectItem):
 class FeaturesParamWidget(QWidget):
     onFeatureActivated = pyqtSignal(object)
     onXScale = pyqtSignal(float)
+    onImageScale = pyqtSignal(float)
 
     def __init__(self, parent, features):
         super(FeaturesParamWidget, self).__init__(parent)
         self.setLayout(QVBoxLayout())
-        self.param_list = QListWidget(self)
+        self.param_list = QTreeWidget(self)
         self.layout().addWidget(self.param_list)
         self.sl_x_scale = QSlider(Qt.Horizontal, self)
         self.sl_x_scale.setRange(1, 100)
+        self.sl_x_scale.setValue(10)
         self.hb_x_scale = QHBoxLayout(self)
         self.hb_x_scale.addWidget(QLabel("x-Scale", self))
         self.hb_x_scale.addWidget(self.sl_x_scale)
         self.sl_x_scale.valueChanged.connect(self.on_slider_x_scale)
+
+        self.sl_img_scale = QSlider(Qt.Horizontal, self)
+        self.sl_img_scale.setRange(1, 100)
+        self.sl_img_scale.setValue(10)
+        self.hb_img_scale = QHBoxLayout(self)
+        self.hb_img_scale.addWidget(QLabel("Image-Scale", self))
+        self.hb_img_scale.addWidget(self.sl_img_scale)
+        self.sl_img_scale.valueChanged.connect(self.on_slider_img_scale)
+        
         self.layout().addItem(self.hb_x_scale)
-        self.param_list.itemChanged.connect(self.on_clicked)
+        self.layout().addItem(self.hb_img_scale)
+        self.param_list.itemClicked.connect(self.on_clicked)
         self.features = []
         self.show()
 
     @pyqtSlot(object)
-    def on_features_changed(self, features):
+    def on_features_changed(self, features:List[FeatureTuple]):
         self.param_list.clear()
         self.features.clear()
-        for f in features:
-            itm = QListWidgetItem(f.name)
-            itm.setCheckState(Qt.Unchecked)
+        curr_voc_name = None
+        curr_voc_itm = None
+        curr_class_name = None
+        curr_class_itm = None
 
-            self.param_list.addItem(itm)
+        for f in sorted(features, key=lambda x:(x.class_obj, x.voc_name, x.name)):
+            if not f.class_obj == curr_class_name:
+                curr_class_name = f.class_obj
+                curr_class_itm = QTreeWidgetItem([curr_class_name])
+                self.param_list.addTopLevelItem(curr_class_itm)
+                curr_voc_name = None
+            if not f.voc_name == curr_voc_name:
+                curr_voc_name = f.voc_name
+                curr_voc_itm = QTreeWidgetItem([f.voc_name])
+                curr_class_itm.addChild(curr_voc_itm)
+
+            itm = QTreeWidgetItem([f.name])
+            itm.setCheckState(0, Qt.Unchecked)
+
+            curr_voc_itm.addChild(itm)
             self.features.append((itm, f))
 
     def on_slider_x_scale(self):
         v = self.sl_x_scale.value() / 10
         self.onXScale.emit(v)
 
+    def on_slider_img_scale(self):
+        v = self.sl_img_scale.value() / 20
+        self.onImageScale.emit(v)
+
     def on_clicked(self):
         result = []
         for f in self.features:
-            if f[0].checkState() == Qt.Checked:
+            if f[0].checkState(0) == Qt.Checked:
                 result.append(f[1])
         self.onFeatureActivated.emit(result)

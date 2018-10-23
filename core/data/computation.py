@@ -521,3 +521,19 @@ def contains_rect(r1, r2):
     if (r2[0] > r1[0]) and r2[1] > r1[1] and r2[2] < r1[2] and r2[3] < r1[3]:
         return True
     return False
+
+
+def get_heatmap_value(val, max = 1.0, asuint8=True, asrgb = True, gray = False):
+    result = np.zeros(shape=(3), dtype=np.float32)
+    if gray:
+        result.fill(val/max)
+    else:
+        result[2] = ((np.clip(val, 0.5, 1.0) - 0.5) / 0.5) * max
+        result[1] = (0.25 - np.abs(np.clip(val, 0.25, 0.75) - 0.5)) / 0.25 * max
+        result[0] = ((0.5 - np.clip(val, 0, 0.5)) / 0.5)
+
+    if asuint8:
+        result *= 255
+    if asrgb:
+        result = result[::-1]
+    return result
