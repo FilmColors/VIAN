@@ -168,7 +168,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
     onSourceChanged = pyqtSignal(str)
 
     def __init__(self, main_window, videoframe, project):
-        super(DrawingOverlay, self).__init__(main_window)
+        super(DrawingOverlay, self).__init__(videoframe)
         path = os.path.abspath("qt_ui/DrawingWidget.ui")
         uic.loadUi(path, self)
         self.main_window = main_window
@@ -191,7 +191,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.current_opencv_frame_index = 0
 
         self.show_annotations = True
-
 
         # The current Values given by the Annotation Options Dock
         self.current_font_size = 12
@@ -619,11 +618,10 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 self.update()
             self.onSourceChanged.emit("VLC")
 
-    def synchronize_transforms(self):
+    def synchronize_transforms(self, is_anamorphic = False):
         # old_size = self.size()
 
         s = self.main_window.player.movie_size
-        # aspect =self.main_window.player.get_aspect_ratio()
 
         if s[0] == 0 or s[1] == 0:
             return
@@ -631,19 +629,22 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         m_width = float(s[0])
         m_height = float(s[1])
 
+        if is_anamorphic:
+            m_width = m_width * 1.4587
+
         f_width = float(self.videoframe.width())
         f_height = float(self.videoframe.height())
 
         if f_width <= 0 or f_height <= 0:
             f_width = 1
             f_height = 1
+
         # if the Movie is clamped by the Width of the MovieFrame
         if (m_height/m_width) < (f_height/f_width):
             x_offset = 0
             y_offset = (f_height/2) - ((f_width * (m_height/m_width))/2)
             x_size = f_width
             y_size = f_width * (m_height/m_width)
-
         else:
             x_offset = (f_width/2) - ((f_height * (m_width/m_height))/2)
             y_offset = 0

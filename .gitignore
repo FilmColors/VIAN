@@ -11,3 +11,4 @@ user/models/*
 .vs/
 *.pyproj
 *.sln
+data/models/face_identification/shape_predictor_68_face_landmarks.dat

@@ -73,7 +73,7 @@ class CreateCorpusDialog(EDialogWidget):
 class CorpusUserDialog(EDialogWidget):
     onContributorUpdate = pyqtSignal(object)
 
-    def __init__(self, main_window, contributor:DBContributor):
+    def __init__(self, main_window, contributor:Contributor):
         super(CorpusUserDialog, self).__init__(main_window, main_window)
         path = os.path.abspath("qt_ui/DialogCorpusUser.ui")
         uic.loadUi(path, self)
@@ -83,8 +83,10 @@ class CorpusUserDialog(EDialogWidget):
         self.btn_OK.clicked.connect(self.on_ok)
         self.btn_Cancel.clicked.connect(self.on_cancel)
 
-        self.lineEdit_Name.setText(self.contributor.name)
+        self.lineEdit_Name.setText(self.contributor.user_name)
+        self.lineEdit_FullName.setText(self.contributor.full_name)
         self.lineEdit_Affiliation.setText(self.contributor.affiliation)
+        self.lineEdi_Email.setText(self.contributor.email)
         self.widget_image.setLayout(QHBoxLayout(self))
 
         self.preview = EGraphicsView(self, auto_frame=True)
@@ -114,8 +116,12 @@ class CorpusUserDialog(EDialogWidget):
         salt = uuid.uuid4().hex
 
         self.contributor.name = self.lineEdit_Name.text()
-        self.contributor.password = hashlib.sha512((self.lineEdi_Password.text() + salt).encode()).hexdigest()
-        self.contributor.email = hashlib.sha512((self.lineEdi_Email.text() + salt).encode()).hexdigest()
+        # self.contributor.password = hashlib.sha512((self.lineEdi_Password.text() + salt).encode()).hexdigest()
+        # self.contributor.email = hashlib.sha512((self.lineEdi_Email.text() + salt).encode()).hexdigest()
+        self.contributor.password = self.lineEdi_Password.text()
+        self.contributor.email = self.lineEdi_Email.text()
+        self.contributor.full_name = self.lineEdit_FullName.text()
+
         if os.path.isfile(self.image_path):
             cv2.imwrite(self.main_window.settings.DIR_CORPORA + "/user_img.jpg", cv2.imread(self.image_path))
         self.contributor.image_path = self.image_path
@@ -128,6 +134,7 @@ class CorpusUserDialog(EDialogWidget):
 
 class CorpusConnectRemoteDialog(EDialogWidget):
     onConnectRemote = pyqtSignal(str, int, str, int)
+
     def __init__(self, main_window, contributor:DBContributor):
         super(CorpusConnectRemoteDialog, self).__init__(main_window, main_window)
         path = os.path.abspath("qt_ui/DialogConnectRemoteCorpus.ui")

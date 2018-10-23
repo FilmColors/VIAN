@@ -715,7 +715,7 @@ class DBContributor(DBEntity):
 
     def from_vian_user(self, user:Contributor):
         self.contributor_id = 0
-        self.name = user.full_name
+        self.name = user.name
         self.email = user.email
         self.affiliation = user.affiliation
         self.password = user.password

@@ -4,19 +4,20 @@ import threading
 class WebAppCorpusInterface(CorpusInterface):
     def __init__(self, corpora_dir):
         super(WebAppCorpusInterface, self).__init__()
-        self.endpoint_adress = 'http://127.0.0.1:5000/api/upload_debug'
+        self.endpoint_upload = 'http://127.0.0.1:5000/api/upload'
+        self.endpoint_token = "http://127.0.0.1:5000/api/get_token"
         self.name = "VIAN-WebApp"
 
     @pyqtSlot(object, object)
-    def connect_user(self, user:DBContributor, options):
+    def connect_user(self, user:Contributor, options):
         try:
-            success = False
-            #TODO SILAS, Authentification is all your business
-
-
+            a = requests.post(self.endpoint_token, json=dict(email = user.email, password = user.password))
+            print("Server Responded:", a.headers, a.text)
+            success = not "failed" in a.text
             if success:
                 # We don't want VIAN to see all Projects on the WebAppCorpus, thus returning an empty list
                 all_projects = []
+                user.token = a.text
                 self.onConnected.emit(success, all_projects, user)
             else:
                 self.onConnected.emit(False, None, None)
@@ -177,8 +178,12 @@ class WebAppCorpusInterface(CorpusInterface):
             fin = open(archive_file + ".zip", 'rb')
             files = {'file': fin}
             try:
-                r = requests.post(self.endpoint_adress, files=files, headers=dict(type="upload")).text
+                print(files, self.endpoint_upload, dict(type="upload", authorization=user.token.encode()))
+                r = requests.post(self.endpoint_upload, files=files, headers=dict(type="upload", authorization=user.token.encode())).text
                 print("Redceived", r)
+            except Exception as e:
+                raise e
+                print(e)
             finally:
                 fin.close()
 

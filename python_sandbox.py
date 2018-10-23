@@ -1,27 +1,53 @@
-import csv
+import requests
+import time
+import json
 
-def get_country_codes():
-    with open("data/country_codes.csv", "r") as f:
-        reader = csv.reader(f)
-        d = dict()
-        for i, r in enumerate(reader):
-            d[r[0]] = r
+token = ''
 
-    return d
+# Delete files older than this:
 
-def get_color_processes():
-    """
-    :return: Returns all Color Processes from the color_processes.txt as list
-    """
-    p = []
-    with open("data/color_processes.txt", "r") as f:
-        for t in f:
-            p.append(t.replace("\n", "").strip())
-    return p
+ts_to = int(time.time()) - 30 * 24 * 60 * 60
 
-filmography_meta = dict(
-    country_codes = get_country_codes(),
-    color_processes = get_color_processes()
-)
 
-print(filmography_meta)
+def list_files():
+    params = {
+
+        'token': token
+        , 'ts_to': ts_to
+        , 'count': 1000
+
+    }
+
+    uri = 'https://slack.com/api/files.list'
+    response = requests.get(uri, params=params)
+
+    return json.loads(response.text)['files']
+
+
+def delete_files(file_ids):
+    count = 0
+
+    num_files = len(file_ids)
+
+    for file_id in file_ids:
+        count = count + 1
+
+        params = {
+
+            'token': token
+
+            , 'file': file_id
+
+        }
+
+        uri = 'https://slack.com/api/files.delete'
+
+        response = requests.get(uri, params=params)
+
+        print(count, "of", num_files, "-", file_id, json.loads(response.text)['ok'])
+
+
+files = list_files()
+file_ids = [f['id'] for f in files]
+print(files)
+# delete_files(file_ids)

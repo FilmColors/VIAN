@@ -5,7 +5,8 @@ from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, 
     ANNOTATION_LAYER, SCREENSHOT_GROUP
 from core.data.interfaces import IProjectContainer, IHasName, IClassifiable
 from core.gui.vocabulary import VocabularyItem
-
+import time
+import numpy as np
 
 class Vocabulary(IProjectContainer, IHasName):
     """
@@ -503,6 +504,7 @@ class Experiment(IProjectContainer, IHasName):
 
         # This is a list of [IClassifiable, UniqueKeyword]
         self.classification_results = []
+        self.correlation_matrix = None
 
     def get_name(self):
         return self.name
@@ -512,6 +514,29 @@ class Experiment(IProjectContainer, IHasName):
 
     def get_type(self):
         return EXPERIMENT
+
+    def get_correlation_matrix(self):
+        if self.correlation_matrix is not None:
+            return self.get_unique_keywords(), self.correlation_matrix
+        else:
+            keywords = self.get_unique_keywords()
+            idx = dict()
+            for i, k in enumerate(keywords):
+                idx[k] = i
+            matrix = np.zeros(shape=(len(keywords), len(keywords)))
+            curr_classifyable = None
+            curr_correlations = []
+            for res in sorted(self.classification_results, key=lambda x:id(x[0])):
+                if res[0] != curr_classifyable:
+                    if curr_classifyable is not None:
+                        for x, k in enumerate(curr_correlations):
+                            for y, l in enumerate(curr_correlations):
+                                matrix[idx[k[1]], idx[l[1]]] += 1
+                                matrix[idx[l[1]], idx[k[1]]] += 1
+                    curr_correlations = []
+                    curr_classifyable = res[0]
+                curr_correlations.append(res)
+            return keywords, matrix
 
     def get_vocabularies(self):
         result = []

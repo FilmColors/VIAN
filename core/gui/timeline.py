@@ -109,7 +109,6 @@ class TimelineContainer(EDockWidget):
         else:
             self.toolbar.hide()
 
-
     def update_settings(self):
         self.timeline.show_id = self.a_show_id.isChecked()
         self.timeline.show_name = self.a_show_name.isChecked()
@@ -429,11 +428,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def paintEvent(self, QPaintEvent):
         super(Timeline, self).paintEvent(QPaintEvent)
 
-    # @pyqtSlot()
-    # def on_strip_hight_changed(self):
-    #     for itm in self.items:
-    #
-
     def update_time_bar(self):
         if self.time_bar is None:
             self.time_bar = TimebarDrawing(self.frame_Bars, self)
@@ -659,6 +653,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def activate_move_tool(self):
         self.abort_cutting()
         self.abort_merge_tool()
+        self.close_selector()
 
     #region CuttingTool
     def activate_cutting_tool(self):
@@ -666,6 +661,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.abort_cutting()
         if self.is_merging:
             self.abort_merge_tool()
+        if self.is_selecting:
+            self.close_selector()
 
         self.time_scrubber.hide()
         self.is_cutting = True
@@ -700,6 +697,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.abort_merge_tool()
         if self.is_cutting:
             self.abort_cutting()
+        if self.is_selecting:
+            self.close_selector()
 
         self.time_scrubber.hide()
         self.is_merging = True
@@ -783,6 +782,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             pos = self.round_to_grid(QMouseEvent.pos() - self.frame_Bars.pos())
             self.move_selector(pos)
 
+    #region Selector
     def start_selector(self, pos):
         if self.interval_segmentation_start is not None:
             return
@@ -812,6 +812,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.selector_context.new_segment.connect(self.create_segment)
             self.selector_context.new_layer.connect(self.create_layer)
 
+    def close_selector(self):
+        if self.selector is not None:
+            self.selector.close()
+            self.selector.deleteLater()
+            self.update()
+        self.selector = None
+    #endregion
     # CONTEXT MENU BINDINGS
     def new_segment(self):
         if self.selector is not None and self.selected is not None:
@@ -824,13 +831,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def set_current_time(self, time):
         self.main_window.player.set_media_time(time)
-
-    def close_selector(self):
-        if self.selector is not None:
-            self.selector.close()
-            self.selector.deleteLater()
-            self.update()
-        self.selector = None
 
     def round_to_grid(self, a):
         if self.settings.USE_GRID:

@@ -96,7 +96,13 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_Corpora"/>
+      <widget class="QComboBox" name="comboBox_Corpora">
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">

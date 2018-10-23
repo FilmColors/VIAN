@@ -280,6 +280,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.pixmap = pixmap
         self.curr_alpha = 1.0
         self.setAcceptHoverEvents(True)
+
         # self.hovered = False
 
     def scale_pos(self, scale, scale_y = None):

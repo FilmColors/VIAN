@@ -5,10 +5,15 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+import time
 import numpy as np
 
 from core.container.analysis import IAnalysisJobAnalysis
 from core.data.interfaces import IProjectChangeNotify
+from core.container.experiment import Experiment
+from core.container.segmentation import Segment
+from core.visualization.feature_plot import GenericFeaturePlot, FeatureTuple, SegmentTuple
+from core.visualization.correlation_matrix import CorrelationVisualization, CorrelationVisualization, CorrelationFeatureTuple
 
 FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
 
@@ -41,18 +46,68 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         super(AnalysisResultsWidget, self).__init__(parent)
         self.main_window = main_window
         self.analysis_widget = QWidget(self)
-        self.setLayout(QHBoxLayout(self))
-        self.layout().addWidget(self.analysis_widget)
+        self.tab = QTabWidget(self)
+        self.analysis_tab = QWidget()
+        self.setLayout(QHBoxLayout())
+        self.classification_tab = QSplitter(Qt.Horizontal, self)
+        self.classification_tab.setLayout(QHBoxLayout())
+
+        self.feature_plot = GenericFeaturePlot(self.classification_tab)
+        feature_param = self.feature_plot.get_param_widget()
+        self.classification_tab.addWidget(feature_param)
+        self.classification_tab.addWidget(self.feature_plot)
+        feature_param.setFixedWidth(200)
+
+        self.correlation_tab = CorrelationVisualization(self)
+
+        self.tab.addTab(self.analysis_tab, "Analyses")
+        self.tab.addTab(self.classification_tab, "Classification")
+        self.tab.addTab(self.correlation_tab, "Correlation")
+        self.tab.currentChanged.connect(self.frame_visualizations)
+
+        self.layout().addWidget(self.tab)
+        self.analysis_tab.setLayout(QHBoxLayout(self))
+        self.analysis_tab.layout().addWidget(self.analysis_widget)
         self.current_visualization = []
         self.current_analysis = None
         self.fullscreen_view = None
         self.analysis_widget.setLayout(QHBoxLayout(self))
+
+    def frame_visualizations(self):
+        self.correlation_tab.barplot.frame_default()
+        self.correlation_tab.matrix.frame_default()
+        self.feature_plot.frame_default()
 
     def activate_analysis(self, analysis: IAnalysisJobAnalysis):
         self.clear_analysis_widget()
         self.current_analysis = analysis
         # self.current_analysis.load_container(self.apply_analysis, sync=True)
         self.apply_analysis()
+
+    def activate_classification(self, exp:Experiment):
+        self.feature_plot.clear_view()
+        segm = self.main_window.project.get_main_segmentation() #type: Segmentation
+        segment_tuples = [SegmentTuple(s.ID, s.get_start(), s.get_end()) for s in segm.segments]
+        features = dict()
+        for f in exp.classification_results:
+            if isinstance(f[0], Segment):
+                if f[1].get_name() not in features:
+                    features[f[1].get_name()] = (f[1], [])
+                features[f[1].get_name()][1].append(f[0].ID - 1)
+
+        self.feature_plot.create_timeline(segment_tuples)
+        for k, v in features.items():
+            self.feature_plot.create_feature(FeatureTuple(k, v[0].voc_obj.get_name(), v[0].class_obj.get_name(), v[1]), True)
+
+        # for scr in self.main_window.project.screenshots:
+        #     self.feature_plot.add_screenshot(scr.img_movie, scr.movie_timestamp)
+
+        keywords, matrix = exp.get_correlation_matrix()
+        features = []
+        for i, k in enumerate(keywords):
+            # CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
+            features.append(CorrelationFeatureTuple(k.word_obj.get_name(), k.voc_obj.get_name(), k.class_obj.get_name(), i))
+        self.correlation_tab.set_data(features, matrix)
 
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()
@@ -95,6 +150,8 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         if len(selected) > 0:
             if isinstance(selected[0], IAnalysisJobAnalysis):
                 self.activate_analysis(selected[0])
+            elif isinstance(selected[0], Experiment):
+                self.activate_classification(selected[0])
 
 
 class AnalysisFullScreenWindow(QMainWindow):
@@ -518,7 +575,6 @@ class FilterCategory(QFrame):
         self.show()
         self.collapse()
 
-
     def on_expand(self):
         if self.is_expanded:
             self.collapse()
@@ -542,7 +598,6 @@ class FilterCategory(QFrame):
             cb.show()
         self.is_expanded = True
         self.filter_section.enlarge(len(self.entries * 150))
-
 
     def paintEvent(self, a0: QPaintEvent):
         super(FilterCategory, self).paintEvent(a0)
