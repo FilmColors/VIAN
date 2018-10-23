@@ -42,6 +42,7 @@ class VIANTextGraphicsItemSignals(QObject):
     onEnter = pyqtSignal(object)
     onLeave = pyqtSignal(object)
 
+
 class VIANTextGraphicsItem(QGraphicsTextItem):
     def __init__(self, text, font, meta = None):
         super(VIANTextGraphicsItem, self).__init__(text)
@@ -60,6 +61,7 @@ class VIANTextGraphicsItem(QGraphicsTextItem):
     def hoverLeaveEvent(self, event: 'QGraphicsSceneHoverEvent'):
         super(VIANTextGraphicsItem, self).hoverLeaveEvent(event)
         self.signals.onLeave.emit(self)
+
 
 class MatrixPlot(EGraphicsView, IVIANVisualization):
     itemClicked = pyqtSignal(object)

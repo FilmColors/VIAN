@@ -27,8 +27,8 @@ class CorrelationVisualization(QWidget, IVIANVisualization):
         self.back_button = QPushButton("Back", self.barplot)
         self.barplot.set_heads_up_widget(self.back_button)
         self.back_button.clicked.connect(partial(self.stack.setCurrentIndex, 0))
-        self.back_button.move(10,10)
-        self.back_button.resize(100,30)
+        self.back_button.move(10, 10)
+        self.back_button.resize(100, 30)
 
         self.setLayout(QHBoxLayout())
         self.layout().addWidget(self.split)
@@ -48,7 +48,7 @@ class CorrelationVisualization(QWidget, IVIANVisualization):
         self.correlation_matrix = correlation_matrix
         self.matrix.set_data(features, correlation_matrix)
         self.barplot.set_data(features, correlation_matrix)
-
+        self.matrix.frame_default()
 
     def get_param_widget(self):
         w = FeatureMatrixParamWidget(self)
@@ -59,13 +59,13 @@ class CorrelationVisualization(QWidget, IVIANVisualization):
         self.matrix.on_filter_changed(features)
         self.barplot.on_filter_changed(features)
 
-
     @pyqtSlot(object)
     def on_feature_selected(self, feature):
         self.barplot.set_current_feature(feature)
-        self.barplot.add_title("Keyword Frequencies for " + feature.name)
         self.barplot.draw()
+        self.barplot.add_title("Keyword Frequencies for " + feature.name)
         self.stack.setCurrentIndex(1)
+        self.barplot.frame_default()
 
 
 class CorrelationBarplot(BarPlot):
@@ -104,9 +104,7 @@ class CorrelationBarplot(BarPlot):
             row = self.current_feature.id
             for f in self.active_features:
                 b = self.add_bar(f.name, self.matrix[row][f.id])
-
-
-
+        self.frame_default()
 
 
 class CorrelationMatrix(MatrixPlot, IVIANVisualization):
@@ -123,6 +121,12 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
         self.active_features = []
         self.correlation_matrix = None
 
+    def frame_default(self):
+        rect = self.scene().itemsBoundingRect()
+        rect.adjust(-50, -50, 100, 100)
+        self.scene().setSceneRect(rect)
+        self.fitInView(rect, Qt.KeepAspectRatio)
+
     def set_data(self, features:List[CorrelationFeatureTuple], correlation_matrix):
         self.max = np.amax(correlation_matrix)
         self.active_features = features
@@ -135,8 +139,6 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
 
         if len(names) > 100:
             names = None
-
-
         self.plot_data(correlation_matrix, names, features, draw_image=True)
 
     def on_enter_text(self, object):
@@ -177,8 +179,6 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
     def on_text_clicked(self, object):
         feature = object.meta
         self.onFeatureClicked.emit(feature)
-
-
 
 
 class FeatureMatrixParamWidget(QWidget):

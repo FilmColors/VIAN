@@ -218,6 +218,7 @@ class UserSettings():
         :param dock_widgets: 
         :return: 
         """
+        # Store the Settings of the DockWidgets
         self.dock_widgets_data = []
         for w in dock_widgets:
             data = dict(
@@ -227,8 +228,8 @@ class UserSettings():
             self.dock_widgets_data.append(data)
 
         ddict = vars(self)
-        if ddict["CONTRIBUTOR"] is not None:
-            ddict['CONTRIBUTOR'] = ddict["CONTRIBUTOR"].serialize()
+        if self.CONTRIBUTOR is not None:
+            ddict['CONTRIBUTOR'] = self.CONTRIBUTOR.serialize()
         try:
             with open(self.store_path, 'w') as f:
                 json.dump(ddict, f)
@@ -302,11 +303,15 @@ class Contributor():
         self.password = password
         self.image_path = ""
         self.affiliation = affiliation
+        self.token = None
 
         #TODO @SILAS, This is the entity that represents the user of VIAN, add additional fields here, they get serialized automatically
 
     def serialize(self):
         return self.__dict__
+
+    def set_token(self, token):
+        self.token = token
 
     def deserialize(self, serialization):
         for attr, value in serialization.items():

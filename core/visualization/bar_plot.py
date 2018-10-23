@@ -38,6 +38,7 @@ class BarPlot(QGraphicsView, IVIANVisualization):
             xmax = 1.0
         self.scene().clear()
         self.points = []
+        py = 0
         for r in self.raw_data:
             title = r[0]
             x = r[1]
@@ -59,6 +60,25 @@ class BarPlot(QGraphicsView, IVIANVisualization):
 
             self.points.append((point, text))
 
+        p = QPen()
+        p.setColor(QColor(255,255,255,200))
+        f = QFont()
+        f.setPointSize(12)
+        if xmax < 10:
+            label_step = 1
+        else:
+            label_step = xmax / 10
+        for i, val in enumerate(range(int(xmax + 1))):
+
+            x = val / xmax * self.max_width
+            self.scene().addLine(x, py, x, py + 20, p)
+            if int(xmax) % label_step == 0:
+                lbl = self.scene().addText(str(round(val, 2)), f)
+                lbl.setDefaultTextColor(QColor(255,255,255,200))
+                center_delta = lbl.boundingRect().width() / 2
+                lbl.setPos(x - center_delta, py + 20)
+
+        self.frame_default()
 
     def frame_default(self):
         rect = self.scene().itemsBoundingRect()

@@ -505,6 +505,7 @@ class Player_VLC(VideoPlayer):
     def get_aspect_ratio(self):
         if self.media_player is None:
             return 4/3
+
         t = self.media_player.video_get_aspect_ratio()
         if t is None:
             return float(4)/3
@@ -581,6 +582,7 @@ class Player_VLC(VideoPlayer):
 
     def on_selected(self,sender, selected):
         pass
+
 
 #region FUTURE: We may need another player to handle certain problems with VLC
 # class Player_Qt(VideoPlayer):

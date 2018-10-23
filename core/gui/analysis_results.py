@@ -63,6 +63,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.tab.addTab(self.analysis_tab, "Analyses")
         self.tab.addTab(self.classification_tab, "Classification")
         self.tab.addTab(self.correlation_tab, "Correlation")
+        self.tab.currentChanged.connect(self.frame_visualizations)
 
         self.layout().addWidget(self.tab)
         self.analysis_tab.setLayout(QHBoxLayout(self))
@@ -71,6 +72,11 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.current_analysis = None
         self.fullscreen_view = None
         self.analysis_widget.setLayout(QHBoxLayout(self))
+
+    def frame_visualizations(self):
+        self.correlation_tab.barplot.frame_default()
+        self.correlation_tab.matrix.frame_default()
+        self.feature_plot.frame_default()
 
     def activate_analysis(self, analysis: IAnalysisJobAnalysis):
         self.clear_analysis_widget()
