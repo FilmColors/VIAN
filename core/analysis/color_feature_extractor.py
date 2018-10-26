@@ -8,7 +8,9 @@ June 2018
 from typing import List
 
 from core.data.computation import ms_to_frames, numpy_to_pixmap
-from core.container.project import *
+import json
+from core.data.interfaces import IAnalysisJob
+from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject, IAnalysisJobAnalysis, VisualizationTab, ParameterWidget
 from core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -134,7 +136,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
         return ColorFeatureParameterWidget()
 
     def serialize(self, data_dict):
-
         d = dict(color_lab=np.array(data_dict["color_lab"]).tolist(),
                  color_bgr=np.array(data_dict["color_bgr"]).tolist(),
                  saturation_l=np.array(data_dict["saturation_l"]).tolist(),

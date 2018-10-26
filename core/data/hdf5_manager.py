@@ -5,6 +5,8 @@ import sys
 import numpy as np
 import inspect
 from core.data.interfaces import IAnalysisJob
+# from core.analysis.analysis_import import SemanticSegmentationAnalysis, BarcodeAnalysisJob, ColorPaletteAnalysis, ColorFeatureAnalysis, ColormetryAnalysis, MovieMosaicAnalysis
+
 
 def load_analysis():
     file_list = []
@@ -30,6 +32,15 @@ def load_analysis():
             continue
     return analyses
 
+# def load_analysis():
+#     return [
+#             eval("SemanticSegmentationAnalysis"),
+#             eval("BarcodeAnalysisJob"),
+#             eval("ColorPaletteAnalysis"),
+#             eval("ColorFeatureAnalysis"),
+#             eval("ColormetryAnalysis"),
+#             eval("MovieMosaicAnalysis")
+#         ]
 
 DEFAULT_SIZE = (50,)
 DS_COL_HIST = "col_histograms"
@@ -53,17 +64,18 @@ class HDF5Manager():
             h5py.File(self.path, "w")
             init = True
         self.h5_file = h5py.File(self.path, "r+")
-        print(list(self.h5_file.keys()))
         return init
 
-
-    def initialize_all(self):
-        for a in load_analysis():
+    def initialize_all(self, analyses = None):
+        if analyses is None:
+            analyses = load_analysis()
+        for a in analyses:
             c = a()
             self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype)
 
     def initialize_dataset(self, name, shape, dtype):
         if name not in self.h5_file:
+            print("Init:", name, shape, dtype)
             self.h5_file.create_dataset(name=name, shape=shape, dtype=dtype, maxshape=(None, ) + shape[1:], chunks=True)
             self._index[name] = 0
 
@@ -72,6 +84,7 @@ class HDF5Manager():
             raise IOError("HDF5 File not opened yet")
         if dataset_name not in self.h5_file:
             self.initialize_all()
+
         pos = self._index[dataset_name]
         if pos > 0 and pos % DEFAULT_SIZE[0] == 0:
             self.h5_file[dataset_name].resize((pos + DEFAULT_SIZE[0], ) + self.h5_file[dataset_name].shape[1:])

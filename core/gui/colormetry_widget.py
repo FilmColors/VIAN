@@ -28,7 +28,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         #
         # self.h_indices = np.array(self.h_indices)
         # self.h_indices = np.array([self.h_indices[:, 0],self.h_indices[:, 1],self.h_indices[:, 2]])
-
+        #
         # self.histogram = HistogramVis(self)
         # self.histogram.plot(8**3 * [1.0], self.h_bgr)
         # self.histogram.view.setYRange(min = 0.1, max = 1.0)

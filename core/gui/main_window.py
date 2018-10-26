@@ -147,7 +147,7 @@ class MainWindow(QtWidgets.QMainWindow):
         loading_screen.showMessage("Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
 
-        self.numpy_data_manager = NumpyDataManager(self)
+        # self.numpy_data_manager = NumpyDataManager(self)
         # self.project_streamer = ProjectStreamerShelve(self)
         self.project_streamer = SQLiteStreamer(self)
 
@@ -417,7 +417,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.node_editor_dock.node_editor,
                                     self.vocabulary_manager,
                                     self.vocabulary_matrix,
-                                    self.numpy_data_manager,
+                                    # self.numpy_data_manager,
                                     self.project_streamer,
                                     self.analysis_results_widget,
                                     self.annotation_options,

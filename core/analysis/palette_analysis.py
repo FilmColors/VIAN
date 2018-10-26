@@ -21,9 +21,9 @@ class ColorPaletteAnalysis(IAnalysisJob):
                                                    dataset_name="ColorPalettes",
                                                    dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6),
                                                    dataset_dtype=np.float16,
-                                                 author="Gaudenz Halter",
-                                                 version="1.0.0",
-                                                 multiple_result=True)
+                                                   author="Gaudenz Halter",
+                                                     version="1.0.0",
+                                                     multiple_result=True)
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """

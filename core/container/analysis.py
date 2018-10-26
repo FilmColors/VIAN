@@ -78,7 +78,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
 
         return data
 
-    def deserialize(self, serialization, streamer):
+    def deserialize(self, serialization, project):
         pass
 
     def delete(self):
@@ -123,7 +123,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
 
             # We want to store the analysis container if it is not already stored
 
-            self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
+            # self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
         except Exception as e:
             print("Exception in NodeScriptAnalysis.serialize(): ", str(e))
 
@@ -147,8 +147,9 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
         self.final_node_ids = []
         self.data = []
         try:
-            data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
-
+            # data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
+            data_json = None
+            #TODO Numpy Storing obsolete for Scripts
             # Loop over each final node of the Script
             for r in data_json:
 
@@ -239,15 +240,16 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
 
         return data
 
-    def deserialize(self, serialization, streamer:ProjectStreamer):
+    def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.analysis_job_class = serialization['analysis_job_class']
         self.notes = serialization['notes']
+
         # VERSION > 0.6.8
         try:
             if serialization['classification_obj'] > 0:
-                self.target_classification_object = streamer.project.get_by_id(serialization['classification_obj'])
+                self.target_classification_object = project.get_by_id(serialization['classification_obj'])
         except Exception as e:
             print(e)
             pass
@@ -257,7 +259,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         # self.data = t().deserialize(streamer.sync_load(self.unique_id))
         self.parameters = serialization['parameters']
 
-        self.set_target_container(streamer.project.get_by_id(serialization['container']))
+        self.set_target_container(project.get_by_id(serialization['container']))
 
         return self
 
@@ -294,22 +296,43 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
     def set_adata(self, d):
         if self.a_class is None:
             self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
-            self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+        self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
 
 class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
     def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None, dataset = ""):
         super(SemanticSegmentationAnalysisContainer, self).__init__(name, results , analysis_job_class, parameters, container, target_classification_object)
         self.dataset = dataset
+        self.entry_shape = None
+
+    def get_adata(self):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+        data = self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
+        return data[0:self.entry_shape[0], 0:self.entry_shape[1]]
+
+    def set_adata(self, d):
+        if self.a_class is None:
+            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+        d, self.entry_shape = self.a_class().to_hdf5(d)
+        self.project.hdf5_manager.dump(d, self.a_class().dataset_name, self.unique_id)
+        self.data = None
 
     def serialize(self):
+        print("Serializing SemanticSeg")
         d = super(SemanticSegmentationAnalysisContainer, self).serialize()
         d['dataset'] = self.dataset
+        d['entry_shape'] = self.entry_shape
+        d['analysis_container_class'] = SemanticSegmentationAnalysisContainer.__name__
         return d
 
     def deserialize(self, serialization, streamer:ProjectStreamer):
         super(SemanticSegmentationAnalysisContainer, self).deserialize(serialization, streamer)
         self.dataset = serialization['dataset']
+        try:
+            self.entry_shape = serialization['entry_shape']
+        except:
+            self.entry_shape = (512, 512)
         return self
 
 class ColormetryAnalysis(AnalysisContainer):
@@ -422,7 +445,7 @@ class ColormetryAnalysis(AnalysisContainer):
         )
         return serialization
 
-    def deserialize(self, serialization, streamer):
+    def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.notes = serialization['notes']

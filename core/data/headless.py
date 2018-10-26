@@ -7,11 +7,11 @@ this it can be used to perform operations in a batch process without having the 
 from core.container.project import *
 from core.data.settings import UserSettings
 from core.data.project_streaming import *
+from core.data.hdf5_manager import *
 from shutil import copy2, move
 # from core.gui.main_window import *
 from typing import Dict, Tuple
 from core.analysis.analysis_import import *
-
 
 VERSION = "0.6.6"
 class HeadlessUserSettings():
@@ -24,7 +24,7 @@ class HeadlessMainWindow(QObject):
     def __init__(self):
         super(HeadlessMainWindow, self).__init__()
         self.thread_pool = QThreadPool()
-        self.numpy_data_manager = NumpyDataManager(self)
+        # self.numpy_data_manager = NumpyDataManager(self)
         self.project_streamer = SQLiteStreamer(self)
         self.version = VERSION
         self.project = None
@@ -73,10 +73,13 @@ class HeadlessMainWindow(QObject):
 
     def worker_progress(self, tpl):
         print(tpl[0], tpl[1])
+
     def worker_error(self, args):
         print("Error", args)
+
     def worker_finished(self, args):
         print("Error", args)
+
     #endregion
 
     # #region Corpus
@@ -93,7 +96,7 @@ class HeadlessMainWindow(QObject):
     def dispatch_on_loaded(self, *args):
         if self.project is not None:
             self.project_streamer.on_loaded(self.project)
-            self.numpy_data_manager.on_loaded(self.project)
+            # self.numpy_data_manager.on_loaded(self.project)
 
     def dispatch_on_closed(self, *args):
         pass
@@ -112,7 +115,7 @@ class HeadlessMainWindow(QObject):
             cap.set(cv2.CAP_PROP_POS_FRAMES, s.frame_pos)
             ret, frame = cap.read()
             s.img_movie = frame
-        print("Loaded")
+
 
 def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
     """
@@ -126,6 +129,11 @@ def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
         mw.project = project
         project.inhibit_dispatch = True
         project.load_project(HeadlessUserSettings(), path)
+        project.hdf5_manager.initialize_all([SemanticSegmentationAnalysis,
+                                             ColorPaletteAnalysis,
+                                             ColorFeatureAnalysis,
+                                             BarcodeAnalysisJob,
+                                             MovieMosaicAnalysis])
         mw.dispatch_on_loaded()
         return project, mw
     except Exception as e:
@@ -200,14 +208,16 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
                     segmentat.create_segment2(segm[0], segm[1], body = segm[2])
 
         # Import Screenshots
+        cap = cv2.VideoCapture(movie_path)
         if screenshots_frame_pos is not None:
-            cap = cv2.VideoCapture(movie_path)
             fps = cap.get(cv2.CAP_PROP_FPS)
             for i, s in enumerate(screenshots_frame_pos):
                 project.create_screenshot_headless("Screenshot_" + str(i).zfill(3), frame_pos=s, fps=fps)
-
         # Store the project
         project.store_project(HeadlessUserSettings(), project.path)
+        project.connect_hdf5()
+        project.hdf5_manager.initialize_all([SemanticSegmentationAnalysis, ColorPaletteAnalysis, ColorFeatureAnalysis, BarcodeAnalysisJob, MovieMosaicAnalysis])
+        project.hdf5_manager.initialize_colorimetry(int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 30))
         return project
     except Exception as e:
         try:
@@ -216,7 +226,6 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         except:
             print("Could not remove folder: ", location)
         raise e
-
 
 
 if __name__ == '__main__':

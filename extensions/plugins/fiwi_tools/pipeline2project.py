@@ -30,7 +30,7 @@ result_path = "F:/_output/"
 project_dir = "F:/_projects/"
 fiwi_root = "F:/fiwi_datenbank/"
 cache_dir = "F:/_cache/"
-template_path = "E:/Programming/Git/visual-movie-annotator/user/templates/ERC_FilmColors.viant"
+template_path = "E:/Programming/Git/visual-movie-annotator/data/templates/ERC_FilmColors.viant"
 
 
 CorpusDBMapping = dict(
@@ -74,6 +74,7 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
         filmography = entry['filmography']
         assignment = entry['assignment']
         masset = entry['movie_asset']
+
         fm_id_str = "_".join([masset['fm_id'][0].zfill(3), masset['fm_id'][1], masset['fm_id'][2]])
 
         # Skip this movie if it is already in the projects
@@ -124,9 +125,12 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
                     uk = exp_keywords[glossary_ids.index(int(k))]
                     experiment.toggle_tag(new_segm, uk)
                 except Exception as e:
-                    idx = glossary_ids2.index(k)
-                    if (glossary_words[idx], glossary_categories[idx]) not in Errors:
-                        Errors.append((glossary_words[idx], glossary_categories[idx]))
+                    if idx in glossary_ids2:
+                        idx = glossary_ids2.index(int(k))
+                        if (glossary_words[idx], glossary_categories[idx]) not in Errors:
+                            Errors.append((glossary_words[idx], glossary_categories[idx]))
+                    else:
+                        print("Whoops")
 
         # Create Screenshots:
         cap = cv2.VideoCapture(movie_path)
@@ -137,7 +141,6 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
         scr_masks = []
         shot_index = dict()
         for i, scr in enumerate(masset['scrs']):
-
             # Add it to the Shot Index for later lookup
             if scr['segm_id'] not in shot_index:
                 shot_index[scr['segm_id']] = dict()
@@ -165,20 +168,22 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
             try:
                 mask = cv2.imread(replace_network_path(mask_file), 0)
 
-                analysis = IAnalysisJobAnalysis(
+                analysis = SemanticSegmentationAnalysisContainer(
                     name="Fg/Bg Segmentation",
                     results=dict(mask=mask.astype(np.uint8),
                                  frame_sizes=(mask.shape[0], mask.shape[1]),
                                  dataset=DATASET_NAME_ADE20K),
                     analysis_job_class=SemanticSegmentationAnalysis,
                     parameters=dict(model=DATASET_NAME_ADE20K, resolution=50),
-                    container=shot
+                    container=shot,
+                    dataset = "ADE20K"
                 )
                 progress("Masks:", dbmovie.movie_name + "_" + str(dbmovie.movie_id), 0.1, c / len(scr_masks))
                 analyses.append(analysis)
                 analysis.a_class = a_class
                 c += 1
-            except:
+            except Exception  as e:
+                raise e
                 continue
         vian_project.add_analyses(analyses)
 
@@ -200,7 +205,7 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
             shot = shot_index[int(ps[0])][int(ps[1])]
 
             palette_fg = palette_assets[p]["palette_fg"]
-            if palette_fg is not None:
+            if palette_fg is not None and len(palette_fg['dist']) != 0:
                 layers = [
                     np.array(palette_fg['layers']),
                     np.array(palette_fg['all_cols']),
@@ -218,7 +223,7 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
                 analyses.append(fg_palette)
 
             palette_bg = palette_assets[p]["palette_bg"]
-            if palette_bg is not None:
+            if palette_bg is not None and len(palette_bg['dist']) != 0:
                 layers = [
                     np.array(palette_bg['layers']),
                     np.array(palette_bg['all_cols']),
@@ -236,7 +241,7 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
                 analyses.append(bg_palette)
 
             palette_glob = palette_assets[p]["palette_glob"]
-            if palette_glob is not None:
+            if palette_glob is not None and len(palette_glob['dist']) != 0:
                 layers = [
                     np.array(palette_glob['layers']),
                     np.array(palette_glob['all_cols']),
@@ -270,6 +275,7 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
             shot = shot_index[int(ps[0])][int(ps[1])]
 
             features_fg = features_assets[p]["features_fg"]
+            print(features_fg)
             if features_fg is not None:
                 features_fg =  IAnalysisJobAnalysis(
                     name="Color-Features" + shot.get_name() + "_FG",
@@ -331,6 +337,7 @@ def generate_project(entry, result_dir, glossary_words, glossary_ids2, glossary_
         return vian_project
         print("\n\n\n")
     except Exception as e:
+        raise e
         print(e)
 
 
@@ -357,6 +364,7 @@ def check_integrity(entry, project_dir):
 
     return "OK"
 
+
 def remove_project(entry, project_dir):
     dbmovie = DBMovie().from_database(entry['dbmovie'])
     filmography = entry['filmography']
@@ -370,9 +378,10 @@ def remove_project(entry, project_dir):
     if os.path.isdir(pdir):
         shutil.rmtree(pdir)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     ### THIS IS THE RIGHT ONE SEPTEMBER
+    HDF5_ROOT = "E:\\Programming\\Git\\visual-movie-annotator\\core\\analysis\\"
 
 
     with open("F:\\_result\\database.json") as f:
@@ -398,7 +407,6 @@ if __name__ == '__main__':
         project_name = project_name.replace(":", "").replace("\'", "").replace("?", "")
 
         project_folder = project_dir + "/" + project_name + "/"
-        print(project_folder)
         overallcounter += 1
         if os.path.isdir(project_folder):
             print("Skipped", overallcounter)
@@ -411,9 +419,11 @@ if __name__ == '__main__':
             threads = []
             print(c, "/", len(data['assets'].keys()))
         else:
-            thread = Thread(target=generate_project, args=(data['assets'][k], project_dir, glossary_words,glossary_ids, glossary_categories,glossary_omit))
+            thread = Thread(target=generate_project, args=(data['assets'][k], project_dir, glossary_words,glossary_ids, glossary_categories, glossary_omit))
             thread.start()
             threads.append(thread)
+        if c == 10:
+            break
 
     for t in threads:
         t.join()

@@ -502,18 +502,26 @@ class VIANProject(IHasName, IClassifiable):
         self.dispatch_changed()
 
     def add_analyses(self, analyses):
-        ids = []
-        objs = []
-        data_types = []
-
         for a in analyses:
-            objs.append(self.main_window.eval_class(a.analysis_job_class)().to_json(a.data))
-            a.data = None
-            a.set_project(self)
-            ids.append(a.unique_id)
-            data_types.append(self.main_window.eval_class(a.analysis_job_class)().serialization_type())
-            self.analysis.append(a)
-        self.main_window.project_streamer.bulk_store(ids, objs, data_types)
+            try:
+                self.add_analysis(a)
+            except Exception as e:
+                print(a.data)
+                raise e
+                print(e, a.analysis_job_class)
+
+        # ids = []
+        # objs = []
+        # data_types = []
+        #
+        # for a in analyses:
+        #     objs.append(self.main_window.eval_class(a.analysis_job_class)().to_json(a.data))
+        #     a.data = None
+        #     a.set_project(self)
+        #     ids.append(a.unique_id)
+        #     data_types.append(self.main_window.eval_class(a.analysis_job_class)().serialization_type())
+        #     self.analysis.append(a)
+        # self.main_window.project_streamer.bulk_store(ids, objs, data_types)
 
     def remove_analysis(self, analysis):
         if analysis in self.analysis:
@@ -740,7 +748,8 @@ class VIANProject(IHasName, IClassifiable):
             scripts=scripts,
             vocabularies=vocabularies,
             experiments=experiments,
-            meta_data = project.meta_data
+            meta_data = project.meta_data,
+            hdf_indices = project.hdf5_manager.get_indices()
         )
         if path is None:
             path = project.path
@@ -800,7 +809,7 @@ class VIANProject(IHasName, IClassifiable):
         self.data_dir = self.folder + "/data/"
         self.hdf5_path = self.data_dir + "analyses.hdf5"
 
-        self.main_window.numpy_data_manager.project = self
+        # self.main_window.numpy_data_manager.project = self
 
         self.hdf5_manager = HDF5Manager()
         self.hdf5_manager.set_path(self.hdf5_path)
@@ -901,7 +910,7 @@ class VIANProject(IHasName, IClassifiable):
         for d in my_dict['analyzes']:
             if d is not None:
                 try:
-                    new = eval(d['analysis_container_class'])().deserialize(d, self.main_window.numpy_data_manager)
+                    new = eval(d['analysis_container_class'])().deserialize(d, self)
                     if isinstance(new, ColormetryAnalysis):
                         try:
                             # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
@@ -1190,7 +1199,7 @@ class VIANProject(IHasName, IClassifiable):
 
     # region Setters/Getters
     def cleanup(self):
-        self.main_window.numpy_data_manager.clean_up([f[0] for f in self.id_list])
+        # self.main_window.numpy_data_manager.clean_up([f[0] for f in self.id_list])
         for l in self.annotation_layers:
             for w in l.annotations:
                 if w.widget is not None:

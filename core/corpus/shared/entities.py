@@ -10,6 +10,7 @@ try:
     from core.container.project import *
     from core.data.settings import Contributor
 except Exception as e:
+    raise e
     class IProjectContainer: pass
     class VIANProject: pass
     class AnnotationLayer: pass

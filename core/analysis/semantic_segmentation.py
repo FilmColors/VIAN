@@ -22,7 +22,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
     def __init__(self):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
                                                            dataset_name="SemanticSegementations",
-                                                           dataset_shape=(512, 512),
+                                                           dataset_shape=(1024, 1024),
                                                            dataset_dtype=np.uint8,
                                                            author="Gaudenz Halter",
                                                            version="1.0.0",
@@ -155,10 +155,16 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         # return json.dumps(self.serialize(container_data))
 
     def to_hdf5(self, data):
-        return cv2.resize(data, self.dataset_shape, interpolation=cv2.INTER_NEAREST)
+        entry = np.zeros(self.dataset_shape, self.dataset_dtype)
+
+        if data.shape[1] > self.dataset_shape[1]:
+            fx = self.dataset_shape[1] / data.shape[1]
+            data = cv2.resize(data, None, None, fx, fx, cv2.INTER_NEAREST)
+        entry[0:data.shape[0], 0:data.shape[1]] = data
+        return entry, data.shape
 
     def from_hdf5(self, db_data):
-        return db_data.astype(np.uint8)
+        return db_data.astype(self.dataset_dtype)
 
 
 class SemanticSegmentationParameterWidget(ParameterWidget):

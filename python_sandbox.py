@@ -1,53 +1,15 @@
-import requests
-import time
-import json
+import cv2
+import numpy as np
 
-token = ''
+d_shape = (512, 512, 3)
 
-# Delete files older than this:
+dataset = np.zeros(d_shape, np.uint8)
+img = cv2.imread("data/test_image.png")
 
-ts_to = int(time.time()) - 30 * 24 * 60 * 60
-
-
-def list_files():
-    params = {
-
-        'token': token
-        , 'ts_to': ts_to
-        , 'count': 1000
-
-    }
-
-    uri = 'https://slack.com/api/files.list'
-    response = requests.get(uri, params=params)
-
-    return json.loads(response.text)['files']
-
-
-def delete_files(file_ids):
-    count = 0
-
-    num_files = len(file_ids)
-
-    for file_id in file_ids:
-        count = count + 1
-
-        params = {
-
-            'token': token
-
-            , 'file': file_id
-
-        }
-
-        uri = 'https://slack.com/api/files.delete'
-
-        response = requests.get(uri, params=params)
-
-        print(count, "of", num_files, "-", file_id, json.loads(response.text)['ok'])
-
-
-files = list_files()
-file_ids = [f['id'] for f in files]
-print(files)
-# delete_files(file_ids)
+if img.shape[1] > d_shape[1]:
+    fx = d_shape[1] / img.shape[1]
+    img = cv2.resize(img, None, None, fx, fx, cv2.INTER_NEAREST)
+dataset[0:img.shape[0], 0:img.shape[1]] = img
+cv2.imshow("Hello", dataset)
+print(img.shape)
+cv2.waitKey()

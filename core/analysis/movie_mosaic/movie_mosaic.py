@@ -14,7 +14,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
         super(MovieMosaicAnalysis, self).__init__(name = "Movie Mosaic",
                                                   source_types=[MOVIE_DESCRIPTOR, SEGMENT, ANNOTATION],
                                                   dataset_name="Mosaics",
-                                                  dataset_shape=(4096, 4096, 3),
+                                                  dataset_shape=(1024, 1024, 3),
                                                   dataset_dtype=np.uint8,
                                                   help_path = "",
                                                   author="Gaudenz Halter",

@@ -160,39 +160,40 @@ class MatrixPlot(EGraphicsView, IVIANVisualization):
         pass
 
 
+class HistogramVis(EGraphicsView, IVIANVisualization):
+    def __init__(self, parent):
+        super(HistogramVis, self).__init__(parent)
+        self.view = EGraphicsView(self, auto_frame=False)
+
+        self.setLayout(QVBoxLayout(self))
+        self.layout().addWidget(self.view)
+        self.items = []
+
+        # self.plt = pg.PlotItem()
+        # self.view.addItem(self.plt)
+
+        self.qimage = None
+
+
+    def plot(self, ys, colors, width = 1):
+        for i in self.items:
+            self.view.removeItem(i)
+        self.items.clear()
+
+        for i in range(len(ys)):
+            item = pg.BarGraphItem(x = [i], height=[ys[i]], width=[width],
+                                   brush=QColor(colors[i][0], colors[i][1], colors[i][2]),
+                                   pen=QPen(QColor(colors[i][0],colors[i][1],colors[i][2])))
+
+            self.view.addItem(item)
+            self.items.append(item)
+        self.view.updateMatrix()
 
 
 
-
-# class HistogramVis(QWidget, IVIANVisualization):
-#     def __init__(self, parent):
-#         super(HistogramVis, self).__init__(parent)
-#         self.view = pg.PlotWidget()
-#
-#         self.setLayout(QVBoxLayout(self))
-#         self.layout().addWidget(self.view)
-#         self.items = []
-#         # self.plt = pg.PlotItem()
-#         # self.view.addItem(self.plt)
-#
-#
-#     def plot(self, ys, colors, width = 1):
-#         for i in self.items:
-#             self.view.removeItem(i)
-#         self.items.clear()
-#
-#         for i in range(len(ys)):
-#             item = pg.BarGraphItem(x = [i], height=[ys[i]], width=[width],
-#                                    brush=QColor(colors[i][0], colors[i][1], colors[i][2]),
-#                                    pen=QPen(QColor(colors[i][0],colors[i][1],colors[i][2])))
-#
-#             self.view.addItem(item)
-#             self.items.append(item)
-#         self.view.updateMatrix()
-#
-#     def update_plot(self, ys):
-#         for i, itm in enumerate(self.items):
-#             itm.setOpts(height=[ys[i]])
+    def update_plot(self, ys):
+        for i, itm in enumerate(self.items):
+            itm.setOpts(height=[ys[i]])
 
 
 class PaletteVis(QWidget, IVIANVisualization):
