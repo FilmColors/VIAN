@@ -319,7 +319,6 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
         self.data = None
 
     def serialize(self):
-        print("Serializing SemanticSeg")
         d = super(SemanticSegmentationAnalysisContainer, self).serialize()
         d['dataset'] = self.dataset
         d['entry_shape'] = self.entry_shape

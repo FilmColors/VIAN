@@ -75,7 +75,6 @@ class HDF5Manager():
 
     def initialize_dataset(self, name, shape, dtype):
         if name not in self.h5_file:
-            print("Init:", name, shape, dtype)
             self.h5_file.create_dataset(name=name, shape=shape, dtype=dtype, maxshape=(None, ) + shape[1:], chunks=True)
             self._index[name] = 0
 
