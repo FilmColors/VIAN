@@ -174,26 +174,19 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
 
         self.qimage = None
 
-
     def plot(self, ys, colors, width = 1):
         for i in self.items:
             self.view.removeItem(i)
         self.items.clear()
-
+        img = QImage(self.size(), QImage.Format_RGB888)
+        p = QPainter()
+        p.begin(img)
         for i in range(len(ys)):
-            item = pg.BarGraphItem(x = [i], height=[ys[i]], width=[width],
-                                   brush=QColor(colors[i][0], colors[i][1], colors[i][2]),
-                                   pen=QPen(QColor(colors[i][0],colors[i][1],colors[i][2])))
-
-            self.view.addItem(item)
-            self.items.append(item)
-        self.view.updateMatrix()
-
-
-
-    def update_plot(self, ys):
-        for i, itm in enumerate(self.items):
-            itm.setOpts(height=[ys[i]])
+            p.fillRect(i * 10, 0, 10, 10, QBrush(QColor(colors[i][0],colors[i][1],colors[i][2])))
+        p.end()
+        self.qimage = img
+        self.scene().clear()
+        self.scene().addPixmap(QPixmap().fromImage(self.qimage))
 
 
 class PaletteVis(QWidget, IVIANVisualization):
