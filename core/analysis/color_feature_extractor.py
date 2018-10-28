@@ -66,6 +66,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
             sign_progress((c - start) / ((stop - start) + 1))
             cap.set(cv2.CAP_PROP_POS_FRAMES, c)
             ret, frame = cap.read()
+            if frame is None:
+                break
             colors_bgr.append(np.mean(frame, axis = (0, 1)))
 
             frame_lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
@@ -164,8 +166,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
                  saturation_p=db_data[7].tolist()
              )
         return d
-
-
 
 
 class ColorFeatureParameterWidget(ParameterWidget):

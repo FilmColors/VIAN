@@ -63,8 +63,9 @@ class ColorPaletteAnalysis(IAnalysisJob):
 
             cap.set(cv2.CAP_PROP_POS_FRAMES, c)
             ret, frame = cap.read()
+            if frame is None:
+                break
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
-
             palettes.append(color_palette(frame))
             c += 1
 

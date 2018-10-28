@@ -207,6 +207,18 @@ def create_hilbert_lookup_table(s):
         idx += 1
     return lookup
 
+def create_hilbert_transform(s):
+    lookup = create_hilbert_lookup_table(s)
+    colors = []
+    a, b, c = (), (), ()
+    for i in range(s**3):
+        t = np.where(lookup == i)
+        a += (t[0], )
+        b += (t[1],)
+        c += (t[2],)
+        colors.append([a, b, c])
+    return (a,b,c), colors
+
 def get_hilbert_lookup():
     if os.path.isfile("core/analysis/colorimetry/hilbert_lookup.npy"):
         return np.load("core/analysis/colorimetry/hilbert_lookup.npy")
