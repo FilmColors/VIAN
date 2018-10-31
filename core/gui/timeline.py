@@ -333,7 +333,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             bars.append(new)
             if i * self.group_height + self.group_height > self.bar_height_min:
                 height += self.group_height
-
         height += self.group_height
 
         item = [control, bars, height]
@@ -460,11 +459,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             ctrl_height = 6
             ctrl = i[0]
             bars = i[1]
-            item_height = ctrl.height()
+            # item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
             ctrl.move(2, loc_y)
-
             if len(bars) >= 1 and len(bars[0].annotations) > 0:
                 loc_y += self.group_height
+            if len(ctrl.groups) > 0:
+                item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
+            else:
+                item_height = (ctrl.height() / np.clip(len(bars), 1, None))
+
             for b in bars:
                 b.move(0, loc_y)
                 b.resize(self.duration/self.scale, item_height)#item_height)
@@ -901,7 +904,6 @@ class TimelineControl(QtWidgets.QWidget):
         else:
             self.resize(self.width(), self.item.strip_height)
 
-
     def set_name(self):
         if self.item is not None:
             self.name = self.item.get_name()
@@ -916,7 +918,10 @@ class TimelineControl(QtWidgets.QWidget):
             if not a0.pos().y() + self.resize_offset < self.timeline.bar_height_min:
                 self.resize(self.width(), a0.pos().y() + self.resize_offset)
                 self.timeline.update_ui()
-                self.onHeightChanged.emit(self.height())
+                if len(self.groups) > 0:
+                    self.onHeightChanged.emit((self.height() - self.timeline.group_height) / len(self.groups))
+                else:
+                    self.onHeightChanged.emit(self.height())
                 self.item.strip_height = self.height()
 
         else:
@@ -963,8 +968,8 @@ class TimelineControl(QtWidgets.QWidget):
                 p2 = QtCore.QPoint(self.width(), y)
                 qp.drawLine(p1, p2)
 
-            p1 = QtCore.QPoint(self.x(), y+ self.timeline.group_height)
-            p2 = QtCore.QPoint(self.width(), y+ self.timeline.group_height)
+            p1 = QtCore.QPoint(self.x(), y + self.timeline.group_height)
+            p2 = QtCore.QPoint(self.width(), y + self.timeline.group_height)
             qp.drawLine(p1, p2)
 
         pen.setColor(QtGui.QColor(255, 255, 255, 200))
@@ -1085,7 +1090,7 @@ class TimelineBar(QtWidgets.QFrame):
 
         for s in self.slices:
             s.move(int(round(s.item.get_start() / self.timeline.scale, 0)), 0)
-            s.resize(int(round((s.item.get_end() - s.item.get_start()) / self.timeline.scale, 0)), self.height())
+            s.resize(int(round((s.item.get_end() - s.item.get_start()) / self.timeline.scale, 0)), self.height() / 2)
 
     def paintEvent(self, QPaintEvent):
         # super(TimelineBar, self).paintEvent(QPaintEvent)

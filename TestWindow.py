@@ -21,14 +21,9 @@ class TWindow(QtWidgets.QMainWindow):
         img = calculate_histogram(img)
 
         table, colors = create_hilbert_transform(16)
-
-        print(table)
-        print(lookup.shape)
         hist_lin = img[table]
-        print(hist_lin.shape)
-
         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
-        self.t.plot(hist_lin, np.array(colors)
+        self.t.plot(hist_lin, np.array(colors))
         self.setCentralWidget(self.t)
         self.resize(1200, 800)
 

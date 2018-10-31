@@ -216,7 +216,7 @@ def create_hilbert_transform(s):
         a += (t[0], )
         b += (t[1],)
         c += (t[2],)
-        colors.append([a, b, c])
+        colors.append([t[0][0], t[1][0], t[2][0]])
     return (a,b,c), colors
 
 def get_hilbert_lookup():

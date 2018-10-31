@@ -164,7 +164,6 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
     def __init__(self, parent):
         super(HistogramVis, self).__init__(parent)
         self.view = EGraphicsView(self, auto_frame=False)
-
         self.setLayout(QVBoxLayout(self))
         self.layout().addWidget(self.view)
         self.items = []
@@ -178,15 +177,22 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
         for i in self.items:
             self.view.removeItem(i)
         self.items.clear()
-        img = QImage(self.size(), QImage.Format_RGB888)
+        img = QImage(QSize(1000,1000), QImage.Format_RGBA8888)
+        img.fill(QColor(0,0,0, 0))
         p = QPainter()
         p.begin(img)
+        pen = QPen()
+        pen.setColor(QColor(255,255,255))
+        p.setPen(pen)
+        p.drawRect(self.rect())
         for i in range(len(ys)):
             p.fillRect(i * 10, 0, 10, 10, QBrush(QColor(colors[i][0],colors[i][1],colors[i][2])))
         p.end()
         self.qimage = img
         self.scene().clear()
-        self.scene().addPixmap(QPixmap().fromImage(self.qimage))
+        img = self.scene().addPixmap(QPixmap().fromImage(self.qimage))
+        self.fitInView(self.scene().itemsBoundingRect())
+        print(self.scene().itemsBoundingRect())
 
 
 class PaletteVis(QWidget, IVIANVisualization):
