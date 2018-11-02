@@ -17,7 +17,7 @@ from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
-from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem
+from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1
 SCALING_MODE_HEIGHT = 2
@@ -97,14 +97,21 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_row_column.setCheckable(True)
         self.a_row_column.setChecked(True)
         self.a_row_column.triggered.connect(partial(self.visualization_changed, "Row-Column"))
+
         self.a_ab_view = self.m_visualization.addAction("CIE-Lab Top View")
         self.a_ab_view.setCheckable(True)
         self.a_ab_view.setChecked(False)
         self.a_ab_view.triggered.connect(partial(self.visualization_changed, "AB-Plane"))
 
+        self.a_colordt_view = self.m_visualization.addAction("Color-dT")
+        self.a_colordt_view.setCheckable(True)
+        self.a_colordt_view.setChecked(False)
+        self.a_colordt_view.triggered.connect(partial(self.visualization_changed, "Color-dT"))
+
         self.inner.resize(400, self.height())
         self.stack = None
         self.ab_view = None
+        self.color_dt = None
         self.slider_image_size = None
         self.lbl_slider_size = None
         self.screenshot_manager = None
@@ -145,17 +152,25 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.curr_visualization = type
         if type == "Row-Column":
             self.a_ab_view.setChecked(False)
+            self.a_colordt_view.setChecked(False)
             self.stack.setCurrentIndex(0)
             self.lbl_slider.setText("N-Columns")
             self.slider_image_size.setVisible(False)
             self.lbl_slider_size.setVisible(False)
         elif type == "AB-Plane":
             self.a_row_column.setChecked(False)
+            self.a_colordt_view.setChecked(False)
             self.stack.setCurrentIndex(1)
             self.lbl_slider.setText("Scale")
             self.slider_image_size.setVisible(True)
             self.lbl_slider_size.setVisible(True)
-
+        elif type == "Color-dT":
+            self.a_row_column.setChecked(False)
+            self.a_ab_view.setChecked(False)
+            self.stack.setCurrentIndex(2)
+            self.lbl_slider.setText("Scale")
+            self.slider_image_size.setVisible(True)
+            self.lbl_slider_size.setVisible(True)
         self.main_window.dispatch_on_changed([self.main_window.screenshots_manager])
 
     def create_bottom_bar(self):
@@ -196,10 +211,15 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
         self.ab_view = ImagePlotCircular(self.stack)
         self.stack.addWidget(self.ab_view)
+
+        self.color_dt = ImagePlotTime(self.stack)
+        self.stack.addWidget(self.color_dt)
+
         self.setWidget(self.stack)
 
         self.screenshot_manager = screenshot_manager
         self.screenshot_manager.ab_view = self.ab_view
+        self.screenshot_manager.color_dt = self.color_dt
         self.create_bottom_bar()
 
     def on_toggle_show_current(self):
@@ -219,13 +239,14 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
     def on_image_size_changed(self):
         self.ab_view.set_image_scale(self.slider_image_size.value())
+        self.color_dt.set_image_scale(self.slider_image_size.value())
 
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
     """
-    def __init__(self,main_window, parent = None, ab_view = None):
+    def __init__(self,main_window, parent = None, ab_view = None, color_dt_view = None):
         super(ScreenshotsManagerWidget, self).__init__(parent)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -290,7 +311,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.rubberBandChanged.connect(self.rubber_band_selection)
 
         self.ab_view = ab_view
-
+        self.color_dt = color_dt_view
         self.ab_view_mean_cache = dict()
         self.qimage_cache = dict()
 
@@ -664,22 +685,29 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         else:
             self.center_images()
 
-        if self.ab_view is not None:
-            if self.ab_view.isVisible():
-                self.ab_view.clear_view()
-                self.ab_view.add_grid()
-                new_cache = dict()
-                for s in self.project.screenshots:
-                    if str(s.unique_id) not in self.ab_view_mean_cache:
-                        mean = np.mean(cv2.cvtColor(s.img_movie, cv2.COLOR_BGR2LAB),axis = (0,1))
-                        mean = np.array([mean[0], 255 - mean[1], mean[2]])
-                    else:
-                        mean = self.ab_view_mean_cache[str(s.unique_id)]
-                    # We have to make sure that we do not cache the place holder before the actual images are loaded
-                    if s.img_movie.shape[0] > 100.0:
-                        new_cache[str(s.unique_id)] = mean
+        if self.ab_view is not None and self.color_dt is not None:
+            self.ab_view.clear_view()
+            self.ab_view.add_grid()
+            new_cache = dict()
+            for s in self.project.screenshots:
+                if str(s.unique_id) not in self.ab_view_mean_cache:
+                    mean = np.mean(cv2.cvtColor(s.img_movie, cv2.COLOR_BGR2LAB),axis = (0,1))
+                    mean = np.array([mean[0], 255 - mean[1], mean[2]])
+                else:
+                    mean = self.ab_view_mean_cache[str(s.unique_id)][0]
+                # We have to make sure that we do not cache the place holder before the actual images are loaded
+                if s.img_movie.shape[0] > 100.0:
+                    new_cache[str(s.unique_id)] = (mean, (lab_to_sat(lab=np.array([(mean / 255)]), implementation="pythagoras")[0], s.movie_timestamp))
+                if self.ab_view.isVisible():
                     self.ab_view.add_image(mean[1], mean[2], s.img_movie, to_float=True)
-                self.ab_view_mean_cache = new_cache
+            self.ab_view_mean_cache = new_cache
+
+            if self.color_dt.isVisible():
+                self.color_dt.clear_view()
+                self.color_dt.add_grid()
+                for s in self.project.screenshots:
+                    sat = self.ab_view_mean_cache[str(s.unique_id)][1]
+                    self.color_dt.add_image(sat[1], sat[0], s.img_movie)
 
     def on_closed(self):
         self.clear_manager()
