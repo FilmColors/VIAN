@@ -59,7 +59,6 @@ class ScreenshotsManagerDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Screenshot Manager")
-
         self.m_display = self.inner.menuBar().addMenu("Display")
         self.a_static = self.m_display.addAction("Static")
         self.a_static.setCheckable(True)
@@ -210,10 +209,20 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.stack.addWidget(screenshot_manager)
 
         self.ab_view = ImagePlotCircular(self.stack)
-        self.stack.addWidget(self.ab_view)
+        self.ab_ctrls = self.ab_view.get_param_widget()
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        w.layout().addWidget(self.ab_view)
+        w.layout().addWidget(self.ab_ctrls)
+        self.stack.addWidget(w)
 
         self.color_dt = ImagePlotTime(self.stack)
-        self.stack.addWidget(self.color_dt)
+        self.color_dt_ctrls = self.color_dt.get_param_widget()
+        w2 = QWidget()
+        w2.setLayout(QVBoxLayout())
+        w2.layout().addWidget(self.color_dt)
+        w2.layout().addWidget(self.color_dt_ctrls)
+        self.stack.addWidget(w2)
 
         self.setWidget(self.stack)
 
@@ -236,6 +245,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
         elif self.curr_visualization == "AB-Plane":
             self.ab_view.set_range_scale(self.slider_n_per_row.value() / 0.01)
+
+        elif self.curr_visualization == "Color-dT":
+            self.color_dt.set_x_scale(self.slider_n_per_row.value() / 0.01)
 
     def on_image_size_changed(self):
         self.ab_view.set_image_scale(self.slider_image_size.value())
@@ -707,7 +719,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.color_dt.add_grid()
                 for s in self.project.screenshots:
                     sat = self.ab_view_mean_cache[str(s.unique_id)][1]
-                    self.color_dt.add_image(sat[1], sat[0], s.img_movie)
+                    self.color_dt.add_image(sat[1], -sat[0], s.img_movie)
 
     def on_closed(self):
         self.clear_manager()

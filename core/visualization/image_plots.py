@@ -728,9 +728,10 @@ class ImagePlotTime(ImagePlot):
         itm.signals.onItemSelection.connect(self.onImageClicked.emit)
         itm.show()
 
-        self.set_x_scale(100)
-        self.set_y_scale(150)
-        self.set_image_scale(250)
+        # self.set_x_scale(self.x_scale)
+        # self.set_y_scale(self.y_scale)
+        # self.set_image_scale(self.img_scale)
+        self.update_position()
         return itm
 
     def clear_view(self):
@@ -773,6 +774,7 @@ class ImagePlotTime(ImagePlot):
     
     def set_image_scale(self, scale):
         scale = scale / 500
+        self.img_scale = scale
         super(ImagePlotTime, self).set_image_scale(scale)
     
     def update_position(self):
@@ -781,6 +783,7 @@ class ImagePlotTime(ImagePlot):
             x = v[0]
             y = v[1]
             itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
+        super(ImagePlotTime, self).set_image_scale(self.img_scale)
         self.update_grid()
 
     def get_param_widget(self):
@@ -792,7 +795,6 @@ class ImagePlotTime(ImagePlot):
         hl2.addWidget(QLabel("Y-Scale:", w))
         hl3 = QHBoxLayout(w)
         hl3.addWidget(QLabel("X-Scale:", w))
-
 
         slider_imagescale = QSlider(Qt.Horizontal, w)
         slider_imagescale.setRange(1, 1000)
