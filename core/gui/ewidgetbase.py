@@ -28,6 +28,34 @@ def line_separator(Orientation):
 
     return frame
 
+class ExpandableWidget(QWidget):
+    def __init__(self, parent, expand_title = "Expand", inner = None):
+        super(ExpandableWidget, self).__init__(parent)
+        self.setLayout(QVBoxLayout())
+        self.btn_expand = QPushButton(expand_title, self)
+        self.layout().addWidget(self.btn_expand)
+        if inner is not None:
+            self.layout().addWidget(inner)
+            self.inner = inner
+            self.inner.hide()
+        self.btn_expand.clicked.connect(self.toggle_expanded)
+
+
+    def set_inner(self, inner):
+        if self.inner is not None:
+            self.layout().removeWidget(self.inner)
+        self.inner = inner
+
+        self.layout().addWidget(inner)
+
+    def toggle_expanded(self):
+        state = None
+        if self.inner is None:
+            return
+        if state is None:
+            self.inner.setVisible(not self.inner.isVisible())
+        else:
+            self.inner.setVisible(state)
 
 class EProgressPopup(QDialog):
     def __init__(self, parent):

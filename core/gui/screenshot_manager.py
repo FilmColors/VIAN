@@ -18,6 +18,7 @@ from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
 from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime
+from core.gui.ewidgetbase import ExpandableWidget
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1
 SCALING_MODE_HEIGHT = 2
@@ -156,6 +157,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
             self.lbl_slider.setText("N-Columns")
             self.slider_image_size.setVisible(False)
             self.lbl_slider_size.setVisible(False)
+            self.inner.statusBar().show()
         elif type == "AB-Plane":
             self.a_row_column.setChecked(False)
             self.a_colordt_view.setChecked(False)
@@ -163,6 +165,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
             self.lbl_slider.setText("Scale")
             self.slider_image_size.setVisible(True)
             self.lbl_slider_size.setVisible(True)
+            self.inner.statusBar().hide()
         elif type == "Color-dT":
             self.a_row_column.setChecked(False)
             self.a_ab_view.setChecked(False)
@@ -170,6 +173,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
             self.lbl_slider.setText("Scale")
             self.slider_image_size.setVisible(True)
             self.lbl_slider_size.setVisible(True)
+            self.inner.statusBar().hide()
         self.main_window.dispatch_on_changed([self.main_window.screenshots_manager])
 
     def create_bottom_bar(self):
@@ -213,7 +217,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         w = QWidget()
         w.setLayout(QVBoxLayout())
         w.layout().addWidget(self.ab_view)
-        w.layout().addWidget(self.ab_ctrls)
+        w.layout().addWidget(ExpandableWidget(w, "Plot Controls", self.ab_ctrls))
         self.stack.addWidget(w)
 
         self.color_dt = ImagePlotTime(self.stack)
@@ -221,7 +225,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         w2 = QWidget()
         w2.setLayout(QVBoxLayout())
         w2.layout().addWidget(self.color_dt)
-        w2.layout().addWidget(self.color_dt_ctrls)
+        w2.layout().addWidget(ExpandableWidget(w2, "Plot Controls", self.color_dt_ctrls))
         self.stack.addWidget(w2)
 
         self.setWidget(self.stack)
