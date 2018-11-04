@@ -844,8 +844,14 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.moveEvent(self, *args, **kwargs)
         self.update()
 
-    def closeEvent(self, *args, **kwargs):
-        self.on_exit()
+    # def closeEvent(self, *args, **kwargs):
+    #     exit = self.on_exit()
+    #     if not exit:
+    #         self.event().ignoreEvent()
+    def closeEvent(self, a0: QtGui.QCloseEvent):
+        exit = self.on_exit()
+        if not exit:
+            a0.ignore()
 
     def resizeEvent(self, *args, **kwargs):
         QtWidgets.QMainWindow.resizeEvent(self, *args, **kwargs)
@@ -1000,7 +1006,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif answer == QMessageBox.No:
                 pass
             else:
-                return
+                return False
 
         self.dispatch_on_closed()
         self.settings.store(self.dock_widgets)
@@ -1013,6 +1019,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.profiler.dump_stats("Profile.prof")
 
         QCoreApplication.quit()
+        return True
 
     def on_undo(self):
         self.project.undo_manager.undo()
@@ -1392,12 +1399,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_application_lost_focus(self, arg):
         if arg is None or len(self.open_dialogs) != 0:
-            # self.set_darwin_player_visibility(False)
             self.set_overlay_visibility(False)
         else:
+            if self.current_perspective in[Perspective.Annotation, Perspective.Segmentation]:
+                self.set_overlay_visibility(True)
+                self.set_overlay_visibility(True)
+                self.onOpenCVFrameVisibilityChanged.emit(True)
+            else:
+                self.set_overlay_visibility(False)
             # self.set_darwin_player_visibility(True)
-            self.set_overlay_visibility(True)
-            self.onOpenCVFrameVisibilityChanged.emit(True)
+
 
     def analysis_triggered(self, analysis):
 
@@ -1730,12 +1741,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_editor = None
 
     def set_overlay_visibility(self, visibility, toggle_keep_hidden = False):
+        print(visibility, "toggle keep hidden:", toggle_keep_hidden, "Forced Hidden:", self.forced_overlay_hidden)
         if self.forced_overlay_hidden and not toggle_keep_hidden:
             return
 
         if visibility:
+            print("overlay shown")
             self.drawing_overlay.show()
         else:
+            print("overlay hidden")
             self.drawing_overlay.hide()
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
         self.update_overlay()

@@ -272,7 +272,6 @@ class ApplySegmentationWindow(QMainWindow):
                 last_idx = i
 
             else:
-                print(len(curr_segment), len(self.indices))
                 curr_segment[1] = self.indices[last_idx]
                 segments.append(curr_segment)
                 curr_segment = [self.indices[last_idx], 0]
