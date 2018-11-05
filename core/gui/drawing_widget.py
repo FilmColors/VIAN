@@ -1187,7 +1187,6 @@ class DrawingText(DrawingBase):
         self.font = QtGui.QFont()
         self.font.setPointSize(annotation_object.font_size)
 
-
     def set_text(self, text = "Some Text"):
         self.text = text
 
@@ -1252,6 +1251,7 @@ class DrawingFreeHand(DrawingBase):
             self.converted_paths.append([[], p[1], p[2]])
             for j in range(len(p[0])):
                 self.converted_paths[i][0].append(QtCore.QPointF(p[0][j][0], p[0][j][1]))
+        self.update()
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.is_drawing = True
@@ -1281,6 +1281,7 @@ class DrawingFreeHand(DrawingBase):
         else:
             if self.button_pressed:
                 self.new_path[0].append(QMouseEvent.pos())
+                self.update()
 
     def mouseReleaseEvent(self, QMouseEvent):
         if not self.is_drawing:
@@ -1309,6 +1310,7 @@ class DrawingFreeHand(DrawingBase):
                 self.button_pressed = False
                 self.update_paths()
 
+
                 # self.is_drawing = False
                 #
                 # self.has_first_point = False
@@ -1321,8 +1323,6 @@ class DrawingFreeHand(DrawingBase):
 
         if self.is_drawing:
             qp.drawRect(self.rect())
-
-
 
         if self.new_path is not None:
             path = QtGui.QPainterPath()
