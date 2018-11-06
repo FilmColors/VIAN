@@ -23,8 +23,8 @@ from threading import Thread
 
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt, QObject, QEvent
+from PyQt5.QtGui import QPixmap, QIcon
 
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow
@@ -32,6 +32,16 @@ from core.gui.main_window import MainWindow
 DEBUG = True
 MAIN_WINDOW = None
 
+class SuperFilter(QObject):
+    def __init__(self, parent):
+        super(SuperFilter, self).__init__(parent)
+
+    def eventFilter(self, a0: 'QObject', a1: 'QEvent'):
+        if a1.type() == QEvent.MouseButtonPress:
+            print(a0.parent(), a0.parent())
+            if a0.parent() is not None: print(a0.parent().parent())
+            print(a0, a1)
+        return super(SuperFilter, self).eventFilter(a0, a1)
 
 def my_exception_hook(exctype, value, traceback):
     # Print the error and traceback
@@ -74,7 +84,11 @@ if __name__ == '__main__':
     settings = UserSettings()
     settings.load()
 
+
     app = QApplication(sys.argv)
+    # filter = SuperFilter(app)
+    # app.installEventFilter(filter)
+    app.setWindowIcon(QIcon("qt_ui/icons/icon_analysis.png"))
     set_attributes(app)
     set_style_sheet(app, settings.THEME_PATH)
     splash = QSplashScreen(QPixmap("qt_ui/images/loading_screen.png"))

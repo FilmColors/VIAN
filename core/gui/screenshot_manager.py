@@ -214,7 +214,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
         self.ab_view = ImagePlotCircular(self.stack)
         self.ab_ctrls = self.ab_view.get_param_widget()
-        w = QWidget()
+        w = QWidget(self.stack)
         w.setLayout(QVBoxLayout())
         w.layout().addWidget(self.ab_view)
         w.layout().addWidget(ExpandableWidget(w, "Plot Controls", self.ab_ctrls))
@@ -862,7 +862,6 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
 
     def mousePressEvent(self, *args, **kwargs):
         self.setSelected(True)
-
         if self.manager.shift_is_pressed:
             selected = self.manager.selected
             if self in selected:

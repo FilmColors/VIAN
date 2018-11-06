@@ -9,7 +9,6 @@ class HistoryView(EDockWidget, IProjectChangeNotify):
         self.setWindowTitle("History View")
         self.history_widget = HistoryWidget(self, self.project().undo_manager)
         self.setWidget(self.history_widget)
-        self.show()
 
     def on_loaded(self, project):
         self.history_widget.undo_manager = project.undo_manager
@@ -58,7 +57,6 @@ class HistoryWidget(QtWidgets.QWidget):
         self.listWidget_Redo.setCurrentItem(None)
         index = len(self.undo_manager.undo_stack) - self.listWidget_Undo.currentRow()
         self.current_item = ["UNDO", index]
-
 
     def on_selection_redo(self):
         self.listWidget_Undo.setCurrentItem(None)
