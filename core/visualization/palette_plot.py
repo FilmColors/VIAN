@@ -459,6 +459,7 @@ class PaletteTimeWidget(QWidget):
         self.layout().addWidget(self.scroll_area)
         self.view = PaletteTimeView(self)
         self.scroll_area.setWidget(self.view)
+        self.scroll_area.setWidgetResizable(True)
         self.slider = QSlider(Qt.Horizontal, self)
         self.lbl_mode_hint = QLabel("Layer Index:", self)
         self.lbl_depth = QLabel("0", self)
@@ -502,7 +503,7 @@ class PaletteTimeWidget(QWidget):
         self.lbl_depth.setText(str(self.slider.value()))
         self.view.depth = self.slider.value()
         self.view.draw_palette()
-        self.view.update()
+        # self.view.update()
 
 
 class PaletteTimeView(EGraphicsView, IVIANVisualization):
@@ -521,6 +522,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         if self.palette is None or self.times is None:
             return
         self.scene().clear()
+        self.scene().setSceneRect(QRectF(0.0,0.0,4000.0,500.0))
         qp = QPainter()
         pen = QPen()
         pen.setWidthF(0.1)
@@ -529,7 +531,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
             self.image = QImage(QSize(4000, 500), QImage.Format_RGBA8888)
             qp.begin(self.image)
             t_width = self.width()
-            self.resize(4000, 500)
+            # self.resize(4000, 500)
         else:
             qp.begin(target)
             t_width = target.width()
@@ -540,19 +542,17 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         for p, t in enumerate(self.palette):
             if p % self.resolution != 0:
                 continue
-            # if p + 1 < len(self.times):
-            #     b_width = ((self.times[p + 1] - self.times[p]) / time_sum * t_width)
-            #     # print((self.times[p + 1] - self.times[p]) / time_sum)
-            #     # print((self.times[p + 1] - self.times[p]) / time_sum * t_width)
-            # else:
-            #     b_width = t_width - x
-            b_width = self.width() / (len(self.palette) / self.resolution)
+
+            if target is None:
+                b_width = self.image.width() / (len(self.palette) / self.resolution)
+            else:
+                b_width = target.width() / (len(self.palette) / self.resolution)
             all_layers = t[0]
             all_cols = t[1]
             all_bins = t[2]
 
             if target is None:
-                t_height = self.height()
+                t_height = self.image.height()
             else:
                 t_height = target.height()
 
@@ -574,10 +574,8 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
                     cols_to_draw = cols_to_draw[new_sort]
                     bins_to_draw = bins_to_draw[new_sort]
                 for q in range(cols_to_draw.shape[0]):
-
                     color = cols_to_draw[q]
                     size = bins_to_draw[q] * width_factor
-
                     qp.fillRect(x - 0.5, y - 0.5, b_width + 1.0, size + 1.0,
                                 QColor(int(color[2]), int(color[1]), int(color[0])))
                     if self.show_grid:
@@ -585,18 +583,8 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
                     y += size
             x += b_width
         qp.end()
-        self.scene().addPixmap(QPixmap().fromImage(self.image))
-        self.fitInView(self.scene().itemsBoundingRect())
-
-    # def paintEvent(self, a0: QPaintEvent):
-    #     if self.image is None:
-    #         return
-    #     qp = QPainter()
-    #     pen = QPen()
-    #     qp.begin(self)
-    #     qp.setPen(pen)
-    #     qp.drawImage(self.rect(), self.image)
-    #     qp.end()
+        itm = self.scene().addPixmap(QPixmap(self.image.size()).fromImage(self.image))
+        self.fitInView(itm.boundingRect(), Qt.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.RightButton:
