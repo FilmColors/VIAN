@@ -299,6 +299,7 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
 
+
 class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
     def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None, dataset = ""):
         super(SemanticSegmentationAnalysisContainer, self).__init__(name, results , analysis_job_class, parameters, container, target_classification_object)
@@ -333,6 +334,7 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
         except:
             self.entry_shape = (512, 512)
         return self
+
 
 class ColormetryAnalysis(AnalysisContainer):
     def __init__(self, results = None, resolution = 30):
@@ -390,23 +392,28 @@ class ColormetryAnalysis(AnalysisContainer):
                 return False
             self.last_idx = frame_idx
             d = self.project.hdf5_manager.get_colorimetry_pal(frame_idx)
+            hist = self.project.hdf5_manager.get_colorimetry_hist(frame_idx)
             layers = [
                 d[:, 1].astype(np.int),
                 d[:, 2:5].astype(np.uint8),
                 d[:, 5].astype(np.int)
             ]
-            return dict(palette = layers)
+            return dict(palette = layers, histogram=hist)
         except Exception as e:
             print(e)
             pass
 
     def get_time_palette(self):
         time_palette_data = []
-        for t in range(len(self.palette_layers) - 1):
+        d = self.project.hdf5_manager.get_colorimetry_pal()
+        palette_layers = d[:, :, 1].astype(np.int)
+        palette_cols = d[:, :, 2:5].astype(np.uint8)
+        palette_bins = d[:, :, 5].astype(np.int)
+        for t in range(palette_layers.shape[0] - 1):
             time_palette_data.append([
-                np.array(self.palette_layers[t]),
-                np.array(self.palette_cols[t]),
-                np.array(self.palette_bins[t])
+                np.array(palette_layers[t]),
+                np.array(palette_cols[t]),
+                np.array(palette_bins[t])
             ])
         return [time_palette_data, self.time_ms]
 

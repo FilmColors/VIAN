@@ -5,6 +5,8 @@ from PyQt5.QtCore import *
 from core.data.interfaces import IProjectChangeNotify
 from core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_mapping_3d, HilbertMode
 from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
+from core.visualization.basic_vis import HistogramVis
+from core.gui.ewidgetbase import ExpandableWidget
 import cv2
 import numpy as np
 
@@ -23,7 +25,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.vis_tab = QTabWidget(self)
         self.lt.addWidget(self.vis_tab)
         self.hilbert_table, self.hilbert_colors = create_hilbert_transform(16)
-        self.hilbert_vis = Hilb
+
         # self.h_bgr = create_hilbert_color_pattern(8, multiplier=32, color_space=cv2.COLOR_Lab2RGB)
         # self.h_indices = hilbert_mapping_3d(8, np.zeros(shape=(8,8,8)), HilbertMode.Indices_All)
         #
@@ -39,11 +41,18 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.palette = PaletteWidget(self)
         self.lab_palette = PaletteLABWidget(self)
         self.time_palette = PaletteTimeWidget(self)
+        self.hilbert_vis = HistogramVis(self)
+        self.hilbert_param = ExpandableWidget(self, "Controls", self.hilbert_vis.get_param_widget())
+        lt_hilbert = QWidget()
+        lt_hilbert.setLayout(QVBoxLayout())
+        lt_hilbert.layout().addWidget(self.hilbert_vis)
+        lt_hilbert.layout().addWidget(self.hilbert_param)
+
         # self.lt.addWidget(self.palette)
         self.vis_tab.addTab(self.palette, "Tree-Palette")
         self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
         self.vis_tab.addTab(self.time_palette, "Time Palette")
-        self.vis_tab.addTab(self.hilbert_vis)
+        self.vis_tab.addTab(lt_hilbert, "Color Histogram")
         self.vis_tab.currentChanged.connect(self.on_tab_changed)
         # self.vis_tab.addTab(self.histogram, "Histogram")
 
@@ -56,6 +65,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                     self.palette.draw_palette()
                 elif self.vis_tab.currentIndex() == 1:
                     self.lab_palette.draw_palette()
+                elif self.vis_tab.currentIndex() == 3:
+                    self.hilbert_vis.plot_color_histogram(data['histogram'])
             except Exception as e:
                 print("Exception in ColormetryWidget.update_timestep()", str(e))
 
@@ -64,6 +75,10 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             self.palette.draw_palette()
         elif self.vis_tab.currentIndex() == 1:
             self.lab_palette.draw_palette()
+        elif self.vis_tab.currentIndex() == 2:
+            ret, col = self.project().get_colormetry()
+            if ret:
+                self.time_palette.set_palette(*col.get_time_palette())
 
     def plot_time_palette(self, data):
         try:

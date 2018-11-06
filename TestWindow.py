@@ -21,6 +21,7 @@ class TWindow(QtWidgets.QMainWindow):
         img = calculate_histogram(img)
 
         table, colors = create_hilbert_transform(16)
+        np.savez("data/hilbert.npz",dict(table=table, colors=colors))
         hist_lin = img[table]
         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
         self.t.plot(hist_lin, np.array(colors))

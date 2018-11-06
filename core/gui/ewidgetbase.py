@@ -39,6 +39,8 @@ class ExpandableWidget(QWidget):
             self.layout().addWidget(inner)
             self.inner = inner
             self.inner.hide()
+        else:
+            self.inner = None
         self.btn_expand.clicked.connect(self.toggle_expanded)
 
 
@@ -203,6 +205,7 @@ class EGraphicsView(QGraphicsView):
         self.curr_scale = 1.0
         self.main_window = main_window
         self.has_context_menu = has_context_menu
+        self.keep_aspect_ratio = True
 
     def set_image(self, pixmap, clear = True):
         if clear:
@@ -231,7 +234,10 @@ class EGraphicsView(QGraphicsView):
 
         elif event.key() == Qt.Key_F:
             self.setSceneRect(QRectF())
-            self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+            if self.keep_aspect_ratio:
+                self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+            else:
+                self.fitInView(self.sceneRect())
             self.curr_scale = 1.0
         else:
             event.ignore()

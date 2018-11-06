@@ -1,12 +1,13 @@
 # import pyqtgraph as pg
 import time
-from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem
+import os
+from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import numpy as np
 from core.data.computation import get_heatmap_value
 from core.gui.ewidgetbase import EGraphicsView
-
+from core.analysis.colorimetry.hilbert import create_hilbert_transform
 from core.gui.tools import ExportImageDialog
 
 class IVIANVisualization():
@@ -161,7 +162,7 @@ class MatrixPlot(EGraphicsView, IVIANVisualization):
 
 
 class HistogramVis(EGraphicsView, IVIANVisualization):
-    def __init__(self, parent):
+    def __init__(self, parent, cache_file = "data/hilbert.npz"):
         super(HistogramVis, self).__init__(parent)
         # self.view = EGraphicsView(self, auto_frame=False)
         self.setLayout(QVBoxLayout(self))
@@ -172,27 +173,125 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
         # self.view.addItem(self.plt)
 
         self.qimage = None
+        if not os.path.isfile(cache_file):
+            self.table, self.colors = create_hilbert_transform(16)
+            np.savez(cache_file, table=self.table, colors=self.colors)
+        else:
+            d = np.load(cache_file)
+            print(d.keys())
+            self.table = (d['table'][0], d['table'][1], d['table'][2])
+            self.colors = d['colors']
+
+        self.raw_data = None
+
+        self.plot_floor = True
+        self.plot_zeros = False
+        self.normalize = True
+        self.draw_grid = False
+        self.plot_log = True
+
+    def plot_color_histogram(self, hist_cube):
+        hist_lin = hist_cube[self.table]
+        if not self.plot_zeros:
+            nonz_idx =  np.nonzero(hist_lin)
+            hist_lin = np.array(hist_lin)[nonz_idx]
+            colors = np.array(self.colors)[nonz_idx[0]]
+        else:
+            colors = np.array(self.colors)
+        if hist_lin.shape[0] == 0:
+            return
+        if self.plot_log:
+            hist_lin = np.log10(hist_lin.astype(np.float32) + 1.0)
+        if self.normalize:
+            hist_lin = (hist_lin / np.amax(hist_lin) * 4096).astype(np.float32)
+
+        self.raw_data = dict(hist=hist_lin, colors = colors)
+        self.plot(hist_lin, colors)
+
+    def redraw(self):
+        if self.raw_data is not None:
+            self.plot(self.raw_data['hist'], self.raw_data['colors'])
 
     def plot(self, ys, colors, width = 1):
         for i in self.items:
             self.view.removeItem(i)
         self.items.clear()
+        self.scene().clear()
         img = QImage(QSize(4096,4096), QImage.Format_RGBA8888)
-        img.fill(QColor(0,0,0, 0))
+        img.fill(QColor(27,27,27,255))
+
         p = QPainter()
         p.begin(img)
         pen = QPen()
-        pen.setColor(QColor(255,255,255))
+        pen.setColor(QColor(255,255,255, 255))
+        pen.setWidth(5)
         p.setPen(pen)
-        p.drawRect(self.rect())
-        for i in range(len(ys)):
-            p.fillRect(i * 1, 0, 1, 4096, QBrush(QColor(colors[i][0],colors[i][1],colors[i][2])))
+        width = 4096 / ys.shape[0]
+        if self.draw_grid:
+            step = 4096 / 5
+            for i in range(5):
+                p.drawLine(0, i * step, 4096, i * step)
+
+        for i in range(ys.shape[0]):
+            p.fillRect(i * width, 4096 - ys[i], width, ys[i], QBrush(QColor(colors[i][0],colors[i][1],colors[i][2])))
+            if self.plot_floor:
+                p.fillRect(i * width, 4050, width, 46,
+                           QBrush(QColor(colors[i][0], colors[i][1], colors[i][2])))
+
         p.end()
         self.qimage = img
         # self.scene().clear()
         img = self.scene().addPixmap(QPixmap().fromImage(self.qimage))
         self.fitInView(self.scene().itemsBoundingRect())
-        print(self.scene().itemsBoundingRect())
+
+    def get_param_widget(self):
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        plot_floor = QCheckBox("Plot Floor")
+        plot_zeros = QCheckBox("Plot Zeros")
+        normalize = QCheckBox("Normalize")
+        draw_grid = QCheckBox("Draw Grid")
+        plot_log = QCheckBox("Plot Log")
+
+        plot_floor.setChecked(self.plot_floor)
+        plot_zeros.setChecked(self.plot_zeros)
+        normalize.setChecked(self.normalize)
+        draw_grid.setChecked(self.draw_grid)
+        plot_log.setChecked(self.plot_log)
+
+        plot_floor.stateChanged.connect(self.set_plot_floor)
+        plot_zeros.stateChanged.connect(self.set_plot_zeros)
+        normalize.stateChanged.connect(self.set_normalize)
+        draw_grid.stateChanged.connect(self.set_draw_grid)
+        plot_log.stateChanged.connect(self.set_plot_log)
+
+        w.layout().addWidget(plot_floor)
+        w.layout().addWidget(plot_zeros)
+        w.layout().addWidget(normalize)
+        w.layout().addWidget(draw_grid)
+        w.layout().addWidget(plot_log)
+
+        return w
+
+    def set_plot_floor(self, state):
+        self.plot_floor = state
+        self.redraw()
+
+    def set_plot_zeros(self, state):
+        self.plot_zeros = state
+        self.redraw()
+
+    def set_normalize(self, state):
+        self.normalize = state
+        self.redraw()
+
+    def set_draw_grid(self, state):
+        self.draw_grid = state
+        self.redraw()
+
+    def set_plot_log(self, state):
+        self.plot_log = state
+        self.redraw()
 
 
 class PaletteVis(QWidget, IVIANVisualization):

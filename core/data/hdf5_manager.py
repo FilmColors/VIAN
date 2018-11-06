@@ -141,8 +141,14 @@ class HDF5Manager():
         t = np.reshape(self.h5_file[DS_COL_TIME], newshape=self.h5_file[DS_COL_TIME].shape[0])
         return t
 
-    def get_colorimetry_pal(self, idx):
-        return self.h5_file[DS_COL_PAL][idx]
+    def get_colorimetry_pal(self, idx = None):
+        if idx is not None:
+            return self.h5_file[DS_COL_PAL][idx]
+        else:
+            return self.h5_file[DS_COL_PAL]
+
+    def get_colorimetry_hist(self, idx):
+        return self.h5_file[DS_COL_HIST][idx]
 
     def col_histograms(self):
         return self.h5_file[DS_COL_HIST]

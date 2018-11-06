@@ -11,6 +11,7 @@ import sys
 from core.analysis.colorimetry.hilbert import *
 from core.visualization.basic_vis import IVIANVisualization
 from core.data.computation import *
+from core.gui.ewidgetbase import EGraphicsView
 import numpy as np
 
 
@@ -504,9 +505,9 @@ class PaletteTimeWidget(QWidget):
         self.view.update()
 
 
-class PaletteTimeView(QWidget, IVIANVisualization):
+class PaletteTimeView(EGraphicsView, IVIANVisualization):
     def __init__(self, parent):
-        super(PaletteTimeView, self).__init__(parent)
+        super(PaletteTimeView, self).__init__(parent, auto_frame=False)
         self.times = None
         self.palette = None
         self.depth = 0
@@ -514,20 +515,21 @@ class PaletteTimeView(QWidget, IVIANVisualization):
         self.show_grid = False
         self.sorting = "Cluster"
         self.setAttribute(Qt.WA_OpaquePaintEvent)
-        self.resolution = 5
+        self.resolution = 1
 
     def draw_palette(self, target=None):
         if self.palette is None or self.times is None:
             return
+        self.scene().clear()
         qp = QPainter()
         pen = QPen()
         pen.setWidthF(0.1)
         pen.setColor(QColor(0, 0, 0, 255))
         if target is None:
-            self.image = QImage(self.size(), QImage.Format_RGBA8888)
+            self.image = QImage(QSize(4000, 500), QImage.Format_RGBA8888)
             qp.begin(self.image)
             t_width = self.width()
-            self.resize(4000, 500)
+            # self.resize(4000, 500)
         else:
             qp.begin(target)
             t_width = target.width()
@@ -583,16 +585,18 @@ class PaletteTimeView(QWidget, IVIANVisualization):
                     y += size
             x += b_width
         qp.end()
+        self.scene().addPixmap(QPixmap().fromImage(self.image))
+        # self.fitInView(self.scene().itemsBoundingRect())
 
-    def paintEvent(self, a0: QPaintEvent):
-        if self.image is None:
-            return
-        qp = QPainter()
-        pen = QPen()
-        qp.begin(self)
-        qp.setPen(pen)
-        qp.drawImage(self.rect(), self.image)
-        qp.end()
+    # def paintEvent(self, a0: QPaintEvent):
+    #     if self.image is None:
+    #         return
+    #     qp = QPainter()
+    #     pen = QPen()
+    #     qp.begin(self)
+    #     qp.setPen(pen)
+    #     qp.drawImage(self.rect(), self.image)
+    #     qp.end()
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.RightButton:
