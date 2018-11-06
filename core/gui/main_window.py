@@ -11,6 +11,7 @@ import sys
 import threading
 import importlib
 from functools import partial
+from PyQt5.QtGui import QKeySequence
 from visualizer.vis_main_window import *
 from core.analysis.analysis_import import *
 from core.concurrent.auto_screenshot import *
@@ -323,6 +324,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionCopy.triggered.connect(self.on_copy)
         self.actionPaste.triggered.connect(self.on_paste)
         self.actionDelete.triggered.connect(self.on_delete)
+        self.actionDelete.setShortcuts([QKeySequence(Qt.Key_Delete), QKeySequence(Qt.Key_Backspace)])
 
         # Tab Windows
         self.actionScreenshot_Manager.triggered.connect(self.create_screenshot_manager_dock_widget)
