@@ -28,6 +28,7 @@ def line_separator(Orientation):
 
     return frame
 
+
 class ExpandableWidget(QWidget):
     def __init__(self, parent, expand_title = "Expand", inner = None):
         super(ExpandableWidget, self).__init__(parent)
@@ -56,6 +57,7 @@ class ExpandableWidget(QWidget):
             self.inner.setVisible(not self.inner.isVisible())
         else:
             self.inner.setVisible(state)
+
 
 class EProgressPopup(QDialog):
     def __init__(self, parent):
@@ -559,6 +561,7 @@ class EditableListWidget(QWidget):
             self.onItemDeleted.emit(itm.name, itm)
             self.items.remove(itm)
 
+
 class EditableListWidgetItem(QListWidgetItem):
     def __init__(self, parent, name, meta):
         super(EditableListWidgetItem, self).__init__(parent)
@@ -569,6 +572,7 @@ class EditableListWidgetItem(QListWidgetItem):
 
 class VIANMoveableGraphicsItemSignals(QObject):
     hasBeenMoved = pyqtSignal(object)
+
 
 class VIANMovableGraphicsItem(QGraphicsPixmapItem):
     def __init__(self, pixmap: QPixmap, hover_text=None, mime_data=None):
@@ -592,8 +596,6 @@ class VIANMovableGraphicsItem(QGraphicsPixmapItem):
         if self.isSelected():
             painter.setPen(QPen(QColor(255,0,0,200)))
             painter.drawRect(QRectF(0,0, self.sceneBoundingRect().width(), self.sceneBoundingRect().height()))
-
-
 
 
 #region POPUPS

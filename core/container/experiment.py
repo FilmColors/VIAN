@@ -8,6 +8,7 @@ from core.gui.vocabulary import VocabularyItem
 import time
 import numpy as np
 
+
 class Vocabulary(IProjectContainer, IHasName):
     """
     :var name: The Name of the Vocabulary

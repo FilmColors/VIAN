@@ -67,6 +67,9 @@ def open_context_menu(main_window, pos, containers, project, screenshot_root = F
         if container_type == EXPERIMENT:
             return ExperimentContextMenu(main_window, pos, project, containers)
 
+        if container_type == CLASSIFICATION_OBJECT:
+            return ClassificationObjectContextMenu(main_window, pos, project, containers)
+
         else:
             cm = ContextMenu(main_window, pos)
             return cm
@@ -641,3 +644,23 @@ class CorpusProjectContextMenu(ContextMenu):
 
     def on_remove(self):
         self.corpus_client.remove_project(self.dbproject)
+
+
+class ClassificationObjectContextMenu(ContextMenu):
+    def __init__(self, parent, pos, project, cl_obj):
+        super(ClassificationObjectContextMenu, self).__init__(parent, pos)
+        self.cl_obj = cl_obj[0]
+        self.project = project
+
+        self.action_set_active = self.addAction("Set as Active Classification Object")
+        self.action_set_active.triggered.connect(self.on_set_active)
+
+        self.action_delete = self.addAction("Remove Classification Object")
+        self.action_delete.triggered.connect(self.on_remove)
+        self.popup(pos)
+
+    def on_set_active(self):
+        pass
+
+    def on_remove(self):
+        self.cl_obj.experiment.remove_classification_object(self.cl_obj)

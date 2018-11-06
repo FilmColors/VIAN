@@ -3,7 +3,7 @@ from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from core.data.interfaces import IProjectChangeNotify
-from core.analysis.colorimetry.hilbert import create_hilbert_color_pattern, hilbert_mapping_3d, HilbertMode
+from core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_mapping_3d, HilbertMode
 from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
 import cv2
 import numpy as np
@@ -22,7 +22,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
         self.vis_tab = QTabWidget(self)
         self.lt.addWidget(self.vis_tab)
-
+        self.hilbert_table, self.hilbert_colors = create_hilbert_transform(16)
+        self.hilbert_vis = Hilb
         # self.h_bgr = create_hilbert_color_pattern(8, multiplier=32, color_space=cv2.COLOR_Lab2RGB)
         # self.h_indices = hilbert_mapping_3d(8, np.zeros(shape=(8,8,8)), HilbertMode.Indices_All)
         #
@@ -42,6 +43,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.vis_tab.addTab(self.palette, "Tree-Palette")
         self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
         self.vis_tab.addTab(self.time_palette, "Time Palette")
+        self.vis_tab.addTab(self.hilbert_vis)
         self.vis_tab.currentChanged.connect(self.on_tab_changed)
         # self.vis_tab.addTab(self.histogram, "Histogram")
 

@@ -27,7 +27,6 @@ class TWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.t)
         self.resize(1200, 800)
 
-
         self.show()
 
     def on_change(self, args):

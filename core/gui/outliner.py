@@ -115,6 +115,10 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             for i, exp in enumerate(self.main_window.project.experiments):
                 experiment_item = ExperimentItem(self.experiment_group, i, exp)
                 self.item_list.append(experiment_item)
+                cl_obj_root = ClassificationObjectsRoot(experiment_item, 6)
+                for cl_obj in exp.get_classification_objects_plain():
+                    cl_obj_item = ClassificationObjectsItem(cl_obj_root, 7, cl_obj)
+                    self.item_list.append(cl_obj_item)
 
             if not first_time:
                 self.project_item.setExpanded(exp_p_item)
@@ -135,7 +139,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                     for i, a in enumerate(entry.get_container().connected_analyses):
                         analysis_item = AnalyzesOutlinerItem(entry, i, a)
                         self.item_list.append(analysis_item)
-
 
             self.on_selected(None, self.project().get_selected())
 
@@ -710,6 +713,7 @@ class AnalyzesOutlinerGroupItem(AbstractOutlinerItem):
         self.setText(0, self.name)
         self.setForeground(0, QtGui.QColor(9, 170, 60)) #7,133,47
 
+
 class NodeScriptsRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(NodeScriptsRootItem, self).__init__(parent, index)
@@ -800,6 +804,38 @@ class ExperimentItem(AbstractOutlinerItem):
     def update_item(self):
         self.setText(0, self.item.get_name())
 
+class ClassificationObjectsRoot(AbstractOutlinerItem):
+    def __init__(self, parent, index):
+        super(ClassificationObjectsRoot, self).__init__(parent, index)
+        self.update_item()
+
+    def set_name(self, name):
+        pass
+        "Not implemented"
+
+    def update_item(self):
+        self.setText(0, "Classification Objects")
+        self.setForeground(0, QtGui.QColor(106,165,255))
+
+class ClassificationObjectsItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, cl_obj):
+        super(ClassificationObjectsItem, self).__init__(parent, index)
+        self.has_item = True
+        self.is_editable = True
+        self.item = cl_obj
+        self.update_item()
+
+    def get_container(self):
+        return self.item
+
+    def set_name(self, name):
+        self.item.set_name(name)
+
+    def get_name(self):
+        return self.item.get_name()
+
+    def update_item(self):
+        self.setText(0, self.item.get_name())
 
 pass
 #endregion

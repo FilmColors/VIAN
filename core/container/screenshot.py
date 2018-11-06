@@ -82,10 +82,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.shot_id_segm = segm_id
 
     def set_notes(self, notes):
-        self.notes = notes
         self.project.undo_manager.to_undo((self.set_notes, [notes]),
                                           (self.set_notes, [self.notes]))
-        # self.dispatch_on_changed(item=self)
+        self.notes = notes
+        self.dispatch_on_changed(item=self)
 
     def set_annotation_visibility(self, visibility):
         self.annotation_is_visible = visibility
@@ -122,9 +122,9 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
     def set_name(self, name):
-        self.title = name
         self.project.undo_manager.to_undo((self.set_title, [name]),
                                           (self.set_title, [self.title]))
+        self.title = name
         self.dispatch_on_changed(item=self)
 
     def update_scene_id(self, segmentation):
