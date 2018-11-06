@@ -529,7 +529,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
             self.image = QImage(QSize(4000, 500), QImage.Format_RGBA8888)
             qp.begin(self.image)
             t_width = self.width()
-            # self.resize(4000, 500)
+            self.resize(4000, 500)
         else:
             qp.begin(target)
             t_width = target.width()
@@ -586,7 +586,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
             x += b_width
         qp.end()
         self.scene().addPixmap(QPixmap().fromImage(self.image))
-        # self.fitInView(self.scene().itemsBoundingRect())
+        self.fitInView(self.scene().itemsBoundingRect())
 
     # def paintEvent(self, a0: QPaintEvent):
     #     if self.image is None:
