@@ -29,7 +29,7 @@ from PyQt5.QtGui import QPixmap, QIcon
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow
 
-DEBUG = True
+DEBUG = False
 MAIN_WINDOW = None
 
 class SuperFilter(QObject):
@@ -42,6 +42,7 @@ class SuperFilter(QObject):
             if a0.parent() is not None: print(a0.parent().parent())
             print(a0, a1)
         return super(SuperFilter, self).eventFilter(a0, a1)
+
 
 def my_exception_hook(exctype, value, traceback):
     # Print the error and traceback
@@ -57,6 +58,7 @@ def my_exception_hook(exctype, value, traceback):
         QMessageBox.warning(MAIN_WINDOW, "Error occured", "Oups, there has gone something wrong.\n"
                                                           "Probably you can just work on, probably not.\n"
                                                           "Best you make a backup of your project now. ")
+
 
 def handler(msg_type, msg_log_context, msg_string):
     pass

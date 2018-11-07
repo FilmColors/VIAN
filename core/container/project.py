@@ -811,13 +811,6 @@ class VIANProject(IHasName, IClassifiable):
 
         # self.main_window.numpy_data_manager.project = self
 
-        self.hdf5_manager = HDF5Manager()
-        self.hdf5_manager.set_path(self.hdf5_path)
-
-        try:
-            self.hdf5_manager.set_indices(my_dict['hdf_indices'])
-        except Exception as e:
-            self.hdf5_manager.initialize_all()
 
 
 
@@ -839,6 +832,37 @@ class VIANProject(IHasName, IClassifiable):
         except Exception as e:
             print("Exception occured during loading:", str(e))
             move_project_to_directory_project = True
+
+        # Migrating the Project to the new FileSystem
+        if move_project_to_directory_project:
+            answer = QMessageBox.question(self.main_window, "Project Migration", "This Project seems to be older than 0.2.9.\n\n"
+                                                            "VIAN uses a directory System since 0.2.10,\n "
+                                                            "do you want to move the Project to the new System now?")
+            if answer == QMessageBox.Yes:
+                try:
+                    old_path = self.path
+
+                    folder = QFileDialog.getExistingDirectory()
+                    self.folder = folder + "/" + self.name
+                    self.path = self.folder + "/" + self.name
+                    os.mkdir(self.folder)
+                    self.create_file_structure()
+                    copy2(old_path, self.path + settings.PROJECT_FILE_EXTENSION)
+
+                except Exception as e:
+                    print(e)
+        # Check the FileStructure integrity anyway
+        else:
+            self.create_file_structure()
+
+        self.hdf5_manager = HDF5Manager()
+        self.hdf5_manager.set_path(self.hdf5_path)
+
+        try:
+            self.hdf5_manager.set_indices(my_dict['hdf_indices'])
+        except Exception as e:
+            self.hdf5_manager.initialize_all()
+
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
@@ -935,27 +959,7 @@ class VIANProject(IHasName, IClassifiable):
                         node.operation.result = res
 
         self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
-        # Migrating the Project to the new FileSystem
-        if move_project_to_directory_project:
-            answer = QMessageBox.question(self.main_window, "Project Migration", "This Project seems to be older than 0.2.9.\n\n"
-                                                            "VIAN uses a directory System since 0.2.10,\n "
-                                                            "do you want to move the Project to the new System now?")
-            if answer == QMessageBox.Yes:
-                try:
-                    old_path = self.path
 
-                    folder = QFileDialog.getExistingDirectory()
-                    self.folder = folder + "/" + self.name
-                    self.path = self.folder + "/" + self.name
-                    os.mkdir(self.folder)
-                    self.create_file_structure()
-                    copy2(old_path, self.path + settings.PROJECT_FILE_EXTENSION)
-
-                except Exception as e:
-                    print(e)
-        # Check the FileStructure integrity anyway
-        else:
-            self.create_file_structure()
 
         if self.colormetry_analysis is not None:
             if not self.hdf5_manager.has_colorimetry():
@@ -1329,6 +1333,13 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.fps = fps
         self.is_relative = False
         self.meta_data = dict()
+        self.margin_rect = None
+
+    def set_marginless_frame(self, rect):
+        self.margin_rect = rect
+
+    def get_marginless_rect(self):
+        return self.margin_rect
 
     def serialize(self):
         data = dict(

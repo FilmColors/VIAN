@@ -35,8 +35,12 @@ class ColorPaletteAnalysis(IAnalysisJob):
         args = []
         fps = project.movie_descriptor.fps
         for tgt in targets:
-            args.append([ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps), project.movie_descriptor.movie_path, parameters, tgt.get_id()])
-
+            args.append([ms_to_frames(tgt.get_start(), fps),
+                         ms_to_frames(tgt.get_end(), fps),
+                         project.movie_descriptor.movie_path,
+                         parameters,
+                         tgt.get_id(),
+                         project.movie_descriptor.get_marginless_rect()])
         return args
 
     def process(self, args, sign_progress):
@@ -48,6 +52,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
         stop = args[1]
         movie_path = args[2]
         params = args[3]
+        margins = args[5]
+
 
         palettes = []
 
@@ -63,8 +69,14 @@ class ColorPaletteAnalysis(IAnalysisJob):
 
             cap.set(cv2.CAP_PROP_POS_FRAMES, c)
             ret, frame = cap.read()
+
             if frame is None:
                 break
+
+            # Get sub frame if there are any margins
+            if margins is not None:
+                frame = frame[margins[0]:margins[2], margins[1], margins[3]]
+
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
             palettes.append(color_palette(frame))
             c += 1

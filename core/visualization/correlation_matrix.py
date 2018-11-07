@@ -128,6 +128,8 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
         self.fitInView(rect, Qt.KeepAspectRatio)
 
     def set_data(self, features:List[CorrelationFeatureTuple], correlation_matrix):
+        if correlation_matrix.shape[0] == 0:
+            return
         self.max = np.amax(correlation_matrix)
         self.active_features = features
         self.correlation_matrix = correlation_matrix
