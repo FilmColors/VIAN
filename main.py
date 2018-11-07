@@ -88,7 +88,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     # filter = SuperFilter(app)
     # app.installEventFilter(filter)
-    app.setWindowIcon(QIcon("qt_ui/icons/icon_analysis.png"))
+    app.setWindowIcon(QIcon("qt_ui/images/main.png"))
     set_attributes(app)
     set_style_sheet(app, settings.THEME_PATH)
     splash = QSplashScreen(QPixmap("qt_ui/images/loading_screen.png"))
