@@ -15,6 +15,7 @@ from PyQt5.QtGui import QKeySequence
 from visualizer.vis_main_window import *
 from core.analysis.analysis_import import *
 from core.concurrent.auto_screenshot import *
+from core.gui.letterbox_widget import LetterBoxWidget
 from core.concurrent.auto_segmentation import *
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from core.concurrent.worker import MinimalThreadWorker
@@ -400,6 +401,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSetMovie.triggered.connect(self.on_set_movie_path)
         self.actionReload_Movie.triggered.connect(self.on_reload_movie)
         self.actionClearRecent.triggered.connect(self.clear_recent)
+        self.actionSet_Letterbox.triggered.connect(self.on_set_letterbox)
 
         # Corpus
         self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
@@ -1413,6 +1415,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.set_overlay_visibility(False)
             # self.set_darwin_player_visibility(True)
 
+    def on_set_letterbox(self):
+        if self.project is not None:
+            dialog = LetterBoxWidget(self, self)
+            dialog.set_movie(self.project.movie_descriptor)
+            dialog.show()
+            dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
 
     def analysis_triggered(self, analysis):
 
@@ -1614,10 +1622,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.store_project(self.settings)
 
         self.project.inhibit_dispatch = False
-        self.dispatch_on_loaded()
 
-        if finish_callback is not None:
-            finish_callback()
+        dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
+        dialog.set_movie(self.project.movie_descriptor)
+        dialog.show()
+        dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
+
+        # if finish_callback is not None:
+        #     finish_callback()
 
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
@@ -1745,15 +1757,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_editor = None
 
     def set_overlay_visibility(self, visibility, toggle_keep_hidden = False):
-        print(visibility, "toggle keep hidden:", toggle_keep_hidden, "Forced Hidden:", self.forced_overlay_hidden)
+        # print(visibility, "toggle keep hidden:", toggle_keep_hidden, "Forced Hidden:", self.forced_overlay_hidden)
         if self.forced_overlay_hidden and not toggle_keep_hidden:
             return
 
         if visibility:
-            print("overlay shown")
+            # print("overlay shown")
             self.drawing_overlay.show()
         else:
-            print("overlay hidden")
+            # print("overlay hidden")
             self.drawing_overlay.hide()
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
         self.update_overlay()

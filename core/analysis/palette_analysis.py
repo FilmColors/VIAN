@@ -40,7 +40,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
                          project.movie_descriptor.movie_path,
                          parameters,
                          tgt.get_id(),
-                         project.movie_descriptor.get_marginless_rect()])
+                         project.movie_descriptor.get_letterbox_rect()])
         return args
 
     def process(self, args, sign_progress):
@@ -75,7 +75,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
 
             # Get sub frame if there are any margins
             if margins is not None:
-                frame = frame[margins[0]:margins[2], margins[1], margins[3]]
+                frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
             palettes.append(color_palette(frame))

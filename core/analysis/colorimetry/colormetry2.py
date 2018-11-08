@@ -38,7 +38,7 @@ class ColormetryJob2(QObject):
             frame_duration,
             self.resolution,
             project.movie_descriptor.fps,
-            project.movie_descriptor.get_marginless_rect()
+            project.movie_descriptor.get_letterbox_rect()
         ]
 
     def run_concurrent(self, args, callback):
@@ -47,6 +47,7 @@ class ColormetryJob2(QObject):
         end = args[2]
         resolution = args[3]
         fps = args[4]
+        margins = args[5]
 
         start *= resolution
         length = np.clip(int(end - start), 1, None)
@@ -72,7 +73,9 @@ class ColormetryJob2(QObject):
 
             # Get sub frame if there are any margins
             if margins is not None:
-                frame = frame[margins[0]:margins[2], margins[1], margins[3]]
+                frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+                cv2.imshow("", frame)
+                cv2.waitKey(5)
 
             # Colorspace Conversion
             frame_lab = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2Lab)

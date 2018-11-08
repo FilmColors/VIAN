@@ -1333,13 +1333,13 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.fps = fps
         self.is_relative = False
         self.meta_data = dict()
-        self.margin_rect = None
+        self.letterbox_rect = None
 
-    def set_marginless_frame(self, rect):
-        self.margin_rect = rect
+    def set_letterbox_rect(self, rect):
+        self.letterbox_rect = rect
 
-    def get_marginless_rect(self):
-        return self.margin_rect
+    def get_letterbox_rect(self):
+        return self.letterbox_rect
 
     def serialize(self):
         data = dict(
@@ -1352,7 +1352,8 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             duration=self.duration,
             notes=self.notes,
             is_relative = self.is_relative,
-            meta_data = self.meta_data
+            meta_data = self.meta_data,
+            letterbox_rect = self.letterbox_rect
         )
 
         return data

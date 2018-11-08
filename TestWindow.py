@@ -10,21 +10,14 @@ from core.gui.tools import StringList
 from visualizer.vis_main_window import *
 from core.visualization.basic_vis import HistogramVis
 from core.analysis.colorimetry.hilbert import create_hilbert_transform
+from core.gui.letterbox_widget import LetterBoxWidget
 
 # CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = HistogramVis(self)
-        lookup = np.load("core/analysis/colorimetry/hilbert_lookup.npy")
-        img = cv2.imread("data/test_image.png")
-        img = calculate_histogram(img)
-
-        table, colors = create_hilbert_transform(16)
-        np.savez("data/hilbert.npz",dict(table=table, colors=colors))
-        hist_lin = img[table]
-        # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
-        self.t.plot(hist_lin, np.array(colors))
+        self.t = LetterBoxWidget(self)
+        self.t.set_movie("C:\\Users\\Gaudenz Halter\\Videos\\Hyper\\Netflix\\trailer.mp4")
         self.setCentralWidget(self.t)
         self.resize(1200, 800)
 
