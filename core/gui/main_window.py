@@ -52,7 +52,8 @@ from core.gui.quick_annotation import QuickAnnotationDock
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
-from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog, ClassificationWindow
+from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
+from core.gui.classification import ClassificationWindow
 from core.gui.face_identificator import FaceIdentificatorDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults

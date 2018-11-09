@@ -6,7 +6,7 @@ import os
 
 from random import sample
 from visualizer.presentation.presentation_widget import *
-from core.gui.vocabulary import CheckBoxGroupWidget
+from core.gui.classification import CheckBoxGroupWidget
 from visualizer.widgets.search_bar import *
 from core.corpus.shared.entities import *
 from visualizer.widgets.representation_widgets import *
