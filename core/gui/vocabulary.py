@@ -45,7 +45,6 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.main_window = main_window
         self.project = main_window.project
 
-
         self.treeView = VocabularyTreeView(self, self)
         self.inner.layout().addWidget(self.treeView)
 
@@ -109,7 +108,6 @@ class VocabularyTreeView(QTreeView):
         self.is_editing = False
         self.vocabulary_manager = vocabulary_manager
 
-
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() == Qt.RightButton:
             self.open_context_menu(QMouseEvent)
@@ -172,9 +170,6 @@ class VocabularyContextMenu(QMenu):
 
         self.a_new_voc = self.addAction("New Vocabulary")
         self.a_new_voc.triggered.connect(self.on_new_voc)
-
-
-
 
         self.popup(pos)
 

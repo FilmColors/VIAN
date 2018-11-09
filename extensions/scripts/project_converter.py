@@ -1,7 +1,9 @@
+"""
+Converts a pre HDF5 managed project to such a project.
+This change has been happening in the 0.7.0
+"""
+
 from core.data.headless import *
-
-
-
 
 if __name__ == '__main__':
     old_project, mw = load_project_headless("F:/_webapp/old/3460_1_1_Do the Right Thing_1989/3460_1_1_Do the Right Thing_1989.eext")

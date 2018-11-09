@@ -90,6 +90,8 @@ def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method 
         lum_var = cv2.blur(lum_var, (12, 12))
         color_img, heatm = get_heatmap_rgb(lum_var, input_img)
         return color_img, lum_var
-       
+    else:
+        return input_img, np.zeros_like(input_img)
+
 
 
