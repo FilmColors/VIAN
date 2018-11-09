@@ -1,10 +1,10 @@
 import sys
 import time
 import requests
-
+from functools import partial
 import cv2
 from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
@@ -17,7 +17,7 @@ import os
 
 
 class PlayerDockWidget(EDockWidget):
-    onSpacialFrequencyChanged = pyqtSignal(bool)
+    onSpacialFrequencyChanged = pyqtSignal(bool, str)
     onFaceRecognitionChanged = pyqtSignal(bool)
 
     def __init__(self, main_window):
@@ -27,16 +27,40 @@ class PlayerDockWidget(EDockWidget):
         self.setMinimumWidth(100)
         self.setMinimumHeight(100)
         self.vis_menu = self.inner.menuBar().addMenu("Visualization")
-        self.a_spacial_frequency = self.vis_menu.addAction("Spacial Frequency")
+        self.spatial_frequency_menu = QMenu("Spatial Frequency")
+        self.vis_menu.addMenu(self.spatial_frequency_menu)
+
+        self.a_spacial_frequency = self.spatial_frequency_menu.addAction("Edge Mean")
         self.a_spacial_frequency.setCheckable(True)
-        self.a_spacial_frequency.triggered.connect(self.on_spacial_frequency_changed)
+        self.a_spacial_frequency.triggered.connect(partial(self.on_spacial_frequency_changed, "edge-mean"))
+
+        self.a_spacial_frequency_col_var = self.spatial_frequency_menu.addAction("Color Variance")
+        self.a_spacial_frequency_col_var.setCheckable(True)
+        self.a_spacial_frequency_col_var.triggered.connect(partial(self.on_spacial_frequency_changed, "color-var"))
+
+        self.a_spacial_frequency_hue_var = self.spatial_frequency_menu.addAction("Hue Variance")
+        self.a_spacial_frequency_hue_var.setCheckable(True)
+        self.a_spacial_frequency_hue_var.triggered.connect(partial(self.on_spacial_frequency_changed, "hue-var"))
+
+        self.a_spacial_frequency_lum_var = self.spatial_frequency_menu.addAction("Luminance Variance")
+        self.a_spacial_frequency_lum_var.setCheckable(True)
+        self.a_spacial_frequency_lum_var.triggered.connect(partial(self.on_spacial_frequency_changed, "luminance-var"))
 
         self.a_face_rec = self.vis_menu.addAction("Face Recognition")
         self.a_face_rec.setCheckable(True)
         self.a_face_rec.triggered.connect(self.on_face_rec_changed)
 
-    def on_spacial_frequency_changed(self):
-        self.onSpacialFrequencyChanged.emit(self.a_spacial_frequency.isChecked())
+
+
+    def on_spacial_frequency_changed(self, method):
+        state = self.sender().isChecked()
+        self.a_spacial_frequency.setChecked(False)
+        self.a_spacial_frequency_col_var.setChecked(False)
+        self.a_spacial_frequency_lum_var.setChecked(False)
+        self.a_spacial_frequency_hue_var.setChecked(False)
+        self.sender().setChecked(True)
+        self.onSpacialFrequencyChanged.emit(state, method)
+
 
     def on_face_rec_changed(self):
         self.onFaceRecognitionChanged.emit(self.a_face_rec.isChecked())

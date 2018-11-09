@@ -33,6 +33,7 @@ class TimestepUpdateWorkerSingle(QObject):
         self.update_face_rec = False
         self.update_spacial_frequency = False
         self.update_face_identification = True
+        self.spacial_frequency_method = "edge-mean"
 
         self.face_rec_model = FaceRecognitionModel()
 
@@ -46,9 +47,10 @@ class TimestepUpdateWorkerSingle(QObject):
         self.movie_path = movie_path
         self.video_capture = cv2.VideoCapture(movie_path)
 
-    @pyqtSlot(bool)
-    def toggle_spacial_frequency(self, state):
+    @pyqtSlot(bool, str)
+    def toggle_spacial_frequency(self, state, method):
         self.update_spacial_frequency = state
+        self.spacial_frequency_method = method
         self.run()
 
     @pyqtSlot(bool)
@@ -110,7 +112,7 @@ class TimestepUpdateWorkerSingle(QObject):
                 return None
             # Calculate Spacial Frequency if necessary
             if self.update_spacial_frequency:
-                heatmap, mask = get_spacial_frequency_heatmap(frame)
+                heatmap, mask = get_spacial_frequency_heatmap(frame, method=self.spacial_frequency_method)
                 frame = heatmap
             if self.update_face_rec:
                 frame = self.face_rec_model.draw_faces(frame, identify=self.update_face_identification)
