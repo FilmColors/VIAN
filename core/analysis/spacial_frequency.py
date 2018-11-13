@@ -42,14 +42,21 @@ def get_heatmap_rgb(img, to_blend = None):
     else:
         return result
 
-def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method = "edge-mean"):
+def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method = "edge-mean", normalize = True, norm_factor = None):
     # input_img = cv2.resize(input_img, None, None, 0.5,0.5, cv2.INTER_CUBIC)
     lab = cv2.cvtColor(input_img, cv2.COLOR_BGR2LAB)
     if method == "edge-mean":
         edges = cv2.Canny(lab, x2, x3).astype(np.float32)
         edges = np.clip(cv2.GaussianBlur(edges, (1, 1), 0), 0, 1.0)
         edge_mean = neighborhood_mean_cv(edges, 20)
-        result = edge_mean / np.amax(edge_mean)
+        raw = edge_mean
+        if normalize:
+            if norm_factor is None:
+                norm_factor = np.amax(edge_mean)
+            result = edge_mean / norm_factor
+        else:
+            result = raw.copy()
+
         if blur:
             result *= 255
             result = cv2.fastNlMeansDenoising((result * 255).astype(np.uint8), h = 10)
@@ -58,40 +65,53 @@ def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method 
 
         color_img, heatm = get_heatmap_rgb(result, input_img)
         result *= 255
-        return color_img, result.astype(np.uint8)
+        return color_img, result.astype(np.uint8), raw
     elif method == "color-var":
         col_var = neighborhood_var_cv(lab.astype(np.float32), 20, channels=(1, 2))
-        col_var = col_var / np.amax(col_var)
+        raw = col_var.copy()
+        if normalize:
+            if norm_factor is None:
+                norm_factor = np.amax(col_var)
+            col_var = col_var / norm_factor
         hcut = np.percentile(col_var, 95)
         col_var[np.where(col_var > 0.95)] = np.mean(col_var)
         col_var = cv2.blur(col_var, (12, 12))
         col_var = col_var / hcut
         color_img, heatm = get_heatmap_rgb(col_var, input_img)
-        return color_img, col_var
+        return color_img, col_var, raw
 
     elif method == "hue-var":
         lab = cv2.cvtColor(input_img.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
         lch = img_lab_to_lch(lab)
         hue_var = neighborhood_var_cv(lch.astype(np.float32), 20, channels=(1))
-        hue_var = hue_var / np.amax(hue_var)
+        raw = hue_var.copy()
+        if normalize:
+            if norm_factor is None:
+                norm_factor = np.amax(hue_var)
+            hue_var = hue_var / norm_factor
+        # hue_var = hue_var / np.amax(hue_var)
         hcut = np.percentile(hue_var, 95)
         hue_var = hue_var / hcut
         hue_var[np.where(hue_var > 0.95)] = np.mean(hue_var)
         hue_var = cv2.blur(hue_var, (12, 12))
         color_img, heatm = get_heatmap_rgb(hue_var, input_img)
-        return color_img, hue_var
+        return color_img, hue_var, raw
 
     elif method == "luminance-var":
         lum_var = neighborhood_var_cv(lab.astype(np.float32), 20, channels=(0))
-        lum_var = lum_var / np.amax(lum_var)
+        raw = lum_var.copy()
+        if normalize:
+            if norm_factor is None:
+                norm_factor = np.amax(lum_var)
+            lum_var = lum_var / norm_factor
         hcut = np.percentile(lum_var, 95)
         lum_var = lum_var / hcut
         lum_var[np.where(lum_var > 0.95)] = np.mean(lum_var)
         lum_var = cv2.blur(lum_var, (12, 12))
         color_img, heatm = get_heatmap_rgb(lum_var, input_img)
-        return color_img, lum_var
+        return color_img, lum_var, raw
     else:
-        return input_img, np.zeros_like(input_img)
+        return input_img, np.zeros_like(input_img), np.zeros_like(input_img)
 
 
 

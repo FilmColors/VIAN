@@ -708,6 +708,8 @@ class ImagePlotTime(ImagePlot):
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0):
         timestamp = ms_to_string(x)
+        y = np.log10(y + 1.0)
+        y *= 10
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
                                          hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
@@ -801,7 +803,7 @@ class ImagePlotTime(ImagePlot):
         slider_imagescale.setValue(self.x_scale)
         slider_imagescale.valueChanged.connect(self.set_image_scale)
         slider_yscale = QSlider(Qt.Horizontal, w)
-        slider_yscale.setRange(1, 1000)
+        slider_yscale.setRange(1, 2000)
         slider_imagescale.setValue(self.y_scale)
         slider_yscale.valueChanged.connect(self.set_y_scale)
 

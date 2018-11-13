@@ -379,7 +379,7 @@ class ColormetryAnalysis(AnalysisContainer):
         try:
             self.time_ms.append(data['time_ms'])
             self.current_idx = self.project.hdf5_manager.get_colorimetry_length() - 1
-            self.project.hdf5_manager.dump_colorimetry(data, self.current_idx)
+            self.project.hdf5_manager.dump_colorimetry(data, self.current_idx, self.end_idx)
             self.check_finished()
 
         except Exception as e:

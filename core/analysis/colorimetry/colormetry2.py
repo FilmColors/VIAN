@@ -2,6 +2,7 @@ from core.container.project import VIANProject
 from core.data.interfaces import IConcurrentJob
 from core.analysis.colorimetry.computation import calculate_histogram
 from core.data.computation import frame2ms, ms_to_frames, lab_to_sat
+from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
 from core.analysis.palette_extraction import *
 import cv2
 import numpy as np
@@ -83,7 +84,7 @@ class ColormetryJob2(QObject):
             # Histogram
             hist = np.divide(calculate_histogram(frame_lab, 16), (width * height))
             # hist = None
-            palette = color_palette(frame_lab, n_merge_steps=200, n_merge_per_lvl=20, image_size=150.0, n_pixels=100, seeds_input_width=400)
+            palette = color_palette(frame_lab, n_merge_steps=200, n_merge_per_lvl=20, image_size=150.0, n_pixels=400, seeds_input_width=400)
             # palette = None
 
             # Color Features
@@ -95,6 +96,12 @@ class ColormetryJob2(QObject):
             feature_mat[3:6] = color_bgr
             feature_mat[6] = lab_to_sat(lab=color_bgr, implementation="luebbe")
             feature_mat[7] = lab_to_sat(lab=color_lab, implementation="pythagoras")
+
+            # Spatial
+            eout, enorm, edenorm = get_spacial_frequency_heatmap(frame, method="edge-mean", normalize=False)
+            cout, cnorm, cdenorm = get_spacial_frequency_heatmap(frame, method="color-var", normalize=False)
+            hout, hnorm, hdenorm = get_spacial_frequency_heatmap(frame, method="hue-var", normalize=False)
+            lout, lnorm, ldenorm = get_spacial_frequency_heatmap(frame, method="luminance-var", normalize=False)
 
             if self.aborted:
                 return
@@ -109,7 +116,15 @@ class ColormetryJob2(QObject):
             palette_mat[:count, 2:5] = palette.tree[1][:count]
             palette_mat[:count, 5] = palette.tree[2][:count]
 
-            yielded_result = dict(frame_pos=i + start, time_ms=frame2ms(i + start, fps), hist=hist, palette=palette_mat, features=feature_mat)
+            yielded_result = dict(frame_pos=i + start,
+                                  time_ms=frame2ms(i + start, fps),
+                                  hist=hist,
+                                  palette=palette_mat,
+                                  features=feature_mat,
+                                  spatial_edge = np.array([np.amax(edenorm), np.mean(edenorm)],dtype=np.float32),
+                                  spatial_color=np.array([np.amax(cdenorm), np.mean(cdenorm)], dtype=np.float32),
+                                  spatial_hue = np.array([np.amax(hdenorm), np.mean(hdenorm)], dtype=np.float32),
+                                  spatial_luminance = np.array([np.amax(ldenorm), np.mean(ldenorm)], dtype=np.float32))
             callback.emit([yielded_result, (i + start) / end])
 
             hist_counter += 1

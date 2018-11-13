@@ -112,7 +112,18 @@ class TimestepUpdateWorkerSingle(QObject):
                 return None
             # Calculate Spacial Frequency if necessary
             if self.update_spacial_frequency:
-                heatmap, mask = get_spacial_frequency_heatmap(frame, method=self.spacial_frequency_method)
+                f = None
+                if self.project.colormetry_analysis.check_finished():
+                    if self.spacial_frequency_method == "edge-mean":
+                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['edge']
+                    elif self.spacial_frequency_method == "color-var":
+                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
+                    elif self.spacial_frequency_method == "hue-var":
+                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
+                    elif self.spacial_frequency_method == "luminance-var":
+                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
+
+                heatmap, mask, denorm = get_spacial_frequency_heatmap(frame, method=self.spacial_frequency_method, normalize=True, norm_factor=f)
                 frame = heatmap
             if self.update_face_rec:
                 frame = self.face_rec_model.draw_faces(frame, identify=self.update_face_identification)

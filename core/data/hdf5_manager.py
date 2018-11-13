@@ -47,6 +47,10 @@ DS_COL_HIST = "col_histograms"
 DS_COL_PAL = "col_palettes"
 DS_COL_FEAT = "col_features"
 DS_COL_TIME = "col_time_ms"
+DS_COL_SPATIAL_EDGE = "col_spatial_edge"
+DS_COL_SPATIAL_COLOR = "col_spatial_color"
+DS_COL_SPATIAL_HUE = "col_spatial_hue"
+DS_COL_SPATIAL_LUMINANCE = "col_spatial_luminance"
 
 class HDF5Manager():
     def __init__(self):
@@ -54,6 +58,12 @@ class HDF5Manager():
         self.h5_file = None
         self._index = dict()
         self._uid_index = dict()
+
+        #Cached
+        self.col_edge_max = None
+        self.col_hue_max = None
+        self.col_color_max = None
+        self.col_lum_max = None
 
     #region -- Generic --
     def set_path(self, path):
@@ -114,24 +124,46 @@ class HDF5Manager():
         else:
             return False
 
-    def initialize_colorimetry(self, length):
-        print("Initializing Colorimetry")
-        for n in [DS_COL_FEAT, DS_COL_HIST, DS_COL_PAL, DS_COL_TIME]:
-            if n in self.h5_file:
-                del self.h5_file[n]
-        self._index['col'] = 0
+    def initialize_colorimetry(self, length, remove = True):
+        if remove:
+            for n in [DS_COL_FEAT, DS_COL_HIST, DS_COL_PAL, DS_COL_TIME,
+                      DS_COL_SPATIAL_EDGE, DS_COL_SPATIAL_LUMINANCE,
+                      DS_COL_SPATIAL_HUE, DS_COL_SPATIAL_COLOR]:
+                if n in self.h5_file:
+                    del self.h5_file[n]
+            self._index['col'] = 0
 
-        self.h5_file.create_dataset(DS_COL_HIST, shape=(length, 16, 16, 16), dtype=np.float16)
-        self.h5_file.create_dataset(DS_COL_FEAT, shape=(length, 8), dtype=np.float16)
-        self.h5_file.create_dataset(DS_COL_PAL, shape=(length, 1000, 6), dtype=np.float16)
-        self.h5_file.create_dataset(DS_COL_TIME, shape=(length, 1), dtype=np.uint64)
+        if DS_COL_HIST not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_HIST, shape=(length, 16, 16, 16), dtype=np.float16)
+        if DS_COL_FEAT not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_FEAT, shape=(length, 8), dtype=np.float16)
+        if DS_COL_PAL not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_PAL, shape=(length, 1000, 6), dtype=np.float16)
+        if DS_COL_TIME not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_TIME, shape=(length, 1), dtype=np.uint64)
+
+        if DS_COL_SPATIAL_COLOR not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_SPATIAL_COLOR, shape=(length, 2), dtype=np.float32)
+        if DS_COL_SPATIAL_EDGE not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_SPATIAL_EDGE, shape=(length, 2), dtype=np.float32)
+        if DS_COL_SPATIAL_HUE not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_SPATIAL_HUE, shape=(length, 2), dtype=np.float32)
+        if DS_COL_SPATIAL_LUMINANCE not in self.h5_file:
+            self.h5_file.create_dataset(DS_COL_SPATIAL_LUMINANCE, shape=(length, 2), dtype=np.float32)
+
         self.h5_file.flush()
 
-    def dump_colorimetry(self, d, idx):
+    def dump_colorimetry(self, d, idx, length):
+        self.initialize_colorimetry(length, remove=False)
         self.h5_file[DS_COL_PAL][idx] = d['palette']
         self.h5_file[DS_COL_HIST][idx] = d['hist']
         self.h5_file[DS_COL_FEAT][idx] = d['features']
         self.h5_file[DS_COL_TIME][idx] = d['time_ms']
+        self.h5_file[DS_COL_SPATIAL_EDGE][idx] = d['spatial_edge']
+        self.h5_file[DS_COL_SPATIAL_COLOR][idx] = d['spatial_color']
+        self.h5_file[DS_COL_SPATIAL_HUE][idx] = d['spatial_hue']
+        self.h5_file[DS_COL_SPATIAL_LUMINANCE][idx] = d['spatial_luminance']
+
         self.h5_file.flush()
 
     def get_colorimetry_length(self):
@@ -150,6 +182,20 @@ class HDF5Manager():
     def get_colorimetry_hist(self, idx):
         return self.h5_file[DS_COL_HIST][idx]
 
+    def get_colorimetry_spatial_max(self):
+        if self.h5_file is None:
+            return None
+        if self.col_edge_max is None:
+            if DS_COL_SPATIAL_EDGE in self.h5_file:
+                self.col_edge_max = np.amax(self.h5_file[DS_COL_SPATIAL_EDGE][:, 0])
+                self.col_color_max = np.amax(self.h5_file[DS_COL_SPATIAL_COLOR][:, 0])
+                self.col_hue_max = np.amax(self.h5_file[DS_COL_SPATIAL_HUE][:, 0])
+                self.col_lum_max = np.amax(self.h5_file[DS_COL_SPATIAL_LUMINANCE][:, 0])
+        return dict(edge=self.col_edge_max,
+                    color=self.col_color_max,
+                    hue=self.col_hue_max,
+                    luminance=self.col_lum_max)
+
     def col_histograms(self):
         return self.h5_file[DS_COL_HIST]
     #endregion
@@ -159,3 +205,14 @@ class HDF5Manager():
 
     def on_close(self):
         self.h5_file.close()
+
+        self.col_edge_max = None
+        self.col_hue_max = None
+        self.col_color_max = None
+        self.col_lum_max = None
+
+        self.path = None
+        self.h5_file = None
+        self._index = dict()
+        self._uid_index = dict()
+

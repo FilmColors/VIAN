@@ -713,7 +713,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     mean = self.ab_view_mean_cache[str(s.unique_id)][0]
                 # We have to make sure that we do not cache the place holder before the actual images are loaded
                 if s.img_movie.shape[0] > 100.0:
-                    new_cache[str(s.unique_id)] = (mean, (lab_to_sat(lab=np.array([(mean / 255)]), implementation="pythagoras")[0], s.movie_timestamp))
+                    new_cache[str(s.unique_id)] = (mean, (lab_to_sat(lab=np.array([(mean / 255)]), implementation="phytagoras")[0], s.movie_timestamp))
                 if self.ab_view.isVisible():
                     self.ab_view.add_image(mean[1], mean[2], s.img_movie, to_float=True)
             self.ab_view_mean_cache = new_cache
