@@ -7,7 +7,7 @@ June 2018
 
 from typing import List
 
-from core.data.computation import ms_to_frames, numpy_to_pixmap
+from core.data.computation import ms_to_frames, numpy_to_pixmap, floatify_img
 import json
 from core.data.interfaces import IAnalysisJob
 from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject, IAnalysisJobAnalysis, VisualizationTab, ParameterWidget
@@ -79,7 +79,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
 
             colors_bgr.append(np.mean(frame, axis = (0, 1)))
 
-            frame_lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
             colors_lab.append(np.mean(frame_lab, axis=(0, 1)))
             c += 1
 

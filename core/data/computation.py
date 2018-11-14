@@ -120,8 +120,15 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
     if implementation == "luebbe":
         result =  chroma / np.sqrt((chroma ** 2) + (lum ** 2))
 
-    else: # implementation == "pythagoras":
+    elif implementation == "phytagoras": # implementation == "pythagoras":
         result =  np.sqrt(np.square(chroma) + np.square(lum)) - lum
+
+    else:
+        result = chroma
+        print("Chroma:", chroma)
+        # angle = np.dot(np.stack((chroma, lum), axis=1), [0, 1])
+        # result = angle * chroma
+    # print(angle)
     np.nan_to_num(result)
     return result
 
@@ -537,3 +544,7 @@ def get_heatmap_value(val, max = 1.0, asuint8=True, asrgb = True, gray = False):
     if asrgb:
         result = result[::-1]
     return result
+
+
+def floatify_img(img):
+    return img.astype(np.float32) / 255

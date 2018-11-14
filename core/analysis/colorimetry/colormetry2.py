@@ -88,13 +88,14 @@ class ColormetryJob2(QObject):
             # palette = None
 
             # Color Features
+            frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2Lab)
             color_bgr = np.mean(frame, axis = (0, 1))
             color_lab = np.mean(frame_lab, axis = (0, 1))
 
             feature_mat = np.zeros(shape=8)
             feature_mat[0:3] = color_lab
             feature_mat[3:6] = color_bgr
-            feature_mat[6] = lab_to_sat(lab=color_bgr, implementation="luebbe")
+            feature_mat[6] = lab_to_sat(lab=color_lab, implementation="luebbe")
             feature_mat[7] = lab_to_sat(lab=color_lab, implementation="pythagoras")
 
             # Spatial

@@ -708,8 +708,8 @@ class ImagePlotTime(ImagePlot):
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0):
         timestamp = ms_to_string(x)
-        y = np.log10(y + 1.0)
-        y *= 10
+       # y = np.log10(y + 1.0)
+       # y *= 10
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
                                          hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
