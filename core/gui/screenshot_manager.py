@@ -222,6 +222,14 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
         self.color_dt = ImagePlotTime(self.stack)
         self.color_dt_ctrls = self.color_dt.get_param_widget()
+        hl4 = QHBoxLayout(self.color_dt_ctrls)
+        hl4.addWidget(QLabel("Channel:", self.color_dt_ctrls))
+        self.color_dt_ctrls.layout().addItem(hl4)
+        cbox_channel = QComboBox(self.color_dt_ctrls)
+        cbox_channel.addItems(["Saturation", "Hue", "Chroma", "Luminance", "A", "B"])
+        cbox_channel.currentTextChanged.connect(screenshot_manager.color_dt_mode_changed)
+        hl4.addWidget(cbox_channel)
+
         w2 = QWidget()
         w2.setLayout(QVBoxLayout())
         w2.layout().addWidget(self.color_dt)
@@ -330,6 +338,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.color_dt = color_dt_view
         self.ab_view_mean_cache = dict()
         self.qimage_cache = dict()
+        self.color_dt_mode = "Saturation"
 
     def set_loading(self, state):
         if state:
@@ -700,30 +709,68 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.frame_segment(self.current_segment_index)
         else:
             self.center_images()
+        self.draw_visualizations()
 
+    def color_dt_mode_changed(self, v):
+        self.color_dt_mode = v
+        print(v)
+        self.draw_visualizations()
+
+
+    def draw_visualizations(self):
         if self.ab_view is not None and self.color_dt is not None:
             self.ab_view.clear_view()
             self.ab_view.add_grid()
             new_cache = dict()
             for s in self.project.screenshots:
                 if str(s.unique_id) not in self.ab_view_mean_cache:
-                    mean = np.mean(cv2.cvtColor(s.img_movie, cv2.COLOR_BGR2LAB),axis = (0,1))
-                    mean = np.array([mean[0], 255 - mean[1], mean[2]])
+                    frame = s.img_movie.astype(np.float32)/255
+                    if self.project.movie_descriptor.letterbox_rect is not None:
+                        margins = self.project.movie_descriptor.letterbox_rect
+                        frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+
+                    mean = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2LAB),axis = (0,1))
+                    mean = np.array([mean[0], mean[1], mean[2]])
                 else:
                     mean = self.ab_view_mean_cache[str(s.unique_id)][0]
                 # We have to make sure that we do not cache the place holder before the actual images are loaded
                 if s.img_movie.shape[0] > 100.0:
-                    new_cache[str(s.unique_id)] = (mean, (lab_to_sat(lab=np.array([(mean / 255)]), implementation="chroma")[0], s.movie_timestamp))
-                if self.ab_view.isVisible():
-                    self.ab_view.add_image(mean[1], mean[2], s.img_movie, to_float=True)
+                    new_cache[str(s.unique_id)] = (mean, lab_to_sat(lab=np.array([mean]), implementation="luebbe")[0], s.movie_timestamp, lab_to_lch(mean))
             self.ab_view_mean_cache = new_cache
 
             if self.color_dt.isVisible():
-                self.color_dt.clear_view()
-                self.color_dt.add_grid()
+                # self.color_dt.clear_view()
+                # self.color_dt.add_grid()
+                for s in self.project.screenshots:
+                    x = self.ab_view_mean_cache[str(s.unique_id)][2]
+                    sat = self.ab_view_mean_cache[str(s.unique_id)][1]
+                    lab = self.ab_view_mean_cache[str(s.unique_id)][0]
+                    lch = self.ab_view_mean_cache[str(s.unique_id)][3]
+
+                    if self.color_dt_mode == "Saturation":
+                        y = sat * 100
+                    elif self.color_dt_mode == "Luminance":
+                        y = lab[0]
+                    elif self.color_dt_mode == "Chroma":
+                        y = lch[1]
+                    elif self.color_dt_mode == "A":
+                        y = lab[1] / 255 * 100
+                    elif self.color_dt_mode == "B":
+                        y = lab[2] / 255 * 100
+                    elif self.color_dt_mode == "Hue":
+                        y = lch[2] / (2*np.pi) * 100
+                    else:
+                        y = sat
+                    exists = self.color_dt.set_item_values(s.unique_id, [x, y])
+                    if not exists:
+                        self.color_dt.add_image(x, y, s.img_movie, index_id=s.unique_id)
+
+            elif self.ab_view.isVisible():
                 for s in self.project.screenshots:
                     sat = self.ab_view_mean_cache[str(s.unique_id)][1]
-                    self.color_dt.add_image(sat[1], -sat[0], s.img_movie)
+                    lab = self.ab_view_mean_cache[str(s.unique_id)][0]
+                    lch = self.ab_view_mean_cache[str(s.unique_id)][3]
+                    self.ab_view.add_image(128 - lab[1], 128 - lab[2], s.img_movie, to_float=True)
 
     def on_closed(self):
         self.clear_manager()

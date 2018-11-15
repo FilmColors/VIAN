@@ -15,6 +15,7 @@ from core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from core.analysis.palette_extraction import *
+from core.container.screenshot import Screenshot
 from core.visualization.palette_plot import *
 
 
@@ -39,12 +40,22 @@ class ColorFeatureAnalysis(IAnalysisJob):
         args = []
         fps = project.movie_descriptor.fps
         for tgt in targets:
-            args.append([ms_to_frames(tgt.get_start(), fps),
-                         ms_to_frames(tgt.get_end(), fps),
-                         project.movie_descriptor.movie_path,
-                         parameters,
-                         tgt.get_id(),
-                         project.movie_descriptor.get_letterbox_rect()])
+            if isinstance(tgt, Screenshot):
+                args.append([tgt.frame_pos,
+                             tgt.frame_pos,
+                             project.movie_descriptor.movie_path,
+                             parameters,
+                             tgt.get_id(),
+                             project.movie_descriptor.get_letterbox_rect()])
+            else:
+                args.append([
+                ms_to_frames(tgt.get_start(), fps),
+                ms_to_frames(tgt.get_end(), fps),
+                project.movie_descriptor.movie_path,
+                parameters,
+                tgt.get_id(),
+                project.movie_descriptor.get_letterbox_rect()])
+
         return args
 
     def process(self, args, sign_progress):
@@ -77,8 +88,9 @@ class ColorFeatureAnalysis(IAnalysisJob):
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
+            cv2.imshow("Out", frame)
+            cv2.waitKey(20)
             colors_bgr.append(np.mean(frame, axis = (0, 1)))
-
             frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
             colors_lab.append(np.mean(frame_lab, axis=(0, 1)))
             c += 1
@@ -91,6 +103,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
             colors_bgr = colors_bgr[0]
             colors_lab = colors_lab[0]
 
+        print(colors_lab)
         saturation_l = lab_to_sat(lab=colors_lab, implementation="luebbe")
         saturation_p = lab_to_sat(lab=colors_lab, implementation="pythagoras")
 
@@ -120,11 +133,14 @@ class ColorFeatureAnalysis(IAnalysisJob):
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
         w = QWidget()
-        w.setLayout(QVBoxLayout())
+        w.setLayout(QVBoxLayout(w))
         w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.get_adata()['color_lab']), w))
         w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.get_adata()['color_bgr']), w))
         w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.get_adata()['saturation_l']), w))
         w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.get_adata()['saturation_p']), w))
+        view = EGraphicsView(w)
+        view.set_image(numpy_to_pixmap(np.array(([[analysis.get_adata()['color_bgr']] * 100 ] * 100)).astype(np.uint8)))
+        w.layout().addWidget(w)
         return w
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
@@ -137,6 +153,9 @@ class ColorFeatureAnalysis(IAnalysisJob):
         w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.get_adata()['color_bgr']), w))
         w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.get_adata()['saturation_l']), w))
         w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.get_adata()['saturation_p']), w))
+        view = EGraphicsView(w)
+        view.set_image(numpy_to_pixmap(np.array(([[analysis.get_adata()['color_bgr']] * 100 ] * 100)).astype(np.uint8)))
+        w.layout().addWidget(w)
         return [VisualizationTab(widget=w, name="Color-Features", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):

@@ -682,6 +682,7 @@ class ImagePlotTime(ImagePlot):
         self.base_line = 1000
         self.x_end = 0
         self.lines = []
+        self.item_idx = dict()
 
         self.pixel_size_x = 1500
         self.pixel_size_y = 800
@@ -696,6 +697,7 @@ class ImagePlotTime(ImagePlot):
         self.set_y_scale(y_scale)
         self.set_image_scale(image_scale)
 
+
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
         self.pixel_size_y = pixel_size_y
@@ -706,10 +708,10 @@ class ImagePlotTime(ImagePlot):
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
 
-    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0):
+    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, index_id = None):
         timestamp = ms_to_string(x)
-       # y = np.log10(y + 1.0)
-       # y *= 10
+        # y = np.log10(y + 1.0)
+        # y *= 10
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
                                          hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
@@ -730,11 +732,25 @@ class ImagePlotTime(ImagePlot):
         itm.signals.onItemSelection.connect(self.onImageClicked.emit)
         itm.show()
 
+        if index_id is not None:
+            self.item_idx[index_id] = itm
+
         # self.set_x_scale(self.x_scale)
         # self.set_y_scale(self.y_scale)
         # self.set_image_scale(self.img_scale)
         self.update_position()
         return itm
+
+    def set_item_values(self, uid, values):
+        if uid in self.item_idx:
+            itm = self.item_idx[uid]
+            idx = self.images.index(itm)
+            self.values[idx] = values
+            self.update_position()
+            return True
+
+        return False
+
 
     def clear_view(self):
         super(ImagePlotTime, self).clear_view()
@@ -798,6 +814,7 @@ class ImagePlotTime(ImagePlot):
         hl3 = QHBoxLayout(w)
         hl3.addWidget(QLabel("X-Scale:", w))
 
+
         slider_imagescale = QSlider(Qt.Horizontal, w)
         slider_imagescale.setRange(1, 1000)
         slider_imagescale.setValue(self.x_scale)
@@ -835,6 +852,9 @@ class ImagePlotTime(ImagePlot):
         x_scale_line.valueChanged.connect(slider_xscale.setValue)
         slider_xscale.valueChanged.connect(x_scale_line.setValue)
         hl3.addWidget(x_scale_line)
+
+
+
 
         w.layout().addItem(hl1)
         w.layout().addItem(hl2)

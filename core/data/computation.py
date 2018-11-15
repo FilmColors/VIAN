@@ -112,6 +112,7 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
     elif lab is not None:
         if len(lab.shape) < 2:
             lab = np.array([lab])
+            print("Reshaped")
         lum = lab[:, 0]
         a_sq = np.square(lab[:, 1])
         b_sq = np.square(lab[:, 2])
@@ -132,6 +133,19 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
     np.nan_to_num(result)
     return result
 
+
+def lab_to_lch(lab):
+    if len(lab.shape) > 1:
+        lch = np.empty(lab.shape, dtype=np.float32)
+        lch[:, 0] = lab[:, 0]
+        lch[:, 1] = np.linalg.norm(lab[:, 1:3], axis=1)
+        lch[:, 2] = np.arctan2(lab[:, 2], lab[:, 1])
+    else:
+        lch = np.empty(lab.shape, dtype=np.float32)
+        lch[0] = lab[0]
+        lch[1] = np.linalg.norm(lab[1:3])
+        lch[2] = np.arctan2(lab[2], lab[1])
+    return lch
 
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     """
@@ -315,7 +329,7 @@ def ms_to_frames(time, fps):
     :param fps: FPS of the Film
     :return: returns a FRAME IDX
     """
-    return int(float(time) / 1000 * fps)
+    return int(round(float(time) / 1000 * fps))
 
 
 def frame2ms(frame, fps):
