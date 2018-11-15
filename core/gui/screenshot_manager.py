@@ -742,28 +742,32 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 # self.color_dt.clear_view()
                 # self.color_dt.add_grid()
                 for s in self.project.screenshots:
-                    x = self.ab_view_mean_cache[str(s.unique_id)][2]
-                    sat = self.ab_view_mean_cache[str(s.unique_id)][1]
-                    lab = self.ab_view_mean_cache[str(s.unique_id)][0]
-                    lch = self.ab_view_mean_cache[str(s.unique_id)][3]
+                    try:
+                        x = self.ab_view_mean_cache[str(s.unique_id)][2]
+                        sat = self.ab_view_mean_cache[str(s.unique_id)][1]
+                        lab = self.ab_view_mean_cache[str(s.unique_id)][0]
+                        lch = self.ab_view_mean_cache[str(s.unique_id)][3]
 
-                    if self.color_dt_mode == "Saturation":
-                        y = sat * 100
-                    elif self.color_dt_mode == "Luminance":
-                        y = lab[0]
-                    elif self.color_dt_mode == "Chroma":
-                        y = lch[1]
-                    elif self.color_dt_mode == "A":
-                        y = lab[1] / 255 * 100
-                    elif self.color_dt_mode == "B":
-                        y = lab[2] / 255 * 100
-                    elif self.color_dt_mode == "Hue":
-                        y = lch[2] / (2*np.pi) * 100
-                    else:
-                        y = sat
-                    exists = self.color_dt.set_item_values(s.unique_id, [x, y])
-                    if not exists:
-                        self.color_dt.add_image(x, y, s.img_movie, index_id=s.unique_id)
+                        if self.color_dt_mode == "Saturation":
+                            y = sat * 100
+                        elif self.color_dt_mode == "Luminance":
+                            y = lab[0]
+                        elif self.color_dt_mode == "Chroma":
+                            y = lch[1]
+                        elif self.color_dt_mode == "A":
+                            y = lab[1] / 255 * 100
+                        elif self.color_dt_mode == "B":
+                            y = lab[2] / 255 * 100
+                        elif self.color_dt_mode == "Hue":
+                            y = lch[2] / (2*np.pi) * 100
+                        else:
+                            y = sat
+                        exists = self.color_dt.set_item_values(s.unique_id, [x, y])
+                        if not exists:
+                            self.color_dt.add_image(x, y, s.img_movie, index_id=s.unique_id)
+                    except Exception as e:
+                        continue
+                self.color_dt.update_position()
 
             elif self.ab_view.isVisible():
                 for s in self.project.screenshots:
@@ -777,6 +781,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.setEnabled(False)
         if self.ab_view is not None:
             self.ab_view.scene().clear()
+        if self.color_dt is not None:
+            self.color_dt.clear_view()
 
     def on_selected(self, sender, selected):
         if selected is None:

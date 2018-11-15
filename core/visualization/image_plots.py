@@ -733,7 +733,7 @@ class ImagePlotTime(ImagePlot):
         itm.show()
 
         if index_id is not None:
-            self.item_idx[index_id] = itm
+            self.item_idx[index_id] = (itm, len(self.images) - 1)
 
         # self.set_x_scale(self.x_scale)
         # self.set_y_scale(self.y_scale)
@@ -743,10 +743,8 @@ class ImagePlotTime(ImagePlot):
 
     def set_item_values(self, uid, values):
         if uid in self.item_idx:
-            itm = self.item_idx[uid]
-            idx = self.images.index(itm)
+            idx = self.item_idx[uid][1]
             self.values[idx] = values
-            self.update_position()
             return True
 
         return False
@@ -757,6 +755,7 @@ class ImagePlotTime(ImagePlot):
         self.x_end = 0
         self.values = []
         self.lines = []
+        self.item_idx = dict()
 
     def add_grid(self, set_scene_rect = True):
         pass

@@ -22,7 +22,6 @@ class HilbertMode(enum.Enum):
     Indices_Non_Zero = 4
 
 
-
 def hilbert_traversal_3d(data, mapped, mode, s, rgb_multiplier = 1, x=0, y=0, z=0, dx=1, dy=0, dz=0, dx2=0, dy2=1, dz2=0, dx3=0, dy3=0, dz3=1):
     """
     
@@ -121,8 +120,6 @@ def hilbert_traversal_3d(data, mapped, mode, s, rgb_multiplier = 1, x=0, y=0, z=
                              -dx, -dy, -dz)
 
 
-# Will reduce a three dimensional array into a one-dimensional array using a Hilbert-Room-Filling Curve
-# Assuming an array where dimensions x = y = z and a power of 2
 def hilbert_mapping_3d(s, v_data, hilbert_mode, multiplier = 1):
     v_mapped = []
     hilbert_traversal_3d(v_data, v_mapped, hilbert_mode, s, multiplier)#, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
@@ -207,6 +204,7 @@ def create_hilbert_lookup_table(s):
         idx += 1
     return lookup
 
+
 def create_hilbert_transform(s):
     lookup = create_hilbert_lookup_table(s)
     colors = []
@@ -222,11 +220,13 @@ def create_hilbert_transform(s):
     colors = cv2.cvtColor(colors, cv2.COLOR_LAB2RGB)[0]
     return (a,b,c), colors
 
+
 def get_hilbert_lookup():
     if os.path.isfile("core/analysis/colorimetry/hilbert_lookup.npy"):
         return np.load("core/analysis/colorimetry/hilbert_lookup.npy")
     else:
          return None
+
 
 def hilbert_traversal_2d(data, mapped, mode, s, multiplier = 4096, x = 0.0, y = 0.0, dx1 = 1.0, dy1 = 0.0, dx2 = 0.0, dy2 = 1.0):
     """

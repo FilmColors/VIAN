@@ -103,7 +103,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
             colors_bgr = colors_bgr[0]
             colors_lab = colors_lab[0]
 
-        print(colors_lab)
         saturation_l = lab_to_sat(lab=colors_lab, implementation="luebbe")
         saturation_p = lab_to_sat(lab=colors_lab, implementation="pythagoras")
 
