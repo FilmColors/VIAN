@@ -7,7 +7,6 @@ import csv
 from core.data.plugin import *
 from imdb import IMDb
 import requests
-import urllib.request as requests
 from core.concurrent.worker import MinimalThreadWorker, run_minimal_worker
 from core.data.computation import open_web_browser
 from collections import namedtuple
@@ -158,7 +157,7 @@ class IMDBFinder(QMainWindow):
             self.tableWidget_AllMovies.insertRow(self.tableWidget_AllMovies.rowCount())
             self.tableWidget_AllMovies.setItem(i, 0, QTableWidgetItem(m.FilemakerID))
             self.tableWidget_AllMovies.setItem(i, 1, QTableWidgetItem(m.MovieName))
-            self.tableWidget_AllMovies.setItem(i, 2, QTableWidgetItem(m.IMDb_ID))
+            self.tableWidget_AllMovies.setItem(i, 2, QTableWidgetItem(m.imdb))
             self.tableWidget_AllMovies.setItem(i, 3, QTableWidgetItem(m.Status))
 
         try:
@@ -291,7 +290,11 @@ class ConcurrentQuery(MinimalThreadWorker):
 
 if __name__ == '__main__':
     db = IMDb()
-    result = db.search_movie("Matrix")
-    for r in result:
-        movieobj = db.get_movie(r.movieID)
-        print(movieobj.keys())
+    m = db.get_movie("0075640")
+    for k in m.__dict__.keys():
+        print(k, m.__dict__[k])
+    print(db.get_imdbID(m))
+    # result = db.search_movie("Matrix")
+    # for r in result:
+    #     movieobj = db.get_movie(r.movieID)
+    #     print(movieobj.keys())

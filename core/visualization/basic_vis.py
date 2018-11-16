@@ -233,7 +233,7 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
                 p.drawLine(0, i * step, 4096, i * step)
 
         for i in range(ys.shape[0]):
-            p.fillRect(i * width, 4096 - ys[i], width, ys[i], QBrush(QColor(colors[i][0],colors[i][1],colors[i][2])))
+            p.fillRect(i * width, 4096 - int(ys[i]), width, int(ys[i]), QBrush(QColor(colors[i][0],colors[i][1],colors[i][2])))
             if self.plot_floor:
                 p.fillRect(i * width, 4050, width, 46,
                            QBrush(QColor(colors[i][0], colors[i][1], colors[i][2])))

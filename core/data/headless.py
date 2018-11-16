@@ -12,6 +12,11 @@ from shutil import copy2, move
 # from core.gui.main_window import *
 from typing import Dict, Tuple
 from core.analysis.analysis_import import *
+from threading import Lock, Thread
+
+
+PROJECT_LOCK = Lock()
+
 
 VERSION = "0.6.6"
 class HeadlessUserSettings():
@@ -48,37 +53,45 @@ class HeadlessMainWindow(QObject):
         args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
 
         if analysis.multiple_result:
-            for arg in args:
-                worker = Worker(analysis.process, self, self.analysis_result, arg,
-                                msg_finished=analysis.name + " Finished", target_id=None, i_analysis_job=analysis)
-                self.start_worker(worker, analysis.get_name())
+            for i, arg in enumerate(args):
+                res = analysis.process(arg, self.worker_progress)
+                with PROJECT_LOCK:
+                    analysis.modify_project(self.project, res)
+                    self.project.add_analysis(res)
         else:
-            worker = Worker(analysis.process, self, self.analysis_result, args,
-                            msg_finished=analysis.name + " Finished", target_id=None, i_analysis_job=analysis)
-            self.start_worker(worker, analysis.get_name())
+            res = analysis.process(args, self.worker_progress)
+            with PROJECT_LOCK:
+                analysis.modify_project(self.project, res)
+                self.project.add_analysis(res)
 
-    def analysis_result(self, result):
-        analysis = result[1]
-        result = result[0]
+    def run_analysis_threaded(self, analysis:IAnalysisJob, targets:List[IProjectContainer], parameters:Dict, class_objs:List[ClassificationObject], fps, n_threads = 5, n_targets = 1):
+        threads = []
+        targets_thread = []
+        for i, s in enumerate(targets):
+            targets_thread.append(s)
+            if i % n_targets == 0:
+                thread = Thread(target=self.run_analysis,
+                                args=(analysis, targets_thread, parameters, class_objs, fps))
+                thread.start()
+                threads.append(thread)
+                targets_thread = []
 
-        if isinstance(result, list):
-            for r in result:
-                analysis.modify_project(self.project, r, main_window=self)
-                self.project.add_analysis(r)
-                r.unload_container()
-        else:
-            analysis.modify_project(self.project, result, main_window=self)
-            self.project.add_analysis(result)
-            result.unload_container()
+            if i % n_threads * n_targets == 0 or i == len(targets) - 1:
+                print(i, "/", len(targets))
+                for t in threads:
+                    t.join()
 
     def worker_progress(self, tpl):
-        print(tpl[0], tpl[1])
+        return
+        print(tpl)
 
     def worker_error(self, args):
         print("Error", args)
 
     def worker_finished(self, args):
         print("Error", args)
+
+
 
     #endregion
 

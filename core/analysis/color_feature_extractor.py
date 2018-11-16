@@ -88,8 +88,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
-            cv2.imshow("Out", frame)
-            cv2.waitKey(20)
+            # cv2.imshow("Out:" + str(start), frame)
+            # cv2.waitKey(1)
             colors_bgr.append(np.mean(frame, axis = (0, 1)))
             frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
             colors_lab.append(np.mean(frame_lab, axis=(0, 1)))

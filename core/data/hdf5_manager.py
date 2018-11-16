@@ -5,7 +5,18 @@ import sys
 import numpy as np
 import inspect
 from core.data.interfaces import IAnalysisJob
-# from core.analysis.analysis_import import SemanticSegmentationAnalysis, BarcodeAnalysisJob, ColorPaletteAnalysis, ColorFeatureAnalysis, ColormetryAnalysis, MovieMosaicAnalysis
+# from core.analysis.analysis_import import \
+#     SemanticSegmentationAnalysis, \
+#     BarcodeAnalysisJob, ColorPaletteAnalysis, ColorFeatureAnalysis, \
+#     ColormetryAnalysis, MovieMosaicAnalysis, ColorHistogramAnalysis
+
+# ANALYSES = [SemanticSegmentationAnalysis,
+#             BarcodeAnalysisJob,
+#             ColorPaletteAnalysis,
+#             ColorFeatureAnalysis,
+#             ColormetryAnalysis,
+#             MovieMosaicAnalysis,
+#             ColorHistogramAnalysis]
 
 
 def load_analysis():
@@ -27,9 +38,13 @@ def load_analysis():
                 if inspect.isclass(obj) and issubclass(obj, IAnalysisJob):
                     if obj is not IAnalysisJob and obj not in analyses:
                         analyses.append(obj)
+                        print(obj)
 
         except Exception as e:
+            print(e)
             continue
+    global ANALYSES
+    ANALYSES = analyses
     return analyses
 
 # def load_analysis():
@@ -41,7 +56,7 @@ def load_analysis():
 #             eval("ColormetryAnalysis"),
 #             eval("MovieMosaicAnalysis")
 #         ]
-
+ANALYSES = []
 DEFAULT_SIZE = (50,)
 DS_COL_HIST = "col_histograms"
 DS_COL_PAL = "col_palettes"
@@ -77,8 +92,11 @@ class HDF5Manager():
         return init
 
     def initialize_all(self, analyses = None):
-        if analyses is None:
+        if analyses is None or len(analyses) == 0:
             analyses = load_analysis()
+        else:
+            global ANALYSES
+            ANALYSES = analyses
         for a in analyses:
             c = a()
             self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype)

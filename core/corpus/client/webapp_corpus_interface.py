@@ -173,8 +173,7 @@ class WebAppCorpusInterface(CorpusInterface):
             with open(export_project_dir + "image_linker.json", "w") as f:
                 json.dump(dict(masks=mask_index, shots=shots_index), f)
 
-            for scr in project.screenshots:
-                print(scr.unique_id in mask_index.keys(), scr.unique_id in shots_index.keys())
+
 
             h5_file.close()
 

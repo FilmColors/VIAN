@@ -112,7 +112,6 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
     elif lab is not None:
         if len(lab.shape) < 2:
             lab = np.array([lab])
-            print("Reshaped")
         lum = lab[:, 0]
         a_sq = np.square(lab[:, 1])
         b_sq = np.square(lab[:, 2])
@@ -126,7 +125,6 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
 
     else:
         result = chroma
-        print("Chroma:", chroma)
         # angle = np.dot(np.stack((chroma, lum), axis=1), [0, 1])
         # result = angle * chroma
     # print(angle)

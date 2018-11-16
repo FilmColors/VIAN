@@ -3,6 +3,7 @@ from core.analysis.palette_analysis import *
 from core.analysis.barcode_analysis import *
 from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
+from core.analysis.histogram_analysis import ColorHistogramAnalysis
 import dlib
 try:
     from core.analysis.semantic_segmentation import *
@@ -15,7 +16,7 @@ except:
         def __init__(self):
             super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
                                                                dataset_name="SemanticSegementations",
-                                                               dataset_shape=(512, 512),
+                                                               dataset_shape=(1024, 1024),
                                                                dataset_dtype = np.uint8,
                                                                author="Gaudenz Halter",
                                                                version="1.0.0",

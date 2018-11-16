@@ -190,6 +190,7 @@
     <addaction name="actionMovie_Barcode"/>
     <addaction name="actionMovie_Mosaic"/>
     <addaction name="actionColorFeatures"/>
+    <addaction name="actionColor_Histogram"/>
     <addaction name="actionColor_Palette"/>
     <addaction name="separator"/>
     <addaction name="actionColormetry"/>
@@ -853,6 +854,11 @@
   <action name="actionSet_Letterbox">
    <property name="text">
     <string>Set Letterbox</string>
+   </property>
+  </action>
+  <action name="actionColor_Histogram">
+   <property name="text">
+    <string>Color Histogram</string>
    </property>
   </action>
  </widget>

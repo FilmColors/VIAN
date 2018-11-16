@@ -102,20 +102,20 @@ class VIANProject(IHasName, IClassifiable):
 
         self.meta_data = None
 
-        self.annotation_layers = []
-        self.current_annotation_layer = None
-        self.screenshots = []
-        self.segmentation = []
+        self.annotation_layers = []             #type: List[AnnotationLayer]
+        self.current_annotation_layer = None    #type: AnnotationLayer
+        self.screenshots = []                   #type: List[Screenshot]
+        self.segmentation = []                  #type: List[Segmentation]
         self.main_segmentation_index = 0
         self.movie_descriptor = MovieDescriptor(project=self)
-        self.analysis = []
-        self.screenshot_groups = []
-        self.vocabularies = []
+        self.analysis = []                      #type: List[AnalysisContainer]
+        self.screenshot_groups = []             #type: List[ScreenshotGroup]
+        self.vocabularies = []                  #type: List[Vocabulary]
 
-        self.experiments = []
+        self.experiments = []                   #type: List[Experiment]
 
         self.current_script = None
-        self.node_scripts = []
+        self.node_scripts = []                  #type: List[NodeScript]
         self.create_script(dispatch=False)
 
         self.add_screenshot_group("All Shots", initial=True)
@@ -320,7 +320,7 @@ class VIANProject(IHasName, IClassifiable):
 
         self.dispatch_changed()
 
-    def get_main_segmentation(self):
+    def get_main_segmentation(self) -> Segmentation:
         if len(self.segmentation) > 0:
             return self.segmentation[self.main_segmentation_index]
             # return self.segmentation[0]
@@ -1210,6 +1210,37 @@ class VIANProject(IHasName, IClassifiable):
                     w.widget.close()
         if self.hdf5_manager is not None:
             self.hdf5_manager.on_close()
+        # if self.hdf5_manager is not None:
+        #     self.clean_hdf5()
+
+    def clean_hdf5(self, analyses = None):
+        new_h5 = HDF5Manager()
+        new_h5.set_path(self.data_dir + "/clean_temp.hdf5")
+        new_h5.initialize_all(analyses)
+        for a in self.analysis:
+            try:
+                if isinstance(a, SemanticSegmentationAnalysisContainer):
+                    if a.a_class is None:
+                        a.a_class = self.main_window.eval_class(a.analysis_job_class)
+                    data, shape = a.a_class().to_hdf5(a.get_adata())
+                    new_h5.dump(data, a.a_class().dataset_name, a.unique_id)
+                elif isinstance(a, IAnalysisJobAnalysis):
+                    if a.a_class is None:
+                        a.a_class = self.main_window.eval_class(a.analysis_job_class)
+                    data = a.a_class().to_hdf5(a.get_adata())
+                    new_h5.dump(data, a.a_class().dataset_name, a.unique_id)
+            except Exception as e:
+                print(e)
+                continue
+
+        self.hdf5_manager.h5_file.close()
+        new_h5.h5_file.close()
+        os.remove(self.hdf5_manager.path)
+        shutil.copy2(new_h5.path, self.hdf5_manager.path)
+        os.remove(new_h5.path)
+        self.hdf5_manager = HDF5Manager()
+        self.hdf5_manager.set_path(self.hdf5_path)
+
 
     def get_time_ranges_of_selected(self):
         result = []
