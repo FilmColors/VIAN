@@ -14,3 +14,4 @@ user/models/*
 data/models/face_identification/shape_predictor_68_face_landmarks.dat
 data/models/
 idea/
+*.mp4
