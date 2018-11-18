@@ -58,6 +58,7 @@ def load_analysis():
 #         ]
 ANALYSES = []
 DEFAULT_SIZE = (50,)
+DS_MOVIE = "movie"
 DS_COL_HIST = "col_histograms"
 DS_COL_PAL = "col_palettes"
 DS_COL_FEAT = "col_features"
