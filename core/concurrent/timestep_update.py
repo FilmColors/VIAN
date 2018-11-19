@@ -7,7 +7,7 @@ from core.analysis.analysis_import import FaceRecognitionModel
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
-    onColormetryUpdate = pyqtSignal(object)
+    onColormetryUpdate = pyqtSignal(object, int)
     onLocationUpdate = pyqtSignal(list)
     onError = pyqtSignal(list)
     onMessage = pyqtSignal(str)
@@ -95,7 +95,7 @@ class TimestepUpdateWorkerSingle(QObject):
                 if self.project is not None and self.project.colormetry_analysis is not None:
                     data = self.project.colormetry_analysis.get_update(self.position_ms)
                     if data is not False:
-                        self.signals.onColormetryUpdate.emit(data)
+                        self.signals.onColormetryUpdate.emit(data, self.position_ms)
 
 
 

@@ -1,16 +1,20 @@
 # import pyqtgraph as pg
 import time
 import os
-from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox, QMenu
+from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox, QMenu, QHBoxLayout, QLabel, QSlider
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import numpy as np
-from core.data.computation import get_heatmap_value
+from core.data.computation import get_heatmap_value, ms_to_string, overlap_rect
 from core.gui.ewidgetbase import EGraphicsView
 from core.analysis.colorimetry.hilbert import create_hilbert_transform
 from core.gui.tools import ExportImageDialog
 
 class IVIANVisualization():
+
+    def set_time_indicator(self, x):
+        pass
+
     def set_heads_up_widget(self, widget):
         pass
 
@@ -39,7 +43,7 @@ class IVIANVisualization():
 
 
 class VIANPlot(QGraphicsView, IVIANVisualization):
-    def __init__(self, parent, background=QColor(30, 30, 30), aspect = Qt.KeepAspectRatio):
+    def __init__(self, parent, background=QColor(30, 30, 30), aspect = Qt.KeepAspectRatio, x_label_format = "value", y_label_format = "value"):
         super(VIANPlot, self).__init__(parent)
         self.setRenderHint(QPainter.Antialiasing)
         self.setMouseTracking(True)
@@ -51,7 +55,12 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
         self.curr_zoom_scale = 1.0
         self.x_scale = 1.0
         self.y_scale = 1.0
-        self.base_line = 1000
+
+        self.base_line_x_orig = 1000
+        self.base_line_y_orig = 1000
+
+        self.base_line_x = self.base_line_x_orig
+        self.base_line_y = self.base_line_y_orig
         self.ctrl_is_pressed = False
 
         # For Grid
@@ -62,12 +71,42 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
         self.raw_data = []
         self.grid = []
 
+        self.x_label_format = x_label_format
+        self.y_label_format = y_label_format
+
+    def draw(self):
+        pass
+
+    def set_x_scale(self, scale):
+        self.base_line_x = self.base_line_x_orig * (scale / 100)
+        self.scene().clear()
+        self.draw()
+        self.grid = []
+        self.plot_grid()
+        self.frame_default()
+
+    def set_y_scale(self, scale):
+        self.base_line_y = self.base_line_y_orig * (scale / 100)
+        self.scene().clear()
+        self.grid = []
+        self.draw()
+        self.plot_grid()
+        self.frame_default()
+
+    def convert_format(self, val, format):
+        if format == "value":
+            return val
+        if format == "ms":
+            return ms_to_string(val)
+        else:
+            return val
+
     def get_ceil(self, tmax):
         for i in range(100):
             if tmax <= 10 ** i:
-                step = round(10 ** (i - 1), 1)
+                step = 10 ** (i - 2)
                 ceil = np.ceil(tmax / step) * step
-                return ceil, step
+                return ceil, 10 ** (i - 2)
 
         return 1.0, 0.1
 
@@ -85,26 +124,42 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
         pen.setColor(col)
         font = QFont()
         font.setPointSize(self.font_size)
-        for i in range(11):
+        n_x = x_ceil / x_step
+        n_y = y_ceil / y_step
+
+        last_x = -1000
+        for i in range(int(n_x)):
             x_true = x_step * i
-            # x_view = self.base_line / 10 * x_true
-            x_view = self.base_line / 10 * i
+            x_view = self.base_line_x / n_x * i
+            self.grid.append(self.scene().addLine(x_view, 0, x_view, self.base_line_y, pen))
+            x_lbl = self.scene().addText(str(self.convert_format(round(x_true, 2), self.x_label_format)), font)
+            x_lbl.setPos(x_view - x_lbl.boundingRect().width() / 2, self.base_line_y + x_lbl.boundingRect().height())
 
+            if x_view - x_lbl.boundingRect().width() / 2 < last_x:
+                self.scene().removeItem(x_lbl)
+            else:
+                x_lbl.setDefaultTextColor(col)
+                last_x = x_view - x_lbl.boundingRect().width() / 2 + x_lbl.boundingRect().width()
+                self.grid.append(x_lbl)
+
+        last_y = 10000000
+        for i in range(int(n_y)):
             y_true = y_step * i
-            y_view = self.base_line - self.base_line / 10 * i
-
-            self.grid.append(self.scene().addLine(0, y_view, self.base_line, y_view, pen))
-            self.grid.append(self.scene().addLine(x_view, 0, x_view, self.base_line, pen))
-            x_lbl = self.scene().addText(str(x_true), font)
-            x_lbl.setPos(x_view - x_lbl.boundingRect().width() / 2, self.base_line + x_lbl.boundingRect().height())
-            x_lbl.setDefaultTextColor(col)
-
-            y_lbl = self.scene().addText(str(y_true), font)
+            y_view = self.base_line_y - self.base_line_y / n_y * i
+            self.grid.append(self.scene().addLine(0, y_view, self.base_line_x, y_view, pen))
+            y_lbl = self.scene().addText(str(self.convert_format(round(y_true, 2), self.y_label_format)), font)
             y_lbl.setPos(-y_lbl.boundingRect().width(), y_view - y_lbl.boundingRect().height() / 2)
-            y_lbl.setDefaultTextColor(col)
-            self.grid.append(x_lbl)
-            self.grid.append(y_lbl)
-            self.grid.append(self.scene().addText(str(x_true)))
+
+            # y_lbl.setDefaultTextColor(col)
+            # self.grid.append(y_lbl)
+
+
+            if y_view + y_lbl.boundingRect().height() > last_y:
+                self.scene().removeItem(y_lbl)
+            else:
+                y_lbl.setDefaultTextColor(col)
+                last_y = y_view + y_lbl.boundingRect().height()
+                self.grid.append(y_lbl)
 
     def clear_view(self):
         self.scene().clear()
@@ -193,6 +248,30 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
         painter.end()
 
         return image
+
+    def get_param_widget(self):
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        hl2 = QHBoxLayout(w)
+        hl2.addWidget(QLabel("Y-Scale:", w))
+        hl3 = QHBoxLayout(w)
+        hl3.addWidget(QLabel("X-Scale:", w))
+
+        slider_yscale = QSlider(Qt.Horizontal, w)
+        slider_yscale.setRange(1, 1000)
+        slider_yscale.setValue(100)
+        slider_yscale.valueChanged.connect(self.set_y_scale)
+        hl2.addWidget(slider_yscale)
+
+        slider_xscale = QSlider(Qt.Horizontal, w)
+        slider_xscale.setRange(1, 1000)
+        slider_xscale.setValue(100)
+        slider_xscale.valueChanged.connect(self.set_x_scale)
+        hl3.addWidget(slider_xscale)
+
+        w.layout().addItem(hl2)
+        w.layout().addItem(hl3)
+        return w
 
 
 class VIANTextGraphicsItemSignals(QObject):

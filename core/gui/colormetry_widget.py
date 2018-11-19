@@ -7,6 +7,7 @@ from core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_
 from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
 from core.visualization.basic_vis import HistogramVis
 from core.gui.ewidgetbase import ExpandableWidget
+from core.visualization.line_plot import LinePlot
 import cv2
 import numpy as np
 
@@ -42,6 +43,14 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.lab_palette = PaletteLABWidget(self)
         self.time_palette = PaletteTimeWidget(self)
         self.hilbert_vis = HistogramVis(self)
+
+        self.spatial_complexity_vis = LinePlot(self, x_label_format="ms")
+        lt_spatial = QWidget()
+        lt_spatial.setLayout(QVBoxLayout())
+        lt_spatial.layout().addWidget(self.spatial_complexity_vis)
+        self.spatial_complexity_param = ExpandableWidget(self, "Controls", self.spatial_complexity_vis.get_param_widget())
+        lt_spatial.layout().addWidget(self.spatial_complexity_param)
+
         self.hilbert_param = ExpandableWidget(self, "Controls", self.hilbert_vis.get_param_widget())
         lt_hilbert = QWidget()
         lt_hilbert.setLayout(QVBoxLayout())
@@ -53,10 +62,14 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
         self.vis_tab.addTab(self.time_palette, "Time Palette")
         self.vis_tab.addTab(lt_hilbert, "Color Histogram")
+        self.vis_tab.addTab(lt_spatial, "Spatial Complexity")
         self.vis_tab.currentChanged.connect(self.on_tab_changed)
+
+        self.main_window.onTimeStep.connect(self.on_time_step)
         # self.vis_tab.addTab(self.histogram, "Histogram")
 
-    def update_timestep(self, data):
+    @pyqtSlot(object, int)
+    def update_timestep(self, data, time_ms):
         if data is not None:
             try:
                 self.palette.set_palette(data['palette'])
@@ -67,8 +80,29 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                     self.lab_palette.draw_palette()
                 elif self.vis_tab.currentIndex() == 3:
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
+                elif self.vis_tab.currentIndex() == 4:
+                    self.spatial_complexity_vis.clear_view()
+                    colors = [
+                        QColor(200, 61, 50),
+                        QColor(98, 161, 169),
+                        QColor(153, 175, 93),
+                        QColor(230, 183, 64)
+                    ]
+                    cidx = data['current_idx']
+                    for i, key in enumerate(data['spatial'].keys()):
+                        xs = data['times']
+                        ys = data['spatial'][key]
+                        self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
+                                                         line_name=key,
+                                                         force_xmax=self.main_window.project.movie_descriptor.duration)
+
             except Exception as e:
+                raise e
                 print("Exception in ColormetryWidget.update_timestep()", str(e))
+
+    @pyqtSlot(int)
+    def on_time_step(self, time_ms):
+        self.spatial_complexity_vis.set_time_indicator(time_ms)
 
     def on_tab_changed(self):
         if self.vis_tab.currentIndex() == 0:

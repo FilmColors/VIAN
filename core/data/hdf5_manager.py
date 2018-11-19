@@ -2,6 +2,7 @@ import h5py
 import os
 import importlib
 import sys
+import gc
 import numpy as np
 import inspect
 from core.data.interfaces import IAnalysisJob
@@ -17,6 +18,7 @@ from core.data.interfaces import IAnalysisJob
 #             ColormetryAnalysis,
 #             MovieMosaicAnalysis,
 #             ColorHistogramAnalysis]
+import shutil
 
 
 def load_analysis():
@@ -152,6 +154,10 @@ class HDF5Manager():
                     del self.h5_file[n]
             self._index['col'] = 0
 
+            gc.collect()
+            self.h5_file.flush()
+            self.cleanup()
+
         if DS_COL_HIST not in self.h5_file:
             self.h5_file.create_dataset(DS_COL_HIST, shape=(length, 16, 16, 16), dtype=np.float16)
         if DS_COL_FEAT not in self.h5_file:
@@ -215,9 +221,39 @@ class HDF5Manager():
                     hue=self.col_hue_max,
                     luminance=self.col_lum_max)
 
+    def get_colorimetry_spatial(self, idx = None):
+        if idx is None:
+            col_edge =self.h5_file[DS_COL_SPATIAL_EDGE]
+            col_color = self.h5_file[DS_COL_SPATIAL_COLOR]
+            col_hue = self.h5_file[DS_COL_SPATIAL_HUE]
+            col_lum= self.h5_file[DS_COL_SPATIAL_LUMINANCE]
+        else:
+            col_edge =self.h5_file[DS_COL_SPATIAL_EDGE][idx]
+            col_color = self.h5_file[DS_COL_SPATIAL_COLOR][idx]
+            col_hue = self.h5_file[DS_COL_SPATIAL_HUE][idx]
+            col_lum= self.h5_file[DS_COL_SPATIAL_LUMINANCE][idx]
+
+        return dict(edge=col_edge,
+                    color=col_color,
+                    hue=col_hue,
+                    luminance=col_lum)
+
     def col_histograms(self):
         return self.h5_file[DS_COL_HIST]
     #endregion
+
+    def cleanup(self):
+        new_file = h5py.File(self.path.replace("analyses", "temp"), mode="w")
+        for name in self.h5_file.keys():
+            ds = self.h5_file[name]
+            nds = new_file.create_dataset(name, ds.shape, ds.dtype)
+            nds[:] = ds[:]
+        new_file.close()
+        self.h5_file.close()
+        os.remove(self.path)
+        os.rename(self.path.replace("analyses", "temp"), self.path)
+        self.h5_file = h5py.File(self.path, "r+")
+
 
     def get_indices(self):
         return dict(curr_pos=self._index, uidmapping=self._uid_index)

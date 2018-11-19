@@ -14,16 +14,20 @@ from core.visualization.line_plot import LinePlot
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
+        self.w = QWidget(self)
+        self.w.setLayout(QVBoxLayout())
         self.t = LinePlot(self)
         ys1 = np.random.randint(0, 10, 20)
         xs1 = list(range(20))
         ys2 = np.random.randint(0, 100, 20)
         xs2 = list(range(20))
-        self.setCentralWidget(self.t)
-        self.t.plot(xs1, ys1, col = QColor(255,200,200), line_name = "Bob")
-        self.t.plot(xs2, ys2, col=QColor(200, 255, 200), line_name="Susanne")
-        self.resize(1200, 800)
 
+        self.w.layout().addWidget(self.t)
+        self.w.layout().addWidget(self.t.get_param_widget())
+        self.t.plot(xs1, ys1, col=QColor(255, 200, 200), line_name="Bob")
+        self.t.plot(xs2, ys2, col=QColor(200, 255, 200), line_name="Susanne")
+        self.setCentralWidget(self.w)
+        self.resize(1200, 800)
         self.show()
 
     def on_change(self, args):

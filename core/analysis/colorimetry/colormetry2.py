@@ -26,8 +26,8 @@ class ColormetryJob2(QObject):
             self.colormetry_analysis.clear()
             start = 0
         else:
-            if project.colormetry_analysis.current_idx == 0:
-                project.colormetry_analysis.clear()
+            # if project.colormetry_analysis.current_idx == 0:
+            #     project.colormetry_analysis.clear()
 
             self.colormetry_analysis = project.colormetry_analysis
             start = self.colormetry_analysis.current_idx
@@ -75,8 +75,8 @@ class ColormetryJob2(QObject):
             # Get sub frame if there are any margins
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
-                cv2.imshow("", frame)
-                cv2.waitKey(5)
+                # cv2.imshow("", frame)
+                # cv2.waitKey(5)
 
             # Colorspace Conversion
             frame_lab = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2Lab)

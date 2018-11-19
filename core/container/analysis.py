@@ -378,6 +378,7 @@ class ColormetryAnalysis(AnalysisContainer):
     def append_data(self, data):
         try:
             self.time_ms.append(data['time_ms'])
+            print(self.current_idx)
             self.current_idx = self.project.hdf5_manager.get_colorimetry_length() - 1
             self.project.hdf5_manager.dump_colorimetry(data, self.current_idx, self.end_idx)
             self.check_finished()
@@ -393,12 +394,14 @@ class ColormetryAnalysis(AnalysisContainer):
             self.last_idx = frame_idx
             d = self.project.hdf5_manager.get_colorimetry_pal(frame_idx)
             hist = self.project.hdf5_manager.get_colorimetry_hist(frame_idx)
+            spatial = self.project.hdf5_manager.get_colorimetry_spatial()
+            times = self.project.hdf5_manager.get_colorimetry_times()
             layers = [
                 d[:, 1].astype(np.int),
                 d[:, 2:5].astype(np.uint8),
                 d[:, 5].astype(np.int)
             ]
-            return dict(palette = layers, histogram=hist)
+            return dict(palette = layers, histogram=hist, spatial=spatial, times=times, frame_idx = frame_idx, current_idx = self.current_idx)
         except Exception as e:
             print(e)
             pass
@@ -465,6 +468,8 @@ class ColormetryAnalysis(AnalysisContainer):
 
         except Exception as e:
             print("Exception in Loading Analysis", str(e))
+        self.current_idx = project.hdf5_manager.get_colorimetry_length() - 1
+        self.time_ms = project.hdf5_manager.get_colorimetry_times()[:self.current_idx + 1].tolist()
         self.check_finished()
         return self
 
