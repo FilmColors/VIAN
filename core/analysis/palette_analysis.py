@@ -54,7 +54,6 @@ class ColorPaletteAnalysis(IAnalysisJob):
         params = args[3]
         margins = args[5]
 
-
         palettes = []
 
         cap = cv2.VideoCapture(movie_path)

@@ -1,7 +1,7 @@
 # import pyqtgraph as pg
 import time
 import os
-from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox
+from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox, QMenu
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import numpy as np
@@ -35,6 +35,163 @@ class IVIANVisualization():
         qp.begin(image)
         qp.fillRect(image.rect(), background)
         qp.end()
+        return image
+
+
+class VIANPlot(QGraphicsView, IVIANVisualization):
+    def __init__(self, parent, background=QColor(30, 30, 30), aspect = Qt.KeepAspectRatio):
+        super(VIANPlot, self).__init__(parent)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setMouseTracking(True)
+        self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
+        self.setBackgroundBrush(QColor(30, 30, 30))
+        self.setScene(QGraphicsScene(self))
+
+        self.aspect = aspect
+        self.curr_zoom_scale = 1.0
+        self.x_scale = 1.0
+        self.y_scale = 1.0
+        self.base_line = 1000
+        self.ctrl_is_pressed = False
+
+        # For Grid
+        self.max_x = 1.0
+        self.max_y = 1.0
+
+        self.font_size = 10
+        self.raw_data = []
+        self.grid = []
+
+    def get_ceil(self, tmax):
+        for i in range(100):
+            if tmax <= 10 ** i:
+                step = round(10 ** (i - 1), 1)
+                ceil = np.ceil(tmax / step) * step
+                return ceil, step
+
+        return 1.0, 0.1
+
+
+    def plot_grid(self, col = QColor(255,255,255,128)):
+        for itm in self.grid:
+            self.scene().removeItem(itm)
+        self.grid = []
+
+        x_ceil, x_step = self.get_ceil(self.max_x)
+        y_ceil, y_step = self.get_ceil(self.max_y)
+
+        pen = QPen()
+        pen.setWidthF(0.1)
+        pen.setColor(col)
+        font = QFont()
+        font.setPointSize(self.font_size)
+        for i in range(11):
+            x_true = x_step * i
+            # x_view = self.base_line / 10 * x_true
+            x_view = self.base_line / 10 * i
+
+            y_true = y_step * i
+            y_view = self.base_line - self.base_line / 10 * i
+
+            self.grid.append(self.scene().addLine(0, y_view, self.base_line, y_view, pen))
+            self.grid.append(self.scene().addLine(x_view, 0, x_view, self.base_line, pen))
+            x_lbl = self.scene().addText(str(x_true), font)
+            x_lbl.setPos(x_view - x_lbl.boundingRect().width() / 2, self.base_line + x_lbl.boundingRect().height())
+            x_lbl.setDefaultTextColor(col)
+
+            y_lbl = self.scene().addText(str(y_true), font)
+            y_lbl.setPos(-y_lbl.boundingRect().width(), y_view - y_lbl.boundingRect().height() / 2)
+            y_lbl.setDefaultTextColor(col)
+            self.grid.append(x_lbl)
+            self.grid.append(y_lbl)
+            self.grid.append(self.scene().addText(str(x_true)))
+
+    def clear_view(self):
+        self.scene().clear()
+
+    def frame_default(self):
+        rect = self.scene().itemsBoundingRect()
+        rect.adjust(-10, -10, 20, 20)
+        self.scene().setSceneRect(rect)
+        self.fitInView(rect,  self.aspect)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Control:
+            self.ctrl_is_pressed = True
+            event.ignore()
+        elif event.key() == Qt.Key_F:
+            self.frame_default()
+        else:
+            event.ignore()
+
+    def keyReleaseEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Control:
+            self.ctrl_is_pressed = False
+        else:
+            event.ignore()
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.RightButton:
+            menu = QMenu(self)
+            a_export = menu.addAction("Export")
+            a_export.triggered.connect(self.export)
+            menu.popup(self.mapToGlobal(event.pos()))
+        else:
+            event.ignore()
+
+    def wheelEvent(self, event: QWheelEvent):
+        if self.ctrl_is_pressed:
+            self.setTransformationAnchor(QGraphicsView.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.NoAnchor)
+
+            old_pos = self.mapToScene(event.pos())
+
+            h_factor = 1.1
+            l_factor = 0.9
+
+            if event.angleDelta().y() > 0.0 and self.curr_zoom_scale < 100:
+                self.scale(h_factor, h_factor)
+                self.curr_zoom_scale *= h_factor
+
+            elif event.angleDelta().y() < 0.0 and self.curr_zoom_scale > 0.001:
+                self.curr_zoom_scale *= l_factor
+                self.scale(l_factor, l_factor)
+
+            cursor_pos = self.mapToScene(event.pos()) - old_pos
+
+            self.translate(cursor_pos.x(), cursor_pos.y())
+
+        else:
+            super(QGraphicsView, self).wheelEvent(event)
+
+    def get_raw_data(self):
+        return self.raw_data
+
+    def apply_raw_data(self, raw_data):
+        for i, r in enumerate(raw_data):
+            if i == 0:
+                self.add_grid(r.curr_grid)
+            self.add_point(r.x, r.y, r.z, r.col)
+
+    def render_to_image(self, background: QColor, size: QSize):
+        """
+        Renders the scene content to an image, alternatively if return iamge is set to True, 
+        the QImage is returned and not stored to disc
+        :param return_image: 
+        :return: 
+        """
+
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
+
+        image = QImage(size, QImage.Format_ARGB32)
+        image.fill(background)
+
+        painter = QPainter()
+        painter.begin(image)
+        painter.setRenderHint(QPainter.Antialiasing)
+        self.scene().render(painter)
+        painter.end()
+
         return image
 
 
@@ -325,4 +482,3 @@ class PaletteVis(QWidget, IVIANVisualization):
             self.items.append(itm)
 
         self.view.fitInView(self.view.sceneRect())
-

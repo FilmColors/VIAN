@@ -514,8 +514,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.CONTRIBUTOR is None:
             self.show_first_start()
         else:
-            print("Contributor:", self.settings.CONTRIBUTOR.full_name)
-            print("Contributor:", self.settings.CONTRIBUTOR.email)
+            try:
+                print("Contributor:", self.settings.CONTRIBUTOR.full_name)
+                print("Contributor:", self.settings.CONTRIBUTOR.email)
+            except:
+                pass
 
     def print_time(self, segment):
         print(segment)
@@ -2123,7 +2126,6 @@ class DialogFirstStart(QtWidgets.QDialog):
         else:
             self.lineEdit_UserName.setStyleSheet("QLineEdit{color:red;}")
             return False
-
 
     def on_ok(self):
         if self.check_if_finished():

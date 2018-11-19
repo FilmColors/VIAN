@@ -8,17 +8,20 @@ from PyQt5.QtCore import Qt
 
 from core.gui.tools import StringList
 from visualizer.vis_main_window import *
-from core.visualization.basic_vis import HistogramVis
-from core.analysis.colorimetry.hilbert import create_hilbert_transform
-from core.gui.letterbox_widget import LetterBoxWidget
+from core.visualization.line_plot import LinePlot
 
 # CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = LetterBoxWidget(self)
-        self.t.set_movie("C:\\Users\\Gaudenz Halter\\Videos\\Hyper\\Netflix\\trailer.mp4")
+        self.t = LinePlot(self)
+        ys1 = np.random.randint(0, 10, 20)
+        xs1 = list(range(20))
+        ys2 = np.random.randint(0, 100, 20)
+        xs2 = list(range(20))
         self.setCentralWidget(self.t)
+        self.t.plot(xs1, ys1, col = QColor(255,200,200), line_name = "Bob")
+        self.t.plot(xs2, ys2, col=QColor(200, 255, 200), line_name="Susanne")
         self.resize(1200, 800)
 
         self.show()

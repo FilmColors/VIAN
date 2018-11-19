@@ -145,6 +145,7 @@ def lab_to_lch(lab):
         lch[2] = np.arctan2(lab[2], lab[1])
     return lch
 
+
 def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alpha = False):
     """
     Converts a Numpy Image array to a QTImage
