@@ -36,10 +36,17 @@ class IdentificationWorker(QObject):
         self.model = FaceRecognitionModel()
         self.n_faces = 100
         self.n_epochs = 100
+        self.batch_size = 10
         self.aborted = False
 
     @pyqtSlot(str, dict)
     def find_faces(self, movie_path, settings):
+        """
+        Findes faces within a movie, extracts features and clusters them
+        :param movie_path: 
+        :param settings: 
+        :return: (dict(n_cluster: List[Labels]), images, )
+        """
         start = 0
         resolution = settings['resolution']
 
@@ -54,7 +61,7 @@ class IdentificationWorker(QObject):
             ret, frame = cap.read()
             if i % resolution == 0:
                 self.signals.onProgress.emit(round(i / length, 2))
-                res = self.model.get_vector(frame, preview=False)
+                res = self.model.get_vector(frame, preview=False) #return (rect, feature_vec, eucl_dists)
                 if res is None:
                     continue
                 for r in res:
@@ -67,41 +74,46 @@ class IdentificationWorker(QObject):
                 break
 
         euclidian = np.zeros(shape=(len(result_features), 68))
-        for idx, r in enumerate(result_features): euclidian[idx] = r[1][2][0]
+
+        for idx, r in enumerate(result_features):
+            euclidian[idx] = r[1][2]
+
         result = dict()
         for idx, n_cluster in enumerate(range(settings['min_clusters'], settings['max_clusters'])):
             self.signals.onProgress.emit(round(idx / np.clip(settings['max_clusters'] - settings['min_clusters'], 1, None), 2))
             if n_cluster > euclidian.shape[0]:
                 break
             result[n_cluster] = self.model.cluster_faces(euclidian, n_cluster)
-
-        self.signals.onFacesFound.emit(result, images, result_features)
+        self.signals.onFacesFound.emit(result, images, euclidian)# result_features)
 
     def train_model(self, dataset, settings):
-        self.model.init_model(dataset['n_classes'],settings['dropout'])
+        self.model.init_model(dataset['n_classes'],settings['dropout'], settings['labels'])
         self.model.weights_path = settings['path']
         self.n_epochs = settings['epochs']
-        data = zip(dataset['labels'], dataset['vectors'])
+        self.batch_size = settings['batch_size']
+        data = list(zip(dataset['labels'], dataset['vectors']))
         # for i in range(5):
-        # shuffle(data)
-        n_test = int(np.floor(len(dataset['labels']) / 3 * 2))
-        n_train = len(dataset['labels']) - n_test
+        for i in range(5):
+            shuffle(data)
+            n_test = int(np.floor(len(dataset['labels']) / 3 * 2))
+            n_train = len(dataset['labels']) - n_test
 
-        tx = np.zeros(shape=(n_train, 68, 1))
-        ty = np.zeros(shape=(n_train, dataset['n_classes']))
-        ex = np.zeros(shape=(n_test, 68, 1))
-        ey = np.zeros(shape=(n_test, dataset['n_classes']))
+            tx = np.zeros(shape=(n_train, 68, 1))
+            ty = np.zeros(shape=(n_train, dataset['n_classes']))
+            ex = np.zeros(shape=(n_test, 68, 1))
+            ey = np.zeros(shape=(n_test, dataset['n_classes']))
 
-        for idx, (lbl, vec) in enumerate(data):
-            print(idx, lbl, vec[1][2])
-            c = np.array(to_categorical(lbl, dataset['n_classes']))
-            if idx < n_train:
-                tx[idx] = np.reshape(vec[1][2], newshape=(68, 1))
-                ty[idx] = c
-            else:
-                ex[idx - n_train] = np.reshape(vec[1][2], newshape=(68, 1))
-                ey[idx - n_train] = c
-        self.model.train_model(tx, ty, ex, ey, callback=self.on_keras_callback)
+            for idx, (lbl, vec) in enumerate(data):
+                c = np.array(to_categorical(lbl, dataset['n_classes']))
+                if idx < n_train:
+                    tx[idx] = np.reshape(vec, newshape=(68, 1))
+                    ty[idx] = c
+                else:
+                    ex[idx - n_train] = np.reshape(vec, newshape=(68, 1))
+                    ey[idx - n_train] = c
+
+            self.model.train_model(tx, ty, ex, ey, callback=self.on_keras_callback, n_epochs=self.n_epochs, batch_size=self.batch_size)
+
         self.model.store_weights()
         self.signals.onTrainingDone.emit(settings['path'])
 
@@ -194,7 +206,6 @@ class FaceIdentificatorWidget(QWidget):
         self.tab_widget.setTabEnabled(1, False)
         self.tab_widget.setTabEnabled(2, False)
 
-
     def collect_faces(self):
         settings = self.collection_window.get_settings()
         self.onCollectFaces.emit(self.main_window.project.movie_descriptor.movie_path, settings)
@@ -221,6 +232,9 @@ class FaceIdentificatorWidget(QWidget):
     def on_create_dataset(self):
         self.set_stage(2)
         self.final_dataset = self.cluster_view.get_final_dataset()
+        np.savez(self.main_window.project.data_dir + "/dataset.npz", labels=self.final_dataset['labels'], vectors=self.final_dataset['vectors'])
+
+
 
     def set_stage(self, v):
         self.current_stage = v
@@ -232,7 +246,6 @@ class FaceIdentificatorWidget(QWidget):
 
     def on_browse_weights(self):
         hdf5 = QFileDialog.getOpenFileName(directory=self.main_window.project.folder, filter="*.hdf5")
-        print(hdf5)
         if os.path.isfile(hdf5[0]) and os.path.isfile(hdf5[0].replace(".hdf5", ".json")):
             # self.onLoadWeights.emit(hdf5[0])
             self.onModelTrained.emit(hdf5[0])
@@ -247,6 +260,7 @@ class FaceIdentificatorWidget(QWidget):
             s = self.fine_adjusting_window.settings.get_settings()
             s['path'] = self.main_window.project.data_dir + s['path']
             print(s['path'], self.main_window.project.data_dir + s['path'])
+            s['labels'] = [str(i) for i in range(self.final_dataset['n_classes'])]
             self.onTrainModel.emit(self.final_dataset, s)
 
     @pyqtSlot(str)
@@ -298,6 +312,7 @@ class FaceClusteringView(QGraphicsView):
 
         self.selected = []
         self.items = []
+        self.pixmaps = []
 
         self.fiex_clustering = []
 
@@ -353,6 +368,7 @@ class FaceClusteringView(QGraphicsView):
                 itm = VIANMovableGraphicsItem(numpy_to_pixmap(img), mime_data=dict(data_idx=img_idx))
                 itm.signals.hasBeenMoved.connect(self.update_arrangement)
                 self.scene().addItem(itm)
+
                 itm.setFlag(QGraphicsItem.ItemIsMovable, True)
                 if img.shape[0] > h_max:
                     h_max = img.shape[0]
@@ -376,8 +392,11 @@ class FaceClusteringView(QGraphicsView):
                 vectors.append(self.result_features[img_idx])
         return dict(vectors=vectors, labels=labels, n_classes=len(list(set(labels))))
 
-    @pyqtSlot(object)
-    def update_arrangement(self, args):
+    @pyqtSlot(object, object)
+    def update_arrangement(self, args, pnt):
+        for itm in self.selected:
+            itm.moveBy(pnt)
+
         new_clustering = dict()
         for itm in self.items:
             cluster = int(np.floor(itm.pos().y() / (self.item_height + (2 * self.item_margin))))
@@ -387,11 +406,15 @@ class FaceClusteringView(QGraphicsView):
         self.clusters[self.curr_cluster_idx] = new_clustering
         self.set_current_cluster()
 
-
-    def on_rubberband_selection(self, QRect, Union, QPointF=None, QPoint=None):
+    def on_rubberband_selection(self, r, Union, QPointF=None, QPoint=None):
         p = QPainterPath()
-        p.addRect(QRectF(self.mapToScene(QRect).boundingRect()))
+        p.addRect(QRectF(self.mapToScene(r).boundingRect()))
+
         self.scene().setSelectionArea(p, self.viewportTransform())
+        self.selected = []
+        for itm in self.items:
+            if itm.sceneBoundingRect().intersects(QRectF(r)):
+                self.selected.append(itm)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.RightButton:

@@ -86,11 +86,16 @@ class FaceRecognitionModel():
         self.session = None
         self.graph = None
         self.serving = serving
+        self.labels = []
 
-    def init_model(self, n_classes, dropout):
+    def init_model(self, n_classes, dropout, labels):
         if self.session is not None:
             self.session.close()
         # self.session = K.get_session()
+
+        self.dropout = dropout
+        self.n_classes = n_classes
+        self.labels = labels
 
         self.graph = tf.Graph()
 
@@ -104,8 +109,6 @@ class FaceRecognitionModel():
         self.session = tf.Session(config=config, graph=self.graph)
         KTF.set_session(self.session)
 
-        self.dropout = dropout
-        self.n_classes = n_classes
 
     def extract_faces(self, frame_bgr, preview = False):
         if self.disabled:
@@ -160,8 +163,7 @@ class FaceRecognitionModel():
                     if identify and self.dnn_model is not None:
                         class_idx, prob = self.predict(v[2])
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        print(class_idx)
-                        cv2.putText(img, str(class_idx), (v[0][0], v[0][1]), font, 4, (255, 255, 255), 2, cv2.LINE_AA)
+                        cv2.putText(img, str(self.labels[class_idx]), (v[0][0], v[0][1]), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
                     vec = np.add(v[1], [r[0], r[1]])
                     for i in range(68):
                         cv2.circle(frame_bgr, (int(vec[i][0]), int(vec[i][1])), 1, (0, 235, 235), thickness=2)
@@ -198,10 +200,8 @@ class FaceRecognitionModel():
             norm_vec = new - np.amin(new)
             norm_vec /= np.amax(norm_vec)
             eucl_dist = np.linalg.norm(norm_vec - norm_vec[self.nose_point_idx], axis=1)
-
             vectors = new
             res.append((rectangle, vectors, eucl_dist))
-
 
         return res
 
@@ -217,11 +217,6 @@ class FaceRecognitionModel():
         X = np.array(eucl_dist_vecs)
         clustering = AgglomerativeClustering(n_clusters=n_clusters).fit(X)
 
-        # print(clustering.labels_)
-        # lbl_cluster = [[]] * int(np.amax(clustering.labels_) + 1)
-        # for idx, lbl in enumerate(clustering.labels_):
-        #     lbl_cluster[lbl].append(idx)
-
         return clustering.labels_
 
     def load_weights(self, path = None, init_model = True):
@@ -236,7 +231,7 @@ class FaceRecognitionModel():
         if init_model:
             with open(path.replace(".hdf5", ".json"), "r") as f:
                 d = json.load(f)
-                self.init_model(d['n_classes'], d['dropout'])
+                self.init_model(d['n_classes'], d['dropout'], d['labels'])
         if self.dnn_model is None:
             raise RuntimeError("Model not initialized")
 
@@ -251,10 +246,12 @@ class FaceRecognitionModel():
             path = self.weights_path
 
         with open(path.replace(".hdf5", ".json"), "w") as f:
-            json.dump(dict(n_classes = self.n_classes, dropout= self.dropout), f)
-        self.dnn_model.save_weights(path)
+            json.dump(dict(n_classes = self.n_classes, dropout= self.dropout, labels=self.labels), f)
 
-    def train_model(self, X_train, y_train, X_test, y_test, load=False, callback=None):
+        with self.graph.as_default():
+            self.dnn_model.save_weights(path)
+
+    def train_model(self, X_train, y_train, X_test, y_test, load=False, callback=None, n_epochs = 100, batch_size = 10):
         if self.dnn_model is None:
             raise RuntimeError("Model not initialized")
 
@@ -263,10 +260,6 @@ class FaceRecognitionModel():
 
             checkpoint = ModelCheckpoint(self.weights_path, monitor='loss', verbose=0, save_best_only=True, mode='auto')
 
-            # tensorboard = TensorBoard(
-            #     log_dir='./logs/' + now, histogram_freq=1, write_graph=True
-            # )
-            # callbacks_list = [checkpoint, tensorboard]
             if callback is not None:
                 cb = VIANKerasCallback()
                 cb.onCallback.connect(callback)
@@ -277,13 +270,13 @@ class FaceRecognitionModel():
             self.dnn_model.fit(
                 X_train,
                 y_train,
-                epochs=100,
-                batch_size=10,
+                epochs=n_epochs,
+                batch_size=batch_size,
                 shuffle='batch',
                 callbacks=callbacks_list,
                 verbose=1)
 
-            (loss, accuracy) = self.dnn_model.evaluate(X_test, y_test, batch_size=10)
+            (loss, accuracy) = self.dnn_model.evaluate(X_test, y_test, batch_size=batch_size)
 
             print("[INFO] loss={:.4f}, accuracy: {:.4f}%".format(loss, accuracy * 100))
 
@@ -305,6 +298,7 @@ class FaceRecognitionModel():
         #     print("creating new weights file")
         with self.graph.as_default():
             pred = self.dnn_model.predict(X, batch_size=1, verbose=0)[0]
+
         class_idx = np.argmax(pred)
         prob = pred[class_idx]
         return class_idx, prob

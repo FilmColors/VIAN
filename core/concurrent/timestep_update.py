@@ -36,6 +36,7 @@ class TimestepUpdateWorkerSingle(QObject):
         self.spacial_frequency_method = "edge-mean"
 
         self.face_rec_model = FaceRecognitionModel(serving=True)
+        self.face_rec_model.load_weights(os.path.abspath("data/models/face_identification/age_of_innocence_sample.hdf5"))
 
     @pyqtSlot(str)
     def load_face_rec_model(self, str):

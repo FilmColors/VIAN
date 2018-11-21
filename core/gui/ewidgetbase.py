@@ -577,7 +577,7 @@ class EditableListWidgetItem(QListWidgetItem):
 
 
 class VIANMoveableGraphicsItemSignals(QObject):
-    hasBeenMoved = pyqtSignal(object)
+    hasBeenMoved = pyqtSignal(object, object)
 
 
 class VIANMovableGraphicsItem(QGraphicsPixmapItem):
@@ -592,10 +592,14 @@ class VIANMovableGraphicsItem(QGraphicsPixmapItem):
         self.mime_data = mime_data
         self.pixmap = pixmap
         self.curr_alpha = 1.0
+        self.curr_pos = self.pos()
+
+    def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
+        self.curr_pos = self.pos()
 
     def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent'):
         super(VIANMovableGraphicsItem, self).mouseReleaseEvent(event)
-        self.signals.hasBeenMoved.emit(self)
+        self.signals.hasBeenMoved.emit(self, self.pos() - self.curr_pos)
 
     def paint(self, painter: QPainter, option: 'QStyleOptionGraphicsItem', widget: QWidget):
         super(VIANMovableGraphicsItem, self).paint(painter, option, widget)
