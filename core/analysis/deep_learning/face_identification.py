@@ -8,6 +8,9 @@ from keras.layers import Activation, Dense, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
 import keras.backend as K
+import tensorflow as tf
+import keras.backend.tensorflow_backend as KTF
+
 from sklearn.cluster.hierarchical import AgglomerativeClustering
 
 from core.analysis.deep_learning.keras_callback import VIANKerasCallback
@@ -60,7 +63,8 @@ class FaceRecognitionModel():
     def __init__(self, cascPath = "data/models/face_identification/haarcascade_frontalface_default.xml",
                  predictor_path = "data/models/face_identification/shape_predictor_68_face_landmarks.dat",
                  weights_path = "data/models/face_identification/weights.hdf5",
-                 cascPathside="data/models/face_identification/haarcascade_profileface.xml"):
+                 cascPathside="data/models/face_identification/haarcascade_profileface.xml",
+                 serving = False):
         self.disabled = False
         if os.path.isfile(cascPath) and os.path.isfile(cascPathside) and os.path.isfile(predictor_path):
             self.cascade = cv2.CascadeClassifier(cascPath)
@@ -80,10 +84,26 @@ class FaceRecognitionModel():
         self.dropout = 0.25
         self.n_classes = 3
         self.session = None
+        self.graph = None
+        self.serving = serving
 
     def init_model(self, n_classes, dropout):
-        self.session = K.get_session()
-        self.dnn_model = FaceRecKeras(n_classes, dropout)
+        if self.session is not None:
+            self.session.close()
+        # self.session = K.get_session()
+
+        self.graph = tf.Graph()
+
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+        config.log_device_placement = True  # to log device placement (on which device the operation ran)
+
+        with self.graph.as_default():
+            self.dnn_model = FaceRecKeras(n_classes, dropout)
+
+        self.session = tf.Session(config=config, graph=self.graph)
+        KTF.set_session(self.session)
+
         self.dropout = dropout
         self.n_classes = n_classes
 
@@ -210,15 +230,18 @@ class FaceRecognitionModel():
         jsonp = path.replace(".hdf5", ".json")
 
         if not os.path.isfile(path) or not os.path.isfile(jsonp):
-            print("No Weights and json descriptor found")
+            print("No Weights or json descriptor found")
             return
+
         if init_model:
             with open(path.replace(".hdf5", ".json"), "r") as f:
                 d = json.load(f)
                 self.init_model(d['n_classes'], d['dropout'])
         if self.dnn_model is None:
             raise RuntimeError("Model not initialized")
-        self.dnn_model.load_weights(path)
+
+        with self.graph.as_default():
+            self.dnn_model.load_weights(path)
 
     def store_weights(self, path = None):
         if self.dnn_model is None:
@@ -235,34 +258,34 @@ class FaceRecognitionModel():
         if self.dnn_model is None:
             raise RuntimeError("Model not initialized")
 
-        self.dnn_model.compile(loss='categorical_crossentropy', optimizer='nadam', metrics=['accuracy'])
+        with self.graph.as_default():
+            self.dnn_model.compile(loss='categorical_crossentropy', optimizer='nadam', metrics=['accuracy'])
 
-        checkpoint = ModelCheckpoint(self.weights_path, monitor='loss', verbose=0, save_best_only=True, mode='auto')
+            checkpoint = ModelCheckpoint(self.weights_path, monitor='loss', verbose=0, save_best_only=True, mode='auto')
 
-        # tensorboard = TensorBoard(
-        #     log_dir='./logs/' + now, histogram_freq=1, write_graph=True
-        # )
-        # callbacks_list = [checkpoint, tensorboard]
-        if callback is not None:
-            cb = VIANKerasCallback()
-            cb.onCallback.connect(callback)
-            callbacks_list = [checkpoint, cb]
-        else:
-            callbacks_list = [checkpoint]
+            # tensorboard = TensorBoard(
+            #     log_dir='./logs/' + now, histogram_freq=1, write_graph=True
+            # )
+            # callbacks_list = [checkpoint, tensorboard]
+            if callback is not None:
+                cb = VIANKerasCallback()
+                cb.onCallback.connect(callback)
+                callbacks_list = [checkpoint, cb]
+            else:
+                callbacks_list = [checkpoint]
 
+            self.dnn_model.fit(
+                X_train,
+                y_train,
+                epochs=100,
+                batch_size=10,
+                shuffle='batch',
+                callbacks=callbacks_list,
+                verbose=1)
 
-        self.dnn_model.fit(
-            X_train,
-            y_train,
-            epochs=100,
-            batch_size=10,
-            shuffle='batch',
-            callbacks=callbacks_list,
-            verbose=1)
+            (loss, accuracy) = self.dnn_model.evaluate(X_test, y_test, batch_size=10)
 
-        (loss, accuracy) = self.dnn_model.evaluate(X_test, y_test, batch_size=10)
-
-        print("[INFO] loss={:.4f}, accuracy: {:.4f}%".format(loss, accuracy * 100))
+            print("[INFO] loss={:.4f}, accuracy: {:.4f}%".format(loss, accuracy * 100))
 
     def predict(self, face_vec):
         """ Predict the class of a particular image """
@@ -280,8 +303,8 @@ class FaceRecognitionModel():
         #     self.dnn_model.load_weights(self.weights_path)
         # except OSError:
         #     print("creating new weights file")
-
-        pred = self.dnn_model.predict(X, batch_size=1, verbose=0)[0]
+        with self.graph.as_default():
+            pred = self.dnn_model.predict(X, batch_size=1, verbose=0)[0]
         class_idx = np.argmax(pred)
         prob = pred[class_idx]
         return class_idx, prob

@@ -5,7 +5,9 @@ import tensorflow as tf
 from core.analysis.deep_learning.labels import *
 
 DIR_WEIGHTS_BUILT_IN = "/data/models/"
-KERAS_LIP_WEIGHTS = "data/models/LIP_PSPNET50_Weights.hdf5"
+KERAS_LIP_WEIGHTS = "data/models/semantic_segmentation/LIP_PSPNET50_Weights.hdf5"
+
+
 
 
 class KerasModel():
@@ -46,8 +48,8 @@ class PSPNetModel(KerasModel):
 
 
 class RealTimeHumanExtractor:
-    prototxt = "data/models/MobileNetSSD_deploy.prototxt.txt"
-    model = "data/models/MobileNetSSD_deploy.caffemodel"
+    prototxt = "data/models/semantic_segmentation/MobileNetSSD_deploy.prototxt.txt"
+    model = "data/models/semantic_segmentation/MobileNetSSD_deploy.caffemodel"
 
     def __init__(self, confidence = 0.5):
         self.confidence = confidence
@@ -85,7 +87,12 @@ if __name__ == '__main__':
     from core.analysis.deep_learning.labels import LIPLabels
 
     with tf.Graph().as_default():
-        session = tf.Session('')
+
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+        config.log_device_placement = True  # to log device placement (on which device the operation ran)
+
+        session = tf.Session(config)
         KTF.set_session(session)
 
         files = glob.glob("test_images/*.jpg")

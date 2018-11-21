@@ -32,7 +32,13 @@ class VIANVisualizer(QMainWindow):
                 raise FileExistsError("No Corpus File Selected")
         else:
             path = CORPUS_PATH
+
+        if not os.path.isfile(path.replace(".vian_corpus", ".vian_corpus_sql")):
+            sql_path = "sqlite:///" + QFileDialog.getOpenFileName(self, filter="*.vian_corpus_sql")[0]
+        else:
+            sql_path = None
         self.query_worker = QueryWorker(path, contributor)
+        self.query_worker.corpus.sql_path = sql_path
 
         self.query_thread = QThread()
         self.query_worker.moveToThread(self.query_thread)

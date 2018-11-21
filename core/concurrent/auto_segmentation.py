@@ -244,18 +244,28 @@ class ApplySegmentationWindow(QMainWindow):
                     curr_lbl = c
 
         self.view.scene().clear()
-        y = 0
+        x = 0
         img_h = 200
-        for group in images:
-            x = 0
-            y += img_h
+        img_w = 200
+        max_height = 0
+        m_base = 0
+        n_groups = int(len(images) / 2)
+        for i, group in enumerate(images):
+            y = 0 + m_base
+            x += img_w
             for img in group:
                 itm = self.view.scene().addPixmap(img)
                 itm.setPos(x, y)
-                x += 220
+                y += 180
+                if y > max_height:
+                    max_height = y
+            if i == n_groups:
+                self.view.scene().addLine(0, max_height + 50, self.view.scene().itemsBoundingRect().width(), max_height + 50)
+                m_base = max_height + 100
+                x = img_w
 
-        rect = QRectF(self.view.scene().itemsBoundingRect().x(), self.view.scene().itemsBoundingRect().y(), 100, self.view.scene().itemsBoundingRect().height())
-        self.view.fitInView(rect, Qt.KeepAspectRatio)
+        # rect = QRectF(self.view.scene().itemsBoundingRect().x(), self.view.scene().itemsBoundingRect().y(), 100, self.view.scene().itemsBoundingRect().height())
+        self.view.fitInView(self.view.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
 
     def apply_segmentation(self):
         index = int(self.slider.value()) - 1 - self.cluster_range[0]

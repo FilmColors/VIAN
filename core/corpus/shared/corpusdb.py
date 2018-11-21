@@ -1340,7 +1340,7 @@ class DatasetCorpusDB(CorpusDB):
         result_shots = []
         features = []
 
-        for o in out:
+        for i, o in enumerate(out):
             dbscr = DBScreenshot()
             dbscr.from_database(dict(o))
             dbscr.screenshot_id = o['target_container_id']
@@ -1351,10 +1351,13 @@ class DatasetCorpusDB(CorpusDB):
         return (result_shots, features)
 
     def get_color_ab_info(self, screenshot_ids):
+        print("Querying Analyses")
         include_args = '(' + ','.join(map(str, screenshot_ids)) + ')'
         out = self.db.query(Q_FEATURES_OF_SHOTS + include_args)
         features = []
-        for o in out:
+        print("Assembling Features")
+        for i, o in enumerate(out):
+            sys.stdout.write("\r" + str(i))
             dbanalysis = DBAnalysis().from_database(o)
             dbanalysis.analysis_id = o['analysis_id']
             features.append(dbanalysis)
@@ -1385,14 +1388,17 @@ class DatasetCorpusDB(CorpusDB):
             )
             json.dump(data, f)
 
-    def load(self, path):
+    def load(self, path, sql_path = None):
         try:
             with open(path, "r") as f:
                 data = json.load(f)
                 for attr, value in data.items():
                     setattr(self, attr, value)
             self.ftp_dir = self.root_dir + FTP_DIR
-            self.sql_path = "sqlite:///" + path.replace(".vian_corpus", ".vian_corpus_sql")
+            if sql_path is None:
+                self.sql_path = "sqlite:///" + path.replace(".vian_corpus", ".vian_corpus_sql")
+            else:
+                self.sql_path = sql_path
 
             print(self.sql_path)
             self.connect(self.sql_path)

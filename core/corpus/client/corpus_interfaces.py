@@ -224,12 +224,13 @@ class LocalCorpusInterface(CorpusInterface):
     def __init__(self):
         super(LocalCorpusInterface, self).__init__()
         self.local_corpus = DatasetCorpusDB()
+        self.sql_path = None
 
     @pyqtSlot(object, object)
     def connect_user(self, user:DBContributor, options):
         try:
             user = DBContributor().from_vian_user(user)
-            self.local_corpus = DatasetCorpusDB().load(options)
+            self.local_corpus = DatasetCorpusDB().load(options, self.sql_path)
             self.name = self.local_corpus.name
             user = self.local_corpus.connect_user(user)
             self.onConnected.emit(True, self.local_corpus.get_projects(), user)

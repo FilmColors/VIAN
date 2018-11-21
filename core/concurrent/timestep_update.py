@@ -35,12 +35,12 @@ class TimestepUpdateWorkerSingle(QObject):
         self.update_face_identification = True
         self.spacial_frequency_method = "edge-mean"
 
-        self.face_rec_model = FaceRecognitionModel()
+        self.face_rec_model = FaceRecognitionModel(serving=True)
 
     @pyqtSlot(str)
     def load_face_rec_model(self, str):
         self.face_rec_model.load_weights(str)
-        self.face_rec_model.session.graph.finalize()
+        # self.face_rec_model.graph.finalize()
 
     @pyqtSlot(str)
     def set_movie_path(self, movie_path):

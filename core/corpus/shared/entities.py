@@ -1147,6 +1147,7 @@ class QueryRequestData():
         self.filter_classification_objects = filter_classification_objects
         self.segment_filters = segment_filters
         self.shot_id = shot_id
+        self.k_shots = 300
 
 
 class FilmographyQuery():

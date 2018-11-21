@@ -34,6 +34,7 @@ class IdentificationWorker(QObject):
         super(IdentificationWorker, self).__init__()
         self.signals = IdentificationWorkerSignals()
         self.model = FaceRecognitionModel()
+        self.n_faces = 100
         self.n_epochs = 100
         self.aborted = False
 
@@ -59,6 +60,8 @@ class IdentificationWorker(QObject):
                 for r in res:
                     result_features.append([i, r])
                     images.append(sub_image(frame, r[0]))
+                if len(result_features) >= 100:
+                    break
             if self.aborted:
                 self.aborted = False
                 break
@@ -71,7 +74,6 @@ class IdentificationWorker(QObject):
             if n_cluster > euclidian.shape[0]:
                 break
             result[n_cluster] = self.model.cluster_faces(euclidian, n_cluster)
-            print(len(result[n_cluster]), len(images))
 
         self.signals.onFacesFound.emit(result, images, result_features)
 
@@ -203,6 +205,8 @@ class FaceIdentificatorWidget(QWidget):
 
     @pyqtSlot(object, object, object)
     def on_collect_faces_finished(self, result, images, result_features):
+        if len(list(result.keys())) == 0:
+            return
         self.set_stage(1)
         self.progress_bar.setValue(0)
         self.cluster_selector.setRange(np.amin(list(result.keys())), np.amax(list(result.keys())))
@@ -234,7 +238,6 @@ class FaceIdentificatorWidget(QWidget):
             self.onModelTrained.emit(hdf5[0])
             self.fine_adjusting_window.settings.btn_Train.setText("Retrain")
             self.set_stage(2)
-
 
     def on_finetune(self):
         self.cluster_selector.hide()
