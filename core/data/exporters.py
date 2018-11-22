@@ -39,7 +39,7 @@ class ScreenshotsExporter():
             if annotation_visibility:
                 img = s.img_blend
             else:
-                img = s.img_movie
+                img = s.get_image(True)
 
             if smooth:
                 img = cv2.GaussianBlur(img, (3, 3), 0)

@@ -376,7 +376,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     s.setPixmap(numpy_to_pixmap(s.screenshot_obj.img_blend))
                     s.screenshot_obj.annotation_is_visible = state
                 else:
-                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.img_movie))
+                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.get_image()))
                     s.screenshot_obj.annotation_is_visible = False
         pass
 
@@ -409,7 +409,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if s.annotation_is_visible and s.img_blend is not None:
                 image = s.img_blend
             else:
-                image = s.img_movie
+                image = s.get_image()
 
             # Convert to Pixmap
             # Cache the converted QPixamps if these are not the initial place holders
@@ -724,7 +724,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             new_cache = dict()
             for s in self.project.screenshots:
                 if str(s.unique_id) not in self.ab_view_mean_cache:
-                    frame = s.img_movie.astype(np.float32)/255
+                    frame = s.get_image().astype(np.float32)/255
                     if self.project.movie_descriptor.letterbox_rect is not None:
                         margins = self.project.movie_descriptor.letterbox_rect
                         frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
@@ -734,7 +734,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 else:
                     mean = self.ab_view_mean_cache[str(s.unique_id)][0]
                 # We have to make sure that we do not cache the place holder before the actual images are loaded
-                if s.img_movie.shape[0] > 100.0:
+                if s.get_image().shape[0] > 100.0:
                     new_cache[str(s.unique_id)] = (mean, lab_to_sat(lab=np.array([mean]), implementation="luebbe")[0], s.movie_timestamp, lab_to_lch(mean))
             self.ab_view_mean_cache = new_cache
 
@@ -764,7 +764,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                             y = sat
                         exists = self.color_dt.set_item_values(s.unique_id, [x, y])
                         if not exists:
-                            self.color_dt.add_image(x, y, s.img_movie, index_id=s.unique_id)
+                            self.color_dt.add_image(x, y, s.get_image(), index_id=s.unique_id)
                     except Exception as e:
                         continue
                 self.color_dt.update_position()
@@ -774,7 +774,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     sat = self.ab_view_mean_cache[str(s.unique_id)][1]
                     lab = self.ab_view_mean_cache[str(s.unique_id)][0]
                     lch = self.ab_view_mean_cache[str(s.unique_id)][3]
-                    self.ab_view.add_image(128 - lab[1], 128 - lab[2], s.img_movie, to_float=True)
+                    self.ab_view.add_image(128 - lab[1], 128 - lab[2], s.get_image(), to_float=True)
 
     def on_closed(self):
         self.clear_manager()

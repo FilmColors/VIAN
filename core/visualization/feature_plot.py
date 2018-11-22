@@ -123,7 +123,7 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
 
     def create_timeline(self):
         for s in self.project.screenshots:
-            img = cv2.resize(s.img_movie, (192, 108), interpolation=cv2.INTER_CUBIC)
+            img = cv2.resize(s.get_image(), (192, 108), interpolation=cv2.INTER_CUBIC)
             # img = s.img_movie
             shot = self.scene().addPixmap(numpy_to_pixmap(img))
             shot.setPos(s.movie_timestamp * self.magnification, 1400)

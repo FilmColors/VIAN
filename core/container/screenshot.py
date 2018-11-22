@@ -121,6 +121,9 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         else:
             return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
+    def get_image(self, ignore_cl_obj = False):
+        return self.img_movie
+
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_title, [name]),
                                           (self.set_title, [self.title]))
