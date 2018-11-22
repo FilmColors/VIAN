@@ -102,6 +102,7 @@ class IProjectContainer(QObject):
                 result.append(r)
         return result
 
+
     def delete(self):
         print("Not Implemented in ", self)
 

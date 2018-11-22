@@ -61,13 +61,13 @@ if __name__ == '__main__':
         multi_mask = scr.get_connected_analysis(SemanticSegmentationAnalysis)[0].get_adata()['mask']
         fg_mask = labels_to_binary_mask(multi_mask, class_obj_fg.semantic_segmentation_labels[1])
         fg_features = compute_features(project.movie_descriptor.movie_path, scr.frame_pos, fg_mask,
-                         1, scr, class_obj_fg)
+                         True, scr, class_obj_fg)
         bg_mask = labels_to_binary_mask(multi_mask, class_obj_bg.semantic_segmentation_labels[1])
         bg_features = compute_features(project.movie_descriptor.movie_path, scr.frame_pos, bg_mask,
-                         1, scr, class_obj_bg)
+                         True, scr, class_obj_bg)
         glob_mask = labels_to_binary_mask(multi_mask, class_obj_glob.semantic_segmentation_labels[1])
         glob_features = compute_features(project.movie_descriptor.movie_path, scr.frame_pos, glob_mask,
-                         1, scr, class_obj_glob)
+                         True, scr, class_obj_glob)
 
         analyses.append(fg_features)
         analyses.append(bg_features)

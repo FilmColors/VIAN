@@ -660,7 +660,7 @@ class ClassificationObjectContextMenu(ContextMenu):
         self.popup(pos)
 
     def on_set_active(self):
-        pass
+        self.project.set_active_classification_object(self.cl_obj)
 
     def on_remove(self):
         self.cl_obj.experiment.remove_classification_object(self.cl_obj)

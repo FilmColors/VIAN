@@ -3,7 +3,8 @@ import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from core.data.interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
-from core.data.computation import numpy_to_qt_image
+from core.data.computation import numpy_to_qt_image, apply_mask
+from core.container.analysis import SemanticSegmentationAnalysisContainer
 import datetime
 
 
@@ -45,6 +46,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         self.preview_cache = None
         self.curr_size = 1.0
+
+        self.hdf5_cache = dict()
 
 
     def to_stream(self, project = None):
@@ -122,7 +125,39 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
     def get_image(self, ignore_cl_obj = False):
+        # If the CL obje should be igrnoer there is none or it has no semantic-segmentation:
+        if ignore_cl_obj or self.project.active_classification_object is None or self.project.active_classification_object.semantic_segmentation_labels[0] == "":
+            return self.img_movie
+        else:
+            a = self.get_semantic_segmentations(self.project.active_classification_object.semantic_segmentation_labels[0])
+            lbls = self.project.active_classification_object.semantic_segmentation_labels[1]
+            if len(self.project.active_classification_object.semantic_segmentation_labels[0]) == len(lbls):
+                return self.img_movie
+            if a is not None:
+                mask = a.get_adata()
+                return apply_mask(self.img_movie, mask, lbls)
         return self.img_movie
+
+
+    def get_semantic_segmentations(self, dataset=None):
+        """
+        Returns a dict {dataset_name: SemanticSegmentationAnalysisContainer}
+        :return: 
+        """
+        if dataset is not None:
+            for d in self.connected_analyses:
+                if isinstance(d, SemanticSegmentationAnalysisContainer):
+                    if d.dataset == dataset:
+                        return d
+            return None
+        else:
+            result = dict()
+            for d in self.connected_analyses:
+                if isinstance(d, SemanticSegmentationAnalysisContainer):
+                    result[d.dataset] = d
+            return result
+
+
 
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_title, [name]),

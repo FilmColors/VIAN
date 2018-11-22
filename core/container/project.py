@@ -122,6 +122,7 @@ class VIANProject(IHasName, IClassifiable):
         self.active_screenshot_group = self.screenshot_groups[0]
         self.active_screenshot_group.is_current = True
 
+        self.active_classification_object = None
         # self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
@@ -244,6 +245,10 @@ class VIANProject(IHasName, IClassifiable):
         needs_init = self.hdf5_manager.set_path(self.hdf5_path)
         if needs_init:
             self.hdf5_manager.initialize_all()
+
+    def set_active_classification_object(self, cl_obj):
+        self.active_classification_object = cl_obj
+        self.dispatch_changed(item=self)
 
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):

@@ -495,17 +495,30 @@ def images_to_movie(imgs, out_file, time_scale = 20, fps = 20.0, size = (640,480
 
 def labels_to_binary_mask(multi_mask, labels):
     """
-    Converts a Label Mask to a binary mask with all indices that have a value which is in labels are 1
+    Converts a Label Mask to a binary mask with all indices that have a value which is in labels are set to True
     else 0. 
     
     :param multi_mask: 
     :param labels: 
     :return: 
     """
-    result = np.zeros_like(multi_mask)
+    result = np.zeros_like(multi_mask, dtype=np.bool)
     for i in labels:
-        result[np.where(multi_mask == i)] = 1
+        result[np.where(multi_mask == i)] = True
     return result
+
+def apply_mask(img, mask, indices):
+    if len(mask.shape) > 2:
+        mask = cv2.cvtColor(mask ,cv2.COLOR_BGR2GRAY)
+    if mask.shape[0] != img.shape[0] and mask.shape[1] != img.shape[1]:
+        mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
+
+    bin_mask = labels_to_binary_mask(mask, indices)
+    alpha = np.zeros(img.shape[:2], dtype=np.uint8)
+    alpha[np.where(bin_mask == True)] = 255
+    result = np.dstack((img, alpha))
+    return result
+
 
 
 def rotate(origin, point, angle):

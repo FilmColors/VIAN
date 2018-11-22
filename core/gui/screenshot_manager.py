@@ -415,15 +415,19 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             # Cache the converted QPixamps if these are not the initial place holders
             if image.shape[0] > 100:
                 # Check if the Image is already in the cache
-                if str(s.unique_id) in self.qimage_cache:
-                    qpixmap = self.qimage_cache[str(s.unique_id)]
-                else:
-                    try:
+                # if str(s.unique_id) in self.qimage_cache:
+                #     qpixmap = self.qimage_cache[str(s.unique_id)]
+                # else:
+                try:
+                    if image.shape[2] == 4:
+                        qpixmap = numpy_to_pixmap(image, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
+                    else:
                         qpixmap = numpy_to_pixmap(image)
-                        self.qimage_cache[str(s.unique_id)] = qpixmap
-                    except:
-                        continue
-                new_qimage_cache[str(s.unique_id)] = qpixmap
+
+                    self.qimage_cache[str(s.unique_id)] = qpixmap
+                except:
+                    continue
+                # new_qimage_cache[str(s.unique_id)] = qpixmap
             else:
                 qpixmap = numpy_to_pixmap(image)
 
