@@ -90,7 +90,7 @@ class WebAppCorpusInterface(CorpusInterface):
 
             # -- Thumbnail --
             if len(project.screenshots) > 0:
-                thumb = sample(project.screenshots, 1)[0].get_image(True)
+                thumb = sample(project.screenshots, 1)[0].get_img_movie(True)
                 cv2.imwrite(export_project_dir + "thumbnail.jpg", thumb)
 
             # -- Export all Screenshots --
@@ -104,7 +104,7 @@ class WebAppCorpusInterface(CorpusInterface):
                 sys.stdout.write("\r" + str(round(i / len(project.screenshots), 2) * 100).rjust(3) + "%\t Baking Screenshots")
                 self.onEmitProgress.emit(i / len(project.screenshots), "Baking Screenshots")
 
-                img = cv2.cvtColor(scr.get_image(True), cv2.COLOR_BGR2BGRA)
+                img = cv2.cvtColor(scr.get_img_movie(True), cv2.COLOR_BGR2BGRA)
                 # # Export the Screenshot as extracted from the movie
                 grp_name = scr.screenshot_group
                 name = scr_dir + grp_name + "_" \

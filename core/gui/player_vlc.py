@@ -335,6 +335,7 @@ class Player_VLC(VideoPlayer):
 
         capture = cv2.VideoCapture(self.movie_path)
         self.fps = capture.get(cv2.CAP_PROP_FPS)
+        self.movie_size = (capture.get(cv2.CAP_PROP_FRAME_WIDTH), capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.main_window.project.movie_descriptor.fps = self.fps
         self.media_descriptor.set_duration(self.duration)
         self.user_fps = self.fps

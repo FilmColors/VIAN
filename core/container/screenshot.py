@@ -30,7 +30,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         IProjectContainer.__init__(self)
         IClassifiable.__init__(self)
         self.title = title
-        self.img_movie = image
+        self.img_movie = None
+        self.set_img_movie(image)
         self.img_blend = img_blend
         self.annotation_item_ids = annotation_item_ids
         self.frame_pos = frame_pos
@@ -65,11 +66,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             project = self.project
 
         obj = project.streamer.from_stream(self.unique_id)
-
-    # pyqtSlot(object)
-    # def on_images_loaded(self, obj):
-    #     self.img_movie = cv2.resize(obj['img_movie'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
-    #     self.img_blend = cv2.resize(obj['img_blend'], None, self.curr_size, self.curr_size, cv2.INTER_CUBIC)
 
     def set_title(self, title):
         self.title = title
@@ -124,20 +120,30 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         else:
             return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
-    def get_image(self, ignore_cl_obj = False):
+    def get_img_movie(self, ignore_cl_obj = False):
         # If the CL obje should be igrnoer there is none or it has no semantic-segmentation:
         if ignore_cl_obj or self.project.active_classification_object is None or self.project.active_classification_object.semantic_segmentation_labels[0] == "":
             return self.img_movie
         else:
-            a = self.get_semantic_segmentations(self.project.active_classification_object.semantic_segmentation_labels[0])
-            lbls = self.project.active_classification_object.semantic_segmentation_labels[1]
-            if len(self.project.active_classification_object.semantic_segmentation_labels[0]) == len(lbls):
-                return self.img_movie
-            if a is not None:
-                mask = a.get_adata()
-                return apply_mask(self.img_movie, mask, lbls)
+            clobj = self.project.active_classification_object
+            cached = self.project.main_window.hdf5_cache.get_screenshot(clobj.get_id(), self.unique_id)
+            if cached is None:
+                a = self.get_semantic_segmentations(clobj.semantic_segmentation_labels[0])
+                lbls = clobj.semantic_segmentation_labels[1]
+                if len(clobj.semantic_segmentation_labels[0]) == len(lbls):
+                    return self.img_movie
+                if a is not None:
+                    mask = a.get_adata()
+                    masked = apply_mask(self.img_movie, mask, lbls)
+                    self.project.main_window.hdf5_cache.dump_screenshot(clobj.get_id(), self.unique_id, masked)
+                    return apply_mask(self.img_movie, mask, lbls)
+            else:
+                print("Chache")
+                return cached
         return self.img_movie
 
+    def set_img_movie(self, img):
+        self.img_movie = img
 
     def get_semantic_segmentations(self, dataset=None):
         """
@@ -156,8 +162,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
                 if isinstance(d, SemanticSegmentationAnalysisContainer):
                     result[d.dataset] = d
             return result
-
-
 
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_title, [name]),

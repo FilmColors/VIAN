@@ -18,6 +18,7 @@ from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
 from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime
+from core.analysis.color_feature_extractor import ColorFeatureAnalysis
 from core.gui.ewidgetbase import ExpandableWidget
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1
@@ -376,7 +377,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     s.setPixmap(numpy_to_pixmap(s.screenshot_obj.img_blend))
                     s.screenshot_obj.annotation_is_visible = state
                 else:
-                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.get_image()))
+                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.get_img_movie()))
                     s.screenshot_obj.annotation_is_visible = False
         pass
 
@@ -409,7 +410,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if s.annotation_is_visible and s.img_blend is not None:
                 image = s.img_blend
             else:
-                image = s.get_image()
+                image = s.get_img_movie()
 
             # Convert to Pixmap
             # Cache the converted QPixamps if these are not the initial place holders
@@ -703,7 +704,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.ab_view.scene().clear()
 
     def on_changed(self, project, item):
-        if item is not None and item.get_type() not in [SEGMENT, SEGMENTATION, SCREENSHOT, SCREENSHOT_GROUP, PROJECT]:
+        if item is not None and item.get_type() not in [SEGMENT, SEGMENTATION, SCREENSHOT, SCREENSHOT_GROUP]:
             return
         self.project = project
         self.update_manager()
@@ -727,19 +728,33 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.ab_view.add_grid()
             new_cache = dict()
             for s in self.project.screenshots:
-                if str(s.unique_id) not in self.ab_view_mean_cache:
-                    frame = s.get_image().astype(np.float32)/255
-                    if self.project.movie_descriptor.letterbox_rect is not None:
-                        margins = self.project.movie_descriptor.letterbox_rect
-                        frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+                res = s.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)
+                t = "default"
+                # if self.project.active_classification_object is not None and self.project.active_classification_object.name != "Global":
+                #     try:
+                # if str(s.unique_id) not in self.ab_view_mean_cache:
+                #     frame = s.get_img_movie().astype(np.float32) / 255
+                #     if self.project.movie_descriptor.letterbox_rect is not None:
+                #         margins = self.project.movie_descriptor.letterbox_rect
+                #         frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+                #
+                #     mean = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2LAB),axis = (0,1))
+                #     mean = np.array([mean[0], mean[1], mean[2]])
 
-                    mean = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2LAB),axis = (0,1))
-                    mean = np.array([mean[0], mean[1], mean[2]])
-                else:
-                    mean = self.ab_view_mean_cache[str(s.unique_id)][0]
-                # We have to make sure that we do not cache the place holder before the actual images are loaded
-                if s.get_image().shape[0] > 100.0:
-                    new_cache[str(s.unique_id)] = (mean, lab_to_sat(lab=np.array([mean]), implementation="luebbe")[0], s.movie_timestamp, lab_to_lch(mean))
+
+                # if str(s.unique_id) not in self.ab_view_mean_cache:
+                #     frame = s.get_img_movie().astype(np.float32) / 255
+                #     if self.project.movie_descriptor.letterbox_rect is not None:
+                #         margins = self.project.movie_descriptor.letterbox_rect
+                #         frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+                #
+                #     mean = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2LAB),axis = (0,1))
+                #     mean = np.array([mean[0], mean[1], mean[2]])
+                # else:
+                #     mean = self.ab_view_mean_cache[str(s.unique_id)][0]
+                # # We have to make sure that we do not cache the place holder before the actual images are loaded
+                # if s.get_img_movie().shape[0] > 100.0:
+                #     new_cache[str(s.unique_id)] = (mean, lab_to_sat(lab=np.array([mean]), implementation="luebbe")[0], s.movie_timestamp, lab_to_lch(mean))
             self.ab_view_mean_cache = new_cache
 
             if self.color_dt.isVisible():
@@ -747,6 +762,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 # self.color_dt.add_grid()
                 for s in self.project.screenshots:
                     try:
+
                         x = self.ab_view_mean_cache[str(s.unique_id)][2]
                         sat = self.ab_view_mean_cache[str(s.unique_id)][1]
                         lab = self.ab_view_mean_cache[str(s.unique_id)][0]
@@ -768,17 +784,26 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                             y = sat
                         exists = self.color_dt.set_item_values(s.unique_id, [x, y])
                         if not exists:
-                            self.color_dt.add_image(x, y, s.get_image(), index_id=s.unique_id)
+                            self.color_dt.add_image(x,
+                                                    y,
+                                                    s.get_img_movie(),
+                                                    index_id=s.unique_id)
                     except Exception as e:
                         continue
                 self.color_dt.update_position()
 
             elif self.ab_view.isVisible():
                 for s in self.project.screenshots:
-                    sat = self.ab_view_mean_cache[str(s.unique_id)][1]
-                    lab = self.ab_view_mean_cache[str(s.unique_id)][0]
-                    lch = self.ab_view_mean_cache[str(s.unique_id)][3]
-                    self.ab_view.add_image(128 - lab[1], 128 - lab[2], s.get_image(), to_float=True)
+                    try:
+                        sat = self.ab_view_mean_cache[str(s.unique_id)][1]
+                        lab = self.ab_view_mean_cache[str(s.unique_id)][0]
+                        lch = self.ab_view_mean_cache[str(s.unique_id)][3]
+                        self.ab_view.add_image(128 - lab[1],
+                                               128 - lab[2],
+                                               s.get_img_movie(),
+                                               to_float=True)
+                    except:
+                        continue
 
     def on_closed(self):
         self.clear_manager()

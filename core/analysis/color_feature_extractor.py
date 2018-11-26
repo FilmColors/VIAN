@@ -27,7 +27,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                                    dataset_dtype=np.float16,
                                                  author="Gaudenz Halter",
                                                  version="1.0.0",
-                                                 multiple_result=True)
+                                                 multiple_result=False)
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -58,72 +58,85 @@ class ColorFeatureAnalysis(IAnalysisJob):
 
         return args
 
-    def process(self, args, sign_progress):
+    def process(self, argst, sign_progress):
 
+        result = []
         # Signal the Progress
-        sign_progress(0.0)
+        cap = None
+        counter = 0
+        for args in argst:
+            sign_progress(counter / len(argst))
+            counter += 1
 
-        start = args[0]
-        stop = args[1]
-        movie_path = args[2]
-        params = args[3]
-        margins = args[5]
-        colors_lab = []
-        colors_bgr = []
+            start = args[0]
+            stop = args[1]
+            movie_path = args[2]
+            params = args[3]
+            margins = args[5]
+            colors_lab = []
+            colors_bgr = []
 
-        cap = cv2.VideoCapture(movie_path)
-        cap.set(cv2.CAP_PROP_POS_FRAMES, start)
-        c = start
+            if cap is None:
+                cap = cv2.VideoCapture(movie_path)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start)
+            c = start
 
-        while (c < stop + params['resolution']):
-            if c % params['resolution'] != 0:
+            while (c < stop + params['resolution']):
+                if c % params['resolution'] != 0:
+                    c += 1
+                    continue
+
+                cap.set(cv2.CAP_PROP_POS_FRAMES, c)
+                ret, frame = cap.read()
+                if frame is None:
+                    break
+                # Get sub frame if there are any margins
+                if margins is not None:
+                    frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+
+                # cv2.imshow("Out:" + str(start), frame)
+                # cv2.waitKey(1)
+                colors_bgr.append(np.mean(frame, axis = (0, 1)))
+                frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+                colors_lab.append(np.mean(frame_lab, axis=(0, 1)))
                 c += 1
+
+            if len(colors_lab) > 1:
+                colors_bgr = np.mean(colors_bgr, axis = 0)
+                colors_lab = np.mean(colors_lab, axis = 0)
+
+            elif len(colors_lab) == 1:
+                colors_bgr = colors_bgr[0]
+                colors_lab = colors_lab[0]
+
+            else:
                 continue
-            sign_progress((c - start) / ((stop - start) + 1))
-            cap.set(cv2.CAP_PROP_POS_FRAMES, c)
-            ret, frame = cap.read()
-            if frame is None:
-                break
-            # Get sub frame if there are any margins
-            if margins is not None:
-                frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
-            # cv2.imshow("Out:" + str(start), frame)
-            # cv2.waitKey(1)
-            colors_bgr.append(np.mean(frame, axis = (0, 1)))
-            frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
-            colors_lab.append(np.mean(frame_lab, axis=(0, 1)))
-            c += 1
+            saturation_l = lab_to_sat(lab=colors_lab, implementation="luebbe")
+            saturation_p = lab_to_sat(lab=colors_lab, implementation="pythagoras")
 
-        if len(colors_lab) > 1:
-            colors_bgr = np.mean(colors_bgr, axis = 0)
-            colors_lab = np.mean(colors_lab, axis = 0)
-
-        else:
-            colors_bgr = colors_bgr[0]
-            colors_lab = colors_lab[0]
-
-        saturation_l = lab_to_sat(lab=colors_lab, implementation="luebbe")
-        saturation_p = lab_to_sat(lab=colors_lab, implementation="pythagoras")
-
-        sign_progress(1.0)
-        return IAnalysisJobAnalysis(
-            name="Color-Features",
-            results = dict(color_lab=colors_lab,
-                           color_bgr = colors_bgr,
-                           saturation_l=saturation_l,
-                           saturation_p = saturation_p
-                           ),
-            analysis_job_class=self.__class__,
-            parameters=params,
-            container=args[4]
-        )
+            sign_progress(1.0)
+            result.append(
+             IAnalysisJobAnalysis(
+                name="Color-Features",
+                results = dict(color_lab=colors_lab,
+                               color_bgr = colors_bgr,
+                               saturation_l=saturation_l,
+                               saturation_p = saturation_p
+                               ),
+                analysis_job_class=self.__class__,
+                parameters=params,
+                container=args[4]
+            )
+            )
+        return result
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
         """
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.
         """
+
         result.set_target_container(project.get_by_id(result.target_container))
         result.set_target_classification_obj(self.target_class_obj)
 

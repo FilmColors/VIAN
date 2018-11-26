@@ -86,7 +86,7 @@ class IProjectContainer(QObject):
         if analysis in self.connected_analyses:
             self.connected_analyses.remove(analysis)
 
-    def get_connected_analysis(self, class_type=None):
+    def get_connected_analysis(self, class_type=None, as_clobj_dict = False):
         """
         Returns a List of AnalysesResults that are of class_type, and attached to this container
         
@@ -94,13 +94,26 @@ class IProjectContainer(QObject):
         :return: 
         """
         if class_type is None:
-            return self.connected_analyses
+            to_return = self.connected_analyses
+        else:
+            to_return = []
+            for r in self.connected_analyses:
+                if r.analysis_job_class == class_type.__name__:
+                    to_return.append(r)
 
-        result = []
-        for r in self.connected_analyses:
-            if r.analysis_job_class == class_type.__name__:
-                result.append(r)
-        return result
+        if as_clobj_dict:
+            result = dict()
+            for t in to_return:
+                cl_obj =  t.target_classification_object
+                if cl_obj is None:
+                    cl_obj = "default"
+                if cl_obj not in result:
+                    result[cl_obj] = []
+                result[cl_obj].append(t)
+            return result
+
+        else:
+            return to_return
 
 
     def delete(self):

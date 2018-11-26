@@ -28,6 +28,7 @@ from core.data.computation import ms_to_frames
 from core.data.importers import *
 from core.data.settings import UserSettings,Contributor
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
+from core.data.cache import HDF5Cache
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -114,8 +115,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.extension_list = ExtensionList(self)
         self.is_darwin = False
 
-        # for MacOS
 
+
+        # for MacOS
         if sys.platform == "darwin":
             self.is_darwin = True
             self.setAttribute(Qt.WA_MacFrameworkScaled)
@@ -129,6 +131,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.open_dialogs = []
         self.settings = UserSettings()
         self.settings.load()
+
+        self.hdf5_cache = HDF5Cache(self.settings.DIR_PROJECT + "/scr_cache.hdf5")
 
         self.clipboard_data = []
         loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
@@ -1467,7 +1471,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if isinstance(result, list):
                 for r in result:
                     analysis.modify_project(self.project, r, main_window = self)
-                    self.project.add_analysis(r)
+                    self.project.add_analysis(r, dispatch = False)
                     r.unload_container()
             else:
                 analysis.modify_project(self.project, result, main_window=self)
@@ -1476,7 +1480,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             raise e
             print("Exception in MainWindow.analysis_result", str(e))
-
+        self.project.dispatch_changed(item=self.project)
         # Unload the analysis from Memory
 
     def on_save_custom_perspective(self):
@@ -1964,6 +1968,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.set_darwin_player_visibility(True)
         self.autosave_timer.start()
         self.set_ui_enabled(True)
+        self.hdf5_cache.cleanup()
+
 
         screenshot_position = []
         screenshot_annotation_dicts = []
@@ -1974,7 +1980,6 @@ class MainWindow(QtWidgets.QMainWindow):
             o.on_loaded(self.project)
 
         self.project.unload_all()
-
         for s in self.project.screenshots:
             screenshot_position.append(s.frame_pos)
             a_dicts = []

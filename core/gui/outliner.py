@@ -29,8 +29,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.corpus_client.onCorpusDisconnected.connect(self.recreate_tree)
         self.corpus_client.onCorpusChanged.connect(self.recreate_tree)
         self.item_list = []
-
-
         self.show()
 
     def recreate_tree(self):
@@ -38,7 +36,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         # Storing last State of the None container items
         first_time = True
         self.item_list = []
-
 
         if self.project_item is not None:
             first_time = False

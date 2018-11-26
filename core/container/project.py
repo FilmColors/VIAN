@@ -499,12 +499,14 @@ class VIANProject(IHasName, IClassifiable):
         self.add_analysis(analysis)
         return analysis
 
-    def add_analysis(self, analysis):
+    def add_analysis(self, analysis, dispatch = True):
         analysis.set_project(self)
         self.analysis.append(analysis)
 
         self.undo_manager.to_undo((self.add_analysis, [analysis]), (self.remove_analysis, [analysis]))
-        self.dispatch_changed()
+
+        if dispatch:
+            self.dispatch_changed()
 
     def add_analyses(self, analyses):
         for a in analyses:

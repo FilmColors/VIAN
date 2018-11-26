@@ -493,7 +493,7 @@ def images_to_movie(imgs, out_file, time_scale = 20, fps = 20.0, size = (640,480
     writer.release()
 
 
-def labels_to_binary_mask(multi_mask, labels):
+def labels_to_binary_mask(multi_mask, labels, as_bool = False):
     """
     Converts a Label Mask to a binary mask with all indices that have a value which is in labels are set to True
     else 0. 
@@ -502,20 +502,32 @@ def labels_to_binary_mask(multi_mask, labels):
     :param labels: 
     :return: 
     """
-    result = np.zeros_like(multi_mask, dtype=np.bool)
+    result = np.zeros_like(multi_mask, dtype=np.uint8)
     for i in labels:
-        result[np.where(multi_mask == i)] = True
+        result[np.where(multi_mask == i)] = 255
+
+    if as_bool:
+        return result.astype(np.bool)
     return result
 
-def apply_mask(img, mask, indices):
+# def labels_to_binary_mask2(multi_mask, labels):
+#     result = np.zeros_like(multi_mask, dtype=np.bool)
+#     idx = np.intersect1d(multi_mask, labels, return_indices=True)[1]
+#     idx = np.unravel_index(idx, multi_mask.shape)
+#     result[idx] = True
+#     return result
+
+def apply_mask(img, mask, indices, mask_size = 100):
     if len(mask.shape) > 2:
         mask = cv2.cvtColor(mask ,cv2.COLOR_BGR2GRAY)
-    if mask.shape[0] != img.shape[0] and mask.shape[1] != img.shape[1]:
-        mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
-
+    # if mask.shape[0] != img.shape[0] and mask.shape[1] != img.shape[1]:
+    #     mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
+    mask = cv2.resize(mask, (mask_size, mask_size), interpolation=cv2.INTER_NEAREST)
     bin_mask = labels_to_binary_mask(mask, indices)
+    bin_mask = cv2.resize(bin_mask, img.shape[:2][::-1], interpolation=cv2.INTER_NEAREST)
+
     alpha = np.zeros(img.shape[:2], dtype=np.uint8)
-    alpha[np.where(bin_mask == True)] = 255
+    alpha[np.nonzero(bin_mask)] = 255
     result = np.dstack((img, alpha))
     return result
 

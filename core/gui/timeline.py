@@ -1555,7 +1555,8 @@ class TimebarPicture(QtWidgets.QWidget):
         qimage, qpixmap = screenshot.get_preview(scale=0.1)
         self.pixmap = qpixmap
         self.qimage = qimage
-        self.size = (screenshot.get_image().shape[0], screenshot.get_image().shape[1])
+        self.size = (screenshot.get_img_movie(ignore_cl_obj = True).shape[0],
+                     screenshot.get_img_movie(ignore_cl_obj = True).shape[1])
         width = self.size[1] * self.pic_height // self.size[0]
         self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
         self.resize(width, self.pic_height)
@@ -1599,7 +1600,7 @@ class TimebarPicture(QtWidgets.QWidget):
         self.raise_()
 
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
-        preview = ImagePreviewPopup(self.timeline.main_window, numpy_to_pixmap(self.item.get_image()))
+        preview = ImagePreviewPopup(self.timeline.main_window, numpy_to_pixmap(self.item.get_img_movie(ignore_cl_obj = True)))
         preview.show()
         self.timeline.set_current_time(self.item.movie_timestamp)
 

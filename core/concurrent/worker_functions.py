@@ -170,7 +170,7 @@ class LoadScreenshotsJob(IConcurrentJob):
             if img is None:
                 break
 
-            project.screenshots[i].img_movie = img.astype(np.uint8)
+            project.screenshots[i].set_img_movie(img.astype(np.uint8))
             project.screenshots[i].img_blend = annotations[i]
 
             # project.screenshots[i].to_stream(project)

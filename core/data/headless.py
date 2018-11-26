@@ -127,7 +127,7 @@ class HeadlessMainWindow(QObject):
                 sys.stdout.write("\r" + str(round(i / len(self.project.screenshots), 2) * 100) + "% Loaded Screenshots")
             cap.set(cv2.CAP_PROP_POS_FRAMES, s.frame_pos)
             ret, frame = cap.read()
-            s.img_movie = frame
+            s.set_img_movie(frame)
 
 
 def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:

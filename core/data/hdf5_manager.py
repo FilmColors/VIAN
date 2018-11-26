@@ -246,7 +246,7 @@ class HDF5Manager():
         new_file = h5py.File(self.path.replace("analyses", "temp"), mode="w")
         for name in self.h5_file.keys():
             ds = self.h5_file[name]
-            nds = new_file.create_dataset(name, ds.shape, ds.dtype)
+            nds = new_file.create_dataset(name, ds.shape, ds.dtype, maxshape=(None, ) + ds.shape[1:], chunks = True)
             nds[:] = ds[:]
         new_file.close()
         self.h5_file.close()
