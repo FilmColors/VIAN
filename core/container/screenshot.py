@@ -7,6 +7,7 @@ from core.data.computation import numpy_to_qt_image, apply_mask
 from core.container.analysis import SemanticSegmentationAnalysisContainer
 import datetime
 
+CACHE_WIDTH = 250
 
 class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable):
     """
@@ -135,10 +136,11 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
                 if a is not None:
                     mask = a.get_adata()
                     masked = apply_mask(self.img_movie, mask, lbls)
+                    h = CACHE_WIDTH / masked.shape[0] * masked.shape[1]
+                    masked = cv2.resize(masked, (int(h), CACHE_WIDTH), interpolation=cv2.INTER_CUBIC)
                     self.project.main_window.hdf5_cache.dump_screenshot(clobj.get_id(), self.unique_id, masked)
                     return apply_mask(self.img_movie, mask, lbls)
             else:
-                print("Chache")
                 return cached
         return self.img_movie
 

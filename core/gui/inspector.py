@@ -441,7 +441,12 @@ class AttributesAnalysis(QWidget):
         super(AttributesAnalysis, self).__init__(parent)
         self.descriptor = descriptor
         self.setLayout(QVBoxLayout(self))
-        # self.layout().addWidget(QLabel("<b>Target: " + self.descriptor.get_target_item().get_name()))
+
+        clobj_name = "Default"
+        if self.descriptor.target_classification_object is not None:
+            clobj_name = self.descriptor.target_classification_object.name
+        self.layout().addWidget(QLabel("Target: " + clobj_name))
+
         # index = self.descriptor.procedure_id
         self.vis_button = QPushButton("Show Visualization", self)
         self.layout().addWidget(self.vis_button)

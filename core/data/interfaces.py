@@ -97,8 +97,12 @@ class IProjectContainer(QObject):
             to_return = self.connected_analyses
         else:
             to_return = []
+            if isinstance(class_type, str):
+                class_name = class_type
+            else:
+                class_name = class_type.__name__
             for r in self.connected_analyses:
-                if r.analysis_job_class == class_type.__name__:
+                if r.analysis_job_class == class_name:
                     to_return.append(r)
 
         if as_clobj_dict:
@@ -269,6 +273,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         self.version = version
         self.multiple_result = multiple_result
         self.data_serialization = data_serialization
+        self.hdf5_manager = None
 
         self.target_class_obj = None
 

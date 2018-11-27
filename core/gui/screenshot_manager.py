@@ -244,6 +244,9 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.screenshot_manager.color_dt = self.color_dt
         self.create_bottom_bar()
 
+        self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
+
+
     def on_toggle_show_current(self):
         state = self.a_show_only_current.isChecked()
         self.screenshot_manager.only_show_current_segment = state
@@ -718,55 +721,41 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def color_dt_mode_changed(self, v):
         self.color_dt_mode = v
-        print(v)
         self.draw_visualizations()
 
+    @QtCore.pyqtSlot(object)
+    def on_classification_object_changed(self):
+        self.draw_visualizations(clear = True)
 
-    def draw_visualizations(self):
+
+
+
+    def draw_visualizations(self, clear = False):
         if self.ab_view is not None and self.color_dt is not None:
             self.ab_view.clear_view()
             self.ab_view.add_grid()
             new_cache = dict()
-            for s in self.project.screenshots:
-                res = s.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)
-                t = "default"
-                # if self.project.active_classification_object is not None and self.project.active_classification_object.name != "Global":
-                #     try:
-                # if str(s.unique_id) not in self.ab_view_mean_cache:
-                #     frame = s.get_img_movie().astype(np.float32) / 255
-                #     if self.project.movie_descriptor.letterbox_rect is not None:
-                #         margins = self.project.movie_descriptor.letterbox_rect
-                #         frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
-                #
-                #     mean = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2LAB),axis = (0,1))
-                #     mean = np.array([mean[0], mean[1], mean[2]])
 
-
-                # if str(s.unique_id) not in self.ab_view_mean_cache:
-                #     frame = s.get_img_movie().astype(np.float32) / 255
-                #     if self.project.movie_descriptor.letterbox_rect is not None:
-                #         margins = self.project.movie_descriptor.letterbox_rect
-                #         frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
-                #
-                #     mean = np.mean(cv2.cvtColor(frame, cv2.COLOR_BGR2LAB),axis = (0,1))
-                #     mean = np.array([mean[0], mean[1], mean[2]])
-                # else:
-                #     mean = self.ab_view_mean_cache[str(s.unique_id)][0]
-                # # We have to make sure that we do not cache the place holder before the actual images are loaded
-                # if s.get_img_movie().shape[0] > 100.0:
-                #     new_cache[str(s.unique_id)] = (mean, lab_to_sat(lab=np.array([mean]), implementation="luebbe")[0], s.movie_timestamp, lab_to_lch(mean))
             self.ab_view_mean_cache = new_cache
+            cl_obj = self.project.active_classification_object
+            if cl_obj is None:
+                if len(self.project.experiments) > 0:
+                    cl_obj = self.project.experiments[0].get_classification_object_by_name("Global")
+                if cl_obj is None:
+                    cl_obj = "default"
 
             if self.color_dt.isVisible():
-                # self.color_dt.clear_view()
-                # self.color_dt.add_grid()
+                if clear:
+                    self.color_dt.clear_view()
+                    self.color_dt.add_grid()
                 for s in self.project.screenshots:
                     try:
+                        a = s.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[cl_obj][0].get_adata()
+                        x = s.movie_timestamp
 
-                        x = self.ab_view_mean_cache[str(s.unique_id)][2]
-                        sat = self.ab_view_mean_cache[str(s.unique_id)][1]
-                        lab = self.ab_view_mean_cache[str(s.unique_id)][0]
-                        lch = self.ab_view_mean_cache[str(s.unique_id)][3]
+                        sat = a['saturation_p']
+                        lab = a['color_lab']
+                        lch = lab_to_lch(lab)
 
                         if self.color_dt_mode == "Saturation":
                             y = sat * 100
@@ -786,8 +775,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                         if not exists:
                             self.color_dt.add_image(x,
                                                     y,
-                                                    s.get_img_movie(),
-                                                    index_id=s.unique_id)
+                                                    s.get_img_movie(ignore_cl_obj=False),
+                                                    index_id=s.unique_id,
+                                                    convert = False)
                     except Exception as e:
                         continue
                 self.color_dt.update_position()
@@ -795,13 +785,13 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             elif self.ab_view.isVisible():
                 for s in self.project.screenshots:
                     try:
-                        sat = self.ab_view_mean_cache[str(s.unique_id)][1]
-                        lab = self.ab_view_mean_cache[str(s.unique_id)][0]
-                        lch = self.ab_view_mean_cache[str(s.unique_id)][3]
+                        a = s.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[cl_obj][0].get_adata()
+                        lab = a['color_lab']
+
                         self.ab_view.add_image(128 - lab[1],
                                                128 - lab[2],
-                                               s.get_img_movie(),
-                                               to_float=True)
+                                               s.get_img_movie(ignore_cl_obj=False),
+                                               to_float=True, convert=False)
                     except:
                         continue
 

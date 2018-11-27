@@ -7,7 +7,7 @@ June 2018
 
 from typing import List
 
-from core.data.computation import ms_to_frames, numpy_to_pixmap, floatify_img
+from core.data.computation import ms_to_frames, numpy_to_pixmap, floatify_img, labels_to_binary_mask
 import json
 from core.data.interfaces import IAnalysisJob
 from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject, IAnalysisJobAnalysis, VisualizationTab, ParameterWidget
@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import *
 from core.analysis.palette_extraction import *
 from core.container.screenshot import Screenshot
 from core.visualization.palette_plot import *
+
 
 
 class ColorFeatureAnalysis(IAnalysisJob):
@@ -36,17 +37,28 @@ class ColorFeatureAnalysis(IAnalysisJob):
 
         """
         super(ColorFeatureAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
+        self.hdf5_manager = project.hdf5_manager
 
         args = []
         fps = project.movie_descriptor.fps
         for tgt in targets:
             if isinstance(tgt, Screenshot):
+                if class_objs is not None:
+                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
+                    if len(semseg) > 0:
+                        semseg = semseg[0]
+                    else:
+                        semseg = None
+                else:
+                    semseg = None
+
                 args.append([tgt.frame_pos,
                              tgt.frame_pos,
                              project.movie_descriptor.movie_path,
                              parameters,
                              tgt.get_id(),
-                             project.movie_descriptor.get_letterbox_rect()])
+                             project.movie_descriptor.get_letterbox_rect(),
+                             semseg])
             else:
                 args.append([
                 ms_to_frames(tgt.get_start(), fps),
@@ -73,6 +85,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
             movie_path = args[2]
             params = args[3]
             margins = args[5]
+            semseg = args[6]
             colors_lab = []
             colors_bgr = []
 
@@ -90,15 +103,27 @@ class ColorFeatureAnalysis(IAnalysisJob):
                 ret, frame = cap.read()
                 if frame is None:
                     break
+
                 # Get sub frame if there are any margins
                 if margins is not None:
                     frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
-                # cv2.imshow("Out:" + str(start), frame)
-                # cv2.waitKey(1)
-                colors_bgr.append(np.mean(frame, axis = (0, 1)))
-                frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
-                colors_lab.append(np.mean(frame_lab, axis=(0, 1)))
+                bin_mask = None
+                if semseg is not None and self.target_class_obj is not None:
+                    name, labels = self.target_class_obj.semantic_segmentation_labels
+                    mask = semseg.get_adata()
+                    bin_mask = labels_to_binary_mask(mask, labels)
+                    if margins is not None:
+                        bin_mask = bin_mask[margins[1]:margins[3], margins[0]:margins[2]]
+                if bin_mask is not None:
+                    indices = np.where(bin_mask > 0)
+                    colors_bgr.append(np.mean(frame[indices], axis=(0)))
+                    frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+                    colors_lab.append(np.mean(frame_lab[indices], axis=(0)))
+                else:
+                    colors_bgr.append(np.mean(frame, axis = (0, 1)))
+                    frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+                    colors_lab.append(np.mean(frame_lab, axis=(0, 1)))
                 c += 1
 
             if len(colors_lab) > 1:
@@ -200,10 +225,10 @@ class ColorFeatureAnalysis(IAnalysisJob):
         return d
 
     def from_hdf5(self, db_data):
-        d = dict(color_lab=db_data[0:3].tolist(),
-                 color_bgr=db_data[3:6].tolist(),
-                 saturation_l=db_data[6].tolist(),
-                 saturation_p=db_data[7].tolist()
+        d = dict(color_lab=db_data[0:3],
+                 color_bgr=db_data[3:6],
+                 saturation_l=db_data[6],
+                 saturation_p=db_data[7]
              )
         return d
 

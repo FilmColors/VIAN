@@ -661,6 +661,7 @@ class ClassificationObjectContextMenu(ContextMenu):
 
     def on_set_active(self):
         self.project.set_active_classification_object(self.cl_obj)
+        self.main_window.currentClassificationObjectChanged.emit(self.cl_obj)
 
     def on_remove(self):
         self.cl_obj.experiment.remove_classification_object(self.cl_obj)

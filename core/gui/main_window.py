@@ -94,6 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onOpenCVFrameVisibilityChanged = pyqtSignal(bool)
     onCorpusConnected = pyqtSignal(object)
     onCorpusDisconnected = pyqtSignal(object)
+    currentClassificationObjectChanged = pyqtSignal(object)
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -1666,9 +1667,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.player.stop()
             self.abortAllConcurrentThreads.emit()
-            self.project.cleanup()
             if self.colormetry_running:
                 self.toggle_colormetry()
+            self.project.cleanup()
 
         self.player_controls.setState(False)
         self.project = None

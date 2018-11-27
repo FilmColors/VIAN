@@ -374,7 +374,6 @@ class Player_VLC(VideoPlayer):
         # Wait for a little
         # time.sleep(0.5)
         self.set_initial_values()
-        print("Duration:", self.duration)
         if from_server:
             self.new_movie_loaded = True
 

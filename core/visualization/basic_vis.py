@@ -414,7 +414,6 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
             np.savez(cache_file, table=self.table, colors=self.colors)
         else:
             d = np.load(cache_file)
-            print(d.keys())
             self.table = (d['table'][0], d['table'][1], d['table'][2])
             self.colors = d['colors']
 

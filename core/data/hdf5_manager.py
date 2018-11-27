@@ -92,14 +92,14 @@ class HDF5Manager():
             h5py.File(self.path, "w")
             init = True
         self.h5_file = h5py.File(self.path, "r+")
+        print("Datasets in HDF5 File:")
+        for k in self.h5_file.keys():
+            print(k)
         return init
 
     def initialize_all(self, analyses = None):
         if analyses is None or len(analyses) == 0:
             analyses = load_analysis()
-        else:
-            global ANALYSES
-            ANALYSES = analyses
         for a in analyses:
             c = a()
             self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype)
@@ -123,6 +123,7 @@ class HDF5Manager():
 
         self._uid_index[unique_id] = (dataset_name, pos)
         self._index[dataset_name] += 1
+        self.h5_file.flush()
 
     def load(self, unique_id):
         if self.h5_file is None:
@@ -147,9 +148,14 @@ class HDF5Manager():
 
     def initialize_colorimetry(self, length, remove = True):
         if remove:
-            for n in [DS_COL_FEAT, DS_COL_HIST, DS_COL_PAL, DS_COL_TIME,
-                      DS_COL_SPATIAL_EDGE, DS_COL_SPATIAL_LUMINANCE,
-                      DS_COL_SPATIAL_HUE, DS_COL_SPATIAL_COLOR]:
+            for n in [DS_COL_FEAT,
+                      DS_COL_HIST,
+                      DS_COL_PAL,
+                      DS_COL_TIME,
+                      DS_COL_SPATIAL_EDGE,
+                      DS_COL_SPATIAL_LUMINANCE,
+                      DS_COL_SPATIAL_HUE,
+                      DS_COL_SPATIAL_COLOR]:
                 if n in self.h5_file:
                     del self.h5_file[n]
             self._index['col'] = 0

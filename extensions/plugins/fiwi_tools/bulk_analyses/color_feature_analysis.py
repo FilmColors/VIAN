@@ -25,7 +25,6 @@ def compute_features(movie_path, frame_idx, mask, label, scr, class_obj):
     saturation_l = lab_to_sat(lab=colors_lab, implementation="luebbe")
     saturation_p = lab_to_sat(lab=colors_lab, implementation="pythagoras")
 
-
     colors_bgr = np.nan_to_num(colors_bgr)
     colors_lab = np.nan_to_num(colors_lab)
     saturation_l = np.nan_to_num(saturation_l)

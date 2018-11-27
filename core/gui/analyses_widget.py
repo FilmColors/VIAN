@@ -30,12 +30,18 @@ class AnalysisDialog(EDialogWidget):
         self.widget_Parameters.layout().addWidget(self.param_widget)
         
         self.update_list()
-        
+        self.all_classification_objects = dict()
+        self.all_classification_objects['Default'] = None
+        self.comboBox_ClObj.addItem("Default")
+        for e in main_window.project.experiments:
+            for cl_obj in e.get_classification_objects_plain():
+                self.all_classification_objects[e.name + ":" + cl_obj.name] = cl_obj
+                self.comboBox_ClObj.addItem(e.name + ":" + cl_obj.name)
+
         self.btn_AddTarget.clicked.connect(self.add_selection)
         self.btn_RemoveTarget.clicked.connect(self.remove_selected)
         self.btn_Analyse.clicked.connect(self.on_analyse)
         self.btn_Cancel.clicked.connect(self.on_cancel)
-
 
         self.lbl_AnalysisName.setText(self.analysis.name)
         self.lbl_Author.setText(self.analysis.author)
@@ -71,7 +77,7 @@ class AnalysisDialog(EDialogWidget):
             analysis = self.analysis,
             targets = self.targets,
             parameters = parameters,
-            classification_objs = None
+            classification_objs = self.all_classification_objects[self.comboBox_ClObj.currentText()]
         )
         self.onAnalyse.emit(message)
         self.close()

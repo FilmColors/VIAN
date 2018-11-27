@@ -697,7 +697,6 @@ class ImagePlotTime(ImagePlot):
         self.set_y_scale(y_scale)
         self.set_image_scale(image_scale)
 
-
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
         self.pixel_size_y = pixel_size_y
@@ -749,13 +748,13 @@ class ImagePlotTime(ImagePlot):
 
         return False
 
-
     def clear_view(self):
         super(ImagePlotTime, self).clear_view()
         self.x_end = 0
         self.values = []
         self.lines = []
         self.item_idx = dict()
+        self.images = []
 
     def add_grid(self, set_scene_rect = True):
         pass
@@ -815,7 +814,7 @@ class ImagePlotTime(ImagePlot):
 
 
         slider_imagescale = QSlider(Qt.Horizontal, w)
-        slider_imagescale.setRange(1, 1000)
+        slider_imagescale.setRange(1, 2000)
         slider_imagescale.setValue(self.x_scale)
         slider_imagescale.valueChanged.connect(self.set_image_scale)
         slider_yscale = QSlider(Qt.Horizontal, w)
@@ -824,7 +823,7 @@ class ImagePlotTime(ImagePlot):
         slider_yscale.valueChanged.connect(self.set_y_scale)
 
         slider_xscale = QSlider(Qt.Horizontal, w)
-        slider_xscale.setRange(1, 1000)
+        slider_xscale.setRange(1, 2000)
         slider_xscale.valueChanged.connect(self.set_x_scale)
 
         hl1.addWidget(slider_imagescale)
@@ -832,21 +831,21 @@ class ImagePlotTime(ImagePlot):
         hl3.addWidget(slider_xscale)
 
         image_scale_line = QSpinBox(w)
-        image_scale_line.setRange(1, 1000)
+        image_scale_line.setRange(1, 2000)
         image_scale_line.setValue(self.x_scale)
         image_scale_line.valueChanged.connect(slider_imagescale.setValue)
         slider_imagescale.valueChanged.connect(image_scale_line.setValue)
         hl1.addWidget(image_scale_line)
 
         y_scale_line = QSpinBox(w)
-        y_scale_line.setRange(1, 1000)
+        y_scale_line.setRange(1, 2000)
         y_scale_line.setValue(self.y_scale)
         y_scale_line.valueChanged.connect(slider_yscale.setValue)
         slider_yscale.valueChanged.connect(y_scale_line.setValue)
         hl2.addWidget(y_scale_line)
 
         x_scale_line = QSpinBox(w)
-        x_scale_line.setRange(1, 1000)
+        x_scale_line.setRange(1, 2000)
         x_scale_line.setValue(self.x_scale)
         x_scale_line.valueChanged.connect(slider_xscale.setValue)
         slider_xscale.valueChanged.connect(x_scale_line.setValue)

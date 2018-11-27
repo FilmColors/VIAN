@@ -248,7 +248,7 @@ class VIANProject(IHasName, IClassifiable):
 
     def set_active_classification_object(self, cl_obj):
         self.active_classification_object = cl_obj
-        self.dispatch_changed(item=self)
+        # self.dispatch_changed(item=self)
 
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):
@@ -868,6 +868,7 @@ class VIANProject(IHasName, IClassifiable):
         try:
             self.hdf5_manager.set_indices(my_dict['hdf_indices'])
         except Exception as e:
+            print(e)
             self.hdf5_manager.initialize_all()
 
 
