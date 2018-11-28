@@ -11,7 +11,7 @@ from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelec
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 from core.gui.vocabulary import VocabularyItem
-from core.data.project_streaming import ProjectStreamer, NUMPY_NO_OVERWRITE, NUMPY_OVERWRITE
+from core.data.project_streaming import NUMPY_NO_OVERWRITE, NUMPY_OVERWRITE
 from core.data.enums import *
 from typing import List
 from core.data.project_streaming import IStreamableContainer

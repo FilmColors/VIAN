@@ -727,9 +727,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def on_classification_object_changed(self):
         self.draw_visualizations(clear = True)
 
-
-
-
     def draw_visualizations(self, clear = False):
         if self.ab_view is not None and self.color_dt is not None:
             self.ab_view.clear_view()

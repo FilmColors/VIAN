@@ -183,7 +183,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         for s in self.segments:
             if s.start < time < s.end:
                 return s
-
         return None
 
     def remove_unreal_segments(self, length = 1):

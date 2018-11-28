@@ -326,8 +326,8 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
         d['analysis_container_class'] = SemanticSegmentationAnalysisContainer.__name__
         return d
 
-    def deserialize(self, serialization, streamer:ProjectStreamer):
-        super(SemanticSegmentationAnalysisContainer, self).deserialize(serialization, streamer)
+    def deserialize(self, serialization, project):
+        super(SemanticSegmentationAnalysisContainer, self).deserialize(serialization, project)
         self.dataset = serialization['dataset']
         try:
             self.entry_shape = serialization['entry_shape']
