@@ -478,7 +478,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.screenshot_groups.append(grp)
         if not initial:
             self.dispatch_changed()
-
+        self.onScreenshotGroupAdded.emit(grp)
         return grp
 
     def remove_screenshot_group(self, grp):
@@ -486,6 +486,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.screenshot_groups.remove(grp)
             self.remove_from_id_list(grp)
             self.dispatch_changed()
+            self.onScreenshotGroupRemoved.emit(grp)
 
     def get_screenshots_of_segment(self, main_segm_id, segmentation = None):
         if segmentation is None:

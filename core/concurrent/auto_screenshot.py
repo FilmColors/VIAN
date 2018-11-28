@@ -2,9 +2,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from core.data.interfaces import *
 from core.gui.ewidgetbase import *
+from core.analysis.informative import select_rows
+from core.data.computation import ms_to_frames
 from core.container.project import *
 
-def auto_screenshot(project:VIANProject, method, distribution, n, segmentation):
+def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, hdf5_manager):
         frame_ms = []
 
         if method == "Uniform Distribution":
@@ -28,6 +30,21 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation):
                 while k < project.movie_descriptor.duration:
                     frame_ms.append(k)
                     k += frame2ms(n, project.movie_descriptor.fps)
+
+        elif method == "Most Informative":
+            for s in segmentation.segments:
+                idx_start = int(ms_to_frames(s.get_start(), project.movie_descriptor.fps) / project.colormetry_analysis.resolution)
+                idx_end = int(ms_to_frames(s.get_end(), project.movie_descriptor.fps) / project.colormetry_analysis.resolution)
+                indices = range(idx_start, idx_end, 1)
+                print(indices)
+                hists = hdf5_manager.col_histograms()[indices]
+                hists = np.reshape(hists, newshape=(hists.shape[0], hists.shape[1]* hists.shape[2] * hists.shape[3]))
+                hists /= np.sqrt(np.sum(hists ** 2, axis=1, keepdims=True))
+
+                result = select_rows(hists, np.clip(n, 1, hists.shape[0]))
+
+                frame_ms.extend([frame2ms((f + idx_start) * project.colormetry_analysis.resolution, project.movie_descriptor.fps) for f in result])
+
         frame_pos = []
         for f in frame_ms:
             frame_pos.append(ms_to_frames(f, project.movie_descriptor.fps))
@@ -61,25 +78,29 @@ class DialogAutoScreenshot(EDialogWidget):
             segmentation = self.segmentations[self.comboBox_Target.currentIndex()]
         job = AutoScreenshotJob(None, self.comboBox_Method.currentText(),
                           self.comboBox_Distribution.currentText(),
-                            self.spinBox_N.value(), segmentation)
+                            self.spinBox_N.value(), segmentation, self.project.hdf5_manager)
         self.main_window.run_job_concurrent(job)
         self.close()
 
 
 class AutoScreenshotJob(IConcurrentJob):
-    def __init__(self, args, method, distribution, n, segmentation):
+    def __init__(self, args, method, distribution, n, segmentation, hdf5_manager):
         super(AutoScreenshotJob, self).__init__(args)
         self.method = method
         self.distribution = distribution
         self.n = n
         self.segmentation = segmentation
+        self.hdf5_manager = hdf5_manager
 
     def prepare(self, project):
-        self.args = [project.movie_descriptor.movie_path, auto_screenshot(project, self.method, self.distribution, self.n, self.segmentation)]
+        self.args = [project.movie_descriptor.movie_path,
+                     project]
 
     def run_concurrent(self, args, sign_progress):
         movie_path = args[0]
-        frame_pos = args[1]
+        project = args[1]
+        frame_pos = auto_screenshot(project, self.method, self.distribution, self.n, self.segmentation, self.hdf5_manager)
+        # frame_pos = args[1]
 
         cap = cv2.VideoCapture(movie_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
@@ -100,13 +121,21 @@ class AutoScreenshotJob(IConcurrentJob):
                 )
         return result
 
-    def modify_project(self, project, result, sign_progress=None, main_window = None):
+    def modify_project(self, project:VIANProject, result, sign_progress=None, main_window = None):
         if result is not None:
+            scr_group = project.add_screenshot_group("Manual")
+            scr_group.add_screenshots(project.screenshots)
+
             project.inhibit_dispatch = True
+
+            shots = []
             for s in result:
                 n = Screenshot(s['name'], image=s['img'], timestamp=s['ms_pos'], frame_pos=s['frame_pos'])
                 project.add_screenshot(n)
+                shots.append(n)
             project.inhibit_dispatch = False
+            scr_group = project.add_screenshot_group("Automatic")
+            scr_group.add_screenshots(shots)
             project.dispatch_changed()
 
     def get_widget(self, parent, result):

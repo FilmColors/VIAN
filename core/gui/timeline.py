@@ -482,6 +482,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         project.onAnnotationLayerAdded.connect(self.add_annotation_layer)
         project.onSegmentationRemoved.connect(self.recreate_timeline)
         project.onAnnotationLayerRemoved.connect(self.recreate_timeline)
+        project.onScreenshotGroupAdded.connect(self.add_screenshots)
+        project.onScreenshotGroupRemoved.connect(self.recreate_timeline)
 
         self.update_time_bar()
         self.update_ui()

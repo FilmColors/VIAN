@@ -337,7 +337,7 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
 
 
 class ColormetryAnalysis(AnalysisContainer):
-    def __init__(self, results = None, resolution = 30):
+    def __init__(self, results = None, resolution = 10):
         super(ColormetryAnalysis, self).__init__(name = "Colormetry", data = results)
         self.curr_location = 0
         self.time_ms = []

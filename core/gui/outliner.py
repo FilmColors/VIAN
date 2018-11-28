@@ -41,13 +41,12 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         first_time = True
         self.item_list = []
 
-        if self.project_item is not None:
-            first_time = False
-            exp_p_item = self.project_item.isExpanded()
-            exp_group_nodes = []
-            for i in range(self.project_item.childCount()):
-                exp_group_nodes.append(self.project_item.child(i).isExpanded())
-
+        # if self.project_item is not None:
+        #     first_time = False
+        #     exp_p_item = self.project_item.isExpanded()
+        #     exp_group_nodes = []
+        #     for i in range(self.project_item.childCount()):
+        #         exp_group_nodes.append(self.project_item.child(i).isExpanded())
         self.tree.clear()
         self.project_item = None
         p = self.project()
@@ -73,7 +72,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 self.add_annotation_layer(l)
 
             self.analyzes_group = AnalyzesOutlinerRootItem(self.project_item, 3)
-            a_name = ""
             for i, a in enumerate(sorted(self.main_window.project.analysis, key=lambda x:x.analysis_job_class)):
                 self.add_analysis(a)
 
@@ -131,7 +129,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
     def remove_segmentation(self, s):
         if s.get_id() in self.item_index:
-            self.segmentation_group.remove(self.item_index[s.get_id()])
+            self.segmentation_group.removeChild(self.item_index[s.get_id()])
             self.item_index.pop(s.get_id())
 
     def update_tree(self, item):
@@ -152,7 +150,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
     def remove_annotation_layer(self, layer):
         if layer.get_id() in self.item_index:
-            self.annotation_group.remove(self.item_index[layer.get_id()])
+            self.annotation_group.removeChild(self.item_index[layer.get_id()])
             self.item_index.pop(layer.get_id())
 
     def add_screenshot_group(self, grp):
@@ -162,7 +160,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
     def remove_screenshot_group(self, grp):
         if grp.get_id() in self.item_index:
-            self.screenshot_group.remove(self.item_index[grp.get_id()])
+            self.screenshot_group.removeChild(self.item_index[grp.get_id()])
             self.item_index.pop(grp.get_id())
 
     def add_experiment(self, s):
@@ -214,6 +212,10 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.recreate_tree()
 
     def on_closed(self):
+        self.tree.clear()
+        self.analyses_roots = dict()
+        self.item_list = []
+        self.project_item = None
         self.setDisabled(True)
 
     def on_selected(self, sender, selected):

@@ -30,6 +30,11 @@
          <string>Uniform Distribution</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Most Informative</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
