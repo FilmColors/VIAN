@@ -3,6 +3,7 @@ from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, 
 from core.data.interfaces import IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, \
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject
 
+from PyQt5.QtCore import pyqtSignal
 
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     """
@@ -13,6 +14,9 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     :var is_main_segmentation: If this is the main Segmentation
 
     """
+    onSegmentAdded = pyqtSignal(object)
+    onSegmentDeleted = pyqtSignal(object)
+
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
@@ -126,6 +130,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if dispatch:
             self.project.undo_manager.to_undo((self.add_segment, [segment]), (self.remove_segment, [segment]))
             self.dispatch_on_changed(item=self)
+        self.onSegmentAdded.emit(segment)
 
     def remove_segment(self, segment, dispatch = True):
         self.segments.remove(segment)
@@ -135,6 +140,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         if dispatch:
             self.project.undo_manager.to_undo((self.remove_segment, [segment]), (self.add_segment, [segment]))
             self.dispatch_on_changed(item=self)
+        self.onSegmentDeleted.emit(segment)
 
     def cut_segment(self, segm, time):
         if segm in self.segments:
@@ -320,6 +326,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     :var notes: Additional Notes that can be set in the Inspector
 
     """
+    onSegmentChanged = pyqtSignal(object)
+
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None, annotation_body = "", name = "New Segment"):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
@@ -340,6 +348,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def set_id(self, ID):
         self.ID = ID
+        self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def set_start(self, start):
@@ -349,6 +358,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.start = start
         self.segmentation.update_segment_ids()
         self.project.sort_screenshots()
+        self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def set_end(self, end):
@@ -359,6 +369,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.end = end
         self.segmentation.update_segment_ids()
         self.project.sort_screenshots()
+        self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_start(self):
@@ -373,6 +384,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.end = end
         self.segmentation.update_segment_ids()
         self.project.sort_screenshots()
+        self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_name(self):
@@ -381,11 +393,13 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.name]))
         self.name = name
+        self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def set_annotation_body(self, annotation):
         self.project.undo_manager.to_undo((self.set_annotation_body, [annotation]), (self.set_annotation_body, [self.annotation_body]))
         self.annotation_body = annotation
+        self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_annotation_body(self):
@@ -457,6 +471,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def set_timeline_visibility(self, visibility):
         self.timeline_visibility = visibility
+        self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_timeline_visibility(self):

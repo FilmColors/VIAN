@@ -265,18 +265,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_bar.raise_()
         self.time_scrubber.raise_()
 
-    def add_item(self, ctrl_itm, bar_itms):
-        control = self.add_control()
-        bars = []
-        for i in bar_itms:
-            bars.append(self.add_bar())
-        item = [control, bars]
-        self.items.append(item)
-        self.update_ui()
-
+    @pyqtSlot(object)
     def add_segmentation(self, segmentation):
-        control = TimelineControl(self.frame_Controls,self, segmentation)
-        bars = TimelineBar(self.frame_Bars, self, control=control)
+        control = TimelineSegmentationControl(self.frame_Controls, self, segmentation)
+        bars = TimelineSegmentationBar(self.frame_Bars, self, control, segmentation)
         for i, s in enumerate(segmentation.segments):
             bars.add_slice(s)
         item = [control, [bars], self.bar_height_min]
@@ -318,12 +310,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
             self.main_window.print_message("Please set a Start Point First", "Orange")
 
+    @pyqtSlot(object)
     def add_annotation_layer(self, layer):
-        control = TimelineControl(self.frame_Controls, self, layer)
+        control = TimelineAnnotationLayerControl(self.frame_Controls, self, layer)
         height = self.bar_height_min
         bars = []
         for i, a in enumerate(layer.annotations):
-            new = TimelineBar(self.frame_Bars, self, control, self.group_height)
+            new = TimelineAnnotationBar(self.frame_Bars, self, control, self.group_height)
             new.add_slice(a)
             keys = []
             for k in a.keys:
@@ -336,27 +329,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         height += self.group_height
 
         item = [control, bars, height]
-        self.item_ann_layers.append(item)
-        self.items.append(item)
-        self.update_ui()
-
-    def add_annotation_layer_old(self, layer):
-        control = TimelineControl(self.frame_Controls,self, layer)
-        bars = TimelineBar(self.frame_Bars, self)
-        bars.add_slice(layer)
-        height = self.bar_height_min
-        for i, a in enumerate(layer.annotations):
-            keys = []
-            for k in a.keys:
-                keys.append(k)
-            bars.add_annotation(a, keys)
-            control.add_group(a)
-
-            if i * self.group_height + self.group_height > self.bar_height_min:
-                height += self.group_height
-        height += self.group_height
-
-        item = [control, [bars], height]
         self.item_ann_layers.append(item)
         self.items.append(item)
         self.update_ui()
@@ -387,15 +359,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for i in self.items:
             ctrl = i[0]
             bars = i[1]
-            if isinstance(bars[0], ScreenshotGroupBar):
-                continue
             for b in bars:
                 b.close()
             ctrl.close()
         self.items = []
         self.item_segments = []
         self.item_ann_layers = []
-        # self.item_screenshots = []
+        self.item_screenshots = []
 
     def update_location(self):
         # self.curr_movie_time = self.main_window.player.get_media_time() / 1000
@@ -507,24 +477,28 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for grp in project.screenshot_groups:
             self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
+        project.onSegmentationAdded.connect(self.add_segmentation)
+        project.onAnnotationLayerAdded.connect(self.add_annotation_layer)
+        project.onSegmentationRemoved.connect(self.recreate_timeline)
+        project.onAnnotationLayerRemoved.connect(self.recreate_timeline)
+
         self.update_time_bar()
         self.update_ui()
         self.scroll_h()
 
     def on_changed(self, project, item):
-        t = time.time()
         vlocation = self.scrollArea.verticalScrollBar().value()
 
-        self.clear()
+        # self.clear()
         self.duration = project.get_movie().duration
 
-        for s in project.segmentation:
-            if s.get_timeline_visibility() is True:
-                self.add_segmentation(s)
+        # for s in project.segmentation:
+        #     if s.get_timeline_visibility() is True:
+        #         self.add_segmentation(s)
 
-        for l in project.annotation_layers:
-            if l.get_timeline_visibility() is True:
-                self.add_annotation_layer(l)
+        # for l in project.annotation_layers:
+        #     if l.get_timeline_visibility() is True:
+        #         self.add_annotation_layer(l)
 
         # for grp in project.screenshot_groups:
         #     self.add_screenshots(grp.screenshots, grp, grp.get_name())
@@ -532,7 +506,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.on_selected(None, project.selected)
         self.update_ui()
         self.scrollArea.verticalScrollBar().setValue(vlocation)
-        print("Timeline", time.time()- t)
 
     def on_selected(self, sender, selected):
         if sender is self:
@@ -559,6 +532,29 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.clear()
         self.set_colormetry_progress(0.0)
         self.setDisabled(True)
+
+    def recreate_timeline(self, args = None):
+        t = time.time()
+        vlocation = self.scrollArea.verticalScrollBar().value()
+        project = self.main_window.project
+        self.clear()
+        self.duration = project.get_movie().duration
+
+        for s in project.segmentation:
+            if s.get_timeline_visibility() is True:
+                self.add_segmentation(s)
+
+        for l in project.annotation_layers:
+            if l.get_timeline_visibility() is True:
+                self.add_annotation_layer(l)
+
+        for grp in project.screenshot_groups:
+            self.add_screenshots(grp.screenshots, grp, grp.get_name())
+
+        self.on_selected(None, project.selected)
+        self.update_ui()
+        self.scrollArea.verticalScrollBar().setValue(vlocation)
+        print("Timeline", time.time()- t)
 
     def select(self, control = None, item = None, dispatch = True):
         #TODO This deselectes all items in multiple selection except the last one
@@ -828,7 +824,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.update()
         self.selector = None
     #endregion
-    # CONTEXT MENU BINDINGS
+
+    #region CONTEXT MENU BINDINGS
     def new_segment(self):
         if self.selector is not None and self.selected is not None:
             if self.selected.get_type() == SEGMENTATION:
@@ -881,6 +878,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def create_segmentation(self):
         self.project().create_segmentation("New Segmentation")
+    #endregion
 
     def resizeEvent(self, QResizeEvent):
         super(Timeline, self).resizeEvent(QResizeEvent)
@@ -897,7 +895,7 @@ class TimelineControl(QtWidgets.QWidget):
         self.h_col = 100
         self.name = name
         self.set_name()
-        self.groups = []
+        self.groups = dict()
         self.setMouseTracking(True)
         self.is_selected = False
 
@@ -917,7 +915,7 @@ class TimelineControl(QtWidgets.QWidget):
     def add_group(self, annotation):
         y = len(self.groups) * self.timeline.group_height
         text = annotation.get_name()
-        self.groups.append([annotation, text])
+        self.groups[annotation.get_id()] = ([annotation, text])
 
     def mouseMoveEvent(self, a0: QtGui.QMouseEvent):
         if self.is_resizing:
@@ -925,7 +923,7 @@ class TimelineControl(QtWidgets.QWidget):
                 self.resize(self.width(), a0.pos().y() + self.resize_offset)
                 self.timeline.update_ui()
                 if len(self.groups) > 0:
-                    self.onHeightChanged.emit((self.height() - self.timeline.group_height) / len(self.groups))
+                    self.onHeightChanged.emit((self.height() - self.timeline.group_height) / len(self.groups.values()))
                 else:
                     self.onHeightChanged.emit(self.height())
                 self.item.strip_height = self.height()
@@ -967,7 +965,7 @@ class TimelineControl(QtWidgets.QWidget):
         pen.setWidth(1)
         qp.setPen(pen)
 
-        for i,a in enumerate(self.groups):
+        for i,a in enumerate(self.groups.values()):
             y = i * self.timeline.group_height + self.timeline.group_height
             if i == 0:
                 p1 = QtCore.QPoint(self.x(), y)
@@ -992,7 +990,7 @@ class TimelineControl(QtWidgets.QWidget):
             gradient.setSpread(QGradient.PadSpread)
             qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), gradient)
 
-        for i, a in enumerate(self.groups):
+        for i, a in enumerate(self.groups.values()):
             y = i * self.timeline.group_height + self.timeline.group_height
             text_rect = QtCore.QRect(0, y, self.width(), self.timeline.group_height)
             qp.drawText(text_rect, Qt.AlignRight|Qt.AlignVCenter, a[1])
@@ -1019,6 +1017,23 @@ class TimelineControl(QtWidgets.QWidget):
         qp.end()
 
 
+class TimelineAnnotationLayerControl(TimelineControl):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, item = None, name = "No Name"):
+        super(TimelineAnnotationLayerControl, self).__init__(parent, timeline, item, name)
+        self.layer = item
+
+
+class TimelineSegmentationControl(TimelineControl):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, item=None, name="No Name"):
+        super(TimelineSegmentationControl, self).__init__(parent, timeline, item, name)
+        self.segmentation = item
+
+
+
 class TimelineBar(QtWidgets.QFrame):
     onHeightChanged = pyqtSignal(int)
 
@@ -1035,6 +1050,7 @@ class TimelineBar(QtWidgets.QFrame):
         self.setFrameStyle(QFrame.Box)
 
         self.slices = []
+        self.slices_index = dict()
         self.annotations = []
         self.show()
 
@@ -1066,6 +1082,14 @@ class TimelineBar(QtWidgets.QFrame):
         slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
         slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
         self.slices.append(slice)
+        self.slices_index[item.get_id()] = slice
+
+    def remove_slice(self, item):
+        if item.get_id() in self.slices_index:
+            itm = self.slices_index[item.get_id()]
+            self.slices.remove(itm)
+            self.slices_index.pop(item.get_id())
+            itm.close()
 
     def get_previous_slice(self, slice):
         result = None
@@ -1128,7 +1152,7 @@ class TimelineBar(QtWidgets.QFrame):
 
 
 class TimebarSlice(QtWidgets.QWidget):
-    def __init__(self, parent:TimelineBar, item, timeline):
+    def __init__(self, parent:TimelineBar, item, timeline, color = (232, 174, 12, 100)):
         super(TimebarSlice, self).__init__(parent)
         self.bar = parent
         self.locked = False
@@ -1145,13 +1169,7 @@ class TimebarSlice(QtWidgets.QWidget):
 
         self.update_text()
 
-        self.color = (232, 174, 12, 100)
-        if item.get_type() == ANNOTATION_LAYER:
-            self.color = (232, 55, 40, 100)
-        if item.get_type() == SEGMENT:
-            self.color = (54,146,182, 100)
-        if item.get_type() == ANNOTATION:
-            self.color = (133, 42, 42, 100)
+        self.color = color
         self.text_size = 10
 
         self.is_hovered = False
@@ -1443,6 +1461,49 @@ class TimebarSlice(QtWidgets.QWidget):
 
     def update(self, *__args):
         super(TimebarSlice, self).update(*__args)
+
+
+class TimelineSegmentationBar(TimelineBar):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, control, segmentation, height = 45):
+        super(TimelineSegmentationBar, self).__init__(parent, timeline, control, height)
+        self.segmentation = segmentation
+        self.segmentation.onSegmentDeleted.connect(self.remove_slice)
+        self.segmentation.onSegmentAdded.connect(self.add_slice)
+
+    def add_slice(self, item):
+        slice = TimebarSegmentationSlice(self, item, self.timeline)
+        self.onHeightChanged.connect(slice.on_height_changed)
+        slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
+        slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
+        self.slices.append(slice)
+        self.slices_index[item.get_id()] = slice
+
+
+class TimebarSegmentationSlice(TimebarSlice):
+    def __init__(self, parent:TimelineSegmentationBar, item, timeline):
+        super(TimebarSegmentationSlice, self).__init__(parent, item, timeline, color = (54,146,182, 100))
+
+
+class TimelineAnnotationBar(TimelineBar):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, control, height = 45):
+        super(TimelineAnnotationBar, self).__init__(parent, timeline, control, height)
+
+    def add_slice(self, item):
+        slice = TimebarAnnotationSlice(self, item, self.timeline)
+        self.onHeightChanged.connect(slice.on_height_changed)
+        slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
+        slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
+        self.slices.append(slice)
+        self.slices_index[item.get_id()] = slice
+
+
+class TimebarAnnotationSlice(TimebarSlice):
+    def __init__(self, parent:TimelineSegmentationBar, item, timeline):
+        super(TimebarAnnotationSlice, self).__init__(parent, item, timeline, color = (133, 42, 42, 100))
 
 
 class MediaObjectWidget(QWidget):

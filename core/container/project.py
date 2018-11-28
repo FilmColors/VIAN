@@ -81,6 +81,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
     :var selected: A List of Currently Selected IProjectContainers
     """
 
+    onScreenshotGroupAdded = pyqtSignal(object)
+    onScreenshotGroupRemoved = pyqtSignal(object)
+    onSegmentationAdded = pyqtSignal(object)
+    onSegmentationRemoved = pyqtSignal(object)
+    onAnnotationLayerAdded = pyqtSignal(object)
+    onAnnotationLayerRemoved = pyqtSignal(object)
+
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
         QObject.__init__(self)
@@ -265,6 +272,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if dispatch:
             self.undo_manager.to_undo((self.add_segmentation, [segmentation]), (self.remove_segmentation, [segmentation]))
             self.dispatch_changed()
+        self.onSegmentationAdded.emit(segmentation)
 
     def copy_segmentation(self, segmentation):
         new = self.create_segmentation(name = segmentation.name + "_Copy")
@@ -297,6 +305,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                  s.update_scene_id(self.segmentation[self.main_segmentation_index])
         else:
             self.main_segmentation_index = 0
+        self.onSegmentationRemoved.emit(segmentation)
         self.dispatch_changed()
 
     def has_segmentation(self):
@@ -634,6 +643,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.undo_manager.to_undo((self.add_annotation_layer, [layer]),
                                   (self.remove_annotation_layer, [layer]))
 
+        self.onAnnotationLayerAdded.emit(layer)
         self.dispatch_changed()
 
     def remove_annotation_layer(self, layer):
@@ -650,6 +660,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.current_annotation_layer = self.annotation_layers[0]
 
         self.remove_from_id_list(layer)
+        self.onAnnotationLayerRemoved.emit(layer)
         self.dispatch_changed()
 
     def remove_annotation(self, annotation):
