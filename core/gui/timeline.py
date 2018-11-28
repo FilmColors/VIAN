@@ -1033,7 +1033,6 @@ class TimelineSegmentationControl(TimelineControl):
         self.segmentation = item
 
 
-
 class TimelineBar(QtWidgets.QFrame):
     onHeightChanged = pyqtSignal(int)
 
@@ -1617,8 +1616,9 @@ class ScreenshotGroupBar(TimelineBar):
             self.pictures[scr.unique_id].close()
 
     def rescale(self):
-        for s in self.pictures.values():
-            s.move(s.item.get_start()//self.timeline.scale, 0)
+        for s in self.pictures.keys():
+            pic = self.pictures[s]
+            pic.move(pic.item.get_start()//self.timeline.scale, 0)
 
 
 class TimebarPicture(QtWidgets.QWidget):
