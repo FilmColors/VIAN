@@ -151,7 +151,8 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
         if self.selection_rect is not None:
             self.scene().removeItem(self.selection_rect)
         feature = object.meta
-        x = feature.id * self.dot_size
+        # x = feature.id * self.dot_size
+        x = self.active_features.index(feature) * self.dot_size
         width = self.matrix.shape[0] * self.dot_size
         self.selection_rect = self.scene().addRect(0, x, width, self.dot_size, QPen(), QBrush(QColor(230,100,100,100)))
 
