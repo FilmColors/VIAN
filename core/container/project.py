@@ -98,7 +98,7 @@ class VIANProject(IHasName, IClassifiable):
 
         self.corpus_id = -1
 
-        self.id_list = []
+        self.id_list = dict()
 
         self.meta_data = None
 
@@ -211,12 +211,12 @@ class VIANProject(IHasName, IClassifiable):
     def get_all_containers(self, types = None):
         result = []
         if types is None:
-            for itm in self.id_list:
-                result.append(itm[1])
+            for itm in self.id_list.values():
+                result.append(itm)
         else:
-            for itm in self.id_list:
-                if itm[1].get_type() in types:
-                    result.append(itm[1])
+            for itm in self.id_list.values():
+                if itm.get_type() in types:
+                    result.append(itm)
         return result
 
     def unload_all(self):
@@ -430,15 +430,14 @@ class VIANProject(IHasName, IClassifiable):
                 shot_id_global += 1
 
     def remove_screenshot(self, screenshot):
-        for grp in self.screenshot_groups:
-            for s in grp.screenshots:
-                if s not in self.screenshots:
-                    self.screenshots.append(s)
+        # for grp in self.screenshot_groups:
+        #     for s in grp.screenshots:
+        #         if s not in self.screenshots:
+        #             self.screenshots.append(s)
 
         if screenshot in self.screenshots:
             for grp in self.screenshot_groups:
                 grp.remove_screenshots(screenshot)
-
 
             self.screenshots.remove(screenshot)
             self.remove_from_id_list(screenshot)
@@ -447,6 +446,7 @@ class VIANProject(IHasName, IClassifiable):
             self.dispatch_changed()
         else:
             print("Not Found")
+        print("Deleted")
 
     def get_screenshots(self):
         return self.screenshots
@@ -1271,34 +1271,29 @@ class VIANProject(IHasName, IClassifiable):
         return item_id
 
     def add_to_id_list(self, container_object, item_id):
-        self.id_list.append((item_id, container_object))
-        self.id_list = sorted(self.id_list, key=lambda x: x[0])
+        # self.id_list.append((item_id, container_object))
+        # self.id_list = sorted(self.id_list, key=lambda x: x[0])
+        self.id_list[item_id] = container_object
 
     def remove_from_id_list(self, container_object):
-        for d in self.id_list:
-            if d[1] == container_object:
-                self.id_list.remove(d)
-                # print("Removed: ", d)
-                break
+        if container_object.unique_id in self.id_list:
+            self.id_list.pop(container_object.unique_id)
 
     def clean_id_list(self):
-        self.id_list = [itm for itm in self.id_list if itm[0] == itm[1].unique_id]
-
-    def replace_ids(self):
-        for itm in self.id_list:
-            if itm[0] != itm[1].unique_id:
-                old = itm[0]
-                itm[0] = itm[1].unique_id
-                print("Updated ", old, " --> ", itm[1].unique_id, itm[1])
+        new = dict()
+        for itm, val in self.id_list.items():
+            if itm == val.unique_id:
+                new[itm] = val
+        self.id_list = new
 
     def get_object_list(self):
         string = ""
-        for ids in self.id_list:
-            string += str(ids[0]).ljust(20) + str(ids[1]) + "\n"
+        for k, v in self.id_list.items():
+            string += str(k).ljust(20) + str(v) + "\n"
         return string
 
     def get_all_ids(self):
-        return [itm[0] for itm in self.id_list]
+        return [itm for itm in self.id_list.keys()]
 
     def get_by_id(self, item_id):
         """
@@ -1306,19 +1301,10 @@ class VIANProject(IHasName, IClassifiable):
         :param id: 
         :return: 
         """
-        first = 0
-        last = len(self.id_list) - 1
-        while first <= last:
-            mid_point = (first + last) // 2
-            if self.id_list[mid_point][0] == item_id:
-                return self.id_list[mid_point][1]
-            else:
-                if self.id_list[mid_point][0] > item_id:
-                    last = mid_point - 1
-                else:
-                    first = mid_point + 1
-
-        return None
+        if item_id in self.id_list:
+            return self.id_list[item_id]
+        else:
+            return None
 
     def get_notes(self):
         return self.notes
