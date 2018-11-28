@@ -1644,7 +1644,8 @@ class TimebarPicture(QtWidgets.QWidget):
         self.resize(width, self.pic_height)
         self.show()
 
-    def on_image_set(self, screenshot):
+    @pyqtSlot(object, object)
+    def on_image_set(self, screenshot, pixmap):
         qimage, qpixmap = screenshot.get_preview(scale=0.1)
         self.pixmap = qpixmap
         self.qimage = qimage

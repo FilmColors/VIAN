@@ -30,6 +30,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.corpus_client.onCorpusConnected.connect(self.recreate_tree)
         self.corpus_client.onCorpusDisconnected.connect(self.recreate_tree)
         self.corpus_client.onCorpusChanged.connect(self.recreate_tree)
+        self.analyses_roots = dict()
         self.item_list = []
         self.item_index = dict()
         self.show()
@@ -74,11 +75,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             self.analyzes_group = AnalyzesOutlinerRootItem(self.project_item, 3)
             a_name = ""
             for i, a in enumerate(sorted(self.main_window.project.analysis, key=lambda x:x.analysis_job_class)):
-                if a.analysis_job_class != a_name:
-                    a_grp = AnalyzesOutlinerGroupItem(self.analyzes_group, 3, a.analysis_job_class)
-                    a_name = a.analysis_job_class
-                analysis_item = AnalyzesOutlinerItem(a_grp, i, a)
-                self.item_list.append(analysis_item)
+                self.add_analysis(a)
 
             self.node_scripts_group = NodeScriptsRootItem(self.project_item, 4)
             for i, s in enumerate(self.main_window.project.node_scripts):
@@ -90,23 +87,18 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
             self.experiment_group = ExperimentRootItem(self.project_item, 5)
             for i, exp in enumerate(self.main_window.project.experiments):
-                experiment_item = ExperimentItem(self.experiment_group, i, exp)
-                self.item_list.append(experiment_item)
-                cl_obj_root = ClassificationObjectsRoot(experiment_item, 6)
-                for cl_obj in exp.get_classification_objects_plain():
-                    cl_obj_item = ClassificationObjectsItem(cl_obj_root, 7, cl_obj)
-                    self.item_list.append(cl_obj_item)
+                self.add_experiment(exp)
 
-            if not first_time:
-                self.project_item.setExpanded(exp_p_item)
-                for i in range(self.project_item.childCount()):
-                    self.project_item.child(i).setExpanded(exp_group_nodes[i])
-
-                complete_list = []
-                self.project_item.get_children(complete_list)
-                for i in complete_list:
-                    if i.has_item:
-                        i.setExpanded(i.get_container().outliner_expanded)
+            # if not first_time:
+            #     self.project_item.setExpanded(exp_p_item)
+            #     for i in range(self.project_item.childCount()):
+            #         self.project_item.child(i).setExpanded(exp_group_nodes[i])
+            #
+            #     complete_list = []
+            #     self.project_item.get_children(complete_list)
+            #     for i in complete_list:
+            #         if i.has_item:
+            #             i.setExpanded(i.get_container().outliner_expanded)
 
                     # self.on_selected(None, self.project().selected)
             self.tree.selection_dispatch = True
@@ -173,6 +165,32 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             self.screenshot_group.remove(self.item_index[grp.get_id()])
             self.item_index.pop(grp.get_id())
 
+    def add_experiment(self, s):
+        experiment_item = ExperimentItem(self.experiment_group, 0, s)
+        self.item_list.append(experiment_item)
+        self.item_index[s.get_id()] = experiment_item
+
+    def remove_experiment(self, s):
+        if s.get_id() in self.item_index:
+            self.item_list.remove(self.item_index[s.get_id()])
+            self.item_index.pop(s.get_id())
+
+    def add_analysis(self, s):
+        if s.analysis_job_class not in self.analyses_roots:
+            a_grp = AnalyzesOutlinerGroupItem(self.analyzes_group, 3, s.analysis_job_class)
+            self.analyses_roots[s.analysis_job_class] = a_grp
+        else:
+            a_grp = self.analyses_roots[s.analysis_job_class]
+
+        analysis = AnalyzesOutlinerItem(a_grp, 0, s)
+        self.item_list.append(analysis)
+        self.item_index[s.get_id()] = analysis
+
+    def remove_analysis(self, s):
+        if s.get_id() in self.item_index:
+            self.item_list.remove(self.item_index[s.get_id()])
+            self.item_index.pop(s.get_id())
+
     def on_changed(self, project, item):
         pass
         # if item:
@@ -189,6 +207,10 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         project.onAnnotationLayerRemoved.connect(self.remove_annotation_layer)
         project.onScreenshotGroupAdded.connect(self.add_screenshot_group)
         project.onScreenshotGroupRemoved.connect(self.remove_screenshot_group)
+        project.onExperimentAdded.connect(self.add_experiment)
+        project.onExperimentRemoved.connect(self.remove_experiment)
+        project.onAnalysisAdded.connect(self.add_analysis)
+        project.onAnalysisRemoved.connect(self.remove_analysis)
         self.recreate_tree()
 
     def on_closed(self):
@@ -813,12 +835,25 @@ class ExperimentRootItem(AbstractOutlinerItem):
 
 
 class ExperimentItem(AbstractOutlinerItem):
-    def __init__(self, parent, index, script):
+    def __init__(self, parent, index, experiment):
         super(ExperimentItem, self).__init__(parent, index)
         self.has_item = True
         self.is_editable = True
-        self.item = script
+        self.item = experiment
         self.update_item()
+        self.classification_objects = dict()
+
+        self.classification_root = ClassificationObjectsRoot(self, 0)
+        for cl_obj in experiment.get_classification_objects_plain():
+            self.add_classification_object(cl_obj)
+
+    def add_classification_object(self, cl_obj):
+            cl_obj_item = ClassificationObjectsItem(self.classification_root, 7, cl_obj)
+            self.classification_objects[cl_obj.get_id()] = (cl_obj_item)
+
+    def remove_classification_object(self, cl_obj):
+        if cl_obj.get_id() in self.classification_objects:
+            self.removeChild(self.classification_objects[cl_obj.get_id()])
 
     def get_container(self):
         return self.item

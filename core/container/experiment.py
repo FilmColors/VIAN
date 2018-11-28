@@ -6,6 +6,7 @@ from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, 
 from core.data.interfaces import IProjectContainer, IHasName, IClassifiable
 from core.gui.vocabulary import VocabularyItem
 import time
+from PyQt5.QtCore import pyqtSignal
 import numpy as np
 
 
@@ -19,6 +20,9 @@ class Vocabulary(IProjectContainer, IHasName):
     :var was_expanded: If it is expandend in the VocabularyManager
     :var category: The Category it belongs to
     """
+    onVocabularyChanged = pyqtSignal(object)
+    onVocabularyWordAdded = pyqtSignal(object)
+    onVocabularyWordRemoved = pyqtSignal(object)
     def __init__(self, name):
         IProjectContainer.__init__(self)
         self.name = name
@@ -63,6 +67,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
         if dispatch:
             self.dispatch_on_changed(item=self)
+        self.onVocabularyWordAdded.emit(word)
 
     def remove_word(self, word, dispatch = True):
         children = []
@@ -84,6 +89,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
         if dispatch:
             self.dispatch_on_changed(item=self)
+        self.onVocabularyWordRemoved.emit(word)
 
     def get_word_by_name(self, name):
         for w in self.words_plain:
@@ -221,6 +227,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def set_name(self, name):
         self.name = name
+        self.onVocabularyChanged.emit(self)
 
     def delete(self):
         for w in self.words_plain:
@@ -241,6 +248,8 @@ class VocabularyWord(IProjectContainer, IHasName):
     :var connected_items: IProjectContainer objects that are connected with it # Obsolete
 
     """
+    onVocabularyWordChanged = pyqtSignal(object)
+
     def __init__(self, name, vocabulary, parent = None, is_checkable = False):
         IProjectContainer.__init__(self)
         self.name = name
@@ -253,14 +262,18 @@ class VocabularyWord(IProjectContainer, IHasName):
         self.children = []
         self.connected_items = []
 
-    # OBSOLETE
-    def add_connected_item(self, item):
-        self.connected_items.append(item)
+    # # OBSOLETE
+    # def add_connected_item(self, item):
+    #     self.connected_items.append(item)
+    #
+    # # OBSOLETE
+    # def remove_connected_item(self, item):
+    #     if item in self.connected_items:
+    #         self.connected_items.remove(item)
 
-    # OBSOLETE
-    def remove_connected_item(self, item):
-        if item in self.connected_items:
-            self.connected_items.remove(item)
+    def set_name(self, name):
+        self.name = name
+        self.onVocabularyWordChanged.emit(self)
 
     def add_children(self, children):
         if isinstance(children, list):
@@ -314,6 +327,10 @@ class ClassificationObject(IProjectContainer, IHasName):
     :var semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple ("<Name of Dataset>", [Indices of assigned Mask layers])
 
     """
+    onClassificationObjectChanged = pyqtSignal(object)
+    onUniqueKeywordsChanged = pyqtSignal(object)
+    onSemanticLabelsChanged = pyqtSignal(object)
+
     def __init__(self, name, experiment, parent = None):
         IProjectContainer.__init__(self)
         self.name = name
@@ -336,12 +353,14 @@ class ClassificationObject(IProjectContainer, IHasName):
                 keyword.set_project(self.project)
                 self.unique_keywords.append(keyword)
                 keywords.append(keyword)
+            self.onUniqueKeywordsChanged.emit(self)
             return keywords
         else:
             keywords = []
             for r in self.unique_keywords:
                 if r.voc_obj == voc:
                     keywords.append(r)
+            self.onUniqueKeywordsChanged.emit(self)
             return keywords
 
     def remove_vocabulary(self, voc):
@@ -351,6 +370,7 @@ class ClassificationObject(IProjectContainer, IHasName):
 
         for d in to_delete:
             self.project.remove_from_id_list(d)
+        self.onUniqueKeywordsChanged.emit(self)
 
     def get_vocabularies(self):
         return self.classification_vocabularies
@@ -360,6 +380,7 @@ class ClassificationObject(IProjectContainer, IHasName):
 
     def set_name(self, name):
         self.name = name
+        self.onClassificationObjectChanged.emit(self)
 
     def add_child(self, classification_object):
         classification_object.parent = self
@@ -384,10 +405,12 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.semantic_segmentation_labels = ("", [])
         else:
             self.semantic_segmentation_labels = (dataset_name, [])
+        self.onClassificationObjectChanged.emit(self)
 
     def add_dataset_label(self, value):
         if value not in self.semantic_segmentation_labels[1]:
             self.semantic_segmentation_labels[1].append(value)
+        self.ononClassificationObjectChanged.emit(self)
 
     def remove_dataset_label(self, value):
         if value in self.semantic_segmentation_labels[1]:
@@ -496,6 +519,9 @@ class Experiment(IProjectContainer, IHasName):
     :var classification_results: The Classification Mapping a list of [IClassifiable, UniqueKeywords]
 
     """
+    onExperimentChanged = pyqtSignal(object)
+    onClassificationObjectAdded = pyqtSignal(object)
+    onClassificationObjectRemoved = pyqtSignal(object)
 
     def __init__(self, name="New Experiment"):
         IProjectContainer.__init__(self)
@@ -512,6 +538,7 @@ class Experiment(IProjectContainer, IHasName):
 
     def set_name(self, name):
         self.name = name
+        self.onExperimentChanged.emit(self)
 
     def get_type(self):
         return EXPERIMENT
@@ -572,10 +599,12 @@ class Experiment(IProjectContainer, IHasName):
     def add_classification_object(self, obj: ClassificationObject):
         if obj not in self.classification_objects:
             self.classification_objects.append(obj)
+            self.onClassificationObjectAdded.emit(self)
 
     def remove_classification_object(self, obj: ClassificationObject):
         if obj in self.classification_objects:
             self.classification_objects.remove(obj)
+            self.onClassificationObjectRemoved.emit(self)
 
     def get_containers_to_classify(self):
         """

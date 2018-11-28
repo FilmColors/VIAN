@@ -87,6 +87,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
     onSegmentationRemoved = pyqtSignal(object)
     onAnnotationLayerAdded = pyqtSignal(object)
     onAnnotationLayerRemoved = pyqtSignal(object)
+    onAnalysisAdded = pyqtSignal(object)
+    onAnalysisRemoved = pyqtSignal(object)
+    onExperimentAdded = pyqtSignal(object)
+    onExperimentRemoved = pyqtSignal(object)
+    onVocabularyAdded = pyqtSignal(object)
+    onVocabularyRemoved = pyqtSignal(object)
+
 
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
@@ -518,6 +525,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         if dispatch:
             self.dispatch_changed()
+        self.onAnalysisAdded.emit(analysis)
 
     def add_analyses(self, analyses):
         for a in analyses:
@@ -547,6 +555,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.remove_from_id_list(analysis)
             self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
             self.dispatch_changed()
+            self.onAnalysisRemoved.emit(analysis)
 
     # def get_analyzes_of_item(self, item):
     #     result = []
@@ -1098,12 +1107,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if dispatch:
             self.dispatch_changed()
 
+        self.onVocabularyAdded.emit(voc)
+
         return voc
 
     def remove_vocabulary(self, voc):
         if voc in self.vocabularies:
             self.vocabularies.remove(voc)
             self.remove_from_id_list(voc)
+            self.onVocabularyRemoved.emit(voc)
         self.dispatch_changed()
 
     def copy_vocabulary(self, voc, add_to_global = True):
@@ -1207,6 +1219,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.undo_manager.to_undo((self.add_experiment, [experiment]),
                                   (self.remove_experiment, [experiment]))
+        self.onExperimentAdded.emit(experiment)
         self.dispatch_changed(item=experiment)
 
     def remove_experiment(self, experiment):
@@ -1215,7 +1228,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.remove_from_id_list(experiment)
             self.undo_manager.to_undo((self.remove_experiment, [experiment]),
                                       (self.add_experiment, [experiment]))
-
+            self.onExperimentRemoved.emit(experiment)
             self.dispatch_changed()
 
 

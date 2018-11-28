@@ -28,7 +28,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     :var curr_size: The size of the loaded Image relative to it's original Size
     """
     onScreenshotChanged = pyqtSignal(object)
-    onImageSet = pyqtSignal(object)
+    onImageSet = pyqtSignal(object, object)
 
     def __init__(self, title = "", image = None,
                  img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
@@ -155,7 +155,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def set_img_movie(self, img):
         self.img_movie = img
-        self.onImageSet.emit(self)
+        self.onImageSet.emit(self, self.img_movie)
 
     def get_semantic_segmentations(self, dataset=None):
         """
