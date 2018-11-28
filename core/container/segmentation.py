@@ -16,6 +16,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     """
     onSegmentAdded = pyqtSignal(object)
     onSegmentDeleted = pyqtSignal(object)
+    onSegmentationChanged = pyqtSignal(object)
 
     def __init__(self, name = None, segments = None):
         IProjectContainer.__init__(self)
@@ -212,6 +213,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.name]))
         self.name = name
+        self.onSegmentationChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_name(self):
@@ -258,16 +260,19 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         ILockable.lock(self)
         for s in self.segments:
             s.lock()
+        self.onSegmentationChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def unlock(self):
         ILockable.unlock(self)
         for s in self.segments:
             s.unlock()
+        self.onSegmentationChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def set_timeline_visibility(self, visibility):
         self.timeline_visibility = visibility
+        self.onSegmentationChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_timeline_visibility(self):

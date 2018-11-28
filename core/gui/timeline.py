@@ -1093,6 +1093,7 @@ class TimelineBar(QtWidgets.QFrame):
 
     def get_previous_slice(self, slice):
         result = None
+        self.slices = sorted(self.slices, key=lambda x: x.pos().x())
         for s in self.slices:
             if s.pos().x() < slice.pos().x():
                 result = s
@@ -1103,6 +1104,7 @@ class TimelineBar(QtWidgets.QFrame):
 
     def get_next_slice(self, slice):
         result = None
+        self.slices = sorted(self.slices, key=lambda x: x.pos().x())
         for s in self.slices:
             if s.pos().x() > slice.pos().x():
                 if result is None:

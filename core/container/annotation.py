@@ -1,6 +1,6 @@
 import cv2
 # from PyQt5 import QtGui, QtCore
-
+from PyQt5.QtCore import pyqtSignal
 from core.data.computation import numpy_to_qt_image
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import AnnotationType, MediaObjectType, ANNOTATION, ANNOTATION_LAYER
@@ -363,6 +363,10 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
     :var notes: Additional notes set in the Inspector
 
     """
+    onAnnotationAdded = pyqtSignal(object)
+    onAnnotationRemoved = pyqtSignal(object)
+    onAnnotationLayerChanged = pyqtSignal(object)
+
     def __init__(self, name = None, t_start = 0, t_end = 0):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)

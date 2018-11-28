@@ -27,6 +27,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     :var notes: Additional Notes set in the Inspector
     :var curr_size: The size of the loaded Image relative to it's original Size
     """
+    onScreenshotChanged = pyqtSignal(object)
     onImageSet = pyqtSignal(object)
 
     def __init__(self, title = "", image = None,
@@ -73,21 +74,26 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def set_title(self, title):
         self.title = title
+        self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def set_scene_id(self, scene_id):
         self.scene_id = scene_id
+        self.onScreenshotChanged.emit(self)
 
     def set_shot_id_global(self, global_id):
         self.shot_id_global = global_id
+        self.onScreenshotChanged.emit(self)
 
     def set_shot_id_segm(self, segm_id):
         self.shot_id_segm = segm_id
+        self.onScreenshotChanged.emit(self)
 
     def set_notes(self, notes):
         self.project.undo_manager.to_undo((self.set_notes, [notes]),
                                           (self.set_notes, [self.notes]))
         self.notes = notes
+        self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def set_annotation_visibility(self, visibility):
@@ -173,6 +179,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.project.undo_manager.to_undo((self.set_title, [name]),
                                           (self.set_title, [self.title]))
         self.title = name
+        self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def update_scene_id(self, segmentation):
@@ -233,6 +240,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def set_timeline_visibility(self, visibility):
         self.timeline_visibility = visibility
+        self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_timeline_visibility(self):
@@ -249,6 +257,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     onScreenshotGroupDeleted = pyqtSignal(object)
     onScreenshotAdded = pyqtSignal(object)
     onScreenshotRemoved = pyqtSignal(object)
+    onScreenshotGroupChanged = pyqtSignal(object)
 
     def __init__(self, project, name = "New Screenshot Group"):
         IProjectContainer.__init__(self)
@@ -266,6 +275,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         self.name = name
         for s in self.screenshots:
             s.screenshot_group = self.name
+        self.onScreenshotGroupChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def add_screenshots(self, shots):

@@ -1,12 +1,14 @@
 import os
+from functools import partial
 from random import randint
 from PyQt5 import QtCore, uic, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit, QMainWindow
 from PyQt5.QtGui import QFont, QIcon
 
 from core.data.computation import ms_to_string
 from core.data.interfaces import IProjectChangeNotify
+from core.container.project import VIANProject
 from core.gui.context_menu import open_context_menu, CorpusProjectContextMenu
 from .ewidgetbase import EDockWidget
 from core.corpus.client.corpus_client import CorpusClient
@@ -29,6 +31,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.corpus_client.onCorpusDisconnected.connect(self.recreate_tree)
         self.corpus_client.onCorpusChanged.connect(self.recreate_tree)
         self.item_list = []
+        self.item_index = dict()
         self.show()
 
     def recreate_tree(self):
@@ -52,44 +55,21 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
             self.descriptor_item = MovieDescriptorOutlinerItem(self.project_item, 0, p.movie_descriptor)
             self.item_list.append(self.descriptor_item)
-            #self.descriptor_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_movie.png"))
 
             # Segmentation
             self.segmentation_group = SegmentationOutlinerRootItem(self.project_item, 0)
             for i, st in enumerate(p.get_segmentations()):
-                segmentation_item =  SegmentationOutlinerItem(self.segmentation_group, i, st)
-                self.item_list.append(segmentation_item)
-
-                if i == self.project().main_segmentation_index:
-                    segmentation_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
-
-                for j, s in enumerate(st.segments):
-                    segment_item = SegmentOutlinerItem(segmentation_item, i, s)
-                    self.item_list.append(segment_item)
+                self.add_segmentation(st)
             # Screenshots
+
             self.screenshot_group = ScreenshotRootOutlinerItem(self.project_item, 1)
             for i, scr_grp in enumerate(p.screenshot_groups):
-                scr_group =  ScreenshotGroupOutlinerItem(self.screenshot_group, i, scr_grp)
-
-                if scr_grp is self.project().active_screenshot_group:
-                    scr_group.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
-
-                for j, scr in enumerate(scr_grp.screenshots):
-                    screenshot = ScreenshotOutlinerItem(scr_group, i, scr)
-                    self.item_list.append(screenshot)
-            # for i, scr in enumerate(p.get_screenshots()):
-            #     screenshot =  ScreenshotOutlinerItem(self.screenshot_group, i, scr)
-            #     self.item_list.append(screenshot)
+                self.add_screenshot_group(scr_grp)
 
             # Annotations
             self.annotation_group = AnnotationLayerOutlinerRootItem(self.project_item, 2)
             for i,l in enumerate(self.main_window.project.get_annotation_layers()):
-                layer_item = AnnotationLayerOutlinerItem(self.annotation_group, i, l)
-                self.item_list.append(layer_item)
-                for j, d in enumerate(l.annotations):
-                    annotation_item = AnnotationOutlinerItem(layer_item, j, d)
-                    self.item_list.append(annotation_item)
-
+                self.add_annotation_layer(l)
 
             self.analyzes_group = AnalyzesOutlinerRootItem(self.project_item, 3)
             a_name = ""
@@ -150,6 +130,18 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 itm = CorpusProjectOutlinerItem(self.tree, 0, p)
                 self.item_list.append(itm)
 
+    def add_segmentation(self, s):
+        segmentation_item = SegmentationOutlinerItem(self.segmentation_group, 0, s)
+        self.item_list.append(segmentation_item)
+        self.item_index[s.get_id()] = segmentation_item
+        if s == self.project().get_main_segmentation():
+            segmentation_item.setIcon(0, QtGui.QIcon("qt_ui/icons/icon_main_segment.png"))
+
+    def remove_segmentation(self, s):
+        if s.get_id() in self.item_index:
+            self.segmentation_group.remove(self.item_index[s.get_id()])
+            self.item_index.pop(s.get_id())
+
     def update_tree(self, item):
         found = False
         for itm in self.item_list:
@@ -161,52 +153,42 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         if not found:
             self.recreate_tree()
 
-    def add_segmentation(self, segmentation):
-        for i, st in enumerate(segmentation):
-            segmentation_item = SegmentationOutlinerItem(self.segmentation_group, i, st)
-
-            for j, s in enumerate(st.segments):
-                segment_item = SegmentOutlinerItem(segmentation_item, i, s)
-                segment_item.setText(0, str(s.ID))
-
-    def remove_segmentation(self, segmentation):
-        for i in range(self.segmentation_group.childCount()):
-            if self.segmentation_group.child(i).segmentation is segmentation:
-                self.segmentation_group.removeChild(self.segmentation_group.child(i))
-
     def add_annotation_layer(self, layer):
-
-        layer_item = AnnotationLayerOutlinerItem(self.annotation_group, 0, layer)
-        layer_item.setText(0, layer.name)
-        layer_item.setText(1, ms_to_string(layer.t_start))
-        layer_item.setText(2, ms_to_string(layer.t_end))
-        for j, d in enumerate(layer.annotations):
-            annotation_item = AnnotationOutlinerItem(layer_item, j, d)
-            annotation_item.setText(0, d.a_type.name)
+        item = AnnotationLayerOutlinerItem(self.annotation_group, 1, layer)
+        self.item_list.append(item)
+        self.item_index[layer.get_id()] = item
 
     def remove_annotation_layer(self, layer):
-        for i in range(self.annotation_group.childCount()):
-            if self.annotation_group.child(i).annotation_layer is layer:
-                self.annotation_group.removeChild(self.annotation_group.child(i))
+        if layer.get_id() in self.item_index:
+            self.annotation_group.remove(self.item_index[layer.get_id()])
+            self.item_index.pop(layer.get_id())
 
-    def add_screenshot(self, scr):
-        screenshot = ScreenshotOutlinerItem(self.screenshot_group, self.screenshot_group.childCount(), scr)
-        screenshot.setText(0, scr.title)
+    def add_screenshot_group(self, grp):
+        itm = ScreenshotGroupOutlinerItem(self.screenshot_group, 2, grp)
+        self.item_index[grp.get_id()] = itm
+        self.item_list.append(itm)
 
-    def remove_screenshot(self, scr):
-        for i in range(self.screenshot_group.childCount()):
-            if self.screenshot_group.child(i).screenshot is scr:
-                self.screenshot_group.removeChild(self.screenshot_group.child(i))
+    def remove_screenshot_group(self, grp):
+        if grp.get_id() in self.item_index:
+            self.screenshot_group.remove(self.item_index[grp.get_id()])
+            self.item_index.pop(grp.get_id())
 
     def on_changed(self, project, item):
-        if item:
-            self.update_tree(item)
-        else:
-            self.recreate_tree()
+        pass
+        # if item:
+        #     self.update_tree(item)
+        # else:
+        #     self.recreate_tree()
 
-    def on_loaded(self, project):
+    def on_loaded(self, project:VIANProject):
         self.setDisabled(False)
         self.tree.project = project
+        project.onSegmentationAdded.connect(self.add_segmentation)
+        project.onSegmentationRemoved.connect(self.remove_segmentation)
+        project.onAnnotationLayerAdded.connect(self.add_annotation_layer)
+        project.onAnnotationLayerRemoved.connect(self.remove_annotation_layer)
+        project.onScreenshotGroupAdded.connect(self.add_screenshot_group)
+        project.onScreenshotGroupRemoved.connect(self.remove_screenshot_group)
         self.recreate_tree()
 
     def on_closed(self):
@@ -412,15 +394,10 @@ class AbstractOutlinerItem(QTreeWidgetItem):
     def set_name(self, name):
         "Not implemented"
 
-
     def update_item(self):
         if self.has_item:
             if self.get_container() is not None and self.get_container().outliner_highlighted:
                 self.setForeground(0, QtGui.QColor(0,200,0))
-
-
-
-
 
     def get_children(self, list):
         if self.childCount() > 0:
@@ -472,6 +449,12 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
         self.is_editable = True
         self.has_item = True
         self.update_item()
+        self.segments = dict()
+        for s in segmentation.segments:
+            self.on_segment_added(s)
+        self.segmentation.onSegmentAdded.connect(self.on_segment_added)
+        self.segmentation.onSegmentDeleted.connect(self.on_segment_removed)
+        self.segmentation.onSegmentationChanged.connect(partial(self.update_item))
 
     def get_container(self):
         return self.segmentation
@@ -481,6 +464,19 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
 
     def get_name(self):
         return self.segmentation.name
+
+    @pyqtSlot(object)
+    def on_segment_added(self, segment):
+        if segment.get_id() not in self.segments:
+            segment_item = SegmentOutlinerItem(None, segment.ID, segment)
+            print(segment.ID)
+            self.insertChild(segment.ID - 1, segment_item)
+            self.segments[segment.get_id()] = segment_item
+
+    @pyqtSlot(object)
+    def on_segment_removed(self, s):
+        if s.get_id() in self.segments:
+            self.removeChild(self.segments[s.get_id()])
 
     def update_item(self):
         super(SegmentationOutlinerItem, self).update_item()
@@ -528,7 +524,24 @@ class AnnotationLayerOutlinerItem(AbstractOutlinerItem):
         self.annotation_layer = annotation_layer
         self.is_editable = True
         self.has_item = True
+        self.annotations = dict()
+        for a in annotation_layer.annotations:
+            self.on_add_annotation(a)
+        self.annotation_layer.onAnnotationAdded.connect(self.on_add_annotation)
+        self.annotation_layer.onAnnotationRemoved.connect(self.on_annotation_removed)
+        self.annotation_layer.onAnnotationLayerChanged.connect(partial(self.update_item))
         self.update_item()
+
+    @pyqtSlot(object)
+    def on_add_annotation(self, a):
+        if a.get_id() not in self.annotations:
+            itm = AnnotationOutlinerItem(self, len(self.annotations.keys()), a)
+            self.annotations[a.get_id()] = itm
+
+    @pyqtSlot(object)
+    def on_annotation_removed(self, a):
+        if a.get_id() in self.annotations:
+            self.removeChild(self.annotations[a.get_id()])
 
     def get_container(self):
         return self.annotation_layer
@@ -589,6 +602,23 @@ class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
         self.setText(0, screenshot_group.get_name())
         self.has_item = True
         self.is_editable = True
+        self.screenshots = dict()
+        for s in screenshot_group.screenshots:
+            self.on_add_screenshot(s)
+        self.item.onScreenshotAdded.connect(self.on_add_screenshot)
+        self.item.onScreenshotRemoved.connect(self.on_remove_screenshot)
+        self.item.onScreenshotGroupChanged.connect(partial(self.update_item))
+
+    @pyqtSlot(object)
+    def on_add_screenshot(self, a):
+        if a.get_id() not in self.screenshots:
+            itm = ScreenshotOutlinerItem(self, len(self.screenshots.keys()), a)
+            self.screenshots[a.get_id()] = itm
+
+    @pyqtSlot(object)
+    def on_remove_screenshot(self, a):
+        if a.get_id() in self.screenshots:
+            self.removeChild(self.screenshots[a.get_id()])
 
     def get_container(self):
         return self.item
@@ -606,8 +636,9 @@ class ScreenshotOutlinerItem(AbstractOutlinerItem):
         self.screenshot = screenshot
         self.is_editable = True
         self.has_item = True
-
+        screenshot.onScreenshotChanged.connect(partial(self.update_item))
         self.update_item()
+
     def get_container(self):
         return self.screenshot
 
