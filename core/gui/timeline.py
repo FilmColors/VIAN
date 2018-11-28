@@ -362,8 +362,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
 
     def add_screenshots(self, screenshots, screenshot_group, grp_name = "Screenshots", ):
+        print("Screenshot Group Added")
         control = TimelineControl(self.frame_Controls, self, name = grp_name, item=screenshot_group)
-        bars = ScreenshotBar(self.frame_Bars, self, screenshots, control)
+        bars = ScreenshotGroupBar(self.frame_Bars, self, screenshot_group, control)
         item = [control, [bars], self.bar_height_min]
         self.item_screenshots.append(item)
         self.items.append(item)
@@ -386,13 +387,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for i in self.items:
             ctrl = i[0]
             bars = i[1]
+            if isinstance(bars[0], ScreenshotGroupBar):
+                continue
             for b in bars:
                 b.close()
             ctrl.close()
         self.items = []
         self.item_segments = []
         self.item_ann_layers = []
-        self.item_screenshots = []
+        # self.item_screenshots = []
 
     def update_location(self):
         # self.curr_movie_time = self.main_window.player.get_media_time() / 1000
@@ -454,6 +457,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_scrubber.resize(self.scrubber_width, h)
 
         loc_y = self.time_bar_height
+        self.items = self.item_segments + self.item_ann_layers + self.item_screenshots
         for c, i in enumerate(self.items):
             bar_start = loc_y
             ctrl_height = 6
@@ -508,6 +512,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scroll_h()
 
     def on_changed(self, project, item):
+        t = time.time()
         vlocation = self.scrollArea.verticalScrollBar().value()
 
         self.clear()
@@ -521,12 +526,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             if l.get_timeline_visibility() is True:
                 self.add_annotation_layer(l)
 
-        for grp in project.screenshot_groups:
-            self.add_screenshots(grp.screenshots, grp, grp.get_name())
+        # for grp in project.screenshot_groups:
+        #     self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
         self.on_selected(None, project.selected)
         self.update_ui()
         self.scrollArea.verticalScrollBar().setValue(vlocation)
+        print("Timeline", time.time()- t)
 
     def on_selected(self, sender, selected):
         if sender is self:
@@ -1524,23 +1530,33 @@ class TimebarKey(QtWidgets.QWidget):
         self.is_hovered = False
 
 
-class ScreenshotBar(TimelineBar):
-    def __init__(self, parent, timeline, screenshots, control, height=45):
-        super(ScreenshotBar, self).__init__(parent, timeline, control, height=45)
-        self.screenshots = []
-        self.pictures = []
+class ScreenshotGroupBar(TimelineBar):
+    def __init__(self, parent, timeline, screenshot_group, control, height=45):
+        super(ScreenshotGroupBar, self).__init__(parent, timeline, control, height=45)
+        self.screenshot_group = screenshot_group
+        self.screenshot_group.onScreenshotAdded.connect(self.add_screenshot)
+        self.screenshot_group.onScreenshotRemoved.connect(self.remove_screenshot)
+        # self.screenshots = dict([(s.unique_id, s) for s in screenshot_group.screenshots])
+        self.pictures = dict()
         self.timeline = timeline
 
-        for s in screenshots:
-            pic = TimebarPicture(self, s, timeline)
-            self.onHeightChanged.connect(pic.on_height_changed)
-            pic.move(s.get_start()//timeline.scale, 0)
-            self.pictures.append(pic)
-
+        for s in screenshot_group.screenshots:
+            self.add_screenshot(s)
         self.show()
 
+    def add_screenshot(self, scr):
+        if scr not in self.pictures:
+            pic = TimebarPicture(self, scr, self.timeline)
+            self.onHeightChanged.connect(pic.on_height_changed)
+            pic.move(scr.get_start() // self.timeline.scale, 0)
+            self.pictures[scr.unique_id] = pic
+
+    def remove_screenshot(self, scr):
+        if scr.unique_id in self.pictures:
+            self.pictures[scr.unique_id].close()
+
     def rescale(self):
-        for s in self.pictures:
+        for s in self.pictures.values():
             s.move(s.item.get_start()//self.timeline.scale, 0)
 
 
@@ -1548,6 +1564,7 @@ class TimebarPicture(QtWidgets.QWidget):
     def __init__(self, parent, screenshot:Screenshot, timeline, height = 43):
         super(TimebarPicture, self).__init__(parent)
         self.item = screenshot
+        self.item.onImageSet.connect(self.on_image_set)
         self.timeline = timeline
         self.is_hovered = False
         self.color = (123, 86, 32, 100)
@@ -1561,6 +1578,12 @@ class TimebarPicture(QtWidgets.QWidget):
         self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
         self.resize(width, self.pic_height)
         self.show()
+
+    def on_image_set(self, screenshot):
+        qimage, qpixmap = screenshot.get_preview(scale=0.1)
+        self.pixmap = qpixmap
+        self.qimage = qimage
+        self.update()
 
     def on_height_changed(self, height):
         self.pic_height = height

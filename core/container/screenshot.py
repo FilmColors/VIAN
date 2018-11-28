@@ -5,6 +5,8 @@ from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from core.data.interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
 from core.data.computation import numpy_to_qt_image, apply_mask
 from core.container.analysis import SemanticSegmentationAnalysisContainer
+
+from PyQt5.QtCore import pyqtSignal
 import datetime
 
 CACHE_WIDTH = 250
@@ -25,6 +27,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     :var notes: Additional Notes set in the Inspector
     :var curr_size: The size of the loaded Image relative to it's original Size
     """
+    onImageSet = pyqtSignal(object)
+
     def __init__(self, title = "", image = None,
                  img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
                  shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None):
@@ -50,7 +54,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.curr_size = 1.0
 
         self.hdf5_cache = dict()
-
 
     def to_stream(self, project = None):
         obj = dict(
@@ -146,6 +149,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def set_img_movie(self, img):
         self.img_movie = img
+        self.onImageSet.emit(self)
 
     def get_semantic_segmentations(self, dataset=None):
         """
@@ -242,6 +246,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
 
 class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
+    onScreenshotGroupDeleted = pyqtSignal(object)
+    onScreenshotAdded = pyqtSignal(object)
+    onScreenshotRemoved = pyqtSignal(object)
+
     def __init__(self, project, name = "New Screenshot Group"):
         IProjectContainer.__init__(self)
         self.set_project(project)
@@ -266,8 +274,8 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         for s in shots:
             self.screenshots.append(s)
             s.screenshot_group = self.get_name()
-
-        self.dispatch_on_changed(item=self)
+            self.onScreenshotAdded.emit(s)
+        # self.dispatch_on_changed(item=self)
 
     def remove_screenshots(self, shots):
         if not isinstance(shots, list):
@@ -275,6 +283,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
         for s in shots:
             if s in self.screenshots:
                 self.screenshots.remove(s)
+                self.onScreenshotRemoved.emit(s)
 
     def get_type(self):
         return SCREENSHOT_GROUP
@@ -317,3 +326,5 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
     def delete(self):
         self.project.remove_screenshot_group(self)
+        self.onScreenshotGroupDeleted.emit(self)
+

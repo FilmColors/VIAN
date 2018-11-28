@@ -21,9 +21,9 @@ from core.data.hdf5_manager import HDF5Manager
 from core.node_editor.node_editor import *
 from shutil import copy2
 from enum import Enum
-# from PyQt4 import QtCore, QtGui
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import QPoint, QRect, QSize
+from PyQt5.QtCore import  pyqtSignal
 
 from core.container.annotation import *
 from core.container.segmentation import *
@@ -34,7 +34,7 @@ from core.container.media_objects import *
 from core.container.node_scripts import *
 
 
-class VIANProject(IHasName, IClassifiable):
+class VIANProject(QObject, IHasName, IClassifiable):
     """
     This Class hold the Complete VIAN Project.
     As such it is the owner of all subsequent IProjectContainers, directly or indirectly
@@ -80,8 +80,10 @@ class VIANProject(IHasName, IClassifiable):
 
     :var selected: A List of Currently Selected IProjectContainers
     """
+
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
+        QObject.__init__(self)
         self.undo_manager = UndoRedoManager()
         self.main_window = main_window
         # self.streamer = main_window.project_streamer
@@ -402,7 +404,7 @@ class VIANProject(IHasName, IClassifiable):
 
 
         # screenshot.to_stream(self)
-        self.dispatch_changed()
+        # self.dispatch_changed()
 
     def sort_screenshots(self):
         if self.get_main_segmentation():
@@ -443,7 +445,7 @@ class VIANProject(IHasName, IClassifiable):
             self.remove_from_id_list(screenshot)
             self.sort_screenshots()
             self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
-            self.dispatch_changed()
+            # self.dispatch_changed()
         else:
             print("Not Found")
         print("Deleted")

@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+import time
 
 from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
@@ -246,7 +247,6 @@ class ScreenshotsManagerDockWidget(EDockWidget):
 
         self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
 
-
     def on_toggle_show_current(self):
         state = self.a_show_only_current.isChecked()
         self.screenshot_manager.only_show_current_segment = state
@@ -392,12 +392,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         if self.project is None:
             return
-
+        last_items = dict()
+        for img in self.images_plain:
+            last_items[img.screenshot_obj.unique_id] = img
         self.clear_manager()
 
         current_segment_id = 0
         current_sm_object = None
         new_qimage_cache = dict()
+        t = time.time()
         for s in self.project.screenshots:
             # If this Screenshot belongs to a new Segment, append the last SMObject to the list
             if s.scene_id != current_segment_id:
@@ -409,33 +412,36 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 if segment is not None:
                     current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
 
-            # Should we use the Annotated Screenshot?
-            if s.annotation_is_visible and s.img_blend is not None:
-                image = s.img_blend
+            if s.unique_id in last_items:
+                item_image = last_items[s.unique_id]
             else:
-                image = s.get_img_movie()
+                # Should we use the Annotated Screenshot?
+                if s.annotation_is_visible and s.img_blend is not None:
+                    image = s.img_blend
+                else:
+                    image = s.get_img_movie()
 
-            # Convert to Pixmap
-            # Cache the converted QPixamps if these are not the initial place holders
-            if image.shape[0] > 100:
-                # Check if the Image is already in the cache
-                # if str(s.unique_id) in self.qimage_cache:
-                #     qpixmap = self.qimage_cache[str(s.unique_id)]
-                # else:
-                try:
-                    if image.shape[2] == 4:
-                        qpixmap = numpy_to_pixmap(image, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-                    else:
-                        qpixmap = numpy_to_pixmap(image)
+                # Convert to Pixmap
+                # Cache the converted QPixamps if these are not the initial place holders
+                if image.shape[0] > 100:
+                    # Check if the Image is already in the cache
+                    # if str(s.unique_id) in self.qimage_cache:
+                    #     qpixmap = self.qimage_cache[str(s.unique_id)]
+                    # else:
+                    try:
+                        if image.shape[2] == 4:
+                            qpixmap = numpy_to_pixmap(image, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
+                        else:
+                            qpixmap = numpy_to_pixmap(image)
 
-                    self.qimage_cache[str(s.unique_id)] = qpixmap
-                except:
-                    continue
-                # new_qimage_cache[str(s.unique_id)] = qpixmap
-            else:
-                qpixmap = numpy_to_pixmap(image)
+                        self.qimage_cache[str(s.unique_id)] = qpixmap
+                    except:
+                        continue
+                    # new_qimage_cache[str(s.unique_id)] = qpixmap
+                else:
+                    qpixmap = numpy_to_pixmap(image)
 
-            item_image = ScreenshotManagerPixmapItems(qpixmap, self, s)
+                item_image = ScreenshotManagerPixmapItems(qpixmap, self, s)
             self.scene.addItem(item_image)
 
             self.images_plain.append(item_image)
@@ -443,19 +449,24 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 current_sm_object.segm_images.append(item_image)
 
                 scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font)
-                scr_lbl.setPos(item_image.pos() + QPoint(10, qpixmap.height()))
+                scr_lbl.setPos(item_image.pos() + QPoint(10, item_image.qpixmap.height()))
                 scr_lbl.setDefaultTextColor(self.color)
                 # scr_lbl.setFlag(QGraphicsItem.ItemIgnoresTransformations)
                 current_sm_object.scr_captions.append(scr_lbl)
-                current_sm_object.scr_caption_offset = QPoint(10, qpixmap.height())
+                current_sm_object.scr_caption_offset = QPoint(10, item_image.qpixmap.height())
                 self.scr_captions.append(scr_lbl)
 
         if current_sm_object is not None:
             self.images_segmentation.append(current_sm_object)
 
+        print("Item Creation", time.time() - t)
+        t = time.time()
+
         self.qimage_cache = new_qimage_cache
         self.clear_selection_frames()
+        t = time.time()
         self.arrange_images()
+        print("Arrange", time.time() - t)
 
     def clear_manager(self):
         self.clear_scr_captions()
@@ -928,6 +939,7 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         self.manager = manager
         self.screenshot_obj = obj
         self.selection_rect = selection_rect
+        self.qpixmap = qpixmap
 
     def mousePressEvent(self, *args, **kwargs):
         self.setSelected(True)
