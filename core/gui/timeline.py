@@ -333,9 +333,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.items.append(item)
         self.update_ui()
 
-    def add_screenshots(self, screenshots, screenshot_group, grp_name = "Screenshots", ):
-        print("Screenshot Group Added")
-        control = TimelineControl(self.frame_Controls, self, name = grp_name, item=screenshot_group)
+    @pyqtSlot(object)
+    def add_screenshots(self, screenshot_group):
+        control = TimelineControl(self.frame_Controls, self, name = screenshot_group.name, item=screenshot_group)
         bars = ScreenshotGroupBar(self.frame_Bars, self, screenshot_group, control)
         item = [control, [bars], self.bar_height_min]
         self.item_screenshots.append(item)
@@ -356,6 +356,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         return None
 
     def clear(self):
+        self.items = self.item_screenshots + self.item_ann_layers + self.item_segments
         for i in self.items:
             ctrl = i[0]
             bars = i[1]
@@ -475,7 +476,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.add_annotation_layer(l)
 
         for grp in project.screenshot_groups:
-            self.add_screenshots(grp.screenshots, grp, grp.get_name())
+            self.add_screenshots(grp)
 
         project.onSegmentationAdded.connect(self.add_segmentation)
         project.onAnnotationLayerAdded.connect(self.add_annotation_layer)
@@ -549,7 +550,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.add_annotation_layer(l)
 
         for grp in project.screenshot_groups:
-            self.add_screenshots(grp.screenshots, grp, grp.get_name())
+            self.add_screenshots(grp)
 
         self.on_selected(None, project.selected)
         self.update_ui()
@@ -1605,11 +1606,12 @@ class ScreenshotGroupBar(TimelineBar):
         self.show()
 
     def add_screenshot(self, scr):
-        if scr not in self.pictures:
+        if scr.unique_id not in self.pictures:
             pic = TimebarPicture(self, scr, self.timeline)
             self.onHeightChanged.connect(pic.on_height_changed)
             pic.move(scr.get_start() // self.timeline.scale, 0)
             self.pictures[scr.unique_id] = pic
+
 
     def remove_screenshot(self, scr):
         if scr.unique_id in self.pictures:

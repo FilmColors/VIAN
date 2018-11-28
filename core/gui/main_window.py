@@ -532,6 +532,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None:
             print("Cleaning")
             self.project.hdf5_manager.cleanup()
+            self.timeline.timeline.recreate_timeline()
         # if self.project is not None:
         #     self.corpus_client.on_commit_project(self.project)
 
@@ -2040,7 +2041,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 r.on_changed(self.project, item)
         else:
             for o in self.i_project_notify_reciever:
+                t = time.time()
                 o.on_changed(self.project, item)
+                print(time.time() - t, o)
 
     def dispatch_on_selected(self, sender, selected):
         if self.project is None:
