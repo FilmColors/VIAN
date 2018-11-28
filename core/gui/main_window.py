@@ -2041,9 +2041,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 r.on_changed(self.project, item)
         else:
             for o in self.i_project_notify_reciever:
-                t = time.time()
                 o.on_changed(self.project, item)
-                print(time.time() - t, o)
 
     def dispatch_on_selected(self, sender, selected):
         if self.project is None:

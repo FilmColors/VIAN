@@ -867,6 +867,7 @@ class ExperimentItem(AbstractOutlinerItem):
     def update_item(self):
         self.setText(0, self.item.get_name())
 
+
 class ClassificationObjectsRoot(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(ClassificationObjectsRoot, self).__init__(parent, index)
@@ -879,6 +880,7 @@ class ClassificationObjectsRoot(AbstractOutlinerItem):
     def update_item(self):
         self.setText(0, "Classification Objects")
         self.setForeground(0, QtGui.QColor(106,165,255))
+
 
 class ClassificationObjectsItem(AbstractOutlinerItem):
     def __init__(self, parent, index, cl_obj):

@@ -29,11 +29,12 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
     def remove_node(self, node, dispatch = True):
         if node in self.nodes:
             self.nodes.remove(node)
-            for conn in self.connections:
-                if conn.input_node == node.unique_id:
-                    self.remove_connection(conn)
-                elif conn.output_node == node.unique_id:
-                    self.remove_connection(conn)
+            to_remove = []
+            for i, conn in enumerate(self.connections):
+                if conn.input_node == node.unique_id or conn.output_node == node.unique_id:
+                    to_remove.append(conn)
+            for conn in to_remove:
+                self.remove_connection(conn)
             self.project.remove_from_id_list(node)
 
             if dispatch:
@@ -41,6 +42,8 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
 
         else:
             print("Not Found")
+
+
 
     def create_connection(self, connection, unique_id = -1):
         new = ConnectionDescriptor(connection.input_field, connection.output_field,
@@ -110,11 +113,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
             node = NodeDescriptor().deserialize(n, self.project)
             node.set_project(self.project)
             self.add_node(node)
-            # pos = QPoint(n['pos'][0] * node_editor.scale, n['pos'][1] * node_editor.scale)
-            # node.scale(node_editor.scale)
-            # node.node_pos = pos
 
-            # node.move(pos)
 
         for c in connections:
             conn = ConnectionDescriptor().deserialize(c, self.project)
@@ -212,7 +211,7 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
         return self
 
     def delete(self):
-        self.node_script.remove_node(self)
+        self.node_script.remove_node(self, True)
 
 
 

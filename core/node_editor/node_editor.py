@@ -48,7 +48,6 @@ class ScriptExecutor(QRunnable):
             print("Script Executor Failed")
             print(e)
             print("")
-            raise e
 
             res = False
 
@@ -644,6 +643,7 @@ class Node(QWidget, IHasName):
                     # IF has Connected Nodes, execute those
                     if p.connection is not None:
                         pin_id = p.connection.connection_object.input_pin_id - p.connection.input_field.node.n_input_fields
+                        print(pin_id)
                         args.append(p.connection.input_field.node.perform(project, perform_loop_nodes)[pin_id])
                     # ELSE return default value
                     else:
@@ -713,9 +713,11 @@ class Node(QWidget, IHasName):
     def get_connections(self):
         conns = []
         for f in self.fields:
+            # if it is an Input field it can only have one input
             if isinstance(f, InputField):
                 if f.connection:
                     conns.append(f.connection)
+            # Else it may have several
             else:
                 conns.extend(f.connections)
         return conns
