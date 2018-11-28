@@ -360,7 +360,6 @@ class MatrixPlot(EGraphicsView, IVIANVisualization):
                     lbl.signals.onEnter.connect(self.on_enter_text)
                     lbl.signals.onLeave.connect(self.on_leave_text)
 
-
                 lbl = VIANTextGraphicsItem(names[x], f)
                 self.scene().addItem(lbl)
                 # lbl = self.scene().addText(names[x], f)

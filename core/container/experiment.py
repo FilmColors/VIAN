@@ -564,6 +564,7 @@ class Experiment(IProjectContainer, IHasName):
                     curr_correlations = []
                     curr_classifyable = res[0]
                 curr_correlations.append(res)
+            matrix /= np.amax(matrix)
             return keywords, matrix
 
     def get_vocabularies(self):

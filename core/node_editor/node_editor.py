@@ -10,7 +10,6 @@ from core.gui.ewidgetbase import EDockWidget
 from core.data.interfaces import *
 from core.data.computation import tuple2point
 
-
 import json
 NODETYPE_INPUT_NODE = 0
 NODETYPE_OUTPUT_NODE = 1

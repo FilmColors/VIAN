@@ -80,7 +80,10 @@ class CorrelationBarplot(BarPlot):
         self.features = []
         self.matrix = None
 
+        # All features to compare with
         self.active_features = []
+
+        # The feature that is currently of interest
         self.current_feature = None
 
     def set_data(self, features:List[CorrelationFeatureTuple], matrix):
@@ -103,6 +106,7 @@ class CorrelationBarplot(BarPlot):
         if self.current_feature is not None and self.matrix is not None:
             row = self.current_feature.id
             for f in self.active_features:
+                print(f.id, row)
                 b = self.add_bar(f.name, self.matrix[row][f.id])
         self.frame_default()
 
@@ -161,12 +165,12 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
 
         self.active_features = []
         for i, f in enumerate(features):
-            self.active_features.append(CorrelationFeatureTuple(f.name, f.voc_name, f.class_obj, i))
+            self.active_features.append(f)
 
         sub_mat = np.zeros(shape=(len(self.active_features), len(self.active_features)))
-        for x in self.active_features:
-            for y in self.active_features:
-                sub_mat[x.id, y.id] = self.correlation_matrix[x.id, y.id]
+        for i, x in enumerate(self.active_features):
+            for j, y in enumerate(self.active_features):
+                sub_mat[i, j] = self.correlation_matrix[x.id, y.id]
 
         names = [f.name + f.voc_name + f.class_obj for f in self.active_features]
         if len(names) > 500:
