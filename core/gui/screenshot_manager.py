@@ -59,7 +59,7 @@ class SMSegment(object):
         self.scr_caption_offset = QPoint(0,0)
 
 
-class ScreenshotsManagerDockWidget(EDockWidget):
+class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Screenshot Manager")
@@ -112,12 +112,15 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.a_colordt_view.triggered.connect(partial(self.visualization_changed, "Color-dT"))
 
         self.inner.resize(400, self.height())
-        self.stack = None
+        self.tab = None
         self.ab_view = None
         self.color_dt = None
         self.slider_image_size = None
         self.lbl_slider_size = None
         self.screenshot_manager = None
+
+        self.color_dt_mode = "Saturation"
+        self.ab_view_mean_cache = dict()
 
         # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
@@ -156,7 +159,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         if type == "Row-Column":
             self.a_ab_view.setChecked(False)
             self.a_colordt_view.setChecked(False)
-            self.stack.setCurrentIndex(0)
+            self.tab.setCurrentIndex(0)
             self.lbl_slider.setText("N-Columns")
             self.slider_image_size.setVisible(False)
             self.lbl_slider_size.setVisible(False)
@@ -164,7 +167,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         elif type == "AB-Plane":
             self.a_row_column.setChecked(False)
             self.a_colordt_view.setChecked(False)
-            self.stack.setCurrentIndex(1)
+            self.tab.setCurrentIndex(1)
             self.lbl_slider.setText("Scale")
             self.slider_image_size.setVisible(True)
             self.lbl_slider_size.setVisible(True)
@@ -172,7 +175,7 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         elif type == "Color-dT":
             self.a_row_column.setChecked(False)
             self.a_ab_view.setChecked(False)
-            self.stack.setCurrentIndex(2)
+            self.tab.setCurrentIndex(2)
             self.lbl_slider.setText("Scale")
             self.slider_image_size.setVisible(True)
             self.lbl_slider_size.setVisible(True)
@@ -212,38 +215,36 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.bar_row_column = bar
 
     def set_manager(self, screenshot_manager):
-        self.stack = QStackedWidget(self.inner)
-        self.stack.addWidget(screenshot_manager)
+        self.tab = QTabWidget(self.inner)
+        self.tab.addTab(screenshot_manager, "Screenshot Manager")
 
-        self.ab_view = ImagePlotCircular(self.stack)
+        self.ab_view = ImagePlotCircular(self.tab)
         self.ab_ctrls = self.ab_view.get_param_widget()
-        w = QWidget(self.stack)
+        w = QWidget(self.tab)
         w.setLayout(QVBoxLayout())
         w.layout().addWidget(self.ab_view)
         w.layout().addWidget(ExpandableWidget(w, "Plot Controls", self.ab_ctrls))
-        self.stack.addWidget(w)
+        self.tab.addTab(w, "AB-Plane")
 
-        self.color_dt = ImagePlotTime(self.stack)
+        self.color_dt = ImagePlotTime(self.tab)
         self.color_dt_ctrls = self.color_dt.get_param_widget()
         hl4 = QHBoxLayout(self.color_dt_ctrls)
         hl4.addWidget(QLabel("Channel:", self.color_dt_ctrls))
         self.color_dt_ctrls.layout().addItem(hl4)
         cbox_channel = QComboBox(self.color_dt_ctrls)
         cbox_channel.addItems(["Saturation", "Hue", "Chroma", "Luminance", "A", "B"])
-        cbox_channel.currentTextChanged.connect(screenshot_manager.color_dt_mode_changed)
+        cbox_channel.currentTextChanged.connect(self.color_dt_mode_changed)
         hl4.addWidget(cbox_channel)
 
         w2 = QWidget()
         w2.setLayout(QVBoxLayout())
         w2.layout().addWidget(self.color_dt)
         w2.layout().addWidget(ExpandableWidget(w2, "Plot Controls", self.color_dt_ctrls))
-        self.stack.addWidget(w2)
+        self.tab.addTab(w2, "Color-dt")
 
-        self.setWidget(self.stack)
+        self.setWidget(self.tab)
 
         self.screenshot_manager = screenshot_manager
-        self.screenshot_manager.ab_view = self.ab_view
-        self.screenshot_manager.color_dt = self.color_dt
         self.create_bottom_bar()
 
         self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
@@ -270,6 +271,83 @@ class ScreenshotsManagerDockWidget(EDockWidget):
         self.ab_view.set_image_scale(self.slider_image_size.value())
         self.color_dt.set_image_scale(self.slider_image_size.value())
 
+    def color_dt_mode_changed(self, v):
+        self.color_dt_mode = v
+        self.draw_visualizations()
+
+    def remove_screenshot(self, scr):
+        pass
+
+    def on_loaded(self, project:VIANProject):
+        project.onScreenshotGroupAdded.connect(self.connect_scr_group)
+        for grp in project.screenshot_groups:
+            self.connect_scr_group(grp)
+            for scr in grp.screenshots:
+                self.add_screenshot(scr)
+
+
+    def connect_scr_group(self, grp):
+        grp.onScreenshotAdded.connect(self.add_screenshot)
+
+    @pyqtSlot(object)
+    def add_screenshot(self, scr:Screenshot):
+        scr.onImageSet.connect(self.update_screenshot)
+        self.update_screenshot(scr)
+
+    @pyqtSlot(object, object, object)
+    def update_screenshot(self, scr, ndarray=None, pixmap=None):
+        clobj = self.main_window.project.active_classification_object
+        if clobj is None:
+            try:
+                a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)["default"][0].get_adata()
+            except:
+                a = None
+        else:
+            a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
+        if a is None:
+            return
+        x = scr.movie_timestamp
+        sat = a['saturation_p']
+        lab = a['color_lab']
+        lch = lab_to_lch(lab)
+
+        if self.color_dt_mode == "Saturation":
+            y = sat * 100
+        elif self.color_dt_mode == "Luminance":
+            y = lab[0]
+        elif self.color_dt_mode == "Chroma":
+            y = lch[1]
+        elif self.color_dt_mode == "A":
+            y = lab[1] / 255 * 100
+        elif self.color_dt_mode == "B":
+            y = lab[2] / 255 * 100
+        elif self.color_dt_mode == "Hue":
+            y = lch[2] / (2 * np.pi) * 100
+        else:
+            y = sat
+
+        if pixmap is None:
+            ndarray = scr.get_img_movie(ignore_cl_obj=False)
+            if ndarray.shape[2] == 3:
+                pixmap = numpy_to_pixmap(ndarray)
+            else:
+                 pixmap = numpy_to_pixmap(ndarray, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
+
+        exists = self.color_dt.update_item(scr.unique_id, [x, y], pixmap)
+        if not exists:
+            self.color_dt.add_image(x,
+                                    y,
+                                    ndarray,
+                                    index_id=scr.unique_id,
+                                    convert=False)
+        exists = self.ab_view.update_item(scr.unique_id, [128 - lab[1], 128 - lab[2]], pixmap)
+        if not exists:
+            self.ab_view.add_image(128 - lab[1],
+                                   128 - lab[2],
+                                   ndarray,
+                                   to_float=True,
+                                   convert=False,
+                                   uid=scr.unique_id)
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
@@ -339,11 +417,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         # self.setBaseSize(500,500)
         self.rubberBandChanged.connect(self.rubber_band_selection)
 
-        self.ab_view = ab_view
-        self.color_dt = color_dt_view
-        self.ab_view_mean_cache = dict()
         self.qimage_cache = dict()
-        self.color_dt_mode = "Saturation"
 
     def set_loading(self, state):
         if state:
@@ -715,9 +789,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.project = project
         self.update_manager()
 
-        if self.ab_view is not None:
-            self.ab_view.scene().clear()
-
     def on_changed(self, project, item):
         if item is not None and item.get_type() not in [SEGMENT, SEGMENTATION, SCREENSHOT, SCREENSHOT_GROUP]:
             return
@@ -729,88 +800,14 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.frame_segment(self.current_segment_index)
         else:
             self.center_images()
-        self.draw_visualizations()
-
-    def color_dt_mode_changed(self, v):
-        self.color_dt_mode = v
-        self.draw_visualizations()
 
     @QtCore.pyqtSlot(object)
     def on_classification_object_changed(self):
         self.draw_visualizations(clear = True)
 
-    def draw_visualizations(self, clear = False):
-        if self.ab_view is not None and self.color_dt is not None:
-            self.ab_view.clear_view()
-            self.ab_view.add_grid()
-            new_cache = dict()
-
-            self.ab_view_mean_cache = new_cache
-            cl_obj = self.project.active_classification_object
-            if cl_obj is None:
-                if len(self.project.experiments) > 0:
-                    cl_obj = self.project.experiments[0].get_classification_object_by_name("Global")
-                if cl_obj is None:
-                    cl_obj = "default"
-
-            if self.color_dt.isVisible():
-                if clear:
-                    self.color_dt.clear_view()
-                    self.color_dt.add_grid()
-                for s in self.project.screenshots:
-                    try:
-                        a = s.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[cl_obj][0].get_adata()
-                        x = s.movie_timestamp
-
-                        sat = a['saturation_p']
-                        lab = a['color_lab']
-                        lch = lab_to_lch(lab)
-
-                        if self.color_dt_mode == "Saturation":
-                            y = sat * 100
-                        elif self.color_dt_mode == "Luminance":
-                            y = lab[0]
-                        elif self.color_dt_mode == "Chroma":
-                            y = lch[1]
-                        elif self.color_dt_mode == "A":
-                            y = lab[1] / 255 * 100
-                        elif self.color_dt_mode == "B":
-                            y = lab[2] / 255 * 100
-                        elif self.color_dt_mode == "Hue":
-                            y = lch[2] / (2*np.pi) * 100
-                        else:
-                            y = sat
-                        exists = self.color_dt.set_item_values(s.unique_id, [x, y])
-                        if not exists:
-                            self.color_dt.add_image(x,
-                                                    y,
-                                                    s.get_img_movie(ignore_cl_obj=False),
-                                                    index_id=s.unique_id,
-                                                    convert = False)
-                    except Exception as e:
-                        continue
-                self.color_dt.update_position()
-
-            elif self.ab_view.isVisible():
-                for s in self.project.screenshots:
-                    try:
-                        a = s.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[cl_obj][0].get_adata()
-                        lab = a['color_lab']
-
-                        self.ab_view.add_image(128 - lab[1],
-                                               128 - lab[2],
-                                               s.get_img_movie(ignore_cl_obj=False),
-                                               to_float=True, convert=False)
-                    except:
-                        continue
-
     def on_closed(self):
         self.clear_manager()
         self.setEnabled(False)
-        if self.ab_view is not None:
-            self.ab_view.scene().clear()
-        if self.color_dt is not None:
-            self.color_dt.clear_view()
 
     def on_selected(self, sender, selected):
         if selected is None:

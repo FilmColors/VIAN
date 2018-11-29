@@ -157,10 +157,14 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             self.onImageSet.emit(self, result, numpy_to_pixmap(result, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
         return result
 
-
     def get_img_movie(self, ignore_cl_obj = False):
-        # If the CL obje should be igrnoer there is none or it has no semantic-segmentation:
-        return self.img_movie
+        if not ignore_cl_obj:
+            try:
+                return self.masked_cache[self.project.active_classification_object.unique_id]
+            except:
+                return self.img_movie
+        else:
+            return self.img_movie
 
     def set_img_movie(self, img):
         self.img_movie = img

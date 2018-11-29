@@ -55,6 +55,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
 
         self.add_grid()
         self.create_title()
+        self.item_idx = dict()
 
         # self.tipp_label = self.scene().addText("Use F to Focus the complete Plot\nUse Ctrl/Cmd and Wheel to Zoom")
         # self.tipp_label.setFlag(QGraphicsItem.ItemIgnoresTransformations)
@@ -67,7 +68,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         #                  (range_x[1] - range_x[0]) * self.magnification/ 12,
         #                  (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
 
-    def add_image(self, x, y, img, convert = True, luminance = None, mime_data = None, z = 0):
+    def add_image(self, x, y, img, convert = True, luminance = None, mime_data = None, z = 0, uid = None):
         pass
 
     def sort_images(self):
@@ -88,6 +89,15 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
     def add_controls(self, ctrl):
         self.controls_itm = self.scene().addWidget(ctrl)
         self.controls_itm.show()
+
+    def update_item(self, uid, pos, pixmap = None):
+        if uid in self.item_idx:
+            itm = self.item_idx[uid]
+            if pixmap is not None:
+                itm.setPixmap(pixmap)
+            itm.setPos(pos[0], pos[1])
+            return True
+        return False
 
     def set_image_scale(self, scale):
         for img in self.images:
@@ -283,6 +293,10 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
         # self.hovered = False
 
+    def setPixmap(self, pixmap: QtGui.QPixmap):
+        super(VIANPixmapGraphicsItem, self).setPixmap(pixmap)
+        self.pixmap = pixmap
+
     def scale_pos(self, scale, scale_y = None):
         if scale_y is None:
             self.pos_scale = scale
@@ -315,8 +329,9 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
+        self.to_float = False
 
-    def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None, z = 0):
+    def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None, z = 0, uid = None):
         try:
             if convert:
                 # itm = QGraphicsPixmapItem(numpy_to_pixmap(img))
@@ -326,6 +341,7 @@ class ImagePlotCircular(ImagePlot):
                 itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True), mime_data=mime_data)
             self.scene().addItem(itm)
 
+            self.to_float = to_float
             if to_float:
                 itm.setPos(np.nan_to_num(-1.0 * (x -128) * self.magnification),np.nan_to_num(1.0 * (y -128) * self.magnification))
             else:
@@ -338,6 +354,11 @@ class ImagePlotCircular(ImagePlot):
             itm.signals.onItemSelection.connect(self.onImageClicked.emit)
             self.images.append(itm)
 
+            if uid is not None:
+                if uid in self.item_idx:
+                    self.scene().removeItem(self.item_idx[uid][0])
+                self.item_idx[uid] = (itm)
+
             if luminance is not None:
                 self.luminances.append([luminance, itm])
 
@@ -347,6 +368,22 @@ class ImagePlotCircular(ImagePlot):
         except Exception as e:
             print(e)
             return None
+
+    def update_item(self, uid, pos, pixmap = None):
+        if uid in self.item_idx:
+            itm = self.item_idx[uid]
+            x = pos[0]
+            y = pos[1]
+            if pixmap is not None:
+                itm.setPixmap(pixmap)
+            if self.to_float:
+                itm.setPos(np.nan_to_num(-1.0 * (x - 128) * self.magnification),
+                           np.nan_to_num(1.0 * (y - 128) * self.magnification))
+            else:
+                itm.setPos(np.nan_to_num(-1.0 * (x * self.magnification)),
+                           np.nan_to_num(1.0 * (y * self.magnification)))
+            return True
+        return False
 
     def add_grid(self):
         pen = QPen()
@@ -433,7 +470,7 @@ class ImagePlotPlane(ImagePlot):
         super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
 
 
-    def add_image(self, x, y, img, convert = True, mime_data = None, z = 0):
+    def add_image(self, x, y, img, convert = True, mime_data = None, z = 0, uid=None):
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img), mime_data=mime_data)
         else:
@@ -447,6 +484,10 @@ class ImagePlotPlane(ImagePlot):
         itm.signals.onItemSelection.connect(self.onImageClicked.emit)
 
         self.luminances.append([y, itm])
+        if uid is not None:
+            if uid in self.item_idx:
+                self.scene().removeItem(self.item_idx[uid][0])
+            self.item_idx[uid] = (itm)
 
         itm.show()
         return itm
@@ -682,7 +723,6 @@ class ImagePlotTime(ImagePlot):
         self.base_line = 1000
         self.x_end = 0
         self.lines = []
-        self.item_idx = dict()
 
         self.pixel_size_x = 1500
         self.pixel_size_y = 800
@@ -709,6 +749,7 @@ class ImagePlotTime(ImagePlot):
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, index_id = None):
         timestamp = ms_to_string(x)
+
         # y = np.log10(y + 1.0)
         # y *= 10
         if convert:
@@ -732,6 +773,8 @@ class ImagePlotTime(ImagePlot):
         itm.show()
 
         if index_id is not None:
+            if index_id in self.item_idx:
+                self.scene().removeItem(self.item_idx[index_id][0])
             self.item_idx[index_id] = (itm, len(self.images) - 1)
 
         # self.set_x_scale(self.x_scale)
@@ -740,12 +783,18 @@ class ImagePlotTime(ImagePlot):
         self.update_position()
         return itm
 
-    def set_item_values(self, uid, values):
+    def update_item(self, uid, values, pixmap = None):
         if uid in self.item_idx:
-            idx = self.item_idx[uid][1]
+            tpl = self.item_idx[uid]
+            idx = tpl[1]
+            itm = tpl[0]
             self.values[idx] = values
+            x, y = values[0], values[1]
+            if pixmap is not None:
+                itm.setPixmap(pixmap)
+            itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num(
+                (self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
             return True
-
         return False
 
     def clear_view(self):
@@ -785,11 +834,11 @@ class ImagePlotTime(ImagePlot):
         self.update_position()
 
     def set_y_scale(self, value):
-        self.y_scale = value * 2
+        self.y_scale = value * 0.01
         self.update_position()
     
     def set_image_scale(self, scale):
-        scale = scale / 500
+        scale = scale / 100
         self.img_scale = scale
         super(ImagePlotTime, self).set_image_scale(scale)
     
@@ -815,16 +864,16 @@ class ImagePlotTime(ImagePlot):
 
         slider_imagescale = QSlider(Qt.Horizontal, w)
         slider_imagescale.setRange(1, 2000)
-        slider_imagescale.setValue(self.x_scale)
         slider_imagescale.valueChanged.connect(self.set_image_scale)
         slider_yscale = QSlider(Qt.Horizontal, w)
         slider_yscale.setRange(1, 2000)
-        slider_imagescale.setValue(self.y_scale)
         slider_yscale.valueChanged.connect(self.set_y_scale)
+
 
         slider_xscale = QSlider(Qt.Horizontal, w)
         slider_xscale.setRange(1, 2000)
         slider_xscale.valueChanged.connect(self.set_x_scale)
+
 
         hl1.addWidget(slider_imagescale)
         hl2.addWidget(slider_yscale)
@@ -851,6 +900,9 @@ class ImagePlotTime(ImagePlot):
         slider_xscale.valueChanged.connect(x_scale_line.setValue)
         hl3.addWidget(x_scale_line)
 
+        slider_imagescale.setValue(200)
+        slider_xscale.setValue(600)
+        slider_yscale.setValue(600)
 
 
 

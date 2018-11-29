@@ -264,7 +264,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def set_active_classification_object(self, cl_obj):
         self.active_classification_object = cl_obj
-        # self.dispatch_changed(item=self)
 
     #region Segmentation
     def create_segmentation(self, name = None, dispatch = True):

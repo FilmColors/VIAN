@@ -111,6 +111,11 @@ class IProjectContainer(QObject):
                 cl_obj =  t.target_classification_object
                 if cl_obj is None:
                     cl_obj = "default"
+                if cl_obj.name == "Global":
+                    if "default" not in result:
+                        result["default"] = []
+                    result["default"].append(t)
+
                 if cl_obj not in result:
                     result[cl_obj] = []
                 result[cl_obj].append(t)
@@ -118,7 +123,6 @@ class IProjectContainer(QObject):
 
         else:
             return to_return
-
 
     def delete(self):
         print("Not Implemented in ", self)

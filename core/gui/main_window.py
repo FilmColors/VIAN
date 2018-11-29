@@ -421,6 +421,7 @@ class MainWindow(QtWidgets.QMainWindow):
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
                                     self.drawing_overlay,
+                                    self.screenshots_manager_dock,
                                     self.screenshots_manager,
                                     self.outliner,
                                     self.timeline.timeline,
@@ -1487,6 +1488,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Unload the analysis from Memory
 
     def on_classification_object_changed(self, cl_obj):
+        self.project.set_active_classification_object(cl_obj)
         job = ClassificationObjectChangedJob(self.project, self.project.hdf5_manager, cl_obj)
         self.run_job_concurrent(job)
 
