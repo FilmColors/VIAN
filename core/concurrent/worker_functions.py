@@ -133,51 +133,63 @@ class LoadScreenshotsJob(IConcurrentJob):
 
     If the annotated fails, it will be reset to None.
     """
-    def run_concurrent(self, args, sign_progress):
-        movie_path = args[0]
-        locations = args[1]
-        annotation_dicts = args[2]
-
+    def run_concurrent(self, project, sign_progress):
+        # [self.project.movie_descriptor.get_movie_path(), screenshot_position, screenshot_annotation_dicts]
+        # for s in self.project.screenshots:
+        #     screenshot_position.append(s.frame_pos)
+        #     a_dicts = []
+        #     if s.annotation_item_ids is not None:
+        #         for a_id in s.annotation_item_ids:
+        #             annotation_dict = self.project.get_by_id(a_id)
+        #             if annotation_dict is not None:
+        #                 a_dicts.append(annotation_dict.serialize())
+        #
+        #     screenshot_annotation_dicts.append(a_dicts)
+        movie_path = project.movie_descriptor.get_movie_path()
         video_capture = cv2.VideoCapture(movie_path)
-        screenshots = []
-        annotations = []
-        for i,frame_pos in enumerate(locations):
+        for i, scr in enumerate(project.screenshots): #type: Screenshot
             if self.aborted:
                 break
 
-            sign_progress(float(i)/len(locations))
+            sign_progress(float(i)/len(project.screenshots))
 
-            video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
+            video_capture.set(cv2.CAP_PROP_POS_FRAMES, scr.frame_pos)
             ret, frame = video_capture.read()
-            if len(annotation_dicts[i]) > 0:
-                annotation = render_annotations(frame, annotation_dicts[i])
+            a_dicts = []
+            if scr.annotation_item_ids is not None:
+                for a_id in scr.annotation_item_ids:
+                    annotation_dict = project.get_by_id(a_id)
+                    if annotation_dict is not None:
+                        a_dicts.append(annotation_dict.serialize())
+            if len(a_dicts) > 0:
+                annotation = render_annotations(frame, a_dicts[i])
                 if annotation is not None:
                     annotation = annotation.astype(np.uint8)
             else:
                 annotation = None
 
-            screenshots.append(frame)
-            annotations.append(annotation)
+            scr.set_img_movie(frame)
+            scr.img_blend = annotation
 
-        return [screenshots, annotations]
+        return None
 
     def modify_project(self, project, result, sign_progress = None, main_window = None):
-        images = result[0]
-        annotations = result[1]
-
-        for i, img in enumerate(images):
-            # sign_progress(int(float(i) / len(images) * 100))
-            if img is None:
-                break
-
-            project.screenshots[i].set_img_movie(img.astype(np.uint8))
-            project.screenshots[i].img_blend = annotations[i]
-
-            # project.screenshots[i].to_stream(project)
-
-            project.dispatch_changed()
-
-        # sign_progress(100)
+        # images = result[0]
+        # annotations = result[1]
+        #
+        # for i, img in enumerate(images):
+        #     # sign_progress(int(float(i) / len(images) * 100))
+        #     if img is None:
+        #         break
+        #
+        #     project.screenshots[i].set_img_movie(img.astype(np.uint8))
+        #     project.screenshots[i].img_blend = annotations[i]
+        #
+        #     # project.screenshots[i].to_stream(project)
+        #
+        #     project.dispatch_changed()
+        #
+        # # sign_progress(100)
 
         project.main_window.screenshots_manager.set_loading(False)
 
