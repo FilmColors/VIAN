@@ -32,6 +32,8 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.pos_scale = 1.0
         self.img_scale = 1.0
 
+        self.grid = []
+
         self.setBackgroundBrush(QColor(30, 30, 30))
         self.setScene(QGraphicsScene(self))
         self.ctrl_is_pressed = False
@@ -56,6 +58,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.add_grid()
         self.create_title()
         self.item_idx = dict()
+
 
         # self.tipp_label = self.scene().addText("Use F to Focus the complete Plot\nUse Ctrl/Cmd and Wheel to Zoom")
         # self.tipp_label.setFlag(QGraphicsItem.ItemIgnoresTransformations)
@@ -191,6 +194,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.images.clear()
         self.luminances.clear()
         self.raw_data = []
+        self.grid = []
 
     def frame_default(self):
         # self.tipp_label.setPos(QPointF())
@@ -478,7 +482,10 @@ class ImagePlotPlane(ImagePlot):
         self.scene().addItem(itm)
 
         self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
-        itm.setPos(np.nan_to_num(x * self.magnification),np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification))
+        x, z = rotate((0, 0), (x, y), self.curr_angle)
+
+        itm.setPos(np.nan_to_num(x * self.curr_scale * self.magnification),
+                   np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification * self.curr_scale))
         self.images.append(itm)
         itm.setZValue(z)
         itm.signals.onItemSelection.connect(self.onImageClicked.emit)
@@ -487,19 +494,37 @@ class ImagePlotPlane(ImagePlot):
         if uid is not None:
             if uid in self.item_idx:
                 self.scene().removeItem(self.item_idx[uid][0])
-            self.item_idx[uid] = (itm)
+            self.item_idx[uid] = (itm, len(self.images) - 1)
 
         itm.show()
         return itm
 
+    def update_item(self, uid, pos, pixmap = None):
+        if uid in self.item_idx:
+            itm, idx = self.item_idx[uid]
+            x = pos[0]
+            y = pos[1]
+            z = pos[2]
+            raw = self.raw_data[idx]
+            self.raw_data[idx] = ImagePlotRawData(x=x, y=y, z=z,image=raw.image, mime_data=raw.mime_data)
+            x, z = rotate((0, 0), (x, z), self.curr_angle)
+            itm.setPos(np.nan_to_num(x * self.magnification) * self.curr_scale,
+                                    np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification * self.curr_scale))
+            itm.setZValue(z)
+            if pixmap is not None:
+                itm.setPixmap(pixmap)
+            return True
+        return False
+
     def draw_compass(self):
+        if self.compass is not None:
+            return
         m = self.magnification
         p = QPen()
         p.setColor(QColor(100,100,100,200))
         p.setWidth(0.1)
         f = QFont()
         f.setPointSize(5* m)
-
 
         path = QPainterPath(QPointF(0,0))
         path.addEllipse(QRectF(95 * m,95* m,30* m,30* m))
@@ -518,6 +543,16 @@ class ImagePlotPlane(ImagePlot):
         t.rotate(self.curr_angle)
         t.translate(x, y)
 
+    def set_scale(self, v):
+        self.curr_scale = v / 200
+        for idx, itm in enumerate(self.raw_data):
+            x, z = rotate((0, 0), (itm.x, itm.z), self.curr_angle)
+            self.images[idx].setPos(np.nan_to_num(x * self.magnification) * self.curr_scale,
+                                    np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification * self.curr_scale))
+            self.images[idx].setZValue(z)
+        self.add_grid()
+
+
     def rotate_view(self, angle_rad):
         angle = (angle_rad / 360 * np.pi) * 2
         self.curr_angle = angle_rad
@@ -525,7 +560,8 @@ class ImagePlotPlane(ImagePlot):
         for idx, itm in enumerate(self.raw_data):
             x,z = rotate((0,0), (itm.x, itm.z), angle)
             try:
-                self.images[idx].setPos(np.nan_to_num(x * self.magnification), np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification))
+                self.images[idx].setPos(np.nan_to_num(x * self.magnification * self.curr_scale),
+                                        np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification * self.curr_scale))
                 self.images[idx].setZValue(z)
             except: continue
 
@@ -537,6 +573,8 @@ class ImagePlotPlane(ImagePlot):
         self.compass.setTransform(t)
 
     def add_grid(self):
+        for itm in self.grid:
+            self.scene().removeItem(itm)
         pen = QPen()
         pen.setWidth(10)
         pen.setColor(QColor(200, 200, 200, 150))
@@ -550,28 +588,31 @@ class ImagePlotPlane(ImagePlot):
         y1 = self.range_y[1] * self.magnification
         for x in range(self.range_x[0] * self.magnification, self.range_x[1] * self.magnification, 1):
             if x % (20 * self.magnification) == 0:
-                self.scene().addLine(x, y0, x, y1, pen)
+                l = self.scene().addLine(x, y0, x, y1, pen)
 
-                text = self.scene().addText(str(round((x / self.magnification), 0)), font)
+                text = self.scene().addText(str(round((x / (self.magnification * self.curr_scale)), 0)), font)
                 text.setPos(x, self.range_y[1] * self.magnification)
                 text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                self.grid.append(l)
+                self.grid.append(text)
 
 
         for x in range(self.range_y[0] * self.magnification, self.range_y[1] * self.magnification, 1):
             if x % (20 * self.magnification) == 0:
-                self.scene().addLine(x0, x, x1, x, pen)
+                l = self.scene().addLine(x0, x, x1, x, pen)
 
-                text = self.scene().addText(str(round(((self.range_y[1] * self.magnification - x) / self.magnification), 0)), font)
+                text = self.scene().addText(str(round(((self.range_y[1] * self.magnification - x) / (self.magnification * self.curr_scale)), 0)), font)
                 text.setPos(self.range_x[0] * self.magnification, x)
                 text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                self.grid.append(l)
+                self.grid.append(text)
 
         self.draw_compass()
 
     def get_param_widget(self):
         w = QWidget()
         w.setLayout(QVBoxLayout())
-        # hl1 = QHBoxLayout(w)
-        # hl1.addWidget(QLabel("Range Scale:", w))
+
         # hl2 = QHBoxLayout(w)
         # hl2.addWidget(QLabel("Image Scale:", w))
         hl3 = QHBoxLayout(w)
@@ -589,20 +630,18 @@ class ImagePlotPlane(ImagePlot):
         slider_angle = QSlider(Qt.Horizontal, w)
         slider_angle.setRange(0, 360)
 
-        # hl1.addWidget(slider_xscale)
-        # x_scale_line = QSpinBox(w)
-        # x_scale_line.setRange(1, 1000)
-        # x_scale_line.setValue(100)
-        # x_scale_line.valueChanged.connect(slider_xscale.setValue)
-        # slider_xscale.valueChanged.connect(x_scale_line.setValue)
-        # hl1.addWidget(x_scale_line)
-        #
-        # hl2.addWidget(slider_yscale)
-        # y_scale_line = QSpinBox(w)
-        # y_scale_line.setRange(1, 1000)
-        # y_scale_line.setValue(100)
-        # y_scale_line.valueChanged.connect(slider_yscale.setValue)
-        # slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        hl1 = QHBoxLayout(w)
+        hl1.addWidget(QLabel("Scale:", w))
+        slider_xscale = QSlider(Qt.Horizontal, w)
+        slider_xscale.setRange(1, 1000)
+        hl1.addWidget(slider_xscale)
+        x_scale_line = QSpinBox(w)
+        x_scale_line.setRange(1, 1000)
+        x_scale_line.setValue(100)
+        x_scale_line.valueChanged.connect(slider_xscale.setValue)
+        slider_xscale.valueChanged.connect(x_scale_line.setValue)
+        slider_xscale.valueChanged.connect(self.set_scale)
+        hl1.addWidget(x_scale_line)
 
         # hl2.addWidget(y_scale_line)
         slider_angle.valueChanged.connect(self.rotate_view)
@@ -615,7 +654,7 @@ class ImagePlotPlane(ImagePlot):
         slider_angle.valueChanged.connect(angle_sp.setValue)
         hl3.addWidget(angle_sp)
 
-        # w.layout().addItem(hl1)
+        w.layout().addItem(hl1)
         # w.layout().addItem(hl2)
         w.layout().addItem(hl3)
 

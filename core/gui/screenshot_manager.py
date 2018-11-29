@@ -18,7 +18,7 @@ from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
-from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime
+from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime, ImagePlotPlane
 from core.analysis.color_feature_extractor import ColorFeatureAnalysis
 from core.gui.ewidgetbase import ExpandableWidget
 
@@ -95,25 +95,11 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.a_show_only_current.setChecked(False)
         self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
 
-        self.m_visualization = self.inner.menuBar().addMenu("Visualization")
-        self.a_row_column = self.m_visualization.addAction("Row-Column")
-        self.a_row_column.setCheckable(True)
-        self.a_row_column.setChecked(True)
-        self.a_row_column.triggered.connect(partial(self.visualization_changed, "Row-Column"))
-
-        self.a_ab_view = self.m_visualization.addAction("CIE-Lab Top View")
-        self.a_ab_view.setCheckable(True)
-        self.a_ab_view.setChecked(False)
-        self.a_ab_view.triggered.connect(partial(self.visualization_changed, "AB-Plane"))
-
-        self.a_colordt_view = self.m_visualization.addAction("Color-dT")
-        self.a_colordt_view.setCheckable(True)
-        self.a_colordt_view.setChecked(False)
-        self.a_colordt_view.triggered.connect(partial(self.visualization_changed, "Color-dT"))
 
         self.inner.resize(400, self.height())
         self.tab = None
         self.ab_view = None
+        self.lc_view = None
         self.color_dt = None
         self.slider_image_size = None
         self.lbl_slider_size = None
@@ -153,34 +139,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def on_follow_time(self):
         self.screenshot_manager.follow_time = self.a_follow_time.isChecked()
-
-    def visualization_changed(self, type):
-        self.curr_visualization = type
-        if type == "Row-Column":
-            self.a_ab_view.setChecked(False)
-            self.a_colordt_view.setChecked(False)
-            self.tab.setCurrentIndex(0)
-            self.lbl_slider.setText("N-Columns")
-            self.slider_image_size.setVisible(False)
-            self.lbl_slider_size.setVisible(False)
-            self.inner.statusBar().show()
-        elif type == "AB-Plane":
-            self.a_row_column.setChecked(False)
-            self.a_colordt_view.setChecked(False)
-            self.tab.setCurrentIndex(1)
-            self.lbl_slider.setText("Scale")
-            self.slider_image_size.setVisible(True)
-            self.lbl_slider_size.setVisible(True)
-            self.inner.statusBar().hide()
-        elif type == "Color-dT":
-            self.a_row_column.setChecked(False)
-            self.a_ab_view.setChecked(False)
-            self.tab.setCurrentIndex(2)
-            self.lbl_slider.setText("Scale")
-            self.slider_image_size.setVisible(True)
-            self.lbl_slider_size.setVisible(True)
-            self.inner.statusBar().hide()
-        self.main_window.dispatch_on_changed([self.main_window.screenshots_manager])
 
     def create_bottom_bar(self):
         bar = QStatusBar(self)
@@ -235,6 +193,14 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         cbox_channel.addItems(["Saturation", "Hue", "Chroma", "Luminance", "A", "B"])
         cbox_channel.currentTextChanged.connect(self.color_dt_mode_changed)
         hl4.addWidget(cbox_channel)
+
+        self.lc_view = ImagePlotPlane(self.tab, range_y=[0, 100])
+        self.color_lc_view = self.lc_view.get_param_widget()
+        w3 = QWidget()
+        w3.setLayout(QVBoxLayout())
+        w3.layout().addWidget(self.lc_view)
+        w3.layout().addWidget(ExpandableWidget(w3, "Plot Controls", self.color_lc_view))
+        self.tab.addTab(w3, "LC-Plane")
 
         w2 = QWidget()
         w2.setLayout(QVBoxLayout())
@@ -348,6 +314,14 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
                                    to_float=True,
                                    convert=False,
                                    uid=scr.unique_id)
+        exists = self.lc_view.update_item(scr.unique_id, [lab[1], lab[0], lab[2]], pixmap)
+        if not exists:
+            self.lc_view.add_image(lab[1],
+                                   lab[0],
+                                   ndarray,
+                                   convert=False,
+                                   uid=scr.unique_id,
+                                   z=lab[2])
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
