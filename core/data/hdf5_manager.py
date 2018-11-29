@@ -115,6 +115,8 @@ class HDF5Manager():
             raise IOError("HDF5 File not opened yet")
         if dataset_name not in self.h5_file:
             self.initialize_all()
+        if not dataset_name in self._index:
+            self._index[dataset_name] = 0
 
         pos = self._index[dataset_name]
         if pos > 0 and pos % DEFAULT_SIZE[0] == 0:
