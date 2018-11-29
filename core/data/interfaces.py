@@ -468,7 +468,7 @@ class IConcurrentJob():
         self.aborted = False
 
     def prepare(self, project):
-        self.args = self.args
+        pass
 
     def run_concurrent(self, args, sign_progress):
         print("run_concurrent not implemented by", self)

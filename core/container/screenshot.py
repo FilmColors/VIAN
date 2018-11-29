@@ -3,7 +3,7 @@ import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from core.data.interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
-from core.data.computation import numpy_to_qt_image, apply_mask
+from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from core.container.analysis import SemanticSegmentationAnalysisContainer
 
 from PyQt5.QtCore import pyqtSignal
@@ -28,7 +28,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     :var curr_size: The size of the loaded Image relative to it's original Size
     """
     onScreenshotChanged = pyqtSignal(object)
-    onImageSet = pyqtSignal(object, object)
+    onImageSet = pyqtSignal(object, object, object) # Screenshot, ndarray, QPixmap
 
     def __init__(self, title = "", image = None,
                  img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
@@ -54,7 +54,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.preview_cache = None
         self.curr_size = 1.0
 
-        self.hdf5_cache = dict()
+        self.masked_cache = dict()
 
     def to_stream(self, project = None):
         obj = dict(
@@ -130,32 +130,46 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         else:
             return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
-    def get_img_movie(self, ignore_cl_obj = False):
-        # If the CL obje should be igrnoer there is none or it has no semantic-segmentation:
-        if ignore_cl_obj or self.project.active_classification_object is None or self.project.active_classification_object.semantic_segmentation_labels[0] == "":
-            return self.img_movie
+    def set_classification_object(self, clobj, recompute = False):
+        if not recompute and clobj.unique_id in self.masked_cache:
+            result = self.masked_cache[clobj.unique_id]
+        elif clobj is None or clobj.semantic_segmentation_labels[0] == "":
+            result = self.img_movie
         else:
-            clobj = self.project.active_classification_object
+            result = None
             cached = self.project.main_window.hdf5_cache.get_screenshot(clobj.get_id(), self.unique_id)
             if cached is None:
                 a = self.get_semantic_segmentations(clobj.semantic_segmentation_labels[0])
                 lbls = clobj.semantic_segmentation_labels[1]
                 if len(clobj.semantic_segmentation_labels[0]) == len(lbls):
-                    return self.img_movie
+                    result = self.img_movie
                 if a is not None:
                     mask = a.get_adata()
                     masked = apply_mask(self.img_movie, mask, lbls)
                     h = CACHE_WIDTH / masked.shape[0] * masked.shape[1]
                     masked = cv2.resize(masked, (int(h), CACHE_WIDTH), interpolation=cv2.INTER_CUBIC)
                     self.project.main_window.hdf5_cache.dump_screenshot(clobj.get_id(), self.unique_id, masked)
-                    return apply_mask(self.img_movie, mask, lbls)
+                    result = masked
             else:
-                return cached
+                result = cached
+        if result is not None:
+            self.masked_cache[clobj.unique_id] = result
+            self.onImageSet.emit(self, result, numpy_to_pixmap(result, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
+        return result
+
+
+    def get_img_movie(self, ignore_cl_obj = False):
+        # If the CL obje should be igrnoer there is none or it has no semantic-segmentation:
         return self.img_movie
 
     def set_img_movie(self, img):
         self.img_movie = img
-        self.onImageSet.emit(self, self.img_movie)
+        if img is None:
+            return
+        if img.shape[2] == 3:
+            self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img))
+        elif img.shape[2] == 4:
+            self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
 
     def get_semantic_segmentations(self, dataset=None):
         """

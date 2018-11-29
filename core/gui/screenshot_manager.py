@@ -5,7 +5,7 @@ import time
 
 from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt, QPoint, QRectF
+from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
 from core.data.enums import *
@@ -21,6 +21,7 @@ from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
 from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime
 from core.analysis.color_feature_extractor import ColorFeatureAnalysis
 from core.gui.ewidgetbase import ExpandableWidget
+
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1
 SCALING_MODE_HEIGHT = 2
@@ -934,12 +935,18 @@ class ScreenshotsManagerScene(QGraphicsScene):
 
 
 class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
-    def __init__(self, qpixmap, manager, obj, selection_rect = QtCore.QRect(0,0,0,0)):
+    def __init__(self, qpixmap, manager, obj:Screenshot, selection_rect = QtCore.QRect(0,0,0,0)):
         super(ScreenshotManagerPixmapItems, self).__init__(qpixmap)
         self.manager = manager
         self.screenshot_obj = obj
+        self.screenshot_obj.onImageSet.connect(self.set_pixmap)
         self.selection_rect = selection_rect
         self.qpixmap = qpixmap
+
+    @pyqtSlot(object, object, object)
+    def set_pixmap(self, scr, ndarray, pixmap):
+        self.setPixmap(pixmap)
+        self.qpixmap = pixmap
 
     def mousePressEvent(self, *args, **kwargs):
         self.setSelected(True)

@@ -36,11 +36,9 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
                 idx_start = int(ms_to_frames(s.get_start(), project.movie_descriptor.fps) / project.colormetry_analysis.resolution)
                 idx_end = int(ms_to_frames(s.get_end(), project.movie_descriptor.fps) / project.colormetry_analysis.resolution)
                 indices = range(idx_start, idx_end, 1)
-                print(indices)
                 hists = hdf5_manager.col_histograms()[indices]
                 hists = np.reshape(hists, newshape=(hists.shape[0], hists.shape[1]* hists.shape[2] * hists.shape[3]))
                 hists /= np.sqrt(np.sum(hists ** 2, axis=1, keepdims=True))
-
                 result = select_rows(hists, np.clip(n, 1, hists.shape[0]))
 
                 frame_ms.extend([frame2ms((f + idx_start) * project.colormetry_analysis.resolution, project.movie_descriptor.fps) for f in result])

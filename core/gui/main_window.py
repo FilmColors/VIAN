@@ -20,6 +20,7 @@ from core.concurrent.auto_segmentation import *
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from core.concurrent.worker import MinimalThreadWorker
 from core.concurrent.worker_functions import *
+from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.corpus.client.corpus_client import CorpusClientToolBar, CorpusClient
 from core.corpus.shared.corpusdb import CorpusDB
 from core.corpus.shared.widgets import *
@@ -1484,6 +1485,10 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Exception in MainWindow.analysis_result", str(e))
         self.project.dispatch_changed(item=self.project)
         # Unload the analysis from Memory
+
+    def on_classification_object_changed(self, cl_obj):
+        job = ClassificationObjectChangedJob(self.project, self.project.hdf5_manager, cl_obj)
+        self.run_job_concurrent(job)
 
     def on_save_custom_perspective(self):
         setting = QSettings("UniversityOfZurich", "VIAN")
