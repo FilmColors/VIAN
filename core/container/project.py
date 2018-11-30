@@ -896,6 +896,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
+
         # Attempt to load the Vocabularies, this might fail if the save is from VIAN 0.1.1
         try:
             self.vocabularies = []
@@ -918,8 +919,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for c in my_dict['segmentation']:
             new = Segmentation().deserialize(c, self)
             self.add_segmentation(new)
-
-
 
         try:
             old = self.screenshot_groups

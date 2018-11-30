@@ -239,7 +239,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def color_dt_mode_changed(self, v):
         self.color_dt_mode = v
-        self.draw_visualizations()
+        # self.draw_visualizations()
 
     def remove_screenshot(self, scr):
         pass
@@ -470,6 +470,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 else:
                     image = s.get_img_movie()
 
+                if image is None:
+                    continue
                 # Convert to Pixmap
                 # Cache the converted QPixamps if these are not the initial place holders
                 if image.shape[0] > 100:
