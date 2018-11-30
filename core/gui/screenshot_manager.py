@@ -95,7 +95,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.a_show_only_current.setChecked(False)
         self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
 
-
         self.inner.resize(400, self.height())
         self.tab = None
         self.ab_view = None
@@ -239,7 +238,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def color_dt_mode_changed(self, v):
         self.color_dt_mode = v
-        # self.draw_visualizations()
+        self.draw_visualizations()
 
     def remove_screenshot(self, scr):
         pass
@@ -271,7 +270,8 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         else:
             try:
                 a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
-            except:
+            except Exception as e:
+                print(e)
                 a = None
 
         if a is None:

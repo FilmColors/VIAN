@@ -283,13 +283,6 @@ class OutlinerTreeWidget(QTreeWidget):
 
         self.header().close()
 
-    # def on_clicked(self, QModelIndex):
-    #     self.itemFromIndex(QModelIndex).setSelected(True)
-    # #     self.select([self.itemFromIndex(QModelIndex)], dispatch=True)
-    #     # if self.currentItem().has_item:
-    #     #     self.project.set_selected(self.outliner, self.currentItem().get_container())
-    #     #     self.has_performed_selection = True
-
     def on_doubleClicked(self, QModelIndex):
         if not self.currentItem().is_editable:
             return
@@ -383,7 +376,6 @@ class QOutlinerLineEdit(QLineEdit):
 
         self.show()
 
-
     def on_return(self):
         self.item.set_name(self.text())
         self.close()
@@ -410,6 +402,27 @@ class AbstractOutlinerItem(QTreeWidgetItem):
         self.is_editable = False
         self.has_item = False
         self.item = None
+
+        self.analyses = dict()
+
+    def connect_analyses_slots(self, item):
+        item.onAnalysisAdded.connect(self.add_analysis)
+        item.onAnalysisRemoved.connect(self.remove_analysis)
+        for a in item.connected_analyses:
+            self.add_analysis(a)
+
+    @pyqtSlot(object)
+    def add_analysis(self, analysis):
+        if analysis.unique_id not in self.analyses:
+            itm = AnalyzesOutlinerItem(self, 0, analysis)
+            self.analyses[analysis.unique_id] = itm
+
+    @pyqtSlot(object)
+    def remove_analysis(self, analysis):
+        if analysis.unique_id in self.analyses:
+            self.removeChild(self.annotations[analysis.get_id()])
+            self.analyses.pop(analysis.get_id())
+
 
     def get_container(self):
         return None
@@ -503,6 +516,7 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
     def on_segment_removed(self, s):
         if s.get_id() in self.segments:
             self.removeChild(self.segments[s.get_id()])
+            self.segments[s.get_id()].pop()
 
     def update_item(self):
         super(SegmentationOutlinerItem, self).update_item()
@@ -525,6 +539,7 @@ class SegmentOutlinerItem(AbstractOutlinerItem):
         self.segment = segment
         self.has_item = True
         self.update_item()
+        self.connect_analyses_slots(self.segment)
 
     def get_container(self):
         return self.segment
@@ -568,6 +583,7 @@ class AnnotationLayerOutlinerItem(AbstractOutlinerItem):
     def on_annotation_removed(self, a):
         if a.get_id() in self.annotations:
             self.removeChild(self.annotations[a.get_id()])
+            self.annotations.pop(a.get_id())
 
     def get_container(self):
         return self.annotation_layer
@@ -598,6 +614,7 @@ class AnnotationOutlinerItem(AbstractOutlinerItem):
         self.is_editable = True
         self.has_item = True
         self.update_item()
+        self.connect_analyses_slots(annotation)
 
     def get_container(self):
         return self.annotation
@@ -664,6 +681,7 @@ class ScreenshotOutlinerItem(AbstractOutlinerItem):
         self.has_item = True
         screenshot.onScreenshotChanged.connect(partial(self.update_item))
         self.update_item()
+        self.connect_analyses_slots(screenshot)
 
     def get_container(self):
         return self.screenshot

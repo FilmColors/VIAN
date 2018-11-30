@@ -116,7 +116,7 @@ class IProjectContainer(QObject):
                 cl_obj =  t.target_classification_object
                 if cl_obj is None:
                     cl_obj = "default"
-                if cl_obj.name == "Global":
+                elif cl_obj.name == "Global":
                     if "default" not in result:
                         result["default"] = []
                     result["default"].append(t)
