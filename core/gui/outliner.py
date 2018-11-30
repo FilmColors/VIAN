@@ -168,6 +168,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.item_list.append(experiment_item)
         self.item_index[s.get_id()] = experiment_item
 
+
     def remove_experiment(self, s):
         if s.get_id() in self.item_index:
             self.item_list.remove(self.item_index[s.get_id()])
@@ -186,6 +187,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
     def remove_analysis(self, s):
         if s.get_id() in self.item_index:
+            self.analyses_roots[s.analysis_job_class].removeChild(self.item_index[s.get_id()])
             self.item_list.remove(self.item_index[s.get_id()])
             self.item_index.pop(s.get_id())
 

@@ -337,7 +337,7 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
 
 
 class ColormetryAnalysis(AnalysisContainer):
-    def __init__(self, results = None, resolution = 10):
+    def __init__(self, results = None, resolution = 30):
         super(ColormetryAnalysis, self).__init__(name = "Colormetry", data = results)
         self.curr_location = 0
         self.time_ms = []
@@ -378,7 +378,6 @@ class ColormetryAnalysis(AnalysisContainer):
     def append_data(self, data):
         try:
             self.time_ms.append(data['time_ms'])
-            print(self.current_idx)
             self.current_idx = self.project.hdf5_manager.get_colorimetry_length() - 1
             self.project.hdf5_manager.dump_colorimetry(data, self.current_idx, self.end_idx)
             self.check_finished()

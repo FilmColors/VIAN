@@ -269,7 +269,11 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
             except:
                 a = None
         else:
-            a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
+            try:
+                a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
+            except:
+                a = None
+
         if a is None:
             return
         x = scr.movie_timestamp

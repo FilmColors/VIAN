@@ -5,7 +5,7 @@ In this Module, all interfaces used by VIAN are defined.
 from random import randint
 from collections import namedtuple
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QObject, pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import DataSerialization
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
@@ -63,6 +63,9 @@ class IClassifiable():
 
 
 class IProjectContainer(QObject):
+    onAnalysisAdded = pyqtSignal(object)
+    onAnalysisRemoved = pyqtSignal(object)
+
     def __init__(self):
         QObject.__init__(self)
         self.project = None
@@ -81,10 +84,12 @@ class IProjectContainer(QObject):
 
     def add_analysis(self, analysis):
         self.connected_analyses.append(analysis)
+        self.onAnalysisAdded.emit(analysis)
 
     def remove_analysis(self, analysis):
         if analysis in self.connected_analyses:
             self.connected_analyses.remove(analysis)
+            self.onAnalysisRemoved.emit(analysis)
 
     def get_connected_analysis(self, class_type=None, as_clobj_dict = False):
         """
