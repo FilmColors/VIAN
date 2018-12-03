@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 import cv2
 from core.data.computation import *
-from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
+from core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_spacial_frequency_heatmap2
 
 from core.analysis.analysis_import import FaceRecognitionModel
 
@@ -38,6 +38,7 @@ class TimestepUpdateWorkerSingle(QObject):
         self.face_rec_model = FaceRecognitionModel(serving=True)
         self.face_rec_model.load_weights(os.path.abspath("data/models/face_identification/age_of_innocence_sample.hdf5"))
 
+
     @pyqtSlot(str)
     def load_face_rec_model(self, str):
         self.face_rec_model.load_weights(str)
@@ -47,6 +48,10 @@ class TimestepUpdateWorkerSingle(QObject):
     def set_movie_path(self, movie_path):
         self.movie_path = movie_path
         self.video_capture = cv2.VideoCapture(movie_path)
+        ret, frame = self.video_capture.read()
+        if frame is not None:
+            self.seedsmodel = cv2.ximgproc.createSuperpixelSEEDS(frame.shape[1], frame.shape[0], 3, 200,
+                                                                 num_levels=6, histogram_bins=8)
 
     @pyqtSlot(bool, str)
     def toggle_spacial_frequency(self, state, method):
@@ -123,7 +128,6 @@ class TimestepUpdateWorkerSingle(QObject):
                         f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
                     elif self.spacial_frequency_method == "luminance-var":
                         f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
-
                 heatmap, mask, denorm = get_spacial_frequency_heatmap(frame, method=self.spacial_frequency_method, normalize=True, norm_factor=f)
                 frame = heatmap
             if self.update_face_rec:

@@ -840,9 +840,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         # self.main_window.numpy_data_manager.project = self
 
-
-
-
         move_project_to_directory_project = False
         version = [0,0,0]
         try:
@@ -892,7 +889,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         except Exception as e:
             print(e)
             self.hdf5_manager.initialize_all()
-
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])

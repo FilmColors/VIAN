@@ -115,3 +115,61 @@ def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method 
 
 
 
+def convolve_segmentation(values, segmentation):
+    for t in np.unique(segmentation).tolist():
+        indices = np.where(segmentation == t)
+        values[indices] = np.mean(values[indices])
+    return values
+
+
+def get_spacial_frequency_heatmap2(input_img, blur = False, x2=20, x3=20, method = "edge-mean", normalize = True, norm_factor = 1.0, model=None):
+    # input_img = cv2.resize(input_img, None, None, 1.0, 1.0, cv2.INTER_CUBIC)
+    lab = cv2.cvtColor(input_img.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+    # lab[:, :, 0] = lab[:, :, 0] - np.amin(lab[:, :, 0])
+    # lab[:, :, 0] = lab[:, :, 0] / np.amax(lab[:, :, 0])
+    # lab[:, :, 1] = lab[:, :, 1] - np.amin(lab[:, :, 1])
+    # lab[:, :, 1] = lab[:, :, 1] / np.amax(lab[:, :, 1])
+    # lab[:, :, 2] = lab[:, :, 2] - np.amin(lab[:, :, 2])
+    # lab[:, :, 2] = lab[:, :, 2] / np.amax(lab[:, :, 2])
+
+    model.iterate(lab)
+    segmentation = model.getLabels()
+
+    if method == "edge-mean":
+        edges = cv2.Canny(cv2.cvtColor(input_img, cv2.COLOR_BGR2LAB), 20, 20).astype(np.float32)
+        edges = np.clip(cv2.GaussianBlur(edges, (1, 1), 0), 0, 1.0)
+        raw = edges.copy()
+        edge_mean = neighborhood_mean_cv(edges, 20)
+        edge_mean /= np.amax(edge_mean)
+        # cv2.imshow("found edges", edge_mean)
+
+        t = convolve_segmentation(edge_mean, segmentation)
+        t = np.clip(cv2.GaussianBlur(t, (5, 5), 0), 0, 1.0)
+        img, heatm = get_heatmap_rgb(t, input_img)
+        return img, heatm, raw
+
+    elif method == "color-var":
+        col_var = neighborhood_var_cv(lab.astype(np.float32), 50, channels=(1, 2))
+        raw = col_var.copy()
+        hcut = np.percentile(col_var, 95)
+        col_var /= norm_factor
+        t = convolve_segmentation(col_var, segmentation)
+        t = np.clip(cv2.GaussianBlur(t, (5, 5), 0), 0, 1.0)
+        img, heatm = get_heatmap_rgb(t, input_img)
+        return img, heatm, raw
+
+    elif method == "luminance-var":
+        lum_var = neighborhood_var_cv(lab.astype(np.float32), 20, channels=(0))
+        raw = lum_var.copy()
+        hcut = np.percentile(lum_var, 95)
+        lum_var = lum_var / norm_factor
+        t = convolve_segmentation(lum_var, segmentation)
+        t = np.clip(cv2.GaussianBlur(t, (5, 5), 0), 0, 1.0)
+        img, heatm = get_heatmap_rgb(t, input_img)
+        return img, heatm, raw
+
+    else:
+        return input_img, None, None
+
+
+
