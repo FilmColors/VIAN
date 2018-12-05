@@ -20,6 +20,7 @@ class QueryWorker(QObject):
         self.active = True
         self.wait = True
         self.corpus = LocalCorpusInterface()
+        self.root = os.path.split(path)[0]
         self.user = user
         self.path = path
         self.initialized = False

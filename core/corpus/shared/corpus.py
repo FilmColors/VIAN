@@ -22,7 +22,7 @@ class VIANCorpus(QObject):
         self.Session = sessionmaker(bind=self.engine)
         self.db = self.Session()
 
-    def commit_project(self, project:VIANProject):
+    def commit_project(self, zip_path):
         pass
 
     def get_project(self, project_id):
@@ -72,7 +72,6 @@ class VIANCorpus(QObject):
                     keyword.external_id = ukw.id
                     keyword.set_project(project)
                     clobj.unique_keywords.append(keyword)
-
 
         # project.store_project(HeadlessUserSettings())
         template = project.get_template(True, True, True, True, True)

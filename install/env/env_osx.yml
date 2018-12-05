@@ -1,4 +1,4 @@
-name: vian_osx
+name: vian-osx
 channels:
 - menpo
 - conda-forge
