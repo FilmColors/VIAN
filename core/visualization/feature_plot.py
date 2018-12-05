@@ -299,7 +299,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         for s in segments:
             if s.end > max:
                 max = s.end
-        self.stretch = 2000 / max
+        self.stretch = 2000 / np.clip(max, 1, None)
         for s in segments:
             # itm = self.scene().addRect(s.start * self.magnification, self.feature_base_height,
             #                            (s.end - s.start) * self.magnification, - self.segment_height,

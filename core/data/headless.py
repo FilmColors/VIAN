@@ -113,6 +113,7 @@ class HeadlessMainWindow(QObject):
 
     def dispatch_on_closed(self, *args):
         pass
+
     #endregion
 
     def eval_class(self, name):
@@ -173,8 +174,7 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         project = VIANProject(mw, name=name, folder=location, path=location + "/" + name)
         mw.project = project
         project.inhibit_dispatch = False
-
-
+        print(project.path)
         if os.path.isdir(project.folder):
             c = 0
             while(os.path.isdir(project.folder + "_" +str(c).zfill(2))):
@@ -183,6 +183,7 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
 
         os.mkdir(project.folder)
         project.create_file_structure()
+        project.connect_hdf5()
 
         # Move the Movie if set
         if move_movie == "copy":
@@ -233,11 +234,6 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         project.hdf5_manager.initialize_colorimetry(int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 30))
         return project
     except Exception as e:
-        try:
-            pass
-            # shutil.rmtree(location)
-        except:
-            print("Could not remove folder: ", location)
         raise e
 
 

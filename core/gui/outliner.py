@@ -516,7 +516,7 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
     def on_segment_removed(self, s):
         if s.get_id() in self.segments:
             self.removeChild(self.segments[s.get_id()])
-            self.segments[s.get_id()].pop()
+            self.segments.pop(s.get_id())
 
     def update_item(self):
         super(SegmentationOutlinerItem, self).update_item()
