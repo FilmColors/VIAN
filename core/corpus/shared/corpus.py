@@ -57,9 +57,11 @@ class VIANCorpus(QObject):
                 word = voc.create_word(w.name)
                 word_idx[w.id] = word
 
+
         for e in experiments:
             exp = project.create_experiment()
             exp.name = e.name
+            all_ids = []
             for obj in e.classification_objects: #type:DBClassificationObject
                 added_vocabularies = dict()
                 clobj = exp.create_class_object(obj.name, exp)
@@ -70,9 +72,17 @@ class VIANCorpus(QObject):
                     voc = voc_idx[ukw.word.vocabulary_id]
                     keyword = UniqueKeyword(exp, voc, word_idx[ukw.word.id], clobj)
                     keyword.external_id = ukw.id
+                    all_ids.append(ukw.id)
                     keyword.set_project(project)
                     clobj.unique_keywords.append(keyword)
+                ds_name = ""
+                ds_labels = []
+                for lbl in obj.semantic_segmentation_labels: #type:DBSemanticSegmentationLabel
+                    if ds_name == "":
+                        ds_name = lbl.dataset.name
+                    ds_labels.append(lbl.mask_idx - 1)
 
+                clobj.semantic_segmentation_labels = (ds_name, list(set(ds_labels)))
         # project.store_project(HeadlessUserSettings())
         template = project.get_template(True, True, True, True, True)
         try:
@@ -84,11 +94,8 @@ class VIANCorpus(QObject):
             print(e)
         return template
 
-
-
-
 if __name__ == '__main__':
-    corpus = VIANCorpus("F:/_corpus/ERCFilmColors_V2/database2_after_g.db")
+    corpus = VIANCorpus("F:/_corpus/ERCFilmColors_V2/database.db")
     template = corpus.get_template("C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\")
     with open("ERC_FilmColors.viant", "w") as f:
         json.dump(template, f)

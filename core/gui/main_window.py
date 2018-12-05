@@ -134,6 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings = UserSettings()
         self.settings.load()
 
+        print("HDF5")
         self.hdf5_cache = HDF5Cache(self.settings.DIR_PROJECT + "/scr_cache.hdf5")
 
         self.clipboard_data = []
@@ -215,7 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
-
+        print("UPDATE WORKER")
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread(self)
         self.frame_update_worker.moveToThread(self.frame_update_thread)
@@ -224,7 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.frame_update_thread.started.connect(self.frame_update_worker.run)
         self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
-
+        print("DONE")
         self.create_widget_elan_status()
         loading_screen.showMessage("Creating GUI: Player", Qt.AlignHCenter | Qt.AlignBottom,
                                    QColor(200, 200, 200, 100))

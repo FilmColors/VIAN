@@ -12,6 +12,7 @@ import csv
 from sqlalchemy import create_engine, func, and_
 from sqlalchemy.orm import sessionmaker
 from core.data.computation import ms_to_frames
+from core.corpus.shared.corpus import VIANCorpus
 import datetime
 
 def fm_unique_keywords(path="resources/fm2gl.csv"):
@@ -45,7 +46,7 @@ def get_movie(ida = None, idb = None, idc = None, path = "E:\Programming\Git\ERC
 
 if __name__ == '__main__':
     db_path = "sqlite:///F:/_corpus/ERCFilmColors_V2/database.db"
-    template_path = "E:\Programming\Git\ERC_FilmColors\\resources\ERC_FilmColors.viant"
+    template_path = "E:\\Programming\\Git\\visual-movie-annotator\\data\\templates\\ERC_FilmColors.viant"
     use_cache = True
 
     engine = create_engine(db_path, echo=False)
@@ -57,7 +58,6 @@ if __name__ == '__main__':
     mw = HeadlessMainWindow()
     root = "F:/_projects/"
 
-    kwd_conversion = fm_unique_keywords("E:\Programming\Git\ERC_FilmColors\\resources\\fm2gl.csv")
     c = 0
     n = len(db_session.query(DBProject).all())
     for p in db_session.query(DBProject).all(): #type:DBProject
@@ -92,15 +92,11 @@ if __name__ == '__main__':
         for s in p.segments: #type:DBSegment
             segment = main_seg.create_segment2(s.start_ms, s.end_ms, body = s.body)
             for ukw in s.unique_keywords:
-                if int(ukw.id) in kwd_conversion:
-                    kwdid = kwd_conversion[int(ukw.id)]
-                    ukw_p = keyword_idx[int(kwdid)]
-                    if segment is not None and ukw_p is not None:
-                        experiment.tag_container(segment, ukw_p)
-                    else:
-                        print("Missing:", ukw.id)
+                ukw_p = keyword_idx[int(ukw.id)]
+                if segment is not None and ukw_p is not None:
+                    experiment.tag_container(segment, ukw_p)
                 else:
-                    print(ukw.id)
+                    print("Missing:", ukw_p, segment, s.__dict__)
 
         curr_id = 0
         curr_segment = None

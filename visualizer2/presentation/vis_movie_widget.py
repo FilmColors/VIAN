@@ -119,6 +119,7 @@ class VisMovieLayout(PresentationWidget):
             data = self.visualizer.query_worker.corpus.hdf5_manager.features()[analysis.hdf5_index]
             print(self.visualizer.query_worker.root + "/shots/" + scr.file_path)
             img = cv2.imread(self.visualizer.query_worker.root + scr.file_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
             # x = self.screenshots[k][0].time_ms
             # y = self.color_features[k].analysis_data['saturation_p']
             l = data[3]
@@ -143,98 +144,6 @@ class VisMovieLayout(PresentationWidget):
         self.plot_ab_space.clear_view()
         self.plot_ab_space.add_grid()
         self.plot_la_space.add_grid()
-
-    # def on_query_result(self, obj):
-    #     if id(obj) in self.already_processed:
-    #         return
-    #     self.already_processed.append(id(obj))
-    #     if obj['type'] == "movie_info":
-    #         # COLOR FEATURES
-    #         segments = []
-    #         segment_index = dict()
-    #         self.clear()
-    #
-    #         dbsegments = obj['data']['segments']
-    #         for s in dbsegments:
-    #             segments.append(SegmentTuple(s.movie_segm_id, s.segm_start, s.segm_end))
-    #             segment_index[s.segment_id] = s.movie_segm_id
-    #
-    #         feature_index = dict()
-    #         try:
-    #             # self.compute_node_matrix(obj['data']['keywords'], self.visualizer.all_keywords)
-    #             for f in obj['data']['keywords']:
-    #                 if f.keyword_id not in feature_index:
-    #                     feature_index[f.keyword_id] = FeatureTuple(self.visualizer.all_keywords[f.keyword_id]['word'].name, [])
-    #                 if f.target_id in segment_index:
-    #                     feature_index[f.keyword_id].segment_ids.append(segment_index[f.target_id])
-    #         except Exception as e:
-    #             print(e)
-    #
-    #         self.plot_features.create_timeline(segments)
-    #         for f in feature_index.keys():
-    #             self.plot_features.create_feature(feature_index[f])
-    #
-    #         # COLOR-dT
-    #         to_sort = dict()
-    #         for scr in obj['data']['screenshots']:
-    #             if scr.classification_object_id not in to_sort:
-    #                 to_sort[scr.classification_object_id] = []
-    #             to_sort[scr.classification_object_id].append(scr)
-    #
-    #         to_load = []
-    #         for t in to_sort:
-    #             scrs = to_sort[t]
-    #             k = np.clip(self.visualizer.K_IMAGES, 0, len(scrs))
-    #             segment_groups = dict()
-    #             for s in scrs:
-    #                 if s.segment_id not in segment_groups:
-    #                     segment_groups[s.segment_id] = []
-    #                 segment_groups[s.segment_id].append(s)
-    #
-    #             n_remaining = k
-    #             n_segments_rem = len(list(segment_groups.keys()))
-    #             for s in segment_groups.keys():
-    #                 k_sub = np.clip(n_remaining / n_segments_rem, 0 , len(segment_groups[s]))
-    #                 to_load.extend(sample(segment_groups[s], int(k_sub)))
-    #                 n_remaining -= k_sub
-    #                 n_segments_rem -= 1
-    #
-    #         for scr in obj['data']['screenshots']:
-    #             self.screenshots[scr.screenshot_id] = [scr, None, False]
-    #             if self.vis_plot_color_dt.get_current_classification_object() == scr.classification_object_id:
-    #                 self.screenshots[scr.screenshot_id][2] = True
-    #
-    #         if len(obj['data']['features']) > 0:
-    #             for o in obj['data']['features']:
-    #                 self.color_features[o.target_container_id] = o
-    #
-    #         shot_per_segment = dict()
-    #         for s in obj['data']['screenshot_segm_mapping'].keys():
-    #             if s in self.screenshots:
-    #                 new_key = obj['data']['screenshot_segm_mapping'][s]
-    #                 self.screenshots[s][0].segment_id = new_key
-    #                 if new_key not in shot_per_segment:
-    #                     shot_per_segment[new_key] = []
-    #                 shot_per_segment[new_key].append(self.screenshots[s][0])
-    #
-    #         for s in dbsegments:
-    #             if s.segment_id in shot_per_segment:
-    #                 self.plot_segments.add_entry(obj['data']['project'], s, shot_per_segment[s.segment_id])
-    #             else:
-    #                 self.plot_segments.add_entry(obj['data']['project'], s, [])
-    #         self.visualizer.on_load_screenshots(to_load, self.on_screenshot_loaded)
-    #
-    #     elif obj['type'] == "keywords":
-    #         cl_objs = []
-    #         for k in obj['data']['cl_objs'].keys():
-    #             cl_objs.append(obj['data']['cl_objs'][k])
-    #
-    #         for cb in self.classification_object_filter_cbs:
-    #             cb.clear()
-    #             for cl in cl_objs:
-    #                 cb.addItem(cl.name)
-    #         for cl in cl_objs:
-    #             self.classification_object_filter_indices[cl.name] = cl.classification_object_id
 
     def compute_node_matrix(self, key_mapping, keywords):
         labels = []
