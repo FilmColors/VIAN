@@ -47,7 +47,7 @@ class UserSettings():
             naming.Movie_Source.name,
 
         ]
-        self.CONTRIBUTOR = None
+        self.CONTRIBUTOR = Contributor()
         self.CORPUS_IP = "127.0.0.1"
         self.COPRUS_PORT = 5006
         self.COPRUS_PW = "CorpusPassword"
