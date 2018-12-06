@@ -117,7 +117,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.extension_list = ExtensionList(self)
         self.is_darwin = False
 
-
+        self.application_in_focus = True
 
         # for MacOS
         if sys.platform == "darwin":
@@ -595,7 +595,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings.OPENCV_PER_FRAME != ALWAYS_VLC:
             self.frame_update_worker.set_opencv_frame(True)
             self.onUpdateFrame.emit(self.player.get_media_time(), self.player.get_frame_pos_by_time(self.player.get_media_time()))
-            self.set_overlay_visibility(True)
+            self.check_overlay_visibility()
 
     #region WidgetCreation
 
@@ -661,7 +661,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget.set_player(self.player)
             self.player_dock_widget.show()
         if self.drawing_overlay is not None:
-            self.set_overlay_visibility(True)
+            self.check_overlay_visibility()
 
 
 #OLD CODE
@@ -1223,7 +1223,6 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def switch_perspective(self, perspective):
-        print(perspective)
         self.centralWidget().setParent(None)
         self.statusBar().show()
 
@@ -1392,7 +1391,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.centralWidget().show()
         # self.centralWidget().setBaseSize(size_central)
 
-        self.set_overlay_visibility(self.player_dock_widget.isVisible())
+        self.check_overlay_visibility()
         self.set_default_dock_sizes(self.current_perspective)
 
     def hide_all_widgets(self):
@@ -1454,15 +1453,21 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).changeEvent(event)
 
     def on_application_lost_focus(self, arg):
-        if arg is None or len(self.open_dialogs) != 0:
-            self.set_overlay_visibility(False)
+        if arg is None:
+            self.application_in_focus = False
         else:
-            if self.current_perspective in[Perspective.Annotation, Perspective.Segmentation]:
-                self.set_overlay_visibility(True)
-                self.set_overlay_visibility(True)
-                self.onOpenCVFrameVisibilityChanged.emit(True)
-            else:
-                self.set_overlay_visibility(False)
+            self.application_in_focus = True
+
+        self.check_overlay_visibility()
+        # if arg is None or len(self.open_dialogs) != 0:
+        #     self.set_overlay_visibility(False)
+        # else:
+        #     if self.current_perspective in[Perspective.Annotation, Perspective.Segmentation]:
+        #         self.set_overlay_visibility(True)
+        #         self.set_overlay_visibility(True)
+        #         self.onOpenCVFrameVisibilityChanged.emit(True)
+        #     else:
+        #         self.set_overlay_visibility(False)
             # self.set_darwin_player_visibility(True)
 
     def on_set_letterbox(self):
@@ -1559,11 +1564,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if visibility:
             if (self.current_perspective == Perspective.Segmentation or
                     self.current_perspective == Perspective.Annotation):
-                self.set_overlay_visibility(True)
+                self.check_overlay_visibility()
 
         else:
             if self.current_perspective == Perspective.Segmentation:
-                self.set_overlay_visibility(False)
+                self.check_overlay_visibility()
 
     def update_player_size(self):
         self.player.update()
@@ -1692,10 +1697,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if answer == QMessageBox.Yes:
                 self.on_save_project()
 
-        self.set_overlay_visibility(False)
+        self.check_overlay_visibility()
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
-        if self.current_perspective == (Perspective.Segmentation.name or Perspective.Annotation.name):
-            self.set_overlay_visibility(True)
         path = path[0]
         self.close_project()
         self.load_project(path)
@@ -1811,11 +1814,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_editor.close()
             self.drawing_editor = None
 
-    def set_overlay_visibility(self, visibility, toggle_keep_hidden = False):
-        # print(visibility, "toggle keep hidden:", toggle_keep_hidden, "Forced Hidden:", self.forced_overlay_hidden)
-        if self.forced_overlay_hidden and not toggle_keep_hidden:
-            return
+    def check_overlay_visibility(self):
+        if self.application_in_focus is False:
+            self.set_overlay_visibility(False)
+        elif not self.player_dock_widget.isVisible():
+            self.set_overlay_visibility(False)
+        elif len(self.open_dialogs) > 0:
+            self.set_overlay_visibility(False)
+        elif self.settings.OPENCV_PER_FRAME == 0:
+            self.set_overlay_visibility(False)
+        else:
+            self.set_overlay_visibility(True)
 
+    def set_overlay_visibility(self, visibility = None):
         if visibility:
             # print("overlay shown")
             self.drawing_overlay.show()
@@ -1824,9 +1835,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_overlay.hide()
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
         self.update_overlay()
-
-        if toggle_keep_hidden:
-            self.forced_overlay_hidden = not self.forced_overlay_hidden
 
     def create_analysis_list(self):
         self.analysis_list = []
@@ -2051,7 +2059,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.settings.AUTO_START_COLORMETRY:
                 run_colormetry = True
             else:
-                self.set_overlay_visibility(False, True)
+                self.set_overlay_visibility(False)
                 answer = QMessageBox.question(self, "Colormetry",
                                               "Do you want to start the Colormetry Analysis now?"
                                               "\n\n"
@@ -2059,7 +2067,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                               "but will need quite some resources of your computer.")
                 if answer == QMessageBox.Yes:
                     run_colormetry = True
-                self.set_overlay_visibility(True, True)
+                self.set_overlay_visibility(True)
 
         if run_colormetry:
             self.toggle_colormetry()

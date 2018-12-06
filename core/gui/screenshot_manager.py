@@ -527,14 +527,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if current_sm_object is not None:
             self.images_segmentation.append(current_sm_object)
 
-        print("Item Creation", time.time() - t)
-        t = time.time()
-
         self.qimage_cache = new_qimage_cache
         self.clear_selection_frames()
         t = time.time()
         self.arrange_images()
-        print("Arrange", time.time() - t)
 
     def clear_manager(self):
         self.clear_scr_captions()

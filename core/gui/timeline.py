@@ -537,7 +537,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.setDisabled(True)
 
     def recreate_timeline(self, args = None):
-        t = time.time()
         vlocation = self.scrollArea.verticalScrollBar().value()
         project = self.main_window.project
         self.clear()
@@ -557,7 +556,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.on_selected(None, project.selected)
         self.update_ui()
         self.scrollArea.verticalScrollBar().setValue(vlocation)
-        print("Timeline", time.time()- t)
 
     def select(self, control = None, item = None, dispatch = True):
         #TODO This deselectes all items in multiple selection except the last one

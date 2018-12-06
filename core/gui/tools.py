@@ -149,7 +149,6 @@ class EListWidget(QListWidget):
             self.line_edit.returnPressed.connect(self.on_lineedit_closed)
             self.line_edit.setFocus(Qt.OtherFocusReason)
 
-        print("Hello")
 
     def on_lineedit_closed(self):
         self.line_edit.close()

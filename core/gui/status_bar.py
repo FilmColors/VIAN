@@ -287,7 +287,7 @@ class StageSelector(QWidget):
                 btn.setChecked(True)
             else:
                 btn.setChecked(False)
-        print(idx)
+
         if dispatch:
             if idx == 0:
                 self.main_window.switch_perspective(Perspective.Segmentation.name)
