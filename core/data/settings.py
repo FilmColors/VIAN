@@ -228,9 +228,9 @@ class UserSettings():
             self.dock_widgets_data.append(data)
 
         ddict = vars(self)
-        if self.CONTRIBUTOR is not None:
-            ddict['CONTRIBUTOR'] = self.CONTRIBUTOR.serialize()
         try:
+            if self.CONTRIBUTOR is not None:
+                ddict['CONTRIBUTOR'] = self.CONTRIBUTOR.serialize()
             with open(self.store_path, 'w') as f:
                 json.dump(ddict, f)
         except Exception as e:

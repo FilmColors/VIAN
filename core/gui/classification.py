@@ -3,7 +3,7 @@ from functools import partial
 
 import numpy as np
 from PyQt5 import uic
-from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton
+from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout
 
 from core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
 from core.data.interfaces import IProjectChangeNotify
@@ -79,8 +79,14 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.stackedWidget.setCurrentIndex(1)
             self.progressBar.hide()
             self.btn_PromoteToScreenshots = QPushButton("Promote to Screenshots")
-            self.stackedWidget.widget(1).layout().addWidget(self.btn_PromoteToScreenshots)
+            self.btn_ResetQuery = QPushButton("Reset Query")
+            w = QWidget()
+            w.setLayout(QHBoxLayout())
+            w.layout().addWidget(self.btn_ResetQuery)
+            w.layout().addWidget(self.btn_PromoteToScreenshots)
+            self.stackedWidget.widget(1).layout().addWidget(w)
             self.btn_PromoteToScreenshots.clicked.connect(self.on_promote_query_to_screenshots)
+            self.btn_ResetQuery.clicked.connect(self.on_reset_query)
 
 
     def on_changed(self, project, item):
@@ -370,6 +376,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def on_promote_query_to_screenshots(self):
         if self.current_experiment is not None:
             self.current_experiment.query(self.current_query_keywords, True)
+
+    def on_reset_query(self):
+        self.current_query_keywords = []
+        self.update_widget()
+        self.current_experiment.query(self.current_query_keywords, True)
+
 
 class CheckBoxGroupWidget(QWidget):
     def __init__(self, parent, name ,n_columns = 3):

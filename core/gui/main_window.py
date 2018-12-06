@@ -1223,6 +1223,7 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def switch_perspective(self, perspective):
+        print(perspective)
         self.centralWidget().setParent(None)
         self.statusBar().show()
 
@@ -1364,6 +1365,27 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea,self.player_dock_widget)
             self.addDockWidget(Qt.BottomDockWidgetArea, self.quick_annotation_dock)
 
+        elif perspective == Perspective.Query.name:
+            self.current_perspective = Perspective.Query
+            self.hide_all_widgets()
+
+            self.timeline.show()
+            self.screenshots_manager_dock.show()
+            self.player_dock_widget.show()
+            self.colorimetry_live.show()
+            self.query_widget.show()
+
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
+            self.tabifyDockWidget(self.player_dock_widget, self.query_widget)
+            if self.facial_identification_dock is not None:
+                self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
+
+            self.screenshot_toolbar.show()
+            self.screenshots_manager_dock.raise_()
+            self.elan_status.stage_selector.set_stage(5, False)
 
         self.setCentralWidget(central)
 
@@ -1380,6 +1402,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshot_toolbar.hide()
 
         # self.create_widget_video_player()
+        self.query_widget.hide()
         self.drawing_overlay.hide()
         self.outliner.hide()
         self.perspective_manager.hide()
