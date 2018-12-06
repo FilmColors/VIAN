@@ -50,7 +50,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.tabs = [] # The Category Tabs
         self.checkbox_groups = []
         self.checkbox_names =[]
-        self.all_checkboxes = []
+        self.all_checkboxes = dict()
 
         m_layout = self.inner.menuBar().addMenu("Layout")
         self.a_cat = m_layout.addAction("Category")
@@ -163,9 +163,26 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.update_layout_class_obj()
 
     def update_layout_class_obj(self):
+        # Select current Container
+        print(self.sorted_containers, self.current_idx)
+        if len(self.sorted_containers) > self.current_idx:
+            self.current_container = self.sorted_containers[self.current_idx]
+            self.main_window.project.set_selected(None, selected=[self.current_container])
+            self.lbl_CurrentContainer.setText(self.current_container.get_name())
+            self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
+        else:
+            self.current_container = None
+        if self.current_container is None:
+            return
+        if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())):
+            for checkbox in self.all_checkboxes.values():
+                checkbox.stateChanged.disconnect()
+                checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+            return
         self.tab_widget.clear()
         self.tabs = []
-
+        self.all_checkboxes = dict()
         self.tab_categories = []
         self.checkbox_groups = []
         self.checkbox_names = []
@@ -181,15 +198,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             tab_widgets_class_objs_index.append(c.unique_id)
             self.tab_categories.append([])
             self.tabs.append([])
-
-        # Select current Container
-        if len(self.sorted_containers) > self.current_idx:
-            self.current_container = self.sorted_containers[self.current_idx]
-            self.main_window.project.set_selected(None, selected=[self.current_container])
-            self.lbl_CurrentContainer.setText(self.current_container.get_name())
-            self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
-        else:
-            self.current_container = None
 
         # Draw Fields
         if self.current_container is not None:
@@ -223,6 +231,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 checkbox.stateChanged.connect(
                     partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
                 group.add_checkbox(checkbox)
+                self.all_checkboxes[k.unique_id] = checkbox
 
         for g in self.tabs:
             for t in g:
@@ -231,12 +240,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.frame_container(self.current_container)
 
     def update_layout_categories(self):
-        self.tab_widget.clear()
-        self.tabs = []
-        self.tab_categories = []
-        self.checkbox_groups = []
-        self.checkbox_names = []
-
+        print(self.sorted_containers, self.current_idx)
+        # Select current Container
         if len(self.sorted_containers) > self.current_idx:
             self.current_container = self.sorted_containers[self.current_idx]
             self.main_window.project.set_selected(None, selected=[self.current_container])
@@ -244,6 +249,22 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
         else:
             self.current_container = None
+
+        if self.current_container is None:
+            return
+        if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())):
+            for checkbox in self.all_checkboxes.values():
+                checkbox.stateChanged.disconnect()
+                checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+            return
+
+        self.tab_widget.clear()
+        self.tabs = []
+        self.tab_categories = []
+        self.checkbox_groups = []
+        self.all_checkboxes = dict()
+        self.checkbox_names = []
 
         if self.current_container is not None:
             keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
@@ -273,6 +294,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
                 checkbox.stateChanged.connect(
                     partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                self.all_checkboxes[k.k.unique_id] = checkbox
                 group.add_checkbox(checkbox)
 
         for t in self.tabs:
