@@ -32,8 +32,14 @@ class IProjectChangeNotify():
 
 
 class IClassifiable():
+    onQueryHighlightChanged = pyqtSignal(bool)
+
     def __init__(self):
         self.voc_list = []
+        self.is_query_highlighted = False
+
+    def set_classification_highlight(self, state):
+        self.onQueryHighlightChanged.emit(state)
 
     def get_parent_container(self):
         return None

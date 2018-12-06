@@ -1,3 +1,7 @@
+"""
+This script has been used to fix the missing target_container in the experiments of the FilmColors Corpus.
+"""
+
 import glob
 from core.corpus.shared.sqlalchemy_entities import *
 from core.data.headless import *

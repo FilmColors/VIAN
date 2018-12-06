@@ -1081,6 +1081,7 @@ class TimelineBar(QtWidgets.QFrame):
     def add_slice(self, item):
         slice = TimebarSlice(self, item, self.timeline)
         self.onHeightChanged.connect(slice.on_height_changed)
+        item.onQueryHighlightChanged.connect(slice.set_query_highlighted)
         slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
         slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
         self.slices.append(slice)
@@ -1196,9 +1197,14 @@ class TimebarSlice(QtWidgets.QWidget):
                     x -= 30
 
         self.merge_highlighted = False
+        self.query_highlighted = False
 
         self.min_possible = 0
         self.max_possible = self.timeline.duration * self.timeline.scale
+
+    def set_query_highlighted(self, state):
+        self.query_highlighted = state
+        self.update()
 
     def paintEvent(self, QPaintEvent):
         self.locked = False
@@ -1211,6 +1217,9 @@ class TimebarSlice(QtWidgets.QWidget):
         else:
             if self.merge_highlighted:
                 col = (255, 160, 47, 200)
+
+            elif self.query_highlighted:
+                col = (63, 200, 229, 200)
 
             elif self.is_hovered:
                 if self.timeline.is_cutting:
@@ -1479,6 +1488,7 @@ class TimelineSegmentationBar(TimelineBar):
     def add_slice(self, item):
         slice = TimebarSegmentationSlice(self, item, self.timeline)
         self.onHeightChanged.connect(slice.on_height_changed)
+        item.onQueryHighlightChanged.connect(slice.set_query_highlighted)
         slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
         slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
         self.slices.append(slice)
@@ -1499,6 +1509,7 @@ class TimelineAnnotationBar(TimelineBar):
     def add_slice(self, item):
         slice = TimebarAnnotationSlice(self, item, self.timeline)
         self.onHeightChanged.connect(slice.on_height_changed)
+        item.onQueryHighlightChanged.connect(slice.set_query_highlighted)
         slice.move(int(round(item.get_start() / self.timeline.scale,0)), 0)
         slice.resize(int(round((item.get_end() - item.get_start()) / self.timeline.scale, 0)), self.height())
         self.slices.append(slice)

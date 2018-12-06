@@ -14,15 +14,18 @@ MATRIX_ORDER_PER_TYPE = 1
 MATRIX_ORDER_RANDOM = 2
 MATRIX_ORDERS = ["By Time", "By Type", "Random"]
 
-
 class ClassificationWindow(EDockWidget, IProjectChangeNotify):
-    def __init__(self, main_window):
+    def __init__(self, main_window, behaviour = "classification"):
         super(ClassificationWindow, self).__init__(main_window, limit_size=False)
         path = os.path.abspath("qt_ui/ClassificationWidget.ui")
         uic.loadUi(path, self)
         self.main_window = main_window
         self.n_per_row = 20
-        self.setWindowTitle("Classification Window")
+        self.behaviour = behaviour
+        if self.behaviour == "classification":
+            self.setWindowTitle("Classification Window")
+        else:
+            self.setWindowTitle("Query Window")
 
         self.order_method = MATRIX_ORDER_PER_SEGMENT
 
@@ -42,6 +45,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         # Can be one of "categories", "class-obj", "class-cat"
         self.mode = "class-obj"
 
+        self.current_query_keywords = []
+
         # GUI
         self.tab_widget = QTabWidget(self.contentWidget)
         self.contentWidget.layout().addWidget(self.tab_widget)
@@ -50,7 +55,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.tabs = [] # The Category Tabs
         self.checkbox_groups = []
         self.checkbox_names =[]
-        self.all_checkboxes = dict()
+        self.all_checkboxes = dict() # All Checkboxes by their corresponding UniqueKeyword.unique_id
 
         m_layout = self.inner.menuBar().addMenu("Layout")
         self.a_cat = m_layout.addAction("Category")
@@ -64,29 +69,53 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
-    def on_changed(self, project, item):
-        self.comboBox_Experiment.clear()
-        if len(project.experiments) > 0:
-            self.setEnabled(True)
-            for e in project.experiments:
-                self.comboBox_Experiment.addItem(e.get_name())
-        else:
-            self.setEnabled(False)
+        if self.behaviour == "query":
+            self.btn_StartClassification.hide()
+            self.btn_StopClassification.hide()
+            self.btn_Previous.hide()
+            self.btn_Next.hide()
+            self.lbl_CurrentContainer.hide()
+            self.comboBox_Sorting.hide()
+            self.stackedWidget.setCurrentIndex(1)
+            self.progressBar.hide()
 
+
+    def on_changed(self, project, item):
+        if self.behaviour == "classification":
+            self.comboBox_Experiment.clear()
+            if len(project.experiments) > 0:
+                self.setEnabled(True)
+                for e in project.experiments:
+                    self.comboBox_Experiment.addItem(e.get_name())
+            else:
+                self.setEnabled(False)
+        else:
+            self.update_widget()
         return
 
     def on_loaded(self, project):
-        self.comboBox_Experiment.clear()
-        if len(project.experiments) > 0:
-            self.setEnabled(True)
-            for e in project.experiments:
-                self.comboBox_Experiment.addItem(e.get_name())
-        else:
-            self.setEnabled(False)
+        if self.behaviour == "classification":
+            self.comboBox_Experiment.clear()
+            if len(project.experiments) > 0:
+                self.setEnabled(True)
+                for e in project.experiments:
+                    self.comboBox_Experiment.addItem(e.get_name())
+            else:
+                self.setEnabled(False)
 
-        self.stackedWidget.setCurrentIndex(0)
+            self.stackedWidget.setCurrentIndex(0)
+        else:
+            if len(project.experiments) > 0:
+                self.current_query_keywords = []
+                self.setEnabled(True)
+                self.current_experiment = project.experiments[0]
+            self.stackedWidget.setCurrentIndex(1)
+            self.update_widget()
 
     def on_selected(self, sender, selected):
+        # if isinstance(selected, )
+        # if self.behaviour == "query":
+        #     self.current_experiment =
         # if sender is not self:
         #     if len(selected) > 0:
         #         self.current_container = selected[0]
@@ -163,23 +192,27 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.update_layout_class_obj()
 
     def update_layout_class_obj(self):
-        # Select current Container
-        print(self.sorted_containers, self.current_idx)
-        if len(self.sorted_containers) > self.current_idx:
-            self.current_container = self.sorted_containers[self.current_idx]
-            self.main_window.project.set_selected(None, selected=[self.current_container])
-            self.lbl_CurrentContainer.setText(self.current_container.get_name())
-            self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
-        else:
-            self.current_container = None
-        if self.current_container is None:
-            return
-        if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())):
-            for checkbox in self.all_checkboxes.values():
-                checkbox.stateChanged.disconnect()
-                checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
-                checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
-            return
+        # if we are classifying, Select current Container
+        if self.behaviour == "classification":
+            if len(self.sorted_containers) > self.current_idx:
+                self.current_container = self.sorted_containers[self.current_idx]
+                self.main_window.project.set_selected(None, selected=[self.current_container])
+                self.lbl_CurrentContainer.setText(self.current_container.get_name())
+                self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
+            else:
+                self.current_container = None
+            if self.current_container is None:
+                return
+
+            # Check if we need to rebuild the layout or if the checkboxes stay the same,
+            # if so apply the classification of the current container
+            if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())):
+                for checkbox in self.all_checkboxes.values():
+                    checkbox.stateChanged.disconnect()
+                    checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                    checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                return
+
         self.tab_widget.clear()
         self.tabs = []
         self.all_checkboxes = dict()
@@ -200,8 +233,11 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.tabs.append([])
 
         # Draw Fields
-        if self.current_container is not None:
-            keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+        if self.current_container is not None or self.behaviour == "query":
+            if self.behaviour == "query":
+                keywords = self.current_experiment.get_unique_keywords()
+            else:
+                keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
             keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
 
             for k in keywords:
@@ -227,9 +263,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     group = self.checkbox_groups[self.checkbox_names.index(k.voc_obj.name + ":" + k.class_obj.name)]
 
                 checkbox = WordCheckBox(group, k)
-                checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
-                checkbox.stateChanged.connect(
-                    partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                if self.behaviour == "classification":
+                    checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                    checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                else:
+                    checkbox.setChecked(k in self.current_query_keywords)
+                    checkbox.stateChanged.connect(partial(self.on_query_changed, checkbox))
                 group.add_checkbox(checkbox)
                 self.all_checkboxes[k.unique_id] = checkbox
 
@@ -240,24 +279,29 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.frame_container(self.current_container)
 
     def update_layout_categories(self):
-        print(self.sorted_containers, self.current_idx)
-        # Select current Container
-        if len(self.sorted_containers) > self.current_idx:
-            self.current_container = self.sorted_containers[self.current_idx]
-            self.main_window.project.set_selected(None, selected=[self.current_container])
-            self.lbl_CurrentContainer.setText(self.current_container.get_name())
-            self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
-        else:
-            self.current_container = None
+        # if we are classifying, Select current Container
+        if self.behaviour == "classification":
+            if len(self.sorted_containers) > self.current_idx:
+                self.current_container = self.sorted_containers[self.current_idx]
+                self.main_window.project.set_selected(None, selected=[self.current_container])
+                self.lbl_CurrentContainer.setText(self.current_container.get_name())
+                self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
+            else:
+                self.current_container = None
+            if self.current_container is None:
+                return
 
-        if self.current_container is None:
-            return
-        if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())):
-            for checkbox in self.all_checkboxes.values():
-                checkbox.stateChanged.disconnect()
-                checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
-                checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
-            return
+            # Check if we need to rebuild the layout or if the checkboxes stay the same,
+            # if so apply the classification of the current container
+            if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in
+                                                      self.current_experiment.get_unique_keywords(
+                                                              self.current_container.get_parent_container())):
+                for checkbox in self.all_checkboxes.values():
+                    checkbox.stateChanged.disconnect()
+                    checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                    checkbox.stateChanged.connect(
+                        partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                return
 
         self.tab_widget.clear()
         self.tabs = []
@@ -266,8 +310,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.all_checkboxes = dict()
         self.checkbox_names = []
 
-        if self.current_container is not None:
-            keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+        if self.current_container is not None or self.behaviour == "query":
+            if self.behaviour == "query":
+                keywords = self.current_experiment.get_unique_keywords()
+            else:
+                keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+
             keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
             for k in keywords:
                 if k.voc_obj.category not in self.tab_categories:
@@ -291,9 +339,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     group = self.checkbox_groups[self.checkbox_names.index(k.voc_obj.name + ":" + k.class_obj.name)]
 
                 checkbox = WordCheckBox(group, k)
-                checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
-                checkbox.stateChanged.connect(
-                    partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                if self.behaviour == "classification":
+                    checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                    checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                else:
+                    checkbox.setChecked(k in self.current_query_keywords)
+                    checkbox.stateChanged.connect(partial(self.on_query_changed, checkbox))
                 self.all_checkboxes[k.k.unique_id] = checkbox
                 group.add_checkbox(checkbox)
 
@@ -302,6 +353,16 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         self.frame_container(self.current_container)
 
+    def on_query_changed(self, checkbox):
+        if checkbox.isChecked():
+            if checkbox.word not in self.current_query_keywords:
+                self.current_query_keywords.append(checkbox.word)
+        else:
+            if checkbox.word in self.current_query_keywords:
+                self.current_query_keywords.remove(checkbox.word)
+        if self.current_experiment is not None:
+            self.current_experiment.query(self.current_query_keywords)
+        pass
 
 class CheckBoxGroupWidget(QWidget):
     def __init__(self, parent, name ,n_columns = 3):

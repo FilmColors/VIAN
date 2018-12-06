@@ -199,6 +199,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_popup = None
         self.quick_annotation_dock = None
         self.colorimetry_live = None
+        self.query_widget = None
 
         # This is the Widget created when Double Clicking on a Annotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
@@ -260,6 +261,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.create_vocabulary_manager()
         self.create_vocabulary_matrix()
+        self.create_query_widget()
 
         loading_screen.showMessage("Creating GUI: Analysis", Qt.AlignHCenter | Qt.AlignBottom,
                                    QColor(200, 200, 200, 100))
@@ -437,8 +439,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.annotation_options,
                                     self.experiment_dock.experiment_editor,
                                     self.corpus_client,
-                                    self.colorimetry_live
-
+                                    self.colorimetry_live,
+                                    self.query_widget
                                           ]
 
         self.menus_list = [
@@ -807,6 +809,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_matrix.raise_()
             self.vocabulary_matrix.activateWindow()
 
+    def create_query_widget(self):
+        if self.query_widget is None:
+            self.query_widget = ClassificationWindow(self, behaviour="query")
+            self.tabifyDockWidget(self.player_dock_widget, self.query_widget)
+        else:
+            self.query_widget.show()
+            self.query_widget.raise_()
+            self.query_widget.activateWindow()
+
     def create_analysis_results_widget(self):
         if self.analysis_results_widget is None:
             self.analysis_results_widget_dock = AnalysisResultsDock(self)
@@ -903,7 +914,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 event.acceptProposedAction()
 
     def dropEvent(self, event):
-        print("Hello")
         if event.mimeData().hasUrls():
             file_extension = str(event.mimeData().urls()[0]).split(".").pop()
             files = event.mimeData().urls()
