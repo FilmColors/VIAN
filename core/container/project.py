@@ -83,6 +83,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     onScreenshotGroupAdded = pyqtSignal(object)
     onScreenshotGroupRemoved = pyqtSignal(object)
+    onScreenshotsHighlighted = pyqtSignal(object)
     onSegmentationAdded = pyqtSignal(object)
     onSegmentationRemoved = pyqtSignal(object)
     onAnnotationLayerAdded = pyqtSignal(object)
@@ -150,6 +151,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.inhibit_dispatch = False
         self.selected = []
+        self.segment_screenshot_mapping = dict()
 
     def highlight_types(self, types):
 
@@ -422,6 +424,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # self.dispatch_changed()
 
     def sort_screenshots(self):
+        self.segment_screenshot_mapping = dict()
         if self.get_main_segmentation():
             self.get_main_segmentation().update_segment_ids()
             self.screenshots.sort(key=lambda x: x.movie_timestamp, reverse=False)
@@ -430,7 +433,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 grp.screenshots.sort(key=lambda x: x.movie_timestamp, reverse=False)
 
             for s in self.screenshots:
-                s.update_scene_id(self.get_main_segmentation())
+                segment = s.update_scene_id(self.get_main_segmentation())
+                if segment not in self.segment_screenshot_mapping:
+                    self.segment_screenshot_mapping[segment] = []
+                self.segment_screenshot_mapping[segment].append(s)
 
             shot_id_global = 1
             shot_id_segm = 1

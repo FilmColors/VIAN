@@ -249,7 +249,19 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
             self.connect_scr_group(grp)
             for scr in grp.screenshots:
                 self.add_screenshot(scr)
+        project.onScreenshotsHighlighted.connect(self.on_screenshots_highlighted)
 
+    @pyqtSlot(object)
+    def on_screenshots_highlighted(self, screenshots):
+        if len(screenshots) == 0:
+            self.color_dt.set_highlighted([], True)
+            self.ab_view.set_highlighted([], True)
+            self.lc_view.set_highlighted([], True)
+        else:
+            uids = [scr.unique_id for scr in screenshots]
+            self.color_dt.set_highlighted_by_uid(uids)
+            self.ab_view.set_highlighted_by_uid(uids)
+            self.lc_view.set_highlighted_by_uid(uids)
 
     def connect_scr_group(self, grp):
         grp.onScreenshotAdded.connect(self.add_screenshot)
@@ -326,6 +338,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
                                    convert=False,
                                    uid=scr.unique_id,
                                    z=lab[2])
+
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """

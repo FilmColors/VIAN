@@ -234,20 +234,36 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
     def get_heads_up_widget(self):
         return self.heads_up_widget
 
+    def set_highlighted_by_uid(self, uids, reset = False, alpha_active = 1.0, alpha_inactive = 0.0):
+        if len(uids) > 0:
+            items = [self.item_idx[uid][0] for uid in uids]
+            for idx, img in enumerate(self.images):
+                if img in items:
+                    img.set_transparency(alpha_active)
+                    # img.setZValue(0.0)                    # img.setZValue(0.0)
+                else:
+                    img.set_transparency(alpha_inactive)
+                    # img.setZValue(-10.0)
+        else:
+            if reset:
+                for idx, img in enumerate(self.images):
+                    img.set_transparency(1.0)
+                    # img.setZValue(0.0)
+
     def set_highlighted(self, indices, reset = False):
         if len(indices) > 0:
             for idx, img in enumerate(self.images):
                 if idx in indices:
                     img.set_transparency(1.0)
-                    img.setZValue(0.0)
+                    # img.setZValue(0.0)
                 else:
                     img.set_transparency(0.2)
-                    img.setZValue(-10.0)
+                    # img.setZValue(-10.0)
         else:
             if reset:
                 for idx, img in enumerate(self.images):
                     img.set_transparency(1.0)
-                    img.setZValue(0.0)
+
 
     @pyqtSlot(int)
     def on_high_cut(self, value):
@@ -326,7 +342,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
             qp.setOpacity(alpha)
             qp.drawPixmap(0,0, self.pixmap)
             qp.end()
-            self.setPixmap(QPixmap(img))
+            super(VIANPixmapGraphicsItem, self).setPixmap(QPixmap(img))
             self.curr_alpha = alpha
 
 
@@ -361,7 +377,7 @@ class ImagePlotCircular(ImagePlot):
             if uid is not None:
                 if uid in self.item_idx:
                     self.scene().removeItem(self.item_idx[uid][0])
-                self.item_idx[uid] = (itm)
+                self.item_idx[uid] = (itm, len(self.images) - 1)
 
             if luminance is not None:
                 self.luminances.append([luminance, itm])
@@ -375,7 +391,7 @@ class ImagePlotCircular(ImagePlot):
 
     def update_item(self, uid, pos, pixmap = None):
         if uid in self.item_idx:
-            itm = self.item_idx[uid]
+            itm = self.item_idx[uid][0]
             x = pos[0]
             y = pos[1]
             if pixmap is not None:
@@ -472,7 +488,6 @@ class ImagePlotPlane(ImagePlot):
         self.curr_angle = 0.0
         self.compass = None
         super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
-
 
     def add_image(self, x, y, img, convert = True, mime_data = None, z = 0, uid=None):
         if convert:

@@ -2,7 +2,7 @@ import json
 from typing import List
 from core.container.analysis import AnalysisContainer, AnalysisParameters
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
-    ANNOTATION_LAYER, SCREENSHOT_GROUP
+    ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from core.data.interfaces import IProjectContainer, IHasName, IClassifiable
 from core.gui.vocabulary import VocabularyItem
 import time
@@ -543,9 +543,11 @@ class Experiment(IProjectContainer, IHasName):
     def get_type(self):
         return EXPERIMENT
     
-    def query(self, keywords:List[UniqueKeyword]):
+    def query(self, keywords:List[UniqueKeyword], promote_to_screenshots = False):
         result = []
         containers = self.project.get_all_containers()
+        self.project.onScreenshotsHighlighted.emit([])
+
         for c in containers:
             if isinstance(c, IClassifiable):
                 c.set_classification_highlight(False)
@@ -554,8 +556,19 @@ class Experiment(IProjectContainer, IHasName):
             if k[1] in keywords:
                 result.append(k[0])
         result = list(set(result))
-        for r in result:
-            r.set_classification_highlight(True)
+
+        if not promote_to_screenshots:
+            for r in result:
+                r.set_classification_highlight(True)
+        else:
+            screenshots = []
+            for r in result:
+                r.set_classification_highlight(True)
+                if r.get_type() == SEGMENT and r in self.project.segment_screenshot_mapping:
+                    screenshots.extend(self.project.segment_screenshot_mapping[r])
+
+            if len(screenshots) > 0:
+                self.project.onScreenshotsHighlighted.emit(screenshots)
     
     def get_correlation_matrix(self):
         if self.correlation_matrix is not None:

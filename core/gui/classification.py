@@ -3,7 +3,7 @@ from functools import partial
 
 import numpy as np
 from PyQt5 import uic
-from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox
+from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton
 
 from core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
 from core.data.interfaces import IProjectChangeNotify
@@ -78,6 +78,9 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.comboBox_Sorting.hide()
             self.stackedWidget.setCurrentIndex(1)
             self.progressBar.hide()
+            self.btn_PromoteToScreenshots = QPushButton("Promote to Screenshots")
+            self.stackedWidget.widget(1).layout().addWidget(self.btn_PromoteToScreenshots)
+            self.btn_PromoteToScreenshots.clicked.connect(self.on_promote_query_to_screenshots)
 
 
     def on_changed(self, project, item):
@@ -363,6 +366,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         if self.current_experiment is not None:
             self.current_experiment.query(self.current_query_keywords)
         pass
+
+    def on_promote_query_to_screenshots(self):
+        if self.current_experiment is not None:
+            self.current_experiment.query(self.current_query_keywords, True)
 
 class CheckBoxGroupWidget(QWidget):
     def __init__(self, parent, name ,n_columns = 3):
