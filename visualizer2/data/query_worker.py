@@ -18,7 +18,7 @@ class QueryWorkerSignals(QObject):
     onSegmentsQueryResult = pyqtSignal(object)
     onKeywordsQueryResult = pyqtSignal(object)
     onProjectsQueryResult = pyqtSignal(object)
-    onCorpusQueryResult = pyqtSignal(object, object) #type: List[DBProjects], List[DBUniuqeKeywords]
+    onCorpusQueryResult = pyqtSignal(object, object, object) #type: List[DBProjects], List[DBUniuqeKeywords], List[DBClassificationObject]
     onProjectQueryResult = pyqtSignal(object)
     onFinishedQuery = pyqtSignal(str)
 
@@ -46,7 +46,7 @@ class QueryWorker(QObject):
         return self.corpus.db.query(DBUniqueKeyword).all()
 
     def on_corpus_info(self):
-        self.signals.onCorpusQueryResult.emit(self.corpus.db.query(DBProject).all(), self.corpus.db.query(DBUniqueKeyword).all())
+        self.signals.onCorpusQueryResult.emit(self.corpus.db.query(DBProject).all(), self.corpus.db.query(DBUniqueKeyword).all(), self.corpus.db.query(DBClassificationObject).all())
 
     def on_project_query(self, project:DBProject):
         pass

@@ -23,7 +23,7 @@ class VIANVisualizer(QMainWindow):
     onProjectQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
     onAbortAllWorker = pyqtSignal()
-    onLoadScreenshots = pyqtSignal(object, bool)
+    onLoadScreenshots = pyqtSignal(object, object, int)
 
     def __init__(self, parent = None, contributor=None):
         super(VIANVisualizer, self).__init__(parent)
@@ -45,9 +45,9 @@ class VIANVisualizer(QMainWindow):
         self.query_worker = QueryWorker(path, contributor)
         self.query_worker.corpus.sql_path = sql_path
 
-        # self.query_thread = QThread()
-        # self.query_worker.moveToThread(self.query_thread)
-        # self.query_thread.start()
+        self.query_thread = QThread()
+        self.query_worker.moveToThread(self.query_thread)
+        self.query_thread.start()
         self.onQuery.connect(self.query_worker.on_query)
         self.onCorpusQuery.connect(self.query_worker.on_corpus_info)
         self.onProjectQuery.connect(self.query_worker.on_project_query)
@@ -58,7 +58,7 @@ class VIANVisualizer(QMainWindow):
 
         # self.query_worker.initialize(contributor)
 
-        self.screenshot_loader = ScreenshotWorker(self)
+        self.screenshot_loader = ScreenshotWorker(self, os.path.split(CORPUS_PATH)[0])
         self.screenshot_loader_thread = QThread()
         self.screenshot_loader.moveToThread(self.screenshot_loader_thread)
         self.screenshot_loader_thread.start()
@@ -122,6 +122,7 @@ class VIANVisualizer(QMainWindow):
         # This is set during startup in the vis_search_widget #TUPLE (kwd, voc, cl_obj, word)
         self.all_keywords = dict()
         self.onCorpusQuery.emit()
+        self.classification_objects = []
         # self.on_query("projects")
         # self.on_query("keywords")
 

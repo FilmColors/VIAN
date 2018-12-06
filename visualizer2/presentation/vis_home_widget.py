@@ -22,10 +22,11 @@ class VisHomeWidget(PresentationWidget):
         self.hbox_Lower.addItem(self.vbox_contributions)
 
 
-    def on_corpus_result(self, projects:List[DBProject], keywords:List[DBUniqueKeyword]):
+    def on_corpus_result(self, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects = List[DBClassificationObject]):
         for p in projects:
             self.contribution_list.add_entry(dbproject=p)
-            self.visualizer.screenshot_loader.initialize(self.visualizer.db_root)
+            # self.visualizer.screenshot_loader.initialize(self.visualizer.db_root)
+        self.visualizer.classification_objects = classification_objects
     # @pyqtSlot(object)
     # def on_query_result(self, obj):
     #     if obj['type'] == "projects":
