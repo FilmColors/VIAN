@@ -384,7 +384,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
 
 class CheckBoxGroupWidget(QWidget):
-    def __init__(self, parent, name ,n_columns = 3):
+    def __init__(self, parent, name, n_columns = 3):
         super(CheckBoxGroupWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/ClassificationCategory.ui")
         uic.loadUi(path, self)
@@ -401,7 +401,11 @@ class CheckBoxGroupWidget(QWidget):
 
     def add_checkbox(self, checkbox):
         self.items.append(checkbox)
-        self.items = sorted(self.items, key = lambda x: x.word.get_name())
+        try:
+            self.items = sorted(self.items, key=lambda x: x.word.get_name())
+        except:
+            self.items = sorted(self.items, key = lambda x: x.word.name)
+
         size = len(self.items)
         n_rows = np.ceil(size/self.n_columns)
 

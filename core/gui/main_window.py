@@ -2031,16 +2031,6 @@ class MainWindow(QtWidgets.QMainWindow):
             o.on_loaded(self.project)
 
         self.project.unload_all()
-        # for s in self.project.screenshots:
-        #     screenshot_position.append(s.frame_pos)
-        #     a_dicts = []
-        #     if s.annotation_item_ids is not None:
-        #         for a_id in s.annotation_item_ids:
-        #             annotation_dict = self.project.get_by_id(a_id)
-        #             if annotation_dict is not None:
-        #                 a_dicts.append(annotation_dict.serialize())
-        #
-        #     screenshot_annotation_dicts.append(a_dicts)
 
         self.frame_update_worker.set_movie_path(self.project.movie_descriptor.get_movie_path())
         self.frame_update_worker.set_project(self.project)

@@ -89,7 +89,6 @@ class VisSearchLayout(PresentationWidget):
             self.visualizer.on_query(d[0], d[1], d[2], d[3], d[4])
 
 
-
 class KeywordWidget(QWidget):
     def __init__(self,parent, visualizer):
         super(KeywordWidget, self).__init__(parent)
@@ -238,6 +237,7 @@ class FilmographyWidget(QWidget):
             query.year_end = self.spinBox_YearB.value()
 
         return query
+
 
 class WordCheckBox(QCheckBox):
     def __init__(self, parent, word, unique_keyword):
