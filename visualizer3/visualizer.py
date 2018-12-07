@@ -11,6 +11,7 @@ from core.corpus.shared.sqlalchemy_entities import *
 from visualizer3.worker import QueryWorker, CORPUS_PATH
 from functools import partial
 from visualizer3.plot_widget import PlotWidget, PlotResultsWidget
+from visualizer3.screenshot_worker import ScreenshotWorker
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime
 
 class ProgressBar(QMainWindow):
@@ -37,15 +38,16 @@ class VIANVisualizer(QMainWindow):
         self.query_widget = KeywordWidget(self, self)
         self.setCentralWidget(QWidget(self))
 
-        self.worker = QueryWorker(CORPUS_PATH)
-        self.query_thread = QThread()
-        self.worker.moveToThread(self.query_thread)
-        self.query_thread.start()
-
-        self.onSegmentQuery.connect(self.worker.on_query_segments)
-        self.worker.signals.onCorpusQueryResult.connect(self.on_corpus_result)
-        self.worker.signals.onSegmentQueryResult.connect(self.on_segment_query_result)
-        self.onCorpusQuery.connect(self.worker.on_corpus_info)
+        # self.worker = QueryWorker(CORPUS_PATH)
+        # self.query_thread = QThread()
+        # self.worker.moveToThread(self.query_thread)
+        # self.query_thread.start()
+        #
+        # self.onSegmentQuery.connect(self.worker.on_query_segments)
+        # self.worker.signals.onCorpusQueryResult.connect(self.on_corpus_result)
+        # self.worker.signals.onSegmentQueryResult.connect(self.on_segment_query_result)
+        # self.onCorpusQuery.connect(self.worker.on_corpus_info)
+        self.screenshot_loader = ScreenshotWorker(self)
         self.centralWidget().setLayout(QVBoxLayout())
 
         self.cb_corpus = QComboBox(self)
@@ -58,12 +60,29 @@ class VIANVisualizer(QMainWindow):
 
         self.btn_query = QPushButton("Query")
         self.btn_query.clicked.connect(self.on_query)
-        self.centralWidget().layout().addWidget(self.btn_query)
+
 
         self.classification_objects = []
         self.onCorpusQuery.emit()
 
         self.result_wnd = PlotResultsWidget(self)
+
+        self.plot_types_stack = QStackedWidget(self)
+
+        # Plottypes Widget
+        self.w_plot_types = QWidget(self)
+        lt = QGridLayout()
+        self.w_plot_types.setLayout(lt)
+        self.cb_segm_ab_plot = QCheckBox("AB-Plot", self)
+        self.cb_segm_lc_plot = QCheckBox("LC-Plot", self)
+        self.cb_segm_dt_plot = QCheckBox("Color-dT", self)
+        lt.addWidget(QLabel("Plot Types"), 0, 0)
+        lt.addWidget(self.cb_segm_ab_plot, 1, 0)
+        lt.addWidget(self.cb_segm_lc_plot, 2, 0)
+        lt.addWidget(self.cb_segm_dt_plot, 3, 0)
+        self.centralWidget().layout().addWidget(self.w_plot_types)
+
+        self.centralWidget().layout().addWidget(self.btn_query)
 
         self.sub_corpora = dict()
         # SegmentsData

@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from core.visualization.image_plots import *
 from core.gui.ewidgetbase import ExpandableWidget
+
 class PlotWidget(QDockWidget):
     def __init__(self, parent, plot, name = "no name"):
         super(PlotWidget, self).__init__(parent)
