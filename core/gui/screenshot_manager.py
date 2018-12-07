@@ -241,7 +241,10 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.draw_visualizations()
 
     def remove_screenshot(self, scr):
-        pass
+        self.color_dt.remove_image_by_uid(scr.unique_id)
+        self.ab_view.remove_image_by_uid(scr.unique_id)
+        self.lc_view.remove_image_by_uid(scr.unique_id)
+        print("removed", scr)
 
     def on_loaded(self, project:VIANProject):
         project.onScreenshotGroupAdded.connect(self.connect_scr_group)
@@ -265,27 +268,35 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def connect_scr_group(self, grp):
         grp.onScreenshotAdded.connect(self.add_screenshot)
+        grp.onScreenshotRemoved.connect(self.remove_screenshot)
 
     @pyqtSlot(object)
     def add_screenshot(self, scr:Screenshot):
         scr.onImageSet.connect(self.update_screenshot)
+        scr.onAnalysisAdded.connect(self.on_analysis_added)
         self.update_screenshot(scr)
+
+    def on_analysis_added(self, a):
+        self.update_screenshot(a.target_container)
+        print("on analysis added")
 
     @pyqtSlot(object, object, object)
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
         clobj = self.main_window.project.active_classification_object
+        print(scr, scr.connected_analyses)
         if clobj is None:
             try:
                 a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)["default"][0].get_adata()
-            except:
+                print(a)
+            except Exception as e:
+                print(e)
                 a = None
         else:
             try:
                 a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
+                print(a)
             except Exception as e:
-                print(e)
                 a = None
-
         if a is None:
             return
         x = scr.movie_timestamp

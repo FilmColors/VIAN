@@ -33,6 +33,9 @@ class VIANVisualizer(QMainWindow):
         self.centralWidget().layout().addWidget(self.cb_query_type)
         self.centralWidget().layout().addWidget(self.query_widget)
 
+        self.btn_query = QPushButton("Query")
+        self.centralWidget().layout().addWidget(self.btn_query)
+
         self.classification_objects = []
         self.onCorpusQuery.emit()
         self.show()

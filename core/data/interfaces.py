@@ -90,6 +90,7 @@ class IProjectContainer(QObject):
 
     def add_analysis(self, analysis):
         self.connected_analyses.append(analysis)
+        analysis.set_project(self.project)
         self.onAnalysisAdded.emit(analysis)
 
     def remove_analysis(self, analysis):

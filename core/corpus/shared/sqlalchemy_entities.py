@@ -1,8 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Table, TypeDecorator, Unicode, Text, Float
 from sqlalchemy.orm import relationship
-from sqlalchemy_searchable import make_searchable
-from sqlalchemy_utils.types import TSVectorType
 import json
 
 """
@@ -14,8 +12,6 @@ use_postgres = False
 
 Base = declarative_base()
 
-if use_postgres:
-    make_searchable(Base.metadata)
 
 
 class Point(object):
@@ -120,8 +116,6 @@ class User(Base):
                                            secondary=Subcorpora_subscibed_user_association_table,
                                            back_populates="users")
 
-    if use_postgres:
-        search_vector = Column(TSVectorType('username'))
 
 
 class Upload(Base):
