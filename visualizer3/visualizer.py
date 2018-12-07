@@ -4,15 +4,31 @@ from PyQt5.QtWidgets import *
 from core.gui.classification import CheckBoxGroupWidget
 from PyQt5 import uic
 import os
+import cv2
 from typing import List
 
 from core.corpus.shared.sqlalchemy_entities import *
 from visualizer3.worker import QueryWorker, CORPUS_PATH
 from functools import partial
+from visualizer3.plot_widget import PlotWidget, PlotResultsWidget
+from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime
 
+class ProgressBar(QMainWindow):
+    def __init__(self, parent, singal):
+        super(ProgressBar, self).__init__(parent)
+        self.pbar = QProgressBar(self)
+        self.setWindowFlags(Qt.Dialog)
+        self.setCentralWidget(self.pbar)
+        singal.connect(self.on_progress)
+
+    @pyqtSlot(float)
+    def on_progress(self, f):
+        self.pbar.setValue(int(f * 100))
+        if f == 1.0:
+            self.close()
 
 class VIANVisualizer(QMainWindow):
-    onSegmentQuery = pyqtSignal(object, object)
+    onSegmentQuery = pyqtSignal(object, object, object)
     onMovieQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
 
@@ -20,8 +36,15 @@ class VIANVisualizer(QMainWindow):
         super(VIANVisualizer, self).__init__(parent)
         self.query_widget = KeywordWidget(self, self)
         self.setCentralWidget(QWidget(self))
+
         self.worker = QueryWorker(CORPUS_PATH)
+        self.query_thread = QThread()
+        self.worker.moveToThread(self.query_thread)
+        self.query_thread.start()
+
+        self.onSegmentQuery.connect(self.worker.on_query_segments)
         self.worker.signals.onCorpusQueryResult.connect(self.on_corpus_result)
+        self.worker.signals.onSegmentQueryResult.connect(self.on_segment_query_result)
         self.onCorpusQuery.connect(self.worker.on_corpus_info)
         self.centralWidget().setLayout(QVBoxLayout())
 
@@ -34,11 +57,61 @@ class VIANVisualizer(QMainWindow):
         self.centralWidget().layout().addWidget(self.query_widget)
 
         self.btn_query = QPushButton("Query")
+        self.btn_query.clicked.connect(self.on_query)
         self.centralWidget().layout().addWidget(self.btn_query)
 
         self.classification_objects = []
         self.onCorpusQuery.emit()
+
+        self.result_wnd = PlotResultsWidget(self)
+
+        self.sub_corpora = dict()
+        # SegmentsData
+        self.segments = dict()
+        self.segm_scrs = dict()
         self.show()
+
+    def on_query(self):
+        progress = ProgressBar(self, self.worker.signals.onProgress)
+        progress.show()
+        if self.cb_query_type.currentText() == "Segments":
+            self.query_segments()
+        else:
+            self.query_movies()
+
+    def query_segments(self):
+        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), self.sub_corpora[self.cb_corpus.currentText()])
+        pass
+
+    def query_movies(self):
+        pass
+
+    def on_segment_query_result(self, segments:List[DBSegment], screenshots:List[DBScreenshot]):
+        self.segm_scrs = dict()
+        self.segments = dict()
+        p_ab = ImagePlotCircular(self.result_wnd)
+        p_lc = ImagePlotPlane(self.result_wnd)
+        p_dt = ImagePlotTime(self.result_wnd)
+        for scr in screenshots.values():
+            try:
+                data = scr.features[1]
+                img = scr.current_image
+                img = cv2.imread(self.worker.root + "/shots/" + scr.dbscreenshot.file_path)
+                l = data[0]
+                tx = scr.dbscreenshot.time_ms
+                ty = data[7]
+                x = data[1]
+                y = data[2]
+                p_ab.add_image(x, y, img, True, mime_data=scr, z=l)
+                p_lc.add_image(x, l, img, False, mime_data=scr, z=y)
+                p_dt.add_image(tx, ty, img, False, mime_data=scr)
+            except Exception as e:
+                pass
+
+        self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_ab, "AB-View"))
+        self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_dt, "DT-View"))
+        self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_lc, "LC-VIEW"))
+        self.result_wnd.show()
 
     def on_corpus_result(self, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
         self.classification_objects = classification_objects
@@ -51,7 +124,7 @@ class VIANVisualizer(QMainWindow):
         self.query_widget.add_spacers()
         for c in subcorpora:
             self.cb_corpus.addItem(c.name)
-
+            self.sub_corpora[c.name] = c
 
 class ClassificationObjectList(QListWidget):
     def __init__(self, parent):
@@ -100,7 +173,7 @@ class KeywordWidget(QWidget):
         self.add_filmography_widget()
 
     def add_filmography_widget(self):
-        stack = FilmographyWidget(self, self.visualizer)
+        stack = FilmographyWidget(self)
         self.stack_map["Filmography"] = stack
         self.stack_widget.addWidget(stack)
         self.filmography_widget = stack
@@ -160,11 +233,11 @@ class KeywordWidget(QWidget):
             group = self.voc_map[cl_obj.name][voc.vocabulary_category.name][voc.name]
 
         checkbox = WordCheckBox(None, voc_word)
+        checkbox.setTristate(True)
         self.keyword_map[ukw.id] = checkbox
         self.keyword_cl_obj_map[ukw.id] = cl_obj_item
         group.add_checkbox(checkbox)
         checkbox.show()
-        print(checkbox)
 
     def get_keyword_filters(self):
         result_include = []
@@ -172,10 +245,10 @@ class KeywordWidget(QWidget):
         for k in self.keyword_map.keys():
             cb = self.keyword_map[k]
             if cb.checkState() == Qt.Checked:
-                result_include.append(cb.unique_keyword.unique_keyword_id)
+                result_include.append(cb.word.id)
             elif cb.checkState() == Qt.PartiallyChecked:
-                result_exclude.append(cb.unique_keyword.unique_keyword_id)
-        return dict(include=result_include, exclude=result_exclude)
+                result_exclude.append(cb.word.id)
+        return result_include, result_exclude
 
     def get_classification_object_filters(self):
         result = []
@@ -197,7 +270,7 @@ class WordCheckBox(QCheckBox):
 
 
 class FilmographyWidget(QWidget):
-    def __init__(self,parent, visualizer):
+    def __init__(self,parent):
         super(FilmographyWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/visualizer/FilmographyQueryWidget.ui")
         uic.loadUi(path, self)

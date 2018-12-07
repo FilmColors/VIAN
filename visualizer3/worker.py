@@ -3,6 +3,8 @@ from core.corpus.shared.corpus import VIANCorpus
 from core.corpus.shared.sqlalchemy_entities import *
 from enum import Enum
 import os
+from random import shuffle
+from visualizer3.vis_entities import VisScreenshot
 
 class QueryType(Enum):
     Segment = 0
@@ -12,10 +14,10 @@ class QueryType(Enum):
     Keywords = 4
 
 class QueryWorkerSignals(QObject):
-    onSegmentQueryResult = pyqtSignal(object)
+    onSegmentQueryResult = pyqtSignal(object, object)
     onMovieQueryResult = pyqtSignal(object)
     onCorpusQueryResult = pyqtSignal(object, object, object, object)  # type: List[DBProjects], List[DBUniuqeKeywords], List[DBClassificationObject]
-
+    onProgress = pyqtSignal(float)
 CORPUS_PATH = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
 # CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
 
@@ -48,15 +50,38 @@ class QueryWorker(QObject):
     def on_project_query(self, project:DBProject):
         pass
 
-    def on_query_segments(self, include_kwds = None, exclude_kwds = None):
+
+    def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None):
         excluded_subquery = self.corpus.db.query(DBSegment.id) \
             .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(exclude_kwds))).subquery()
 
-        segments = self.corpus.db.query(DBSegment) \
-            .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds))) \
-            .filter(DBSegment.id.notin_(excluded_subquery)) \
+        res = self.corpus.db.query(DBSegment, DBScreenshot, DBScreenshotAnalysis) \
+            .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds)))\
+            .filter(DBSegment.id.notin_(excluded_subquery))\
+            .filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
+            .join(DBScreenshot)\
+            .join(DBScreenshotAnalysis)\
             .all()
-        return segments
+
+        print(res)
+        segments = []
+        for r in res:
+            segments.append(r[0])
+
+        segments = list(set(segments))
+
+        screenshots = dict()
+        print("Loading Analyses")
+        # shuffle(res)
+        for i, (segm, scr, analysis)  in enumerate(res): #type: DBScreenshot
+            self.signals.onProgress.emit(i / 1000)
+            if scr.id not in screenshots:
+                screenshots[scr.id] = VisScreenshot(scr, dict())
+
+            screenshots[scr.id].features[analysis.classification_obj_id]=self.corpus.hdf5_manager.features()[analysis.hdf5_index]
+            if i == 1000:
+                break
+        return self.signals.onSegmentQueryResult.emit(segments, screenshots)
 
     @pyqtSlot(str, object)
     def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id):
