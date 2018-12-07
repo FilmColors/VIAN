@@ -28,26 +28,33 @@ class ProgressBar(QMainWindow):
         if f == 1.0:
             self.close()
 
+
 class VIANVisualizer(QMainWindow):
     onSegmentQuery = pyqtSignal(object, object, object)
     onMovieQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
+    onLoadScreenshots = pyqtSignal(object, object, int)
 
     def __init__(self, parent = None):
         super(VIANVisualizer, self).__init__(parent)
         self.query_widget = KeywordWidget(self, self)
         self.setCentralWidget(QWidget(self))
 
-        # self.worker = QueryWorker(CORPUS_PATH)
-        # self.query_thread = QThread()
-        # self.worker.moveToThread(self.query_thread)
-        # self.query_thread.start()
-        #
-        # self.onSegmentQuery.connect(self.worker.on_query_segments)
-        # self.worker.signals.onCorpusQueryResult.connect(self.on_corpus_result)
-        # self.worker.signals.onSegmentQueryResult.connect(self.on_segment_query_result)
-        # self.onCorpusQuery.connect(self.worker.on_corpus_info)
+        self.MAX_WIDTH = 300
+
+        self.worker = QueryWorker(CORPUS_PATH)
+        self.query_thread = QThread()
+        self.worker.moveToThread(self.query_thread)
+        self.query_thread.start()
+
+        self.onSegmentQuery.connect(self.worker.on_query_segments)
+        self.worker.signals.onCorpusQueryResult.connect(self.on_corpus_result)
+        self.worker.signals.onSegmentQueryResult.connect(self.on_segment_query_result)
+        self.onCorpusQuery.connect(self.worker.on_corpus_info)
+
         self.screenshot_loader = ScreenshotWorker(self)
+        self.onLoadScreenshots.connect(self.screenshot_loader.on_load_screenshots)
+
         self.centralWidget().setLayout(QVBoxLayout())
 
         self.cb_corpus = QComboBox(self)
@@ -61,22 +68,24 @@ class VIANVisualizer(QMainWindow):
         self.btn_query = QPushButton("Query")
         self.btn_query.clicked.connect(self.on_query)
 
-
         self.classification_objects = []
+
+        self.load_corpus()
         self.onCorpusQuery.emit()
 
         self.result_wnd = PlotResultsWidget(self)
 
-        self.plot_types_stack = QStackedWidget(self)
-
         # Plottypes Widget
         self.w_plot_types = QWidget(self)
-        lt = QGridLayout()
+        lt = QGridLayout(self.w_plot_types)
         self.w_plot_types.setLayout(lt)
-        self.cb_segm_ab_plot = QCheckBox("AB-Plot", self)
-        self.cb_segm_lc_plot = QCheckBox("LC-Plot", self)
-        self.cb_segm_dt_plot = QCheckBox("Color-dT", self)
-        lt.addWidget(QLabel("Plot Types"), 0, 0)
+        self.cb_segm_ab_plot = QCheckBox("AB-Plot", self.w_plot_types)
+        self.cb_segm_lc_plot = QCheckBox("LC-Plot", self.w_plot_types)
+        self.cb_segm_dt_plot = QCheckBox("Color-dT", self.w_plot_types)
+        self.cb_segm_ab_plot.setChecked(True)
+        self.cb_segm_lc_plot.setChecked(True)
+        self.cb_segm_dt_plot.setChecked(True)
+        lt.addWidget(QLabel("Plot Types", self.w_plot_types), 0, 0)
         lt.addWidget(self.cb_segm_ab_plot, 1, 0)
         lt.addWidget(self.cb_segm_lc_plot, 2, 0)
         lt.addWidget(self.cb_segm_dt_plot, 3, 0)
@@ -84,11 +93,19 @@ class VIANVisualizer(QMainWindow):
 
         self.centralWidget().layout().addWidget(self.btn_query)
 
+
         self.sub_corpora = dict()
         # SegmentsData
         self.segments = dict()
         self.segm_scrs = dict()
         self.show()
+
+    def load_corpus(self, path = "F:\\_corpus\\ERCFilmColors_V2\\database.db"):
+        root = os.path.split(path)[0]
+        hdf5_path = path.replace("database.db", "analyses.hdf5")
+        sql_path = "sqlite:///" + path
+        self.worker.load(path, root)
+        self.screenshot_loader.db_root = root
 
     def on_query(self):
         progress = ProgressBar(self, self.worker.signals.onProgress)
@@ -115,22 +132,31 @@ class VIANVisualizer(QMainWindow):
             try:
                 data = scr.features[1]
                 img = scr.current_image
-                img = cv2.imread(self.worker.root + "/shots/" + scr.dbscreenshot.file_path)
+                # img = cv2.imread(self.worker.root + "/shots/" + scr.dbscreenshot.file_path)
                 l = data[0]
                 tx = scr.dbscreenshot.time_ms
                 ty = data[7]
                 x = data[1]
                 y = data[2]
-                p_ab.add_image(x, y, img, True, mime_data=scr, z=l)
-                p_lc.add_image(x, l, img, False, mime_data=scr, z=y)
-                p_dt.add_image(tx, ty, img, False, mime_data=scr)
+                scr.onImageChanged.connect(p_ab.add_image(x, y, img, True, mime_data=scr, z=l).setPixmap)
+                scr.onImageChanged.connect(p_lc.add_image(x, l, img, False, mime_data=scr, z=y).setPixmap)
+                scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr).setPixmap)
             except Exception as e:
                 pass
 
         self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_ab, "AB-View"))
         self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_dt, "DT-View"))
         self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_lc, "LC-VIEW"))
+
         self.result_wnd.show()
+
+        labels = []
+        for clobj in self.classification_objects:
+            t = [lbl.mask_idx for lbl in clobj.semantic_segmentation_labels]
+            labels.append([clobj.id, t])
+
+        print(labels)
+        self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
 
     def on_corpus_result(self, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
         self.classification_objects = classification_objects
@@ -144,6 +170,7 @@ class VIANVisualizer(QMainWindow):
         for c in subcorpora:
             self.cb_corpus.addItem(c.name)
             self.sub_corpora[c.name] = c
+
 
 class ClassificationObjectList(QListWidget):
     def __init__(self, parent):

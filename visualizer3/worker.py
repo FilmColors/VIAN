@@ -29,7 +29,7 @@ class QueryWorker(QObject):
 
         self.active = True
         self.wait = True
-        self.corpus = VIANCorpus(path)
+        self.corpus = None
         self.user = user
         self.root = os.path.split(path)[0]
         self.path = path
@@ -37,6 +37,10 @@ class QueryWorker(QObject):
 
     def initialize(self):
         self.corpus.onQueryResult.connect(self.on_query_result)
+
+    def load(self, path, root):
+        self.corpus = VIANCorpus(path)
+        self.root = root
 
     def on_query_keywords(self):
         return self.corpus.db.query(DBUniqueKeyword).all()
@@ -63,7 +67,6 @@ class QueryWorker(QObject):
             .join(DBScreenshotAnalysis)\
             .all()
 
-        print(res)
         segments = []
         for r in res:
             segments.append(r[0])
@@ -73,11 +76,19 @@ class QueryWorker(QObject):
         screenshots = dict()
         print("Loading Analyses")
         # shuffle(res)
-        for i, (segm, scr, analysis)  in enumerate(res): #type: DBScreenshot
-            self.signals.onProgress.emit(i / 1000)
+        n = 1000
+        step = int(len(res) / n)
+        indices = []
+        for i in range(len(n)):
+            if i % step == 0:
+                indices.extend([i * step, i*step + 1, i+step + 2])
+
+        # for i, (segm, scr, analysis)  in enumerate(res): #type: DBScreenshot
+        for i, idx in enumerate(indices):
+            self.signals.onProgress.emit(i / 1000 * 3)
+            segm, scr, analysis = res[idx]
             if scr.id not in screenshots:
                 screenshots[scr.id] = VisScreenshot(scr, dict())
-
             screenshots[scr.id].features[analysis.classification_obj_id]=self.corpus.hdf5_manager.features()[analysis.hdf5_index]
             if i == 1000:
                 break

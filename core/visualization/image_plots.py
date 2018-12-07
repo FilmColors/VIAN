@@ -324,6 +324,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
     def setPixmap(self, pixmap: QtGui.QPixmap):
         super(VIANPixmapGraphicsItem, self).setPixmap(pixmap)
         self.pixmap = pixmap
+        print("Hello")
 
     def scale_pos(self, scale, scale_y = None):
         if scale_y is None:
