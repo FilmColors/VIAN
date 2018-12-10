@@ -28,6 +28,8 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         if range_y is None:
             range_y = [-128, 128]
 
+        self.grid_color = QColor(200, 200, 200, 150)
+
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.pos_scale = 1.0
         self.img_scale = 1.0
@@ -202,6 +204,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.images.clear()
         self.luminances.clear()
         self.raw_data = []
+        self.item_idx = dict()
         self.grid = []
 
     def frame_default(self):
@@ -219,6 +222,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         :return: 
         """
 
+        self.add_grid()
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
@@ -243,15 +247,14 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         return self.heads_up_widget
 
     def set_highlighted_by_uid(self, uids, reset = False, alpha_active = 1.0, alpha_inactive = 0.0):
+        print("Highlighting")
+        uids_hash = dict(zip(uids, uids))
         if len(uids) > 0:
-            items = [self.item_idx[uid][0] for uid in uids]
-            for idx, img in enumerate(self.images):
-                if img in items:
-                    img.set_transparency(alpha_active)
-                    # img.setZValue(0.0)                    # img.setZValue(0.0)
+            for k, v in self.item_idx.items():
+                if k in uids_hash:
+                    v[0].set_transparency(alpha_active)
                 else:
-                    img.set_transparency(alpha_inactive)
-                    # img.setZValue(-10.0)
+                    v[0].set_transparency(alpha_inactive)
         else:
             if reset:
                 for idx, img in enumerate(self.images):
@@ -271,7 +274,6 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             if reset:
                 for idx, img in enumerate(self.images):
                     img.set_transparency(1.0)
-
 
     @pyqtSlot(int)
     def on_high_cut(self, value):
@@ -324,7 +326,6 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
     def setPixmap(self, pixmap: QtGui.QPixmap):
         super(VIANPixmapGraphicsItem, self).setPixmap(pixmap)
         self.pixmap = pixmap
-        print("Hello")
 
     def scale_pos(self, scale, scale_y = None):
         if scale_y is None:
@@ -411,38 +412,62 @@ class ImagePlotCircular(ImagePlot):
             else:
                 itm.setPos(np.nan_to_num(-1.0 * (x * self.magnification)),
                            np.nan_to_num(1.0 * (y * self.magnification)))
+
+            itm.scale_pos(self.pos_scale)
             return True
         return False
 
     def add_grid(self):
+        for g in self.grid:
+            self.scene().removeItem(g)
+        self.grid = []
         pen = QPen()
         pen.setWidth(10)
-        pen.setColor(QColor(200,200,200,150))
+        pen.setColor(self.grid_color)
 
         font = QFont()
-        font.setPointSize(self.font_size * self.magnification)
+        font.setPointSize(12 * self.magnification)
+
 
         for i in range(7):
             self.circle0 = self.scene().addEllipse(QRectF(0,
-                                           0,
-                                                          (255/6 * i) * self.magnification,
-                                                          (255 / 6 * i) * self.magnification),
-                                    pen)
+                                           0,(255/6 * i) * self.magnification,
+                                                          (255 / 6 * i) * self.magnification),pen)
+            self.grid.append(self.circle0)
 
             q = -(128/6 * i)
             self.circle0.setPos(q * self.magnification, q * self.magnification)
-            # text = self.scene().addText(str(round(i *(128/6),0)), font)
-            # text.setPos(0,(-i *(128/6) * self.magnification)- self.font_size *self.magnification)
-            # text.setDefaultTextColor(QColor(200,200,200,200))
 
         for i in range(self.n_grid):
             x = 128 * self.magnification * np.cos(i * (2 * np.pi / self.n_grid))
             y = 128 * self.magnification * np.sin(i * (2 * np.pi / self.n_grid))
-            self.scene().addLine(0, 0 , x, y, pen)
-        self.circle0.show()
+            l = self.scene().addLine(0, 0 , x, y, pen)
+            self.grid.append(l)
 
-    def set_range_scale(self, value):
-        self.pos_scale = value / 100
+        lbla = self.scene().addText("-B", font)
+        lbla.setDefaultTextColor(self.grid_color)
+        lbla.setPos( - lbla.boundingRect().width() / 2, 130 * self.magnification)
+        self.grid.append(lbla)
+
+        lblb = self.scene().addText("A", font)
+        lblb.setDefaultTextColor(self.grid_color)
+        lblb.setPos(130 * self.magnification,  - lblb.boundingRect().height() / 2)
+        self.grid.append(lblb)
+
+        lbla = self.scene().addText("B", font)
+        lbla.setDefaultTextColor(self.grid_color)
+        lbla.setPos(- lbla.boundingRect().width() / 2, -128 * self.magnification -lbla.boundingRect().height())
+        self.grid.append(lbla)
+
+        lblb = self.scene().addText("-A", font)
+        lblb.setDefaultTextColor(self.grid_color)
+        lblb.setPos(-128 * self.magnification -lbla.boundingRect().width(), - lblb.boundingRect().height() / 2 )
+        self.grid.append(lblb)
+        # self.circle0.show()
+
+    def set_range_scale(self, value = None):
+        if value is not None:
+            self.pos_scale = value / 100
 
         for img in self.images:
             if isinstance(img, VIANPixmapGraphicsItem):
@@ -537,6 +562,7 @@ class ImagePlotPlane(ImagePlot):
             itm.setZValue(z)
             if pixmap is not None:
                 itm.setPixmap(pixmap)
+            itm.scale_pos(self.pos_scale)
             return True
         return False
 
@@ -567,8 +593,9 @@ class ImagePlotPlane(ImagePlot):
         t.rotate(self.curr_angle)
         t.translate(x, y)
 
-    def set_scale(self, v):
-        self.curr_scale = v / 200
+    def set_scale(self, v=None):
+        if v is not None:
+            self.curr_scale = v / 200
         for idx, itm in enumerate(self.raw_data):
             x, z = rotate((0, 0), (itm.x, itm.z), self.curr_angle)
             self.images[idx].setPos(np.nan_to_num(x * self.magnification) * self.curr_scale,
@@ -576,8 +603,8 @@ class ImagePlotPlane(ImagePlot):
             self.images[idx].setZValue(z)
         self.add_grid()
 
-
     def rotate_view(self, angle_rad):
+        print("Rotating")
         angle = (angle_rad / 360 * np.pi) * 2
         self.curr_angle = angle_rad
 
@@ -587,21 +614,31 @@ class ImagePlotPlane(ImagePlot):
                 self.images[idx].setPos(np.nan_to_num(x * self.magnification * self.curr_scale),
                                         np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification * self.curr_scale))
                 self.images[idx].setZValue(z)
-            except: continue
+            except Exception as e:
+                print(e)
+                continue
 
         t = QTransform()
         x, y = -110 * self.magnification, -110 * self.magnification
         t.translate(-x, -y)
         t.rotate(self.curr_angle)
         t.translate(x, y)
+        print("Set Transform")
         self.compass.setTransform(t)
+        print("Done")
+
+    def set_image_scale(self,value):
+        for img in self.images:
+            img.setScale(value / 100)
+        self.img_scale = value / 100
 
     def add_grid(self):
         for itm in self.grid:
             self.scene().removeItem(itm)
+        self.grid = []
         pen = QPen()
         pen.setWidth(10)
-        pen.setColor(QColor(200, 200, 200, 150))
+        pen.setColor(self.grid_color)
 
         font = QFont()
         font.setPointSize(self.font_size * self.magnification)
@@ -616,10 +653,17 @@ class ImagePlotPlane(ImagePlot):
 
                 text = self.scene().addText(str(round((x / (self.magnification * self.curr_scale)), 0)), font)
                 text.setPos(x, self.range_y[1] * self.magnification)
-                text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                text.setDefaultTextColor(self.grid_color)
                 self.grid.append(l)
                 self.grid.append(text)
 
+        font.setPointSize(self.font_size * 2 * self.magnification)
+        text = self.scene().addText("Luminance", font)
+        text.setRotation(-90)
+        text.setPos(-(sum(self.range_y) / 2 + self.font_size) * self.magnification - text.boundingRect().height(), x + self.magnification / 2 + text.boundingRect().width() / 2)
+        text.setDefaultTextColor(self.grid_color)
+        font.setPointSize(self.font_size * self.magnification)
+        self.grid.append(text)
 
         for x in range(self.range_y[0] * self.magnification, self.range_y[1] * self.magnification, 1):
             if x % (20 * self.magnification) == 0:
@@ -627,9 +671,16 @@ class ImagePlotPlane(ImagePlot):
 
                 text = self.scene().addText(str(round(((self.range_y[1] * self.magnification - x) / (self.magnification * self.curr_scale)), 0)), font)
                 text.setPos(self.range_x[0] * self.magnification, x)
-                text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                text.setDefaultTextColor(self.grid_color)
                 self.grid.append(l)
                 self.grid.append(text)
+
+        font.setPointSize(self.font_size * 2 * self.magnification)
+        text = self.scene().addText("Chroma", font)
+        text.setPos(sum(self.range_x) / 2 * self.magnification - (text.boundingRect().width() / 2), x + self.font_size * 2 * self.magnification)
+        text.setDefaultTextColor(self.grid_color)
+        self.grid.append(text)
+
 
         self.draw_compass()
 
@@ -637,22 +688,21 @@ class ImagePlotPlane(ImagePlot):
         w = QWidget()
         w.setLayout(QVBoxLayout())
 
-        # hl2 = QHBoxLayout(w)
-        # hl2.addWidget(QLabel("Image Scale:", w))
+        hl2 = QHBoxLayout(w)
+        hl2.addWidget(QLabel("Image Scale:", w))
+
         hl3 = QHBoxLayout(w)
         hl3.addWidget(QLabel("View Angle:", w))
 
-        # slider_xscale = QSlider(Qt.Horizontal, w)
-        # slider_xscale.setRange(1, 1000)
-        # slider_xscale.setValue(100)
-        # slider_xscale.valueChanged.connect(self.scale_pos)
-        # slider_yscale = QSlider(Qt.Horizontal, w)
-        # slider_yscale.setRange(1, 1000)
-        # slider_xscale.setValue(100)
-        # slider_yscale.valueChanged.connect(self.set_image_scale)
+        slider_image = QSlider(Qt.Horizontal, w)
+        slider_image.setRange(1, 1000)
+        slider_image.setValue(100)
+        slider_image.valueChanged.connect(self.set_image_scale)
+        hl2.addWidget(slider_image)
 
         slider_angle = QSlider(Qt.Horizontal, w)
         slider_angle.setRange(0, 360)
+
 
         hl1 = QHBoxLayout(w)
         hl1.addWidget(QLabel("Scale:", w))
@@ -679,7 +729,7 @@ class ImagePlotPlane(ImagePlot):
         hl3.addWidget(angle_sp)
 
         w.layout().addItem(hl1)
-        # w.layout().addItem(hl2)
+        w.layout().addItem(hl2)
         w.layout().addItem(hl3)
 
         return w
@@ -869,15 +919,14 @@ class ImagePlotTime(ImagePlot):
         self.images = []
 
     def add_grid(self, set_scene_rect = True):
-        pass
-        # pen = QPen()
-        # pen.setWidth(10)
-        # pen.setColor(QColor(200, 200, 200, 150))
-        #
-        # font = QFont()
-        # font.setPointSize(self.font_size)
-        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
-        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
+        pen = QPen()
+        pen.setWidth(10)
+        pen.setColor(QColor(200, 200, 200, 150))
+
+        font = QFont()
+        font.setPointSize(self.font_size)
+        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
+        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
         # if set_scene_rect:
         #     self.setSceneRect(self.scene().itemsBoundingRect())
 

@@ -181,6 +181,10 @@ class ExportImageDialog(EDialogWidget):
         self.spinBox_BG_G.valueChanged.connect(self.on_update)
         self.spinBox_BG_B.valueChanged.connect(self.on_update)
         self.spinBox_BG_A.valueChanged.connect(self.on_update)
+        self.spinBox_GridR.valueChanged.connect(self.on_update)
+        self.spinBox_GridG.valueChanged.connect(self.on_update)
+        self.spinBox_GridB.valueChanged.connect(self.on_update)
+        self.spinBox_GridA.valueChanged.connect(self.on_update)
         self.spinBox_Width.valueChanged.connect(self.on_update)
         self.spinBox_Height.valueChanged.connect(self.on_update)
 
@@ -191,10 +195,13 @@ class ExportImageDialog(EDialogWidget):
 
     def on_update(self):
         background = QColor(self.spinBox_BG_R.value(), self.spinBox_BG_G.value(), self.spinBox_BG_B.value(), self.spinBox_BG_A.value())
+        grid = QColor(self.spinBox_GridR.value(), self.spinBox_GridG.value(), self.spinBox_GridB.value(), self.spinBox_GridA.value())
+
         if not self.checkBox_Transparent.isChecked():
             background.setAlpha(255)
 
         size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value())
+        self.visualization.grid_color = grid
         image = self.visualization.render_to_image(background, size)
         self.preview.set_image(image)
         return image

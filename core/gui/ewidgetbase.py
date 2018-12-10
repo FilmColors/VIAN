@@ -74,6 +74,14 @@ class EProgressPopup(QDialog):
         self.progressBar.setValue(value * 100)
 
 
+class ESimpleDockWidget(QDockWidget):
+    def __init__(self, parent, inner, name = ""):
+        super(ESimpleDockWidget, self).__init__(parent)
+        self.setWidget(inner)
+        self.setWindowTitle(name)
+
+
+
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
@@ -289,11 +297,12 @@ class EGraphicsView(QGraphicsView):
         menu.popup(self.mapToGlobal(pos))
 
     def on_export_image(self):
-        img = pixmap_to_numpy(self.pixmap.pixmap())
-        file_name = QFileDialog.getSaveFileName(self.main_window,
-                                                directory = self.main_window.project.export_dir,
-                                                filter ="*.png *.jpg")[0]
-        cv2.imwrite(file_name, img)
+        if self.pixmap is not None:
+            img = pixmap_to_numpy(self.pixmap.pixmap())
+            file_name = QFileDialog.getSaveFileName(self.main_window,
+                                                    directory = self.main_window.project.export_dir,
+                                                    filter ="*.png *.jpg")[0]
+            cv2.imwrite(file_name, img)
 
     def set_heads_up_widget(self, widget:QWidget):
         self.heads_up_widget = widget

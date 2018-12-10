@@ -1622,9 +1622,8 @@ class ScreenshotGroupBar(TimelineBar):
         if scr.unique_id not in self.pictures:
             pic = TimebarPicture(self, scr, self.timeline)
             self.onHeightChanged.connect(pic.on_height_changed)
-            pic.move(scr.get_start() // self.timeline.scale, 0)
+            pic.move(int(round(scr.get_start() / self.timeline.scale,0)), 0)
             self.pictures[scr.unique_id] = pic
-
 
     def remove_screenshot(self, scr):
         if scr.unique_id in self.pictures:
@@ -1633,7 +1632,7 @@ class ScreenshotGroupBar(TimelineBar):
     def rescale(self):
         for s in self.pictures.keys():
             pic = self.pictures[s]
-            pic.move(pic.item.get_start()//self.timeline.scale, 0)
+            pic.move(int(round(pic.item.get_start() / self.timeline.scale, 0)), 0)
 
 
 class TimebarPicture(QtWidgets.QWidget):

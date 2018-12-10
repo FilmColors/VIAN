@@ -78,14 +78,20 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.comboBox_Sorting.hide()
             self.stackedWidget.setCurrentIndex(1)
             self.progressBar.hide()
-            self.btn_PromoteToScreenshots = QPushButton("Promote to Screenshots")
             self.btn_ResetQuery = QPushButton("Reset Query")
             w = QWidget()
             w.setLayout(QHBoxLayout())
             w.layout().addWidget(self.btn_ResetQuery)
-            w.layout().addWidget(self.btn_PromoteToScreenshots)
+
+            # self.btn_PromoteToScreenshots = QPushButton("Promote to Screenshots")
+            # self.btn_PromoteToScreenshots.clicked.connect(self.on_promote_query_to_screenshots)
+            # w.layout().addWidget(self.btn_PromoteToScreenshots)
+
+            self.cb_PromoteToScreenshots = QCheckBox("Promote to Screenshots", w)
+            self.cb_PromoteToScreenshots.stateChanged.connect(self.on_promote_query_to_screenshots_changed)
+            w.layout().addWidget(self.cb_PromoteToScreenshots)
             self.stackedWidget.widget(1).layout().addWidget(w)
-            self.btn_PromoteToScreenshots.clicked.connect(self.on_promote_query_to_screenshots)
+
             self.btn_ResetQuery.clicked.connect(self.on_reset_query)
 
 
@@ -370,17 +376,21 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             if checkbox.word in self.current_query_keywords:
                 self.current_query_keywords.remove(checkbox.word)
         if self.current_experiment is not None:
-            self.current_experiment.query(self.current_query_keywords)
+            self.current_experiment.query(self.current_query_keywords, self.cb_PromoteToScreenshots.isChecked())
         pass
 
     def on_promote_query_to_screenshots(self):
         if self.current_experiment is not None:
             self.current_experiment.query(self.current_query_keywords, True)
 
+    def on_promote_query_to_screenshots_changed(self):
+        if self.current_experiment is not None:
+            self.current_experiment.query(self.current_query_keywords, self.cb_PromoteToScreenshots.isChecked())
+
     def on_reset_query(self):
         self.current_query_keywords = []
         self.update_widget()
-        self.current_experiment.query(self.current_query_keywords, True)
+        self.current_experiment.query(self.current_query_keywords, self.cb_PromoteToScreenshots.isChecked())
 
 
 class CheckBoxGroupWidget(QWidget):

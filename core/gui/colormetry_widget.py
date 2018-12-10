@@ -6,7 +6,7 @@ from core.data.interfaces import IProjectChangeNotify
 from core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_mapping_3d, HilbertMode
 from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
 from core.visualization.basic_vis import HistogramVis
-from core.gui.ewidgetbase import ExpandableWidget
+from core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
 from core.visualization.line_plot import LinePlot
 import cv2
 import numpy as np
@@ -23,8 +23,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
         self.inner.setCentralWidget(self.central)
 
-        self.vis_tab = QTabWidget(self)
-        self.lt.addWidget(self.vis_tab)
+        # self.vis_tab = QTabWidget(self)
+        # self.lt.addWidget(self.vis_tab)
         self.hilbert_table, self.hilbert_colors = create_hilbert_transform(16)
 
         # self.h_bgr = create_hilbert_color_pattern(8, multiplier=32, color_space=cv2.COLOR_Lab2RGB)
@@ -58,12 +58,18 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         lt_hilbert.layout().addWidget(self.hilbert_param)
 
         # self.lt.addWidget(self.palette)
-        self.vis_tab.addTab(self.palette, "Tree-Palette")
-        self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
-        self.vis_tab.addTab(self.time_palette, "Time Palette")
-        self.vis_tab.addTab(lt_hilbert, "Color Histogram")
-        self.vis_tab.addTab(lt_spatial, "Spatial Complexity")
-        self.vis_tab.currentChanged.connect(self.on_tab_changed)
+        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner,  self.palette, "Palette"), Qt.Horizontal)
+        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, self.lab_palette, "Space Palette"), Qt.Horizontal)
+        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, self.time_palette, "Time Palette"), Qt.Horizontal)
+        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, lt_hilbert, "Histogram"), Qt.Horizontal)
+        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, lt_spatial, "Spatial Frequency"), Qt.Horizontal)
+        #
+        # self.vis_tab.addTab(self.palette, "Tree-Palette")
+        # self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
+        # self.vis_tab.addTab(self.time_palette, "Time Palette")
+        # self.vis_tab.addTab(lt_hilbert, "Color Histogram")
+        # self.vis_tab.addTab(lt_spatial, "Spatial Complexity")
+        # self.vis_tab.currentChanged.connect(self.on_tab_changed)
 
         self.main_window.onTimeStep.connect(self.on_time_step)
         # self.vis_tab.addTab(self.histogram, "Histogram")
@@ -74,13 +80,16 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             try:
                 self.palette.set_palette(data['palette'])
                 self.lab_palette.set_palette(data['palette'])
-                if self.vis_tab.currentIndex() == 0:
+                print(self.palette.isVisible(), self.lab_palette.isVisible(), self.hilbert_vis.isVisible(),
+                      self.spatial_complexity_vis.isVisible())
+
+                if self.palette.isVisible():
                     self.palette.draw_palette()
-                elif self.vis_tab.currentIndex() == 1:
+                if self.lab_palette.isVisible():
                     self.lab_palette.draw_palette()
-                elif self.vis_tab.currentIndex() == 3:
+                if self.hilbert_vis.isVisible():
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
-                elif self.vis_tab.currentIndex() == 4:
+                if self.spatial_complexity_vis.isVisible():
                     self.spatial_complexity_vis.clear_view()
                     colors = [
                         QColor(200, 61, 50),
@@ -105,11 +114,14 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.spatial_complexity_vis.set_time_indicator(time_ms)
 
     def on_tab_changed(self):
-        if self.vis_tab.currentIndex() == 0:
+        if self.project() is None:
+            return
+
+        if self.palette.isVisible():
             self.palette.draw_palette()
-        elif self.vis_tab.currentIndex() == 1:
+        if self.lab_palette.isVisible():
             self.lab_palette.draw_palette()
-        elif self.vis_tab.currentIndex() == 2:
+        if self.time_palette.isVisible():
             ret, col = self.project().get_colormetry()
             if ret:
                 self.time_palette.set_palette(*col.get_time_palette())

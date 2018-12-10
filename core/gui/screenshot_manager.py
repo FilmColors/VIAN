@@ -20,7 +20,7 @@ from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
 from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime, ImagePlotPlane
 from core.analysis.color_feature_extractor import ColorFeatureAnalysis
-from core.gui.ewidgetbase import ExpandableWidget
+from core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
 
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1
@@ -172,18 +172,25 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.bar_row_column = bar
 
     def set_manager(self, screenshot_manager):
-        self.tab = QTabWidget(self.inner)
-        self.tab.addTab(screenshot_manager, "Screenshot Manager")
+        # self.tab = QTabWidget(self.inner)
+        # self.tab.addTab(screenshot_manager, "Screenshot Manager")
 
-        self.ab_view = ImagePlotCircular(self.tab)
+        self.inner.addDockWidget(Qt.TopDockWidgetArea, ESimpleDockWidget(self.inner, screenshot_manager, "Screenshots"), Qt.Horizontal)
+        # t = QWidget()
+        # t.setMinimumHeight(1)
+        # t.setMinimumWidth(1)
+        # self.inner.setCentralWidget(t)
+
+        self.ab_view = ImagePlotCircular(self)
         self.ab_ctrls = self.ab_view.get_param_widget()
         w = QWidget(self.tab)
         w.setLayout(QVBoxLayout())
         w.layout().addWidget(self.ab_view)
         w.layout().addWidget(ExpandableWidget(w, "Plot Controls", self.ab_ctrls))
-        self.tab.addTab(w, "AB-Plane")
+        # self.tab.addTab(w, "AB-Plane")
+        self.inner.addDockWidget(Qt.TopDockWidgetArea, ESimpleDockWidget(self.inner, w, "LA-View"), Qt.Horizontal)
 
-        self.color_dt = ImagePlotTime(self.tab)
+        self.color_dt = ImagePlotTime(self)
         self.color_dt_ctrls = self.color_dt.get_param_widget()
         hl4 = QHBoxLayout(self.color_dt_ctrls)
         hl4.addWidget(QLabel("Channel:", self.color_dt_ctrls))
@@ -193,24 +200,27 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         cbox_channel.currentTextChanged.connect(self.color_dt_mode_changed)
         hl4.addWidget(cbox_channel)
 
-        self.lc_view = ImagePlotPlane(self.tab, range_y=[0, 100])
+        self.lc_view = ImagePlotPlane(self, range_y=[0, 255])
         self.color_lc_view = self.lc_view.get_param_widget()
         w3 = QWidget()
         w3.setLayout(QVBoxLayout())
         w3.layout().addWidget(self.lc_view)
         w3.layout().addWidget(ExpandableWidget(w3, "Plot Controls", self.color_lc_view))
-        self.tab.addTab(w3, "LC-Plane")
+        self.inner.addDockWidget(Qt.TopDockWidgetArea, ESimpleDockWidget(self.inner, w3, "LC-View"), Qt.Horizontal)
+        # self.tab.addTab(w3, "LC-Plane")
 
         w2 = QWidget()
         w2.setLayout(QVBoxLayout())
         w2.layout().addWidget(self.color_dt)
         w2.layout().addWidget(ExpandableWidget(w2, "Plot Controls", self.color_dt_ctrls))
-        self.tab.addTab(w2, "Color-dt")
+        self.inner.addDockWidget(Qt.BottomDockWidgetArea, ESimpleDockWidget(self.inner, w2, "Color-dT"), Qt.Horizontal)
+        # self.tab.addTab(w2, "Color-dt")
 
         self.setWidget(self.tab)
 
         self.screenshot_manager = screenshot_manager
         self.create_bottom_bar()
+
 
         self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
 
@@ -254,6 +264,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
                 self.add_screenshot(scr)
         project.onScreenshotsHighlighted.connect(self.on_screenshots_highlighted)
 
+    def on_closed(self):
+        self.color_dt.clear_view()
+        self.ab_view.clear_view()
+        self.ab_view.add_grid()
+        self.lc_view.clear_view()
+        self.lc_view.add_grid()
+
     @pyqtSlot(object)
     def on_screenshots_highlighted(self, screenshots):
         if len(screenshots) == 0:
@@ -283,18 +300,15 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     @pyqtSlot(object, object, object)
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
         clobj = self.main_window.project.active_classification_object
-        print(scr, scr.connected_analyses)
         if clobj is None:
             try:
                 a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)["default"][0].get_adata()
-                print(a)
             except Exception as e:
                 print(e)
                 a = None
         else:
             try:
                 a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
-                print(a)
             except Exception as e:
                 a = None
         if a is None:

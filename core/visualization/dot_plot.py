@@ -27,6 +27,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.font_size = 4
 
         self.dot_size = 20
+        self.grid = []
 
         self.raw_data = []
         self.points = []
@@ -39,10 +40,13 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
     def add_grid(self, grid_type = "Default"):
         self.curr_grid = grid_type
+        for g in self.grid:
+            self.scene().removeItem(g)
+        self.grid = []
         if grid_type == "LA":
             pen = QPen()
             pen.setWidth(1)
-            pen.setColor(QColor(200, 200, 200, 50))
+            pen.setColor(self.grid_color)
 
             font = QFont()
             font.setPointSize(self.font_size)
@@ -58,6 +62,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
                     text = self.scene().addText(str(round(x, 0)), font)
                     text.setPos(x, 130)
                     text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                    self.grid.append(text)
 
             for x in range(-128, 128, 1):
                 if x % 20 == 0:
@@ -65,6 +70,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
                     text = self.scene().addText(str(round(x, 0)), font)
                     text.setPos(x, 130)
                     text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                    self.grid.append(text)
 
             self.draw_compass()
 
@@ -84,11 +90,13 @@ class DotPlot(QGraphicsView, IVIANVisualization):
                                                        pen)
                 q = -(128 / 6 * i)
                 self.circle0.setPos(q, q)
+                self.grid.append(self.circle0)
 
             for i in range(self.n_grid):
                 x = 128 * np.cos(i * (2 * np.pi / self.n_grid))
                 y = 128 * np.sin(i * (2 * np.pi / self.n_grid))
-                self.scene().addLine(0, 0, x, y, pen)
+                l = self.scene().addLine(0, 0, x, y, pen)
+                self.grid.append(l)
             self.circle0.show()
         self.setSceneRect(self.scene().itemsBoundingRect())
 

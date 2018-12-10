@@ -11,6 +11,8 @@ from core.analysis.colorimetry.hilbert import create_hilbert_transform
 from core.gui.tools import ExportImageDialog
 
 class IVIANVisualization():
+    def __init__(self):
+        self.grid_color = QColor(100,100,100,100)
 
     def set_time_indicator(self, x):
         pass
@@ -152,8 +154,6 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
 
             # y_lbl.setDefaultTextColor(col)
             # self.grid.append(y_lbl)
-
-
             if y_view + y_lbl.boundingRect().height() > last_y:
                 self.scene().removeItem(y_lbl)
             else:
@@ -399,6 +399,7 @@ class MatrixPlot(EGraphicsView, IVIANVisualization):
 class HistogramVis(EGraphicsView, IVIANVisualization):
     def __init__(self, parent, cache_file = "data/hilbert.npz"):
         super(HistogramVis, self).__init__(parent)
+        self.has_context_menu = True
         # self.view = EGraphicsView(self, auto_frame=False)
         self.setLayout(QVBoxLayout(self))
         # self.layout().addWidget(self.view)
@@ -446,13 +447,13 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
         if self.raw_data is not None:
             self.plot(self.raw_data['hist'], self.raw_data['colors'])
 
-    def plot(self, ys, colors, width = 1):
+    def plot(self, ys, colors, width = 1, background=QColor(27,27,27,255)):
         for i in self.items:
             self.view.removeItem(i)
         self.items.clear()
         self.scene().clear()
         img = QImage(QSize(4096,4096), QImage.Format_RGBA8888)
-        img.fill(QColor(27,27,27,255))
+        img.fill(background)
 
         p = QPainter()
         p.begin(img)
@@ -526,6 +527,34 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
     def set_plot_log(self, state):
         self.plot_log = state
         self.redraw()
+
+    def render_to_image(self, background: QColor, size: QSize):
+        """
+        Renders the scene content to an image, alternatively if return iamge is set to True, 
+        the QImage is returned and not stored to disc
+        :param return_image: 
+        :return: 
+        """
+
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
+
+        t_size = self.sceneRect().size().toSize()
+        image = QImage(size, QImage.Format_ARGB32)
+        image.fill(background)
+        painter = QPainter()
+        painter.begin(image)
+        if self.raw_data is not None:
+            self.plot(self.raw_data['hist'], self.raw_data['colors'], background=background)
+        self.scene().render(painter)
+        painter.end()
+
+        return image
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.RightButton:
+            self.export()
+        else:
+            super(EGraphicsView, self).mousePressEvent(event)
 
 
 class PaletteVis(QWidget, IVIANVisualization):

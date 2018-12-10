@@ -7,7 +7,7 @@ from core.gui.main_window import *
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
 from core.container.screenshot import *
-
+from core.data.computation import frame2ms
 
 def create_screenshot(args, sign_progress):
 
@@ -147,13 +147,14 @@ class LoadScreenshotsJob(IConcurrentJob):
         #     screenshot_annotation_dicts.append(a_dicts)
         movie_path = project.movie_descriptor.get_movie_path()
         video_capture = cv2.VideoCapture(movie_path)
+        fps = video_capture.get(cv2.CAP_PROP_FPS)
         for i, scr in enumerate(project.screenshots): #type: Screenshot
             if self.aborted:
                 break
 
             sign_progress(float(i)/len(project.screenshots))
-
             video_capture.set(cv2.CAP_PROP_POS_FRAMES, scr.frame_pos)
+            scr.movie_timestamp = frame2ms(scr.frame_pos, fps)
             ret, frame = video_capture.read()
             a_dicts = []
             if scr.annotation_item_ids is not None:
@@ -162,9 +163,12 @@ class LoadScreenshotsJob(IConcurrentJob):
                     if annotation_dict is not None:
                         a_dicts.append(annotation_dict.serialize())
             if len(a_dicts) > 0:
-                annotation = render_annotations(frame, a_dicts[i])
-                if annotation is not None:
-                    annotation = annotation.astype(np.uint8)
+                try:
+                    annotation = render_annotations(frame, a_dicts[i])
+                    if annotation is not None:
+                        annotation = annotation.astype(np.uint8)
+                except:
+                    annotation = None
             else:
                 annotation = None
 

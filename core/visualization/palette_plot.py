@@ -365,6 +365,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
                 pen.setColor(QColor(255, 255, 255, 200))
 
         qp.setPen(pen)
+        pen.setColor(self.grid_color)
 
         if self.show_grid:
             qp.drawLine(0, t_height / 2, t_width, t_height / 2)

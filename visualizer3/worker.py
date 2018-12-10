@@ -76,22 +76,22 @@ class QueryWorker(QObject):
         screenshots = dict()
         print("Loading Analyses")
         # shuffle(res)
-        n = 1000
+        n = 300
         step = int(len(res) / n)
         indices = []
-        for i in range(len(n)):
+        for i in range(len(res)):
             if i % step == 0:
-                indices.extend([i * step, i*step + 1, i+step + 2])
+                indices.extend([i, i + 1, i + 2])
 
+        print(indices)
         # for i, (segm, scr, analysis)  in enumerate(res): #type: DBScreenshot
         for i, idx in enumerate(indices):
-            self.signals.onProgress.emit(i / 1000 * 3)
+            self.signals.onProgress.emit(i / n * 3)
             segm, scr, analysis = res[idx]
             if scr.id not in screenshots:
                 screenshots[scr.id] = VisScreenshot(scr, dict())
             screenshots[scr.id].features[analysis.classification_obj_id]=self.corpus.hdf5_manager.features()[analysis.hdf5_index]
-            if i == 1000:
-                break
+
         return self.signals.onSegmentQueryResult.emit(segments, screenshots)
 
     @pyqtSlot(str, object)
