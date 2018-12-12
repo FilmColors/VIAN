@@ -19,9 +19,11 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.setWindowTitle("Colorimetry")
         self.lt = QVBoxLayout(self)
         self.central = QWidget()
+        self.central.setFixedWidth(1)
         self.central.setLayout(self.lt)
 
         self.inner.setCentralWidget(self.central)
+        self.use_tab_mode = False
 
         # self.vis_tab = QTabWidget(self)
         # self.lt.addWidget(self.vis_tab)
@@ -57,19 +59,34 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         lt_hilbert.layout().addWidget(self.hilbert_vis)
         lt_hilbert.layout().addWidget(self.hilbert_param)
 
-        # self.lt.addWidget(self.palette)
-        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner,  self.palette, "Palette"), Qt.Horizontal)
-        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, self.lab_palette, "Space Palette"), Qt.Horizontal)
-        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, self.time_palette, "Time Palette"), Qt.Horizontal)
-        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, lt_hilbert, "Histogram"), Qt.Horizontal)
-        self.inner.addDockWidget(Qt.RightDockWidgetArea, ESimpleDockWidget(self.inner, lt_spatial, "Spatial Frequency"), Qt.Horizontal)
+
+
         #
-        # self.vis_tab.addTab(self.palette, "Tree-Palette")
-        # self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
-        # self.vis_tab.addTab(self.time_palette, "Time Palette")
-        # self.vis_tab.addTab(lt_hilbert, "Color Histogram")
-        # self.vis_tab.addTab(lt_spatial, "Spatial Complexity")
-        # self.vis_tab.currentChanged.connect(self.on_tab_changed)
+        # self.lt.addWidget(self.palette)
+        if self.use_tab_mode:
+            self.vis_tab.addTab(self.palette, "Tree-Palette")
+            self.vis_tab.addTab(self.lab_palette, "LAB-Palette")
+            self.vis_tab.addTab(self.time_palette, "Time Palette")
+            self.vis_tab.addTab(lt_hilbert, "Color Histogram")
+            self.vis_tab.addTab(lt_spatial, "Spatial Complexity")
+            self.vis_tab.currentChanged.connect(self.on_tab_changed)
+        else:
+            t1 = ESimpleDockWidget(self.inner,  self.palette, "Palette")
+            t2 = ESimpleDockWidget(self.inner, self.lab_palette, "Space Palette")
+            t3 = ESimpleDockWidget(self.inner, self.time_palette, "Time Palette")
+            t4 = ESimpleDockWidget(self.inner, lt_hilbert, "Histogram")
+            t5 = ESimpleDockWidget(self.inner, lt_spatial, "Spatial Frequency")
+
+            self.inner.addDockWidget(Qt.RightDockWidgetArea, t1, Qt.Horizontal)
+            self.inner.addDockWidget(Qt.RightDockWidgetArea, t2, Qt.Horizontal)
+            self.inner.addDockWidget(Qt.RightDockWidgetArea, t3, Qt.Horizontal)
+            self.inner.addDockWidget(Qt.RightDockWidgetArea, t4, Qt.Horizontal)
+            self.inner.addDockWidget(Qt.RightDockWidgetArea, t5, Qt.Horizontal)
+
+            t3.hide()
+            t4.hide()
+            t5.hide()
+
 
         self.main_window.onTimeStep.connect(self.on_time_step)
         # self.vis_tab.addTab(self.histogram, "Histogram")
@@ -78,33 +95,45 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     def update_timestep(self, data, time_ms):
         if data is not None:
             try:
-                self.palette.set_palette(data['palette'])
-                self.lab_palette.set_palette(data['palette'])
-                print(self.palette.isVisible(), self.lab_palette.isVisible(), self.hilbert_vis.isVisible(),
-                      self.spatial_complexity_vis.isVisible())
+                t = time.time()
 
+
+                # print(self.palette.isVisible(), self.lab_palette.isVisible(), self.hilbert_vis.isVisible(),
+                #       self.spatial_complexity_vis.isVisible())
+
+                # print("Spacial Complexity", t - time.time())
+                t = time.time()
                 if self.palette.isVisible():
+                    self.palette.set_palette(data['palette'])
                     self.palette.draw_palette()
+                # print("Palette", time.time() - t )
+                t = time.time()
                 if self.lab_palette.isVisible():
+                    self.lab_palette.set_palette(data['palette'])
                     self.lab_palette.draw_palette()
+                # print("Palette AB", time.time() - t)
+                t = time.time()
                 if self.hilbert_vis.isVisible():
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
-                if self.spatial_complexity_vis.isVisible():
-                    self.spatial_complexity_vis.clear_view()
-                    colors = [
-                        QColor(200, 61, 50),
-                        QColor(98, 161, 169),
-                        QColor(153, 175, 93),
-                        QColor(230, 183, 64)
-                    ]
-                    cidx = data['current_idx']
-                    for i, key in enumerate(data['spatial'].keys()):
-                        xs = data['times']
-                        ys = data['spatial'][key]
-                        self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
-                                                         line_name=key,
-                                                         force_xmax=self.main_window.project.movie_descriptor.duration)
-
+                # print("Hilbert",  time.time() - t)
+                t = time.time()
+                # if self.spatial_complexity_vis.isVisible():
+                #     self.spatial_complexity_vis.clear_view()
+                #     colors = [
+                #         QColor(200, 61, 50),
+                #         QColor(98, 161, 169),
+                #         QColor(153, 175, 93),
+                #         QColor(230, 183, 64)
+                #     ]
+                #     cidx = data['current_idx']
+                #     for i, key in enumerate(data['spatial'].keys()):
+                #         xs = data['times']
+                #         ys = data['spatial'][key]
+                #         self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
+                #                                          line_name=key,
+                #                                          force_xmax=self.main_window.project.movie_descriptor.duration)
+                # print("Spacial", time.time() - t)
+                t = time.time()
             except Exception as e:
                 raise e
                 print("Exception in ColormetryWidget.update_timestep()", str(e))

@@ -1032,6 +1032,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.on_play()
 
     def on_exit(self):
+        self.set_overlay_visibility(False)
         if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
             if answer == QMessageBox.Yes:
@@ -1039,6 +1040,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif answer == QMessageBox.No:
                 pass
             else:
+                self.set_overlay_visibility(True)
                 return False
 
         self.dispatch_on_closed()
@@ -1828,13 +1830,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_overlay_visibility(self, visibility = None):
         if visibility:
-            # print("overlay shown")
             self.drawing_overlay.show()
         else:
-            # print("overlay hidden")
             self.drawing_overlay.hide()
-        self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
+
         self.update_overlay()
+        self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
+
 
     def create_analysis_list(self):
         self.analysis_list = []

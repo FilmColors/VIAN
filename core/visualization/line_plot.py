@@ -215,7 +215,6 @@ class LinePlot(VIANPlot):
 
     def get_param_widget(self):
         w = LineParamWidget(None)
-        print(w)
         w.onEntryStateChanged.connect(self.on_entry_state_changed)
         w.onXScale.connect(self.set_x_scale)
         w.onYScale.connect(self.set_y_scale)

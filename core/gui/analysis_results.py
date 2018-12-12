@@ -102,12 +102,15 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         # for scr in self.main_window.project.screenshots:
         #     self.feature_plot.add_screenshot(scr.img_movie, scr.movie_timestamp)
 
-        keywords, matrix = exp.get_correlation_matrix()
-        features = []
-        for i, k in enumerate(keywords):
-            # CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
-            features.append(CorrelationFeatureTuple(k.word_obj.get_name(), k.voc_obj.get_name(), k.class_obj.get_name(), i))
-        self.correlation_tab.set_data(features, matrix)
+        try:
+            keywords, matrix = exp.get_correlation_matrix()
+            features = []
+            for i, k in enumerate(keywords):
+                # CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
+                features.append(CorrelationFeatureTuple(k.word_obj.get_name(), k.voc_obj.get_name(), k.class_obj.get_name(), i))
+            self.correlation_tab.set_data(features, matrix)
+        except Exception as e:
+            print(e)
 
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()

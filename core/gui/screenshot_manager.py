@@ -221,7 +221,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.screenshot_manager = screenshot_manager
         self.create_bottom_bar()
 
-
         self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
 
     def on_toggle_show_current(self):
@@ -254,7 +253,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.color_dt.remove_image_by_uid(scr.unique_id)
         self.ab_view.remove_image_by_uid(scr.unique_id)
         self.lc_view.remove_image_by_uid(scr.unique_id)
-        print("removed", scr)
 
     def on_loaded(self, project:VIANProject):
         project.onScreenshotGroupAdded.connect(self.connect_scr_group)
@@ -295,7 +293,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def on_analysis_added(self, a):
         self.update_screenshot(a.target_container)
-        print("on analysis added")
 
     @pyqtSlot(object, object, object)
     def update_screenshot(self, scr, ndarray=None, pixmap=None):

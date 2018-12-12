@@ -45,7 +45,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.images = []
         self.range_x = range_x
         self.range_y = range_y
-        self.font_size = 4
+        self.font_size = 8
         self.title = title
 
         self.left_button_pressed = False
@@ -223,7 +223,9 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         """
 
         self.add_grid()
-        self.scene().setSceneRect(self.scene().itemsBoundingRect())
+        r = self.scene().itemsBoundingRect()
+        r.adjust(-20, -20, 20, 20)
+        self.scene().setSceneRect(r)
 
         t_size = self.sceneRect().size().toSize()
         image = QImage(size, QImage.Format_ARGB32)
@@ -358,8 +360,10 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
 class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
+        self.lbl_max = None
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
         self.to_float = False
+
 
     def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None, z = 0, uid = None):
         try:
@@ -420,6 +424,10 @@ class ImagePlotCircular(ImagePlot):
     def add_grid(self):
         for g in self.grid:
             self.scene().removeItem(g)
+        if self.lbl_max is not None:
+            if self.lbl_max in self.scene().items():
+                self.scene().removeItem(self.lbl_max)
+            self.lbl_max = None
         self.grid = []
         pen = QPen()
         pen.setWidth(10)
@@ -454,20 +462,34 @@ class ImagePlotCircular(ImagePlot):
         lblb.setPos(130 * self.magnification,  - lblb.boundingRect().height() / 2)
         self.grid.append(lblb)
 
+        self.lbl_max = self.scene().addText(str(round(128 / self.pos_scale, 0)), font)
+        self.lbl_max.setDefaultTextColor(self.grid_color)
+        self.lbl_max.setPos(130 * self.magnification, + (self.lbl_max.boundingRect().height()))
+
         lbla = self.scene().addText("B", font)
         lbla.setDefaultTextColor(self.grid_color)
-        lbla.setPos(- lbla.boundingRect().width() / 2, -128 * self.magnification -lbla.boundingRect().height())
+        lbla.setPos(- lbla.boundingRect().width() / 2, -130 * self.magnification -lbla.boundingRect().height())
         self.grid.append(lbla)
 
         lblb = self.scene().addText("-A", font)
         lblb.setDefaultTextColor(self.grid_color)
-        lblb.setPos(-128 * self.magnification -lbla.boundingRect().width(), - lblb.boundingRect().height() / 2 )
+        lblb.setPos(-130 * self.magnification - 2 * lbla.boundingRect().width(), - lblb.boundingRect().height() / 2 )
         self.grid.append(lblb)
         # self.circle0.show()
 
     def set_range_scale(self, value = None):
         if value is not None:
             self.pos_scale = value / 100
+
+        font = QFont()
+        font.setPointSize(10 * self.magnification)
+
+        if self.lbl_max is not None:
+            self.scene().removeItem(self.lbl_max)
+            self.lbl_max = None
+        self.lbl_max = self.scene().addText(str(round(128 / self.pos_scale, 0)), font)
+        self.lbl_max.setDefaultTextColor(self.grid_color)
+        self.lbl_max.setPos(130 * self.magnification, + (self.lbl_max.boundingRect().height()))
 
         for img in self.images:
             if isinstance(img, VIANPixmapGraphicsItem):
@@ -477,6 +499,7 @@ class ImagePlotCircular(ImagePlot):
         for img in self.images:
             img.setScale(value / 100)
         self.img_scale = value / 100
+
 
     def get_param_widget(self):
         w = QWidget()
@@ -647,17 +670,20 @@ class ImagePlotPlane(ImagePlot):
         x1 = self.range_x[1] * self.magnification
         y0 = self.range_y[0] * self.magnification
         y1 = self.range_y[1] * self.magnification
+
+        counter = 0
         for x in range(self.range_x[0] * self.magnification, self.range_x[1] * self.magnification, 1):
             if x % (20 * self.magnification) == 0:
                 l = self.scene().addLine(x, y0, x, y1, pen)
-
-                text = self.scene().addText(str(round((x / (self.magnification * self.curr_scale)), 0)), font)
-                text.setPos(x, self.range_y[1] * self.magnification)
-                text.setDefaultTextColor(self.grid_color)
                 self.grid.append(l)
-                self.grid.append(text)
+                if counter % 2 == 0:
+                    text = self.scene().addText(str(round((x / (self.magnification * self.curr_scale)), 0)), font)
+                    text.setPos(x - text.boundingRect().width() / 2, self.range_y[1] * self.magnification)
+                    text.setDefaultTextColor(self.grid_color)
+                    self.grid.append(text)
+                counter += 1
 
-        font.setPointSize(self.font_size * 2 * self.magnification)
+        font.setPointSize(int(self.font_size * 1.5 * self.magnification))
         text = self.scene().addText("Luminance", font)
         text.setRotation(-90)
         text.setPos(-(sum(self.range_y) / 2 + self.font_size) * self.magnification - text.boundingRect().height(), x + self.magnification / 2 + text.boundingRect().width() / 2)
@@ -665,17 +691,20 @@ class ImagePlotPlane(ImagePlot):
         font.setPointSize(self.font_size * self.magnification)
         self.grid.append(text)
 
+        counter = 0
         for x in range(self.range_y[0] * self.magnification, self.range_y[1] * self.magnification, 1):
             if x % (20 * self.magnification) == 0:
                 l = self.scene().addLine(x0, x, x1, x, pen)
-
-                text = self.scene().addText(str(round(((self.range_y[1] * self.magnification - x) / (self.magnification * self.curr_scale)), 0)), font)
-                text.setPos(self.range_x[0] * self.magnification, x)
-                text.setDefaultTextColor(self.grid_color)
                 self.grid.append(l)
-                self.grid.append(text)
+                if counter % 2 == 0:
+                    text = self.scene().addText(str(round(((self.range_y[1] * self.magnification - x) / (self.magnification * self.curr_scale)), 0)), font)
+                    text.setPos(self.range_x[0] * self.magnification, x - text.boundingRect().height() / 2)
+                    text.setDefaultTextColor(self.grid_color)
+                    self.grid.append(text)
+                counter += 1
 
-        font.setPointSize(self.font_size * 2 * self.magnification)
+
+        font.setPointSize(int(self.font_size * 1.5 * self.magnification))
         text = self.scene().addText("Chroma", font)
         text.setPos(sum(self.range_x) / 2 * self.magnification - (text.boundingRect().width() / 2), x + self.font_size * 2 * self.magnification)
         text.setDefaultTextColor(self.grid_color)
@@ -983,7 +1012,7 @@ class ImagePlotTime(ImagePlot):
 
 
         slider_xscale = QSlider(Qt.Horizontal, w)
-        slider_xscale.setRange(1, 2000)
+        slider_xscale.setRange(1, 6000)
         slider_xscale.valueChanged.connect(self.set_x_scale)
 
 

@@ -508,7 +508,6 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
     def on_segment_added(self, segment):
         if segment.get_id() not in self.segments:
             segment_item = SegmentOutlinerItem(None, segment.ID, segment)
-            print(segment.ID)
             self.insertChild(segment.ID - 1, segment_item)
             self.segments[segment.get_id()] = segment_item
 

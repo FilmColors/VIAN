@@ -94,7 +94,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
             self.btn_ResetQuery.clicked.connect(self.on_reset_query)
 
-
     def on_changed(self, project, item):
         if self.behaviour == "classification":
             self.comboBox_Experiment.clear()
@@ -249,43 +248,46 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         # Draw Fields
         if self.current_container is not None or self.behaviour == "query":
-            if self.behaviour == "query":
-                keywords = self.current_experiment.get_unique_keywords()
-            else:
-                keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
-            keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
-
-            for k in keywords:
-                idx = tab_widgets_class_objs_index.index(k.class_obj.unique_id)
-                if  k.voc_obj.category not in self.tab_categories[idx]:
-                    tab = QScrollArea()
-                    tab.setWidget(QWidget())
-                    tab.widget().setLayout(QVBoxLayout())
-                    tab.setWidgetResizable(True)
-
-                    self.tabs[idx].append(tab)
-                    self.tab_categories[idx].append(k.voc_obj.category)
-                    tab_widgets_class_objs[str(k.class_obj.unique_id)].addTab(tab, k.voc_obj.category)
+            try:
+                if self.behaviour == "query":
+                    keywords = self.current_experiment.get_unique_keywords()
                 else:
-                    tab = self.tabs[idx][self.tab_categories[idx].index(k.voc_obj.category)]
+                    keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+                keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
 
-                if k.voc_obj.name + ":" + k.class_obj.name not in self.checkbox_names:
-                    self.checkbox_names.append(k.voc_obj.name + ":" + k.class_obj.name)
-                    group = CheckBoxGroupWidget(tab, k.voc_obj.name)
-                    tab.widget().layout().addWidget(group)
-                    self.checkbox_groups.append(group)
-                else:
-                    group = self.checkbox_groups[self.checkbox_names.index(k.voc_obj.name + ":" + k.class_obj.name)]
+                for k in keywords:
+                    idx = tab_widgets_class_objs_index.index(k.class_obj.unique_id)
+                    if  k.voc_obj.category not in self.tab_categories[idx]:
+                        tab = QScrollArea()
+                        tab.setWidget(QWidget())
+                        tab.widget().setLayout(QVBoxLayout())
+                        tab.setWidgetResizable(True)
 
-                checkbox = WordCheckBox(group, k)
-                if self.behaviour == "classification":
-                    checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
-                    checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
-                else:
-                    checkbox.setChecked(k in self.current_query_keywords)
-                    checkbox.stateChanged.connect(partial(self.on_query_changed, checkbox))
-                group.add_checkbox(checkbox)
-                self.all_checkboxes[k.unique_id] = checkbox
+                        self.tabs[idx].append(tab)
+                        self.tab_categories[idx].append(k.voc_obj.category)
+                        tab_widgets_class_objs[str(k.class_obj.unique_id)].addTab(tab, k.voc_obj.category)
+                    else:
+                        tab = self.tabs[idx][self.tab_categories[idx].index(k.voc_obj.category)]
+
+                    if k.voc_obj.name + ":" + k.class_obj.name not in self.checkbox_names:
+                        self.checkbox_names.append(k.voc_obj.name + ":" + k.class_obj.name)
+                        group = CheckBoxGroupWidget(tab, k.voc_obj.name)
+                        tab.widget().layout().addWidget(group)
+                        self.checkbox_groups.append(group)
+                    else:
+                        group = self.checkbox_groups[self.checkbox_names.index(k.voc_obj.name + ":" + k.class_obj.name)]
+
+                    checkbox = WordCheckBox(group, k)
+                    if self.behaviour == "classification":
+                        checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                        checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                    else:
+                        checkbox.setChecked(k in self.current_query_keywords)
+                        checkbox.stateChanged.connect(partial(self.on_query_changed, checkbox))
+                    group.add_checkbox(checkbox)
+                    self.all_checkboxes[k.unique_id] = checkbox
+            except Exception as e:
+                print(e)
 
         for g in self.tabs:
             for t in g:

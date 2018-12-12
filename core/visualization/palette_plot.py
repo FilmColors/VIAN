@@ -338,7 +338,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
         self.image = QImage(self.size(), QImage.Format_RGBA8888)
         qp = QPainter()
         pen = QPen()
-        pen.setWidthF(0.1)
+        pen.setWidthF(0.5)
 
         if target is None:
             qp.begin(self.image)
@@ -354,6 +354,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
             if self.background == "White":
                 qp.fillRect(self.rect(), QColor(self.background))
                 pen.setColor(QColor(0,0,0,200))
+                self.grid_color = QColor(0,0,0,255)
             elif self.background == "Light-Gray":
                 qp.fillRect(self.rect(), QColor(130,130,130))
                 pen.setColor(QColor(0,0,0,200))
@@ -442,8 +443,6 @@ class PaletteLABView(QWidget, IVIANVisualization):
             self.view.slider_scale.setValue(self.scale)
         else:
             a0.ignore()
-
-        print(self.scale)
 
     def render_to_image(self, background: QColor, size: QSize):
         image = super(PaletteLABView, self).render_to_image(background, size)

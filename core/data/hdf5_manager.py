@@ -94,7 +94,7 @@ class HDF5Manager():
         self.h5_file = h5py.File(self.path, "r+")
         print("Datasets in HDF5 File:")
         for k in self.h5_file.keys():
-            print(k)
+            print("\t-- ", k)
         return init
 
     def initialize_all(self, analyses = None):

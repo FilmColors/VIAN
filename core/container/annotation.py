@@ -430,6 +430,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         self.project.undo_manager.to_undo((self.add_annotation, [annotation]),
                                           (self.remove_annotation, [annotation]))
         self.dispatch_on_changed(item=self)
+        self.onAnnotationAdded.emit(annotation)
 
     def remove_annotation(self, annotation):
         if annotation in self.annotations:
@@ -438,6 +439,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             self.project.undo_manager.to_undo((self.remove_annotation, [annotation]),
                                               (self.add_annotation, [annotation]))
             self.dispatch_on_changed(item=self)
+            self.onAnnotationRemoved.emit(annotation)
 
     def set_is_current_layer(self, bool):
         self.is_current_layer = bool

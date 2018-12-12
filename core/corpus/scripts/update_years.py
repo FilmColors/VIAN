@@ -22,6 +22,5 @@ if __name__ == '__main__':
         ds.commit()
     except Exception as e:
         ds.rollback()
-        print("Oups", e)
 
 
