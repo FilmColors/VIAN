@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
+title: Crash after saving Project
+labels: bug
 assignees: ''
 
 ---
