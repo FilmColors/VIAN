@@ -357,7 +357,6 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
             super(VIANPixmapGraphicsItem, self).setPixmap(QPixmap(img))
             self.curr_alpha = alpha
 
-
 class ImagePlotCircular(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None):
         self.lbl_max = None
@@ -627,7 +626,6 @@ class ImagePlotPlane(ImagePlot):
         self.add_grid()
 
     def rotate_view(self, angle_rad):
-        print("Rotating")
         angle = (angle_rad / 360 * np.pi) * 2
         self.curr_angle = angle_rad
 
@@ -646,9 +644,7 @@ class ImagePlotPlane(ImagePlot):
         t.translate(-x, -y)
         t.rotate(self.curr_angle)
         t.translate(x, y)
-        print("Set Transform")
         self.compass.setTransform(t)
-        print("Done")
 
     def set_image_scale(self,value):
         for img in self.images:

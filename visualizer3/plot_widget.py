@@ -1,8 +1,32 @@
 from PyQt5.QtCore import *
+from typing import List
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from core.visualization.image_plots import *
 from core.gui.ewidgetbase import ExpandableWidget
+
+def feature_changed(scr, plot):
+    try:
+        data = scr.current_feature
+        img = scr.current_image
+        # img = cv2.imread(self.worker.root + "/shots/" + scr.dbscreenshot.file_path)
+        l = data[0]
+        tx = scr.dbscreenshot.time_ms
+        ty = data[7]
+        x = data[1]
+        y = data[2]
+
+
+        if isinstance(plot, ImagePlotCircular):
+            plot.update_item(scr.dbscreenshot.id, (x, y, l))
+        elif isinstance(plot, ImagePlotPlane):
+            plot.update_item(scr.dbscreenshot.id, (x, l, y))
+        elif isinstance(plot, ImagePlotTime):
+            plot.update_item(scr.dbscreenshot.id, (tx, y))
+    except Exception as e:
+        print(e)
+        pass
+
 
 class PlotWidget(QDockWidget):
     def __init__(self, parent, plot, name = "no name"):
@@ -16,14 +40,62 @@ class PlotWidget(QDockWidget):
         self.widget.layout().addWidget(ExpandableWidget(self, "Plot Controls", plot.get_param_widget()))
         self.show()
 
+class ClassificationObjectSelector(QDockWidget):
+    onClassificationObjectChanged = pyqtSignal(str)
+
+    def __init__(self, parent, clobjs = None):
+        super(ClassificationObjectSelector, self).__init__(parent)
+        self.list = QListWidget()
+        self.setWidget(self.list)
+        self.cl_objs = dict()
+        if clobjs is not None:
+            self.set_classification_objects(clobjs)
+        self.list.currentItemChanged.connect(self.on_clobject_changed)
+
+
+    def set_classification_objects(self, objects):
+        self.list.clear()
+        self.cl_objs = dict()
+        for c in sorted(objects.values(), key=lambda x: x.name):
+            self.list.addItem(c.name)
+            self.cl_objs[c.name] = c.name
+
+    def on_clobject_changed(self):
+        self.onClassificationObjectChanged.emit(self.list.currentItem().text())
+
 
 class PlotResultsWidget(QMainWindow):
     def __init__(self, parent):
         super(PlotResultsWidget, self).__init__(parent)
-        self.plots = dict()
+        self.group_widgets = []
 
-    def add_plot(self, p:PlotWidget):
-        self.addDockWidget(Qt.RightDockWidgetArea, p, Qt.Horizontal)
+
+    def add_plots(self, p:List[PlotWidget], classification_objects, scrs):
+        print(classification_objects)
+        t = PlotResultsGroupWidget(self, classification_objects)
+
+        t.scrs = scrs
+        for q in p:
+            t.add_plot(q)
+        self.addDockWidget(Qt.RightDockWidgetArea, t, Qt.Vertical)
+        self.group_widgets.append(t)
+        t.show()
+
+
+class PlotResultsGroupWidget(QDockWidget):
+    def __init__(self, parent, classification_objects):
+        super(PlotResultsGroupWidget, self).__init__(parent)
+        self.plots = dict()
+        self.classification_objects = classification_objects
+        self.classification_object_selector = ClassificationObjectSelector(self, classification_objects)
+        self.classification_object_selector.onClassificationObjectChanged.connect(self.on_classification_object_changed)
+        self.central = QMainWindow()
+        self.setWidget(self.central)
+        self.central.addDockWidget(Qt.LeftDockWidgetArea, self.classification_object_selector)
+        self.scrs = dict()
+
+    def add_plot(self, p: PlotWidget):
+        self.central.addDockWidget(Qt.RightDockWidgetArea, p, Qt.Horizontal)
         self.plots[p.name] = p
 
     def remove_plot(self, p):
@@ -31,3 +103,9 @@ class PlotResultsWidget(QMainWindow):
             self.plots.pop(p)
         p.close()
 
+    def on_classification_object_changed(self, name):
+        print(name, self.classification_objects)
+        if name in self.classification_objects:
+            id_cl = self.classification_objects[name].id
+            for s in self.scrs.values():
+                s.set_current_clobj_index(id_cl)

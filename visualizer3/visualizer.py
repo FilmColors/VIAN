@@ -10,9 +10,31 @@ from typing import List
 from core.corpus.shared.sqlalchemy_entities import *
 from visualizer3.worker import QueryWorker, CORPUS_PATH
 from functools import partial
-from visualizer3.plot_widget import PlotWidget, PlotResultsWidget
+from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed
 from visualizer3.screenshot_worker import ScreenshotWorker
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime
+
+
+class FilmographyQuery():
+    def __init__(self, imdb_id = None, corpus_id = None, color_process = None, director = None, genre = None, cinematography = None,
+                 color_consultant = None, production_design = None, art_director= None, costum_design= None,
+                 production_company= None, country= None, year_start= None, year_end= None):
+
+        self.imdb_id = imdb_id
+        self.corpus_id = corpus_id
+        self.color_process = color_process
+        self.director = director
+        self.genre = genre
+        self.cinematography = cinematography
+        self.color_consultant = color_consultant
+        self.production_design = production_design
+        self.art_director = art_director
+        self.costum_design = costum_design
+        self.production_company = production_company
+        self.country = country
+        self.year_start = year_start
+        self.year_end = year_end
+
 
 class ProgressBar(QMainWindow):
     def __init__(self, parent, singal):
@@ -34,6 +56,7 @@ class VIANVisualizer(QMainWindow):
     onMovieQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
     onLoadScreenshots = pyqtSignal(object, object, int)
+    onChangeScreenshotClObj = pyqtSignal(object, int)
     onCorpusChanged = pyqtSignal(object)
 
     def __init__(self, parent = None):
@@ -66,6 +89,7 @@ class VIANVisualizer(QMainWindow):
         self.screenshot_loader.moveToThread(self.screenshot_thread)
         self.screenshot_thread.start()
         self.onLoadScreenshots.connect(self.screenshot_loader.on_load_screenshots)
+        self.onChangeScreenshotClObj.connect(self.screenshot_loader.on_change_classification_object)
 
         self.centralWidget().setLayout(QVBoxLayout())
 
@@ -81,7 +105,7 @@ class VIANVisualizer(QMainWindow):
         self.btn_query = QPushButton("Query")
         self.btn_query.clicked.connect(self.on_query)
 
-        self.classification_objects = []
+        self.classification_objects = dict()
 
         self.load_corpus()
         self.onCorpusQuery.emit()
@@ -102,8 +126,16 @@ class VIANVisualizer(QMainWindow):
         lt.addWidget(self.cb_segm_ab_plot, 1, 0)
         lt.addWidget(self.cb_segm_lc_plot, 2, 0)
         lt.addWidget(self.cb_segm_dt_plot, 3, 0)
+        hbox_k = QHBoxLayout()
+        hbox_k.addWidget(QLabel("K-Images", self.centralWidget()))
+        self.sp_box_K = QSpinBox(self.centralWidget())
+        self.sp_box_K.setRange(1, 10000)
+        self.sp_box_K.setValue(400)
+        hbox_k.addWidget(self.sp_box_K)
 
         self.centralWidget().layout().addWidget(self.w_plot_types)
+
+        self.centralWidget().layout().addItem(hbox_k)
         self.centralWidget().layout().addWidget(self.btn_query)
 
         self.cb_corpus.currentTextChanged.connect(self.on_corpus_changed)
@@ -135,7 +167,7 @@ class VIANVisualizer(QMainWindow):
         subcorpus = None
         if self.cb_corpus.currentText() != "Complete":
             subcorpus = self.sub_corpora[self.cb_corpus.currentText()]
-        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), subcorpus)
+        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), subcorpus, self.sp_box_K.value())
         pass
 
     def query_movies(self):
@@ -150,9 +182,20 @@ class VIANVisualizer(QMainWindow):
         self.btn_query.setEnabled(True)
         self.segm_scrs = dict()
         self.segments = dict()
-        p_ab = ImagePlotCircular(self.result_wnd)
-        p_lc = ImagePlotPlane(self.result_wnd)
-        p_dt = ImagePlotTime(self.result_wnd)
+        if self.cb_segm_ab_plot.isChecked():
+            p_ab = ImagePlotCircular(self.result_wnd)
+        else:
+            p_ab = None
+
+        if self.cb_segm_lc_plot.isChecked():
+            p_lc = ImagePlotPlane(self, range_y=[0, 255])
+        else:
+            p_lc = None
+
+        if self.cb_segm_dt_plot.isChecked():
+            p_dt = ImagePlotTime(self.result_wnd)
+        else:
+            p_dt = None
         for scr in screenshots.values():
             try:
                 data = scr.features[1]
@@ -163,27 +206,40 @@ class VIANVisualizer(QMainWindow):
                 ty = data[7]
                 x = data[1]
                 y = data[2]
-                scr.onImageChanged.connect(p_ab.add_image(x, y, img, True, mime_data=scr, z=l).setPixmap)
-                scr.onImageChanged.connect(p_lc.add_image(x, l, img, False, mime_data=scr, z=y).setPixmap)
-                scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr).setPixmap)
+                if p_ab is not None:
+                    scr.onImageChanged.connect(p_ab.add_image(x, y, img, True, mime_data=scr, z=l, uid=scr.dbscreenshot.id).setPixmap)
+                    scr.onFeatureChanged.connect(partial(feature_changed, scr, p_ab))
+                if p_lc is not None:
+                    scr.onImageChanged.connect(p_lc.add_image(x, l, img, False, mime_data=scr, z=y, uid=scr.dbscreenshot.id).setPixmap)
+                    scr.onFeatureChanged.connect(partial(feature_changed, scr, p_lc))
+                if p_dt is not None:
+                    scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, index_id=scr.dbscreenshot.id).setPixmap)
+                    scr.onFeatureChanged.connect(partial(feature_changed, scr,  p_dt))
             except Exception as e:
                 pass
 
-        self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_ab, "AB-View"))
-        self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_dt, "DT-View"))
-        self.result_wnd.add_plot(PlotWidget(self.result_wnd, p_lc, "LC-VIEW"))
+        plots = []
+        if p_ab is not None:
+            plots.append(PlotWidget(self.result_wnd, p_ab, "AB-View"))
+        if p_dt is not None:
+            plots.append(PlotWidget(self.result_wnd, p_dt, "DT-View"))
+        if p_lc is not None:
+            plots.append(PlotWidget(self.result_wnd, p_lc, "LC-VIEW"))
 
+        self.result_wnd.add_plots(plots, self.classification_objects, screenshots)
         self.result_wnd.show()
 
         labels = []
-        for clobj in self.classification_objects:
+        for clobj in self.classification_objects.values():
             t = [lbl.mask_idx for lbl in clobj.semantic_segmentation_labels]
             labels.append([clobj.id, t])
-
+        self.segm_scrs = screenshots
         self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
 
-    def on_corpus_result(self, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
-        self.classification_objects = classification_objects
+    def on_corpus_result(self, autofill, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
+        self.classification_objects = dict()
+        for clobj in classification_objects:
+            self.classification_objects[clobj.name] = clobj
         self.query_widget.clear()
         for kwd in keywords:
             voc = kwd.word.vocabulary
@@ -194,6 +250,7 @@ class VIANVisualizer(QMainWindow):
         for c in subcorpora:
             self.cb_corpus.addItem(c.name)
             self.sub_corpora[c.name] = c
+        self.query_widget.filmography_widget.apply_autofill(autofill)
 
 
 class CorpusWidget(QDockWidget):
@@ -356,6 +413,34 @@ class FilmographyWidget(QWidget):
         super(FilmographyWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/visualizer/FilmographyQueryWidget.ui")
         uic.loadUi(path, self)
+
+    def apply_autofill(self, a):
+        completer_imdb = QCompleter(a["imdb_id"])
+        completer_production_company = QCompleter(a["production_company"])
+        completer_cinematography = QCompleter(a["cinematography"])
+        completer_color_consultant = QCompleter(a["color_consultant"])
+        completer_costum_design = QCompleter(a["costum_design"])
+        completer_art_director = QCompleter(a["art_director"])
+        completer_country = QCompleter(a["country"])
+        completer_production_design = QCompleter(a["production_design"])
+        completer_color_process = QCompleter(a["color_process"])
+
+        for c in [completer_imdb, completer_production_company, completer_art_director, completer_color_consultant,
+                  completer_costum_design, completer_cinematography, completer_costum_design, completer_country,
+                  completer_production_design, completer_color_process]:
+            c.setCaseSensitivity(False)
+            c.setCompletionMode(QCompleter.PopupCompletion)
+
+        self.lineEdit_IMDB.setCompleter(completer_imdb)
+        self.lineEdit_Cinematography.setCompleter(completer_cinematography)
+        self.lineEdit_ColorConsultant.setCompleter(completer_color_consultant)
+        self.lineEdit_ProductionDesign.setCompleter(completer_production_design)
+        self.lineEdit_ArtDirector.setCompleter(completer_art_director)
+        self.lineEdit_CostumDesign.setCompleter(completer_costum_design)
+        self.lineEdit_ArtDirector.setCompleter(completer_art_director)
+        self.lineEdit_ProductionCompany.setCompleter(completer_production_company)
+        self.lineEdit_ProductionCountry.setCompleter(completer_country)
+
 
     def get_filmography_query(self):
         query = FilmographyQuery()

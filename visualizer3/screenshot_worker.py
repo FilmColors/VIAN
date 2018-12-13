@@ -38,13 +38,22 @@ class ScreenshotWorker(QObject):
                 if s.mask is not None:
                     mask = cv2.imread(self.db_root + "/masks/" + s.mask.mask_path, cv2.IMREAD_GRAYSCALE)
                     for clobj in clobj_labels:
-                        s.image_cache[clobj[0]] = numpy_to_pixmap(apply_mask(img, mask, clobj[1]))
+                        if len(clobj[1]) > 0:
+                            s.image_cache[clobj[0]] = numpy_to_pixmap(apply_mask(img, mask, clobj[1]), cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
 
                     s.current_image = s.image_cache[current_cl_obj_id]
                 else:
                     s.current_image = numpy_to_pixmap(img)
                 s.onImageChanged.emit(s.current_image)
         self.aborted = False
+
+    @pyqtSlot(object, int)
+    def on_change_classification_object(self, scrs, id_cl):
+        for s in scrs:
+            if id_cl in s.image_cache:
+                s.current_image = s.image_cache[id_cl]
+                s.onImageChanged.emit(s.current_image)
+
     @pyqtSlot()
     def abort(self):
         self.aborted = True

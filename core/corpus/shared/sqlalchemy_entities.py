@@ -117,7 +117,6 @@ class User(Base):
                                            back_populates="users")
 
 
-
 class Upload(Base):
     __tablename__ = 'uploads'
 

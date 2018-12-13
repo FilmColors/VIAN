@@ -17,7 +17,7 @@ class QueryType(Enum):
 class QueryWorkerSignals(QObject):
     onSegmentQueryResult = pyqtSignal(object, object)
     onMovieQueryResult = pyqtSignal(object)
-    onCorpusQueryResult = pyqtSignal(object, object, object, object)  # type: List[DBProjects], List[DBUniuqeKeywords], List[DBClassificationObject]
+    onCorpusQueryResult = pyqtSignal(object, object, object, object, object)  # type: List[DBProjects], List[DBUniuqeKeywords], List[DBClassificationObject]
     onProgress = pyqtSignal(float)
 CORPUS_PATH = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
 # CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
@@ -47,7 +47,10 @@ class QueryWorker(QObject):
         return self.corpus.db.query(DBUniqueKeyword).all()
 
     def on_corpus_info(self):
-        self.signals.onCorpusQueryResult.emit(self.corpus.db.query(DBProject).all(),
+        for k, v in self.generate_filmography_autofill().items():
+            print(k, v)
+        self.signals.onCorpusQueryResult.emit(self.generate_filmography_autofill(),
+                                              self.corpus.db.query(DBProject).all(),
                                               self.corpus.db.query(DBUniqueKeyword).all(),
                                               self.corpus.db.query(DBClassificationObject).all(),
                                               self.corpus.db.query(DBSubCorpus).all())
@@ -55,6 +58,27 @@ class QueryWorker(QObject):
     def on_project_query(self, project:DBProject):
         pass
 
+
+    def generate_filmography_autofill(self):
+        movies = self.corpus.db.query(DBMovie).all()
+        result=dict(
+            imdb_id = [],
+            color_process = [],
+            cinematography = [],
+            color_consultant = [],
+            production_design = [],
+            art_director = [],
+            costum_design = [],
+            production_company = [],
+            country = []
+        )
+        for m in movies:
+            for k in result.keys():
+                val = getattr(m, k)
+                if val not in result[k]:
+                    result[k].append(val)
+        print(result)
+        return result
 
     def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None, n = 400):
         excluded_subquery = self.corpus.db.query(DBSegment.id) \
@@ -96,7 +120,7 @@ class QueryWorker(QObject):
         screenshots = dict()
         print("Loading Analyses")
 
-        n_attempts = int(n * 1.2)
+        n_attempts = int(n * 2.0)
         c = 0
         if len(scrs) > 0:
             while(len(screenshots.keys()) < n and c < n_attempts):
@@ -131,6 +155,7 @@ class QueryWorker(QObject):
 
         self.signals.onProgress.emit(1.0)
         return self.signals.onSegmentQueryResult.emit(segments, screenshots)
+
 
     @pyqtSlot(str, object)
     def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id):

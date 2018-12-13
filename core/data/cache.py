@@ -17,12 +17,23 @@ class HDF5Cache():
 
     # region -- Generic --
     def set_path(self, path):
-        self.path = path
-        init = False
-        if not os.path.isfile(self.path):
-            h5py.File(self.path, "w")
-            init = True
-        self.h5_file = h5py.File(self.path, "r+")
+        success = False
+        counter = 0
+        while not success:
+            try:
+                self.path = path
+                init = False
+                if not os.path.isfile(self.path):
+                    h5py.File(self.path, "w")
+                    init = True
+                self.h5_file = h5py.File(self.path, "r+")
+                success = True
+            except:
+                path = path.split(".")[0]
+                path += "_" + str(counter)
+                path += ".hdf5"
+                counter += 1
+
         return init
 
     def create_screenshot_cache(self, clobj, size):
