@@ -225,7 +225,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.main_window.actionIntervalSegmentStart.triggered.connect(self.on_interval_segment_start)
         self.main_window.actionIntervalSegmentEnd.triggered.connect(self.on_interval_segment_end)
 
-
         self.time_label = QLabel("00:00:00::1000", self)
         self.time_label.setMinimumWidth(150)
         self.time_label.setStyleSheet("QLabel{"
@@ -266,9 +265,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_scrubber.raise_()
 
     @pyqtSlot(object)
-    def add_segmentation(self, segmentation):
+    def add_segmentation(self, segmentation:Segmentation):
         control = TimelineSegmentationControl(self.frame_Controls, self, segmentation)
         bars = TimelineSegmentationBar(self.frame_Bars, self, control, segmentation)
+        segmentation.onSegmentationChanged.connect(control.update_info)
         for i, s in enumerate(segmentation.segments):
             bars.add_slice(s)
         item = [control, [bars], self.bar_height_min]
@@ -321,11 +321,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
 
     @pyqtSlot(object)
-    def add_annotation_layer(self, layer):
+    def add_annotation_layer(self, layer:AnnotationLayer):
         control = TimelineAnnotationLayerControl(self.frame_Controls, self, layer)
         height = self.bar_height_min
         bars = []
-        layer.onAnnotationAdded.connect(self.on_annotation_added)
+        layer.onAnnotationAdded.connect(self.recreate_timeline)
+        layer.onAnnotationRemoved.connect(self.recreate_timeline)
+        layer.onAnnotationLayerChanged.connect(control.update_info)
         for i, a in enumerate(layer.annotations):
             new = TimelineAnnotationBar(self.frame_Bars, self, control, a, self.group_height)
             # new.add_slice(a)
@@ -338,7 +340,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             if i * self.group_height + self.group_height > self.bar_height_min:
                 height += self.group_height
         height += self.group_height
-
+        control.resize(control.width(), height)
+        control.group_height = self.group_height
         item = [control, bars, height]
         self.item_ann_layers.append(item)
         self.items.append(item)
@@ -445,7 +448,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             ctrl_height = 6
             ctrl = i[0]
             bars = i[1]
-            # item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
             ctrl.move(2, loc_y)
             if len(bars) >= 1 and len(bars[0].annotations) > 0:
                 loc_y += self.group_height
@@ -458,7 +460,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 b.move(0, loc_y)
                 b.resize(self.duration/self.scale, item_height)#item_height)
                 loc_y += item_height #item_height
-                ctrl_height += item_height + 4 # + item_height
+                ctrl_height += item_height # + item_height
                 b.rescale()
 
             if loc_y - bar_start < self.bar_height_min:
@@ -466,8 +468,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 ctrl.resize(self.controls_width - 4, self.bar_height_min)
             else:
                 ctrl.resize(self.controls_width - 4, loc_y - bar_start)
+
             n_bars = np.clip(1, len(bars), None)
-            ctrl.onHeightChanged.emit(ctrl.height() / n_bars)
+            if isinstance(ctrl, TimelineAnnotationLayerControl):
+                ctrl.onHeightChanged.emit((ctrl.height() - ctrl.timeline.group_height) / np.clip(len(ctrl.groups), 1, None))
+            else:
+                ctrl.onHeightChanged.emit(ctrl.height() / n_bars)
 
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
@@ -925,6 +931,9 @@ class TimelineControl(QtWidgets.QWidget):
         if self.item is not None:
             self.name = self.item.get_name()
 
+    def update_info(self, layer):
+        self.set_name()
+
     def add_group(self, annotation):
         y = len(self.groups) * self.timeline.group_height
         text = annotation.get_name()
@@ -937,7 +946,7 @@ class TimelineControl(QtWidgets.QWidget):
             self.onHeightChanged.emit((self.height() - self.timeline.group_height) / len(self.groups))
         else:
             self.onHeightChanged.emit(self.height())
-        self.item.strip_height = self.height()
+        self.item.strip_height = self.height() - self.timeline.group_height
         self.group_height = self.item.strip_height / np.clip(len(self.groups), 1, None)
         self.update()
 
@@ -985,7 +994,7 @@ class TimelineControl(QtWidgets.QWidget):
         qp.setPen(pen)
 
         for i,a in enumerate(self.groups):
-            y = i * self.group_height + self.group_height
+            y = i * self.group_height + self.timeline.group_height
             if i == 0:
                 p1 = QtCore.QPoint(self.x(), y)
                 p2 = QtCore.QPoint(self.width(), y)
@@ -1010,7 +1019,7 @@ class TimelineControl(QtWidgets.QWidget):
             qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), gradient)
 
         for i, a in enumerate(self.groups):
-            y = i * self.group_height + self.group_height
+            y = i * self.group_height + self.timeline.group_height
             text_rect = QtCore.QRect(0, y, self.width(), self.group_height)
             qp.drawText(text_rect, Qt.AlignRight|Qt.AlignVCenter, a[1])
 
@@ -1042,6 +1051,10 @@ class TimelineAnnotationLayerControl(TimelineControl):
     def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineAnnotationLayerControl, self).__init__(parent, timeline, item, name)
         self.layer = item
+
+    def add_group(self, annotation):
+        super(TimelineAnnotationLayerControl, self).add_group(annotation)
+        # self.group_height = (self.height() - self.timeline.group_height) / np.clip(len(self.groups), 1, None)
 
 
 class TimelineSegmentationControl(TimelineControl):
@@ -1512,8 +1525,9 @@ class TimelineSegmentationBar(TimelineBar):
 
 
 class TimebarSegmentationSlice(TimebarSlice):
-    def __init__(self, parent:TimelineSegmentationBar, item, timeline):
+    def __init__(self, parent:TimelineSegmentationBar, item:Segment, timeline):
         super(TimebarSegmentationSlice, self).__init__(parent, item, timeline, color = (54,146,182, 100))
+        item.onSegmentChanged.connect(self.update_text)
 
 
 class TimelineAnnotationBar(TimelineBar):

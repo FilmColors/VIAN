@@ -220,7 +220,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             if isinstance(self.selected_class_object.obj.parent, ClassificationObject):
                 self.selected_class_object.obj.parent.remove_child(self.selected_class_object.obj)
             else:
-                self.current_experiment.remove_class_object(self.selected_class_object.obj)
+                self.current_experiment.remove_classification_object(self.selected_class_object.obj)
         self.update_classification_object_tree()
 
     def update_vocabulary_list_in_object(self):

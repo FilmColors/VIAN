@@ -18,7 +18,7 @@ class ProgressBar(QMainWindow):
     def __init__(self, parent, singal):
         super(ProgressBar, self).__init__(parent)
         self.pbar = QProgressBar(self)
-        self.setWindowFlags(Qt.Dialog)
+        self.setWindowFlags(Qt.Dialog|Qt.FramelessWindowHint)
         self.setCentralWidget(self.pbar)
         singal.connect(self.on_progress)
 
@@ -30,17 +30,26 @@ class ProgressBar(QMainWindow):
 
 
 class VIANVisualizer(QMainWindow):
-    onSegmentQuery = pyqtSignal(object, object, object)
+    onSegmentQuery = pyqtSignal(object, object, object, int)
     onMovieQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
     onLoadScreenshots = pyqtSignal(object, object, int)
+    onCorpusChanged = pyqtSignal(object)
 
     def __init__(self, parent = None):
         super(VIANVisualizer, self).__init__(parent)
         self.query_widget = KeywordWidget(self, self)
         self.setCentralWidget(QWidget(self))
-
+        self.setWindowTitle("VIAN Visualizer")
+        self.menu_file = self.menuBar().addMenu("File")
+        self.menu_windows = self.menuBar().addMenu("Windows")
+        self.a_subcorpus_view = self.menu_windows.addAction("SubCorpus View")
         self.MAX_WIDTH = 300
+
+        self.corpus_view = CorpusWidget(self)
+        self.onCorpusChanged.connect(self.corpus_view.on_corpus_changed)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_view)
+        self.a_subcorpus_view.triggered.connect(self.corpus_view.show)
 
         self.worker = QueryWorker(CORPUS_PATH)
         self.query_thread = QThread()
@@ -53,11 +62,15 @@ class VIANVisualizer(QMainWindow):
         self.onCorpusQuery.connect(self.worker.on_corpus_info)
 
         self.screenshot_loader = ScreenshotWorker(self)
+        self.screenshot_thread = QThread()
+        self.screenshot_loader.moveToThread(self.screenshot_thread)
+        self.screenshot_thread.start()
         self.onLoadScreenshots.connect(self.screenshot_loader.on_load_screenshots)
 
         self.centralWidget().setLayout(QVBoxLayout())
 
         self.cb_corpus = QComboBox(self)
+        self.cb_corpus.addItem("Complete")
         self.cb_query_type = QComboBox(self)
         self.cb_query_type.addItems(["Segments", "Movies"])
 
@@ -89,11 +102,11 @@ class VIANVisualizer(QMainWindow):
         lt.addWidget(self.cb_segm_ab_plot, 1, 0)
         lt.addWidget(self.cb_segm_lc_plot, 2, 0)
         lt.addWidget(self.cb_segm_dt_plot, 3, 0)
-        self.centralWidget().layout().addWidget(self.w_plot_types)
 
+        self.centralWidget().layout().addWidget(self.w_plot_types)
         self.centralWidget().layout().addWidget(self.btn_query)
 
-
+        self.cb_corpus.currentTextChanged.connect(self.on_corpus_changed)
         self.sub_corpora = dict()
         # SegmentsData
         self.segments = dict()
@@ -110,19 +123,31 @@ class VIANVisualizer(QMainWindow):
     def on_query(self):
         progress = ProgressBar(self, self.worker.signals.onProgress)
         progress.show()
+        progress.resize(self.width(), 30)
+        progress.move(self.x(), self.y() + (0.5 * self.height()))
+        self.btn_query.setEnabled(False)
         if self.cb_query_type.currentText() == "Segments":
             self.query_segments()
         else:
             self.query_movies()
 
     def query_segments(self):
-        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), self.sub_corpora[self.cb_corpus.currentText()])
+        subcorpus = None
+        if self.cb_corpus.currentText() != "Complete":
+            subcorpus = self.sub_corpora[self.cb_corpus.currentText()]
+        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), subcorpus)
         pass
 
     def query_movies(self):
         pass
 
+    def on_corpus_changed(self):
+        if self.cb_corpus.currentText() in self.sub_corpora:
+            curr = self.sub_corpora[self.cb_corpus.currentText()]
+            self.onCorpusChanged.emit(curr)
+
     def on_segment_query_result(self, segments:List[DBSegment], screenshots:List[DBScreenshot]):
+        self.btn_query.setEnabled(True)
         self.segm_scrs = dict()
         self.segments = dict()
         p_ab = ImagePlotCircular(self.result_wnd)
@@ -155,7 +180,6 @@ class VIANVisualizer(QMainWindow):
             t = [lbl.mask_idx for lbl in clobj.semantic_segmentation_labels]
             labels.append([clobj.id, t])
 
-        print(labels)
         self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
 
     def on_corpus_result(self, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
@@ -170,6 +194,18 @@ class VIANVisualizer(QMainWindow):
         for c in subcorpora:
             self.cb_corpus.addItem(c.name)
             self.sub_corpora[c.name] = c
+
+
+class CorpusWidget(QDockWidget):
+    def __init__(self, visualizer):
+        super(CorpusWidget, self).__init__(visualizer)
+        self.list = QListWidget(self)
+        self.setWidget(self.list)
+
+    def on_corpus_changed(self, corpus:DBSubCorpus):
+        self.list.clear()
+        for c in sorted(corpus.projects, key=lambda x:x.movie.name): #type:DBProject
+            self.list.addItem(c.movie.name)
 
 
 class ClassificationObjectList(QListWidget):

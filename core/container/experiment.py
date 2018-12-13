@@ -410,7 +410,7 @@ class ClassificationObject(IProjectContainer, IHasName):
     def add_dataset_label(self, value):
         if value not in self.semantic_segmentation_labels[1]:
             self.semantic_segmentation_labels[1].append(value)
-        self.ononClassificationObjectChanged.emit(self)
+        self.onClassificationObjectChanged.emit(self)
 
     def remove_dataset_label(self, value):
         if value in self.semantic_segmentation_labels[1]:
@@ -448,7 +448,11 @@ class ClassificationObject(IProjectContainer, IHasName):
 
         self.classification_vocabularies = [project.get_by_id(uid) for uid in serialization['classification_vocabularies']]
         self.unique_keywords = [UniqueKeyword(self.experiment).deserialize(ser, project) for ser in serialization['unique_keywords']]
-        self.target_container = [project.get_by_id(uid) for uid in serialization['target_container']]
+        ts = [project.get_by_id(uid) for uid in serialization['target_container']]
+        for t in ts:
+            if t is not None:
+                self.target_container.append(t)
+
 
         # VERSION > 0.6.8
         try:

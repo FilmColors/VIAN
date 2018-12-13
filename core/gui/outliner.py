@@ -865,16 +865,19 @@ class ExperimentItem(AbstractOutlinerItem):
         self.classification_objects = dict()
 
         self.classification_root = ClassificationObjectsRoot(self, 0)
+        experiment.onClassificationObjectAdded.connect(self.add_classification_object)
+        experiment.onClassificationObjectRemoved.connect(self.remove_classification_object)
         for cl_obj in experiment.get_classification_objects_plain():
             self.add_classification_object(cl_obj)
 
     def add_classification_object(self, cl_obj):
-            cl_obj_item = ClassificationObjectsItem(self.classification_root, 7, cl_obj)
-            self.classification_objects[cl_obj.get_id()] = (cl_obj_item)
+        cl_obj_item = ClassificationObjectsItem(self.classification_root, 7, cl_obj)
+        self.classification_objects[cl_obj.get_id()] = (cl_obj_item)
 
     def remove_classification_object(self, cl_obj):
         if cl_obj.get_id() in self.classification_objects:
             self.removeChild(self.classification_objects[cl_obj.get_id()])
+            self.classification_objects.pop(cl_obj.get_id())
 
     def get_container(self):
         return self.item

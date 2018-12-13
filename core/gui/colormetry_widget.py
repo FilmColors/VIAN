@@ -74,6 +74,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             t1 = ESimpleDockWidget(self.inner,  self.palette, "Palette")
             t2 = ESimpleDockWidget(self.inner, self.lab_palette, "Space Palette")
             t3 = ESimpleDockWidget(self.inner, self.time_palette, "Time Palette")
+            t3.visibilityChanged.connect(self.on_tab_changed)
             t4 = ESimpleDockWidget(self.inner, lt_hilbert, "Histogram")
             t5 = ESimpleDockWidget(self.inner, lt_spatial, "Spatial Frequency")
 
@@ -117,22 +118,22 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
                 # print("Hilbert",  time.time() - t)
                 t = time.time()
-                # if self.spatial_complexity_vis.isVisible():
-                #     self.spatial_complexity_vis.clear_view()
-                #     colors = [
-                #         QColor(200, 61, 50),
-                #         QColor(98, 161, 169),
-                #         QColor(153, 175, 93),
-                #         QColor(230, 183, 64)
-                #     ]
-                #     cidx = data['current_idx']
-                #     for i, key in enumerate(data['spatial'].keys()):
-                #         xs = data['times']
-                #         ys = data['spatial'][key]
-                #         self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
-                #                                          line_name=key,
-                #                                          force_xmax=self.main_window.project.movie_descriptor.duration)
-                # print("Spacial", time.time() - t)
+                if self.spatial_complexity_vis.isVisible():
+                    self.spatial_complexity_vis.clear_view()
+                    colors = [
+                        QColor(200, 61, 50),
+                        QColor(98, 161, 169),
+                        QColor(153, 175, 93),
+                        QColor(230, 183, 64)
+                    ]
+                    cidx = data['current_idx']
+                    for i, key in enumerate(data['spatial'].keys()):
+                        xs = data['times']
+                        ys = data['spatial'][key]
+                        self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
+                                                         line_name=key,
+                                                         force_xmax=self.main_window.project.movie_descriptor.duration)
+                print("Spacial", time.time() - t)
                 t = time.time()
             except Exception as e:
                 raise e

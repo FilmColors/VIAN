@@ -42,6 +42,7 @@ def get_heatmap_rgb(img, to_blend = None):
     else:
         return result
 
+
 def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method = "edge-mean", normalize = True, norm_factor = None):
     # input_img = cv2.resize(input_img, None, None, 0.5,0.5, cv2.INTER_CUBIC)
     lab = cv2.cvtColor(input_img, cv2.COLOR_BGR2LAB)
@@ -89,7 +90,7 @@ def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method 
             if norm_factor is None:
                 norm_factor = np.amax(hue_var)
             hue_var = hue_var / norm_factor
-        # hue_var = hue_var / np.amax(hue_var)
+        hue_var = hue_var / np.amax(hue_var)
         hcut = np.percentile(hue_var, 95)
         hue_var = hue_var / hcut
         hue_var[np.where(hue_var > 0.95)] = np.mean(hue_var)
@@ -112,7 +113,6 @@ def get_spacial_frequency_heatmap(input_img, blur = False, x2=20, x3=20, method 
         return color_img, lum_var, raw
     else:
         return input_img, np.zeros_like(input_img), np.zeros_like(input_img)
-
 
 
 def convolve_segmentation(values, segmentation):

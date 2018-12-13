@@ -125,9 +125,11 @@ class TimestepUpdateWorkerSingle(QObject):
                     elif self.spacial_frequency_method == "color-var":
                         f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
                     elif self.spacial_frequency_method == "hue-var":
-                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
+                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['hue']
                     elif self.spacial_frequency_method == "luminance-var":
-                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['color']
+                        f = self.project.hdf5_manager.get_colorimetry_spatial_max()['luminance']
+                if f == 0.0:
+                    f = None
                 heatmap, mask, denorm = get_spacial_frequency_heatmap(frame, method=self.spacial_frequency_method, normalize=True, norm_factor=f)
                 frame = heatmap
             if self.update_face_rec:

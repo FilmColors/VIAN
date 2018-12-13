@@ -150,11 +150,14 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         pass
 
     def on_selected(self, sender, selected):
-        if len(selected) > 0:
-            if isinstance(selected[0], IAnalysisJobAnalysis):
-                self.activate_analysis(selected[0])
-            elif isinstance(selected[0], Experiment):
-                self.activate_classification(selected[0])
+        try:
+            if len(selected) > 0:
+                if isinstance(selected[0], IAnalysisJobAnalysis):
+                    self.activate_analysis(selected[0])
+                elif isinstance(selected[0], Experiment):
+                    self.activate_classification(selected[0])
+        except:
+            pass
 
 
 class AnalysisFullScreenWindow(QMainWindow):

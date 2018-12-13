@@ -5,6 +5,7 @@ from enum import Enum
 import os
 from random import shuffle
 from visualizer3.vis_entities import VisScreenshot
+import random
 
 class QueryType(Enum):
     Segment = 0
@@ -55,43 +56,80 @@ class QueryWorker(QObject):
         pass
 
 
-    def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None):
+    def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None, n = 400):
         excluded_subquery = self.corpus.db.query(DBSegment.id) \
             .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(exclude_kwds))).subquery()
 
-        res = self.corpus.db.query(DBSegment, DBScreenshot, DBScreenshotAnalysis) \
-            .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds)))\
-            .filter(DBSegment.id.notin_(excluded_subquery))\
-            .filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
-            .join(DBScreenshot)\
-            .join(DBScreenshotAnalysis)\
-            .all()
-
+        print("Query SQL")
         segments = []
-        for r in res:
-            segments.append(r[0])
+        if subcorpora is not None:
+            res = self.corpus.db.query(DBSubCorpus, DBProject, DBSegment, DBScreenshot, DBScreenshotAnalysis) \
+                .filter(DBSubCorpus.id == subcorpora.id) \
+                .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds)))\
+                .filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
+                .join(DBSubCorpus.projects) \
+                .join(DBSegment)\
+                .join(DBScreenshot)\
+                .join(DBScreenshotAnalysis)\
+                .all()
+            scrs = []
+            print("Parsing SQL")
+            for a, b, c, d, e in res:
+                scrs.append([d, e])
+                segments.append(c)
+        else:
+            res = self.corpus.db.query(DBProject, DBSegment, DBScreenshot, DBScreenshotAnalysis) \
+                .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds))) \
+                .filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures") \
+                .join(DBSegment) \
+                .join(DBScreenshot) \
+                .join(DBScreenshotAnalysis) \
+                .all()
+            scrs = []
+            print("Parsing SQL")
+            for b, c, d, e in res:
+                scrs.append([d, e])
+                segments.append(c)
 
         segments = list(set(segments))
 
         screenshots = dict()
         print("Loading Analyses")
-        # shuffle(res)
-        n = 300
-        step = int(len(res) / n)
-        indices = []
-        for i in range(len(res)):
-            if i % step == 0:
-                indices.extend([i, i + 1, i + 2])
 
-        print(indices)
-        # for i, (segm, scr, analysis)  in enumerate(res): #type: DBScreenshot
-        for i, idx in enumerate(indices):
-            self.signals.onProgress.emit(i / n * 3)
-            segm, scr, analysis = res[idx]
-            if scr.id not in screenshots:
-                screenshots[scr.id] = VisScreenshot(scr, dict())
-            screenshots[scr.id].features[analysis.classification_obj_id]=self.corpus.hdf5_manager.features()[analysis.hdf5_index]
+        n_attempts = int(n * 1.2)
+        c = 0
+        if len(scrs) > 0:
+            while(len(screenshots.keys()) < n and c < n_attempts):
+                idx = random.randint(0, len(scrs) - 1)
+                scr_id = scrs[idx][0].id
 
+
+                # Find start point
+                t = idx - 1
+                while(t >= 0 and scrs[t][0].id == scr_id):
+                    t -= 1
+
+                # Move forward until a new screenshot comes
+                idx = t + 1
+                to_add = []
+
+                while(idx < len(scrs) and scrs[idx][0].id == scr_id):
+                    to_add.append(scrs[idx])
+                    idx += 1
+                if len(to_add) >= 3:
+                    for t in to_add:
+                        scr = t[0]
+                        analysis = t[1]
+
+                        if scr.id not in screenshots:
+                            screenshots[scr.id] = VisScreenshot(scr, dict())
+
+                        screenshots[scr.id].features[analysis.classification_obj_id] = self.corpus.hdf5_manager.features()[
+                            analysis.hdf5_index]
+                c += 1
+                self.signals.onProgress.emit(len(screenshots.keys()) / n)
+
+        self.signals.onProgress.emit(1.0)
         return self.signals.onSegmentQueryResult.emit(segments, screenshots)
 
     @pyqtSlot(str, object)
