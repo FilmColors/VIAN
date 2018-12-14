@@ -15,26 +15,6 @@ from visualizer3.screenshot_worker import ScreenshotWorker
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime
 
 
-class FilmographyQuery():
-    def __init__(self, imdb_id = None, corpus_id = None, color_process = None, director = None, genre = None, cinematography = None,
-                 color_consultant = None, production_design = None, art_director= None, costum_design= None,
-                 production_company= None, country= None, year_start= None, year_end= None):
-
-        self.imdb_id = imdb_id
-        self.corpus_id = corpus_id
-        self.color_process = color_process
-        self.director = director
-        self.genre = genre
-        self.cinematography = cinematography
-        self.color_consultant = color_consultant
-        self.production_design = production_design
-        self.art_director = art_director
-        self.costum_design = costum_design
-        self.production_company = production_company
-        self.country = country
-        self.year_start = year_start
-        self.year_end = year_end
-
 
 class ProgressBar(QMainWindow):
     def __init__(self, parent, singal):
@@ -52,7 +32,7 @@ class ProgressBar(QMainWindow):
 
 
 class VIANVisualizer2(QMainWindow):
-    onSegmentQuery = pyqtSignal(object, object, object, int)
+    onSegmentQuery = pyqtSignal(object, object, object, int, object)
     onMovieQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
     onLoadScreenshots = pyqtSignal(object, object, int)
@@ -74,6 +54,7 @@ class VIANVisualizer2(QMainWindow):
         self.corpus_view = CorpusWidget(self)
         self.onCorpusChanged.connect(self.corpus_view.on_corpus_changed)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_view)
+        self.corpus_view.hide()
         self.a_subcorpus_view.triggered.connect(self.corpus_view.show)
 
         self.worker = QueryWorker(CORPUS_PATH)
@@ -98,7 +79,7 @@ class VIANVisualizer2(QMainWindow):
         self.cb_corpus = QComboBox(self)
         self.cb_corpus.addItem("Complete")
         self.cb_query_type = QComboBox(self)
-        self.cb_query_type.addItems(["Segments", "Movies"])
+        self.cb_query_type.addItems(["Segments"])#, "Movies"])
 
         self.centralWidget().layout().addWidget(self.cb_corpus)
         self.centralWidget().layout().addWidget(self.cb_query_type)
@@ -120,7 +101,7 @@ class VIANVisualizer2(QMainWindow):
         self.cb_segm_dt_plot = QCheckBox("Color-dT", self.w_plot_types)
         self.cb_segm_ab_plot.setChecked(True)
         self.cb_segm_lc_plot.setChecked(True)
-        self.cb_segm_dt_plot.setChecked(True)
+        self.cb_segm_dt_plot.setChecked(False)
         lt.addWidget(QLabel("Plot Types", self.w_plot_types), 0, 0)
         lt.addWidget(self.cb_segm_ab_plot, 1, 0)
         lt.addWidget(self.cb_segm_lc_plot, 2, 0)
@@ -169,7 +150,7 @@ class VIANVisualizer2(QMainWindow):
         subcorpus = None
         if self.cb_corpus.currentText() != "Complete":
             subcorpus = self.sub_corpora[self.cb_corpus.currentText()]
-        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), subcorpus, self.sp_box_K.value())
+        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), subcorpus, self.sp_box_K.value(), self.query_widget.filmography_widget.get_filmography_query())
         pass
 
     def query_movies(self):
@@ -209,10 +190,10 @@ class VIANVisualizer2(QMainWindow):
                 x = data[1]
                 y = data[2]
                 if p_ab is not None:
-                    scr.onImageChanged.connect(p_ab.add_image(x, y, img, True, mime_data=scr, z=l, uid=scr.dbscreenshot.id).setPixmap)
+                    scr.onImageChanged.connect(p_ab.add_image(-x, -y, img, True, mime_data=scr, z=l, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, p_ab))
                 if p_lc is not None:
-                    scr.onImageChanged.connect(p_lc.add_image(x, l, img, False, mime_data=scr, z=y, uid=scr.dbscreenshot.id).setPixmap)
+                    scr.onImageChanged.connect(p_lc.add_image(-x, l, img, False, mime_data=scr, z=y, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, p_lc))
                 if p_dt is not None:
                     scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, index_id=scr.dbscreenshot.id).setPixmap)
@@ -233,7 +214,7 @@ class VIANVisualizer2(QMainWindow):
 
         labels = []
         for clobj in self.classification_objects.values():
-            t = [lbl.mask_idx for lbl in clobj.semantic_segmentation_labels]
+            t = [lbl.mask_idx - 1 for lbl in clobj.semantic_segmentation_labels]
             labels.append([clobj.id, t])
         self.segm_scrs = screenshots
         self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
@@ -443,13 +424,16 @@ class FilmographyWidget(QWidget):
         self.lineEdit_ProductionCompany.setCompleter(completer_production_company)
         self.lineEdit_ProductionCountry.setCompleter(completer_country)
 
-
     def get_filmography_query(self):
         query = FilmographyQuery()
         if self.lineEdit_IMDB.text() != "":
             query.imdb_id = self.lineEdit_IMDB.text().split(",")
         if self.spinBox_Corpus_A.value() > 0:
-            query.corpus_id = [self.spinBox_Corpus_A.value(), self.spinBox_Corpus_B.value(), self.spinBox_Corpus_C.value()]
+            query.corpus_id = self.spinBox_Corpus_A.value()
+        if self.spinBox_Corpus_B.value() > 0:
+            query.manifestation_id = self.spinBox_Corpus_B.value()
+        if self.spinBox_Corpus_C.value() > 0:
+            query.copy_id = self.spinBox_Corpus_C.value()
         if self.lineEdit_Genre.text() != "":
             query.genre = self.lineEdit_Genre.text().split(",")
         if self.comboBox_ColorProcess.currentText() != "":

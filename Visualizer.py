@@ -40,6 +40,6 @@ if __name__ == '__main__':
     sys.excepthook = my_exception_hook
     app = QApplication(sys.argv)
     set_style_sheet(app)
-    main = VIANVisualizer()
+    main = VIANVisualizer2()
     sys.exit(app.exec_())
 

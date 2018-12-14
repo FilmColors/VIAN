@@ -13,6 +13,28 @@ use_postgres = False
 Base = declarative_base()
 
 
+class FilmographyQuery():
+    def __init__(self, imdb_id = None, corpus_id = None, color_process = None, director = None, genre = None, cinematography = None,
+                 color_consultant = None, production_design = None, art_director= None, costum_design= None,
+                 production_company= None, country= None, year_start= None, year_end= None):
+
+        self.imdb_id = imdb_id
+        self.corpus_id = corpus_id
+        self.color_process = color_process
+        self.director = director
+        self.genre = genre
+        self.cinematography = cinematography
+        self.color_consultant = color_consultant
+        self.production_design = production_design
+        self.art_director = art_director
+        self.costum_design = costum_design
+        self.production_company = production_company
+        self.country = country
+        self.year_start = year_start
+        self.year_end = year_end
+        self.copy_id = None
+        self.manifestation_id = None
+
 
 class Point(object):
     def __init__(self, x, y):

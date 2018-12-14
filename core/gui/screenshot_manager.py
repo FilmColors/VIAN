@@ -95,6 +95,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.a_show_only_current.setChecked(False)
         self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
 
+        self.m_plots = self.inner.menuBar().addMenu("Visualizations")
+        self.a_scr_plot = self.m_plots.addAction("Screenshot Manager")
+        self.a_ab_plot = self.m_plots.addAction("AB-Plot")
+        self.a_lc_plot = self.m_plots.addAction("LC-Plot")
+        self.a_dt_plot = self.m_plots.addAction("Color-dT")
+
+
         self.inner.resize(400, self.height())
         self.tab = None
         self.ab_view = None
@@ -174,8 +181,8 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def set_manager(self, screenshot_manager):
         # self.tab = QTabWidget(self.inner)
         # self.tab.addTab(screenshot_manager, "Screenshot Manager")
-
-        self.inner.addDockWidget(Qt.TopDockWidgetArea, ESimpleDockWidget(self.inner, screenshot_manager, "Screenshots"), Qt.Horizontal)
+        self.manager_dock = ESimpleDockWidget(self.inner, screenshot_manager, "Screenshots")
+        self.inner.addDockWidget(Qt.TopDockWidgetArea, self.manager_dock, Qt.Horizontal)
         # t = QWidget()
         # t.setMinimumHeight(1)
         # t.setMinimumWidth(1)
@@ -188,7 +195,8 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         w.layout().addWidget(self.ab_view)
         w.layout().addWidget(ExpandableWidget(w, "Plot Controls", self.ab_ctrls))
         # self.tab.addTab(w, "AB-Plane")
-        self.inner.addDockWidget(Qt.TopDockWidgetArea, ESimpleDockWidget(self.inner, w, "LA-View"), Qt.Horizontal)
+        self.la_dock = ESimpleDockWidget(self.inner, w, "LA-View")
+        self.inner.addDockWidget(Qt.TopDockWidgetArea, self.la_dock, Qt.Horizontal)
 
         self.color_dt = ImagePlotTime(self)
         self.color_dt_ctrls = self.color_dt.get_param_widget()
@@ -206,20 +214,31 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         w3.setLayout(QVBoxLayout())
         w3.layout().addWidget(self.lc_view)
         w3.layout().addWidget(ExpandableWidget(w3, "Plot Controls", self.color_lc_view))
-        self.inner.addDockWidget(Qt.TopDockWidgetArea, ESimpleDockWidget(self.inner, w3, "LC-View"), Qt.Horizontal)
+        self.lc_dock = ESimpleDockWidget(self.inner, w3, "LC-View")
+        self.inner.addDockWidget(Qt.TopDockWidgetArea, self.lc_dock, Qt.Horizontal)
         # self.tab.addTab(w3, "LC-Plane")
 
         w2 = QWidget()
         w2.setLayout(QVBoxLayout())
         w2.layout().addWidget(self.color_dt)
         w2.layout().addWidget(ExpandableWidget(w2, "Plot Controls", self.color_dt_ctrls))
-        self.inner.addDockWidget(Qt.BottomDockWidgetArea, ESimpleDockWidget(self.inner, w2, "Color-dT"), Qt.Horizontal)
+        self.dt_dock = ESimpleDockWidget(self.inner, w2, "Color-dT")
+        self.inner.addDockWidget(Qt.BottomDockWidgetArea, self.dt_dock, Qt.Horizontal)
         # self.tab.addTab(w2, "Color-dt")
 
         self.setWidget(self.tab)
 
+        self.inner.tabifyDockWidget(self.manager_dock, self.la_dock)
+        self.inner.tabifyDockWidget(self.la_dock, self.lc_dock)
+        self.manager_dock.raise_()
+        self.dt_dock.hide()
         self.screenshot_manager = screenshot_manager
         self.create_bottom_bar()
+
+        self.a_scr_plot.triggered.connect(self.manager_dock.show)
+        self.a_ab_plot.triggered.connect(self.la_dock.show)
+        self.a_lc_plot.triggered.connect(self.lc_dock.show)
+        self.a_dt_plot.triggered.connect(self.dt_dock.show)
 
         self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
 

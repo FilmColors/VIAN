@@ -12,17 +12,17 @@ def feature_changed(scr, plot):
         # img = cv2.imread(self.worker.root + "/shots/" + scr.dbscreenshot.file_path)
         l = data[0]
         tx = scr.dbscreenshot.time_ms
-        ty = data[7]
+        ty = data[6]
         x = data[1]
         y = data[2]
 
 
         if isinstance(plot, ImagePlotCircular):
-            plot.update_item(scr.dbscreenshot.id, (x, y, l))
+            plot.update_item(scr.dbscreenshot.id, (-x, -y, l))
         elif isinstance(plot, ImagePlotPlane):
-            plot.update_item(scr.dbscreenshot.id, (x, l, y))
+            plot.update_item(scr.dbscreenshot.id, (-x, l, y))
         elif isinstance(plot, ImagePlotTime):
-            plot.update_item(scr.dbscreenshot.id, (tx, y))
+            plot.update_item(scr.dbscreenshot.id, (tx, ty))
     except Exception as e:
         print(e)
         pass
@@ -48,6 +48,7 @@ class ClassificationObjectSelector(QDockWidget):
         self.list = QListWidget()
         self.setWidget(self.list)
         self.cl_objs = dict()
+        self.setMaximumWidth(200)
         if clobjs is not None:
             self.set_classification_objects(clobjs)
         self.list.currentItemChanged.connect(self.on_clobject_changed)
@@ -68,12 +69,12 @@ class PlotResultsWidget(QMainWindow):
     def __init__(self, parent):
         super(PlotResultsWidget, self).__init__(parent)
         self.group_widgets = []
-
+        self.result_counter = 0
 
     def add_plots(self, p:List[PlotWidget], classification_objects, scrs):
-        print(classification_objects)
         t = PlotResultsGroupWidget(self, classification_objects)
-
+        self.result_counter += 1
+        t.setWindowTitle("Results_" + str(self.result_counter).zfill(2))
         t.scrs = scrs
         for q in p:
             t.add_plot(q)
@@ -104,7 +105,6 @@ class PlotResultsGroupWidget(QDockWidget):
         p.close()
 
     def on_classification_object_changed(self, name):
-        print(name, self.classification_objects)
         if name in self.classification_objects:
             id_cl = self.classification_objects[name].id
             for s in self.scrs.values():

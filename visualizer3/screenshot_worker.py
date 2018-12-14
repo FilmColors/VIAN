@@ -44,6 +44,9 @@ class ScreenshotWorker(QObject):
                     s.current_image = s.image_cache[current_cl_obj_id]
                 else:
                     s.current_image = numpy_to_pixmap(img)
+
+                #HOTFIX
+                s.image_cache[1] = numpy_to_pixmap(img)
                 s.onImageChanged.emit(s.current_image)
         self.aborted = False
 

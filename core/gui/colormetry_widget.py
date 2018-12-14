@@ -25,6 +25,13 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.inner.setCentralWidget(self.central)
         self.use_tab_mode = False
 
+        self.m_visualization = self.inner.menuBar().addMenu("Visualizations")
+        self.a_palette = self.m_visualization.addAction("Palette")
+        self.a_palette_ab = self.m_visualization.addAction("Palette AB")
+        self.a_palette_dt = self.m_visualization.addAction("Palette dT")
+        self.a_hist = self.m_visualization.addAction("Histogram dT")
+        self.a_spatial = self.m_visualization.addAction("Spatial Complexity dT")
+
         # self.vis_tab = QTabWidget(self)
         # self.lt.addWidget(self.vis_tab)
         self.hilbert_table, self.hilbert_colors = create_hilbert_transform(16)
@@ -78,9 +85,15 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             t4 = ESimpleDockWidget(self.inner, lt_hilbert, "Histogram")
             t5 = ESimpleDockWidget(self.inner, lt_spatial, "Spatial Frequency")
 
-            self.inner.addDockWidget(Qt.RightDockWidgetArea, t1, Qt.Horizontal)
+            self.a_palette.triggered.connect(t1.show)
+            self.a_palette_ab.triggered.connect(t2.show)
+            self.a_palette_dt.triggered.connect(t3.show)
+            self.a_hist.triggered.connect(t4.show)
+            self.a_spatial.triggered.connect(t5.show)
+
+            self.inner.addDockWidget(Qt.LeftDockWidgetArea, t1, Qt.Horizontal)
             self.inner.addDockWidget(Qt.RightDockWidgetArea, t2, Qt.Horizontal)
-            self.inner.addDockWidget(Qt.RightDockWidgetArea, t3, Qt.Horizontal)
+            self.inner.addDockWidget(Qt.BottomDockWidgetArea, t3, Qt.Horizontal)
             self.inner.addDockWidget(Qt.RightDockWidgetArea, t4, Qt.Horizontal)
             self.inner.addDockWidget(Qt.RightDockWidgetArea, t5, Qt.Horizontal)
 

@@ -80,40 +80,58 @@ class QueryWorker(QObject):
         print(result)
         return result
 
-    def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None, n = 400):
+    @pyqtSlot(object, object, object, int, object)
+    def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None, n = 400, filmography:FilmographyQuery = None):
         excluded_subquery = self.corpus.db.query(DBSegment.id) \
             .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(exclude_kwds))).subquery()
 
         print("Query SQL")
-        segments = []
+
+        q = self.corpus.db.query(DBSubCorpus, DBProject, DBMovie, DBSegment, DBScreenshot, DBScreenshotAnalysis)
         if subcorpora is not None:
-            res = self.corpus.db.query(DBSubCorpus, DBProject, DBSegment, DBScreenshot, DBScreenshotAnalysis) \
-                .filter(DBSubCorpus.id == subcorpora.id) \
-                .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds)))\
-                .filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
+            q = q.filter(DBSubCorpus.id == subcorpora.id)
+        if include_kwds is not None and len(include_kwds) > 0:
+            q = q.filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds)))
+        if filmography is not None:
+            if filmography.color_process is not None:
+                q = q.filter(DBMovie.color_process.in_(filmography.color_process))
+            if filmography.imdb_id is not None:
+                q = q.filter(DBMovie.imdb_id.in_(filmography.imdb_id))
+            if filmography.cinematography is not None:
+                q = q.filter(DBMovie.cinematography.in_(filmography.cinematography))
+            if filmography.country is not None:
+                q = q.filter(DBMovie.country.in_(filmography.country))
+            if filmography.color_consultant is not None:
+                q = q.filter(DBMovie.color_consultant.in_(filmography.color_consultant))
+            if filmography.production_design is not None:
+                q = q.filter(DBMovie.production_design.in_(filmography.production_design))
+            if filmography.art_director is not None:
+                q = q.filter(DBMovie.art_director.in_(filmography.art_director))
+            if filmography.costum_design is not None:
+                q = q.filter(DBMovie.costum_design.in_(filmography.costum_design))
+            if filmography.production_company is not None:
+                q = q.filter(DBMovie.production_company.in_(filmography.production_company))
+            if filmography.corpus_id is not None:
+                q = q.filter(DBProject.corpus_id == filmography.corpus_id)
+            if filmography.manifestation_id is not None:
+                q = q.filter(DBProject.manifestation_id == filmography.manifestation_id)
+            if filmography.copy_id is not None:
+                q = q.filter(DBProject.copy_id == filmography.copy_id)
+
+        res = q.filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
                 .join(DBSubCorpus.projects) \
+                .join(DBMovie)\
                 .join(DBSegment)\
                 .join(DBScreenshot)\
                 .join(DBScreenshotAnalysis)\
                 .all()
-            scrs = []
-            print("Parsing SQL")
-            for a, b, c, d, e in res:
-                scrs.append([d, e])
-                segments.append(c)
-        else:
-            res = self.corpus.db.query(DBProject, DBSegment, DBScreenshot, DBScreenshotAnalysis) \
-                .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds))) \
-                .filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures") \
-                .join(DBSegment) \
-                .join(DBScreenshot) \
-                .join(DBScreenshotAnalysis) \
-                .all()
-            scrs = []
-            print("Parsing SQL")
-            for b, c, d, e in res:
-                scrs.append([d, e])
-                segments.append(c)
+        segments = []
+        scrs = []
+
+        print("Parsing SQL")
+        for a, b, c, d, e, f in res:
+            scrs.append([e, f])
+            segments.append(d)
 
         segments = list(set(segments))
 
