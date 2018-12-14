@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1083</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -236,6 +236,7 @@
     <addaction name="actionCheckoutProject"/>
     <addaction name="separator"/>
     <addaction name="actionCorpus_Visualizer"/>
+    <addaction name="actionCorpus_VisualizerLegacy"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -859,6 +860,11 @@
   <action name="actionColor_Histogram">
    <property name="text">
     <string>Color Histogram</string>
+   </property>
+  </action>
+  <action name="actionCorpus_VisualizerLegacy">
+   <property name="text">
+    <string>Corpus Visualizer (Legacy)</string>
    </property>
   </action>
  </widget>

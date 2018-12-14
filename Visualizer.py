@@ -14,7 +14,7 @@ DEBUG = True
 class TWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(TWindow, self).__init__()
-        self.t = VIANVisualizer(self)
+        self.t = VIANVisualizer2(self)
         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
 
         self.setCentralWidget(self.t)

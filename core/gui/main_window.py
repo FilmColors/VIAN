@@ -61,6 +61,7 @@ from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 from core.data.io.web_annotation import WebAnnotationDevice
+from visualizer3.visualizer import VIANVisualizer2
 try:
     import keras.backend as K
     from core.analysis.semantic_segmentation import *
@@ -420,6 +421,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
 
         self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
+        self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -1611,6 +1613,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player.on_loaded(self.project)
 
     def on_start_visualizer(self):
+        try:
+            visualizer = VIANVisualizer2(self)
+            visualizer.show()
+        except Exception as e:
+            print(e)
+
+    def on_start_visualizer_legacy(self):
         try:
             contributor = DBContributor(self.settings.CONTRIBUTOR.full_name, "", email=self.settings.CONTRIBUTOR.email)
             visualizer = VIANVisualizer(self, contributor=contributor)

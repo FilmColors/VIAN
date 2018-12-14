@@ -51,7 +51,7 @@ class ProgressBar(QMainWindow):
             self.close()
 
 
-class VIANVisualizer(QMainWindow):
+class VIANVisualizer2(QMainWindow):
     onSegmentQuery = pyqtSignal(object, object, object, int)
     onMovieQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
@@ -60,11 +60,13 @@ class VIANVisualizer(QMainWindow):
     onCorpusChanged = pyqtSignal(object)
 
     def __init__(self, parent = None):
-        super(VIANVisualizer, self).__init__(parent)
+        super(VIANVisualizer2, self).__init__(parent)
         self.query_widget = KeywordWidget(self, self)
         self.setCentralWidget(QWidget(self))
         self.setWindowTitle("VIAN Visualizer")
         self.menu_file = self.menuBar().addMenu("File")
+        self.a_open = self.menu_file.addAction("Open")
+        self.a_open.triggered.connect(self.load_corpus)
         self.menu_windows = self.menuBar().addMenu("Windows")
         self.a_subcorpus_view = self.menu_windows.addAction("SubCorpus View")
         self.MAX_WIDTH = 300
@@ -107,9 +109,6 @@ class VIANVisualizer(QMainWindow):
 
         self.classification_objects = dict()
 
-        self.load_corpus()
-        self.onCorpusQuery.emit()
-
         self.result_wnd = PlotResultsWidget(self)
 
         # Plottypes Widget
@@ -145,12 +144,15 @@ class VIANVisualizer(QMainWindow):
         self.segm_scrs = dict()
         self.show()
 
-    def load_corpus(self, path = "F:\\_corpus\\ERCFilmColors_V2\\database.db"):
+    def load_corpus(self):
+        path = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
+        path = QFileDialog.getOpenFileName(filter="*.db")[0]
         root = os.path.split(path)[0]
         hdf5_path = path.replace("database.db", "analyses.hdf5")
         sql_path = "sqlite:///" + path
         self.worker.load(path, root)
         self.screenshot_loader.db_root = root
+        self.onCorpusQuery.emit()
 
     def on_query(self):
         progress = ProgressBar(self, self.worker.signals.onProgress)
