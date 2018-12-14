@@ -6,6 +6,7 @@ def neighborhood_mean_cv(img, wlen):
     wmean = cv2.boxFilter(img, -1, (wlen, wlen), borderType=cv2.BORDER_REFLECT)
     return wmean
 
+
 def img_lab_to_lch(lab):
     oshape = lab.shape
 
@@ -16,6 +17,7 @@ def img_lab_to_lch(lab):
     lch[:, 2] = np.arctan2(lab[:, 2], lab[:, 1])
     lch = np.reshape(lch, oshape)
     return lch
+
 
 def neighborhood_var_cv(img, wlen, channels = None):
     if channels is not None:

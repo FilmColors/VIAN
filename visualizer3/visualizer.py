@@ -49,6 +49,7 @@ class VIANVisualizer2(QMainWindow):
         self.a_open.triggered.connect(self.load_corpus)
         self.menu_windows = self.menuBar().addMenu("Windows")
         self.a_subcorpus_view = self.menu_windows.addAction("SubCorpus View")
+        self.a_segment_view = self.menu_windows.addAction("Segment View")
         self.MAX_WIDTH = 300
 
         self.corpus_view = CorpusWidget(self)
@@ -56,6 +57,11 @@ class VIANVisualizer2(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_view)
         self.corpus_view.hide()
         self.a_subcorpus_view.triggered.connect(self.corpus_view.show)
+
+        self.segment_view = SegmentWidget(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.segment_view)
+        self.segment_view.hide()
+        self.a_segment_view.triggered.connect(self.segment_view.show)
 
         self.worker = QueryWorker(CORPUS_PATH)
         self.query_thread = QThread()
@@ -217,6 +223,7 @@ class VIANVisualizer2(QMainWindow):
             t = [lbl.mask_idx - 1 for lbl in clobj.semantic_segmentation_labels]
             labels.append([clobj.id, t])
         self.segm_scrs = screenshots
+        self.segment_view.set_segments(segments)
         self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
 
     def on_corpus_result(self, autofill, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
@@ -247,6 +254,40 @@ class CorpusWidget(QDockWidget):
         for c in sorted(corpus.projects, key=lambda x:x.movie.name): #type:DBProject
             self.list.addItem(c.movie.name)
 
+class SegmentWidget(QDockWidget):
+    def __init__(self, visualizer):
+        super(SegmentWidget, self).__init__(visualizer)
+        self.visualizer = visualizer
+        self.table = QTableWidget()
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+
+        self.setWidget(self.table)
+
+    def add_header(self):
+        self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderItem(0, QTableWidgetItem("FM-ID"))
+        self.table.setHorizontalHeaderItem(1, QTableWidgetItem("Segm-ID"))
+        self.table.setHorizontalHeaderItem(2, QTableWidgetItem("Start"))
+        self.table.setHorizontalHeaderItem(3, QTableWidgetItem("Stop"))
+        self.table.setHorizontalHeaderItem(4, QTableWidgetItem("Text"))
+        self.table.verticalHeader().hide()
+
+    def set_segments(self, segments:List[DBSegment]):
+        self.table.clear()
+        self.add_header()
+        if len(segments) == 0:
+            return
+        for i, s in enumerate(sorted(segments, key = lambda x:x.project.corpus_id)):
+            fm_id = "_".join([str(s.project.corpus_id),
+                              str(s.project.manifestation_id),
+                              str(s.project.copy_id)])
+
+            self.table.setRowCount(self.table.rowCount() + 1)
+            self.table.setItem(i, 0, QTableWidgetItem(fm_id))
+            self.table.setItem(i, 1, QTableWidgetItem(str(s.movie_segm_id)))
+            self.table.setItem(i, 2, QTableWidgetItem(str(s.start_ms)))
+            self.table.setItem(i, 3, QTableWidgetItem(str(s.end_ms)))
+            self.table.setItem(i, 4, QTableWidgetItem(str(s.body)))
 
 class ClassificationObjectList(QListWidget):
     def __init__(self, parent):
