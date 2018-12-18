@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Table, TypeDecorator, Unicode, Text, Float
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 import json
 
 """
@@ -12,6 +12,23 @@ use_postgres = False
 
 Base = declarative_base()
 
+import cProfile
+from io import StringIO
+import pstats
+import contextlib
+
+@contextlib.contextmanager
+def profiled():
+    pr = cProfile.Profile()
+    pr.enable()
+    yield
+    pr.disable()
+    s = StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    ps.print_stats()
+    # uncomment this to see who's calling what
+    # ps.print_callers()
+    print(s.getvalue())
 
 class FilmographyQuery():
     def __init__(self, imdb_id = None, corpus_id = None, color_process = None, director = None, genre = None, cinematography = None,

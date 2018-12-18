@@ -7,12 +7,14 @@ from random import shuffle
 from visualizer3.vis_entities import VisScreenshot
 import random
 
+
 class QueryType(Enum):
     Segment = 0
     Segments = 1
     Project = 2
     Projects = 4
     Keywords = 4
+
 
 class QueryWorkerSignals(QObject):
     onSegmentQueryResult = pyqtSignal(object, object)
@@ -21,6 +23,7 @@ class QueryWorkerSignals(QObject):
     onProgress = pyqtSignal(float)
 CORPUS_PATH = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
 # CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
+
 
 class QueryWorker(QObject):
     def __init__(self, path, user = None):
@@ -85,13 +88,19 @@ class QueryWorker(QObject):
         excluded_subquery = self.corpus.db.query(DBSegment.id) \
             .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(exclude_kwds))).subquery()
 
+        # q = self.corpus.db.query(DBSegment).join(UKW_Segment_association_table).filter(UKW_Segment_association_table.columns.unique_keyword_id.in_(include_kwds)).all()
+        # print(q)
         print("Query SQL")
-
         q = self.corpus.db.query(DBSubCorpus, DBProject, DBMovie, DBSegment, DBScreenshot, DBScreenshotAnalysis)
+
         if subcorpora is not None:
             q = q.filter(DBSubCorpus.id == subcorpora.id)
+
         if include_kwds is not None and len(include_kwds) > 0:
-            q = q.filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(include_kwds)))
+            # q = q.filter(DBSegment.unique_keywords.any(UKW_Segment_association_table.columns.segment_id.in_(include_kwds)))
+            q = q.join(UKW_Segment_association_table, DBSegment.id == UKW_Segment_association_table.columns.segment_id) \
+                .filter(UKW_Segment_association_table.columns.unique_keyword_id.in_(include_kwds))
+
         if filmography is not None:
             if filmography.color_process is not None:
                 q = q.filter(DBMovie.color_process.in_(filmography.color_process))
@@ -120,10 +129,10 @@ class QueryWorker(QObject):
 
         res = q.filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
                 .join(DBSubCorpus.projects) \
-                .join(DBMovie)\
-                .join(DBSegment)\
-                .join(DBScreenshot)\
-                .join(DBScreenshotAnalysis)\
+                .join(DBMovie, DBProject.id == DBMovie.project_id)\
+                .join(DBSegment, DBProject.id == DBSegment.project_id)\
+                .join(DBScreenshot, DBSegment.id == DBScreenshot.segment_id)\
+                .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id)\
                 .all()
         segments = []
         scrs = []
