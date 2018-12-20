@@ -66,7 +66,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
                 project.movie_descriptor.movie_path,
                 parameters,
                 tgt.get_id(),
-                project.movie_descriptor.get_letterbox_rect()])
+                project.movie_descriptor.get_letterbox_rect(),
+                None])
 
         return args
 

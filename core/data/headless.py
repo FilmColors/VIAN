@@ -50,19 +50,20 @@ class HeadlessMainWindow(QObject):
         self.thread_pool.start(worker)
 
     def run_analysis(self, analysis:IAnalysisJob, targets:List[IProjectContainer], parameters:Dict, class_objs:List[ClassificationObject], fps):
-        args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
+        for clobj in class_objs:
+            args = analysis.prepare(self.project, targets, parameters, fps, clobj)
 
-        if analysis.multiple_result:
-            for i, arg in enumerate(args):
-                res = analysis.process(arg, self.worker_progress)
+            if analysis.multiple_result:
+                for i, arg in enumerate(args):
+                    res = analysis.process(arg, self.worker_progress)
+                    with PROJECT_LOCK:
+                        analysis.modify_project(self.project, res)
+                        self.project.add_analysis(res)
+            else:
+                res = analysis.process(args, self.worker_progress)
                 with PROJECT_LOCK:
                     analysis.modify_project(self.project, res)
                     self.project.add_analysis(res)
-        else:
-            res = analysis.process(args, self.worker_progress)
-            with PROJECT_LOCK:
-                analysis.modify_project(self.project, res)
-                self.project.add_analysis(res)
 
     def run_analysis_threaded(self, analysis:IAnalysisJob, targets:List[IProjectContainer], parameters:Dict, class_objs:List[ClassificationObject], fps, n_threads = 5, n_targets = 1):
         threads = []
