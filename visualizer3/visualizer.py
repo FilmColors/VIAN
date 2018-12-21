@@ -13,15 +13,16 @@ from functools import partial
 from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed
 from visualizer3.screenshot_worker import ScreenshotWorker
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime
+from core.visualization.dot_plot import DotPlot
 
 
 
-class ProgressBar(QMainWindow):
+class ProgressBar(QWidget):
     def __init__(self, parent, singal):
         super(ProgressBar, self).__init__(parent)
         self.pbar = QProgressBar(self)
-        self.setWindowFlags(Qt.Dialog|Qt.FramelessWindowHint)
-        self.setCentralWidget(self.pbar)
+        self.setLayout(QHBoxLayout())
+        self.layout().addWidget(self.pbar)
         singal.connect(self.on_progress)
 
     @pyqtSlot(float)
@@ -102,16 +103,23 @@ class VIANVisualizer2(QMainWindow):
         self.w_plot_types = QWidget(self)
         lt = QGridLayout(self.w_plot_types)
         self.w_plot_types.setLayout(lt)
-        self.cb_segm_ab_plot = QCheckBox("AB-Plot", self.w_plot_types)
-        self.cb_segm_lc_plot = QCheckBox("LC-Plot", self.w_plot_types)
+        self.cb_segm_ab_plot = QCheckBox("AB Screenshots Plot", self.w_plot_types)
+        self.cb_segm_lc_plot = QCheckBox("LC Screenshots Plot", self.w_plot_types)
+        self.cb_segm_ab_dot_plot = QCheckBox("AB Dot Plot", self.w_plot_types)
+        self.cb_segm_lc_dot_plot = QCheckBox("LC Dot Plot", self.w_plot_types)
+
         self.cb_segm_dt_plot = QCheckBox("Color-dT", self.w_plot_types)
         self.cb_segm_ab_plot.setChecked(True)
         self.cb_segm_lc_plot.setChecked(True)
+        self.cb_segm_ab_dot_plot.setChecked(True)
+        self.cb_segm_lc_dot_plot.setChecked(True)
         self.cb_segm_dt_plot.setChecked(False)
         lt.addWidget(QLabel("Plot Types", self.w_plot_types), 0, 0)
         lt.addWidget(self.cb_segm_ab_plot, 1, 0)
         lt.addWidget(self.cb_segm_lc_plot, 2, 0)
-        lt.addWidget(self.cb_segm_dt_plot, 3, 0)
+        lt.addWidget(self.cb_segm_ab_dot_plot, 3, 0)
+        lt.addWidget(self.cb_segm_lc_dot_plot, 4, 0)
+        lt.addWidget(self.cb_segm_dt_plot, 1, 1)
         hbox_k = QHBoxLayout()
         hbox_k.addWidget(QLabel("K-Images", self.centralWidget()))
         self.sp_box_K = QSpinBox(self.centralWidget())
@@ -144,8 +152,8 @@ class VIANVisualizer2(QMainWindow):
     def on_query(self):
         progress = ProgressBar(self, self.worker.signals.onProgress)
         progress.show()
-        progress.resize(self.width(), 30)
-        progress.move(self.x(), self.y() + (0.5 * self.height()))
+        progress.resize(self.width(), 100)
+        progress.move(0, (0.5 * self.height()))
         self.btn_query.setEnabled(False)
         if self.cb_query_type.currentText() == "Segments":
             self.query_segments()
@@ -181,6 +189,18 @@ class VIANVisualizer2(QMainWindow):
         else:
             p_lc = None
 
+        if self.cb_segm_lc_dot_plot.isChecked():
+            plot_lc_dot = DotPlot(self)
+            plot_lc_dot.add_grid("LA")
+        else:
+            plot_lc_dot = None
+
+        if self.cb_segm_ab_dot_plot.isChecked():
+            plot_ab_dot = DotPlot(self)
+            plot_ab_dot.add_grid("AB")
+        else:
+            plot_ab_dot = None
+
         if self.cb_segm_dt_plot.isChecked():
             p_dt = ImagePlotTime(self.result_wnd)
         else:
@@ -195,6 +215,8 @@ class VIANVisualizer2(QMainWindow):
                 ty = data[7]
                 x = data[1]
                 y = data[2]
+                c = QColor(data[5], data[4],data[3], 200)
+
                 if p_ab is not None:
                     scr.onImageChanged.connect(p_ab.add_image(-x, -y, img, True, mime_data=scr, z=l, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, p_ab))
@@ -204,16 +226,28 @@ class VIANVisualizer2(QMainWindow):
                 if p_dt is not None:
                     scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, index_id=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr,  p_dt))
+                if plot_ab_dot is not None:
+                    plot_ab_dot.add_point(x, -y, z=l, col=c, uid=scr.dbscreenshot.id)
+                    scr.onFeatureChanged.connect(partial(feature_changed, scr, plot_ab_dot))
+                    #
+                if plot_lc_dot is not None:
+                    plot_lc_dot.add_point(-x, l, z=-y, col=c, uid=scr.dbscreenshot.id)
+                    scr.onFeatureChanged.connect(partial(feature_changed, scr, plot_lc_dot))
+                    #
             except Exception as e:
                 pass
 
         plots = []
         if p_ab is not None:
-            plots.append(PlotWidget(self.result_wnd, p_ab, "AB-View"))
+            plots.append(PlotWidget(self.result_wnd, p_ab, "AB-Screenshots"))
         if p_dt is not None:
-            plots.append(PlotWidget(self.result_wnd, p_dt, "DT-View"))
+            plots.append(PlotWidget(self.result_wnd, p_dt, "dT-Screenshots"))
         if p_lc is not None:
-            plots.append(PlotWidget(self.result_wnd, p_lc, "LC-VIEW"))
+            plots.append(PlotWidget(self.result_wnd, p_lc, "LC-Screenshots"))
+        if plot_ab_dot is not None:
+            plots.append(PlotWidget(self.result_wnd, plot_ab_dot, "LC-Dot"))
+        if plot_lc_dot is not None:
+            plots.append(PlotWidget(self.result_wnd, plot_lc_dot, "LC-Dot"))
 
         self.result_wnd.add_plots(plots, self.classification_objects, screenshots)
         self.result_wnd.show()
@@ -224,7 +258,9 @@ class VIANVisualizer2(QMainWindow):
             labels.append([clobj.id, t])
         self.segm_scrs = screenshots
         self.segment_view.set_segments(segments)
-        self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
+
+        if p_ab is not None or p_dt is not None or p_lc is not None:
+            self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
 
     def on_corpus_result(self, autofill, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
         self.classification_objects = dict()
@@ -253,6 +289,7 @@ class CorpusWidget(QDockWidget):
         self.list.clear()
         for c in sorted(corpus.projects, key=lambda x:x.movie.name): #type:DBProject
             self.list.addItem(c.movie.name)
+
 
 class SegmentWidget(QDockWidget):
     def __init__(self, visualizer):
@@ -288,6 +325,7 @@ class SegmentWidget(QDockWidget):
             self.table.setItem(i, 2, QTableWidgetItem(str(s.start_ms)))
             self.table.setItem(i, 3, QTableWidgetItem(str(s.end_ms)))
             self.table.setItem(i, 4, QTableWidgetItem(str(s.body)))
+
 
 class ClassificationObjectList(QListWidget):
     def __init__(self, parent):

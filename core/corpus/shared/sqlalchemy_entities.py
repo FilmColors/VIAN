@@ -121,17 +121,38 @@ Segment_distances_association_table = Table('segment_distances_association', Bas
                                                     Column('segment_dist_metric', Integer, ForeignKey("db_segment_distance.id"))
                                                     )
 
+Genre_association_table = Table('genre_association', Base.metadata,
+                                                    Column('movie', Integer, ForeignKey("db_movies.id")),
+                                                    Column('genre', Integer, ForeignKey("db_genres.id"))
+                                                    )
+
+class Folder(Base):
+    __tablename__ = 'folders'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    parent_id = Column(Integer, ForeignKey("folders.id"))
+    children = relationship("Folder", cascade="all, delete, delete-orphan")
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+    user = relationship("User", back_populates="folders")
+    saved_vis = relationship("SavedVis", back_populates="folder", cascade="all, delete, delete-orphan")
+
+
 class SavedVis(Base):
     __tablename__ = 'saved_vis'
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer,ForeignKey('users.id'))
+    folder_id = Column(Integer, ForeignKey('folders.id'))
     project_id = Column(Integer, ForeignKey("db_projects.id"))
 
     vis_type = Column(String, nullable=False)
     blob = Column(String, nullable=False)
 
     user = relationship("User", back_populates="saved_vis")
+    folder = relationship("Folder", back_populates="saved_vis")
+
     # project = relationship("DBProject", back_populates="saved_vis")
 
 
@@ -150,6 +171,7 @@ class User(Base):
 
     uploads = relationship("Upload", back_populates="user")
     saved_vis = relationship("SavedVis", back_populates="user")
+    folders = relationship("Folder", back_populates="user")
     owned_sub_corporas = relationship("DBSubCorpus", back_populates="owner")
     subscribed_sub_corporas = relationship("DBSubCorpus",
                                            secondary=Subcorpora_subscibed_user_association_table,
@@ -228,6 +250,7 @@ class DBMovie(Base):
 
     imdb_id = Column(String, nullable=True)
     color_process = Column(String)
+    director = Column(String)
     cinematography = Column(String)
     color_consultant = Column(String)
     production_design = Column(String)
@@ -235,11 +258,14 @@ class DBMovie(Base):
     costum_design = Column(String)
     production_company = Column(String)
     country = Column(String)
-
+    year = Column(Integer)
 
     annotations = relationship("DBAnnotation", back_populates="movie")
     screenshots = relationship("DBScreenshot", back_populates="movie")
     project = relationship("DBProject", back_populates="movie", uselist = False)
+    genres = relationship("DBGenre", secondary=Genre_association_table, back_populates="movies")
+
+    vocabulary_images = relationship("DBConceptImage", back_populates="movie")
 
     def from_project(self, m, project_id):
         if m['meta_data'] is not None and "ERC_FilmColorsFilmography" in m['meta_data'].keys():
@@ -253,6 +279,14 @@ class DBMovie(Base):
         self.duration = m['duration']
         self.project_id = project_id
         return self
+
+
+class DBGenre(Base):
+    __tablename__ = "db_genres"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+    movies = relationship("DBMovie", secondary=Genre_association_table, back_populates="genres")
 
 
 class DBAnnotationLayer(Base):
@@ -295,6 +329,8 @@ class DBSegment(Base):
     segmentation = relationship("DBSegmentation", back_populates="segments")
     analyses = relationship("DBSegmentAnalysis",back_populates="segment")
     screenshots = relationship("DBScreenshot", back_populates="segment")
+
+    vocabulary_images = relationship("DBConceptImage", back_populates="segment")
 
     unique_keywords = relationship("DBUniqueKeyword",
                                    secondary=UKW_Segment_association_table,
@@ -375,7 +411,6 @@ class DBScreenshot(Base):
     time_ms = Column(Integer, nullable=False)
     frame_width = Column(Integer, nullable=False)
     frame_height = Column(Integer, nullable=False)
-
 
     movie_id = Column(Integer, ForeignKey("db_movies.id"))
     segment_id = Column(Integer, ForeignKey("db_segments.id"))
@@ -481,10 +516,40 @@ class DBVocabularyWord(Base):
         self.name = obj['name']
         return self
 
+class DBConceptDescription(Base):
+    __tablename__ = "db_concept_description"
+
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+
+    images = relationship("DBConceptImage", back_populates="concept_description")
+
+    keyword_id = Column(Integer, ForeignKey('db_unique_keywords.id'))
+    keyword = relationship("DBUniqueKeyword", back_populates="concept_description")
+
+
+class DBConceptImage(Base):
+    __tablename__ = "db_concept_images"
+
+    id = Column(Integer, primary_key=True)
+    image_path = Column(String, nullable=False)
+    description = Column(String)
+
+    concept_description_id = Column(Integer, ForeignKey('db_concept_description.id'))
+    concept_description = relationship("DBConceptDescription", back_populates="images")
+
+    movie_id = Column(Integer, ForeignKey('db_movies.id'))
+    movie = relationship("DBMovie", back_populates="vocabulary_images")
+
+    segment_id = Column(Integer, ForeignKey('db_segments.id'))
+    segment = relationship("DBSegment", back_populates="vocabulary_images")
 
 class DBUniqueKeyword(Base):
     __tablename__ = "db_unique_keywords"
     id = Column(Integer, primary_key=True)
+
+    arrangement_group = Column(Integer)
+    complexity_level = Column(Integer)
 
     word_id = Column(Integer, ForeignKey("db_vocabulary_words.id"))
     classification_obj_id = Column(Integer, ForeignKey("db_classification_objects.id"))
@@ -492,6 +557,7 @@ class DBUniqueKeyword(Base):
     word = relationship("DBVocabularyWord", back_populates="unique_keywords")
     classification_object = relationship("DBClassificationObject", back_populates="unique_keywords")
 
+    concept_description = relationship("DBConceptDescription", back_populates="keyword")
 
     annotations = relationship("DBAnnotation",
                                secondary=UKW_Annotation_association_table,
@@ -689,11 +755,6 @@ class DBSemanticSegmentationLabel(Base):
                                           back_populates="semantic_segmentation_labels")
 
 #endregion
-
-# class DBMaskDataset(Base):
-#    __tablename__ = "db_mask_datasets"
-#    id = Column(Integer)
-
 
 
 

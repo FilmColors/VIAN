@@ -25,9 +25,10 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.curr_grid = "Default"
         self.n_grid = 12
         self.font_size = 4
-
+        self.index_uid = dict()
         self.dot_size = 20
         self.grid = []
+        self.lbl_max = None
 
         self.raw_data = []
         self.points = []
@@ -37,6 +38,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.scene().clear()
         self.raw_data = []
         self.points = []
+        self.index_uid = dict()
 
     def add_grid(self, grid_type = "Default"):
         self.curr_grid = grid_type
@@ -100,7 +102,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
             self.circle0.show()
         self.setSceneRect(self.scene().itemsBoundingRect())
 
-    def add_point(self, x, y, z = 0, col = QColor(255,255,255,30)):
+    def add_point(self, x, y, z = 0, col = QColor(255,255,255,30), uid = None):
         s = self.dot_size / 10
         hs = s / 2
 
@@ -116,6 +118,9 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
         point.setZValue(z)
         self.points.append(point)
+        if uid is not None:
+            self.index_uid[uid] = (point, len(self.raw_data))
+
         self.raw_data.append(DotPlotRawData(x=x, y = y, z = z, col=col, mime_data=None, curr_grid=self.curr_grid))
 
     def draw_compass(self):
@@ -248,6 +253,60 @@ class DotPlot(QGraphicsView, IVIANVisualization):
             y = p.rect().y()
             p.setRect(x + hos - hns, y + hos - hns, ns, ns)
 
+    def update_item(self, uid, x, y, z, col = None):
+        if uid in self.index_uid:
+            itm = self.index_uid[uid]
+            q = self.raw_data.pop(itm[1])
+            self.raw_data.insert(itm[1], DotPlotRawData(x=x, y=y, z=z, col=col, mime_data=q.mime_data,
+                                                        curr_grid=self.curr_grid))
+            if col is None:
+                col = q.col
+
+            s = self.dot_size / 10
+            hs = s / 2
+
+            p = QPen()
+            p.setColor(col)
+            p.setWidth(0.1)
+
+            if self.curr_grid == "LA":
+                yt = 128 - y
+                itm[0].setPos(x - hs, yt - hs)
+                itm[0].setZValue(z)
+            else:
+                itm[0].setPos(x - hs, y - hs)
+                itm[0].setZValue(z)
+
+
+    def set_range_scale(self, value = None):
+        if value is not None:
+            self.pos_scale = value / 100
+
+        # font = QFont()
+        # font.setPointSize(10 * self.magnification)
+        #
+        # if self.lbl_max is not None:
+        #     self.scene().removeItem(self.lbl_max)
+        #     self.lbl_max = None
+        # self.lbl_max = self.scene().addText(str(round(128 / self.pos_scale, 0)), font)
+        # self.lbl_max.setDefaultTextColor(self.grid_color)
+        # self.lbl_max.setPos(130 * self.magnification, + (self.lbl_max.boundingRect().height()))
+
+        s = self.dot_size / 10
+        hs = s / 2
+
+        for i, p in enumerate(self.points):
+            x = self.raw_data[i].x * self.pos_scale
+            y = self.raw_data[i].y * self.pos_scale
+            z = self.raw_data[i].z * self.pos_scale
+            if self.curr_grid == "LA":
+                yt = - y
+                p.setPos(x - hs, yt - hs)
+                p.setZValue(z)
+            else:
+                p.setPos(x - hs, y)
+                p.setZValue(z)
+
     def get_raw_data(self):
         return self.raw_data
 
@@ -281,6 +340,16 @@ class DotPlot(QGraphicsView, IVIANVisualization):
     def get_param_widget(self):
         w = QWidget()
         w.setLayout(QVBoxLayout())
+
+        hl1 = QHBoxLayout(w)
+        hl1.addWidget(QLabel("Range Scale:", w))
+
+        slider_xscale = QSlider(Qt.Horizontal, w)
+        slider_xscale.setRange(1, 1000)
+        slider_xscale.setValue(100)
+        slider_xscale.valueChanged.connect(self.set_range_scale)
+        hl1.addWidget(slider_xscale)
+
         hl3 = QHBoxLayout(w)
         hl3.addWidget(QLabel("View Angle:", w))
 
@@ -331,6 +400,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         slider_size.valueChanged.connect(sp_size.setValue)
         hl5.addWidget(sp_size)
 
+        w.layout().addItem(hl1)
         w.layout().addItem(hl3)
         w.layout().addItem(hl4)
         w.layout().addItem(hl5)

@@ -56,7 +56,8 @@ class QueryWorker(QObject):
                                               self.corpus.db.query(DBProject).all(),
                                               self.corpus.db.query(DBUniqueKeyword).all(),
                                               self.corpus.db.query(DBClassificationObject).all(),
-                                              self.corpus.db.query(DBSubCorpus).all())
+                                              self.corpus.db.query(DBSubCorpus).all()
+                                              )
 
     def on_project_query(self, project:DBProject):
         pass
@@ -85,8 +86,8 @@ class QueryWorker(QObject):
 
     @pyqtSlot(object, object, object, int, object)
     def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None, n = 400, filmography:FilmographyQuery = None):
-        excluded_subquery = self.corpus.db.query(DBSegment.id) \
-            .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(exclude_kwds))).subquery()
+        # excluded_subquery = self.corpus.db.query(DBSegment.id) \
+        #     .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(exclude_kwds))).subquery()
 
         # q = self.corpus.db.query(DBSegment).join(UKW_Segment_association_table).filter(UKW_Segment_association_table.columns.unique_keyword_id.in_(include_kwds)).all()
         # print(q)
@@ -100,6 +101,9 @@ class QueryWorker(QObject):
             # q = q.filter(DBSegment.unique_keywords.any(UKW_Segment_association_table.columns.segment_id.in_(include_kwds)))
             q = q.join(UKW_Segment_association_table, DBSegment.id == UKW_Segment_association_table.columns.segment_id) \
                 .filter(UKW_Segment_association_table.columns.unique_keyword_id.in_(include_kwds))
+
+        if exclude_kwds is not None and len(exclude_kwds) > 0:
+            q = q.filter(UKW_Segment_association_table.columns.unique_keyword_id.notin_(exclude_kwds))
 
         if filmography is not None:
             if filmography.color_process is not None:
@@ -126,6 +130,10 @@ class QueryWorker(QObject):
                 q = q.filter(DBProject.manifestation_id == filmography.manifestation_id)
             if filmography.copy_id is not None:
                 q = q.filter(DBProject.copy_id == filmography.copy_id)
+            if filmography.year_start is not None:
+                q = q.filter(DBMovie.year > filmography.year_start)
+            if filmography.year_end is not None:
+                q = q.filter(DBMovie.year < filmography.year_end)
 
         res = q.filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
                 .join(DBSubCorpus.projects) \
@@ -134,6 +142,7 @@ class QueryWorker(QObject):
                 .join(DBScreenshot, DBSegment.id == DBScreenshot.segment_id)\
                 .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id)\
                 .all()
+        print(res)
         segments = []
         scrs = []
 
