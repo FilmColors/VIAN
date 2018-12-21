@@ -81,7 +81,6 @@ class QueryWorker(QObject):
                 val = getattr(m, k)
                 if val not in result[k]:
                     result[k].append(val)
-        print(result)
         return result
 
     @pyqtSlot(object, object, object, int, object)
@@ -135,16 +134,20 @@ class QueryWorker(QObject):
             if filmography.year_end is not None:
                 q = q.filter(DBMovie.year < filmography.year_end)
 
+        print("Query:")
+
         res = q.filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
                 .join(DBSubCorpus.projects) \
                 .join(DBMovie, DBProject.id == DBMovie.project_id)\
                 .join(DBSegment, DBProject.id == DBSegment.project_id)\
                 .join(DBScreenshot, DBSegment.id == DBScreenshot.segment_id)\
-                .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id)\
-                .all()
+                .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id)
         print(res)
+        res = res.all()
         segments = []
         scrs = []
+
+        print("Returned Rows:", len(res))
 
         print("Parsing SQL")
         for a, b, c, d, e, f in res:

@@ -17,7 +17,7 @@ class VIANCorpus(QObject):
         self.sql_path = "sqlite:///" + path
         self.hdf5_path = path.replace(".db", ".hdf5").replace("database", "analyses")
         self.hdf5_manager = HDF5ManagerDatabase(self.hdf5_path)
-        self.engine = create_engine(self.sql_path, echo=True, connect_args={"check_same_thread":False})
+        self.engine = create_engine(self.sql_path, echo=False, connect_args={"check_same_thread":False})
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.db = self.Session()

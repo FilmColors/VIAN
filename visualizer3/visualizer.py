@@ -311,6 +311,7 @@ class SegmentWidget(QDockWidget):
 
     def set_segments(self, segments:List[DBSegment]):
         self.table.clear()
+        self.table.setRowCount(0)
         self.add_header()
         if len(segments) == 0:
             return
@@ -433,7 +434,7 @@ class KeywordWidget(QWidget):
         else:
             group = self.voc_map[cl_obj.name][voc.vocabulary_category.name][voc.name]
 
-        checkbox = WordCheckBox(None, voc_word)
+        checkbox = WordCheckBox(None, ukw)
         checkbox.setTristate(True)
         self.keyword_map[ukw.id] = checkbox
         self.keyword_cl_obj_map[ukw.id] = cl_obj_item
@@ -467,7 +468,7 @@ class WordCheckBox(QCheckBox):
     def __init__(self, parent, word):
         super(WordCheckBox, self).__init__(parent)
         self.word = word
-        self.setText(word.name)
+        self.setText(word.word.name)
 
 
 class FilmographyWidget(QWidget):
