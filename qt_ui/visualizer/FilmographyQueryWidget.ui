@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>515</width>
-    <height>432</height>
+    <width>623</width>
+    <height>517</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -221,13 +221,6 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QLineEdit" name="lineEdit_Genre">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
    <item row="14" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
@@ -281,6 +274,9 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="comboBox_Genre"/>
    </item>
   </layout>
  </widget>

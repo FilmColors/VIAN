@@ -74,13 +74,18 @@ class QueryWorker(QObject):
             art_director = [],
             costum_design = [],
             production_company = [],
-            country = []
+            country = [],
+            genres = []
         )
         for m in movies:
             for k in result.keys():
                 val = getattr(m, k)
                 if val not in result[k]:
                     result[k].append(val)
+
+        result['genres'] = sorted(self.corpus.db.query(DBGenre).all(), key=lambda x:x.name)
+
+        print(result['genres'])
         return result
 
     @pyqtSlot(object, object, object, int, object)
@@ -98,7 +103,8 @@ class QueryWorker(QObject):
 
         if include_kwds is not None and len(include_kwds) > 0:
             # q = q.filter(DBSegment.unique_keywords.any(UKW_Segment_association_table.columns.segment_id.in_(include_kwds)))
-            q = q.join(UKW_Segment_association_table, DBSegment.id == UKW_Segment_association_table.columns.segment_id) \
+            q = q.join(UKW_Segment_association_table,
+                       DBSegment.id == UKW_Segment_association_table.columns.segment_id) \
                 .filter(UKW_Segment_association_table.columns.unique_keyword_id.in_(include_kwds))
 
         if exclude_kwds is not None and len(exclude_kwds) > 0:
@@ -133,17 +139,22 @@ class QueryWorker(QObject):
                 q = q.filter(DBMovie.year > filmography.year_start)
             if filmography.year_end is not None:
                 q = q.filter(DBMovie.year < filmography.year_end)
+            if filmography.genre is not None:
+                q = q.join(Genre_association_table,
+                           DBMovie.id == Genre_association_table.columns.movie) \
+                    .filter(Genre_association_table.columns.genre.in_(filmography.genre))
 
-        print("Query:")
-
-        res = q.filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
+        q = q.filter(DBScreenshotAnalysis.analysis_class_name == "ColorFeatures")\
                 .join(DBSubCorpus.projects) \
                 .join(DBMovie, DBProject.id == DBMovie.project_id)\
                 .join(DBSegment, DBProject.id == DBSegment.project_id)\
                 .join(DBScreenshot, DBSegment.id == DBScreenshot.segment_id)\
                 .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id)
-        print(res)
-        res = res.all()
+
+        print("Query:")
+        print(q)
+
+        res = q.all()
         segments = []
         scrs = []
 

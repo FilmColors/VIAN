@@ -476,8 +476,16 @@ class FilmographyWidget(QWidget):
         super(FilmographyWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/visualizer/FilmographyQueryWidget.ui")
         uic.loadUi(path, self)
+        self.genre_map = dict()
 
     def apply_autofill(self, a):
+        self.comboBox_Genre.clear()
+        self.comboBox_Genre.addItem("None")
+        self.genre_map = dict()
+        for g in a['genres']:
+            self.comboBox_Genre.addItem(g.name)
+            self.genre_map[g.name] = g.id
+
         completer_imdb = QCompleter(a["imdb_id"])
         completer_production_company = QCompleter(a["production_company"])
         completer_cinematography = QCompleter(a["cinematography"])
@@ -514,8 +522,6 @@ class FilmographyWidget(QWidget):
             query.manifestation_id = self.spinBox_Corpus_B.value()
         if self.spinBox_Corpus_C.value() > 0:
             query.copy_id = self.spinBox_Corpus_C.value()
-        if self.lineEdit_Genre.text() != "":
-            query.genre = self.lineEdit_Genre.text().split(",")
         if self.comboBox_ColorProcess.currentText() != "":
             query.color_process = self.comboBox_ColorProcess.text().split(",")
         if self.lineEdit_Director.text() != "":
@@ -538,6 +544,8 @@ class FilmographyWidget(QWidget):
             query.year_start = self.spinBox_YearA.value()
         if self.spinBox_YearB.value() > 0:
             query.year_end = self.spinBox_YearB.value()
+        if self.comboBox_Genre.currentText() != "None":
+            query.genre = [self.genre_map[self.comboBox_Genre.currentText()]]
 
         return query
 
