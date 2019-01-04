@@ -85,7 +85,6 @@ class QueryWorker(QObject):
 
         result['genres'] = sorted(self.corpus.db.query(DBGenre).all(), key=lambda x:x.name)
 
-        print(result['genres'])
         return result
 
     @pyqtSlot(object, object, object, int, object)

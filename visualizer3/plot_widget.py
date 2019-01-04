@@ -41,11 +41,13 @@ class PlotWidget(QDockWidget):
         self.plot = plot
         self.name = name
         self.widget = QWidget(self)
+        self.setWindowTitle(self.name)
         self.widget.setLayout(QVBoxLayout())
         self.setWidget(self.widget)
         self.widget.layout().addWidget(plot)
         self.widget.layout().addWidget(ExpandableWidget(self, "Plot Controls", plot.get_param_widget()))
         self.show()
+
 
 class ClassificationObjectSelector(QDockWidget):
     onClassificationObjectChanged = pyqtSignal(str)
@@ -77,15 +79,20 @@ class PlotResultsWidget(QMainWindow):
         super(PlotResultsWidget, self).__init__(parent)
         self.group_widgets = []
         self.result_counter = 0
+        self.tab = QTabWidget(self)
+        self.setCentralWidget(self.tab)
 
     def add_plots(self, p:List[PlotWidget], classification_objects, scrs):
         t = PlotResultsGroupWidget(self, classification_objects)
         self.result_counter += 1
-        t.setWindowTitle("Results_" + str(self.result_counter).zfill(2))
+
         t.scrs = scrs
         for q in p:
             t.add_plot(q)
-        self.addDockWidget(Qt.RightDockWidgetArea, t, Qt.Vertical)
+
+        # t.setWindowTitle("Results_" + str(self.result_counter).zfill(2))
+        # self.addDockWidget(Qt.RightDockWidgetArea, t, Qt.Vertical)
+        self.tab.addTab(t, "Results_" + str(self.result_counter).zfill(2))
         self.group_widgets.append(t)
         t.show()
 
@@ -98,12 +105,16 @@ class PlotResultsGroupWidget(QDockWidget):
         self.classification_object_selector = ClassificationObjectSelector(self, classification_objects)
         self.classification_object_selector.onClassificationObjectChanged.connect(self.on_classification_object_changed)
         self.central = QMainWindow()
+        t = QWidget()
+        t.setFixedSize(1,1)
         self.setWidget(self.central)
+        self.central.setCentralWidget(t)
         self.central.addDockWidget(Qt.LeftDockWidgetArea, self.classification_object_selector)
         self.scrs = dict()
 
     def add_plot(self, p: PlotWidget):
-        self.central.addDockWidget(Qt.RightDockWidgetArea, p, Qt.Horizontal)
+        alignment = Qt.Horizontal
+        self.central.addDockWidget(Qt.RightDockWidgetArea, p, alignment)
         self.plots[p.name] = p
 
     def remove_plot(self, p):
