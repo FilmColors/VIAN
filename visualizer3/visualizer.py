@@ -14,6 +14,7 @@ from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_chang
 from visualizer3.screenshot_worker import ScreenshotWorker
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime
 from core.visualization.dot_plot import DotPlot
+from core.visualization.palette_plot import MultiPaletteLABWidget
 
 
 
@@ -33,7 +34,7 @@ class ProgressBar(QWidget):
 
 
 class VIANVisualizer2(QMainWindow):
-    onSegmentQuery = pyqtSignal(object, object, object, int, object)
+    onSegmentQuery = pyqtSignal(object, object, object, int, object, object)
     onMovieQuery = pyqtSignal(object)
     onCorpusQuery = pyqtSignal()
     onLoadScreenshots = pyqtSignal(object, object, int)
@@ -107,6 +108,7 @@ class VIANVisualizer2(QMainWindow):
         self.cb_segm_lc_plot = QCheckBox("LC Screenshots Plot", self.w_plot_types)
         self.cb_segm_ab_dot_plot = QCheckBox("AB Dot Plot", self.w_plot_types)
         self.cb_segm_lc_dot_plot = QCheckBox("LC Dot Plot", self.w_plot_types)
+        self.cb_segm_palette_dot_plot = QCheckBox("Palette Dot Plot", self.w_plot_types)
 
         self.cb_segm_dt_plot = QCheckBox("Color-dT", self.w_plot_types)
         self.cb_segm_ab_plot.setChecked(True)
@@ -114,12 +116,14 @@ class VIANVisualizer2(QMainWindow):
         self.cb_segm_ab_dot_plot.setChecked(True)
         self.cb_segm_lc_dot_plot.setChecked(True)
         self.cb_segm_dt_plot.setChecked(False)
+        self.cb_segm_palette_dot_plot.setChecked(False)
         lt.addWidget(QLabel("Plot Types", self.w_plot_types), 0, 0)
         lt.addWidget(self.cb_segm_ab_plot, 1, 0)
         lt.addWidget(self.cb_segm_lc_plot, 2, 0)
         lt.addWidget(self.cb_segm_ab_dot_plot, 3, 0)
         lt.addWidget(self.cb_segm_lc_dot_plot, 4, 0)
         lt.addWidget(self.cb_segm_dt_plot, 1, 1)
+        lt.addWidget(self.cb_segm_palette_dot_plot, 2, 1)
         hbox_k = QHBoxLayout()
         hbox_k.addWidget(QLabel("K-Images", self.centralWidget()))
         self.sp_box_K = QSpinBox(self.centralWidget())
@@ -164,7 +168,19 @@ class VIANVisualizer2(QMainWindow):
         subcorpus = None
         if self.cb_corpus.currentText() != "Complete":
             subcorpus = self.sub_corpora[self.cb_corpus.currentText()]
-        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(), subcorpus, self.sp_box_K.value(), self.query_widget.filmography_widget.get_filmography_query())
+        settings = dict(
+            get_features = (self.cb_segm_ab_plot.isChecked()
+                            or self.cb_segm_lc_plot.isChecked()
+                            or self.cb_segm_ab_dot_plot.isChecked()
+                            or self.cb_segm_lc_dot_plot.isChecked()
+                            or self.cb_segm_dt_plot.isChecked()),
+            get_palettes = self.cb_segm_palette_dot_plot.isChecked()
+        )
+        self.onSegmentQuery.emit(*self.query_widget.get_keyword_filters(),
+                                 subcorpus,
+                                 self.sp_box_K.value(),
+                                 self.query_widget.filmography_widget.get_filmography_query(),
+                                 settings)
         pass
 
     def query_movies(self):
@@ -205,6 +221,17 @@ class VIANVisualizer2(QMainWindow):
             p_dt = ImagePlotTime(self.result_wnd)
         else:
             p_dt = None
+
+        if self.cb_segm_palette_dot_plot.isChecked():
+            p_palette_dot = MultiPaletteLABWidget(self.result_wnd)
+            palettes = []
+            for scr in screenshots.values():
+                if scr.current_palette is not None:
+                    palettes.append(scr.current_palette)
+            p_palette_dot.set_palettes(palettes)
+        else:
+            p_palette_dot = None
+
         for scr in screenshots.values():
             try:
                 data = scr.features[1]
@@ -229,11 +256,11 @@ class VIANVisualizer2(QMainWindow):
                 if plot_ab_dot is not None:
                     plot_ab_dot.add_point(x, -y, z=l, col=c, uid=scr.dbscreenshot.id)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, plot_ab_dot))
-                    #
                 if plot_lc_dot is not None:
                     plot_lc_dot.add_point(-x, l, z=-y, col=c, uid=scr.dbscreenshot.id)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, plot_lc_dot))
                     #
+
             except Exception as e:
                 pass
 
@@ -248,6 +275,8 @@ class VIANVisualizer2(QMainWindow):
             plots.append(PlotWidget(self.result_wnd, plot_ab_dot, "LC-Dot"))
         if plot_lc_dot is not None:
             plots.append(PlotWidget(self.result_wnd, plot_lc_dot, "LC-Dot"))
+        if p_palette_dot is not None:
+            plots.append(PlotWidget(self.result_wnd, p_palette_dot, "Palette-Dot"))
 
         self.result_wnd.add_plots(plots, self.classification_objects, screenshots)
         self.result_wnd.show()

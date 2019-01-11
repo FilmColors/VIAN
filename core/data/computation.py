@@ -505,7 +505,6 @@ def labels_to_binary_mask(multi_mask, labels, as_bool = False):
     result = np.zeros_like(multi_mask, dtype=np.uint8)
     for i in labels:
         result[np.where(multi_mask == i)] = 255
-
     if as_bool:
         return result.astype(np.bool)
     return result

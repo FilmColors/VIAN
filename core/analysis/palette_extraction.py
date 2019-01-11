@@ -133,7 +133,7 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
 
 
 
-def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, image_size = 100.0, seeds_model = None,
+def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, image_size = 400.0, seeds_model = None,
                   n_pixels = 200, out_path = "", n_merge_per_lvl = 10, plot = False, mask_inverse = False, normalization_lower_bound = 100.0,
                   seeds_input_width = 600):
 
@@ -156,15 +156,14 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
         mask = cv2.resize(mask, None, None, fx, fx, cv2.INTER_CUBIC)
 
         if mask_inverse:
-            labels[np.where(mask != mask_index)] = 255
-        else:
             labels[np.where(mask == mask_index)] = 255
+        else:
+            labels[np.where(mask != mask_index)] = 255
 
         bins = np.unique(labels)
         bins = np.delete(bins, np.where(bins==255))
     else:
         bins = np.unique(labels)
-
 
     data = []
 

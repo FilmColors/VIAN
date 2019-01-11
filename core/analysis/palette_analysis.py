@@ -4,7 +4,7 @@ University of Zurich
 June 2018
 
 """
-COLOR_PALETTES_MAX_LENGTH = 1000
+COLOR_PALETTES_MAX_LENGTH = 1024
 from typing import List
 
 from core.data.computation import ms_to_frames, numpy_to_pixmap
@@ -19,7 +19,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
     def __init__(self):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorPalettes",
-                                                   dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6),
+                                                   dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6), #(Distance, Layer, L, A, B, N)
                                                    dataset_dtype=np.float16,
                                                    author="Gaudenz Halter",
                                                      version="1.0.0",
@@ -35,12 +35,20 @@ class ColorPaletteAnalysis(IAnalysisJob):
         args = []
         fps = project.movie_descriptor.fps
         for tgt in targets:
+            semseg = None
+            if isinstance(tgt, Screenshot):
+                if class_objs is not None:
+                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
+                    if len(semseg) > 0:
+                        semseg = semseg[0]
+
             args.append([ms_to_frames(tgt.get_start(), fps),
                          ms_to_frames(tgt.get_end(), fps),
                          project.movie_descriptor.movie_path,
                          parameters,
                          tgt.get_id(),
-                         project.movie_descriptor.get_letterbox_rect()])
+                         project.movie_descriptor.get_letterbox_rect(),
+                         semseg])
         return args
 
     def process(self, args, sign_progress):
@@ -53,6 +61,12 @@ class ColorPaletteAnalysis(IAnalysisJob):
         movie_path = args[2]
         params = args[3]
         margins = args[5]
+        semseg = args[6]
+        bin_mask = None
+        if semseg is not None:
+            name, labels = self.target_class_obj.semantic_segmentation_labels
+            mask = semseg.get_adata()
+            bin_mask = labels_to_binary_mask(mask, labels)
 
         palettes = []
 
@@ -77,7 +91,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
-            palettes.append(color_palette(frame))
+            palettes.append(color_palette(frame, mask=bin_mask, mask_index=255))
             c += 1
 
         if len(palettes) > 1:

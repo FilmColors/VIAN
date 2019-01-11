@@ -7,6 +7,7 @@ from core.data.computation import pixmap_to_numpy
 class VisScreenshot(QObject):
     onImageChanged = pyqtSignal(object)
     onFeatureChanged = pyqtSignal(object)
+    onPaletteChanged = pyqtSignal(object)
 
     def __init__(self, dbscreenshot, features):
         super(VisScreenshot, self).__init__()
@@ -20,6 +21,8 @@ class VisScreenshot(QObject):
         self.current_image = np.zeros(shape=(50,35,3), dtype=np.uint8)
         self.features = features
         self.current_feature = None
+        self.palettes = dict()
+        self.current_palette = None
 
     def set_current_clobj_index(self, idx):
         if idx in self.image_cache and idx in self.features:
@@ -27,5 +30,12 @@ class VisScreenshot(QObject):
             self.current_feature = self.features[idx]
             self.onImageChanged.emit(self.current_image)
             self.onFeatureChanged.emit(self.features[idx])
+
+        if idx in self.palettes:
+            self.current_palette = self.palettes[idx]
+            self.onPaletteChanged.emit(self.current_palette)
         else:
-            print("Not Found", idx, self.image_cache.keys())
+            self.current_palette = None
+
+
+

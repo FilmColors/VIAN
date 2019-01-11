@@ -38,6 +38,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.scene().clear()
         self.raw_data = []
         self.points = []
+        self.grid = []
         self.index_uid = dict()
 
     def add_grid(self, grid_type = "Default"):
@@ -276,7 +277,6 @@ class DotPlot(QGraphicsView, IVIANVisualization):
             else:
                 itm[0].setPos(x - hs, y - hs)
                 itm[0].setZValue(z)
-
 
     def set_range_scale(self, value = None):
         if value is not None:

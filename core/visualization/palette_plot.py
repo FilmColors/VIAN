@@ -12,6 +12,9 @@ from core.analysis.colorimetry.hilbert import *
 from core.visualization.basic_vis import IVIANVisualization
 from core.data.computation import *
 from core.gui.ewidgetbase import EGraphicsView
+from core.visualization.dot_plot import DotPlot
+
+from random import randint
 import numpy as np
 
 
@@ -598,44 +601,68 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         self.draw_palette(image)
         return image
 
-# class TWindow(QMainWindow):
-#     def __init__(self):
-#         super(TWindow, self).__init__()
-#         self.t = PaletteWidget(self)
-#         # self.addDockWidget(Qt.LeftDockWidgetArea, self.t)
-#
-#         self.setCentralWidget(self.t)
-#         self.resize(1200, 800)
-#
-#         self.show()
-#
-# def set_style_sheet(app):
-#     style_sheet = open(os.path.abspath("qt_ui/themes/qt_stylesheet_dark.css"), 'r')
-#     style_sheet = style_sheet.read()
-#     app.setStyleSheet(style_sheet)
-#
-# def my_exception_hook(exctype, value, traceback):
-#     # Print the error and traceback
-#     print((exctype, value, traceback))
-#     # Call the normal Exception hook after
-#     sys._excepthook(exctype, value, traceback)
-#     sys.exit(1)
 
-# if __name__ == '__main__':
-#     # data_path = "E:/Programming/Datasets/FilmColors/example_db/ASSETS/stage_02_2_1_1.pickle"
-#     # data = None
-#     # with open(data_path, "rb") as f:
-#     #     data = pickle.load(f)
-#     # palettes = data.palette_assets
-#     # palette = palettes[0][2].tree
-#     # with open("palette.pickle", "wb") as f:
-#     #     data = pickle.dump(palette, f)
-#     with open("palette.pickle", "rb") as f:
-#         palette = pickle.load(f)
-#     sys._excepthook = sys.excepthook
-#     sys.excepthook = my_exception_hook
-#     app = QApplication(sys.argv)
-#     # set_style_sheet(app)
-#     main = TWindow()
-#     main.t.set_palette(palette)
-#     sys.exit(app.exec_())
+class MultiPaletteLABWidget(QWidget, IVIANVisualization):
+    def __init__(self, parent):
+        super(MultiPaletteLABWidget, self).__init__(parent)
+        self.dot_plot = DotPlot(self)
+        self.dot_plot.dot_size = 5
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(self.dot_plot)
+        self.palette_tree = None
+        self.slider = None
+        self.depth = 0
+
+    def get_param_widget(self):
+        self.slider = QSlider(Qt.Horizontal, self)
+        self.slider.valueChanged.connect(self.on_depth_changed)
+        return self.slider
+
+    def on_depth_changed(self):
+        if self.slider is not None:
+            self.depth = self.slider.value()
+        self.draw_palette()
+
+    def set_palettes(self, palettes):
+        self.palette_tree = np.vstack(tuple(palettes.copy()))
+        layers = self.palette_tree[:, 1]
+        if self.slider is not None:
+            self.slider.setRange(0, len(np.unique(layers)) - 1)
+
+        if not (0 <= self.depth <= len(np.unique(layers)) - 1):
+            self.depth = len(np.unique(layers)) - 1
+        self.draw_palette()
+
+    def draw_palette(self):
+        jitter = 0.5
+        if self.palette_tree is None:
+            return
+        self.dot_plot.clear_view()
+        self.dot_plot.add_grid("AB")
+        try:
+            layer_idx = np.unique(self.palette_tree[:, 1])[self.depth]
+        except:
+            layer_idx = np.unique(np.amax(np.unique(self.palette_tree[:, 1])))
+
+        indices = self.palette_tree[:, 1]
+        indices = np.where(indices == layer_idx)
+        bins = self.palette_tree[indices[0]]
+        bins_max = np.amax(bins[:, 5])
+        drawn = []
+        for i in indices[0]:
+            b = self.palette_tree[i, 2]
+            g = self.palette_tree[i, 3]
+            r = self.palette_tree[i, 4]
+            lab = tpl_bgr_to_lab((b, g, r), as_float=True)
+            if tuple(lab) in drawn:
+                continue
+            else:
+                drawn.append(tuple(lab))
+
+            n_dots = np.clip(np.nan_to_num(self.palette_tree[i, 5] / bins_max * 20), 1, 20)
+            for q in range(int(n_dots)):
+                rx = np.random.normal(0, jitter)
+                ry = np.random.normal(0, jitter)
+                self.dot_plot.add_point(x=lab[1] + rx, y=-lab[2] + ry, z=lab[0], col=QColor(int(r), int(g), int(b)))
+
+

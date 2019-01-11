@@ -6,6 +6,7 @@ import os
 from random import shuffle
 from visualizer3.vis_entities import VisScreenshot
 import random
+import numpy as np
 
 
 class QueryType(Enum):
@@ -87,8 +88,8 @@ class QueryWorker(QObject):
 
         return result
 
-    @pyqtSlot(object, object, object, int, object)
-    def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None, n = 400, filmography:FilmographyQuery = None):
+    @pyqtSlot(object, object, object, int, object, object)
+    def on_query_segments(self, include_kwds = None, exclude_kwds = None, subcorpora = None, n = 400, filmography:FilmographyQuery = None, settings = None):
         # excluded_subquery = self.corpus.db.query(DBSegment.id) \
         #     .filter(DBSegment.unique_keywords.any(DBUniqueKeyword.id.in_(exclude_kwds))).subquery()
 
@@ -171,11 +172,12 @@ class QueryWorker(QObject):
 
         n_attempts = int(n * 2.0)
         c = 0
+
+        # Color Features
         if len(scrs) > 0:
             while(len(screenshots.keys()) < n and c < n_attempts):
                 idx = random.randint(0, len(scrs) - 1)
                 scr_id = scrs[idx][0].id
-
 
                 # Find start point
                 t = idx - 1
@@ -196,12 +198,19 @@ class QueryWorker(QObject):
 
                         if scr.id not in screenshots:
                             screenshots[scr.id] = VisScreenshot(scr, dict())
+                        screenshots[scr.id].features[analysis.classification_obj_id] = self.corpus.hdf5_manager.features()[analysis.hdf5_index]
 
-                        screenshots[scr.id].features[analysis.classification_obj_id] = self.corpus.hdf5_manager.features()[
-                            analysis.hdf5_index]
                 c += 1
-                self.signals.onProgress.emit(len(screenshots.keys()) / n)
+                self.signals.onProgress.emit(np.clip(len(screenshots.keys()) / (n), 0, 0.99))
 
+        if settings['get_palettes']:
+            for i, scr in enumerate(screenshots.values()):
+                for a in scr.dbscreenshot.analyses:
+                    if a.analysis_class_name == "ColorPalette":
+                        scr.palettes[a.classification_obj_id] = self.corpus.hdf5_manager.palettes()[a.hdf5_index]
+                        if a.classification_obj_id == 1:
+                            scr.current_palette = scr.palettes[a.classification_obj_id]
+                self.signals.onProgress.emit(i / len(screenshots.values()))
         self.signals.onProgress.emit(1.0)
         return self.signals.onSegmentQueryResult.emit(segments, screenshots)
 

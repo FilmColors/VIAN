@@ -14,6 +14,9 @@ class IVIANVisualization():
     def __init__(self):
         self.grid_color = QColor(100,100,100,100)
 
+    def get_param_widget(self):
+        return QWidget()
+
     def set_time_indicator(self, x):
         pass
 

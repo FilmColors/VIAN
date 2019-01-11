@@ -45,22 +45,27 @@ def get_movie(ida = None, idb = None, idc = None, path = "E:\Programming\Git\ERC
 
 
 if __name__ == '__main__':
-    db_path = "sqlite:///F:/_corpus/ERCFilmColors_V2/database.db"
+    db_path = "sqlite:///F:/_corpus/ERCFilmColors_02/database.db"
     template_path = "E:\\Programming\\Git\\visual-movie-annotator\\data\\templates\\ERC_FilmColors.viant"
     use_cache = True
+
 
     engine = create_engine(db_path, echo=False)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     db_session = Session()
     hdf5_manager = HDF5Manager()
-    hdf5_manager.set_path("F:/_corpus/ERCFilmColors_V2/analyses.hdf5")
+    hdf5_manager.set_path("F:/_corpus/ERCFilmColors_02/analyses.hdf5")
     mw = HeadlessMainWindow()
-    root = "F:/_projects/"
+    root = "F:/_projects/a02/"
 
     c = 0
     n = len(db_session.query(DBProject).all())
+
+    to_export = [96]
     for p in db_session.query(DBProject).all(): #type:DBProject
+        if p.corpus_id not in to_export:
+            continue
         c += 1
         name = "_".join([str(p.corpus_id),str(p.manifestation_id),str(p.copy_id), p.movie.name])
         name = name.replace(":", "").replace("?", "")
@@ -108,7 +113,7 @@ if __name__ == '__main__':
 
             for mask in scr.masks: # type:DBMask
                 try:
-                    m = cv2.imread("F:\_corpus\ERCFilmColors_V2\masks\\" + mask.mask_path, cv2.IMREAD_GRAYSCALE)
+                    m = cv2.imread("F:\_corpus\ERCFilmColors_02\masks\\" + mask.mask_path, cv2.IMREAD_GRAYSCALE)
                     analysis = SemanticSegmentationAnalysisContainer(
                         name="Fg/Bg Segmentation",
                         results=m.astype(np.uint8),
@@ -136,6 +141,18 @@ if __name__ == '__main__':
                             parameters=dict(),
                             container=scr_p,
                             target_classification_object= cl_obj_index[analysis.classification_obj_id]
+                        )
+                        project.add_analysis(a)
+
+                    elif analysis.analysis_class_name == "ColorPalette":
+                        d = hdf5_manager.h5_file['palettes'][analysis.hdf5_index]
+                        a = IAnalysisJobAnalysis(
+                            name="Color-Features",
+                            results = ColorPaletteAnalysis().from_hdf5(d),
+                            analysis_job_class=ColorPaletteAnalysis,
+                            parameters=dict(),
+                            container=scr_p,
+                            target_classification_object=cl_obj_index[analysis.classification_obj_id]
                         )
                         project.add_analysis(a)
                 except Exception as e:

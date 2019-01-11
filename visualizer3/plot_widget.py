@@ -127,3 +127,15 @@ class PlotResultsGroupWidget(QDockWidget):
             id_cl = self.classification_objects[name].id
             for s in self.scrs.values():
                 s.set_current_clobj_index(id_cl)
+
+            if "Palette-Dot" in self.plots:
+                palettes = []
+                for scr in self.scrs.values():
+                    if id_cl in scr.palettes:
+                        if scr.palettes[id_cl] is not None:
+                            palettes.append(scr.palettes[id_cl])
+                if len(palettes) == 0:
+                    return
+
+                self.plots["Palette-Dot"].plot.set_palettes(palettes)
+
