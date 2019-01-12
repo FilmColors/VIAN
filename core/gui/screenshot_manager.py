@@ -266,7 +266,8 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def color_dt_mode_changed(self, v):
         self.color_dt_mode = v
-        self.draw_visualizations()
+        for scr in self.main_window.project.screenshots:
+            self.update_screenshot(scr)
 
     def remove_screenshot(self, scr):
         self.color_dt.remove_image_by_uid(scr.unique_id)
@@ -330,16 +331,16 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         if a is None:
             return
         x = scr.movie_timestamp
-        sat = a['saturation_p']
+        sat = a['saturation_l']
         lab = a['color_lab']
         lch = lab_to_lch(lab)
 
         if self.color_dt_mode == "Saturation":
             y = sat * 100
         elif self.color_dt_mode == "Luminance":
-            y = lab[0]
+            y = lab[0] * 100
         elif self.color_dt_mode == "Chroma":
-            y = lch[1]
+            y = lch[1] * 100
         elif self.color_dt_mode == "A":
             y = lab[1] / 255 * 100
         elif self.color_dt_mode == "B":
