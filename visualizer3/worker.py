@@ -153,6 +153,7 @@ class QueryWorker(QObject):
 
         print("Query:")
         print(q)
+        print("Parameters:", include_kwds, exclude_kwds)
 
         res = q.all()
         segments = []
@@ -169,14 +170,27 @@ class QueryWorker(QObject):
 
         screenshots = dict()
         print("Loading Analyses")
+        print("n-Segments Total:", len(segments))
+        print("n-Screenshots Total:", len(list(set([r[4] for r in res]))))
 
-        n_attempts = int(n * 2.0)
+        get_all = False
+        if n == 9999:
+            n = len(scrs)
+            get_all = True
+
+        n_attempts = int(n * 20.0)
         c = 0
-
+        idx = 0
+        already_added = []
         # Color Features
         if len(scrs) > 0:
             while(len(screenshots.keys()) < n and c < n_attempts):
-                idx = random.randint(0, len(scrs) - 1)
+                if get_all:
+                    idx += 1
+                else:
+                    idx = random.randint(0, len(scrs) - 1)
+                if idx >= len(scrs):
+                    break
                 scr_id = scrs[idx][0].id
 
                 # Find start point
@@ -192,6 +206,7 @@ class QueryWorker(QObject):
                     to_add.append(scrs[idx])
                     idx += 1
                 if len(to_add) >= 3:
+
                     for t in to_add:
                         scr = t[0]
                         analysis = t[1]
