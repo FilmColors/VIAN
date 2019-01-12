@@ -516,6 +516,7 @@ class DBVocabularyWord(Base):
         self.name = obj['name']
         return self
 
+
 class DBConceptDescription(Base):
     __tablename__ = "db_concept_description"
 
@@ -543,6 +544,7 @@ class DBConceptImage(Base):
 
     segment_id = Column(Integer, ForeignKey('db_segments.id'))
     segment = relationship("DBSegment", back_populates="vocabulary_images")
+
 
 class DBUniqueKeyword(Base):
     __tablename__ = "db_unique_keywords"

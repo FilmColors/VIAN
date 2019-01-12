@@ -12,7 +12,8 @@ from visualizer3.worker import QueryWorker, CORPUS_PATH
 from functools import partial
 from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed
 from visualizer3.screenshot_worker import ScreenshotWorker
-from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime
+from visualizer3.vis_entities import VisScreenshot
+from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime, ImagePlotYear
 from core.visualization.dot_plot import DotPlot
 from core.visualization.palette_plot import MultiPaletteLABWidget
 
@@ -111,19 +112,22 @@ class VIANVisualizer2(QMainWindow):
         self.cb_segm_palette_dot_plot = QCheckBox("Palette Dot Plot", self.w_plot_types)
 
         self.cb_segm_dt_plot = QCheckBox("Color-dT", self.w_plot_types)
+        self.cb_segm_dy_plot = QCheckBox("Color-dY", self.w_plot_types)
         self.cb_segm_ab_plot.setChecked(True)
         self.cb_segm_lc_plot.setChecked(True)
         self.cb_segm_ab_dot_plot.setChecked(True)
         self.cb_segm_lc_dot_plot.setChecked(True)
         self.cb_segm_dt_plot.setChecked(False)
         self.cb_segm_palette_dot_plot.setChecked(False)
+        self.cb_segm_dy_plot.setChecked(False)
         lt.addWidget(QLabel("Plot Types", self.w_plot_types), 0, 0)
         lt.addWidget(self.cb_segm_ab_plot, 1, 0)
         lt.addWidget(self.cb_segm_lc_plot, 2, 0)
         lt.addWidget(self.cb_segm_ab_dot_plot, 3, 0)
         lt.addWidget(self.cb_segm_lc_dot_plot, 4, 0)
         lt.addWidget(self.cb_segm_dt_plot, 1, 1)
-        lt.addWidget(self.cb_segm_palette_dot_plot, 2, 1)
+        lt.addWidget(self.cb_segm_dy_plot, 2, 1)
+        lt.addWidget(self.cb_segm_palette_dot_plot, 1, 2)
         hbox_k = QHBoxLayout()
         hbox_k.addWidget(QLabel("K-Images", self.centralWidget()))
         self.sp_box_K = QSpinBox(self.centralWidget())
@@ -195,6 +199,7 @@ class VIANVisualizer2(QMainWindow):
         self.btn_query.setEnabled(True)
         self.segm_scrs = dict()
         self.segments = dict()
+
         if self.cb_segm_ab_plot.isChecked():
             p_ab = ImagePlotCircular(self.result_wnd)
         else:
@@ -222,6 +227,11 @@ class VIANVisualizer2(QMainWindow):
         else:
             p_dt = None
 
+        if self.cb_segm_dy_plot.isChecked():
+            p_dy = ImagePlotYear(self.result_wnd)
+        else:
+            p_dy = None
+
         if self.cb_segm_palette_dot_plot.isChecked():
             p_palette_dot = MultiPaletteLABWidget(self.result_wnd)
             palettes = []
@@ -232,7 +242,7 @@ class VIANVisualizer2(QMainWindow):
         else:
             p_palette_dot = None
 
-        for scr in screenshots.values():
+        for scr in screenshots.values(): #type:VisScreenshot
             try:
                 data = scr.features[1]
                 img = scr.current_image
@@ -263,6 +273,8 @@ class VIANVisualizer2(QMainWindow):
 
             except Exception as e:
                 pass
+
+        for scr in sorted(screenshots.values(), key=lambda x:x.dbsceenshot.movie.year):
 
         plots = []
         if p_ab is not None:

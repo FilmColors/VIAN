@@ -1049,3 +1049,8 @@ class ImagePlotTime(ImagePlot):
         w.layout().addItem(hl3)
 
         return w
+
+
+class ImagePlotYear(ImagePlotTime):
+    def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100):
+        super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale)
