@@ -4,9 +4,8 @@
 source activate vian_dev
 
 conda install -c anaconda pyqt
-conda install -c conda-forge opencv pyqtgraph pyftpdlib
+conda install -c conda-forge opencv
 conda install -c anaconda requests, networkx, scikit-learn
-pip install dataset
 pip install fastcluster
 
 conda install h5py

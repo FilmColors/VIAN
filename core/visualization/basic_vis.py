@@ -1,4 +1,3 @@
-# import pyqtgraph as pg
 import time
 import os
 from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox, QMenu, QHBoxLayout, QLabel, QSlider
