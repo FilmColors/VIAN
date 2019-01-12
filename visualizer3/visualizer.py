@@ -242,6 +242,46 @@ class VIANVisualizer2(QMainWindow):
         else:
             p_palette_dot = None
 
+        if p_dy is not None:
+            curr_year = 0
+            p_counter = 0
+            year_width = 100
+            img_width = 10
+            max_per_year = 50
+            to_add = []
+            for i, scr in enumerate(sorted(screenshots.values(), key=lambda x:x.dbscreenshot.movie.year)):
+                try:
+                    if i == 0:
+                        miny = scr.dbscreenshot.movie.year * year_width
+                    if scr.dbscreenshot.movie.year != curr_year:
+                        curr_year = scr.dbscreenshot.movie.year
+                        img_width = year_width / len(to_add)
+                        p_dy.add_year((curr_year * year_width) - miny, curr_year)
+                        for j, s in enumerate(to_add):
+                            img = s.current_image
+                            data = s.features[1]
+                            ty = data[7]
+                            x = (curr_year * year_width) - miny + (j * img_width)
+                            s.year_x = x
+                            s.onImageChanged.connect(
+                                p_dy.add_image(x, ty, img, True, mime_data=s, uid=s.dbscreenshot.id,
+                                               hover_text= "Saturation:" + str(round(ty, 2)) +
+                                                          "\nYear:     " + str(curr_year) +
+                                                          "\nMovie:    " + scr.dbscreenshot.movie.name).setPixmap)
+                            s.onFeatureChanged.connect(partial(feature_changed, s, p_dy))
+
+                        to_add = []
+                        p_counter = 0
+
+
+                    if p_counter >= max_per_year:
+                        continue
+                    to_add.append(scr)
+
+                except Exception as e:
+                    print(e)
+                    continue
+
         for scr in screenshots.values(): #type:VisScreenshot
             try:
                 data = scr.features[1]
@@ -261,7 +301,7 @@ class VIANVisualizer2(QMainWindow):
                     scr.onImageChanged.connect(p_lc.add_image(-x, l, img, False, mime_data=scr, z=y, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, p_lc))
                 if p_dt is not None:
-                    scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, index_id=scr.dbscreenshot.id).setPixmap)
+                    scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr,  p_dt))
                 if plot_ab_dot is not None:
                     plot_ab_dot.add_point(x, -y, z=l, col=c, uid=scr.dbscreenshot.id)
@@ -274,14 +314,13 @@ class VIANVisualizer2(QMainWindow):
             except Exception as e:
                 pass
 
-        for scr in sorted(screenshots.values(), key=lambda x:x.dbsceenshot.movie.year):
-            pass
-
         plots = []
         if p_ab is not None:
             plots.append(PlotWidget(self.result_wnd, p_ab, "AB-Screenshots"))
         if p_dt is not None:
             plots.append(PlotWidget(self.result_wnd, p_dt, "dT-Screenshots"))
+        if p_dy is not None:
+            plots.append(PlotWidget(self.result_wnd, p_dy, "dY-Screenshots"))
         if p_lc is not None:
             plots.append(PlotWidget(self.result_wnd, p_lc, "LC-Screenshots"))
         if plot_ab_dot is not None:
@@ -301,7 +340,7 @@ class VIANVisualizer2(QMainWindow):
         self.segm_scrs = screenshots
         self.segment_view.set_segments(segments)
 
-        if p_ab is not None or p_dt is not None or p_lc is not None:
+        if p_ab is not None or p_dt is not None or p_lc is not None or p_dy:
             self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
 
     def on_corpus_result(self, autofill, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):

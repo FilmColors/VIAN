@@ -13,7 +13,7 @@ def feature_changed(scr, plot):
         # img = cv2.imread(self.worker.root + "/shots/" + scr.dbscreenshot.file_path)
         l = data[0]
         tx = scr.dbscreenshot.time_ms
-        ty = data[6]
+        ty = data[7]
         x = data[1]
         y = data[2]
         c = QColor(data[5], data[4], data[3], 200)
@@ -29,6 +29,8 @@ def feature_changed(scr, plot):
                 plot.update_item(scr.dbscreenshot.id, x, -y, z=l, col=c)
             else:
                 plot.update_item(scr.dbscreenshot.id, -x, l, z=-y, col=c)
+        elif isinstance(plot, ImagePlotYear):
+            plot.update_item(scr.dbscreenshot.id, (scr.year_x, ty))
 
     except Exception as e:
         print(e)
@@ -107,14 +109,29 @@ class PlotResultsGroupWidget(QDockWidget):
         self.central = QMainWindow()
         t = QWidget()
         t.setFixedSize(1,1)
+        self.last_up_plot = None
+        self.last_low_plot = None
         self.setWidget(self.central)
         self.central.setCentralWidget(t)
-        self.central.addDockWidget(Qt.LeftDockWidgetArea, self.classification_object_selector)
+        self.central.addDockWidget(Qt.TopDockWidgetArea, self.classification_object_selector)
         self.scrs = dict()
 
     def add_plot(self, p: PlotWidget):
         alignment = Qt.Horizontal
-        self.central.addDockWidget(Qt.RightDockWidgetArea, p, alignment)
+        if isinstance(p.plot, ImagePlotTime) or isinstance(p.plot, ImagePlotYear):
+            if self.last_low_plot is not None:
+                self.central.tabifyDockWidget(self.last_low_plot, p)
+            else:
+                self.central.addDockWidget(Qt.BottomDockWidgetArea, p, Qt.Horizontal)
+                self.last_low_plot = p
+        else:
+            if self.last_up_plot is not None:
+                self.central.tabifyDockWidget(self.last_up_plot, p)
+                self.last_up_plot = None
+            else:
+                self.central.addDockWidget(Qt.TopDockWidgetArea, p, Qt.Horizontal)
+                self.last_up_plot = p
+
         self.plots[p.name] = p
 
     def remove_plot(self, p):

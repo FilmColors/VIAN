@@ -23,6 +23,7 @@ class VisScreenshot(QObject):
         self.current_feature = None
         self.palettes = dict()
         self.current_palette = None
+        self.year_x = 0
 
     def set_current_clobj_index(self, idx):
         if idx in self.image_cache and idx in self.features:

@@ -858,9 +858,10 @@ class ImagePlotControls(QWidget):
 class ImagePlotTime(ImagePlot):
     def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100):
         self.x_scale = 0.001
-        self.y_scale = 200 #50 default
+        self.y_scale = 2000 #50 default
         self.base_line = 1000
-        self.x_end = 0
+        self.x_max = 0
+        self.y_max = 0
         self.lines = []
 
         self.pixel_size_x = 1500
@@ -886,7 +887,7 @@ class ImagePlotTime(ImagePlot):
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
 
-    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, index_id = None):
+    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None):
         timestamp = ms_to_string(x)
 
         # y = np.log10(y + 1.0)
@@ -903,18 +904,21 @@ class ImagePlotTime(ImagePlot):
         self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
         self.images.append(itm)
 
-        if self.x_end < x * self.x_scale:
-            self.x_end = x * self.x_scale
+        if self.x_max < x:
+            self.x_max = x
+
+        if self.y_max < y:
+            self.y_max = y
 
         self.luminances.append([np.nan_to_num(y), itm])
         self.values.append([x, np.nan_to_num(y)])
         itm.signals.onItemSelection.connect(self.onImageClicked.emit)
         itm.show()
 
-        if index_id is not None:
-            if index_id in self.item_idx:
-                self.scene().removeItem(self.item_idx[index_id][0])
-            self.item_idx[index_id] = (itm, len(self.images) - 1)
+        if uid is not None:
+            if uid in self.item_idx:
+                self.scene().removeItem(self.item_idx[uid][0])
+            self.item_idx[uid] = (itm, len(self.images) - 1)
 
         # self.set_x_scale(self.x_scale)
         # self.set_y_scale(self.y_scale)
@@ -931,8 +935,9 @@ class ImagePlotTime(ImagePlot):
             x, y = values[0], values[1]
             if pixmap is not None:
                 itm.setPixmap(pixmap)
-            itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num(
-                (self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
+            itm.setPos(np.nan_to_num(x * self.x_scale),
+                       np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height())
+                       )
             return True
         return False
 
@@ -945,14 +950,15 @@ class ImagePlotTime(ImagePlot):
         self.images = []
 
     def add_grid(self, set_scene_rect = True):
-        pen = QPen()
-        pen.setWidth(10)
-        pen.setColor(QColor(200, 200, 200, 150))
-
-        font = QFont()
-        font.setPointSize(self.font_size)
-        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
-        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
+        pass
+        # pen = QPen()
+        # pen.setWidth(10)
+        # pen.setColor(QColor(200, 200, 200, 150))
+        #
+        # font = QFont()
+        # font.setPointSize(self.font_size)
+        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
+        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
         # if set_scene_rect:
         #     self.setSceneRect(self.scene().itemsBoundingRect())
 
@@ -965,6 +971,7 @@ class ImagePlotTime(ImagePlot):
         # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
         self.add_grid(False)
 
+
     def set_x_scale(self, value):
         self.x_scale = (value / 50) * 0.001
         # self.x_scale = self.pixel_size_x / np.clip((len(self.images) * ((500 - value) / 100)), 0.00001, None)
@@ -972,7 +979,7 @@ class ImagePlotTime(ImagePlot):
         self.update_position()
 
     def set_y_scale(self, value):
-        self.y_scale = value * 0.01
+        self.y_scale = value * 0.1
         self.update_position()
     
     def set_image_scale(self, scale):
@@ -1053,4 +1060,99 @@ class ImagePlotTime(ImagePlot):
 
 class ImagePlotYear(ImagePlotTime):
     def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100):
+        self.x_scale = 0.1
+        self.years = []
+        self.year_grid = []
         super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale)
+
+    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None):
+        if hover_text is None:
+            hover_text = "Saturation:" + str(round(y, 2)) + "\nx: " + str(x)
+
+        # y = np.log10(y + 1.0)
+        # y *= 10
+        if convert:
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
+                                         hover_text=hover_text, mime_data=mime_data)
+        else:
+            itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True),
+                                         hover_text=hover_text,
+                                         mime_data=mime_data)
+        self.scene().addItem(itm)
+        itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
+
+        self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
+        self.images.append(itm)
+
+        if self.x_max < x:
+            self.x_max = x
+
+        if self.y_max < y:
+            self.y_max = y
+
+        self.luminances.append([np.nan_to_num(y), itm])
+        self.values.append([x, np.nan_to_num(y)])
+        itm.signals.onItemSelection.connect(self.onImageClicked.emit)
+        itm.show()
+
+        if uid is not None:
+            if uid in self.item_idx:
+                self.scene().removeItem(self.item_idx[uid][0])
+            self.item_idx[uid] = (itm, len(self.images) - 1)
+
+        # self.set_x_scale(self.x_scale)
+        # self.set_y_scale(self.y_scale)
+        # self.set_image_scale(self.img_scale)
+        self.update_position()
+        return itm
+
+    def set_x_scale(self, value):
+        self.x_scale = (value / 50) * 0.1
+        # self.x_scale = self.pixel_size_x / np.clip((len(self.images) * ((500 - value) / 100)), 0.00001, None)
+        # self.x_scale = 0.01
+        self.update_position()
+
+    def add_year(self, value, name):
+        self.years.append((value, name))
+        self.update_grid()
+
+    def update_grid(self):
+        for l in self.year_grid:
+            self.scene().removeItem(l)
+        self.year_grid = []
+        pen = QPen()
+        pen.setColor(self.grid_color)
+        for (value, name) in self.years:
+            font = QFont()
+            font.setPointSize(self.font_size)
+
+            x = value * self.x_scale
+            y = self.base_line * self.y_scale
+            line = self.scene().addLine(x, y, x, (self.base_line - self.y_max) * self.y_scale, pen)
+            text = self.scene().addText(str(name), font)
+            text.setPos(x - text.boundingRect().width()/2, y + text.boundingRect().height())
+            text.setDefaultTextColor(self.grid_color)
+            self.year_grid.append(line)
+            self.year_grid.append(text)
+
+            self.setSceneRect(self.scene().itemsBoundingRect())
+            # self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+            # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+            # self.add_grid(False)
+
+
+    def update_item(self, uid, values, pixmap=None):
+        if uid in self.item_idx:
+            tpl = self.item_idx[uid]
+            idx = tpl[1]
+            itm = tpl[0]
+            self.values[idx] = values
+            x, y = values[0], values[1]
+            if pixmap is not None:
+                itm.setPixmap(pixmap)
+            itm.setPos(itm.x(),
+                       np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height())
+                       )
+            return True
+
+        return False
