@@ -254,22 +254,22 @@ class VIANVisualizer2(QMainWindow):
                     if i == 0:
                         miny = scr.dbscreenshot.movie.year * year_width
                     if scr.dbscreenshot.movie.year != curr_year:
+                        if not (len(to_add) == 0 or curr_year == 0):
+                            img_width = year_width / len(to_add)
+                            p_dy.add_year((curr_year * year_width) - miny, curr_year)
+                            for j, s in enumerate(to_add):
+                                img = s.current_image
+                                data = s.features[1]
+                                ty = data[7]
+                                x = (curr_year * year_width) - miny + (j * img_width)
+                                s.year_x = x
+                                s.onImageChanged.connect(
+                                    p_dy.add_image(x, ty, img, True, mime_data=s, uid=s.dbscreenshot.id,
+                                                   hover_text= "Saturation:" + str(round(ty, 2)) +
+                                                              "\nYear:     " + str(curr_year) +
+                                                              "\nMovie:    " + s.dbscreenshot.movie.name).setPixmap)
+                                s.onFeatureChanged.connect(partial(feature_changed, s, p_dy))
                         curr_year = scr.dbscreenshot.movie.year
-                        img_width = year_width / len(to_add)
-                        p_dy.add_year((curr_year * year_width) - miny, curr_year)
-                        for j, s in enumerate(to_add):
-                            img = s.current_image
-                            data = s.features[1]
-                            ty = data[7]
-                            x = (curr_year * year_width) - miny + (j * img_width)
-                            s.year_x = x
-                            s.onImageChanged.connect(
-                                p_dy.add_image(x, ty, img, True, mime_data=s, uid=s.dbscreenshot.id,
-                                               hover_text= "Saturation:" + str(round(ty, 2)) +
-                                                          "\nYear:     " + str(curr_year) +
-                                                          "\nMovie:    " + scr.dbscreenshot.movie.name).setPixmap)
-                            s.onFeatureChanged.connect(partial(feature_changed, s, p_dy))
-
                         to_add = []
                         p_counter = 0
 
