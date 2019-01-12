@@ -6,7 +6,6 @@ this it can be used to perform operations in a batch process without having the 
 
 from core.container.project import *
 from core.data.settings import UserSettings
-from core.data.project_streaming import *
 from core.data.hdf5_manager import *
 from shutil import copy2, move
 # from core.gui.main_window import *
@@ -14,10 +13,7 @@ from typing import Dict, Tuple
 from core.analysis.analysis_import import *
 from threading import Lock, Thread
 
-
 PROJECT_LOCK = Lock()
-
-
 VERSION = "0.6.6"
 class HeadlessUserSettings():
     def __init__(self):
@@ -30,7 +26,7 @@ class HeadlessMainWindow(QObject):
         super(HeadlessMainWindow, self).__init__()
         self.thread_pool = QThreadPool()
         # self.numpy_data_manager = NumpyDataManager(self)
-        self.project_streamer = SQLiteStreamer(self)
+        # self.project_streamer = SQLiteStreamer(self)
         self.version = VERSION
         self.project = None
         self.settings = HeadlessUserSettings()
@@ -43,7 +39,7 @@ class HeadlessMainWindow(QObject):
 
     def close(self):
         self.project = None
-        self.project_streamer.on_closed()
+        # self.project_streamer.on_closed()
 
     #region Analysis
     def start_worker(self, worker, name = "New Task"):
@@ -109,7 +105,8 @@ class HeadlessMainWindow(QObject):
 
     def dispatch_on_loaded(self, *args):
         if self.project is not None:
-            self.project_streamer.on_loaded(self.project)
+            pass
+            # self.project_streamer.on_loaded(self.project)
             # self.numpy_data_manager.on_loaded(self.project)
 
     def dispatch_on_closed(self, *args):

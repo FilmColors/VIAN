@@ -324,7 +324,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         pass
     #endregion
 
-    def get_corpus(self) -> DatasetCorpusDB:
+    def get_corpus(self):
         return self.corpus_interface
 
     def on_loaded(self, project):

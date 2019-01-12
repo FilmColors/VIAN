@@ -275,6 +275,7 @@ class VIANVisualizer2(QMainWindow):
                 pass
 
         for scr in sorted(screenshots.values(), key=lambda x:x.dbsceenshot.movie.year):
+            pass
 
         plots = []
         if p_ab is not None:

@@ -425,6 +425,7 @@ def render_annotations(frame, annotation_dicts):
     return img_numpy
 
 
+# TODO DEPRECATED
 class ScreenshotStreamingJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         screenshots = args[0]

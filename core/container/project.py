@@ -11,10 +11,9 @@ from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelec
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
 from core.gui.vocabulary import VocabularyItem
-from core.data.project_streaming import NUMPY_NO_OVERWRITE, NUMPY_OVERWRITE
 from core.data.enums import *
 from typing import List
-from core.data.project_streaming import IStreamableContainer
+# from core.data.project_streaming import IStreamableContainer
 
 from core.data.hdf5_manager import HDF5Manager
 
@@ -212,8 +211,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.export_dir = root + "/export"
         self.hdf5_path = self.data_dir + "/analyses.hdf5"
 
-        if main_window is not None:
-            self.main_window.project_streamer.on_loaded(self)
+        # if main_window is not None:
+        #     self.main_window.project_streamer.on_loaded(self)
 
     def create_file_structure(self):
         self.reset_file_paths(self.folder, self.path, None)
@@ -238,9 +237,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return result
 
     def unload_all(self):
-        for c in self.get_all_containers():
-            if isinstance(c, IStreamableContainer):
-                c.unload_container(sync=True)
+        pass
+        # for c in self.get_all_containers():
+        #     if isinstance(c, IStreamableContainer):
+        #         c.unload_container(sync=True)
 
     def print_all(self, type = None):
         for c in self.get_all_containers():

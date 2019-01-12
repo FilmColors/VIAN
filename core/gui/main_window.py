@@ -160,7 +160,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # self.numpy_data_manager = NumpyDataManager(self)
         # self.project_streamer = ProjectStreamerShelve(self)
-        self.project_streamer = SQLiteStreamer(self)
+        # self.project_streamer = SQLiteStreamer(self)
 
         self.video_capture = None
 
@@ -436,7 +436,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.vocabulary_manager,
                                     self.vocabulary_matrix,
                                     # self.numpy_data_manager,
-                                    self.project_streamer,
+                                    # self.project_streamer,
                                     self.analysis_results_widget,
                                     self.annotation_options,
                                     self.experiment_dock.experiment_editor,

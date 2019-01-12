@@ -219,106 +219,104 @@ class CorpusInterface(QObject):
     def submit_query(self, query_data:QueryRequestData):
         pass
 
-
+# TODO Deprecated
 class LocalCorpusInterface(CorpusInterface):
     def __init__(self):
         super(LocalCorpusInterface, self).__init__()
-        self.local_corpus = DatasetCorpusDB()
-        self.sql_path = None
+    #
+    # @pyqtSlot(object, object)
+    # def connect_user(self, user:DBContributor, options):
+    #     try:
+    #         # user = DBContributor().from_vian_user(user)
+    #         # self.local_corpus = DatasetCorpusDB().load(options, self.sql_path)
+    #         # self.name = self.local_corpus.name
+    #         # user = self.local_corpus.connect_user(user)
+    #         self.onConnected.emit(True, self.local_corpus.get_projects(), user)
+    #     except Exception as e:
+    #         print("Tried", options)
+    #         print("Exception in LocalCorpusInterface.connect_user()", str(e))
+    #         self.onConnected.emit(False, None, None)
+    #
+    # @pyqtSlot(object)
+    # def disconnect_user(self, user):
+    #     user = DBContributor().from_vian_user(user)
+    #
+    # @pyqtSlot(object, object)
+    # def commit_project(self, user, project:VIANProject):
+    #     user = DBContributor().from_vian_user(user)
+    #     if project.main_window is not None:
+    #         # This fails in the Headless Mode, which is exactly what we want
+    #         try:
+    #             pass
+    #             # self.onEmitProgress.connect(project.main_window.on_progress_popup)
+    #         except:
+    #             pass
+    #
+    #     res, path = self.prepare_project(project, True)
+    #     if res is False:
+    #         return
+    #
+    #     success, dbproject = self.local_corpus.commit_project(path, user)
+    #
+    #     if success:
+    #         self.onCommited.emit(True, dbproject, project)
+    #     else:
+    #         self.onCommited.emit(False, None, project)
+    #
+    # @pyqtSlot(object, object)
+    # def checkout_project(self, user, project:DBProject):
+    #     user = DBContributor().from_vian_user(user)
+    #     success, archive = self.local_corpus.checkout_project(project.project_id, user)
+    #     if success:
+    #         self.onCheckedOut.emit(True, self.local_corpus.get_projects())
+    #     else:
+    #         self.onCheckedOut.emit(False, None)
+    #
+    # @pyqtSlot(object, object)
+    # def checkin_project(self, user, project:DBProject):
+    #     user = DBContributor().from_vian_user(user)
+    #     success = self.local_corpus.checkin_project(project.project_id, user)
+    #     if success:
+    #         self.onCheckedIn.emit(True, self.local_corpus.get_projects())
+    #     else:
+    #         self.onCheckedIn.emit(False, None)
+    #
+    # @pyqtSlot(object, object)
+    # def get_projects(self, user):
+    #     pass
+    #
+    # @pyqtSlot(object, object)
+    # def download_project(self, user, project):
+    #     user = DBContributor().from_vian_user(user)
+    #     archive = self.local_corpus.get_project_path(project)
+    #     print("Download Project:", project.project_id, archive)
+    #     if archive is not None:
+    #         self.onReadyForExtraction.emit(True, project, archive)
+    #     else:
+    #         self.onReadyForExtraction.emit(False, None, None)
+    #
+    # @pyqtSlot(object, object)
+    # def check_checkout_state(self, user, dbproject):
+    #     user = DBContributor().from_vian_user(user)
+    #     result = self.local_corpus.get_project(dbproject.project_id)
+    #     print(result.is_checked_out)
+    #     if result is not None:
+    #         if result.is_checked_out == True and result.checked_out_user != user.contributor_id:
+    #             self.onCheckOutStateRecieved.emit(CHECK_OUT_OTHER)
+    #         elif result.is_checked_out == True and result.checked_out_user == user.contributor_id:
+    #             self.onCheckOutStateRecieved.emit(CHECK_OUT_SELF)
+    #         else:
+    #             self.onCheckOutStateRecieved.emit(CHECK_OUT_NO)
+    #     else:
+    #         self.onCheckOutStateRecieved.emit(CHECK_OUT_NOT_IN_DB)
+    #
+    # @pyqtSlot(object)
+    # def submit_query(self, query_data:QueryRequestData):
+    #     result = self.local_corpus.parse_query(query_data)
+    #     self.onQueryResult.emit(result)
+    #     return result
 
-    @pyqtSlot(object, object)
-    def connect_user(self, user:DBContributor, options):
-        try:
-            user = DBContributor().from_vian_user(user)
-            self.local_corpus = DatasetCorpusDB().load(options, self.sql_path)
-            self.name = self.local_corpus.name
-            user = self.local_corpus.connect_user(user)
-            self.onConnected.emit(True, self.local_corpus.get_projects(), user)
-        except Exception as e:
-            print("Tried", options)
-            print("Exception in LocalCorpusInterface.connect_user()", str(e))
-            self.onConnected.emit(False, None, None)
-
-    @pyqtSlot(object)
-    def disconnect_user(self, user):
-        user = DBContributor().from_vian_user(user)
-
-    @pyqtSlot(object, object)
-    def commit_project(self, user, project:VIANProject):
-        user = DBContributor().from_vian_user(user)
-        if project.main_window is not None:
-            # This fails in the Headless Mode, which is exactly what we want
-            try:
-                pass
-                # self.onEmitProgress.connect(project.main_window.on_progress_popup)
-            except:
-                pass
-
-        res, path = self.prepare_project(project, True)
-        if res is False:
-            return
-
-        success, dbproject = self.local_corpus.commit_project(path, user)
-
-        if success:
-            self.onCommited.emit(True, dbproject, project)
-        else:
-            self.onCommited.emit(False, None, project)
-
-    @pyqtSlot(object, object)
-    def checkout_project(self, user, project:DBProject):
-        user = DBContributor().from_vian_user(user)
-        success, archive = self.local_corpus.checkout_project(project.project_id, user)
-        if success:
-            self.onCheckedOut.emit(True, self.local_corpus.get_projects())
-        else:
-            self.onCheckedOut.emit(False, None)
-
-    @pyqtSlot(object, object)
-    def checkin_project(self, user, project:DBProject):
-        user = DBContributor().from_vian_user(user)
-        success = self.local_corpus.checkin_project(project.project_id, user)
-        if success:
-            self.onCheckedIn.emit(True, self.local_corpus.get_projects())
-        else:
-            self.onCheckedIn.emit(False, None)
-
-    @pyqtSlot(object, object)
-    def get_projects(self, user):
-        pass
-
-    @pyqtSlot(object, object)
-    def download_project(self, user, project):
-        user = DBContributor().from_vian_user(user)
-        archive = self.local_corpus.get_project_path(project)
-        print("Download Project:", project.project_id, archive)
-        if archive is not None:
-            self.onReadyForExtraction.emit(True, project, archive)
-        else:
-            self.onReadyForExtraction.emit(False, None, None)
-
-    @pyqtSlot(object, object)
-    def check_checkout_state(self, user, dbproject):
-        user = DBContributor().from_vian_user(user)
-        result = self.local_corpus.get_project(dbproject.project_id)
-        print(result.is_checked_out)
-        if result is not None:
-            if result.is_checked_out == True and result.checked_out_user != user.contributor_id:
-                self.onCheckOutStateRecieved.emit(CHECK_OUT_OTHER)
-            elif result.is_checked_out == True and result.checked_out_user == user.contributor_id:
-                self.onCheckOutStateRecieved.emit(CHECK_OUT_SELF)
-            else:
-                self.onCheckOutStateRecieved.emit(CHECK_OUT_NO)
-        else:
-            self.onCheckOutStateRecieved.emit(CHECK_OUT_NOT_IN_DB)
-
-    @pyqtSlot(object)
-    def submit_query(self, query_data:QueryRequestData):
-        result = self.local_corpus.parse_query(query_data)
-        self.onQueryResult.emit(result)
-        return result
-
-
+# TODO Deprecated
 class RemoteCorpusInterface(CorpusInterface):
     def __init__(self, corpora_dir):
         super(RemoteCorpusInterface, self).__init__()

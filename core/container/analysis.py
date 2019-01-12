@@ -6,15 +6,13 @@ import cv2
 import numpy as np
 import bisect
 from typing import List
-# from PyQt5.QtWidgets import QMessageBox
 
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
 from core.data.interfaces import IProjectContainer, IHasName, ISelectable
-from core.data.project_streaming import *
 from core.data.computation import *
 
 
-class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableContainer):
+class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamableContainer):
     """
     This is the BaseClass of all AnalysisContainers in the VIAN Project.
 
@@ -56,7 +54,8 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.set_adata(obj)
 
     def sync_load(self):
-        self.set_adata(self.project.main_window.project_streamer.sync_load(self.unique_id))
+        pass
+        #self.set_adata(self.project.main_window.project_streamer.sync_load(self.unique_id))
 
     def get_name(self):
         return self.name
@@ -85,7 +84,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable, IStreamableCon
         self.project.remove_analysis(self)
 
 
-class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
+class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
     """
 
     """
@@ -174,7 +173,7 @@ class NodeScriptAnalysis(AnalysisContainer, IStreamableContainer):
         return self
 
 
-class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
+class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
         super(IAnalysisJobAnalysis, self).__init__(name, results)
         self.target_container = container
@@ -269,24 +268,8 @@ class IAnalysisJobAnalysis(AnalysisContainer, IStreamableContainer):
         if self.data is None:
             return
 
-        if sync:
-            self.project.main_window.project_streamer.sync_store(self.unique_id, self.project.main_window.eval_class(self.analysis_job_class)().serialize(self.data))
-        else:
-            self.project.main_window.project_streamer.async_store(self.unique_id, self.project.main_window.eval_class(self.analysis_job_class)().serialize(self.data))
-
     def apply_loaded(self, obj):
         self.set_adata(self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj))
-
-    def dep_get_adata(self):
-        if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
-        return self.a_class().from_json(self.project.main_window.project_streamer.sync_load(self.unique_id, data_type=self.a_class().serialization_type()))
-
-    def dep_set_adata(self, d):
-        if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
-        self.project.main_window.project_streamer.sync_store(self.unique_id, self.a_class().to_json(d), data_type=self.a_class().serialization_type())
-        self.data = None
 
     def get_adata(self):
         if self.a_class is None:

@@ -8,7 +8,6 @@ from PyQt5 import uic
 
 
 from core.gui.ewidgetbase import *
-from core.corpus.shared.corpusdb import DatasetCorpusDB
 from core.corpus.shared.entities import *
 from core.gui.tools import StringList
 import json
@@ -45,26 +44,28 @@ class CreateCorpusDialog(EDialogWidget):
         self.lineEdit_Root.setText(root)
 
     def on_create(self):
-        if self.lineEdit_Name.text() != "" and os.path.isdir(self.lineEdit_Root.text()):
-            database = DatasetCorpusDB()
-            database.allow_movie_upload = self.cB_AllowUpload.isChecked()
-            database.allow_project_download = self.cb_AllowDownload.isChecked()
-
-            database.constrain_segmentations = self.cB_ConstrSegmentation.isChecked()
-            database.constrain_analyses = self.cB_ConstrAnalyses.isChecked()
-            database.constrain_class_objs = self.cB_ConstrClassObj.isChecked()
-            database.constrain_vocabularies = self.cB_ConstrVocabularies.isChecked()
-            database.constrain_experiments = self.cB_ConstrExperiments.isChecked()
-
-            database.default_segmentations = self.sl_segm.get_entries()
-            database.default_annotation_layers = self.sl_layers.get_entries()
-
-            database.initialize(self.lineEdit_Name.text(), self.lineEdit_Root.text())
-
-            self.close()
-            self.onCreated.emit(database)
-        else:
-            QMessageBox.warning(self, "Missing Values", "Please fill out the Form")
+        # TODO Deprecated
+        pass
+        # if self.lineEdit_Name.text() != "" and os.path.isdir(self.lineEdit_Root.text()):
+        #     database = DatasetCorpusDB()
+        #     database.allow_movie_upload = self.cB_AllowUpload.isChecked()
+        #     database.allow_project_download = self.cb_AllowDownload.isChecked()
+        #
+        #     database.constrain_segmentations = self.cB_ConstrSegmentation.isChecked()
+        #     database.constrain_analyses = self.cB_ConstrAnalyses.isChecked()
+        #     database.constrain_class_objs = self.cB_ConstrClassObj.isChecked()
+        #     database.constrain_vocabularies = self.cB_ConstrVocabularies.isChecked()
+        #     database.constrain_experiments = self.cB_ConstrExperiments.isChecked()
+        #
+        #     database.default_segmentations = self.sl_segm.get_entries()
+        #     database.default_annotation_layers = self.sl_layers.get_entries()
+        #
+        #     database.initialize(self.lineEdit_Name.text(), self.lineEdit_Root.text())
+        #
+        #     self.close()
+        #     self.onCreated.emit(database)
+        # else:
+        #     QMessageBox.warning(self, "Missing Values", "Please fill out the Form")
 
     def on_cancel(self):
         self.close()
