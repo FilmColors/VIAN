@@ -2,7 +2,7 @@ from core.corpus.client.corpus_interfaces import *
 import threading
 
 class WebAppCorpusInterface(CorpusInterface):
-    def __init__(self, corpora_dir):
+    def __init__(self):
         super(WebAppCorpusInterface, self).__init__()
         self.endpoint_upload = 'http://127.0.0.1:5000/api/upload'
         self.endpoint_token = "http://127.0.0.1:5000/api/get_token"
@@ -183,11 +183,13 @@ class WebAppCorpusInterface(CorpusInterface):
             archive_file = os.path.join(export_root, project.name)
             shutil.make_archive(archive_file, 'zip', export_project_dir)
 
-
             #endregion
 
+            if user is None:
+                self.onCommited.emit(False, None, project)
+                return
+
             # --- Sending the File --
-            # TODO SILAS, this should already work quite well
             fin = open(archive_file + ".zip", 'rb')
             files = {'file': fin}
             try:

@@ -101,7 +101,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         # TODO everything has to be done with Signal Slots communication, but I think all messages are already setup.
 
         self.is_remote = True
-        self.corpus_interface = WebAppCorpusInterface(self.main_window.settings.DIR_CORPORA)
+        self.corpus_interface = WebAppCorpusInterface()
 
         # Connecting all Signals to the Slots of the WebAppCorpusInterface
         self.connect_signals()

@@ -62,7 +62,7 @@ if __name__ == '__main__':
     c = 0
     n = len(db_session.query(DBProject).all())
 
-    to_export = [96]
+    to_export = [16, 69, 184, 216, 229, 238, 256, 852, 3460, 3400]
     for p in db_session.query(DBProject).all(): #type:DBProject
         if p.corpus_id not in to_export:
             continue

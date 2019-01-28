@@ -26,9 +26,9 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                                    dataset_name="ColorFeatures",
                                                    dataset_shape=(8,),
                                                    dataset_dtype=np.float16,
-                                                 author="Gaudenz Halter",
-                                                 version="1.0.0",
-                                                 multiple_result=False)
+                                                    author="Gaudenz Halter",
+                                                     version="1.0.0",
+                                                     multiple_result=False)
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -163,8 +163,13 @@ class ColorFeatureAnalysis(IAnalysisJob):
         Since this function is called within the Main-Thread, we can modify our project here.
         """
 
-        result.set_target_container(project.get_by_id(result.target_container))
-        result.set_target_classification_obj(self.target_class_obj)
+        if isinstance(result, list):
+            for r in result:
+                r.set_target_container(project.get_by_id(r.target_container))
+                r.set_target_classification_obj(self.target_class_obj)
+        else:
+            result.set_target_container(project.get_by_id(result.target_container))
+            result.set_target_classification_obj(self.target_class_obj)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """
