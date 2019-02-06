@@ -4,14 +4,19 @@ import threading
 class WebAppCorpusInterface(CorpusInterface):
     def __init__(self):
         super(WebAppCorpusInterface, self).__init__()
-        self.endpoint_upload = 'http://127.0.0.1:5000/api/upload'
-        self.endpoint_token = "http://127.0.0.1:5000/api/get_token"
+        self.server_available = False
+        self.ep_root = "http://127.0.0.1:5000/api/"
+        self.ep_upload = self.ep_root + "upload"
+        self.ep_token = self.ep_root + "/get_token"
+        self.ep_ping = self.ep_root + "vian/ping"
+        self.ep_version = self.ep_root + "vian/version"
+
         self.name = "VIAN-WebApp"
 
     @pyqtSlot(object, object)
     def connect_user(self, user:Contributor, options):
         try:
-            a = requests.post(self.endpoint_token, json=dict(email = user.email, password = user.password))
+            a = requests.post(self.ep_token, json=dict(email = user.email, password = user.password))
             print("Server Responded:", a.headers, a.text)
             success = not "failed" in a.text
             if success:
@@ -25,6 +30,18 @@ class WebAppCorpusInterface(CorpusInterface):
             raise e
             print("Exception in RemoteCorpusClient.connect_user(): ", str(e))
             self.onConnected.emit(False, None, None)
+
+    @pyqtSlot()
+    def ping(self):
+        a = requests.get(self.ep_ping)
+        old_state = self.server_available
+        if a.text == "Ping":
+            self.server_available = True
+        else:
+            self.server_available = False
+
+        if old_state != self.server_available:
+            print("VIAN-WebApp Available:", self.server_available)
 
     def to_project_list(self, dlist):
         result = []
@@ -99,7 +116,6 @@ class WebAppCorpusInterface(CorpusInterface):
             mask_index = dict()
             shots_index = dict()
 
-
             for i, scr in enumerate(project.screenshots):
                 sys.stdout.write("\r" + str(round(i / len(project.screenshots), 2) * 100).rjust(3) + "%\t Baking Screenshots")
                 self.onEmitProgress.emit(i / len(project.screenshots), "Baking Screenshots")
@@ -173,8 +189,6 @@ class WebAppCorpusInterface(CorpusInterface):
             with open(export_project_dir + "image_linker.json", "w") as f:
                 json.dump(dict(masks=mask_index, shots=shots_index), f)
 
-
-
             h5_file.close()
 
             # -- Creating the Archive --
@@ -193,8 +207,8 @@ class WebAppCorpusInterface(CorpusInterface):
             fin = open(archive_file + ".zip", 'rb')
             files = {'file': fin}
             try:
-                print(files, self.endpoint_upload, dict(type="upload", authorization=user.token.encode()))
-                r = requests.post(self.endpoint_upload, files=files, headers=dict(type="upload", authorization=user.token.encode())).text
+                print(files, self.ep_upload, dict(type="upload", authorization=user.token.encode()))
+                r = requests.post(self.ep_upload, files=files, headers=dict(type="upload", authorization=user.token.encode())).text
                 print("Redceived", r)
             except Exception as e:
                 raise e

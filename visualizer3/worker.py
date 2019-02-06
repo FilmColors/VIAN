@@ -63,7 +63,6 @@ class QueryWorker(QObject):
     def on_project_query(self, project:DBProject):
         pass
 
-
     def generate_filmography_autofill(self):
         movies = self.corpus.db.query(DBMovie).all()
         result=dict(
@@ -228,7 +227,6 @@ class QueryWorker(QObject):
                 self.signals.onProgress.emit(i / len(screenshots.values()))
         self.signals.onProgress.emit(1.0)
         return self.signals.onSegmentQueryResult.emit(segments, screenshots)
-
 
     @pyqtSlot(str, object)
     def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id):

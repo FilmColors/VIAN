@@ -305,8 +305,6 @@ class Contributor():
         self.affiliation = affiliation
         self.token = None
 
-        #TODO @SILAS, This is the entity that represents the user of VIAN, add additional fields here, they get serialized automatically
-
     def serialize(self):
         return self.__dict__
 

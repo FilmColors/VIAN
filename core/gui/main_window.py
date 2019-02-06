@@ -216,6 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project = VIANProject(self, "", "Default Project")
         self.corpus_client = CorpusClient(self)
 
+
         loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
         print("UPDATE WORKER")

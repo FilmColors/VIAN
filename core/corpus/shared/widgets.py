@@ -6,6 +6,7 @@ import sip
 import os
 from PyQt5 import uic
 
+from core.corpus.client.webapp_corpus import CorpusClient
 
 from core.gui.ewidgetbase import *
 from core.corpus.shared.entities import *
@@ -14,6 +15,141 @@ import json
 import socket
 import threading
 import hashlib, uuid
+
+class CorpusClientToolBar(QToolBar):
+    def __init__(self, parent, corpus_client:CorpusClient):
+        super(CorpusClientToolBar, self).__init__(parent)
+        self.setWindowTitle("Corpus Toolbar")
+        self.spacer = QWidget()
+        self.spacer.setLayout(QHBoxLayout())
+        self.spacer.layout().addItem(QSpacerItem(1,1,QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.addWidget(self.spacer)
+
+        self.addAction(CorpusClientWidgetAction(self, corpus_client, parent))
+
+    def get_client(self):
+        return self.corpus_client
+
+
+class CorpusClientWidgetAction(QWidgetAction):
+    def __init__(self, parent, corpus_client:CorpusClient, main_window):
+        super(CorpusClientWidgetAction, self).__init__(parent)
+        self.p = parent
+        self.corpus_client = corpus_client
+        self.main_window = main_window
+
+    def createWidget(self, parent: QWidget):
+        return CorpusClientWidget(parent,  self.corpus_client, self.main_window)
+
+
+class CorpusClientWidget(QWidget):
+    def __init__(self, parent, corpus_client:CorpusClient, main_window):
+        super(CorpusClientWidget, self).__init__(parent)
+        path = os.path.abspath("qt_ui/CorpusClientWidget.ui")
+        uic.loadUi(path, self)
+        self.corpus_client = corpus_client
+        self.main_window = main_window
+
+        self.dbproject = None
+        self.checkout_state = 0
+
+        self.corpus_client.onCorpusConnected.connect(self.on_connected)
+        self.corpus_client.onCorpusDisconnected.connect(self.on_disconnected)
+        self.corpus_client.onCurrentDBProjectChanged.connect(self.on_project_changed)
+        self.corpus_client.onCheckOutStateChanged.connect(self.checkout_state_changed)
+        self.contributor = self.main_window.settings.CONTRIBUTOR
+
+        self.btn_Commit.clicked.connect(self.on_commit)
+        self.btn_CheckOut.clicked.connect(self.on_check_out)
+        self.btn_Person.clicked.connect(self.open_contributor_editor)
+        self.btn_Update.clicked.connect(self.on_update)
+        self.btn_Commit.setEnabled(False)
+        self.btn_CheckOut.setEnabled(False)
+        self.btn_Update.setEnabled(False)
+
+        self.comboBox_Corpora.addItem("ERC FilmColors") #type:QComboBox
+        self.comboBox_Corpora.currentTextChanged.connect(self.on_corpus_changed)
+
+        #  self.btn_.clicked.connect(self.corpus_client.connect)
+
+        self.on_contributor_update(self.main_window.settings.CONTRIBUTOR)
+        self.show()
+
+    @pyqtSlot(object)
+    def on_connected(self, corpus):
+        self.lbl_Status.setText("\tConnected")
+        self.lbl_Status.setStyleSheet("QLabel{color:green;}")
+        self.btn_Commit.setEnabled(True)
+        self.btn_CheckOut.setEnabled(True)
+        self.btn_Update.setEnabled(True)
+
+    @pyqtSlot(object)
+    def on_disconnected(self, corpus):
+        self.lbl_Status.setText("\tDisconnected")
+        self.lbl_Status.setStyleSheet("QLabel{color:red;}")
+        self.btn_Commit.setEnabled(False)
+        self.btn_CheckOut.setEnabled(False)
+        self.btn_Update.setEnabled(False)
+
+    def on_corpus_changed(self):
+        name = self.comboBox_Corpora.currentText()
+        if name == "ERC FilmColors":
+            self.corpus_client.on_connect_webapp(None)
+
+    def open_contributor_editor(self):
+        dialog = CorpusUserDialog(self.main_window, self.main_window.settings.CONTRIBUTOR)
+        dialog.onContributorUpdate.connect(self.on_contributor_update)
+        dialog.show()
+
+    def on_contributor_update(self, contributor):
+        self.contributor = contributor
+        if os.path.isfile(self.contributor.image_path):
+            self.btn_Person.setIcon(create_icon(contributor.image_path))
+        self.corpus_client.metadata.store(self.corpus_client.metadata.path)
+
+    def on_commit(self):
+        if self.main_window.project is not None:
+            self.corpus_client.on_commit_project(self.main_window.project)
+
+    def on_update(self):
+        pass
+        # self.corpus_client.synchronize()
+
+    def checkout_state_changed(self, value):
+        print("RECIEVED", value)
+        self.btn_CheckOut.clicked.disconnect()
+        if value == CHECK_OUT_SELF:
+            self.btn_CheckOut.setEnabled(True)
+            self.btn_Commit.setEnabled(True)
+            self.btn_CheckOut.setChecked(True)
+        elif value == CHECK_OUT_NO:
+            self.btn_CheckOut.setEnabled(True)
+            self.btn_Commit.setEnabled(True)
+            self.btn_CheckOut.setChecked(False)
+        else:
+            self.btn_CheckOut.setEnabled(False)
+            self.btn_Commit.setEnabled(False)
+        self.btn_CheckOut.clicked.connect(self.on_check_out)
+        self.checkout_state = value
+
+    def on_project_changed(self, dbproject):
+        self.dbproject = dbproject
+        if self.dbproject is None:
+            return
+        # self.btn_CheckOut.clicked.disconnect()
+        # if self.dbproject.is_checked_out:
+        #     self.btn_CheckOut.setChecked(True)
+        # else:
+        #     self.btn_CheckOut.setChecked(False)
+        # self.btn_CheckOut.clicked.connect(self.on_check_out)
+
+    def on_check_out(self):
+        print("Current DBProject:", self.dbproject)
+        if self.dbproject is not None:
+            if self.btn_CheckOut.isChecked():
+                self.corpus_client.checkout_project(self.dbproject)
+            else:
+                self.corpus_client.checkin_project(self.dbproject)
 
 
 class CreateCorpusDialog(EDialogWidget):

@@ -55,6 +55,7 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.metadata = CorpusMetaDataList(self.metadata_path, contributor=self.main_window.settings.CONTRIBUTOR)
         self.metadata.load(self.metadata_path)
 
+        WebAppCorpusInterface().ping()
         # self.on_connect_webapp("http://127.0.0.1:5000/vian_login")
 
     @pyqtSlot()
@@ -280,7 +281,6 @@ class CorpusClient(QObject, IProjectChangeNotify):
         self.onCorpusChanged.emit(self)
 
     #region Querying
-
     def remove_project(self, dbproject:DBProject):
         if not self.connected:
             return
