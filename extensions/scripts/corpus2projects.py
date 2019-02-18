@@ -4,16 +4,13 @@ This change has been happening in the 0.7.0
 """
 
 import glob
-from core.corpus.shared.sqlalchemy_entities import *
-from core.data.headless import *
-import cv2
-import numpy as np
-import csv
-from sqlalchemy import create_engine, func, and_
+
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from core.data.computation import ms_to_frames
-from core.corpus.shared.corpus import VIANCorpus
-import datetime
+
+from core.corpus.sqlalchemy_entities import *
+from core.data.headless import *
+
 
 def fm_unique_keywords(path="resources/fm2gl.csv"):
     res = dict()
@@ -43,12 +40,26 @@ def get_movie(ida = None, idb = None, idc = None, path = "E:\Programming\Git\ERC
         return result
     return None
 
+def create_meta_data(movie: DBMovie):
+    filmography_meta = dict()
+    filmography_meta['imdb_id'] = movie.imdb_id
+    filmography_meta['genre'] = ",".join([g.name for g in  movie.genres])
+    filmography_meta['color_process'] = movie.color_process
+    filmography_meta['director'] = movie.director
+    filmography_meta['cinematography'] = movie.cinematography
+    filmography_meta['color_consultant'] = movie.color_consultant
+    filmography_meta['production_design'] = movie.production_design
+    filmography_meta['art_director'] = movie.art_director
+    filmography_meta['costum_design'] = movie.costum_design
+    filmography_meta['production_company'] = movie.production_company
+    filmography_meta['country'] = movie.country
+    print(filmography_meta)
+    return filmography_meta
 
 if __name__ == '__main__':
     db_path = "sqlite:///F:/_corpus/ERCFilmColors_02/database.db"
     template_path = "E:\\Programming\\Git\\visual-movie-annotator\\data\\templates\\ERC_FilmColors.viant"
     use_cache = True
-
 
     engine = create_engine(db_path, echo=False)
     Base.metadata.create_all(engine)
@@ -82,6 +93,7 @@ if __name__ == '__main__':
         cap = cv2.VideoCapture(movie_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
         project = create_project_headless(name + ".eext", location=dir_name, movie_path = movie_path, template_path=template_path)
+        project.movie_descriptor.meta_data['ERC_FilmColorsFilmography'] = create_meta_data(p.movie)
 
         keyword_idx = dict()
         experiment = project.experiments[0] #type: Experiment
@@ -131,7 +143,7 @@ if __name__ == '__main__':
                     if analysis.analysis_class_name == "ColorFeatures":
                         d = hdf5_manager.h5_file['features'][analysis.hdf5_index]
                         a = IAnalysisJobAnalysis(
-                            name="Color-Features",
+                            name="Features:" + str(analysis.classification_object.name),
                             results=dict(color_lab=d[0:3],
                                          color_bgr=d[3:6],
                                          saturation_l=d[6],
@@ -147,7 +159,7 @@ if __name__ == '__main__':
                     elif analysis.analysis_class_name == "ColorPalette":
                         d = hdf5_manager.h5_file['palettes'][analysis.hdf5_index]
                         a = IAnalysisJobAnalysis(
-                            name="Color-Features",
+                            name="Palette:" + str(analysis.classification_object.name),
                             results = ColorPaletteAnalysis().from_hdf5(d),
                             analysis_job_class=ColorPaletteAnalysis,
                             parameters=dict(),

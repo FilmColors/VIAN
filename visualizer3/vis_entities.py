@@ -1,8 +1,6 @@
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject
-from core.corpus.shared.sqlalchemy_entities import *
 import numpy as np
-import cv2
-from core.data.computation import pixmap_to_numpy
+from PyQt5.QtCore import pyqtSignal, QObject
+
 
 class VisScreenshot(QObject):
     onImageChanged = pyqtSignal(object)

@@ -170,6 +170,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.img_movie = img
         if img is None:
             return
+        if self.project.headless_mode:
+            return
         if img.shape[2] == 3:
             self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img))
         elif img.shape[2] == 4:

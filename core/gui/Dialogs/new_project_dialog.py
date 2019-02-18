@@ -251,11 +251,11 @@ class NewProjectDialog(EDialogWidget):
         self.close()
 
 class FilmographyWidget(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, project = None):
         super(FilmographyWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/FilmographyWidget.ui")
-
         uic.loadUi(path, self)
+        # if project is not None:
 
 
     def get_filmography(self):

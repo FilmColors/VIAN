@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 from visualizer3.vis_entities import VisScreenshot
-from core.corpus.client.corpus_interfaces import *
-from core.data.computation import apply_mask
+from typing import List
+from core.data.computation import *
 
 class ScreenshotWorkerSignals(QObject):
     onScreenshotLoaded = pyqtSignal(object)

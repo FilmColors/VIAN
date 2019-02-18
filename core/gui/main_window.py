@@ -1,67 +1,57 @@
 import inspect
-import webbrowser
 import cProfile
 import os
 import glob
-import cv2
-from core.concurrent.worker import Worker
-import time
-import inspect
-import sys
-import threading
 import importlib
-from functools import partial
-from PyQt5.QtGui import QKeySequence
-from visualizer.vis_main_window import *
-from core.analysis.analysis_import import *
-from core.concurrent.auto_screenshot import *
-from core.gui.letterbox_widget import LetterBoxWidget
+
 from core.concurrent.auto_segmentation import *
+from core.concurrent.auto_screenshot import DialogAutoScreenshot
+from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from core.concurrent.worker import MinimalThreadWorker
 from core.concurrent.worker_functions import *
-from core.concurrent.image_loader import ClassificationObjectChangedJob
-from core.corpus.client.corpus_client import CorpusClientToolBar, CorpusClient
-from core.corpus.shared.corpusdb import CorpusDB
-from core.corpus.shared.widgets import *
-from core.data.exporters import *
-from core.data.computation import ms_to_frames
-from core.data.importers import *
-from core.data.settings import UserSettings,Contributor
-from core.data.vian_updater import VianUpdater, VianUpdaterJob
+from core.corpus.client.widgets import *
 from core.data.cache import HDF5Cache
+from core.data.exporters import *
+from core.data.importers import *
+from core.data.settings import UserSettings, Contributor
+from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
 from core.gui.Dialogs.new_project_dialog import NewProjectDialog
 from core.gui.Dialogs.preferences_dialog import DialogPreferences
-from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
 from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
+from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
+from core.gui.letterbox_widget import LetterBoxWidget
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
+from core.gui.classification import ClassificationWindow
 from core.gui.colormetry_widget import *
 from core.gui.concurrent_tasks import ConcurrentTaskDock
-from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, tuple2point, ALWAYS_VLC
+from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, \
+    ALWAYS_VLC
+from core.analysis.analysis_import import *
 from core.gui.experiment_editor import ExperimentEditorDock
+from core.gui.face_identificator import FaceIdentificatorDock
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
-from core.gui.player_vlc import Player_VLC, PlayerDockWidget# , Player_Qt
+from core.gui.player_vlc import Player_VLC, PlayerDockWidget  # , Player_Qt
 from core.gui.quick_annotation import QuickAnnotationDock
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
-from core.gui.classification import ClassificationWindow
-from core.gui.face_identificator import FaceIdentificatorDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-from core.data.io.web_annotation import WebAnnotationDevice
 from visualizer3.visualizer import VIANVisualizer2
+from core.concurrent.worker import Worker
+
 try:
     import keras.backend as K
     from core.analysis.semantic_segmentation import *
@@ -214,7 +204,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget = None
 
         self.project = VIANProject(self, "", "Default Project")
-        self.corpus_client = CorpusClient(self)
+        self.corpus_client = CorpusClient()
 
 
         loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
@@ -441,7 +431,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.analysis_results_widget,
                                     self.annotation_options,
                                     self.experiment_dock.experiment_editor,
-                                    self.corpus_client,
+                                    # self.corpus_client,
                                     self.colorimetry_live,
                                     self.query_widget
                                           ]
@@ -1960,11 +1950,8 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.onCreated.connect(self.on_corpus_created)
 
     @pyqtSlot(object)
-    def on_corpus_created(self,  corpus: CorpusDB):
-        if corpus is not None:
-            answer = QMessageBox.question(self, "Corpus", "Do you want to connect to " + corpus.name + " now?")
-            if answer == QMessageBox.Yes:
-                self.connect_to_corpus(corpus)
+    def on_corpus_created(self,  corpus):
+        pass
 
     def open_local_corpus(self):
         try:
@@ -1980,12 +1967,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_client_toolbar.show()
         dialog.show()
 
-    def connect_to_corpus(self, corpus: CorpusDB):
-        self.corpus_client.on_connect_local(corpus.file_path)
-        self.corpus_client_toolbar.show()
+    def connect_to_corpus(self, corpus):
+        pass
 
-    def disconnect_to_corpus(self, corpus: CorpusDB):
-        self.onCorpusDisconnected.emit(corpus)
+    def disconnect_to_corpus(self, corpus):
+        pass
 
     #endregion
 

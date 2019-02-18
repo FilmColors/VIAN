@@ -4,7 +4,6 @@ University of Zurich
 June 2018
 
 """
-COLOR_PALETTES_MAX_LENGTH = 1000
 from typing import List
 from core.data.computation import ms_to_frames, numpy_to_pixmap
 from core.container.project import *
