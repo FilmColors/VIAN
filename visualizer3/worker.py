@@ -1,12 +1,12 @@
-from PyQt5.QtCore import *
-from core.corpus.shared.corpus import VIANCorpus
-from core.corpus.shared.sqlalchemy_entities import *
-from enum import Enum
 import os
-from random import shuffle
-from visualizer3.vis_entities import VisScreenshot
 import random
+from enum import Enum
+
 import numpy as np
+from PyQt5.QtCore import *
+
+from core.corpus.sqlalchemy_entities import *
+from visualizer3.vis_entities import VisScreenshot
 
 
 class QueryType(Enum):

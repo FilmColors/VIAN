@@ -12,7 +12,7 @@ from core.container.project import VIANProject
 from core.gui.context_menu import open_context_menu, CorpusProjectContextMenu
 from .ewidgetbase import EDockWidget
 from core.corpus.client.corpus_client import CorpusClient
-from core.corpus.shared.entities import DBProject
+from core.corpus.sqlalchemy_entities import DBProject
 
 class Outliner(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window, corpus_client:CorpusClient):
@@ -27,9 +27,9 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
         self.corpus_client = corpus_client
 
-        self.corpus_client.onCorpusConnected.connect(self.recreate_tree)
-        self.corpus_client.onCorpusDisconnected.connect(self.recreate_tree)
-        self.corpus_client.onCorpusChanged.connect(self.recreate_tree)
+        self.corpus_client.onConnectionEstablished.connect(self.recreate_tree)
+        self.corpus_client.onDisconnect.connect(self.recreate_tree)
+        # self.corpus_client.onCorpusChanged.connect(self.recreate_tree)
         self.analyses_roots = dict()
         self.item_list = []
         self.item_index = dict()
@@ -109,16 +109,16 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
             self.on_selected(None, self.project().get_selected())
 
-        if self.corpus_client.connected:
-            to_add = []
-            if self.project() is not None:
-                for p in self.corpus_client.get_projects():
-                    if p.name != self.project().get_name():
-                        to_add.append(p)
-
-            for p in sorted(to_add, key= lambda x:x.name):
-                itm = CorpusProjectOutlinerItem(self.tree, 0, p)
-                self.item_list.append(itm)
+        # if self.corpus_client.connected:
+        #     to_add = []
+        #     if self.project() is not None:
+        #         for p in self.corpus_client.get_projects():
+        #             if p.name != self.project().get_name():
+        #                 to_add.append(p)
+        #
+        #     for p in sorted(to_add, key= lambda x:x.name):
+        #         itm = CorpusProjectOutlinerItem(self.tree, 0, p)
+        #         self.item_list.append(itm)
 
     def add_segmentation(self, s):
         segmentation_item = SegmentationOutlinerItem(self.segmentation_group, 0, s)

@@ -3,16 +3,8 @@ This script has been used to fix the missing target_container in the experiments
 """
 
 import glob
-from core.corpus.shared.sqlalchemy_entities import *
+
 from core.data.headless import *
-import cv2
-import numpy as np
-import csv
-from sqlalchemy import create_engine, func, and_
-from sqlalchemy.orm import sessionmaker
-from core.data.computation import ms_to_frames
-from core.corpus.shared.corpus import VIANCorpus
-import datetime
 
 if __name__ == '__main__':
     for f in glob.glob("F:\\_projects\\*\\*.eext"):

@@ -11,7 +11,10 @@ class ConcurrentTaskDock(EDockWidget, IProjectChangeNotify):
         super(ConcurrentTaskDock, self).__init__(main_window)
         self.setWindowTitle("Concurrent Tasks")
         self.task_list_widget = ConcurrentTasksList(self)
-        self.setWidget(self.task_list_widget)
+        self.scroll_area = QScrollArea(self)
+        self.setWidget(self.scroll_area)
+        self.scroll_area.setWidget(self.task_list_widget)
+        self.scroll_area.setWidgetResizable(True)
         self.show()
 
 
@@ -46,7 +49,6 @@ class ConcurrentTasksList(QWidget):
                 self.task_entries.remove(t)
                 break
         self.update_progress(-1,-1)
-
 
     def update_progress(self,task_id, value_float):
         if len(self.task_entries) > 0:

@@ -1,22 +1,21 @@
+import os
+from functools import partial
+from typing import List
+
+from PyQt5 import uic
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from core.gui.classification import CheckBoxGroupWidget
-from PyQt5 import uic
-import os
-import cv2
-from typing import List
 
-from core.corpus.shared.sqlalchemy_entities import *
-from visualizer3.worker import QueryWorker, CORPUS_PATH
-from functools import partial
+from core.corpus.sqlalchemy_entities import *
+from core.gui.classification import CheckBoxGroupWidget
+from core.visualization.dot_plot import DotPlot
+from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime, ImagePlotYear
+from core.visualization.palette_plot import MultiPaletteLABWidget
 from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed
 from visualizer3.screenshot_worker import ScreenshotWorker
 from visualizer3.vis_entities import VisScreenshot
-from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime, ImagePlotYear
-from core.visualization.dot_plot import DotPlot
-from core.visualization.palette_plot import MultiPaletteLABWidget
-
+from visualizer3.worker import QueryWorker, CORPUS_PATH
 
 
 class ProgressBar(QWidget):

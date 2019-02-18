@@ -1,7 +1,7 @@
 from core.container.media_objects import AbstractMediaObject
-from core.corpus.shared.entities import DBProject
-from core.corpus.client.corpus_client import CorpusClient
 from core.container.project import *
+from core.corpus.client.corpus_client import CorpusClient
+from core.corpus.sqlalchemy_entities import DBProject
 
 
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):

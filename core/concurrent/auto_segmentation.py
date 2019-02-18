@@ -7,6 +7,7 @@ from core.analysis.colorimetry.computation import calculate_histogram
 from PyQt5.QtCore import QRect, Qt
 from core.data.interfaces import IConcurrentJob
 from core.data.enums import *
+from core.container.project import VIANProject
 
 
 AUTO_SEGM_EVEN = 0

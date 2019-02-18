@@ -151,6 +151,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.inhibit_dispatch = False
         self.selected = []
         self.segment_screenshot_mapping = dict()
+        self.headless_mode = False
 
     def highlight_types(self, types):
 

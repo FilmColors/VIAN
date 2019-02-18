@@ -5,7 +5,7 @@ this it can be used to perform operations in a batch process without having the 
 """
 
 from core.container.project import *
-from core.data.settings import UserSettings
+from core.data.settings import UserSettings, Contributor
 from core.data.hdf5_manager import *
 from shutil import copy2, move
 # from core.gui.main_window import *
@@ -13,6 +13,7 @@ from typing import Dict, Tuple
 from core.analysis.analysis_import import *
 from threading import Lock, Thread
 from random import sample
+from core.corpus.client.corpus_client import WebAppCorpusInterface
 
 PROJECT_LOCK = Lock()
 VERSION = "0.6.6"
@@ -150,6 +151,7 @@ def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
         mw = HeadlessMainWindow()
         project = VIANProject(mw)
         mw.project = project
+        project.headless_mode = True
         project.inhibit_dispatch = True
         project.load_project(HeadlessUserSettings(), path)
         project.hdf5_manager.initialize_all([SemanticSegmentationAnalysis,
@@ -244,6 +246,14 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         return project
     except Exception as e:
         raise e
+
+
+def to_webapp(project, email, password, webapp_url = "http://ercwebapp.westeurope.cloudapp.azure.com:5000/api/"):
+    contributor = Contributor(email=email, password=password)
+    interface = WebAppCorpusInterface(webapp_url)
+    interface.login(contributor)
+    interface.commit_project(project, contributor)
+
 
 
 def to_corpus(project):

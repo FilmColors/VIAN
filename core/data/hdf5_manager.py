@@ -95,6 +95,9 @@ class HDF5Manager():
         print("Datasets in HDF5 File:")
         for k in self.h5_file.keys():
             print("\t-- ", k)
+            if k == "ColorPalettes" and self.h5_file["ColorPalettes"].shape[1] != 1024:
+                print("Deleting Palettes")
+                del self.h5_file["ColorPalettes"]
         return init
 
     def initialize_all(self, analyses = None):
