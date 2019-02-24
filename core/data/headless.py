@@ -248,6 +248,12 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         raise e
 
 
+def ping_webapp(email, password, webapp_url = "http://ercwebapp.westeurope.cloudapp.azure.com:5000/api/"):
+    contributor = Contributor(email=email, password=password)
+    interface = WebAppCorpusInterface(webapp_url)
+    interface.login(contributor)
+
+
 def to_webapp(project, email, password, webapp_url = "http://ercwebapp.westeurope.cloudapp.azure.com:5000/api/"):
     contributor = Contributor(email=email, password=password)
     interface = WebAppCorpusInterface(webapp_url)

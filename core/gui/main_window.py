@@ -1703,7 +1703,11 @@ class MainWindow(QtWidgets.QMainWindow):
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
         path = path[0]
         self.close_project()
-        self.load_project(path)
+        try:
+            self.load_project(path)
+        except Exception as e:
+            print(e)
+            QMessageBox.warning(self, "Failed to Load", "File is corrupt and could not be loaded")
 
     def close_project(self):
         if self.project is not None:

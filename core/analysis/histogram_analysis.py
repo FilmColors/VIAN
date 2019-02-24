@@ -32,12 +32,20 @@ class ColorHistogramAnalysis(IAnalysisJob):
         args = []
         fps = project.movie_descriptor.fps
         for tgt in targets:
+            semseg = None
+            if isinstance(tgt, Screenshot):
+                if class_objs is not None:
+                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
+                    if len(semseg) > 0:
+                        semseg = semseg[0]
+
             args.append([ms_to_frames(tgt.get_start(), fps),
                          ms_to_frames(tgt.get_end(), fps),
                          project.movie_descriptor.movie_path,
                          parameters,
                          tgt.get_id(),
-                         project.movie_descriptor.get_letterbox_rect()])
+                         project.movie_descriptor.get_letterbox_rect(),
+                         semseg])
         return args
 
     def process(self, args, sign_progress):
@@ -50,12 +58,20 @@ class ColorHistogramAnalysis(IAnalysisJob):
         movie_path = args[2]
         params = args[3]
         margins = args[5]
+        semseg = args[6]
 
         cap = cv2.VideoCapture(movie_path)
         cap.set(cv2.CAP_PROP_POS_FRAMES, start)
         c = start
         final_hist = np.zeros(shape=(16,16,16), dtype = np.float32)
         shape = (1,1)
+
+        bin_mask = None
+        if semseg is not None:
+            name, labels = self.target_class_obj.semantic_segmentation_labels
+            mask = semseg.get_adata()
+            bin_mask = labels_to_binary_mask(mask, labels)
+
         while (c < stop + params['resolution']):
             if c % params['resolution'] != 0:
                 c += 1
@@ -75,7 +91,11 @@ class ColorHistogramAnalysis(IAnalysisJob):
             if c == start:
                 shape = frame.shape
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
-            data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
+            if bin_mask is not None:
+                data = frame[np.where(bin_mask==True)]
+            else:
+                data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
+
             final_hist += cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
                                 [16, 16, 16],
                                 [0, 255, 0, 255, 1, 255])
