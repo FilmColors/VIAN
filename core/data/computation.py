@@ -471,7 +471,7 @@ def is_subdir(path, directory):
     return not relative.startswith(os.pardir + os.sep)
 
 
-def images_to_movie(imgs, out_file, time_scale = 20, fps = 20.0, size = (640,480), codec = 'DIVX'):
+def images_to_movie(imgs, out_file, time_scale = 180, fps = 30.0, size = (640,480), codec = 'DIVX'):
     """
     Creates a movie from a list of numpy images
     :param imgs: a list of numpy images

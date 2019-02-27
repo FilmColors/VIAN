@@ -18,6 +18,7 @@ class ExtensionList:
         self.main_window = main_window
         self.load_plugins()
         self.load_analysis()
+        self.load_pipelines()
 
         print("\n#### --- Extensions --- #####")
         if len(self.analyses) > 0:
@@ -89,6 +90,26 @@ class ExtensionList:
 
             except Exception as e:
                 # print(e)
+                continue
+
+    def load_pipelines(self):
+        file_list = []
+        # print (os.path.abspath(os.path.curdir))
+        for root, dirs, files in os.walk("extensions/pipelines/", topdown=False):
+            for name in files:
+                if ".py" in name and not "__init__.py" in name and not "__pycache__" in name:
+                    path = os.path.join(root, name)
+                    path = path.replace("\\", "/")
+                    path = path.replace(".py", "")
+                    path = path.replace("/", ".")
+
+                    file_list.append(path)
+
+        for f in file_list:
+            try:
+                importlib.import_module(f)
+            except Exception as e:
+                print("Exception in load_pipelines():" ,e)
                 continue
 
     def get_plugin_menu(self, parent):

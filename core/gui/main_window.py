@@ -16,6 +16,7 @@ from core.data.exporters import *
 from core.data.importers import *
 from core.data.settings import UserSettings, Contributor
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
+from core.data.creation_events import VIANEventHandler, EVENT_C_SEGMENT, EVENT_C_SCREENSHOT, EVENT_C_ANNOTATION
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -93,8 +94,10 @@ class MainWindow(QtWidgets.QMainWindow):
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
         print("VIAN: ", __version__)
+
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
         loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,100))
+
 
         if PROFILE:
             self.profiler = cProfile.Profile()
@@ -106,6 +109,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.forced_overlay_hidden = False
 
         self.extension_list = ExtensionList(self)
+        print("Registered Events:")
+        for itm in [EVENT_C_SCREENSHOT, EVENT_C_SEGMENT, EVENT_C_ANNOTATION]:
+            for k, v in itm.items():
+                print("\t---", k.ljust(30),v)
         self.is_darwin = False
 
         self.application_in_focus = True
@@ -140,6 +147,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.allow_dispatch_on_change = True
 
         self.thread_pool = QThreadPool.globalInstance()
+        self.vian_event_handler_thread = QThread()
+        self.vian_event_handler = VIANEventHandler(self)
+        self.vian_event_handler.moveToThread(self.vian_event_handler_thread)
+        self.vian_event_handler_thread.start()
         # self.thread_pool.setMaxThreadCount(8)
 
         self.colormetry_running = False
@@ -933,6 +944,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+
     @pyqtSlot(float, str)
     def on_progress_popup(self, value, str):
         try:
@@ -1703,7 +1715,11 @@ class MainWindow(QtWidgets.QMainWindow):
         path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
         path = path[0]
         self.close_project()
-        self.load_project(path)
+        try:
+            self.load_project(path)
+        except Exception as e:
+            print(e)
+            QMessageBox.warning(self, "Failed to Load", "File is corrupt and could not be loaded")
 
     def close_project(self):
         if self.project is not None:
@@ -2018,6 +2034,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.start()
         self.set_ui_enabled(True)
         self.hdf5_cache.cleanup()
+
+        self.vian_event_handler.set_project(self.project)
 
 
         screenshot_position = []

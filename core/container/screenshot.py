@@ -170,7 +170,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.img_movie = img
         if img is None:
             return
-        if self.project.headless_mode:
+        if self.project is not None and self.project.headless_mode:
             return
         if img.shape[2] == 3:
             self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img))
@@ -306,6 +306,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
             self.screenshots.append(s)
             s.screenshot_group = self.get_name()
             self.onScreenshotAdded.emit(s)
+            self.project.onScreenshotAdded.emit(s)
         # self.dispatch_on_changed(item=self)
 
     def remove_screenshots(self, shots):

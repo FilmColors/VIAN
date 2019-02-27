@@ -431,6 +431,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
                                           (self.remove_annotation, [annotation]))
         self.dispatch_on_changed(item=self)
         self.onAnnotationAdded.emit(annotation)
+        self.project.onAnnotationAdded.emit(annotation)
 
     def remove_annotation(self, annotation):
         if annotation in self.annotations:
