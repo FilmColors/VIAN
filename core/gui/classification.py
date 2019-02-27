@@ -413,10 +413,13 @@ class CheckBoxGroupWidget(QWidget):
 
     def add_checkbox(self, checkbox):
         self.items.append(checkbox)
+
         try:
+            # In Visualizer
             self.items = sorted(self.items, key=lambda x: x.word.word.get_name())
         except:
-            self.items = sorted(self.items, key = lambda x: x.word.word.name)
+            # In VIAN
+            self.items = sorted(self.items, key = lambda x: x.word.word_obj.name)
 
         size = len(self.items)
         n_rows = np.ceil(size/self.n_columns)

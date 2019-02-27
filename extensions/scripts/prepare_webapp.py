@@ -6,13 +6,15 @@ ALL_ANALYSES = [BarcodeAnalysisJob, MovieMosaicAnalysis, ColorHistogramAnalysis,
 
 for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
     print(file)
-    # if not "184_1_1_Black Narcissus" in file:
-    #     continue
-    ping_webapp("gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
+    if "3460_1_1_" in file or "256_1_1" in file:
+        continue
+    # ping_webapp("gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
     try:
         # # file = "F:\\_webapp\\new\\016_1_1_The Age of Innocence_1993\\016_1_1_The Age of Innocence_1993.eext"
         project, mw = load_project_headless(file)
         project.hdf5_manager.initialize_all(ALL_ANALYSES)
+        mw.load_screenshots()
+
         #
         # # to_remove = []
         # # for a in project.analysis:
@@ -46,16 +48,17 @@ for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
         # mw.run_analysis_threaded(ColorPaletteAnalysis(), project.screenshots, dict(resolution=10), cl_obj, fps)
         #
         # project.store_project(HeadlessUserSettings())
-        mw.load_screenshots()
+
         t = project.name.split(".")[0].split("_")
         project.movie_descriptor.movie_name = t[3]
         project.movie_descriptor.movie_id = "_".join(t[:3])
         project.sort_screenshots()
         project.store_project(HeadlessUserSettings())
 
-        # to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
+        to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
 
-        to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://127.0.0.1:5000/api/")
+        # to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://127.0.0.1:5000/api/")
+
     except Exception as e:
         print(e)
         continue
