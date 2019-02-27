@@ -132,6 +132,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             self.project.undo_manager.to_undo((self.add_segment, [segment]), (self.remove_segment, [segment]))
             self.dispatch_on_changed(item=self)
         self.onSegmentAdded.emit(segment)
+        self.project.onSegmentAdded.emit(segment)
 
     def remove_segment(self, segment, dispatch = True):
         self.segments.remove(segment)

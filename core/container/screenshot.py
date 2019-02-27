@@ -306,6 +306,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
             self.screenshots.append(s)
             s.screenshot_group = self.get_name()
             self.onScreenshotAdded.emit(s)
+            self.project.onScreenshotAdded.emit(s)
         # self.dispatch_on_changed(item=self)
 
     def remove_screenshots(self, shots):

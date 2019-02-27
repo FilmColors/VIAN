@@ -94,6 +94,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
     onVocabularyAdded = pyqtSignal(object)
     onVocabularyRemoved = pyqtSignal(object)
 
+    onScreenshotAdded = pyqtSignal(object)
+    onAnnotationAdded = pyqtSignal(object)
+    onSegmentAdded = pyqtSignal(object)
+
 
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
