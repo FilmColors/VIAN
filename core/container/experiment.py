@@ -89,6 +89,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
         if dispatch:
             self.dispatch_on_changed(item=self)
+
         self.onVocabularyWordRemoved.emit(word)
 
     def get_word_by_name(self, name):
@@ -151,12 +152,9 @@ class Vocabulary(IProjectContainer, IHasName):
         return self
 
     def export_vocabulary(self, path):
-        try:
-            data = self.serialize()
-            with open(path, "w") as f:
-                json.dump(data, f)
-        except:
-            print("Export_Vocabulary() failed with:", path)
+        data = self.serialize()
+        with open(path, "w") as f:
+            json.dump(data, f)
 
     def import_vocabulary(self, path = None, project = None, serialization = None):
         if serialization is None:

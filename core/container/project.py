@@ -372,9 +372,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param index: 
         :return: 
         """
+        # Main Segmentation can be None or index can be out of range
         try:
             return self.get_main_segmentation().segments[index]
-        except:
+        except Exception as e:
             return None
     # endregion
 
@@ -540,25 +541,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def add_analyses(self, analyses):
         for a in analyses:
-            try:
-                self.add_analysis(a)
-            except Exception as e:
-                print(a.data)
-                raise e
-                print(e, a.analysis_job_class)
-
-        # ids = []
-        # objs = []
-        # data_types = []
-        #
-        # for a in analyses:
-        #     objs.append(self.main_window.eval_class(a.analysis_job_class)().to_json(a.data))
-        #     a.data = None
-        #     a.set_project(self)
-        #     ids.append(a.unique_id)
-        #     data_types.append(self.main_window.eval_class(a.analysis_job_class)().serialization_type())
-        #     self.analysis.append(a)
-        # self.main_window.project_streamer.bulk_store(ids, objs, data_types)
+            self.add_analysis(a)
 
     def remove_analysis(self, analysis):
         if analysis in self.analysis:
@@ -567,13 +550,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
             self.dispatch_changed()
             self.onAnalysisRemoved.emit(analysis)
-
-    # def get_analyzes_of_item(self, item):
-    #     result = []
-    #     for a in self.analysis:
-    #         if isinstance(a, IAnalysisJobAnalysis) and item.unique_id in a.parameters.target_items:
-    #             result.append(item)
-    #     return item
 
     def get_job_analyses(self):
         result = []
@@ -824,32 +800,21 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.name = my_dict['name']
         self.main_segmentation_index = my_dict['main_segmentation_index']
 
-        try:
+        if 'corpus_id' in my_dict:
             self.corpus_id = my_dict['corpus_id']
-        except:
-            self.corpus_id = -1
-        try:
+
+        if 'notes' in my_dict:
             self.notes = my_dict['notes']
-        except:
-            self.notes = ""
 
-        try:
+        if 'meta_data' in my_dict:
             self.meta_data = my_dict['meta_data']
-        except:
-            pass
 
-        # splitted = path.split("/")[0:len(path.split("/")) - 1]
-        # self.folder = ""
-        # for f in splitted:
-        #     self.folder += f + "/"
         self.folder = os.path.split(path)[0] + "/"
         self.results_dir = self.folder + "/results/"
         self.export_dir = self.folder + "/export/"
         self.shots_dir = self.folder + "/shots/"
         self.data_dir = self.folder + "/data/"
         self.hdf5_path = self.data_dir + "analyses.hdf5"
-
-        # self.main_window.numpy_data_manager.project = self
 
         move_project_to_directory_project = False
         version = [0,0,0]
@@ -898,7 +863,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         try:
             self.hdf5_manager.set_indices(my_dict['hdf_indices'])
         except Exception as e:
-            print(e)
+            print("Exception during hdf5_manager.set_indices(): ", e)
             self.hdf5_manager.initialize_all()
 
         self.current_annotation_layer = None

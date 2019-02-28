@@ -245,15 +245,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.img_movie = np.zeros(shape=(30,50,3), dtype=np.uint8)
         self.img_blend = None
 
-        # try:
-        #     for w in serialization["words"]:
-        #         word = self.project.get_by_id(w)
-        #         if word is not None:
-        #             self.add_word(self.project.get_by_id(w))
-        #
-        # except Exception as e:
-        #     pass
-
         return self
 
     def get_type(self):
@@ -335,24 +326,13 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     def deserialize(self, serialization, project):
         self.project = project
         self.name = serialization['name']
-        try:
-            self.unique_id = serialization['unique_id']
-        except:
-            pass
+
+        self.unique_id = serialization['unique_id']
 
         for s in serialization['shots']:
             shot = self.project.get_by_id(s)
             shot.screenshot_group = self.name
             self.screenshots.append(shot)
-
-        # try:
-        #     for w in serialization["words"]:
-        #         word = self.project.get_by_id(w)
-        #         if word is not None:
-        #             self.add_word(self.project.get_by_id(w))
-        #
-        # except Exception as e:
-        #     pass
 
         return self
 

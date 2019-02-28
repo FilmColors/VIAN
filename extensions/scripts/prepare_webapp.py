@@ -6,7 +6,7 @@ ALL_ANALYSES = [BarcodeAnalysisJob, MovieMosaicAnalysis, ColorHistogramAnalysis,
 
 for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
     print(file)
-    if "3460_1_1_" in file or "256_1_1" in file:
+    if "3460_1_1_" in file or "256_1_1" in file or "184_1_1_" in file or "229_1_1_" in file:
         continue
     # ping_webapp("gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
     try:
@@ -37,7 +37,6 @@ for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
         # # project.hdf5_manager._index['ColorPalettes'] = 0
         #
         if len(project.get_main_segmentation().segments[0].connected_analyses) == 0:
-            continue
             mw.run_analysis_threaded(ColorFeatureAnalysis(), project.get_main_segmentation().segments, dict(resolution=30), glob, fps)
             mw.run_analysis_threaded(ColorHistogramAnalysis(), project.get_main_segmentation().segments, dict(resolution=10), glob, fps)
 
@@ -60,6 +59,7 @@ for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
         # to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://127.0.0.1:5000/api/")
 
     except Exception as e:
+        raise e
         print(e)
         continue
 

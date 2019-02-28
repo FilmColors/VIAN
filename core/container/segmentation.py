@@ -247,9 +247,9 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             new.segmentation = self
             self.segments.append(new)
 
-        try:
+        if 'locked' in serialization:
             self.locked = serialization['locked']
-        except:
+        else:
             self.locked = False
 
         return self
@@ -441,20 +441,20 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
         self.notes = serialization['notes']
 
-        # Name has been introduced in 0.4.14
-        try:
+        # Backwards Compatibility
+        if 'name' in serialization:
             self.name = serialization['name']
-        except:
+        else:
             self.name = str(self.ID)
 
-        try:
+        if 'locked' in serialization:
             self.locked = serialization['locked']
-        except:
+        else:
             self.locked = False
 
-        try:
+        if 'annotation_body' in serialization:
             self.annotation_body = serialization['annotation_body']
-        except:
+        else:
             self.annotation_body = ""
 
         try:
