@@ -475,6 +475,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             else:
                 ctrl.onHeightChanged.emit(ctrl.height() / n_bars)
 
+
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
@@ -650,7 +651,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             if abs_scale != 0:
                 self.scale = abs_scale
             else:
-                self.scale = np.clip(- angleDelta.y() * (0.0005 * self.scale) + self.scale, None, s_max)
+                self.scale = np.clip(- angleDelta.y() * (0.0005 * self.scale) + self.scale, self.duration / 12798036, s_max)
+
             self.update_ui()
             self.update()
 
@@ -1871,9 +1873,11 @@ class TimebarDrawing(QtWidgets.QWidget):
 
         self.is_hovered = False
         self.was_playing = False
-        self.a = 50
-        self.b = 200
-        self.c = 1000
+        self.a = 10
+        self.b = 50
+        self.c = 200
+        self.d = 1000
+        self.split_threshold = 100
         self.time_offset = 0
         self.show()
 
@@ -1888,103 +1892,57 @@ class TimebarDrawing(QtWidgets.QWidget):
 
         t_start = float(self.pos().x()) * self.timeline.scale / 1000
         t_end = t_start + float(self.width() * self.timeline.scale / 1000)
+        p_break = np.ceil(np.log10(self.split_threshold * self.timeline.scale / 1000))
         self.time_offset = 0
-        if self.timeline.scale <= self.a:
-            for i in range(int(t_start), int(t_end)):
 
-            #for i in range(int(self.timeline.duration) / 1000):
-                # pos = i * 1000 / self.timeline.scale
-                pos = round(float(i - t_start) / self.timeline.scale * 1000 + self.time_offset)
-                if i % 2 == 0:
-                    s = ms_to_string(i * 1000)
-                    qp.drawText(QtCore.QPoint(pos - (len(s) / 2) * 7, 8), s)
-                if i % 2 == 0:
-                    h = 10
-                    pen.setWidth(1)
-                else:
-                    pen.setWidth(1)
-                    if float(i) % 1 == 0:
-                        h = 15
-                    if float(i) % 1 == 0.5:
-                        h = 20
+        if (t_end - t_start) * 1000 > 100000:
+            res_factor = 1
+        elif (t_end - t_start) * 1000 > 10000:
+            res_factor = 10
+        elif (t_end - t_start) * 1000 > 1000:
+            res_factor = 100
+        else:
+            res_factor = 1000
+
+        # if the zoom allows to display minutes or hours, we want the labels to be set in a
+        # heximal manner
+        if p_break >= 2:
+            decimal_heximal = 0.6
+        else:
+            decimal_heximal = 1.0
+
+        h = 15
+        for i in range(int(t_start * res_factor), int(t_end * res_factor)):
+            pos = round((float(i / res_factor) - t_start) / self.timeline.scale * 1000 + self.time_offset)
+
+            if (i * 1000 / res_factor) % (((10 ** (p_break))* 1000) * decimal_heximal) == 0:
+                s = ms_to_string(i * (1000 / res_factor), include_ms=p_break < 0.01)
+                qp.drawText(QtCore.QPoint(pos - (len(s) / 2) * 7, 8), s)
+
+            if (i * 1000 / res_factor) % (((10 ** p_break * 1000)) * decimal_heximal) == 0:
+                h = 10
+                pen.setWidth(1)
                 qp.setPen(pen)
                 a = QtCore.QPoint(pos, h)
                 b = QtCore.QPoint(pos, 30)
                 qp.drawLine(a, b)
 
-        if self.a  < self.timeline.scale <= self.b:
-            for i in range(int(t_start), int(t_end)):
-            #for i in range(int(self.timeline.duration) / 1000):
-                # pos = i * 1000 / self.timeline.scale
-                pos = float(i - t_start) / self.timeline.scale * 1000 + self.time_offset
-                if i % 30 == 0:
-                    s = ms_to_string(i * 1000)
-                    qp.drawText(QtCore.QPoint(pos - (len(s)/2)*7, 8), s)
-                if i % 10 == 0:
-                    h = 10
-                    pen.setWidth(1)
-                else:
-                    pen.setWidth(1)
-                    if i % 5 == 0:
-                        h = 15
-                    else:
-                        h = 20
+            elif (i * 1000 / res_factor) % int(((10 ** p_break * 1000)* decimal_heximal / 2)) == 0:
+                print("A", (i * 1000 / res_factor), (((10 ** p_break * 1000) / 2)))
+                h = 15
+                pen.setWidth(1)
                 qp.setPen(pen)
                 a = QtCore.QPoint(pos, h)
                 b = QtCore.QPoint(pos, 30)
                 qp.drawLine(a, b)
-
-        if self.b  < self.timeline.scale <= self.c:
-            for i in range(int(t_start), int(t_end)):
-            #for i in range(int(self.timeline.duration) / 1000):
-                paint = True
-                # pos = i * 1000 / self.timeline.scale
-                pos = float(i - t_start) / self.timeline.scale * 1000 + self.time_offset
-                if i % 60 == 0:
-                    pen.setWidth(1)
-                    s = ms_to_string(i * 1000)
-                    qp.drawText(QtCore.QPoint(pos - (len(s)/2)*7, 8), s)
-                    h = 10
-                else:
-                    if i % 30 == 0:
-                        h = 15
-                        pen.setWidth(1)
-                    if i % 15 == 0:
-                        h = 20
-                    else:
-                        paint = False
-
-                if paint:
-                    qp.setPen(pen)
-                    a = QtCore.QPoint(pos, h)
-                    b = QtCore.QPoint(pos, 30)
-                    qp.drawLine(a, b)
-
-        if self.c < self.timeline.scale:
-            for i in range(int(t_start), int(t_end)):
-            #for i in range(int(self.timeline.duration) / 1000):
-                paint = True
-                # pos = i * 1000 / self.timeline.scale
-                pos = float(i - t_start) / self.timeline.scale * 1000 + self.time_offset
-                if i % 600 == 0:
-                    pen.setWidth(1)
-                    s = ms_to_string(i * 1000)
-                    qp.drawText(QtCore.QPoint(pos - (len(s)/2)*7, 8), s)
-                    h = 10
-                else:
-                    if i % 300 == 0:
-                        h = 15
-                        pen.setWidth(1)
-                    if i % 150 == 0:
-                        h = 20
-                    else:
-                        paint = False
-
-                if paint:
-                    qp.setPen(pen)
-                    a = QtCore.QPoint(pos, h)
-                    b = QtCore.QPoint(pos, 30)
-                    qp.drawLine(a, b)
+            elif (i * 1000 / res_factor) % int(((10 ** (p_break - 1)) * 1000)) == 0:
+                print("B", (i * 1000 / res_factor), (((10 ** (p_break - 1)) * 1000)))
+                h = 20
+                pen.setWidth(1)
+                qp.setPen(pen)
+                a = QtCore.QPoint(pos, h)
+                b = QtCore.QPoint(pos, 30)
+                qp.drawLine(a, b)
 
         # Draw the colormetry progress Bar
         if  0.0 < self.colormetry_progress:
