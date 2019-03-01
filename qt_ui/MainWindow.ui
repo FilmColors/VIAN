@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1083</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -157,6 +157,7 @@
     <addaction name="actionInspector"/>
     <addaction name="actionOutliner"/>
     <addaction name="actionTimeline"/>
+    <addaction name="actionScriptEditor"/>
     <addaction name="separator"/>
     <addaction name="actionScreenshot_Manager"/>
     <addaction name="actionVocabularyManager"/>
@@ -865,6 +866,11 @@
   <action name="actionCorpus_VisualizerLegacy">
    <property name="text">
     <string>Corpus Visualizer (Legacy)</string>
+   </property>
+  </action>
+  <action name="actionScriptEditor">
+   <property name="text">
+    <string>Script Editor</string>
    </property>
   </action>
  </widget>

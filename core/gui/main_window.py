@@ -29,6 +29,7 @@ from core.gui.letterbox_widget import LetterBoxWidget
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.classification import ClassificationWindow
+from core.gui.python_script_editor import PythonScriptEditor
 from core.gui.colormetry_widget import *
 from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, \
@@ -197,6 +198,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.experiment_dock = None
         self.corpus_client_toolbar = None
         self.facial_identification_dock = None
+        self.script_editor = PythonScriptEditor(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.script_editor)
+
 
         self.progress_popup = None
         self.quick_annotation_dock = None
@@ -353,6 +357,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTimeline.triggered.connect(self.create_timeline)
         self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
+        self.actionScriptEditor.triggered.connect(self.script_editor.show)
 
         self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup.name))
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
@@ -505,6 +510,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.project.undo_manager.clear()
         self.close_project()
+
 
 
         self.show()

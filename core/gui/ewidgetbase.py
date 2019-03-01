@@ -471,7 +471,6 @@ class EToolBar(QToolBar):
         # qp.fillRect(self.rect(), QColor(50, 50, 50))
 
         if self.show_indicator_frame:
-
             qp.drawRect(self.rect())
 
         qp.end()

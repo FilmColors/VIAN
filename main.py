@@ -92,7 +92,7 @@ if __name__ == '__main__':
     # app.installEventFilter(filter)
     app.setWindowIcon(QIcon("qt_ui/images/main.png"))
     set_attributes(app)
-    set_style_sheet(app, settings.THEME_PATH)
+    set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
     splash = QSplashScreen(QPixmap("qt_ui/images/loading_screen.png"))
     splash.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.SplashScreen)
     splash.show()

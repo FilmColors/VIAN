@@ -64,7 +64,7 @@ class UserSettings():
         self.USE_GRID = True
         self.GRID_SIZE = 100
         # Theme
-        self.THEME_PATH = "qt_ui/themes/qt_stylesheet_dark.css"
+        self.THEME_PATH = "qt_ui/themes/qt_stylesheet_very_dark.css"
 
         # FILES
         self.AUTOSAVE = True

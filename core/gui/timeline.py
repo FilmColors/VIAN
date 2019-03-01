@@ -162,6 +162,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.is_marquee_selecting = False
         self.is_cutting = False
         self.is_merging = False
+        self.sticky_move = False #If true, the adjacent slice is edited as well
 
         self.item_segments = []
         self.item_screenshots = []
@@ -620,6 +621,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.main_window.keyPressEvent(QKeyEvent)
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.shift_pressed = True
+            self.sticky_move = True
         else:
             QKeyEvent.ignore()
 
@@ -630,6 +632,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.main_window.keyReleaseEvent(QKeyEvent)
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.shift_pressed = False
+            self.sticky_move = False
         else:
             QKeyEvent.ignore()
 
@@ -1229,9 +1232,13 @@ class TimebarSlice(QtWidgets.QWidget):
 
         self.merge_highlighted = False
         self.query_highlighted = False
+        self.sticky_highlighted = False
 
         self.min_possible = 0
         self.max_possible = self.timeline.duration * self.timeline.scale
+
+        self.previous_slice = None
+        self.next_slice = None
 
     def set_query_highlighted(self, state):
         self.query_highlighted = state
@@ -1251,6 +1258,9 @@ class TimebarSlice(QtWidgets.QWidget):
 
             elif self.query_highlighted:
                 col = (63, 200, 229, 200)
+
+            elif self.sticky_highlighted:
+                col = (195,38,123, 200)
 
             elif self.is_hovered:
                 if self.timeline.is_cutting:
@@ -1337,10 +1347,12 @@ class TimebarSlice(QtWidgets.QWidget):
 
                         if previous is not None:
                             self.min_possible = previous.pos().x() + previous.width()
+                            self.previous_slice = previous
                         else:
                             self.min_possible = 0
                         if next is not None:
                             self.max_possible = next.pos().x()
+                            self.next_slice = next
                         else:
                             self.max_possible = self.timeline.duration * self.timeline.scale
 
@@ -1381,10 +1393,17 @@ class TimebarSlice(QtWidgets.QWidget):
                     return
                 if self.mode == "left":
                     self.item.set_start(int(round((self.pos().x() * self.timeline.scale),0)))
+                    if self.timeline.sticky_move and self.previous_slice is not None:
+                        self.previous_slice.item.set_end(int(round((self.pos().x() * self.timeline.scale),0)))
+                        self.previous_slice.sticky_highlighted = False
+
                     return
 
                 if self.mode == "right":
                     self.item.set_end(int(round(((self.pos().x() + self.width()) * self.timeline.scale),0)))
+                    if self.timeline.sticky_move and self.next_slice is not None:
+                        self.next_slice.item.set_start(int(round(((self.pos().x() + self.width()) * self.timeline.scale),0)))
+                        self.next_slice.sticky_highlighted = False
                     return
 
     @pyqtSlot(int)
@@ -1402,6 +1421,7 @@ class TimebarSlice(QtWidgets.QWidget):
     def enterEvent(self, QEvent):
         if not self.locked:
             self.is_hovered = True
+
 
     def leaveEvent(self, QEvent):
         if not self.locked:
@@ -1427,12 +1447,22 @@ class TimebarSlice(QtWidgets.QWidget):
                 target = QtCore.QPoint(int(tx), int(ty))
 
                 if self.mode == "right":
-                    if self.timeline.inhibit_overlap:
+                    if self.timeline.sticky_move:
+                        x = np.clip(self.curr_size.width() + target.x(), self.curr_pos.x() - self.offset.x() + 5, None)
+                    elif self.timeline.inhibit_overlap:
                         x = np.clip(self.curr_size.width() + target.x(), self.curr_pos.x() - self.offset.x() + 5, self.max_possible - self.curr_pos.x())
                     else:
                         x = np.clip(self.curr_size.width() + target.x(), self.curr_pos.x() - self.offset.x() + 5, None)
 
+                    old_width = self.width()
                     self.resize(x, self.height())
+                    if self.timeline.sticky_move and self.next_slice is not None:
+                        offset = self.next_slice.x() - (self.x() + old_width)
+                        next_x = self.x() + self.width() + offset
+                        next_width = old_width + self.next_slice.width() - ((next_x - offset) - self.x())
+                        self.next_slice.move(next_x, 0)
+                        self.next_slice.resize(next_width, self.height())
+                        self.next_slice.sticky_highlighted = True
                     self.update()
 
                     time = (self.pos().x() + self.width()) * self.timeline.scale
@@ -1440,7 +1470,12 @@ class TimebarSlice(QtWidgets.QWidget):
                     return
 
                 if self.mode == "left":
-                    if self.timeline.inhibit_overlap:
+                    if self.timeline.sticky_move:
+                        x = np.clip(self.curr_pos.x() + target.x(), a_min=0,
+                                    a_max=self.curr_pos.x() + self.curr_size.width())
+                        w = np.clip(self.curr_size.width() - target.x(), a_min=0,
+                                    a_max=self.curr_pos.x() + self.curr_size.width())
+                    elif self.timeline.inhibit_overlap:
                         x = np.clip(self.curr_pos.x() + target.x(), a_min=self.min_possible, a_max=self.curr_pos.x() + self.curr_size.width())
                         # w = np.clip(self.curr_size.width() - target.x(), a_min=0, a_max=self.curr_pos.x() + self.curr_size.width())
                         w = np.clip(self.curr_size.width() - target.x(), a_min=0,
@@ -1452,9 +1487,15 @@ class TimebarSlice(QtWidgets.QWidget):
                         w = np.clip(self.curr_size.width() - target.x(), a_min=0,
                                     a_max=self.curr_pos.x() + self.curr_size.width())
 
+                    old_width = self.width()
                     if self.pos().x() != x:
                         self.move(x, 0)
                         self.resize(w, self.height())
+
+                    if self.timeline.sticky_move and self.previous_slice is not None:
+                        new_width = self.previous_slice.width() + old_width - self.width()
+                        self.previous_slice.resize(new_width, self.previous_slice.height())
+                        self.previous_slice.sticky_highlighted = True
 
                     self.update()
 
@@ -1928,7 +1969,6 @@ class TimebarDrawing(QtWidgets.QWidget):
                 qp.drawLine(a, b)
 
             elif (i * 1000 / res_factor) % int(((10 ** p_break * 1000)* decimal_heximal / 2)) == 0:
-                print("A", (i * 1000 / res_factor), (((10 ** p_break * 1000) / 2)))
                 h = 15
                 pen.setWidth(1)
                 qp.setPen(pen)
@@ -1936,7 +1976,6 @@ class TimebarDrawing(QtWidgets.QWidget):
                 b = QtCore.QPoint(pos, 30)
                 qp.drawLine(a, b)
             elif (i * 1000 / res_factor) % int(((10 ** (p_break - 1)) * 1000)) == 0:
-                print("B", (i * 1000 / res_factor), (((10 ** (p_break - 1)) * 1000)))
                 h = 20
                 pen.setWidth(1)
                 qp.setPen(pen)
