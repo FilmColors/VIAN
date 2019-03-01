@@ -134,7 +134,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.experiments = []                   #type: List[Experiment]
 
-        self.current_script = None
+        self.current_script = None              #type: NodeScript
         self.node_scripts = []                  #type: List[NodeScript]
         self.create_script(dispatch=False)
 

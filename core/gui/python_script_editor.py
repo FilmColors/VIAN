@@ -1,11 +1,16 @@
 # syntax.py
 
 import sys
+import re
+import importlib.util
+import traceback
 
-from PyQt5.QtCore import QRegExp
-from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QFontDatabase
-from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget
+from PyQt5.QtCore import QRegExp, pyqtSignal, Qt
+from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter
 from functools import partial
+
+from core.data.creation_events import EVENT_C_SEGMENT, EVENT_C_ANNOTATION, EVENT_C_SCREENSHOT
 
 def format(r, g, b, style=''):
     """Return a QTextCharFormat with the given attributes.
@@ -37,14 +42,23 @@ STYLES = {
 
 
 class PythonScriptEditor(QDockWidget):
+    onReload = pyqtSignal(str)
+
     def __init__(self, parent):
         super(PythonScriptEditor, self).__init__(parent)
+        self.main_window = parent
         self.inner = QMainWindow()
         self.setWindowTitle("Script Editor")
         self.editor = QPlainTextEdit(self.inner)
+        self.output = QPlainTextEdit(self.inner)
+        self.output.setReadOnly(True)
+
+        self.central = QSplitter( Qt.Vertical, self.inner)
+        self.central.addWidget(self.editor)
+        self.central.addWidget(self.output)
         self.highlighter = PythonHighlighter(self.editor.document())
-        self.editor.setTabStopWidth(QFontMetricsF(self.editor.font()).width(' ') * 4)
-        self.inner.setCentralWidget(self.editor)
+
+        self.inner.setCentralWidget(self.central)
         self.current_file_path = ""
         QDockWidget.setWidget(self, self.inner)
 
@@ -57,10 +71,16 @@ class PythonScriptEditor(QDockWidget):
         self.a_load.triggered.connect(partial(self.load, None))
         self.a_save.triggered.connect(partial(self.save, None, False))
 
-        self.font = QFont("Consolas")
+        self.font = QFont("Lucida Console")
         self.font.setPointSize(10)
 
+        self.toolbar = self.inner.addToolBar("ScriptEditor Toolbar")
+
+        self.a_reload = self.toolbar.addAction("Reload")
+        self.a_reload.triggered.connect(self.reload)
+
         self.editor.setFont(self.font)
+        self.editor.setTabStopWidth(QFontMetricsF(self.editor.font()).width(' ') * 4)
 
     def new(self):
         self.load("data/default_pipeline.py")
@@ -95,8 +115,24 @@ class PythonScriptEditor(QDockWidget):
         try:
             with open(p, "w") as f:
                 f.write(self.editor.toPlainText())
+            self.current_file_path = p
         except IOError as e:
             print(e)
+
+    def reload(self):
+        self.save()
+        if self.current_file_path != "":
+            try:
+                spec = importlib.util.spec_from_file_location("module.name", self.current_file_path)
+                foo = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(foo)
+                self.output.setPlainText("Successfully imported module")
+            except Exception as e:
+                self.output.setPlainText(traceback.format_exc())
+                pass
+
+        else:
+            print("No Module loaded")
 
 
 class PythonHighlighter (QSyntaxHighlighter):
@@ -153,8 +189,6 @@ class PythonHighlighter (QSyntaxHighlighter):
             for b in PythonHighlighter.braces]
         rules += [(r'%s' % b, 0, STYLES['decorators'])
                   for b in PythonHighlighter.decorators]
-
-        print(rules)
 
         # All other rules
         rules += [

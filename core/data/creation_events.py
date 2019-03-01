@@ -7,9 +7,9 @@ as within VIAN to be called once a selector is created.
 from PyQt5.QtCore import QObject, pyqtSlot
 import cv2
 
-EVENT_C_SEGMENT = dict()
-EVENT_C_SCREENSHOT = dict()
-EVENT_C_ANNOTATION = dict()
+EVENT_C_SEGMENT =       dict(on_segment_created = None)
+EVENT_C_SCREENSHOT =    dict(on_screenshot_created = None)
+EVENT_C_ANNOTATION =    dict(on_annotation_created = None)
 
 class VIANEventHandler(QObject):
     def __init__(self, parent):
@@ -29,17 +29,22 @@ class VIANEventHandler(QObject):
     @pyqtSlot(object)
     def run_segment_created_event(self, segment):
         cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
-        EVENT_C_SEGMENT['default_segment_c_inform'](self.project, segment, cap)
-        pass
+        if EVENT_C_SEGMENT['on_segment_created'] is None:
+            return
+        EVENT_C_SEGMENT['on_segment_created'](self.project, segment, cap)
 
     @pyqtSlot(object)
     def run_on_screenshot_created_event(self, screenshot):
-        EVENT_C_SCREENSHOT['default_screenshot_c_inform'](self.project, screenshot, None)
-        pass
+        if EVENT_C_SCREENSHOT['on_screenshot_created'] is None:
+            return
+        EVENT_C_SCREENSHOT['on_screenshot_created'](self.project, screenshot, None)
 
     @pyqtSlot(object)
-    def run_on_annotation_created_event(self):
-        pass
+    def run_on_annotation_created_event(self, annotation):
+        if EVENT_C_ANNOTATION['on_annotation_created'] is None:
+            return
+        EVENT_C_ANNOTATION['on_annotation_created'](self.project, annotation, None)
+
 
 
 

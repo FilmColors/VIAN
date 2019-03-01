@@ -1262,11 +1262,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.show()
             self.player_dock_widget.show()
             self.colorimetry_live.show()
+            self.script_editor.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.script_editor)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
@@ -1427,6 +1429,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_matrix.hide()
         self.analysis_results_widget_dock.hide()
         self.timeline.hide()
+        self.script_editor.hide()
         self.player_controls.hide()
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
