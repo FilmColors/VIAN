@@ -397,9 +397,11 @@ QMainWindow::separator
 {
     background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #303030, stop: 0.5 #303030, stop: 0.6 #303030, stop:1 #303030);
     /*color: white;*/
-    padding: 4px;
-    border: 12px solid #303030;
-    spacing: 10px; /* spacing between items in the tool bar */
+    width: 2px;
+    height: 2px;
+    padding: 1px;
+    border: 1px solid #202020;
+    spacing: 1px; /* spacing between items in the tool bar */
 }
 
 QMainWindow::separator:hover
@@ -458,7 +460,8 @@ QTabBar::tab {
     border: 1px solid #444;
     border-bottom-style: none;
     /*background-color: #323232*/;
-    padding: 5px;
+    padding: 4px;
+    margin: 0px;
 
 }
 
@@ -469,7 +472,8 @@ QTabWidget::pane {
 
 QTabWidget::tab-bar {
     border: 1px solid #444;
-    spacing:5px;
+    left: 0;
+    spacing:1px;
 }
 
 QTabBar::tab:last
@@ -498,7 +502,8 @@ QTabBar::tab:selected
 {
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
-    margin-bottom: 0px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 QTabBar::tab:!selected:hover

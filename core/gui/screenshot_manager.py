@@ -316,12 +316,14 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     @pyqtSlot(object, object, object)
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
+        if self.main_window.project is None:
+            return
         clobj = self.main_window.project.active_classification_object
         if clobj is None:
             try:
                 a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)["default"][0].get_adata()
             except Exception as e:
-                print(e)
+                # Analysis is missing or not yet computed
                 a = None
         else:
             try:

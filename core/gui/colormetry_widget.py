@@ -146,7 +146,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                         self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
                                                          line_name=key,
                                                          force_xmax=self.main_window.project.movie_descriptor.duration)
-                print("Spacial", time.time() - t)
                 t = time.time()
             except Exception as e:
                 raise e

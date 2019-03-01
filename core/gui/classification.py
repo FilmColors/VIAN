@@ -1,8 +1,10 @@
 import os
 from functools import partial
+import time
 
 import numpy as np
 from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout
 
 from core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
@@ -43,7 +45,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.sorted_containers = []
 
         # Can be one of "categories", "class-obj", "class-cat"
-        self.mode = "class-obj"
+        self.tab_sorting_mode = "class-obj"
+
+        # can be Sequential or Selection
+        self.classification_mode = "Selection"
 
         self.current_query_keywords = []
 
@@ -95,16 +100,17 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.btn_ResetQuery.clicked.connect(self.on_reset_query)
 
     def on_changed(self, project, item):
-        if self.behaviour == "classification":
-            self.comboBox_Experiment.clear()
-            if len(project.experiments) > 0:
-                self.setEnabled(True)
-                for e in project.experiments:
-                    self.comboBox_Experiment.addItem(e.get_name())
-            else:
-                self.setEnabled(False)
-        else:
-            self.update_widget()
+        pass
+        # if self.behaviour == "classification":
+        #     self.comboBox_Experiment.clear()
+        #     if len(project.experiments) > 0:
+        #         self.setEnabled(True)
+        #         for e in project.experiments:
+        #             self.comboBox_Experiment.addItem(e.get_name())
+        #     else:
+        #         self.setEnabled(False)
+        # else:
+        #     self.update_widget()
         return
 
     def on_loaded(self, project):
@@ -127,18 +133,17 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.update_widget()
 
     def on_selected(self, sender, selected):
-        # if isinstance(selected, )
-        # if self.behaviour == "query":
-        #     self.current_experiment =
-        # if sender is not self:
-        #     if len(selected) > 0:
-        #         self.current_container = selected[0]
-        #     else:
-        #         self.current_container = None
-        #     self.update_widget()
-        pass
+        if self.behaviour == "classification":
+            if sender is self:
+                return
+            if len(selected) > 0 and self.current_container is not selected[0]:
+                self.current_container = selected[0]
+                self.update_widget()
+            else:
+                self.current_container = None
 
     def on_closed(self):
+        self.current_experiment = None
         self.stackedWidget.setCurrentIndex(0)
         self.setEnabled(False)
         return
@@ -150,11 +155,11 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         if sender == self.a_class:
             self.a_cat.setChecked(False)
             self.a_class.setChecked(True)
-            self.mode = "class-obj"
+            self.tab_sorting_mode = "class-obj"
         else:
             self.a_cat.setChecked(True)
             self.a_class.setChecked(False)
-            self.mode = "categories"
+            self.tab_sorting_mode = "categories"
         self.update_widget()
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
@@ -164,9 +169,17 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.current_idx = 0
         self.current_experiment = self.main_window.project.experiments[self.comboBox_Experiment.currentIndex()]
         self.sorted_containers = self.current_experiment.get_containers_to_classify()
+        self.classification_mode = self.comboBox_ClassificationMode.currentText()
 
-        #TODO Sort Containers
-        self.update_widget()
+        if self.classification_mode == "Sequential":
+            self.update_widget()
+            self.progressBar.show()
+            self.btn_Previous.show()
+            self.btn_Next.show()
+        else:
+            self.progressBar.hide()
+            self.btn_Previous.hide()
+            self.btn_Next.hide()
 
     def on_stop_classification(self):
         self.stackedWidget.setCurrentIndex(0)
@@ -200,18 +213,20 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def update_widget(self):
         if self.current_experiment is None:
             return
-        if self.mode == "categories":
+        if self.tab_sorting_mode == "categories":
             self.update_layout_categories()
-        elif self.mode == "class-obj":
+        elif self.tab_sorting_mode == "class-obj":
             self.update_layout_class_obj()
 
     def update_layout_class_obj(self):
+        print("Hello")
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
             if len(self.sorted_containers) > self.current_idx:
-                self.current_container = self.sorted_containers[self.current_idx]
-                self.main_window.project.set_selected(None, selected=[self.current_container])
-                self.lbl_CurrentContainer.setText(self.current_container.get_name())
+                if self.classification_mode == "Sequential":
+                    self.current_container = self.sorted_containers[self.current_idx]
+                    self.main_window.project.set_selected(self, selected=[self.current_container])
+                self.lbl_CurrentContainer.setText(self.current_container.__class__.__name__ +" "+ self.current_container.get_name())
                 self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
             else:
                 self.current_container = None
@@ -220,7 +235,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
             # Check if we need to rebuild the layout or if the checkboxes stay the same,
             # if so apply the classification of the current container
-            if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())):
+            if set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())]):
+                print("No Rebuild")
                 for checkbox in self.all_checkboxes.values():
                     checkbox.stateChanged.disconnect()
                     checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
@@ -284,24 +300,28 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     else:
                         checkbox.setChecked(k in self.current_query_keywords)
                         checkbox.stateChanged.connect(partial(self.on_query_changed, checkbox))
-                    group.add_checkbox(checkbox)
+                    group.items.append(checkbox)
                     self.all_checkboxes[k.unique_id] = checkbox
+
+                for g in self.checkbox_groups:
+                    g.finalize()
             except Exception as e:
                 print(e)
-
         for g in self.tabs:
             for t in g:
                 t.widget().layout().addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))
 
-        self.frame_container(self.current_container)
+        if self.classification_mode == "Sequential":
+            self.frame_container(self.current_container)
 
     def update_layout_categories(self):
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
             if len(self.sorted_containers) > self.current_idx:
-                self.current_container = self.sorted_containers[self.current_idx]
-                self.main_window.project.set_selected(None, selected=[self.current_container])
-                self.lbl_CurrentContainer.setText(self.current_container.get_name())
+                if self.classification_mode == "Sequential":
+                    self.current_container = self.sorted_containers[self.current_idx]
+                    self.main_window.project.set_selected(None, selected=[self.current_container])
+                self.lbl_CurrentContainer.setText(self.current_container.__class__.__name__ +" "+ self.current_container.get_name())
                 self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
             else:
                 self.current_container = None
@@ -333,7 +353,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             else:
                 keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
 
-            keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
+            keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.organization_group, x.word_obj.name))
             for k in keywords:
                 if k.voc_obj.category not in self.tab_categories:
                     tab = QScrollArea()
@@ -363,12 +383,15 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     checkbox.setChecked(k in self.current_query_keywords)
                     checkbox.stateChanged.connect(partial(self.on_query_changed, checkbox))
                 self.all_checkboxes[k.k.unique_id] = checkbox
-                group.add_checkbox(checkbox)
+                group.items.append(checkbox)
+            for g in self.checkbox_groups:
+                g.finalize()
 
         for t in self.tabs:
             t.widget().layout().addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))
 
-        self.frame_container(self.current_container)
+        if self.classification_mode == "Sequential":
+            self.frame_container(self.current_container)
 
     def on_query_changed(self, checkbox):
         if checkbox.isChecked():
@@ -410,6 +433,31 @@ class CheckBoxGroupWidget(QWidget):
 
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
         self.toggle_expand()
+
+    def finalize(self):
+        try:
+            # In Visualizer
+            self.items = sorted(self.items, key=lambda x: x.word.word.get_name())
+        except:
+            # In VIAN
+            self.items = sorted(self.items, key=lambda x: x.word.word_obj.name)
+
+        size = len(self.items)
+        n_rows = np.ceil(size / self.n_columns)
+
+        r = 0
+        c = 0
+        for w in self.items:
+            if c == 0:
+                self.vl_01.addWidget(w)
+            elif c == 1:
+                self.vl_02.addWidget(w)
+            else:
+                self.vl_03.addWidget(w)
+            r += 1
+            if r == n_rows:
+                r = 0
+                c += 1
 
     def add_checkbox(self, checkbox):
         self.items.append(checkbox)

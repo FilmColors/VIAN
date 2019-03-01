@@ -16,16 +16,16 @@ class IProjectChangeNotify():
         dummy = dummy
 
     def on_loaded(self, project):
-        print("IProjectChangeNotify: Not Implemented", self)
+        pass
 
     def on_changed(self, project, item):
-        print("IProjectChangeNotify: Not Implemented", self)
+        pass
 
     def get_project(self):
-        print("IProjectChangeNotify: Not Implemented", self)
+        return None
 
     def on_selected(self, sender, selected):
-        print("IProjectChangeNotify: Not Implemented by ",self)
+        pass
 
     def on_closed(self):
         pass

@@ -98,6 +98,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
     onAnnotationAdded = pyqtSignal(object)
     onSegmentAdded = pyqtSignal(object)
 
+    onSelectionChanged = pyqtSignal(object)
+
 
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
@@ -582,7 +584,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     # Getters for easier changes later in the project
-    def set_selected(self,sender, selected = []):
+    def set_selected(self,sender, selected = None):
+        if selected is None:
+            selected = []
+
         if not isinstance(selected, list):
             selected = [selected]
 
@@ -600,6 +605,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.current_annotation_layer = l
 
         self.dispatch_selected(sender)
+        self.onSelectionChanged.emit(self.selected)
 
     def get_selected(self, types = None):
         result = []

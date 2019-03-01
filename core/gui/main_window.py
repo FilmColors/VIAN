@@ -501,7 +501,7 @@ class MainWindow(QtWidgets.QMainWindow):
         loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
         self.update_recent_menu()
-        self.switch_perspective(Perspective.Segmentation.name)
+
 
         self.player_controls.setState(False)
 
@@ -514,6 +514,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.show()
+        self.switch_perspective(Perspective.Segmentation.name)
         loading_screen.hide()
         self.setWindowState(Qt.WindowMaximized)
 
@@ -1244,9 +1245,9 @@ class MainWindow(QtWidgets.QMainWindow):
         central = QWidget(self)
         central.setFixedWidth(0)
 
-        if self.is_darwin:
-            self.screenshot_toolbar.show()
-            self.annotation_toolbar.show()
+        # if self.is_darwin:
+        #     self.screenshot_toolbar.show()
+        #     self.annotation_toolbar.show()
 
         if perspective == Perspective.VideoPlayer.name:
             self.current_perspective = Perspective.VideoPlayer
@@ -1263,17 +1264,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget.show()
             self.colorimetry_live.show()
             self.script_editor.show()
+            self.vocabulary_matrix.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.script_editor)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
-            self.screenshot_toolbar.show()
-            self.screenshots_manager_dock.raise_()
+            # self.screenshot_toolbar.show()
+            # self.screenshots_manager_dock.raise_()
             self.elan_status.stage_selector.set_stage(0, False)
 
         elif perspective == Perspective.Annotation.name:
@@ -1414,6 +1418,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_toolbar.hide()
         if self.screenshot_toolbar.isVisible():
             self.screenshot_toolbar.hide()
+        if self.corpus_client_toolbar.isVisible():
+            self.corpus_client_toolbar.hide()
 
         # self.create_widget_video_player()
         self.query_widget.hide()
@@ -2113,7 +2119,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.elan_status.set_selection(selected)
         for o in self.i_project_notify_reciever:
+                ttime = time.time()
                 o.on_selected(sender, selected)
+                print(sender, o.__class__.__name__, time.time() - ttime)
 
     def dispatch_on_timestep_update(self, time):
         if self.project is None:

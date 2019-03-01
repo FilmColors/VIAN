@@ -259,6 +259,7 @@ class VocabularyWord(IProjectContainer, IHasName):
         self.parent = parent
         self.children = []
         self.connected_items = []
+        self.organization_group = 0
 
     # # OBSOLETE
     # def add_connected_item(self, item):
