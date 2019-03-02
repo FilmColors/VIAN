@@ -1455,6 +1455,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
         self.annotation_options.hide()
+        self.corpus_visualizer_dock.hide()
+        self.corpus_visualizer_result_dock.hide()
 
         if self.facial_identification_dock is not None:
             self.facial_identification_dock.hide()
