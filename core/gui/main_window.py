@@ -498,6 +498,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_worker.signals.onColormetryUpdate.connect(self.colorimetry_live.update_timestep)
         self.player_dock_widget.onSpacialFrequencyChanged.connect(self.frame_update_worker.toggle_spacial_frequency)
 
+        self.vian_event_handler.onException.connect(self.script_editor.print_exception)
         loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
                                    QColor(200,200,200,100))
         self.update_recent_menu()

@@ -5,7 +5,7 @@ import re
 import importlib.util
 import traceback
 
-from PyQt5.QtCore import QRegExp, pyqtSignal, Qt
+from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter
 from functools import partial
@@ -133,6 +133,11 @@ class PythonScriptEditor(QDockWidget):
 
         else:
             print("No Module loaded")
+
+    @pyqtSlot(str)
+    def print_exception(self, e):
+        self.output.setPlainText(e)
+        self.raise_()
 
 
 class PythonHighlighter (QSyntaxHighlighter):
