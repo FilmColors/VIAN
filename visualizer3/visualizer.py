@@ -150,6 +150,8 @@ class VIANVisualizer2(QMainWindow):
     def load_corpus(self):
         path = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
         path = QFileDialog.getOpenFileName(filter="*.db")[0]
+        if not os.path.isfile(path):
+            return
         root = os.path.split(path)[0]
         hdf5_path = path.replace("database.db", "analyses.hdf5")
         sql_path = "sqlite:///" + path
