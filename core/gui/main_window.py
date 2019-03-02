@@ -201,6 +201,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.script_editor = PythonScriptEditor(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.script_editor)
 
+        self.corpus_visualizer = VIANVisualizer2(self)
+        self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
+
+        self.corpus_visualizer_dock = EDockWidget(self, False)
+        self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
+        self.corpus_visualizer_result_dock = EDockWidget(self, False)
+        self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
+
 
         self.progress_popup = None
         self.quick_annotation_dock = None
@@ -1406,6 +1414,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.raise_()
             self.elan_status.stage_selector.set_stage(5, False)
 
+        elif perspective == Perspective.CorpusVisualizer.name:
+            self.current_perspective = Perspective.CorpusVisualizer
+            self.hide_all_widgets()
+            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
+
         self.setCentralWidget(central)
 
         self.centralWidget().show()
@@ -1632,11 +1646,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player.on_loaded(self.project)
 
     def on_start_visualizer(self):
-        try:
-            visualizer = VIANVisualizer2(self)
-            visualizer.show()
-        except Exception as e:
-            print(e)
+        self.switch_perspective(Perspective.CorpusVisualizer.name)
+        # try:
+        #     visualizer = VIANVisualizer2(self)
+        #     visualizer.show()
+        #     self.open_dialogs.append(visualizer)
+        # except Exception as e:
+        #     print(e)
 
     def on_start_visualizer_legacy(self):
         try:

@@ -6,7 +6,11 @@ import numpy as np
 from PyQt5.QtCore import *
 
 from core.corpus.sqlalchemy_entities import *
+from core.corpus.client.hdf5_database import HDF5ManagerDatabase
 from visualizer3.vis_entities import VisScreenshot
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 
 class QueryType(Enum):
@@ -25,6 +29,16 @@ class QueryWorkerSignals(QObject):
 CORPUS_PATH = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
 # CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
 
+class VIANCorpus(QObject):
+    def __init__(self, path):
+        super(VIANCorpus, self).__init__()
+        self.sql_path = "sqlite:///" + path
+        self.hdf5_path = path.replace(".db", ".hdf5").replace("database", "analyses")
+        self.hdf5_manager = HDF5ManagerDatabase(self.hdf5_path)
+        self.engine = create_engine(self.sql_path, echo=False, connect_args={"check_same_thread":False})
+        Base.metadata.create_all(self.engine)
+        self.Session = sessionmaker(bind=self.engine)
+        self.db = self.Session()
 
 class QueryWorker(QObject):
     def __init__(self, path, user = None):

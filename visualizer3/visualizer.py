@@ -43,6 +43,7 @@ class VIANVisualizer2(QMainWindow):
 
     def __init__(self, parent = None):
         super(VIANVisualizer2, self).__init__(parent)
+        self.main_window = parent
         self.query_widget = KeywordWidget(self, self)
         self.setCentralWidget(QWidget(self))
         self.setWindowTitle("VIAN Visualizer")
@@ -358,6 +359,8 @@ class VIANVisualizer2(QMainWindow):
             self.sub_corpora[c.name] = c
         self.query_widget.filmography_widget.apply_autofill(autofill)
 
+    def get_widgets(self):
+        return self, self.result_wnd
 
 class CorpusWidget(QDockWidget):
     def __init__(self, visualizer):

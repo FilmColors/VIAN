@@ -439,12 +439,15 @@ class CheckBoxGroupWidget(QWidget):
         self.toggle_expand()
 
     def finalize(self):
+        is_visualizer = False
         try:
-            # In Visualizer
-            self.items = sorted(self.items, key=lambda x: x.word.word.get_name())
-        except:
             # In VIAN
             self.items = sorted(self.items, key=lambda x: (x.word.word_obj.organization_group, x.word.word_obj.name))
+
+        except:
+            # In Visualizer
+            self.items = sorted(self.items, key=lambda x: x.word.word.name)
+            is_visualizer = True
 
         size = len(self.items)
         n_rows = np.ceil(size / self.n_columns)
@@ -456,21 +459,22 @@ class CheckBoxGroupWidget(QWidget):
         for w in self.items:
             # if a new organization group we insert an empty label
             items_last_group += 1
-            if last_org_group != w.word.word_obj.organization_group:
-                if items_last_group > 1:
-                    last_org_group = w.word.word_obj.organization_group
-                    lbl = QLabel("")
-                    print("added lblb", last_org_group)
-                    if c == 0:
-                        self.vl_01.addWidget(lbl)
-                    elif c == 1:
-                        self.vl_02.addWidget(lbl)
-                    else:
-                        self.vl_03.addWidget(lbl)
-                    r += 1
-                    if r == n_rows:
-                        r = 0
-                        c += 1
+            if not is_visualizer:
+                if last_org_group != w.word.word_obj.organization_group:
+                    if items_last_group > 1:
+                        last_org_group = w.word.word_obj.organization_group
+                        lbl = QLabel("")
+                        print("added lblb", last_org_group)
+                        if c == 0:
+                            self.vl_01.addWidget(lbl)
+                        elif c == 1:
+                            self.vl_02.addWidget(lbl)
+                        else:
+                            self.vl_03.addWidget(lbl)
+                        r += 1
+                        if r == n_rows:
+                            r = 0
+                            c += 1
                 items_last_group = 0
 
             if c == 0:
