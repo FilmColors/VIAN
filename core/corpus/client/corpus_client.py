@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePo
 from core.data.settings import UserSettings, Contributor
 from core.container.project import VIANProject
 from core.container.analysis import SemanticSegmentationAnalysisContainer
-from core.analysis.semantic_segmentation import SemanticSegmentationAnalysis
+from core.analysis.analysis_import import SemanticSegmentationAnalysis
 
 
 import os
