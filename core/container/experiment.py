@@ -121,7 +121,10 @@ class Vocabulary(IProjectContainer, IHasName):
                 name = w.name,
                 unique_id = w.unique_id,
                 parent = w.parent.unique_id,
-                children = [a.unique_id for a in w.children]
+                children = [a.unique_id for a in w.children],
+                organization_group = w.organization_group,
+                complexity_lvl = w.complexity_lvl,
+                complexity_group = w.complexity_group
             )
             words_data.append(data)
 
@@ -144,10 +147,26 @@ class Vocabulary(IProjectContainer, IHasName):
             parent = self.project.get_by_id(w['parent'])
             # If this is a root node in the Vocabulary
             if isinstance(parent, Vocabulary):
-                self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
+                word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
+
+                # Fields introduced in 0.8.0
+                try:
+                    word.complexity_lvl = int(w['complexity_lvl'])
+                    word.organization_group = int(w['organization_group'])
+                    word.complexity_group = w['complexity_group']
+                except Exception as e:
+                    continue
 
             else:
-                self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
+                # Fields introduced in 0.8.0
+                try:
+                    word = self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
+                    word.complexity_lvl = int(w['complexity_lvl'])
+                    word.organization_group = int(w['organization_group'])
+                    word.complexity_group = w['complexity_group']
+                except:
+                    continue
+            print(word.__dict__)
 
         return self
 
@@ -260,6 +279,8 @@ class VocabularyWord(IProjectContainer, IHasName):
         self.children = []
         self.connected_items = []
         self.organization_group = 0
+        self.complexity_lvl = 0
+        self.complexity_group = ""
 
     # # OBSOLETE
     # def add_connected_item(self, item):

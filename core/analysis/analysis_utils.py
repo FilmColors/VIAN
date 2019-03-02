@@ -7,6 +7,7 @@ PROJECT_LOCK = Lock()
 
 def progress_dummy(args, **kwargs):
     pass
+
 def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IProjectContainer], parameters: Dict,
                  class_objs: List[ClassificationObject]):
     fps = project.movie_descriptor.fps
@@ -19,7 +20,7 @@ def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IPro
                 res.append(analysis.process(arg, progress_dummy))
         else:
             res = analysis.process(args, progress_dummy)
-        print(res)
+
         if isinstance(res, list):
             for r in res:
                 with PROJECT_LOCK:

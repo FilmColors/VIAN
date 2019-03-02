@@ -38,6 +38,8 @@ class ColorHistogramAnalysis(IAnalysisJob):
                     semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
                     if len(semseg) > 0:
                         semseg = semseg[0]
+                    else:
+                        semseg = None
 
             args.append([ms_to_frames(tgt.get_start(), fps),
                          ms_to_frames(tgt.get_end(), fps),

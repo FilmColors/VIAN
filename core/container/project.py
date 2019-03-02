@@ -1029,6 +1029,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
+
         for l in template['layers']:
             new = AnnotationLayer(l[0])
             new.unique_id = l[1]

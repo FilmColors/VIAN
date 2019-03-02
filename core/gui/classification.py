@@ -5,7 +5,7 @@ import time
 import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout, QLabel
 
 from core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
 from core.data.interfaces import IProjectChangeNotify
@@ -133,10 +133,14 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.update_widget()
 
     def on_selected(self, sender, selected):
+
         if self.behaviour == "classification":
             if sender is self:
                 return
-            if len(selected) > 0 and self.current_container is not selected[0]:
+            if len(selected) > 0 \
+                    and selected[0].get_type() in [SEGMENT, SCREENSHOT, ANNOTATION] \
+                    and self.current_container is not selected[0]:
+
                 self.current_container = selected[0]
                 self.update_widget()
             else:
@@ -440,14 +444,35 @@ class CheckBoxGroupWidget(QWidget):
             self.items = sorted(self.items, key=lambda x: x.word.word.get_name())
         except:
             # In VIAN
-            self.items = sorted(self.items, key=lambda x: x.word.word_obj.name)
+            self.items = sorted(self.items, key=lambda x: (x.word.word_obj.organization_group, x.word.word_obj.name))
 
         size = len(self.items)
         n_rows = np.ceil(size / self.n_columns)
 
         r = 0
         c = 0
+        items_last_group = 0
+        last_org_group = 0
         for w in self.items:
+            # if a new organization group we insert an empty label
+            items_last_group += 1
+            if last_org_group != w.word.word_obj.organization_group:
+                if items_last_group > 1:
+                    last_org_group = w.word.word_obj.organization_group
+                    lbl = QLabel("")
+                    print("added lblb", last_org_group)
+                    if c == 0:
+                        self.vl_01.addWidget(lbl)
+                    elif c == 1:
+                        self.vl_02.addWidget(lbl)
+                    else:
+                        self.vl_03.addWidget(lbl)
+                    r += 1
+                    if r == n_rows:
+                        r = 0
+                        c += 1
+                items_last_group = 0
+
             if c == 0:
                 self.vl_01.addWidget(w)
             elif c == 1:
@@ -461,30 +486,7 @@ class CheckBoxGroupWidget(QWidget):
 
     def add_checkbox(self, checkbox):
         self.items.append(checkbox)
-
-        try:
-            # In Visualizer
-            self.items = sorted(self.items, key=lambda x: x.word.word.get_name())
-        except:
-            # In VIAN
-            self.items = sorted(self.items, key = lambda x: x.word.word_obj.name)
-
-        size = len(self.items)
-        n_rows = np.ceil(size/self.n_columns)
-
-        r = 0
-        c = 0
-        for w in self.items:
-            if c == 0:
-                self.vl_01.addWidget(w)
-            elif c == 1:
-                self.vl_02.addWidget(w)
-            else:
-                self.vl_03.addWidget(w)
-            r += 1
-            if r == n_rows:
-                r = 0
-                c += 1
+        self.finalize()
 
     def toggle_expand(self):
         if self.expanded:
