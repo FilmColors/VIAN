@@ -176,7 +176,6 @@ class ExportImageDialog(EDialogWidget):
         self.preview = ExportPreviewWidget(self, self.visualization)
         self.widget_Preview.setLayout(QVBoxLayout(self))
         self.widget_Preview.layout().addWidget(self.preview)
-
         self.spinBox_BG_R.valueChanged.connect(self.on_update)
         self.spinBox_BG_G.valueChanged.connect(self.on_update)
         self.spinBox_BG_B.valueChanged.connect(self.on_update)
@@ -187,21 +186,55 @@ class ExportImageDialog(EDialogWidget):
         self.spinBox_GridA.valueChanged.connect(self.on_update)
         self.spinBox_Width.valueChanged.connect(self.on_update)
         self.spinBox_Height.valueChanged.connect(self.on_update)
+        self.spinBoxFontSize.valueChanged.connect(self.on_update)
+        self.spinBoxFontSize.setValue(self.visualization.font_size)
+        self.comboBoxPreset.currentTextChanged.connect(self.on_preset)
 
         self.btn_Export.clicked.connect(self.on_export)
         self.btn_Cancel.clicked.connect(self.close)
         self.btn_ResetRegion.clicked.connect(self.preview.reset_region)
         self.on_update()
 
+    def on_preset(self):
+        if self.comboBoxPreset.currentText() == "White Background":
+            self.spinBox_BG_R.setValue(255)
+            self.spinBox_BG_G.setValue(255)
+            self.spinBox_BG_B.setValue(255)
+            self.spinBox_BG_A.setValue(255)
+            self.spinBox_GridR.setValue(0)
+            self.spinBox_GridG.setValue(0)
+            self.spinBox_GridB.setValue(0)
+            self.spinBox_GridA.setValue(255)
+        elif self.comboBoxPreset.currentText() == "Dark Background":
+            self.spinBox_BG_R.setValue(27)
+            self.spinBox_BG_G.setValue(27)
+            self.spinBox_BG_B.setValue(27)
+            self.spinBox_BG_A.setValue(255)
+            self.spinBox_GridR.setValue(255)
+            self.spinBox_GridG.setValue(255)
+            self.spinBox_GridB.setValue(255)
+            self.spinBox_GridA.setValue(255)
+        else:
+            self.spinBox_BG_R.setValue(255)
+            self.spinBox_BG_G.setValue(255)
+            self.spinBox_BG_B.setValue(255)
+            self.spinBox_BG_A.setValue(255)
+            self.spinBox_GridR.setValue(0)
+            self.spinBox_GridG.setValue(0)
+            self.spinBox_GridB.setValue(0)
+            self.spinBox_GridA.setValue(0)
+
     def on_update(self):
         background = QColor(self.spinBox_BG_R.value(), self.spinBox_BG_G.value(), self.spinBox_BG_B.value(), self.spinBox_BG_A.value())
         grid = QColor(self.spinBox_GridR.value(), self.spinBox_GridG.value(), self.spinBox_GridB.value(), self.spinBox_GridA.value())
+        font_size = self.spinBoxFontSize.value()
 
         if not self.checkBox_Transparent.isChecked():
             background.setAlpha(255)
 
         size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value())
         self.visualization.grid_color = grid
+        self.visualization.font_size = font_size
         image = self.visualization.render_to_image(background, size)
         self.preview.set_image(image)
         return image

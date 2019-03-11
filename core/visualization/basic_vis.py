@@ -11,7 +11,8 @@ from core.gui.tools import ExportImageDialog
 
 class IVIANVisualization():
     def __init__(self):
-        self.grid_color = QColor(100,100,100,100)
+        self.grid_color = QColor(20,20,20,150)
+        self.font_size = 12
 
     def get_param_widget(self):
         return QWidget()

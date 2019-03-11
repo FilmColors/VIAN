@@ -443,9 +443,10 @@ class CheckBoxGroupWidget(QWidget):
         try:
             # In VIAN
             self.items = sorted(self.items, key=lambda x: (x.word.word_obj.organization_group, x.word.word_obj.name))
-
+            print("VIAN Sorting")
         except:
             # In Visualizer
+            print("Visualizer Sorting")
             self.items = sorted(self.items, key=lambda x: x.word.word.name)
             is_visualizer = True
 
@@ -459,12 +460,12 @@ class CheckBoxGroupWidget(QWidget):
         for w in self.items:
             # if a new organization group we insert an empty label
             items_last_group += 1
+
             if not is_visualizer:
                 if last_org_group != w.word.word_obj.organization_group:
                     if items_last_group > 1:
                         last_org_group = w.word.word_obj.organization_group
                         lbl = QLabel("")
-                        print("added lblb", last_org_group)
                         if c == 0:
                             self.vl_01.addWidget(lbl)
                         elif c == 1:
@@ -475,7 +476,7 @@ class CheckBoxGroupWidget(QWidget):
                         if r == n_rows:
                             r = 0
                             c += 1
-                items_last_group = 0
+                    items_last_group = 0
 
             if c == 0:
                 self.vl_01.addWidget(w)

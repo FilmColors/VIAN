@@ -9,7 +9,7 @@ import pickle
 import sys
 
 from core.analysis.colorimetry.hilbert import *
-from core.visualization.basic_vis import IVIANVisualization
+from core.visualization.basic_vis import IVIANVisualization, ExportImageDialog
 from core.data.computation import *
 from core.gui.ewidgetbase import EGraphicsView
 from core.visualization.dot_plot import DotPlot
@@ -561,6 +561,8 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
 
             layers_unique = np.unique(all_layers)
             height = t_height
+            if self.depth >= layers_unique.shape[0]:
+                return
             layers = [layers_unique[self.depth]]
 
             # qp.setRenderHint(QPainter.Antialiasing)
@@ -606,7 +608,7 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
     def __init__(self, parent):
         super(MultiPaletteLABWidget, self).__init__(parent)
         self.dot_plot = DotPlot(self)
-        self.dot_plot.dot_size = 5
+        self.dot_plot.dot_size = 10
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.dot_plot)
         self.palette_tree = None
@@ -618,13 +620,23 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         self.slider.valueChanged.connect(self.on_depth_changed)
         return self.slider
 
+    def render_to_image(self, background: QColor, size: QSize):
+        self.dot_plot.font_size = self.font_size
+        self.dot_plot.grid_color = self.grid_color
+        self.draw_palette()
+        return self.dot_plot.render_to_image(background, size)
+
     def on_depth_changed(self):
         if self.slider is not None:
             self.depth = self.slider.value()
         self.draw_palette()
 
     def set_palettes(self, palettes):
-        self.palette_tree = np.vstack(tuple(palettes.copy()))
+        try:
+            self.palette_tree = np.vstack(tuple(palettes.copy()))
+        except Exception as e:
+            print("Exception in set_palettes()", palettes)
+            return
         layers = self.palette_tree[:, 1]
         if self.slider is not None:
             self.slider.setRange(0, len(np.unique(layers)) - 1)

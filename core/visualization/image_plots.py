@@ -364,7 +364,6 @@ class ImagePlotCircular(ImagePlot):
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
         self.to_float = False
 
-
     def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None, z = 0, uid = None):
         try:
             if convert:
@@ -430,7 +429,7 @@ class ImagePlotCircular(ImagePlot):
             self.lbl_max = None
         self.grid = []
         pen = QPen()
-        pen.setWidth(10)
+        pen.setWidth(1 * self.magnification)
         pen.setColor(self.grid_color)
 
         font = QFont()
@@ -605,8 +604,8 @@ class ImagePlotPlane(ImagePlot):
         path.lineTo(110* m, 125* m)
         path.addText(105* m, 93* m, f, "+B")
         path.addText(105* m, 133* m, f, "-B")
-        path.addText(85* m, 112* m, f, "+A")
-        path.addText(127* m, 112* m, f, "-A")
+        path.addText(85* m, 112* m, f, "-A")
+        path.addText(127* m, 112* m, f, "+A")
 
         pitem = self.scene().addPath(path, p)
         self.compass = pitem
@@ -873,7 +872,7 @@ class ImagePlotTime(ImagePlot):
 
         self.values = []
         super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
-        self.font_size = 60
+        self.font_size = 100
         self.set_y_scale(y_scale)
         self.set_image_scale(image_scale)
 
@@ -938,6 +937,17 @@ class ImagePlotTime(ImagePlot):
             itm.setPos(np.nan_to_num(x * self.x_scale),
                        np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height())
                        )
+
+            update_grid = False
+            if x > self.x_max:
+                self.x_max = x
+                update_grid = True
+            if y > self.y_max:
+                self.y_max = y
+                update_grid = True
+            if update_grid:
+                self.update_grid()
+
             return True
         return False
 
@@ -950,17 +960,44 @@ class ImagePlotTime(ImagePlot):
         self.images = []
 
     def add_grid(self, set_scene_rect = True):
-        pass
-        # pen = QPen()
-        # pen.setWidth(10)
-        # pen.setColor(QColor(200, 200, 200, 150))
-        #
-        # font = QFont()
-        # font.setPointSize(self.font_size)
-        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_end, self.base_line * self.y_scale , pen))
-        # self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, 0, pen))
-        # if set_scene_rect:
-        #     self.setSceneRect(self.scene().itemsBoundingRect())
+        pen = QPen()
+        pen.setWidth(10)
+        pen.setColor(self.grid_color)
+
+        font = QFont()
+        font.setPointSize(self.font_size)
+        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, self.x_max * self.x_scale * 1.1, self.base_line * self.y_scale , pen))
+        self.lines.append(self.scene().addLine(0, self.base_line * self.y_scale, 0, np.nan_to_num((self.base_line * self.y_scale) - (self.y_max * self.y_scale) * 1.1), pen))
+
+        step = np.ceil(self.y_max / 10)
+        if step == 0:
+            return
+        n_steps = np.ceil(self.y_max / step) + 1
+
+        for i in range(int(n_steps)):
+            y = np.nan_to_num((self.base_line * self.y_scale) - ((i * step) * self.y_scale))
+            self.lines.append(self.scene().addLine(0, y, self.x_max * self.x_scale * 1.1, y, pen))
+            lbl = self.scene().addText(str(i * step), font)
+            lbl.setDefaultTextColor(self.grid_color)
+            lbl.setPos(-lbl.boundingRect().width(), y - (lbl.boundingRect().height() / 2))
+            self.lines.append(lbl)
+
+        font.setPointSize(self.font_size * 2)
+        text = self.scene().addText("Time", font)
+        text.setPos(self.x_max * self.x_scale / 2 - (text.boundingRect().width() / 2), self.base_line * self.y_scale + text.boundingRect().height())
+        text.setDefaultTextColor(self.grid_color)
+        self.lines.append(text)
+
+        text = self.scene().addText("Saturation", font)
+        text.setRotation(-90)
+        text.setPos(-(text.boundingRect().height() * 3), self.base_line * self.y_scale - (self.y_max * self.y_scale / 2) + text.boundingRect().width() / 2)
+        text.setDefaultTextColor(self.grid_color)
+        self.lines.append(text)
+
+        if set_scene_rect:
+            self.setSceneRect(self.scene().itemsBoundingRect())
+        for l in self.lines:
+            l.setZValue(-100)
 
     def update_grid(self):
         for l in self.lines:
@@ -970,7 +1007,6 @@ class ImagePlotTime(ImagePlot):
         # self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
         # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
         self.add_grid(False)
-
 
     def set_x_scale(self, value):
         self.x_scale = (value / 50) * 0.001
@@ -1045,8 +1081,8 @@ class ImagePlotTime(ImagePlot):
         slider_xscale.valueChanged.connect(x_scale_line.setValue)
         hl3.addWidget(x_scale_line)
 
-        slider_imagescale.setValue(200)
-        slider_xscale.setValue(600)
+        slider_imagescale.setValue(100)
+        slider_xscale.setValue(100)
         slider_yscale.setValue(600)
 
 
@@ -1063,6 +1099,7 @@ class ImagePlotYear(ImagePlotTime):
         self.x_scale = 0.1
         self.years = []
         self.year_grid = []
+        self.total_width = 1000
         super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale)
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None):
@@ -1117,11 +1154,36 @@ class ImagePlotYear(ImagePlotTime):
         self.update_grid()
 
     def update_grid(self):
+        self.add_grid()
+
+    def add_grid(self, set_scene_rect = True):
         for l in self.year_grid:
             self.scene().removeItem(l)
         self.year_grid = []
+        for l in self.lines:
+            self.scene().removeItem(l)
+        self.lines = []
+
         pen = QPen()
         pen.setColor(self.grid_color)
+
+        # Y - Axis
+        font = QFont()
+        font.setPointSize(self.font_size)
+        step = np.ceil(self.y_max / 10)
+        if step == 0:
+            return
+        n_steps = np.ceil(self.y_max / step) + 1
+
+        for i in range(int(n_steps)):
+            y = np.nan_to_num((self.base_line * self.y_scale) - ((i * step) * self.y_scale))
+            self.lines.append(self.scene().addLine(0, y, self.x_max * self.x_scale * 1.1, y, pen))
+            lbl = self.scene().addText(str(i * step), font)
+            lbl.setDefaultTextColor(self.grid_color)
+            lbl.setPos(-lbl.boundingRect().width(), y - (lbl.boundingRect().height() / 2))
+            self.lines.append(lbl)
+
+        # X - Axis
         for (value, name) in self.years:
             font = QFont()
             font.setPointSize(self.font_size)
@@ -1140,6 +1202,18 @@ class ImagePlotYear(ImagePlotTime):
             # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
             # self.add_grid(False)
 
+
+        font.setPointSize(self.font_size * 2)
+        text = self.scene().addText("Year", font)
+        text.setPos(self.x_max * self.x_scale / 2 - (text.boundingRect().width() / 2), self.base_line * self.y_scale + text.boundingRect().height())
+        text.setDefaultTextColor(self.grid_color)
+        self.lines.append(text)
+
+        text = self.scene().addText("Saturation", font)
+        text.setRotation(-90)
+        text.setPos(-(text.boundingRect().height() * 3), self.base_line * self.y_scale - (self.y_max * self.y_scale / 2) + text.boundingRect().width() / 2)
+        text.setDefaultTextColor(self.grid_color)
+        self.lines.append(text)
 
     def update_item(self, uid, values, pixmap=None):
         if uid in self.item_idx:

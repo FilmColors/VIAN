@@ -18,7 +18,11 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.setScene(QGraphicsScene(self))
         self.curr_scale = 1.0
         self.ctrl_is_pressed = False
-        self.magnification = 100
+        self.magnification = 1.0
+
+        self.grid_color = QColor(20,20,20,150)
+
+        self.pos_scale = 1.0
 
         self.curr_angle = 0
 
@@ -64,7 +68,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
                     self.scene().addLine(x, y0, x, y1, pen)
                     text = self.scene().addText(str(round(x, 0)), font)
                     text.setPos(x, 130)
-                    text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                    text.setDefaultTextColor(self.grid_color)
                     self.grid.append(text)
 
             for x in range(-128, 128, 1):
@@ -72,7 +76,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
                     self.scene().addLine(x0, x, x1, x, pen)
                     text = self.scene().addText(str(round(x, 0)), font)
                     text.setPos(x, 130)
-                    text.setDefaultTextColor(QColor(200, 200, 200, 200))
+                    text.setDefaultTextColor(self.grid_color)
                     self.grid.append(text)
 
             self.draw_compass()
@@ -80,10 +84,10 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         elif grid_type == "AB":
             pen = QPen()
             pen.setWidth(1)
-            pen.setColor(QColor(200, 200, 200, 50))
+            pen.setColor(self.grid_color)
 
             font = QFont()
-            font.setPointSize(self.font_size * self.magnification)
+            font.setPointSize(self.font_size * self.magnification * 2)
 
             for i in range(7):
                 self.circle0 = self.scene().addEllipse(QRectF(0,
@@ -100,7 +104,35 @@ class DotPlot(QGraphicsView, IVIANVisualization):
                 y = 128 * np.sin(i * (2 * np.pi / self.n_grid))
                 l = self.scene().addLine(0, 0, x, y, pen)
                 self.grid.append(l)
+            lbla = self.scene().addText("-B", font)
+            lbla.setDefaultTextColor(self.grid_color)
+            lbla.setPos(- lbla.boundingRect().width() / 2, 130 * self.magnification)
+            self.grid.append(lbla)
+
+            lblb = self.scene().addText("A", font)
+            lblb.setDefaultTextColor(self.grid_color)
+            lblb.setPos(130 * self.magnification, - lblb.boundingRect().height() / 2)
+            self.grid.append(lblb)
+
+            self.lbl_max = self.scene().addText(str(round(128 / self.pos_scale, 0)), font)
+            self.lbl_max.setDefaultTextColor(self.grid_color)
+            self.lbl_max.setPos(130 * self.magnification, + (self.lbl_max.boundingRect().height()))
+
+            lbla = self.scene().addText("B", font)
+            lbla.setDefaultTextColor(self.grid_color)
+            lbla.setPos(- lbla.boundingRect().width() / 2, -130 * self.magnification - lbla.boundingRect().height())
+            self.grid.append(lbla)
+
+            lblb = self.scene().addText("-A", font)
+            lblb.setDefaultTextColor(self.grid_color)
+            lblb.setPos(-130 * self.magnification - 2 * lbla.boundingRect().width(), - lblb.boundingRect().height() / 2)
+            self.grid.append(lblb)
+
             self.circle0.show()
+
+        for g in self.grid:
+            g.setZValue(-100)
+
         self.setSceneRect(self.scene().itemsBoundingRect())
 
     def add_point(self, x, y, z = 0, col = QColor(255,255,255,30), uid = None):
@@ -126,7 +158,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
     def draw_compass(self):
         p = QPen()
-        p.setColor(QColor(100,100,100,200))
+        p.setColor(self.grid_color)
         p.setWidth(0.1)
         f = QFont()
         f.setPointSize(5)

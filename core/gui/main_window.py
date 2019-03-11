@@ -1417,6 +1417,9 @@ class MainWindow(QtWidgets.QMainWindow):
         elif perspective == Perspective.CorpusVisualizer.name:
             self.current_perspective = Perspective.CorpusVisualizer
             self.hide_all_widgets()
+
+            self.corpus_visualizer_result_dock.show()
+            self.corpus_visualizer_dock.show()
             self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
 

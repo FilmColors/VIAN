@@ -16,19 +16,19 @@ def feature_changed(scr, plot):
         ty = data[7]
         x = data[1]
         y = data[2]
-        c = QColor(data[5], data[4], data[3], 200)
+        color = QColor(data[5], data[4], data[3], 200)
 
         if isinstance(plot, ImagePlotCircular):
             plot.update_item(scr.dbscreenshot.id, (-x, -y, l))
         elif isinstance(plot, ImagePlotPlane):
-            plot.update_item(scr.dbscreenshot.id, (-x, l, y))
+            plot.update_item(scr.dbscreenshot.id, (-x, l, -y))
         elif isinstance(plot, ImagePlotTime):
             plot.update_item(scr.dbscreenshot.id, (tx, ty))
         elif isinstance(plot, DotPlot):
             if plot.curr_grid == "AB":
-                plot.update_item(scr.dbscreenshot.id, x, -y, z=l, col=c)
+                plot.update_item(scr.dbscreenshot.id, x, -y, z=l, col=color)
             else:
-                plot.update_item(scr.dbscreenshot.id, -x, l, z=-y, col=c)
+                plot.update_item(scr.dbscreenshot.id, x, l, z=-y, col=color)
         elif isinstance(plot, ImagePlotYear):
             plot.update_item(scr.dbscreenshot.id, (scr.year_x, ty))
 

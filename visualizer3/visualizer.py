@@ -300,7 +300,7 @@ class VIANVisualizer2(QMainWindow):
                     scr.onImageChanged.connect(p_ab.add_image(-x, -y, img, True, mime_data=scr, z=l, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, p_ab))
                 if p_lc is not None:
-                    scr.onImageChanged.connect(p_lc.add_image(-x, l, img, False, mime_data=scr, z=y, uid=scr.dbscreenshot.id).setPixmap)
+                    scr.onImageChanged.connect(p_lc.add_image(x, l, img, False, mime_data=scr, z=-y, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, p_lc))
                 if p_dt is not None:
                     scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, uid=scr.dbscreenshot.id).setPixmap)
