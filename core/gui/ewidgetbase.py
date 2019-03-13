@@ -30,7 +30,7 @@ def line_separator(Orientation):
 
 
 class ExpandableWidget(QWidget):
-    def __init__(self, parent, expand_title = "Expand", inner = None):
+    def __init__(self, parent, expand_title = "Expand", inner = None, expanded = False):
         super(ExpandableWidget, self).__init__(parent)
         self.setLayout(QVBoxLayout())
         self.btn_expand = QPushButton(expand_title, self)
@@ -42,6 +42,8 @@ class ExpandableWidget(QWidget):
         else:
             self.inner = None
         self.btn_expand.clicked.connect(self.toggle_expanded)
+        if expanded:
+            self.toggle_expanded()
 
 
     def set_inner(self, inner):

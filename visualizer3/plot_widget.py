@@ -51,19 +51,18 @@ class PlotWidget(QDockWidget):
         self.show()
 
 
-class ClassificationObjectSelector(QDockWidget):
+class ClassificationObjectSelector(QWidget):
     onClassificationObjectChanged = pyqtSignal(str)
 
     def __init__(self, parent, clobjs = None):
         super(ClassificationObjectSelector, self).__init__(parent)
         self.list = QListWidget()
-        self.setWidget(self.list)
+        self.setLayout(QHBoxLayout())
+        self.layout().addWidget(self.list)
         self.cl_objs = dict()
-        self.setMaximumWidth(200)
         if clobjs is not None:
             self.set_classification_objects(clobjs)
         self.list.currentItemChanged.connect(self.on_clobject_changed)
-
 
     def set_classification_objects(self, objects):
         self.list.clear()
@@ -84,7 +83,7 @@ class PlotResultsWidget(QMainWindow):
         self.tab = QTabWidget(self)
         self.setCentralWidget(self.tab)
 
-    def add_plots(self, p:List[PlotWidget], classification_objects, scrs):
+    def add_plots(self, p:List[PlotWidget], classification_objects, scrs, summary_dict):
         t = PlotResultsGroupWidget(self, classification_objects)
         self.result_counter += 1
 
@@ -95,7 +94,9 @@ class PlotResultsWidget(QMainWindow):
         # t.setWindowTitle("Results_" + str(self.result_counter).zfill(2))
         # self.addDockWidget(Qt.RightDockWidgetArea, t, Qt.Vertical)
         self.tab.addTab(t, "Results_" + str(self.result_counter).zfill(2))
+
         self.group_widgets.append(t)
+        t.set_summary(summary_dict)
         t.show()
 
 
@@ -113,8 +114,13 @@ class PlotResultsGroupWidget(QDockWidget):
         self.last_low_plot = None
         self.setWidget(self.central)
         self.central.setCentralWidget(t)
-        self.central.addDockWidget(Qt.TopDockWidgetArea, self.classification_object_selector)
         self.scrs = dict()
+        self.summary = QuerySummary(self, self.classification_object_selector)
+        self.central.addDockWidget(Qt.TopDockWidgetArea, self.summary)
+
+
+    def set_summary(self, summary_dict):
+        self.summary.set_summary(summary_dict)
 
     def add_plot(self, p: PlotWidget):
         alignment = Qt.Horizontal
@@ -155,4 +161,46 @@ class PlotResultsGroupWidget(QDockWidget):
                     return
 
                 self.plots["Palette-Dot"].plot.set_palettes(palettes)
+
+import json
+class QuerySummary(QDockWidget):
+    def __init__(self, parent, clobj_widget):
+        super(QuerySummary, self).__init__(parent)
+        self.clobj_widget = clobj_widget
+        self.scroll = QScrollArea(self)
+        self.scroll.setWidgetResizable(True)
+        self.setWidget(self.scroll)
+        self.inner = QWidget(self.scroll)
+        self.scroll.setWidget(self.inner)
+        self.inner.setLayout(QVBoxLayout())
+        self.inner.layout().addWidget(QLineEdit("Result_01"))
+        self.text_field_desc = QTextEdit(self)
+        self.text_field_raw = QTextEdit(self)
+        self.text_field_desc.setReadOnly(True)
+        self.text_field_raw.setReadOnly(True)
+
+        self.inner.layout().addWidget(self.text_field_desc)
+
+        self.inner.layout().addWidget(ExpandableWidget(self, "Classification Objects", self.clobj_widget, True))
+        self.inner.layout().addWidget(ExpandableWidget(self, "Raw", self.text_field_raw, True))
+
+        self.inner.layout().addItem(QSpacerItem(0,0, QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+
+    def set_summary(self, summary):
+        description = "Include Keywords:\n"
+        for s in summary['include_kwds_str']:
+            description += "\t" + s + "\n"
+
+        description += "\nExclude Keywords:\n"
+        for s in summary['exclude_kwds_str']:
+            description += "\t" + s + "\n"
+
+        description += "\nFilmography:\n"
+        for key, attr in summary['filmography'].items():
+            if attr is not None:
+                description += "\t" + key + "\t" + str(attr) + "\n"
+
+        self.text_field_desc.setText(description)
+        self.text_field_raw.setText(json.dumps(summary))
 

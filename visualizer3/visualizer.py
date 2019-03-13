@@ -210,7 +210,8 @@ class VIANVisualizer2(QMainWindow):
             curr = self.sub_corpora[self.cb_corpus.currentText()]
             self.onCorpusChanged.emit(curr)
 
-    def on_segment_query_result(self, segments:List[DBSegment], screenshots:List[DBScreenshot]):
+    @pyqtSlot(object, object, object)
+    def on_segment_query_result(self, segments:List[DBSegment], screenshots:List[DBScreenshot], summary_dict):
         self.btn_query.setEnabled(True)
         self.segm_scrs = dict()
         self.segments = dict()
@@ -345,7 +346,7 @@ class VIANVisualizer2(QMainWindow):
         if p_palette_dot is not None:
             plots.append(PlotWidget(self.result_wnd, p_palette_dot, "Palette-Dot"))
 
-        self.result_wnd.add_plots(plots, self.classification_objects, screenshots)
+        self.result_wnd.add_plots(plots, self.classification_objects, screenshots, summary_dict)
         self.result_wnd.show()
 
         labels = []
@@ -479,7 +480,6 @@ class KeywordWidget(QWidget):
         self.layout().addWidget(self.stack_widget)
         self.filmography_widget = None
         self.add_filmography_widget()
-
 
     def add_filmography_widget(self):
         stack = FilmographyWidget(self)
@@ -656,6 +656,5 @@ class FilmographyWidget(QWidget):
             query.genre = [self.genre_map[self.comboBox_Genre.currentText()]]
 
         return query
-
 
 

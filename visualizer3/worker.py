@@ -22,7 +22,7 @@ class QueryType(Enum):
 
 
 class QueryWorkerSignals(QObject):
-    onSegmentQueryResult = pyqtSignal(object, object)
+    onSegmentQueryResult = pyqtSignal(object, object, object)
     onMovieQueryResult = pyqtSignal(object)
     onCorpusQueryResult = pyqtSignal(object, object, object, object, object)  # type: List[DBProjects], List[DBUniuqeKeywords], List[DBClassificationObject]
     onProgress = pyqtSignal(float)
@@ -109,6 +109,17 @@ class QueryWorker(QObject):
         # q = self.corpus.db.query(DBSegment).join(UKW_Segment_association_table).filter(UKW_Segment_association_table.columns.unique_keyword_id.in_(include_kwds)).all()
         # print(q)
         print("Query SQL")
+
+        summary_dict = dict(
+            include_kwds = include_kwds,
+            exclude_kwds = exclude_kwds,
+            subcorpora = subcorpora,
+            n = n,
+            filmography = filmography.__dict__,
+            include_kwds_str=[self.corpus.db.query(DBUniqueKeyword).filter(DBUniqueKeyword.id == idx).one_or_none().word.name for idx in include_kwds],
+            exclude_kwds_str = [self.corpus.db.query(DBUniqueKeyword).filter(DBUniqueKeyword.id == idx).one_or_none().word.name for idx in exclude_kwds]
+        )
+
         q = self.corpus.db.query(DBSubCorpus, DBProject, DBMovie, DBSegment, DBScreenshot, DBScreenshotAnalysis)
 
         if subcorpora is not None:
@@ -240,7 +251,7 @@ class QueryWorker(QObject):
                             scr.current_palette = scr.palettes[a.classification_obj_id]
                 self.signals.onProgress.emit(i / len(screenshots.values()))
         self.signals.onProgress.emit(1.0)
-        return self.signals.onSegmentQueryResult.emit(segments, screenshots)
+        return self.signals.onSegmentQueryResult.emit(segments, screenshots, summary_dict)
 
     @pyqtSlot(str, object)
     def on_query(self, query_type, filter_filmography, filter_keywords, filter_classification_objects, project_filters, segment_filters, shot_id):
