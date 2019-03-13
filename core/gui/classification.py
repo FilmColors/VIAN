@@ -443,10 +443,8 @@ class CheckBoxGroupWidget(QWidget):
         try:
             # In VIAN
             self.items = sorted(self.items, key=lambda x: (x.word.word_obj.organization_group, x.word.word_obj.name))
-            print("VIAN Sorting")
         except:
             # In Visualizer
-            print("Visualizer Sorting")
             self.items = sorted(self.items, key=lambda x: x.word.word.name)
             is_visualizer = True
 

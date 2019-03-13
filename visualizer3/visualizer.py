@@ -49,7 +49,8 @@ class VIANVisualizer2(QMainWindow):
         self.setWindowTitle("VIAN Visualizer")
         self.menu_file = self.menuBar().addMenu("File")
         self.a_open = self.menu_file.addAction("Open")
-        self.a_open.triggered.connect(self.load_corpus)
+        self.m_recent = self.menu_file.addMenu("Recent")
+        self.a_open.triggered.connect(partial(self.load_corpus, None))
         self.menu_windows = self.menuBar().addMenu("Windows")
         self.a_subcorpus_view = self.menu_windows.addAction("SubCorpus View")
         self.a_segment_view = self.menu_windows.addAction("Segment View")
@@ -145,19 +146,31 @@ class VIANVisualizer2(QMainWindow):
         # SegmentsData
         self.segments = dict()
         self.segm_scrs = dict()
+
+        self.update_recent()
         self.show()
 
-    def load_corpus(self):
-        path = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
-        path = QFileDialog.getOpenFileName(filter="*.db")[0]
+    def update_recent(self):
+        for t in self.m_recent.actions():
+            self.m_recent.removeAction(t)
+
+        for r in self.main_window.settings.recent_corpora:
+            name = os.path.split(r)[1]
+            a = self.m_recent.addAction(name)
+            a.triggered.connect(partial(self.load_corpus, r))
+
+    def load_corpus(self, path = None):
+        if path is None:
+            path = QFileDialog.getOpenFileName(filter="*.db")[0]
         if not os.path.isfile(path):
             return
         root = os.path.split(path)[0]
-        hdf5_path = path.replace("database.db", "analyses.hdf5")
-        sql_path = "sqlite:///" + path
         self.worker.load(path, root)
         self.screenshot_loader.db_root = root
         self.onCorpusQuery.emit()
+        self.main_window.settings.add_recent_corpus(path)
+        self.main_window.settings.store(self.main_window.dock_widgets)
+        self.update_recent()
 
     def on_query(self):
         progress = ProgressBar(self, self.worker.signals.onProgress)
@@ -361,8 +374,15 @@ class VIANVisualizer2(QMainWindow):
             self.sub_corpora[c.name] = c
         self.query_widget.filmography_widget.apply_autofill(autofill)
 
+        # Solves an Display Issue, that stacks overlap each other.
+        for s in range(self.query_widget.stack_widget.count()):
+            self.query_widget.stack_widget.setCurrentIndex(s)
+        self.query_widget.stack_widget.setCurrentIndex(0)
+
+
     def get_widgets(self):
         return self, self.result_wnd
+
 
 class CorpusWidget(QDockWidget):
     def __init__(self, visualizer):
@@ -444,9 +464,10 @@ class KeywordWidget(QWidget):
         self.visualizer = visualizer
         self.setLayout(QHBoxLayout(self))
         self.class_obj_list = ClassificationObjectList(self)
-        self.class_obj_list.setMaximumWidth(300)
+        self.class_obj_list.setMaximumWidth(200)
         self.class_obj_list.currentItemChanged.connect(self.on_classification_object_changed)
         self.stack_widget = QStackedWidget(self)
+        self.stack_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         # self.stack_widget.setStyleSheet("QWidget{background: rgb(30,30,30);}")
 
         self.stack_map = dict()
@@ -458,6 +479,7 @@ class KeywordWidget(QWidget):
         self.layout().addWidget(self.stack_widget)
         self.filmography_widget = None
         self.add_filmography_widget()
+
 
     def add_filmography_widget(self):
         stack = FilmographyWidget(self)
@@ -487,13 +509,14 @@ class KeywordWidget(QWidget):
 
     def add_unique_keyword(self, ukw: DBUniqueKeyword, cl_obj: DBClassificationObject, voc: DBVocabulary, voc_word: DBVocabularyWord):
         if cl_obj.name not in self.tabs_map:
-            stack = QTabWidget()
+            stack = QTabWidget(self.stack_widget)
             self.stack_map[cl_obj.name] = stack
             self.stack_widget.addWidget(stack)
             self.tabs_map[cl_obj.name] = dict()
             self.voc_map[cl_obj.name] = dict()
             cl_obj_item = self.class_obj_list.add_item(cl_obj)
             stack.show()
+
         else:
             stack = self.stack_map[cl_obj.name]
             cl_obj_item = self.class_obj_list.get_item(cl_obj)
@@ -519,7 +542,7 @@ class KeywordWidget(QWidget):
         else:
             group = self.voc_map[cl_obj.name][voc.vocabulary_category.name][voc.name]
 
-        checkbox = WordCheckBox(None, ukw)
+        checkbox = WordCheckBox(group, ukw)
         checkbox.setTristate(True)
         self.keyword_map[ukw.id] = checkbox
         self.keyword_cl_obj_map[ukw.id] = cl_obj_item

@@ -860,7 +860,7 @@ class ImagePlotTime(ImagePlot):
         self.y_scale = 2000 #50 default
         self.base_line = 1000
         self.x_max = 0
-        self.y_max = 0
+        self.y_max = 80
         self.lines = []
 
         self.pixel_size_x = 1500
@@ -1099,7 +1099,7 @@ class ImagePlotYear(ImagePlotTime):
         self.x_scale = 0.1
         self.years = []
         self.year_grid = []
-        self.total_width = 1000
+        self.total_width = 20000
         super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale)
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None):
@@ -1123,6 +1123,7 @@ class ImagePlotYear(ImagePlotTime):
 
         if self.x_max < x:
             self.x_max = x
+            self.x_scale = (self.total_width / np.clip(self.x_max, 1, None))
 
         if self.y_max < y:
             self.y_max = y
@@ -1144,6 +1145,7 @@ class ImagePlotYear(ImagePlotTime):
         return itm
 
     def set_x_scale(self, value):
+        return
         self.x_scale = (value / 50) * 0.1
         # self.x_scale = self.pixel_size_x / np.clip((len(self.images) * ((500 - value) / 100)), 0.00001, None)
         # self.x_scale = 0.01
@@ -1214,6 +1216,9 @@ class ImagePlotYear(ImagePlotTime):
         text.setPos(-(text.boundingRect().height() * 3), self.base_line * self.y_scale - (self.y_max * self.y_scale / 2) + text.boundingRect().width() / 2)
         text.setDefaultTextColor(self.grid_color)
         self.lines.append(text)
+
+
+
 
     def update_item(self, uid, values, pixmap=None):
         if uid in self.item_idx:

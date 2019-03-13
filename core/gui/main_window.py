@@ -554,12 +554,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
-        if self.project is not None:
-            print("Cleaning")
-            self.project.hdf5_manager.cleanup()
-            self.timeline.timeline.recreate_timeline()
-        # if self.project is not None:
-        #     self.corpus_client.on_commit_project(self.project)
+        print(self.settings.CONTRIBUTOR)
 
     def toggle_colormetry(self):
         if self.colormetry_running is False:

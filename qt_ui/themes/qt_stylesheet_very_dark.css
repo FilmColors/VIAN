@@ -504,6 +504,7 @@ QTabBar::tab:selected
     border-top-right-radius: 3px;
     margin-top: 2px;
     margin-bottom: 2px;
+    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:1 #212121, stop:0.4 #3f7eaf, stop:0.2 #3f7eaf, stop:0.1 #3f7eaf);
 }
 
 QTabBar::tab:!selected:hover

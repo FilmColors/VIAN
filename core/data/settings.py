@@ -103,6 +103,8 @@ class UserSettings():
         self.recent_files_name = []
         self.recent_files_path = []
 
+        self.recent_corpora = []
+
         self.USE_CORPUS = False
         self.USE_ELAN = False
 
@@ -212,6 +214,17 @@ class UserSettings():
         self.recent_files_name.pop(idx)
         self.recent_files_path.pop(idx)
 
+    def add_recent_corpus(self, r):
+        if not r in self.recent_corpora and os.path.isfile(r):
+            self.recent_corpora.append(r)
+
+
+    def get_last_corpus(self):
+        if len(self.recent_corpora) > 0:
+            return self.recent_corpora[len(self.recent_corpora) - 1]
+        else:
+            return None
+
     def store(self, dock_widgets):
         """
         Saves all current settings and the settings of the EDockWidgets
@@ -227,14 +240,22 @@ class UserSettings():
             )
             self.dock_widgets_data.append(data)
 
-        ddict = vars(self)
+        ddict = self.__dict__
+
         try:
             if self.CONTRIBUTOR is not None:
                 ddict['CONTRIBUTOR'] = self.CONTRIBUTOR.serialize()
             with open(self.store_path, 'w') as f:
                 json.dump(ddict, f)
         except Exception as e:
+            raise e
             print(e)
+
+        # Some weird python is going on here, after serialize(), the CONTRIBUTOR is set as a dict.
+        # for now we brute force our way through
+        # TODO
+        if isinstance(self.CONTRIBUTOR, dict):
+            self.CONTRIBUTOR = Contributor().deserialize(self.CONTRIBUTOR)
 
     def load(self):
         """
@@ -245,8 +266,9 @@ class UserSettings():
         try:
             with open(self.store_path ,"r") as f:
                 data = json.load(f)
-                for attr, value in data.items():
 
+                for attr, value in data.items():
+                    print(attr, value)
                     # Palettes and MAIN_FONT should not be taken into Account,
                     # CONTRIBUTOR needs special treatment
                     if not attr == "PALETTES" and not attr =="MAIN_FONT" and not attr == "CONTRIBUTOR":
