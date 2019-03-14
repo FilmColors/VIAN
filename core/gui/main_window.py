@@ -520,9 +520,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.undo_manager.clear()
         self.close_project()
 
-
-
         self.show()
+
         self.switch_perspective(Perspective.Segmentation.name)
         loading_screen.hide()
         self.setWindowState(Qt.WindowMaximized)

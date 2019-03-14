@@ -83,7 +83,6 @@ class ESimpleDockWidget(QDockWidget):
         self.setWindowTitle(name)
 
 
-
 class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
@@ -615,6 +614,31 @@ class VIANMovableGraphicsItem(QGraphicsPixmapItem):
             painter.drawRect(QRectF(0,0, self.sceneBoundingRect().width(), self.sceneBoundingRect().height()))
 
 
+class FileBrowseBar(QWidget):
+    def __init__(self, parent, mode = "file", default = "", filter = ""):
+        super(FileBrowseBar, self).__init__(parent)
+        self.mode = mode
+        self.filter = filter
+        self.setLayout(QHBoxLayout())
+        self.line_edit = QLineEdit(self)
+        self.line_edit.setText(default)
+        self.btn_browse = QPushButton("Browse", self)
+        self.layout().addWidget(self.line_edit)
+        self.layout().addWidget(self.btn_browse)
+        self.btn_browse.clicked.connect(self.on_browse)
+
+    def on_browse(self):
+        if self.mode == "file":
+            file = QFileDialog.getSaveFileName(filter=self.filter)[0]
+            if os.path.isfile(file):
+                self.line_edit.setText(file)
+        else:
+            ddir = QFileDialog.getExistingDirectory()
+            if os.path.isdir(ddir):
+                self.line_edit.setText(ddir)
+
+    def get_path(self):
+        return self.line_edit.text()
 #region POPUPS
 class CreateSegmentationPopup(QMainWindow):
     def __init__(self, parent, project, name = "New Segmentation", callback = None):

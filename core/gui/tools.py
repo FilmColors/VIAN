@@ -7,11 +7,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QPoint
 from core.data.computation import pixmap_to_numpy
-from core.gui.ewidgetbase import EDialogWidget, EGraphicsView
+from core.gui.ewidgetbase import EDialogWidget, EGraphicsView, FileBrowseBar
 import cv2
+
 
 class ColorPicker(QFrame):
     colorChanged = pyqtSignal(tuple)
+
     def __init__(self, parent):
         super(ColorPicker, self).__init__(parent)
         path = os.path.abspath("qt_ui/ColorPicker.ui")
@@ -168,6 +170,8 @@ class PopupLineEdit(QLineEdit):
 
 
 class ExportNamingConventionWidget(QWidget):
+    last_convention = []
+
     def __init__(self, parent, naming_fields):
         super(ExportNamingConventionWidget, self).__init__(parent)
         self.setLayout(QVBoxLayout(self))
@@ -179,18 +183,34 @@ class ExportNamingConventionWidget(QWidget):
         self.lower.addWidget(self.preview)
         self.boxes = []
         self.naming_fields = naming_fields
-        for k, v in naming_fields.items():
+        for i, (k, v) in enumerate(naming_fields.items()):
             cb = QComboBox(self)
             cb.addItem("None")
             cb.addItems(naming_fields.keys())
+            if len(self.last_convention) > 0:
+                try:
+                    cb.setCurrentText(self.last_convention[i])
+                except:
+                    continue
             self.boxes.append(cb)
             self.upper.addWidget(cb)
+
             cb.currentIndexChanged.connect(self.on_changed)
+
+        # This could fail because the fields are not guaranteed to be present. If so we just keep the default values
         try:
-            self.boxes[0].setCurrentText("keywords_include")
-            self.boxes[1].setCurrentText("keywords_exclude")
-            self.boxes[2].setCurrentText("year")
-            self.boxes[3].setCurrentText("k_images")
+            if  self.naming_fields['corpus_id'] != "":
+                self.boxes[0].setCurrentText("corpus_id")
+                self.boxes[1].setCurrentText("keywords_include")
+                self.boxes[2].setCurrentText("keywords_exclude")
+                self.boxes[3].setCurrentText("year")
+                self.boxes[4].setCurrentText("k_images")
+            else:
+                self.boxes[0].setCurrentText("None")
+                self.boxes[1].setCurrentText("keywords_include")
+                self.boxes[2].setCurrentText("keywords_exclude")
+                self.boxes[3].setCurrentText("year")
+                self.boxes[4].setCurrentText("k_images")
             self.on_changed()
         except:
             pass
@@ -202,25 +222,38 @@ class ExportNamingConventionWidget(QWidget):
 
     def get_naming(self):
         name = []
+        self.last_convention.clear()
+
         for cb in self.boxes:
             if cb.currentText() != "None":
                 v = self.naming_fields[cb.currentText()]
                 if v != "":
                     name.append(v)
+            self.last_convention.append(cb.currentText())
+        print(self.last_convention)
         name.append(self.naming_fields['plot_name'])
         return "_".join(name)
 
 
 class ExportImageDialog(EDialogWidget):
+    last_directories = []
+
     def __init__(self, main_window, visualization):
         super(ExportImageDialog, self).__init__(visualization, main_window)
         path = os.path.abspath("qt_ui/DialogExportImage.ui")
         uic.loadUi(path, self)
+        self.directory = ""
         self.visualization = visualization
         self.preview = ExportPreviewWidget(self, self.visualization)
-        self.widgetNamingConvention.setLayout(QHBoxLayout())
+        self.widgetNamingConvention.setLayout(QVBoxLayout())
         self.naming_widget = ExportNamingConventionWidget(self, visualization.naming_fields)
         self.widgetNamingConvention.layout().addWidget(self.naming_widget)
+        self.file_browser = FileBrowseBar(self, mode="dir")
+
+        if len(self.last_directories) > 0:
+            self.file_browser.line_edit.setText(self.last_directories[len(self.last_directories) - 1])
+
+        self.widgetNamingConvention.layout().addWidget(self.file_browser)
         self.widget_Preview.setLayout(QVBoxLayout(self))
         self.widget_Preview.layout().addWidget(self.preview)
         self.spinBox_BG_R.valueChanged.connect(self.on_update)
@@ -288,13 +321,18 @@ class ExportImageDialog(EDialogWidget):
 
     def on_export(self):
         img = self.on_update()
-        if self.main_window is not None:
-            file_name = QFileDialog.getSaveFileName(self,
-                                                    directory=self.main_window.project.export_dir,
-                                                    filter="*.png *.jpg")[0]
+        self.directory = self.file_browser.get_path()
+        if not os.path.isdir(self.directory):
+            if self.main_window is not None:
+                file_name = QFileDialog.getSaveFileName(self, self.naming_widget.get_naming() + ".png",
+                                                        directory=self.main_window.project.export_dir,
+                                                        filter="*.png *.jpg")[0]
+            else:
+                file_name = QFileDialog.getSaveFileName(self, self.naming_widget.get_naming() + ".png",
+                                                        filter="*.png *.jpg")[0]
         else:
-            file_name = QFileDialog.getSaveFileName(self,
-                                                    filter="*.png *.jpg")[0]
+            self.last_directories.append(self.directory)
+            file_name = os.path.join(self.directory, self.naming_widget.get_naming() + ".png")
 
         try:
             region = self.preview.region

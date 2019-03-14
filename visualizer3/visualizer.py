@@ -216,10 +216,22 @@ class VIANVisualizer2(QMainWindow):
         self.segm_scrs = dict()
         self.segments = dict()
 
+        if summary_dict['filmography']['corpus_id'] != 0:
+            corpus_id = "_".join([str(summary_dict['filmography']['corpus_id']),
+                                  str(summary_dict['filmography']['manifestation_id']).replace("None", "0"),
+                                  str(summary_dict['filmography']['copy_id']).replace("None", "0")])
+        else:
+            corpus_id = ""
+
+        if summary_dict['filmography']['year_start'] == 1800 and summary_dict['filmography']['year_end'] == 2100:
+            year = ""
+        else:
+            year = str(summary_dict['filmography']['year_start']) + "-" + str(summary_dict['filmography']['year_end'])
         naming_fields = dict(
+            corpus_id = corpus_id,
             keywords_include = "_".join(summary_dict['include_kwds_str'][:3]),
             keywords_exclude="_".join(summary_dict['exclude_kwds_str'][:3]),
-            year = str(summary_dict['filmography']['year_start']) + "_" + str(summary_dict['filmography']['year_end']),
+            year = year,
             k_images = "k" + str(summary_dict['n']),
         )
 
