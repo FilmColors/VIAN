@@ -173,7 +173,7 @@ class QueryWorker(QObject):
                 .join(DBMovie, DBProject.id == DBMovie.project_id)\
                 .join(DBSegment, DBProject.id == DBSegment.project_id)\
                 .join(DBScreenshot, DBSegment.id == DBScreenshot.segment_id)\
-                .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id)
+                .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id).options(joinedload(DBScreenshot.analyses))
 
         print("Query:")
         print(q)

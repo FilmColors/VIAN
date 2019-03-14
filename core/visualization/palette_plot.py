@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import pickle
 import sys
+import cv2
 
 from core.analysis.colorimetry.hilbert import *
 from core.visualization.basic_vis import IVIANVisualization, ExportImageDialog
@@ -615,7 +616,7 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         QWidget.__init__(self, parent)
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "palette_ab_plot"
-        self.dot_plot = DotPlot(self)
+        self.dot_plot = DotPlot(self, naming_fields=naming_fields)
         self.dot_plot.dot_size = 10
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.dot_plot)
@@ -682,20 +683,36 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         bins = self.palette_tree[indices[0]]
         bins_max = np.amax(bins[:, 5])
         drawn = []
-        for i in indices[0]:
-            b = self.palette_tree[i, 2]
-            g = self.palette_tree[i, 3]
-            r = self.palette_tree[i, 4]
-            lab = tpl_bgr_to_lab((b, g, r), as_float=True)
-            if tuple(lab) in drawn:
-                continue
-            else:
-                drawn.append(tuple(lab))
 
-            n_dots = np.clip(np.nan_to_num(self.palette_tree[i, 5] / bins_max * 20), 1, 20)
+        pal = self.palette_tree[indices]
+        labs = cv2.cvtColor(np.array([pal[:, 2:5] / 255.0, pal[:, 2:5] / 255.0], dtype=np.float32), cv2.COLOR_BGR2LAB)[0]
+        chroma = lab_to_lch(labs)
+        chroma = np.amax(chroma[:, 1])
+        chroma2 = (np.ceil(chroma / 20)) * 20
+
+        self.dot_plot.set_range_scale(int((128 / chroma2) * 100))
+
+        u, indices = np.unique(labs, axis=0, return_index=True)
+        print(indices)
+        labs = labs[indices]
+        pal = pal[indices]
+        print(labs.shape)
+        print(pal.shape)
+
+        # for i in indices[0]:
+        #     b = self.palette_tree[i, 2]
+        #     g = self.palette_tree[i, 3]
+        #     r = self.palette_tree[i, 4]
+        #     lab = tpl_bgr_to_lab((b, g, r), as_float=True)
+        #     if tuple(lab) in drawn:
+        #         continue
+        #     else:
+        #         drawn.append(tuple(lab))
+        for i in range(labs.shape[0]):
+            lab = labs[i]
+            rgb = pal[i, 2:5]
+            n_dots = np.clip(np.nan_to_num(pal[i, 5] / bins_max * 20), 1, 20)
             for q in range(int(n_dots)):
                 rx = np.random.normal(0, jitter)
                 ry = np.random.normal(0, jitter)
-                self.dot_plot.add_point(x=lab[1] + rx, y=-lab[2] + ry, z=lab[0], col=QColor(int(r), int(g), int(b)))
-
-
+                self.dot_plot.add_point(x=lab[1] + rx, y=-lab[2] + ry, z=lab[0], col=QColor(int(rgb[2]), int(rgb[1]), int(rgb[0])))

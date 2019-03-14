@@ -126,7 +126,6 @@ class PlotResultsGroupWidget(QDockWidget):
         self.central.addDockWidget(Qt.TopDockWidgetArea, self.summary)
         self.summary.onGroupNameChanged.connect(parent.on_group_name_changed)
 
-
     def set_summary(self, summary_dict):
         self.summary.set_summary(summary_dict)
 

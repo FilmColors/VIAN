@@ -22,7 +22,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.ctrl_is_pressed = False
         self.magnification = 1.0
 
-        self.grid_color = QColor(20,20,20,150)
+        self.grid_color = QColor(100,100,100, 150)
 
         self.pos_scale = 1.0
 
@@ -147,9 +147,9 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
         if self.curr_grid == "LA":
             yt = 128 - y
-            point = self.scene().addEllipse(x - hs, yt - hs, s, s, p, QBrush(col))
+            point = self.scene().addEllipse(x * self.pos_scale - hs, yt * self.pos_scale - hs, s, s, p, QBrush(col))
         else:
-            point = self.scene().addEllipse(x - hs, y - hs, s, s,p,QBrush(col))
+            point = self.scene().addEllipse(x* self.pos_scale - hs, y * self.pos_scale - hs, s, s,p,QBrush(col))
 
         point.setZValue(z)
         self.points.append(point)
