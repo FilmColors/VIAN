@@ -2,9 +2,11 @@ from PyQt5.QtCore import *
 from typing import List
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from core.corpus.sqlalchemy_entities import DBSegment
 from core.visualization.image_plots import *
 from core.visualization.dot_plot import DotPlot
-from core.gui.ewidgetbase import ExpandableWidget
+from core.gui.ewidgetbase import ExpandableWidget, EMultiGraphicsView
+from visualizer3.vis_entities import VisScreenshot
 
 def feature_changed(scr, plot):
     try:
@@ -83,9 +85,19 @@ class PlotResultsWidget(QMainWindow):
         self.tab = QTabWidget(self)
         self.setCentralWidget(self.tab)
 
-    def add_plots(self, p:List[PlotWidget], classification_objects, scrs, summary_dict):
-        name = "Results_" + str(self.result_counter).zfill(2)
-        t = PlotResultsGroupWidget(self, classification_objects, name)
+    def add_plots(self, p:List[PlotWidget], classification_objects, scrs, summary_dict, segments):
+        name = "_".join([str(summary_dict['filmography']['corpus_id']),
+               "_".join(summary_dict['include_kwds_str']),
+               "_".join(summary_dict['exclude_kwds_str']),
+               str(summary_dict['filmography']['year_start']),
+               str(summary_dict['filmography']['year_end']),
+               str(summary_dict['n'])])\
+            .replace("None", "")\
+            .replace("2100", "")\
+            .replace("1800", "")\
+            .replace("__", "_")
+
+        t = PlotResultsGroupWidget(self, classification_objects, name, scrs, segments)
         self.result_counter += 1
 
         t.scrs = scrs
@@ -107,8 +119,9 @@ class PlotResultsWidget(QMainWindow):
                 self.tab.setTabText(i, new)
                 break
 
+
 class PlotResultsGroupWidget(QDockWidget):
-    def __init__(self, parent, classification_objects, name):
+    def __init__(self, parent, classification_objects, name, screenshots, segments):
         super(PlotResultsGroupWidget, self).__init__(parent)
         self.plots = dict()
         self.classification_objects = classification_objects
@@ -122,7 +135,7 @@ class PlotResultsGroupWidget(QDockWidget):
         self.setWidget(self.central)
         self.central.setCentralWidget(t)
         self.scrs = dict()
-        self.summary = QuerySummary(self, self.classification_object_selector, name)
+        self.summary = QuerySummary(self, self.classification_object_selector, name, screenshots, segments)
         self.central.addDockWidget(Qt.TopDockWidgetArea, self.summary)
         self.summary.onGroupNameChanged.connect(parent.on_group_name_changed)
 
@@ -169,11 +182,12 @@ class PlotResultsGroupWidget(QDockWidget):
 
                 self.plots["Palette-Dot"].plot.set_palettes(palettes)
 
+
 import json
 class QuerySummary(QDockWidget):
     onGroupNameChanged = pyqtSignal(str, str)
 
-    def __init__(self, parent, clobj_widget, name):
+    def __init__(self, parent, clobj_widget, name, screenshots, segments):
         super(QuerySummary, self).__init__(parent)
         self.clobj_widget = clobj_widget
         self.scroll = QScrollArea(self)
@@ -191,10 +205,26 @@ class QuerySummary(QDockWidget):
         self.text_field_raw.setReadOnly(True)
         self.name_edit.editingFinished.connect(self.on_name_changed)
 
-        self.inner.layout().addWidget(self.text_field_desc)
+        self.screenshots = screenshots
+        self.segments = segments
+        self.segment_view = SegmentsList(self)
 
+        i = 0
+        curr_segment = None
+        screenshots = sorted(screenshots.values(), key=lambda x:x.dbscreenshot.segment.id)
+        vis_scrs = []
+        for s in screenshots: #type:DBSegment
+            if s.dbscreenshot.segment != curr_segment:
+                if len(vis_scrs) > 0:
+                    self.segment_view.add_segment(curr_segment, vis_scrs)
+                vis_scrs = []
+                curr_segment = s.dbscreenshot.segment
+            vis_scrs.append(s)
+
+        self.inner.layout().addWidget(self.text_field_desc)
         self.inner.layout().addWidget(ExpandableWidget(self, "Classification Objects", self.clobj_widget, True))
-        self.inner.layout().addWidget(ExpandableWidget(self, "Raw", self.text_field_raw, True))
+        self.inner.layout().addWidget(ExpandableWidget(self, "Raw Query", self.text_field_raw, False))
+        self.inner.layout().addWidget(ExpandableWidget(self, "Segments", self.segment_view, False))
 
         self.inner.layout().addItem(QSpacerItem(0,0, QSizePolicy.Fixed, QSizePolicy.Expanding))
 
@@ -220,5 +250,43 @@ class QuerySummary(QDockWidget):
     def on_name_changed(self):
         self.onGroupNameChanged.emit(self.old_name, self.name_edit.text())
         self.old_name = self.name_edit.text()
+
+
+class SegmentsList(QWidget):
+    def __init__(self, parent):
+        super(SegmentsList, self).__init__(parent)
+        self.setLayout(QVBoxLayout(self))
+        self.segment_items = dict()
+
+    def add_segment(self, segment, screenshots):
+        item = SegmentItem(self, segment, screenshots)
+        self.segment_items[segment.id] = item
+        self.layout().addWidget(item)
+
+
+class SegmentItem(QWidget):
+    def __init__(self, parent, segment:DBSegment, screenshots:List[VisScreenshot]):
+        super(SegmentItem, self).__init__(parent)
+        self.setLayout(QHBoxLayout(self))
+        self.left = QWidget(self)
+        self.left.setMaximumWidth(150)
+        self.left.setLayout(QVBoxLayout())
+        self.left.layout().addWidget(QLabel("Project ID: " + str(segment.project.corpus_id)))
+        self.left.layout().addWidget(QLabel("Segment ID: " + str(segment.movie_segm_id)))
+        lbl = QLabel("Annotation: " + str(segment.body))
+        lbl.setWordWrap(True)
+        self.left.layout().addWidget(lbl)
+        self.image_view = EMultiGraphicsView(self)
+        self.layout().addWidget(self.left)
+        self.layout().addWidget(self.image_view)
+        self.screenshots = screenshots
+        for scr in screenshots:
+            self.image_view.add_image(numpy_to_pixmap(scr.current_image), item_id=scr.dbscreenshot.id)
+            scr.onImageChanged.connect(self.on_image_changed)
+
+    @pyqtSlot(object)
+    def on_image_changed(self, pixmap):
+        self.image_view.replace_image(self.sender().dbscreenshot.id, pixmap)
+
 
 

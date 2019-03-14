@@ -29,6 +29,7 @@ class QueryWorkerSignals(QObject):
 CORPUS_PATH = "F:\\_corpus\\ERCFilmColors_V2\\database.db"
 # CORPUS_PATH = "C:\\Users\\Gaudenz Halter\\Documents\\VIAN\\corpora\\MyCorpusTesting\\MyCorpusTesting.vian_corpus"
 
+
 class VIANCorpus(QObject):
     def __init__(self, path):
         super(VIANCorpus, self).__init__()
@@ -39,6 +40,7 @@ class VIANCorpus(QObject):
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.db = self.Session()
+
 
 class QueryWorker(QObject):
     def __init__(self, path, user = None):
@@ -173,7 +175,8 @@ class QueryWorker(QObject):
                 .join(DBMovie, DBProject.id == DBMovie.project_id)\
                 .join(DBSegment, DBProject.id == DBSegment.project_id)\
                 .join(DBScreenshot, DBSegment.id == DBScreenshot.segment_id)\
-                .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id).options(joinedload(DBScreenshot.analyses))
+                .join(DBScreenshotAnalysis, DBScreenshot.id == DBScreenshotAnalysis.screenshot_id)\
+                .options(joinedload(DBScreenshot.analyses))
 
         print("Query:")
         print(q)

@@ -366,7 +366,7 @@ class VIANVisualizer2(QMainWindow):
         if p_palette_dot is not None:
             plots.append(PlotWidget(self.result_wnd, p_palette_dot, "Palette-Dot"))
 
-        self.result_wnd.add_plots(plots, self.classification_objects, screenshots, summary_dict)
+        self.result_wnd.add_plots(plots, self.classification_objects, screenshots, summary_dict, segments)
         self.result_wnd.show()
 
         labels = []

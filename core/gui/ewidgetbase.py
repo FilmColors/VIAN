@@ -328,8 +328,9 @@ class EMultiGraphicsView(QGraphicsView):
         self.pixmaps = []
         self.curr_x = 0
         self.margin = 50
+        self.id_map = dict()
 
-    def add_image(self, pixmap, clear = False, frame = True):
+    def add_image(self, pixmap, clear = False, frame = True, item_id = None):
         if clear:
             self.gscene.clear()
         itm = self.gscene.addPixmap(pixmap)
@@ -337,9 +338,23 @@ class EMultiGraphicsView(QGraphicsView):
         self.curr_x += (pixmap.width() + self.margin)
         self.pixmaps.append(itm)
 
+        if item_id is not None:
+            self.id_map[item_id] = itm
+
         if frame:
             rect = self.scene().itemsBoundingRect()
             self.fitInView(rect, Qt.KeepAspectRatio)
+
+    def replace_image(self, item_id, pixmap):
+        if item_id in self.id_map:
+            self.id_map[item_id].setPixmap(pixmap)
+            self.update_layout()
+
+    def update_layout(self):
+        self.curr_x = 0
+        for idx, (k, itm) in enumerate(self.id_map.items()):
+            itm.setPos(self.curr_x, 0)
+            self.curr_x += (itm.pixmap().width() + self.margin)
 
     def resizeEvent(self, event: QResizeEvent):
         super(EMultiGraphicsView, self).resizeEvent(event)
