@@ -23,6 +23,18 @@ def tuple2point(tpl):
     return QtCore.QPoint(tpl[0], tpl[1])
 
 
+def cart2pol(x, y):
+    """
+    Converts two dimensional cartesian coordinates to polar coordinates
+    :param x: 
+    :param y: 
+    :return: 
+    """
+    rho = np.sqrt(x**2 + y**2)
+    phi = np.arctan2(y, x)
+    return(rho, phi)
+
+
 def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
     """
     Converts an Long int MS to a formatted string of type HH:MM:SS:(MS) 

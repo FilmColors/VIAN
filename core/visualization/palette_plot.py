@@ -613,12 +613,24 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         self.layout().addWidget(self.dot_plot)
         self.palette_tree = None
         self.slider = None
+        self.spbox_depth = None
         self.depth = 0
 
     def get_param_widget(self):
+        w = QWidget()
+        w.setLayout(QHBoxLayout())
         self.slider = QSlider(Qt.Horizontal, self)
+        self.slider.setRange(1, 20)
         self.slider.valueChanged.connect(self.on_depth_changed)
-        return self.slider
+        self.spbox_depth = QSpinBox(self)
+        self.spbox_depth.setRange(1, 20)
+        self.spbox_depth.valueChanged.connect(self.slider.setValue)
+        self.slider.valueChanged.connect(self.spbox_depth.setValue)
+
+        w.layout().addWidget(self.slider)
+        w.layout().addWidget(self.spbox_depth)
+
+        return w
 
     def render_to_image(self, background: QColor, size: QSize):
         self.dot_plot.font_size = self.font_size
@@ -640,6 +652,7 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         layers = self.palette_tree[:, 1]
         if self.slider is not None:
             self.slider.setRange(0, len(np.unique(layers)) - 1)
+            self.spbox_depth.setRange(0, len(np.unique(layers)) - 1)
 
         if not (0 <= self.depth <= len(np.unique(layers)) - 1):
             self.depth = len(np.unique(layers)) - 1

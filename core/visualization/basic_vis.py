@@ -13,6 +13,7 @@ class IVIANVisualization():
     def __init__(self):
         self.grid_color = QColor(20,20,20,150)
         self.font_size = 12
+        self.plot_export_name = "new_plot"
 
     def get_param_widget(self):
         return QWidget()

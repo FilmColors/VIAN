@@ -359,10 +359,14 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
 
 class ImagePlotCircular(ImagePlot):
+    sendRangeScaleToControl = pyqtSignal(int)
     def __init__(self, parent, range_x = None, range_y = None):
         self.lbl_max = None
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
         self.to_float = False
+        self.img_scale = 2.8
+        self.rho_max = 1.0
+        self.pos_scale = 1.0
 
     def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None, z = 0, uid = None):
         try:
@@ -386,6 +390,16 @@ class ImagePlotCircular(ImagePlot):
             itm.scale_pos(self.pos_scale)
             itm.signals.onItemSelection.connect(self.onImageClicked.emit)
             self.images.append(itm)
+
+            # set default position scaling if necessary
+            rho = cart2pol(x, y)[0]
+            if rho > self.rho_max:
+                rho = (np.ceil(cart2pol(x, y)[0] / 10)) * 10
+                self.rho_max = rho
+                scale = 128 / rho
+                self.sendRangeScaleToControl.emit(int(scale * 100))
+                self.pos_scale = scale
+                self.set_range_scale()
 
             if uid is not None:
                 if uid in self.item_idx:
@@ -499,7 +513,6 @@ class ImagePlotCircular(ImagePlot):
             img.setScale(value / 100)
         self.img_scale = value / 100
 
-
     def get_param_widget(self):
         w = QWidget()
         w.setLayout(QVBoxLayout())
@@ -514,13 +527,14 @@ class ImagePlotCircular(ImagePlot):
         slider_xscale.valueChanged.connect(self.set_range_scale)
         slider_yscale = QSlider(Qt.Horizontal, w)
         slider_yscale.setRange(1, 1000)
-        slider_xscale.setValue(100)
+        slider_yscale.setValue(int(self.img_scale * 100))
+        slider_xscale.setValue(int(self.pos_scale * 100))
         slider_yscale.valueChanged.connect(self.set_image_scale)
 
         hl1.addWidget(slider_xscale)
         x_scale_line = QSpinBox(w)
         x_scale_line.setRange(1, 1000)
-        x_scale_line.setValue(100)
+        x_scale_line.setValue(int(self.pos_scale * 100))
         x_scale_line.valueChanged.connect(slider_xscale.setValue)
         slider_xscale.valueChanged.connect(x_scale_line.setValue)
         hl1.addWidget(x_scale_line)
@@ -528,11 +542,12 @@ class ImagePlotCircular(ImagePlot):
         hl2.addWidget(slider_yscale)
         y_scale_line = QSpinBox(w)
         y_scale_line.setRange(1, 1000)
-        y_scale_line.setValue(100)
+        y_scale_line.setValue(int(self.img_scale * 100))
         y_scale_line.valueChanged.connect(slider_yscale.setValue)
         slider_yscale.valueChanged.connect(y_scale_line.setValue)
         hl2.addWidget(y_scale_line)
 
+        self.sendRangeScaleToControl.connect(slider_xscale.setValue)
         w.layout().addItem(hl1)
         w.layout().addItem(hl2)
 
@@ -1216,9 +1231,6 @@ class ImagePlotYear(ImagePlotTime):
         text.setPos(-(text.boundingRect().height() * 3), self.base_line * self.y_scale - (self.y_max * self.y_scale / 2) + text.boundingRect().width() / 2)
         text.setDefaultTextColor(self.grid_color)
         self.lines.append(text)
-
-
-
 
     def update_item(self, uid, values, pixmap=None):
         if uid in self.item_idx:
