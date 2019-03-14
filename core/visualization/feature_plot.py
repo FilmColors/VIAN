@@ -17,8 +17,10 @@ SegmentTuple = namedtuple("SegmentTuple", ['id', "start", "end"])
 
 
 class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
-    def __init__(self, parent, project: VIANProject, title =""):
-        super(VIANFeaturePlot, self).__init__(parent)
+    def __init__(self, parent, project: VIANProject, title ="", naming_fields=None):
+        QGraphicsView.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "keyword_timeline"
         self.setRenderHint(QPainter.Antialiasing)
 
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
@@ -211,8 +213,11 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     onSegmentClicked = pyqtSignal(object)
     onImageClicked = pyqtSignal(object)
 
-    def __init__(self, parent, title =""):
-        super(GenericFeaturePlot, self).__init__(parent)
+    def __init__(self, parent, title ="", naming_fields=None):
+        QGraphicsView.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "keyword_timeline"
+
         self.setRenderHint(QPainter.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")

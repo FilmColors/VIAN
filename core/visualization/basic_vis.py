@@ -10,10 +10,13 @@ from core.analysis.colorimetry.hilbert import create_hilbert_transform
 from core.gui.tools import ExportImageDialog
 
 class IVIANVisualization():
-    def __init__(self):
+    def __init__(self, naming_fields = None):
         self.grid_color = QColor(20,20,20,150)
         self.font_size = 12
-        self.plot_export_name = "new_plot"
+        self.naming_fields = dict()
+        if naming_fields is not None:
+            self.naming_fields = naming_fields.copy()
+            self.naming_fields['plot_name'] = "vis"
 
     def get_param_widget(self):
         return QWidget()
@@ -307,8 +310,10 @@ class VIANTextGraphicsItem(QGraphicsTextItem):
 class MatrixPlot(EGraphicsView, IVIANVisualization):
     itemClicked = pyqtSignal(object)
 
-    def __init__(self, parent, max=1.0, allow_hover = True):
-        super(MatrixPlot, self).__init__(parent)
+    def __init__(self, parent, max=1.0, allow_hover = True, naming_fields=None):
+        EGraphicsView.__init__(self, parent, auto_frame=False)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "matrix_plot"
         self.dot_size = 1.0
         self.total_width = 1000
         self.max = max
@@ -401,8 +406,11 @@ class MatrixPlot(EGraphicsView, IVIANVisualization):
 
 
 class HistogramVis(EGraphicsView, IVIANVisualization):
-    def __init__(self, parent, cache_file = "data/hilbert.npz"):
-        super(HistogramVis, self).__init__(parent)
+    def __init__(self, parent, cache_file = "data/hilbert.npz", naming_fields=None):
+        EGraphicsView.__init__(self, parent, auto_frame=False)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "color_histogram"
+
         self.has_context_menu = True
         # self.view = EGraphicsView(self, auto_frame=False)
         self.setLayout(QVBoxLayout(self))
@@ -562,8 +570,11 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
 
 
 class PaletteVis(QWidget, IVIANVisualization):
-    def __init__(self, parent):
-        super(PaletteVis, self).__init__(parent)
+    def __init__(self, parent, naming_fields=None):
+        QWidget.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "palette_plot"
+
         self.view = QGraphicsView()
         self.view.setScene(QGraphicsScene())
 

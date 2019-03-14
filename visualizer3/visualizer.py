@@ -216,40 +216,48 @@ class VIANVisualizer2(QMainWindow):
         self.segm_scrs = dict()
         self.segments = dict()
 
+        naming_fields = dict(
+            keywords_include = "_".join(summary_dict['include_kwds_str'][:3]),
+            keywords_exclude="_".join(summary_dict['exclude_kwds_str'][:3]),
+            year = str(summary_dict['filmography']['year_start']) + "_" + str(summary_dict['filmography']['year_end']),
+            k_images = "k" + str(summary_dict['n']),
+        )
+
         if self.cb_segm_ab_plot.isChecked():
-            p_ab = ImagePlotCircular(self.result_wnd)
+            p_ab = ImagePlotCircular(self.result_wnd, naming_fields=naming_fields)
+
         else:
             p_ab = None
 
         if self.cb_segm_lc_plot.isChecked():
-            p_lc = ImagePlotPlane(self, range_y=[0, 255])
+            p_lc = ImagePlotPlane(self, range_y=[0, 255], naming_fields=naming_fields)
         else:
             p_lc = None
 
         if self.cb_segm_lc_dot_plot.isChecked():
-            plot_lc_dot = DotPlot(self)
+            plot_lc_dot = DotPlot(self, naming_fields=naming_fields)
             plot_lc_dot.add_grid("LA")
         else:
             plot_lc_dot = None
 
         if self.cb_segm_ab_dot_plot.isChecked():
-            plot_ab_dot = DotPlot(self)
+            plot_ab_dot = DotPlot(self, naming_fields=naming_fields)
             plot_ab_dot.add_grid("AB")
         else:
             plot_ab_dot = None
 
         if self.cb_segm_dt_plot.isChecked():
-            p_dt = ImagePlotTime(self.result_wnd)
+            p_dt = ImagePlotTime(self.result_wnd, naming_fields=naming_fields)
         else:
             p_dt = None
 
         if self.cb_segm_dy_plot.isChecked():
-            p_dy = ImagePlotYear(self.result_wnd)
+            p_dy = ImagePlotYear(self.result_wnd, naming_fields=naming_fields)
         else:
             p_dy = None
 
         if self.cb_segm_palette_dot_plot.isChecked():
-            p_palette_dot = MultiPaletteLABWidget(self.result_wnd)
+            p_palette_dot = MultiPaletteLABWidget(self.result_wnd, naming_fields=naming_fields)
             palettes = []
             for scr in screenshots.values():
                 if scr.current_palette is not None:

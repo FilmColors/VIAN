@@ -19,6 +19,16 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>&lt;b&gt;Naming Convention</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widgetNamingConvention" native="true"/>
+       </item>
+       <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
           <string>&lt;b&gt;Resolution</string>

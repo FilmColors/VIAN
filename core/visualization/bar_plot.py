@@ -5,8 +5,10 @@ from PyQt5.QtCore import *
 import numpy as np
 
 class BarPlot(QGraphicsView, IVIANVisualization):
-    def __init__(self, parent, title =""):
-        super(BarPlot, self).__init__(parent)
+    def __init__(self, parent, title ="", naming_fields = None):
+        QGraphicsView.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "bar_plot"
         self.setRenderHint(QPainter.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")

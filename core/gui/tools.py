@@ -167,6 +167,50 @@ class PopupLineEdit(QLineEdit):
         self.close()
 
 
+class ExportNamingConventionWidget(QWidget):
+    def __init__(self, parent, naming_fields):
+        super(ExportNamingConventionWidget, self).__init__(parent)
+        self.setLayout(QVBoxLayout(self))
+        self.upper = QHBoxLayout(self)
+        self.lower = QHBoxLayout(self)
+        self.preview = QLineEdit("preview_name", self)
+        self.layout().addItem(self.upper)
+        self.layout().addItem(self.lower)
+        self.lower.addWidget(self.preview)
+        self.boxes = []
+        self.naming_fields = naming_fields
+        for k, v in naming_fields.items():
+            cb = QComboBox(self)
+            cb.addItem("None")
+            cb.addItems(naming_fields.keys())
+            self.boxes.append(cb)
+            self.upper.addWidget(cb)
+            cb.currentIndexChanged.connect(self.on_changed)
+        try:
+            self.boxes[0].setCurrentText("keywords_include")
+            self.boxes[1].setCurrentText("keywords_exclude")
+            self.boxes[2].setCurrentText("year")
+            self.boxes[3].setCurrentText("k_images")
+            self.on_changed()
+        except:
+            pass
+
+        self.show()
+
+    def on_changed(self):
+        self.preview.setText(self.get_naming())
+
+    def get_naming(self):
+        name = []
+        for cb in self.boxes:
+            if cb.currentText() != "None":
+                v = self.naming_fields[cb.currentText()]
+                if v != "":
+                    name.append(v)
+        name.append(self.naming_fields['plot_name'])
+        return "_".join(name)
+
+
 class ExportImageDialog(EDialogWidget):
     def __init__(self, main_window, visualization):
         super(ExportImageDialog, self).__init__(visualization, main_window)
@@ -174,6 +218,9 @@ class ExportImageDialog(EDialogWidget):
         uic.loadUi(path, self)
         self.visualization = visualization
         self.preview = ExportPreviewWidget(self, self.visualization)
+        self.widgetNamingConvention.setLayout(QHBoxLayout())
+        self.naming_widget = ExportNamingConventionWidget(self, visualization.naming_fields)
+        self.widgetNamingConvention.layout().addWidget(self.naming_widget)
         self.widget_Preview.setLayout(QVBoxLayout(self))
         self.widget_Preview.layout().addWidget(self.preview)
         self.spinBox_BG_R.valueChanged.connect(self.on_update)

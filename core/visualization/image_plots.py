@@ -19,8 +19,11 @@ ImagePlotRawData = namedtuple("ImagePlotRawData", ["image", "x", "y", "z", "mime
 class ImagePlot(QGraphicsView, IVIANVisualization):
     onImageClicked = pyqtSignal(object)
 
-    def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = ""):
-        super(ImagePlot, self).__init__(parent)
+    def __init__(self, parent, range_x = None, range_y = None, create_controls = False, title = "", naming_fields = None):
+        QGraphicsView.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "image_plot"
+
         self.setRenderHint(QPainter.Antialiasing)
         self.heads_up_widget = None
         if range_x is None:
@@ -360,9 +363,10 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
 class ImagePlotCircular(ImagePlot):
     sendRangeScaleToControl = pyqtSignal(int)
-    def __init__(self, parent, range_x = None, range_y = None):
+    def __init__(self, parent, range_x = None, range_y = None, naming_fields = None):
         self.lbl_max = None
-        super(ImagePlotCircular, self).__init__(parent, range_x, range_y)
+        super(ImagePlotCircular, self).__init__(parent, range_x, range_y, naming_fields=naming_fields)
+        self.naming_fields['plot_name'] = "image_ab_plot"
         self.to_float = False
         self.img_scale = 2.8
         self.rho_max = 1.0
@@ -557,11 +561,12 @@ class ImagePlotCircular(ImagePlot):
 class ImagePlotPlane(ImagePlot):
     sendRangeScaleToControl = pyqtSignal(int)
 
-    def __init__(self, parent, range_x = None, range_y = None, title=""):
+    def __init__(self, parent, range_x = None, range_y = None, title="", naming_fields=None):
         self.curr_angle = 0.0
         self.compass = None
         self.rho_max = 1.0
-        super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
+        super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title, naming_fields=naming_fields)
+        self.naming_fields['plot_name'] = "image_lc_plot"
         self.img_scale = 2.8
 
     def add_image(self, x, y, img, convert = True, mime_data = None, z = 0, uid=None):
@@ -888,24 +893,25 @@ class ImagePlotControls(QWidget):
 
 
 class ImagePlotTime(ImagePlot):
-    def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100):
+    def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100, naming_fields=None):
         self.x_scale = 0.001
         self.y_scale = 2000 #50 default
         self.base_line = 1000
         self.x_max = 0
-        self.y_max = 80
+        self.y_max = 1.0
         self.lines = []
 
-        self.pixel_size_x = 1500
-        self.pixel_size_y = 800
+        self.pixel_size_x = 1600
+        self.pixel_size_y = 1200
 
         self.border = 10000
 
         self.labels = []
 
         self.values = []
-        super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title)
-        self.font_size = 100
+        super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title, naming_fields=naming_fields)
+        self.naming_fields['plot_name'] = "image_color_dt"
+        self.font_size = 60
         self.set_y_scale(y_scale)
         self.set_image_scale(image_scale)
 
@@ -938,9 +944,11 @@ class ImagePlotTime(ImagePlot):
 
         if self.x_max < x:
             self.x_max = x
+            self.x_scale = (self.pixel_size_x / np.clip(self.x_max, 1, None))
 
         if self.y_max < y:
             self.y_max = y
+            self.y_scale = (self.pixel_size_y / np.clip(self.y_max, 1, None))
 
         self.luminances.append([np.nan_to_num(y), itm])
         self.values.append([x, np.nan_to_num(y)])
@@ -1128,12 +1136,13 @@ class ImagePlotTime(ImagePlot):
 
 
 class ImagePlotYear(ImagePlotTime):
-    def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100):
+    def __init__(self, parent, range_x = None, range_y = None, title="", image_scale = 150, y_scale = 100,naming_fields=None):
         self.x_scale = 0.1
         self.years = []
         self.year_grid = []
         self.total_width = 20000
-        super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale)
+        super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale, naming_fields=naming_fields)
+        self.naming_fields['plot_name'] = "image_color_dy"
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None):
         if hover_text is None:

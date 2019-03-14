@@ -89,8 +89,10 @@ class PaletteWidget(QWidget):
 
 
 class PaletteView(QWidget, IVIANVisualization):
-    def __init__(self, parent):
-        super(PaletteView, self).__init__(parent)
+    def __init__(self, parent, naming_fields = None):
+        QWidget.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "palette_plot"
         self.palette_layer = None
         self.hilbert_lookup = get_hilbert_lookup()
         self.mode = "Layer"
@@ -322,8 +324,10 @@ class PaletteLABWidget(QWidget):
 
 
 class PaletteLABView(QWidget, IVIANVisualization):
-    def __init__(self, parent):
-        super(PaletteLABView, self).__init__(parent)
+    def __init__(self, parent, naming_fields = None):
+        QWidget.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "palette_ab_plot"
         self.palette_layer = None
         self.view = parent
         self.depth = 0
@@ -510,8 +514,10 @@ class PaletteTimeWidget(QWidget):
 
 
 class PaletteTimeView(EGraphicsView, IVIANVisualization):
-    def __init__(self, parent):
-        super(PaletteTimeView, self).__init__(parent, auto_frame=False)
+    def __init__(self, parent, naming_fields = None):
+        EGraphicsView.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "palette_barcode_plot"
         self.times = None
         self.palette = None
         self.depth = 0
@@ -605,8 +611,10 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
 
 
 class MultiPaletteLABWidget(QWidget, IVIANVisualization):
-    def __init__(self, parent):
-        super(MultiPaletteLABWidget, self).__init__(parent)
+    def __init__(self, parent, naming_fields=None):
+        QWidget.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "palette_ab_plot"
         self.dot_plot = DotPlot(self)
         self.dot_plot.dot_size = 10
         self.setLayout(QVBoxLayout())

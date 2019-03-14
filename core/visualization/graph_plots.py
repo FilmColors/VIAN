@@ -161,8 +161,10 @@ class GraphText(QGraphicsTextItem):
 class VocabularyGraph(QWidget, IVIANVisualization):
     onSelectionChanged = pyqtSignal(object)
 
-    def __init__(self, parent):
-        super(VocabularyGraph, self).__init__(parent)
+    def __init__(self, parent, naming_fields = None):
+        QWidget.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "keyword_graph_plot"
         self.view = EGraphicsView(self)
         self.view.setScene(QGraphicsScene(self))
         self.view.onScaleEvent.connect(self.on_scale)

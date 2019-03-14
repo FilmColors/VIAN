@@ -9,8 +9,10 @@ from collections import namedtuple
 DotPlotRawData = namedtuple("DotPlotRawData", ["x", "y", "z", "col", "mime_data", "curr_grid"])
 
 class DotPlot(QGraphicsView, IVIANVisualization):
-    def __init__(self, parent, title =""):
-        super(DotPlot, self).__init__(parent)
+    def __init__(self, parent, title ="", naming_fields = None):
+        QGraphicsView.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "dot_plot"
         self.setRenderHint(QPainter.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")

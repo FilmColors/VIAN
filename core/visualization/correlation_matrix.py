@@ -12,8 +12,10 @@ from typing import *
 CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
 
 class CorrelationVisualization(QWidget, IVIANVisualization):
-    def __init__(self, parent):
-        super(CorrelationVisualization, self).__init__(parent)
+    def __init__(self, parent, naming_fields = None):
+        QWidget.__init__(self, parent)
+        IVIANVisualization.__init__(self, naming_fields)
+        self.naming_fields['plot_name'] = "correlation_plot"
         self.split = QSplitter()
         self.stack = QStackedWidget()
 
@@ -69,8 +71,9 @@ class CorrelationVisualization(QWidget, IVIANVisualization):
 
 
 class CorrelationBarplot(BarPlot):
-    def __init__(self, parent):
-        super(CorrelationBarplot, self).__init__(parent)
+    def __init__(self, parent, naming_fields=None):
+        super(CorrelationBarplot, self).__init__(parent, naming_fields=naming_fields)
+        self.naming_fields['plot_name'] = "correlation_bar_plot"
         self.setRenderHint(QPainter.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
@@ -114,8 +117,9 @@ class CorrelationBarplot(BarPlot):
 class CorrelationMatrix(MatrixPlot, IVIANVisualization):
     onFeatureClicked = pyqtSignal(object)
 
-    def __init__(self, parent, title =""):
-        super(CorrelationMatrix, self).__init__(parent)
+    def __init__(self, parent, title ="", naming_fields=None):
+        super(CorrelationMatrix, self).__init__(parent, naming_fields=naming_fields)
+        self.naming_fields['plot_name'] = "correlation_matrix_plot"
         self.setRenderHint(QPainter.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
