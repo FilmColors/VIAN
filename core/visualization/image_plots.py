@@ -394,7 +394,7 @@ class ImagePlotCircular(ImagePlot):
             # set default position scaling if necessary
             rho = cart2pol(x, y)[0]
             if rho > self.rho_max:
-                rho = (np.ceil(cart2pol(x, y)[0] / 10)) * 10
+                rho = (np.ceil(rho / 10)) * 10
                 self.rho_max = rho
                 scale = 128 / rho
                 self.sendRangeScaleToControl.emit(int(scale * 100))
@@ -555,10 +555,14 @@ class ImagePlotCircular(ImagePlot):
 
 
 class ImagePlotPlane(ImagePlot):
+    sendRangeScaleToControl = pyqtSignal(int)
+
     def __init__(self, parent, range_x = None, range_y = None, title=""):
         self.curr_angle = 0.0
         self.compass = None
+        self.rho_max = 1.0
         super(ImagePlotPlane, self).__init__(parent, range_x, range_y, title=title)
+        self.img_scale = 2.8
 
     def add_image(self, x, y, img, convert = True, mime_data = None, z = 0, uid=None):
         if convert:
@@ -568,12 +572,12 @@ class ImagePlotPlane(ImagePlot):
         self.scene().addItem(itm)
 
         self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
-        x, z = rotate((0, 0), (x, y), self.curr_angle)
+        nx, nz = rotate((0, 0), (x, y), self.curr_angle)
 
-        itm.setPos(np.nan_to_num(x * self.curr_scale * self.magnification),
+        itm.setPos(np.nan_to_num(nx * self.curr_scale * self.magnification),
                    np.nan_to_num(self.range_y[1] * self.magnification - y * self.magnification * self.curr_scale))
         self.images.append(itm)
-        itm.setZValue(z)
+        itm.setZValue(nz)
         itm.signals.onItemSelection.connect(self.onImageClicked.emit)
 
         self.luminances.append([y, itm])
@@ -582,7 +586,19 @@ class ImagePlotPlane(ImagePlot):
                 self.scene().removeItem(self.item_idx[uid][0])
             self.item_idx[uid] = (itm, len(self.images) - 1)
 
+        # set default position scaling if necessary
+        rho = np.amax([cart2pol(x, y)[0], z])
+        if rho > self.rho_max:
+            q = rho
+            rho = (np.ceil(cart2pol(x, y)[0] / 10)) * 10
+            self.rho_max = rho
+            scale = 255 / rho
+            self.sendRangeScaleToControl.emit(int(scale * 100))
+            self.curr_scale = scale
+            self.set_scale()
+
         itm.show()
+        itm.setScale(self.img_scale)
         return itm
 
     def update_item(self, uid, pos, pixmap = None):
@@ -632,7 +648,7 @@ class ImagePlotPlane(ImagePlot):
 
     def set_scale(self, v=None):
         if v is not None:
-            self.curr_scale = v / 200
+            self.curr_scale = v / 100
         for idx, itm in enumerate(self.raw_data):
             x, z = rotate((0, 0), (itm.x, itm.z), self.curr_angle)
             self.images[idx].setPos(np.nan_to_num(x * self.magnification) * self.curr_scale,
@@ -736,7 +752,7 @@ class ImagePlotPlane(ImagePlot):
 
         slider_image = QSlider(Qt.Horizontal, w)
         slider_image.setRange(1, 1000)
-        slider_image.setValue(100)
+        slider_image.setValue(int(self.img_scale * 100))
         slider_image.valueChanged.connect(self.set_image_scale)
         hl2.addWidget(slider_image)
 
@@ -748,13 +764,15 @@ class ImagePlotPlane(ImagePlot):
         hl1.addWidget(QLabel("Scale:", w))
         slider_xscale = QSlider(Qt.Horizontal, w)
         slider_xscale.setRange(1, 1000)
+        slider_xscale.setValue(self.curr_scale * 100)
         hl1.addWidget(slider_xscale)
         x_scale_line = QSpinBox(w)
         x_scale_line.setRange(1, 1000)
-        x_scale_line.setValue(100)
+        x_scale_line.setValue(self.curr_scale * 100)
         x_scale_line.valueChanged.connect(slider_xscale.setValue)
         slider_xscale.valueChanged.connect(x_scale_line.setValue)
         slider_xscale.valueChanged.connect(self.set_scale)
+        self.sendRangeScaleToControl.connect(slider_xscale.setValue)
         hl1.addWidget(x_scale_line)
 
         # hl2.addWidget(y_scale_line)
