@@ -239,6 +239,8 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.scene().render(painter)
         painter.end()
 
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
+
         return image
 
     def set_heads_up_widget(self, widget:QWidget):

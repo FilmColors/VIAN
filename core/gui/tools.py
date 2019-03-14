@@ -248,7 +248,10 @@ class ExportImageDialog(EDialogWidget):
         self.widgetNamingConvention.setLayout(QVBoxLayout())
         self.naming_widget = ExportNamingConventionWidget(self, visualization.naming_fields)
         self.widgetNamingConvention.layout().addWidget(self.naming_widget)
-        self.file_browser = FileBrowseBar(self, mode="dir")
+        self.file_browser = FileBrowseBar(self, mode="dir", name="Directory:")
+
+        self.orig_grid_color = self.visualization.grid_color
+        self.orig_font_size = self.visualization.font_size
 
         if len(self.last_directories) > 0:
             self.file_browser.line_edit.setText(self.last_directories[len(self.last_directories) - 1])
@@ -271,7 +274,7 @@ class ExportImageDialog(EDialogWidget):
         self.comboBoxPreset.currentTextChanged.connect(self.on_preset)
 
         self.btn_Export.clicked.connect(self.on_export)
-        self.btn_Cancel.clicked.connect(self.close)
+        self.btn_Cancel.clicked.connect(self.on_close)
         self.btn_ResetRegion.clicked.connect(self.preview.reset_region)
         self.on_update()
 
@@ -349,9 +352,16 @@ class ExportImageDialog(EDialogWidget):
                 img = cv2.resize(img, (size.width(), size.height()), interpolation=cv2.INTER_CUBIC)
 
             cv2.imwrite(file_name, img)
+            self.on_close()
         except Exception as e:
             print(e)
             pass
+
+    def on_close(self):
+        self.visualization.grid_color = self.orig_grid_color
+        self.visualization.font_size = self.orig_font_size
+        self.visualization.render_to_image(QColor(0, 0, 0, 255), size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value()))
+        self.close()
 
 
 class ExportPreviewWidget(QGraphicsView):

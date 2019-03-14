@@ -615,11 +615,12 @@ class VIANMovableGraphicsItem(QGraphicsPixmapItem):
 
 
 class FileBrowseBar(QWidget):
-    def __init__(self, parent, mode = "file", default = "", filter = ""):
+    def __init__(self, parent, mode = "file", default = "", filter = "", name = "file:"):
         super(FileBrowseBar, self).__init__(parent)
         self.mode = mode
         self.filter = filter
         self.setLayout(QHBoxLayout())
+        self.layout().addWidget(QLabel(name, self))
         self.line_edit = QLineEdit(self)
         self.line_edit.setText(default)
         self.btn_browse = QPushButton("Browse", self)

@@ -84,7 +84,8 @@ class PlotResultsWidget(QMainWindow):
         self.setCentralWidget(self.tab)
 
     def add_plots(self, p:List[PlotWidget], classification_objects, scrs, summary_dict):
-        t = PlotResultsGroupWidget(self, classification_objects)
+        name = "Results_" + str(self.result_counter).zfill(2)
+        t = PlotResultsGroupWidget(self, classification_objects, name)
         self.result_counter += 1
 
         t.scrs = scrs
@@ -93,15 +94,21 @@ class PlotResultsWidget(QMainWindow):
 
         # t.setWindowTitle("Results_" + str(self.result_counter).zfill(2))
         # self.addDockWidget(Qt.RightDockWidgetArea, t, Qt.Vertical)
-        self.tab.addTab(t, "Results_" + str(self.result_counter).zfill(2))
+        self.tab.addTab(t, name)
 
         self.group_widgets.append(t)
         t.set_summary(summary_dict)
         t.show()
 
+    @pyqtSlot(str, str)
+    def on_group_name_changed(self, old, new):
+        for i in range(self.tab.count()):
+            if self.tab.tabText(i) == old:
+                self.tab.setTabText(i, new)
+                break
 
 class PlotResultsGroupWidget(QDockWidget):
-    def __init__(self, parent, classification_objects):
+    def __init__(self, parent, classification_objects, name):
         super(PlotResultsGroupWidget, self).__init__(parent)
         self.plots = dict()
         self.classification_objects = classification_objects
@@ -115,8 +122,9 @@ class PlotResultsGroupWidget(QDockWidget):
         self.setWidget(self.central)
         self.central.setCentralWidget(t)
         self.scrs = dict()
-        self.summary = QuerySummary(self, self.classification_object_selector)
+        self.summary = QuerySummary(self, self.classification_object_selector, name)
         self.central.addDockWidget(Qt.TopDockWidgetArea, self.summary)
+        self.summary.onGroupNameChanged.connect(parent.on_group_name_changed)
 
 
     def set_summary(self, summary_dict):
@@ -164,7 +172,9 @@ class PlotResultsGroupWidget(QDockWidget):
 
 import json
 class QuerySummary(QDockWidget):
-    def __init__(self, parent, clobj_widget):
+    onGroupNameChanged = pyqtSignal(str, str)
+
+    def __init__(self, parent, clobj_widget, name):
         super(QuerySummary, self).__init__(parent)
         self.clobj_widget = clobj_widget
         self.scroll = QScrollArea(self)
@@ -173,11 +183,14 @@ class QuerySummary(QDockWidget):
         self.inner = QWidget(self.scroll)
         self.scroll.setWidget(self.inner)
         self.inner.setLayout(QVBoxLayout())
-        self.inner.layout().addWidget(QLineEdit("Result_01"))
+        self.name_edit = QLineEdit(name, self)
+        self.inner.layout().addWidget(self.name_edit)
+        self.old_name = name
         self.text_field_desc = QTextEdit(self)
         self.text_field_raw = QTextEdit(self)
         self.text_field_desc.setReadOnly(True)
         self.text_field_raw.setReadOnly(True)
+        self.name_edit.editingFinished.connect(self.on_name_changed)
 
         self.inner.layout().addWidget(self.text_field_desc)
 
@@ -203,4 +216,10 @@ class QuerySummary(QDockWidget):
 
         self.text_field_desc.setText(description)
         self.text_field_raw.setText(json.dumps(summary))
+
+
+    def on_name_changed(self):
+        self.onGroupNameChanged.emit(self.old_name, self.name_edit.text())
+        self.old_name = self.name_edit.text()
+
 
