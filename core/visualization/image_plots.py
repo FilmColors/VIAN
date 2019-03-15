@@ -25,6 +25,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.naming_fields['plot_name'] = "image_plot"
 
         self.setRenderHint(QPainter.Antialiasing)
+        self.setMouseTracking(True)
         self.heads_up_widget = None
         if range_x is None:
             range_x = [-128, 128]
@@ -152,6 +153,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             menu.popup(self.mapToGlobal(event.pos()))
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent):
+        super(ImagePlot, self).mouseMoveEvent(event)
         if self.ctrl_is_pressed:
             delta = event.pos() - self.last_mouse_pos
             self.set_magnification(delta.x(),delta.y())
@@ -230,7 +232,6 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         r.adjust(-20, -20, 20, 20)
         self.scene().setSceneRect(r)
 
-        t_size = self.sceneRect().size().toSize()
         image = QImage(size, QImage.Format_ARGB32)
         image.fill(background)
 
@@ -318,7 +319,7 @@ class VIANPixmapGraphicsItemSignals(QObject):
 class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
     def __init__(self, pixmap:QPixmap, hover_text = None, mime_data = None):
         super(VIANPixmapGraphicsItem, self).__init__(pixmap)
-        if hover_text != None:
+        if hover_text is not None:
             self.setToolTip(hover_text)
         self.abs_pos = None
         self.pos_scale = 1.0
@@ -327,12 +328,14 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.pixmap = pixmap
         self.curr_alpha = 1.0
         self.setAcceptHoverEvents(True)
-
         # self.hovered = False
 
     def setPixmap(self, pixmap: QtGui.QPixmap):
         super(VIANPixmapGraphicsItem, self).setPixmap(pixmap)
         self.pixmap = pixmap
+
+    def boundingRect(self):
+        return QRectF(self.pixmap.rect())
 
     def scale_pos(self, scale, scale_y = None):
         if scale_y is None:
@@ -373,6 +376,7 @@ class ImagePlotCircular(ImagePlot):
         self.img_scale = 2.8
         self.rho_max = 1.0
         self.pos_scale = 1.0
+        self.magnification = 100.0
 
     def add_image(self, x, y, img, convert = True, luminance = None, to_float = False, mime_data = None, z = 0, uid = None):
         try:
@@ -449,12 +453,11 @@ class ImagePlotCircular(ImagePlot):
             self.lbl_max = None
         self.grid = []
         pen = QPen()
-        pen.setWidth(1 * self.magnification)
+        pen.setWidth(10)
         pen.setColor(self.grid_color)
 
         font = QFont()
         font.setPointSize(12 * self.magnification)
-
 
         for i in range(7):
             self.circle0 = self.scene().addEllipse(QRectF(0,

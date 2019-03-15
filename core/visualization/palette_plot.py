@@ -682,7 +682,6 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         indices = np.where(indices == layer_idx)
         bins = self.palette_tree[indices[0]]
         bins_max = np.amax(bins[:, 5])
-        drawn = []
 
         pal = self.palette_tree[indices]
         labs = cv2.cvtColor(np.array([pal[:, 2:5] / 255.0, pal[:, 2:5] / 255.0], dtype=np.float32), cv2.COLOR_BGR2LAB)[0]
@@ -693,21 +692,9 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         self.dot_plot.set_range_scale(int((128 / chroma2) * 100))
 
         u, indices = np.unique(labs, axis=0, return_index=True)
-        print(indices)
         labs = labs[indices]
         pal = pal[indices]
-        print(labs.shape)
-        print(pal.shape)
 
-        # for i in indices[0]:
-        #     b = self.palette_tree[i, 2]
-        #     g = self.palette_tree[i, 3]
-        #     r = self.palette_tree[i, 4]
-        #     lab = tpl_bgr_to_lab((b, g, r), as_float=True)
-        #     if tuple(lab) in drawn:
-        #         continue
-        #     else:
-        #         drawn.append(tuple(lab))
         for i in range(labs.shape[0]):
             lab = labs[i]
             rgb = pal[i, 2:5]

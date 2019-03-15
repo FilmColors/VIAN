@@ -237,6 +237,10 @@ class ExportNamingConventionWidget(QWidget):
 
 class ExportImageDialog(EDialogWidget):
     last_directories = []
+    last_background = []
+    last_grid_color = []
+    last_size = []
+    last_font_size = []
 
     def __init__(self, main_window, visualization):
         super(ExportImageDialog, self).__init__(visualization, main_window)
@@ -253,8 +257,7 @@ class ExportImageDialog(EDialogWidget):
         self.orig_grid_color = self.visualization.grid_color
         self.orig_font_size = self.visualization.font_size
 
-        if len(self.last_directories) > 0:
-            self.file_browser.line_edit.setText(self.last_directories[len(self.last_directories) - 1])
+        self.load_cache()
 
         self.widgetNamingConvention.layout().addWidget(self.file_browser)
         self.widget_Preview.setLayout(QVBoxLayout(self))
@@ -307,6 +310,29 @@ class ExportImageDialog(EDialogWidget):
             self.spinBox_GridB.setValue(0)
             self.spinBox_GridA.setValue(0)
 
+    def load_cache(self):
+        if len(self.last_background) > 0:
+            self.spinBox_BG_R.setValue(self.last_background[0].red())
+            self.spinBox_BG_G.setValue(self.last_background[0].green())
+            self.spinBox_BG_B.setValue(self.last_background[0].blue())
+            self.spinBox_BG_A.setValue(self.last_background[0].alpha())
+
+        if len(self.last_grid_color) > 0:
+            self.spinBox_GridR.setValue(self.last_grid_color[0].red())
+            self.spinBox_GridG.setValue(self.last_grid_color[0].green())
+            self.spinBox_GridB.setValue(self.last_grid_color[0].blue())
+            self.spinBox_GridA.setValue(self.last_grid_color[0].alpha())
+
+        if len(self.last_size) > 0:
+            self.spinBox_Width.setValue(self.last_size[0].width())
+            self.spinBox_Height.setValue(self.last_size[0].height())
+
+        if len(self.last_font_size) > 0:
+            self.spinBoxFontSize.setValue(self.last_font_size[0])
+
+        if len(self.last_directories) > 0:
+            self.file_browser.line_edit.setText(self.last_directories[len(self.last_directories) - 1])
+
     def on_update(self):
         background = QColor(self.spinBox_BG_R.value(), self.spinBox_BG_G.value(), self.spinBox_BG_B.value(), self.spinBox_BG_A.value())
         grid = QColor(self.spinBox_GridR.value(), self.spinBox_GridG.value(), self.spinBox_GridB.value(), self.spinBox_GridA.value())
@@ -318,8 +344,20 @@ class ExportImageDialog(EDialogWidget):
         size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value())
         self.visualization.grid_color = grid
         self.visualization.font_size = font_size
+        print("Rendering Image")
         image = self.visualization.render_to_image(background, size)
+        print("Set Image")
         self.preview.set_image(image)
+
+        #Caching
+        self.last_background.clear()
+        self.last_grid_color.clear()
+        self.last_size.clear()
+        self.last_font_size.clear()
+        self.last_background.append(background)
+        self.last_grid_color.append(grid)
+        self.last_size.append(size)
+        self.last_font_size.append(font_size)
         return image
 
     def on_export(self):
@@ -365,6 +403,7 @@ class ExportImageDialog(EDialogWidget):
 
 
 class ExportPreviewWidget(QGraphicsView):
+    onResize = pyqtSignal()
     def __init__(self, parent, visualization):
         super(ExportPreviewWidget, self).__init__(parent)
         self.visualization = visualization
@@ -379,6 +418,9 @@ class ExportPreviewWidget(QGraphicsView):
         self.p_end = QPoint()
         self.region = None
         self.selector_frame = self.gscene.addRect(self.sceneRect(), QColor(255, 255, 255))
+        self.onResize.connect(self.frame_image)
+        self.last_size = QSize()
+
 
     def reset_region(self):
         self.region = None
@@ -400,7 +442,9 @@ class ExportPreviewWidget(QGraphicsView):
 
     def resizeEvent(self, event: QResizeEvent):
         super(ExportPreviewWidget, self).resizeEvent(event)
-        self.frame_image()
+        if abs(self.last_size.width() - self.width()) > 5 or abs(self.last_size.height() - self.height()) > 5:
+            self.onResize.emit()
+            self.last_size = self.size()
 
     def start_selection(self, pos):
         self.is_selecting = True
@@ -439,10 +483,9 @@ class ExportPreviewWidget(QGraphicsView):
     def mouseReleaseEvent(self, event: QMouseEvent):
         self.end_selection()
 
-
     def update(self):
         super(ExportPreviewWidget, self).update()
-        self.frame_image()
+        self.onResize.emit()
 
 
 
