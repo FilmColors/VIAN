@@ -70,7 +70,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
 
             model = None
             if params['model'] == "LIP":
-                model = PSPNetModel(input_shape=(512, 512, 3))
+                model = PSPNetModelVIAN(input_shape=(512, 512, 3))
                 model.load_weights(KERAS_LIP_WEIGHTS)
                 model_name = DATASET_NAME_LIP
             else:

@@ -136,6 +136,10 @@ class WebAppCorpusInterface(QObject):
         self.ep_token = self.ep_root + "get_token"
         self.ep_ping = self.ep_root + "vian/ping"
         self.ep_version = self.ep_root + "vian/version"
+        self.ep_query_movies = self.ep_root + "query/movies"
+        self.ep_query_persons = self.ep_root + "query/persons"
+        self.ep_query_companies = self.ep_root + "query/companies"
+        self.ep_query_color_processes = self.ep_root + "query/colorprocess"
         self.signals = CorpusInterfaceSignals()
         self.user_id = -1
 
@@ -359,6 +363,20 @@ class WebAppCorpusInterface(QObject):
     @pyqtSlot(object)
     def download_project(self, desc):
         pass
+
+    @pyqtSlot()
+    def get_movies(self):
+        print("OK")
+        return requests.get(self.ep_query_movies).json()
+
+    @pyqtSlot()
+    def get_color_processes(self):
+        return requests.get(self.ep_query_color_processes).json()
+
+    @pyqtSlot()
+    def get_persons(self):
+        return requests.get(self.ep_query_persons).json()
+
 
 class LocalCorpusInterface():
     def __init__(self):

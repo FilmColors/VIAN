@@ -4,7 +4,7 @@ import cv2
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
+from PyQt5.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
 from core.container.project import VIANProject
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
@@ -250,11 +250,24 @@ class NewProjectDialog(EDialogWidget):
         self.main_window.new_project(self.project, template, copy_movie=copy_movie)
         self.close()
 
+
 class FilmographyWidget(QWidget):
-    def __init__(self, parent, project = None):
+    def __init__(self, parent, project = None, persons = None, processes = None):
         super(FilmographyWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/FilmographyWidget.ui")
         uic.loadUi(path, self)
+        if persons is not None:
+            q = QCompleter([p['name'] for p in persons])
+            self.lineEdit_Director.setCompleter(q)
+            self.lineEdit_Cinematography.setCompleter(q)
+            self.lineEdit_ColorConsultant.setCompleter(q)
+            self.lineEdit_ProductionDesign.setCompleter(q)
+            self.lineEdit_ArtDirector.setCompleter(q)
+            self.lineEdit_CostumDesign.setCompleter(q)
+        if processes is not None:
+            self.comboBox_ColorProcess.addItems(sorted([p['name'] for p in processes]))
+
+
         # if project is not None:
 
 

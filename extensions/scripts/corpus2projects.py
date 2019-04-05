@@ -53,7 +53,6 @@ def create_meta_data(movie: DBMovie):
     filmography_meta['costum_design'] = movie.costum_design
     filmography_meta['production_company'] = movie.production_company
     filmography_meta['country'] = movie.country
-    print(filmography_meta)
     return filmography_meta
 
 if __name__ == '__main__':
@@ -94,6 +93,7 @@ if __name__ == '__main__':
         fps = cap.get(cv2.CAP_PROP_FPS)
         project = create_project_headless(name + ".eext", location=dir_name, movie_path = movie_path, template_path=template_path)
         project.movie_descriptor.meta_data['ERC_FilmColorsFilmography'] = create_meta_data(p.movie)
+        project.movie_descriptor.movie_id = "".join([str(p.corpus_id),str(p.manifestation_id),str(p.copy_id)])
 
         keyword_idx = dict()
         experiment = project.experiments[0] #type: Experiment

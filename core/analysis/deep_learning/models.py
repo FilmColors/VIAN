@@ -8,20 +8,47 @@ DIR_WEIGHTS_BUILT_IN = "/data/models/"
 KERAS_LIP_WEIGHTS = "data/models/semantic_segmentation/LIP_PSPNET50_Weights.hdf5"
 
 
+class VIANKerasModel():
+    """
+    This is the base class of VIAN Models. 
+    It should be treated as an interface to implement. 
+    """
 
+    def init_model(self):
+        """
+        This is where the model should be build
+        :return: 
+        """
+        pass
 
-class KerasModel():
     def forward(self, frame):
+        """
+        Compute the next frame
+        :param frame: 
+        :return: 
+        """
         pass
 
     def load_weights(self, path):
+        """
+        :param path: The absolute path to the stored weights
+        :return: 
+        """
+        pass
+
+    def store_weights(self, path):
+        """
+
+        :param path: The absolute path to store the weights
+        :return: 
+        """
         pass
 
     def train(self, args):
         pass
 
 
-class PSPNetModel(KerasModel):
+class PSPNetModelVIAN(VIANKerasModel):
     def __init__(self, input_shape = (256, 256, 3), n_labels=20, kernel=3, pool_size = (2,2), output_mode="softmax"):
         self.input_shape = input_shape
         self.n_labels = n_labels
@@ -96,7 +123,7 @@ if __name__ == '__main__':
         KTF.set_session(session)
 
         files = glob.glob("test_images/*.jpg")
-        model = PSPNetModel(input_shape=(512, 512, 3))
+        model = PSPNetModelVIAN(input_shape=(512, 512, 3))
         for f in files:
             img = cv2.imread(f)
             result = model.forward(img)
