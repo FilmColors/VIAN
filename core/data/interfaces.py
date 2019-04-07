@@ -136,6 +136,18 @@ class IProjectContainer(QObject):
         else:
             return to_return
 
+    def save_delete(self):
+        """
+        This function is called in the GUI and is ment to wrap the self.delete() function, such 
+        that the a GUI event can be raised if necessary, for example if the delete should raise a warning of 
+        unexpected bevhaviour for the user. 
+        
+        If not overriden, it calls the delete() function directly. 
+        
+        :return: 
+        """
+        self.delete()
+
     def delete(self):
         print("Not Implemented in ", self)
 

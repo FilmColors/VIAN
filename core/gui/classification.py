@@ -133,7 +133,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.update_widget()
 
     def on_selected(self, sender, selected):
-
         if self.behaviour == "classification":
             if sender is self:
                 return
@@ -421,6 +420,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.current_query_keywords = []
         self.update_widget()
         self.current_experiment.query(self.current_query_keywords, self.cb_PromoteToScreenshots.isChecked())
+
+    @pyqtSlot(object)
+    def on_experiment_changed(self, exp):
+        self.update_widget()
 
 
 class CheckBoxGroupWidget(QWidget):

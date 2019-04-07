@@ -1082,7 +1082,7 @@ class MainWindow(QtWidgets.QMainWindow):
         to_delete = self.project.selected
         try:
             for d in to_delete:
-                d.delete()
+                d.save_delete()
         except Exception as e:
             print(e)
         self.project.inhibit_dispatch = False

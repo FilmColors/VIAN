@@ -7,7 +7,27 @@ from core.data.interfaces import IProjectContainer, IHasName, IClassifiable
 from core.gui.vocabulary import VocabularyItem
 import time
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QMessageBox, QPushButton
 import numpy as np
+
+
+def delete_even_if_connected_msgbox(mode="word"):
+    """
+    Shows a Question dialog if a given keyword should be removed even if it has already been 
+    used in the classification.
+
+    :param mode: "voc" or "word" 
+    :return: an QMessageBox.Answer
+    """
+    if mode == "word":
+        text = 'This Keyword has already been connected used to classify, removing it from the vocabulary '
+        'also removes it from the classification. Do you want to remove it anyway?'
+    else:
+        text = 'This Vocabulary contains keywords which have already been used to classify, removing the vocabulary'
+        'also removes the classification already done. Do you want to remove it anyway?'
+
+    answer = QMessageBox.question(None, "Warning", text)
+    return answer
 
 
 class Vocabulary(IProjectContainer, IHasName):
@@ -262,6 +282,21 @@ class Vocabulary(IProjectContainer, IHasName):
             self.remove_word(w, dispatch=False)
         self.project.remove_vocabulary(self)
 
+    def save_delete(self):
+        has_been_used = False
+        for w in self.words_plain:
+            for k in w.unique_keywords:
+                if len(k.tagged_containers) > 0:
+                    has_been_used = True
+                    break
+        if has_been_used:
+            answer = delete_even_if_connected_msgbox("voc")
+            if answer == QMessageBox.Yes:
+                self.delete()
+            else:
+                return
+        else:
+            self.delete()
 
 class VocabularyWord(IProjectContainer, IHasName):
     """
@@ -296,10 +331,12 @@ class VocabularyWord(IProjectContainer, IHasName):
 
     def _add_referenced_unique_keyword(self, kwd):
         self.unique_keywords.append(kwd)
+        kwd.class_obj.onUniqueKeywordsChanged.emit(kwd)
 
     def _remove_referenced_unique_keyword(self, kwd):
         if kwd in self.unique_keywords:
             self.unique_keywords.remove(kwd)
+            kwd.class_obj.onUniqueKeywordsChanged.emit(kwd)
 
     def set_name(self, name):
         self.name = name
@@ -333,10 +370,8 @@ class VocabularyWord(IProjectContainer, IHasName):
         return self.name
 
     def cleanup_referenced_keywords(self):
-        print("Cleaning Up")
         to_remove = []
         for ukw in self.unique_keywords:
-            print("Removing Keyword", ukw)
             ukw.class_obj.unique_keywords = [x for x in ukw.class_obj.unique_keywords if not x.word_obj == self]
             to_remove.append(ukw)
         self.unique_keywords = [x for x in self.unique_keywords if x not in to_remove]
@@ -344,6 +379,21 @@ class VocabularyWord(IProjectContainer, IHasName):
     def delete(self):
         self.project.remove_from_id_list(self)
         self.vocabulary.remove_word(self)
+
+    def save_delete(self):
+        has_been_used = False
+        for k in self.unique_keywords:
+            if len(k.tagged_containers) > 0:
+                has_been_used = True
+                break
+        if has_been_used:
+            answer = delete_even_if_connected_msgbox("word")
+            if answer == QMessageBox.Yes:
+                self.delete()
+            else:
+                return
+        else:
+            self.delete()
 
 
 class ClassificationObject(IProjectContainer, IHasName):
@@ -520,6 +570,7 @@ class UniqueKeyword(IProjectContainer):
         self.word_obj = word_obj
         self.class_obj = class_obj
         self.external_id = -1
+        self.tagged_containers = []
 
         if word_obj is not None:
             self.word_obj._add_referenced_unique_keyword(self)
@@ -731,11 +782,10 @@ class Experiment(IProjectContainer, IHasName):
 
     def toggle_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         tag = [container, keyword]
-        # print("Toggled", tag)
         if tag not in self.classification_results:
-            self.classification_results.append(tag)
+            self.tag_container(container, keyword)
         else:
-            self.classification_results.remove([container, keyword])
+            self.remove_tag(container, keyword)
 
     def has_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         tag = [container, keyword]
@@ -748,10 +798,14 @@ class Experiment(IProjectContainer, IHasName):
         tag = [container, keyword]
         if tag not in self.classification_results:
             self.classification_results.append(tag)
+            if container not in keyword.tagged_containers:
+                keyword.tagged_containers.append(container)
 
     def remove_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         try:
             self.classification_results.remove([container, keyword])
+            if container in keyword.tagged_containers:
+                keyword.tagged_containers.remove(container)
         except Exception as e:
             print(e)
 
@@ -852,12 +906,12 @@ class Experiment(IProjectContainer, IHasName):
                 c = project.get_by_id(ser[0])
                 k = project.get_by_id(ser[1])
                 if c is not None and k is not None:
-                    self.classification_results.append([c, k])
+                    self.tag_container(c, k)
                 else:
                     print("Loading Classification mapping failed: ", c, k)
 
         except Exception as e:
-            print(e)
+            print("Exeption during Experiment.deserialize:", e)
             pass
 
         return self

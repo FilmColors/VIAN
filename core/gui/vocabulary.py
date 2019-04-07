@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent
 from PyQt5 import uic
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 from core.data.interfaces import IProjectChangeNotify
@@ -173,9 +173,9 @@ class VocabularyContextMenu(QMenu):
 
     def on_remove(self):
         if self.item.get_type() == VOCABULARY:
-            self.main_window.project.remove_vocabulary(self.item)
+            self.item.save_delete()
         else:
-            self.item.vocabulary.remove_word(self.item)
+            self.item.save_delete()
 
 
 class VocabularyItem(QStandardItem):
