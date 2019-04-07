@@ -337,7 +337,7 @@ class VocabularyWord(IProjectContainer, IHasName):
         to_remove = []
         for ukw in self.unique_keywords:
             print("Removing Keyword", ukw)
-            ukw.class_obj.unique_keywords = [x for x in ukw.class_obj.unique_keywords if not x == self]
+            ukw.class_obj.unique_keywords = [x for x in ukw.class_obj.unique_keywords if not x.word_obj == self]
             to_remove.append(ukw)
         self.unique_keywords = [x for x in self.unique_keywords if x not in to_remove]
 
