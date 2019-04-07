@@ -586,7 +586,6 @@ class KeywordWidget(QWidget):
             try:
                 if item[2].checkState() == Qt.Checked:
                     result.append(item[0].classification_object_id)
-                print("ok")
             except Exception as e:
                 print(e)
         return result

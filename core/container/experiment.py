@@ -70,9 +70,20 @@ class Vocabulary(IProjectContainer, IHasName):
         self.onVocabularyWordAdded.emit(word)
 
     def remove_word(self, word, dispatch = True):
+        """
+        Removes a word from the vocabulary, cleans up all references to this word.
+
+        :param word:
+        :param dispatch:
+        :return:
+        """
         children = []
         word.get_children_plain(children)
 
+        # Remove all unique keywords attached to this VocabularyWord
+        word.cleanup_referenced_keywords()
+
+        # Remove all children if nesseary
         for w in children:
             self.words_plain.remove(w)
 
@@ -278,18 +289,17 @@ class VocabularyWord(IProjectContainer, IHasName):
         self.parent = parent
         self.children = []
         self.connected_items = []
+        self.unique_keywords = []
         self.organization_group = 0
         self.complexity_lvl = 0
         self.complexity_group = ""
 
-    # # OBSOLETE
-    # def add_connected_item(self, item):
-    #     self.connected_items.append(item)
-    #
-    # # OBSOLETE
-    # def remove_connected_item(self, item):
-    #     if item in self.connected_items:
-    #         self.connected_items.remove(item)
+    def _add_referenced_unique_keyword(self, kwd):
+        self.unique_keywords.append(kwd)
+
+    def _remove_referenced_unique_keyword(self, kwd):
+        if kwd in self.unique_keywords:
+            self.unique_keywords.remove(kwd)
 
     def set_name(self, name):
         self.name = name
@@ -321,6 +331,15 @@ class VocabularyWord(IProjectContainer, IHasName):
 
     def get_name(self):
         return self.name
+
+    def cleanup_referenced_keywords(self):
+        print("Cleaning Up")
+        to_remove = []
+        for ukw in self.unique_keywords:
+            print("Removing Keyword", ukw)
+            ukw.class_obj.unique_keywords = [x for x in ukw.class_obj.unique_keywords if not x == self]
+            to_remove.append(ukw)
+        self.unique_keywords = [x for x in self.unique_keywords if x not in to_remove]
 
     def delete(self):
         self.project.remove_from_id_list(self)
@@ -502,6 +521,9 @@ class UniqueKeyword(IProjectContainer):
         self.class_obj = class_obj
         self.external_id = -1
 
+        if word_obj is not None:
+            self.word_obj._add_referenced_unique_keyword(self)
+
     def get_name(self):
         return self.word_obj.get_name()
 
@@ -527,7 +549,7 @@ class UniqueKeyword(IProjectContainer):
             pass
 
         self.set_project(project)
-
+        self.word_obj._add_referenced_unique_keyword(self)
         return self
 
 

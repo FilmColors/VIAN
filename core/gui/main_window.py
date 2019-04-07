@@ -2137,7 +2137,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for o in self.i_project_notify_reciever:
                 ttime = time.time()
                 o.on_selected(sender, selected)
-                print(sender, o.__class__.__name__, time.time() - ttime)
+                # print(sender, o.__class__.__name__, time.time() - ttime)
 
     def dispatch_on_timestep_update(self, time):
         if self.project is None:

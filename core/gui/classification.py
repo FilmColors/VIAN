@@ -223,7 +223,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.update_layout_class_obj()
 
     def update_layout_class_obj(self):
-        print("Hello")
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
             if len(self.sorted_containers) > self.current_idx:
@@ -273,6 +272,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     keywords = self.current_experiment.get_unique_keywords()
                 else:
                     keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+
                 keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
 
                 for k in keywords:
@@ -310,6 +310,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 for g in self.checkbox_groups:
                     g.finalize()
             except Exception as e:
+                raise e
                 print(e)
         for g in self.tabs:
             for t in g:

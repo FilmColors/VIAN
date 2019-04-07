@@ -1090,6 +1090,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return voc
 
     def remove_vocabulary(self, voc):
+        """
+        Removes a given vocabulary from the project and cleans up all references to it.
+
+        :param voc:
+        :return:
+        """
         if voc in self.vocabularies:
             self.vocabularies.remove(voc)
             self.remove_from_id_list(voc)
