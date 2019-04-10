@@ -298,6 +298,7 @@ class Vocabulary(IProjectContainer, IHasName):
         else:
             self.delete()
 
+
 class VocabularyWord(IProjectContainer, IHasName):
     """
     :var name: The Name of the Word

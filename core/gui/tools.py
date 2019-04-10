@@ -241,6 +241,7 @@ class ExportImageDialog(EDialogWidget):
     last_grid_color = []
     last_size = []
     last_font_size = []
+    last_preset = []
 
     def __init__(self, main_window, visualization):
         super(ExportImageDialog, self).__init__(visualization, main_window)
@@ -311,6 +312,9 @@ class ExportImageDialog(EDialogWidget):
             self.spinBox_GridA.setValue(0)
 
     def load_cache(self):
+        if len(self.last_preset) > 0:
+            self.comboBoxPreset.setCurrentText(self.last_preset[0])
+
         if len(self.last_background) > 0:
             self.spinBox_BG_R.setValue(self.last_background[0].red())
             self.spinBox_BG_G.setValue(self.last_background[0].green())
@@ -333,6 +337,8 @@ class ExportImageDialog(EDialogWidget):
         if len(self.last_directories) > 0:
             self.file_browser.line_edit.setText(self.last_directories[len(self.last_directories) - 1])
 
+
+
     def on_update(self):
         background = QColor(self.spinBox_BG_R.value(), self.spinBox_BG_G.value(), self.spinBox_BG_B.value(), self.spinBox_BG_A.value())
         grid = QColor(self.spinBox_GridR.value(), self.spinBox_GridG.value(), self.spinBox_GridB.value(), self.spinBox_GridA.value())
@@ -349,15 +355,18 @@ class ExportImageDialog(EDialogWidget):
         print("Set Image")
         self.preview.set_image(image)
 
-        #Caching
+        # Caching
         self.last_background.clear()
         self.last_grid_color.clear()
         self.last_size.clear()
         self.last_font_size.clear()
+        self.last_preset.clear()
+
         self.last_background.append(background)
         self.last_grid_color.append(grid)
         self.last_size.append(size)
         self.last_font_size.append(font_size)
+        self.last_preset.append(self.comboBoxPreset.currentText())
         return image
 
     def on_export(self):
@@ -374,6 +383,29 @@ class ExportImageDialog(EDialogWidget):
         else:
             self.last_directories.append(self.directory)
             file_name = os.path.join(self.directory, self.naming_widget.get_naming() + ".png")
+
+        if os.path.isfile(file_name):
+            msgBox = QMessageBox()
+            msgBox.setText("A File with this name already exists, "
+                                                      "how do you want to proceed. ")
+            msgBox.addButton(QPushButton('Overwrite'), QMessageBox.YesRole)
+            msgBox.addButton(QPushButton('Create Unique Name'), QMessageBox.NoRole)
+            msgBox.addButton(QPushButton('Cancel'), QMessageBox.RejectRole)
+
+            ret = msgBox.exec_()
+
+            if ret == 0:
+                file_name = file_name
+            elif ret == 1:
+                file_name_new = file_name
+                ftype = "." + file_name.split(".")[-1:][0]
+                c = 1
+                while(os.path.isfile(file_name_new)):
+                    file_name_new = file_name.replace(ftype, "") + "_" + str(c).zfill(2) + ftype
+                    c += 1
+                file_name = file_name_new
+            else:
+                return
 
         try:
             region = self.preview.region

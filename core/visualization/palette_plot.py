@@ -623,19 +623,22 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         self.palette_tree = None
         self.slider = None
         self.spbox_depth = None
-        self.depth = 0
+        self.depth = 10
 
     def get_param_widget(self):
         w = QWidget()
         w.setLayout(QHBoxLayout())
         self.slider = QSlider(Qt.Horizontal, self)
         self.slider.setRange(1, 20)
+        self.slider.setValue(10)
         self.slider.valueChanged.connect(self.on_depth_changed)
         self.spbox_depth = QSpinBox(self)
+        self.spbox_depth.setValue(10)
         self.spbox_depth.setRange(1, 20)
         self.spbox_depth.valueChanged.connect(self.slider.setValue)
         self.slider.valueChanged.connect(self.spbox_depth.setValue)
 
+        w.layout().addWidget(QLabel("Depth:", w))
         w.layout().addWidget(self.slider)
         w.layout().addWidget(self.spbox_depth)
 

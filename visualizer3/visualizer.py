@@ -400,7 +400,6 @@ class VIANVisualizer2(QMainWindow):
             self.query_widget.stack_widget.setCurrentIndex(s)
         self.query_widget.stack_widget.setCurrentIndex(0)
 
-
     def get_widgets(self):
         return self, self.result_wnd
 
@@ -484,11 +483,19 @@ class KeywordWidget(QWidget):
         super(KeywordWidget, self).__init__(parent)
         self.visualizer = visualizer
         self.setLayout(QHBoxLayout(self))
+        self.inner = QWidget(self)
+        self.inner.setLayout(QHBoxLayout())
         self.class_obj_list = ClassificationObjectList(self)
         self.class_obj_list.setMaximumWidth(200)
         self.class_obj_list.currentItemChanged.connect(self.on_classification_object_changed)
+        self.scroll_widget = QScrollArea(self)
+        self.layout().addWidget(self.scroll_widget)
+        self.scroll_widget.setWidgetResizable(True)
+        self.scroll_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         self.stack_widget = QStackedWidget(self)
         self.stack_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.scroll_widget.setWidget(self.inner)
         # self.stack_widget.setStyleSheet("QWidget{background: rgb(30,30,30);}")
 
         self.stack_map = dict()
@@ -496,8 +503,8 @@ class KeywordWidget(QWidget):
         self.voc_map = dict()
         self.keyword_map = dict()
         self.keyword_cl_obj_map = dict()
-        self.layout().addWidget(self.class_obj_list)
-        self.layout().addWidget(self.stack_widget)
+        self.inner.layout().addWidget(self.class_obj_list)
+        self.inner.layout().addWidget(self.stack_widget)
         self.filmography_widget = None
         self.add_filmography_widget()
 

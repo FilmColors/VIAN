@@ -8,10 +8,10 @@ import cv2
 from PyQt5 import uic
 import os
 import sys
-if sys.platform == "darwin":
-    from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
-else:
-    from PyQt5.QtWebKitWidgets import QWebView
+# if sys.platform == "darwin":
+#     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
+# else:
+#     from PyQt5.QtWebKitWidgets import QWebView
 
 # from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 # from matplotlib.figure import Figure
@@ -439,20 +439,20 @@ class EMultiGraphicsView(QGraphicsView):
         cv2.imwrite(file_name, img)
 
 
-class EHtmlDisplay(QWidget):
-    def __init__(self, parent, html, plot_width = 600):
-        super(EHtmlDisplay, self).__init__(parent)
-
-        self.view = QWebView(self)
-        self.plot_width = plot_width
-        self.view.setHtml(html)
-        self.setLayout(QHBoxLayout(self))
-        self.layout().addWidget(self.view)
-        self.view.setZoomFactor(1.0)
-
-    def resizeEvent(self, a0: QResizeEvent):
-        super(EHtmlDisplay, self).resizeEvent(a0)
-        self.view.setZoomFactor(self.width()/self.plot_width - 0.1)
+# class EHtmlDisplay(QWidget):
+#     def __init__(self, parent, html, plot_width = 600):
+#         super(EHtmlDisplay, self).__init__(parent)
+#
+#         self.view = QWebView(self)
+#         self.plot_width = plot_width
+#         self.view.setHtml(html)
+#         self.setLayout(QHBoxLayout(self))
+#         self.layout().addWidget(self.view)
+#         self.view.setZoomFactor(1.0)
+#
+#     def resizeEvent(self, a0: QResizeEvent):
+#         super(EHtmlDisplay, self).resizeEvent(a0)
+#         self.view.setZoomFactor(self.width()/self.plot_width - 0.1)
 
 
 class EToolBar(QToolBar):

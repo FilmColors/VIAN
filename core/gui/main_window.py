@@ -888,7 +888,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #region QEvent Overrides
     def moveEvent(self, *args, **kwargs):
         QtWidgets.QMainWindow.moveEvent(self, *args, **kwargs)
-        if self.drawing_overlay.isVisible():
+        if self.drawing_overlay is not None and self.drawing_overlay.isVisible():
             self.drawing_overlay.synchronize_transforms()
         self.update()
 

@@ -5,8 +5,8 @@ from functools import partial
 import cv2
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtMultimediaWidgets import QVideoWidget
+# from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+# from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 
 from core.gui.ewidgetbase import EDockWidget

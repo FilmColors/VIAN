@@ -8,6 +8,8 @@ from PyQt5.QtGui import QImage, QPixmap, QIcon
 import PyQt5.QtCore as QtCore
 import subprocess
 import cv2
+import inspect
+
 # import matplotlib.pyplot as plt
 import numpy as np
 import cv2
@@ -599,3 +601,9 @@ def get_heatmap_value(val, max = 1.0, asuint8=True, asrgb = True, gray = False):
 
 def floatify_img(img):
     return img.astype(np.float32) / 255
+
+
+def handle_exception(func_name, e):
+    text = "Exception in\t" + str(inspect.stack()[0][3]).rjust(25) + "with message:\t" + str(e)
+    print(text)
+

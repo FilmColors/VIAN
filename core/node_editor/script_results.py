@@ -5,10 +5,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 # from PyQt5.QtWebKitWidgets import QWebView
 import sys
-if sys.platform == "darwin":
-    from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
-else:
-    from PyQt5.QtWebKitWidgets import QWebView
+# if sys.platform == "darwin":
+#     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
+# else:
+#     from PyQt5.QtWebKitWidgets import QWebView
 from core.container.project import *
 from core.gui.ewidgetbase import EDockWidget
 
@@ -97,8 +97,8 @@ class WebResultWidget(ResultWidget):
     def __init__(self, parent, html):
         super(WebResultWidget, self).__init__(parent, "Image Result")
 
-        self.view = QWebView(self)
-        self.view.setHtml(html)
+        # self.view = QWebView(self)
+        # self.view.setHtml(html)
         self.setLayout(QHBoxLayout(self))
         self.layout().addWidget(self.view)
         self.view.setZoomFactor(0.5)
