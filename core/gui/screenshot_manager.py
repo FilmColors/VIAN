@@ -973,7 +973,7 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         self.selection_rect = selection_rect
         self.qpixmap = qpixmap
 
-    @pyqtSlot(object, object, object)
+    # @pyqtSlot(object, object, object)
     def set_pixmap(self, scr, ndarray, pixmap):
         self.setPixmap(pixmap)
         self.qpixmap = pixmap

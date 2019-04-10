@@ -411,13 +411,13 @@ class AbstractOutlinerItem(QTreeWidgetItem):
         for a in item.connected_analyses:
             self.add_analysis(a)
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def add_analysis(self, analysis):
         if analysis.unique_id not in self.analyses:
             itm = AnalyzesOutlinerItem(self, 0, analysis)
             self.analyses[analysis.unique_id] = itm
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def remove_analysis(self, analysis):
         if analysis.unique_id in self.analyses:
             self.removeChild(self.annotations[analysis.get_id()])
@@ -504,14 +504,14 @@ class SegmentationOutlinerItem(AbstractOutlinerItem):
     def get_name(self):
         return self.segmentation.name
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def on_segment_added(self, segment):
         if segment.get_id() not in self.segments:
             segment_item = SegmentOutlinerItem(None, segment.ID, segment)
             self.insertChild(segment.ID - 1, segment_item)
             self.segments[segment.get_id()] = segment_item
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def on_segment_removed(self, s):
         if s.get_id() in self.segments:
             self.removeChild(self.segments[s.get_id()])
@@ -572,13 +572,13 @@ class AnnotationLayerOutlinerItem(AbstractOutlinerItem):
         self.annotation_layer.onAnnotationLayerChanged.connect(partial(self.update_item))
         self.update_item()
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def on_add_annotation(self, a):
         if a.get_id() not in self.annotations:
             itm = AnnotationOutlinerItem(self, len(self.annotations.keys()), a)
             self.annotations[a.get_id()] = itm
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def on_annotation_removed(self, a):
         if a.get_id() in self.annotations:
             self.removeChild(self.annotations[a.get_id()])
@@ -651,13 +651,13 @@ class ScreenshotGroupOutlinerItem(AbstractOutlinerItem):
         self.item.onScreenshotRemoved.connect(self.on_remove_screenshot)
         self.item.onScreenshotGroupChanged.connect(partial(self.update_item))
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def on_add_screenshot(self, a):
         if a.get_id() not in self.screenshots:
             itm = ScreenshotOutlinerItem(self, len(self.screenshots.keys()), a)
             self.screenshots[a.get_id()] = itm
 
-    @pyqtSlot(object)
+    # @pyqtSlot(object)
     def on_remove_screenshot(self, a):
         if a.get_id() in self.screenshots:
             self.removeChild(self.screenshots[a.get_id()])
