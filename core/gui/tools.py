@@ -183,6 +183,7 @@ class ExportNamingConventionWidget(QWidget):
         self.lower.addWidget(self.preview)
         self.boxes = []
         self.naming_fields = naming_fields
+        self.convention_exists = False
         for i, (k, v) in enumerate(naming_fields.items()):
             cb = QComboBox(self)
             cb.addItem("None")
@@ -190,6 +191,7 @@ class ExportNamingConventionWidget(QWidget):
             if len(self.last_convention) > 0:
                 try:
                     cb.setCurrentText(self.last_convention[i])
+                    self.convention_exists = True
                 except:
                     continue
             self.boxes.append(cb)
@@ -199,19 +201,22 @@ class ExportNamingConventionWidget(QWidget):
 
         # This could fail because the fields are not guaranteed to be present. If so we just keep the default values
         try:
-            if  self.naming_fields['corpus_id'] != "":
-                self.boxes[0].setCurrentText("corpus_id")
-                self.boxes[1].setCurrentText("keywords_include")
-                self.boxes[2].setCurrentText("keywords_exclude")
-                self.boxes[3].setCurrentText("year")
-                self.boxes[4].setCurrentText("k_images")
-            else:
-                self.boxes[0].setCurrentText("None")
-                self.boxes[1].setCurrentText("keywords_include")
-                self.boxes[2].setCurrentText("keywords_exclude")
-                self.boxes[3].setCurrentText("year")
-                self.boxes[4].setCurrentText("k_images")
-            self.on_changed()
+            if self.convention_exists is False:
+                if  self.naming_fields['corpus_id'] != "":
+                    self.boxes[0].setCurrentText("corpus_id")
+                    self.boxes[1].setCurrentText("keywords_include")
+                    self.boxes[2].setCurrentText("keywords_exclude")
+                    self.boxes[3].setCurrentText("year")
+                    self.boxes[4].setCurrentText("k_images")
+                    self.boxes[5].setCurrentText("classification_obj")
+                else:
+                    self.boxes[0].setCurrentText("None")
+                    self.boxes[1].setCurrentText("keywords_include")
+                    self.boxes[2].setCurrentText("keywords_exclude")
+                    self.boxes[3].setCurrentText("year")
+                    self.boxes[4].setCurrentText("k_images")
+                    self.boxes[5].setCurrentText("classification_obj")
+                self.on_changed()
         except:
             pass
 
@@ -354,7 +359,6 @@ class ExportImageDialog(EDialogWidget):
 
         if len(self.last_directories) > 0:
             self.file_browser.line_edit.setText(self.last_directories[len(self.last_directories) - 1])
-
 
     def on_update(self):
         background = QColor(self.spinBox_BG_R.value(), self.spinBox_BG_G.value(), self.spinBox_BG_B.value(), self.spinBox_BG_A.value())

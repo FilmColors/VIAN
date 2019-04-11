@@ -1014,7 +1014,7 @@ class ImagePlotTime(ImagePlot):
         self.lines = []
 
         pen = QPen()
-        pen.setWidth(10)
+        pen.setWidth(1)
         pen.setColor(self.grid_color)
 
         font = QFont()
@@ -1220,7 +1220,7 @@ class ImagePlotYear(ImagePlotTime):
 
         # Y - Axis
         font = QFont()
-        font.setPointSize(self.font_size)
+        font.setPointSize(self.font_size * 2.0)
         step = np.ceil(self.y_max / 10)
         if step == 0:
             return
@@ -1235,14 +1235,20 @@ class ImagePlotYear(ImagePlotTime):
             self.lines.append(lbl)
 
         # X - Axis
+        last_year_x = -100
+        y_bottom_second_row = None
         for (value, name) in self.years:
             font = QFont()
-            font.setPointSize(self.font_size)
+            font.setPointSize(self.font_size * 2.0)
 
             x = value * self.x_scale
             y = self.base_line * self.y_scale
             line = self.scene().addLine(x, y, x, (self.base_line - self.y_max) * self.y_scale, pen)
             text = self.scene().addText(str(name), font)
+            if last_year_x > x:
+                y += text.boundingRect().height() * 1.2
+                y_bottom_second_row = text.boundingRect().height() * 2.0
+            last_year_x = x + text.boundingRect().width()
             text.setPos(x - text.boundingRect().width()/2, y + text.boundingRect().height())
             text.setDefaultTextColor(self.grid_color)
             self.year_grid.append(line)
@@ -1250,13 +1256,13 @@ class ImagePlotYear(ImagePlotTime):
 
             self.setSceneRect(self.scene().itemsBoundingRect())
             # self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
-            # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
-            # self.add_grid(False)
+            #             # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+            #             # self.add_grid(False)
 
 
-        font.setPointSize(self.font_size * 2)
+        font.setPointSize(self.font_size * 3)
         text = self.scene().addText("Year", font)
-        text.setPos(self.x_max * self.x_scale / 2 - (text.boundingRect().width() / 2), self.base_line * self.y_scale + text.boundingRect().height())
+        text.setPos(self.x_max * self.x_scale / 2 - (text.boundingRect().width() / 2), self.base_line * self.y_scale + (text.boundingRect().height() * 2.0))
         text.setDefaultTextColor(self.grid_color)
         self.lines.append(text)
 
@@ -1281,3 +1287,44 @@ class ImagePlotYear(ImagePlotTime):
             return True
 
         return False
+
+    def get_param_widget(self):
+        w = QWidget()
+        w.setLayout(QVBoxLayout())
+        hl1 = QHBoxLayout(w)
+        hl1.addWidget(QLabel("Image-Scale", w))
+        hl2 = QHBoxLayout(w)
+        hl2.addWidget(QLabel("Y-Scale:", w))
+
+        slider_imagescale = QSlider(Qt.Horizontal, w)
+        slider_imagescale.setRange(1, 2000)
+        slider_imagescale.valueChanged.connect(self.set_image_scale)
+        slider_yscale = QSlider(Qt.Horizontal, w)
+        slider_yscale.setRange(1, 2000)
+        slider_yscale.valueChanged.connect(self.set_y_scale)
+
+        hl1.addWidget(slider_imagescale)
+        hl2.addWidget(slider_yscale)
+
+        image_scale_line = QSpinBox(w)
+        image_scale_line.setRange(1, 2000)
+        image_scale_line.setValue(self.x_scale)
+        image_scale_line.valueChanged.connect(slider_imagescale.setValue)
+        slider_imagescale.valueChanged.connect(image_scale_line.setValue)
+        hl1.addWidget(image_scale_line)
+
+        y_scale_line = QSpinBox(w)
+        y_scale_line.setRange(1, 2000)
+        y_scale_line.setValue(self.y_scale)
+        y_scale_line.valueChanged.connect(slider_yscale.setValue)
+        slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        hl2.addWidget(y_scale_line)
+
+
+        slider_imagescale.setValue(100)
+        slider_yscale.setValue(600)
+
+        w.layout().addItem(hl1)
+        w.layout().addItem(hl2)
+
+        return w
