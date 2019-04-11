@@ -139,6 +139,21 @@ class PlotResultsGroupWidget(QDockWidget):
         self.central.addDockWidget(Qt.TopDockWidgetArea, self.summary)
         self.summary.onGroupNameChanged.connect(parent.on_group_name_changed)
 
+        self.segment_view = SegmentsList(self)
+
+        i = 0
+        curr_segment = None
+        screenshots = sorted(screenshots.values(), key=lambda x:x.dbscreenshot.segment.id)
+        vis_scrs = []
+        for s in screenshots: #type:DBSegment
+            if s.dbscreenshot.segment != curr_segment:
+                if len(vis_scrs) > 0:
+                    self.segment_view.add_segment(curr_segment, vis_scrs)
+                vis_scrs = []
+                curr_segment = s.dbscreenshot.segment
+            vis_scrs.append(s)
+        self.central.tabifyDockWidget(self.summary, self.segment_view)
+
     def set_summary(self, summary_dict):
         self.summary.set_summary(summary_dict)
 
@@ -190,6 +205,7 @@ class QuerySummary(QDockWidget):
     def __init__(self, parent, clobj_widget, name, screenshots, segments):
         super(QuerySummary, self).__init__(parent)
         self.clobj_widget = clobj_widget
+        self.setWindowTitle("Summary")
         self.scroll = QScrollArea(self)
         self.scroll.setWidgetResizable(True)
         self.setWidget(self.scroll)
@@ -207,24 +223,10 @@ class QuerySummary(QDockWidget):
 
         self.screenshots = screenshots
         self.segments = segments
-        self.segment_view = SegmentsList(self)
-
-        i = 0
-        curr_segment = None
-        screenshots = sorted(screenshots.values(), key=lambda x:x.dbscreenshot.segment.id)
-        vis_scrs = []
-        for s in screenshots: #type:DBSegment
-            if s.dbscreenshot.segment != curr_segment:
-                if len(vis_scrs) > 0:
-                    self.segment_view.add_segment(curr_segment, vis_scrs)
-                vis_scrs = []
-                curr_segment = s.dbscreenshot.segment
-            vis_scrs.append(s)
 
         self.inner.layout().addWidget(self.text_field_desc)
         self.inner.layout().addWidget(ExpandableWidget(self, "Classification Objects", self.clobj_widget, True))
         self.inner.layout().addWidget(ExpandableWidget(self, "Raw Query", self.text_field_raw, False))
-        self.inner.layout().addWidget(ExpandableWidget(self, "Segments", self.segment_view, False))
 
         self.inner.layout().addItem(QSpacerItem(0,0, QSizePolicy.Fixed, QSizePolicy.Expanding))
 
@@ -252,16 +254,22 @@ class QuerySummary(QDockWidget):
         self.old_name = self.name_edit.text()
 
 
-class SegmentsList(QWidget):
+class SegmentsList(QDockWidget):
     def __init__(self, parent):
         super(SegmentsList, self).__init__(parent)
-        self.setLayout(QVBoxLayout(self))
+        self.setWindowTitle("Segment List")
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(QWidget())
+        self.setWidget(self.scroll_area)
+        self.scroll_area.widget().setLayout(QVBoxLayout(self))
         self.segment_items = dict()
 
     def add_segment(self, segment, screenshots):
         item = SegmentItem(self, segment, screenshots)
         self.segment_items[segment.id] = item
-        self.layout().addWidget(item)
+        self.scroll_area.widget().layout().addWidget(item)
 
 
 class SegmentItem(QWidget):
@@ -269,10 +277,13 @@ class SegmentItem(QWidget):
         super(SegmentItem, self).__init__(parent)
         self.setLayout(QHBoxLayout(self))
         self.left = QWidget(self)
-        self.left.setMaximumWidth(150)
+        self.left.setMaximumWidth(200)
         self.left.setLayout(QVBoxLayout())
-        self.left.layout().addWidget(QLabel("Project ID: " + str(segment.project.corpus_id)))
+        self.left.layout().addWidget(QLabel("Project ID: " + "_".join([str(segment.project.corpus_id),
+                                                                       str(segment.project.manifestation_id),
+                                                                       str(segment.project.copy_id)])))
         self.left.layout().addWidget(QLabel("Segment ID: " + str(segment.movie_segm_id)))
+        self.left.layout().addWidget(QLabel("MovieName : " + str(segment.project.movie.name)))
         lbl = QLabel("Annotation: " + str(segment.body))
         lbl.setWordWrap(True)
         self.left.layout().addWidget(lbl)

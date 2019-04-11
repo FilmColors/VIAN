@@ -517,4 +517,4 @@ class WordCheckBox(QCheckBox):
     def __init__(self, parent, word):
         super(WordCheckBox, self).__init__(parent)
         self.word = word
-        self.setText(word.get_name())
+        self.setText(word.get_name().replace("_", " "))

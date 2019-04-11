@@ -482,7 +482,7 @@ class KeywordWidget(QWidget):
     def __init__(self,parent, visualizer):
         super(KeywordWidget, self).__init__(parent)
         self.visualizer = visualizer
-        self.setLayout(QHBoxLayout(self))
+        self.setLayout(QVBoxLayout(self))
         self.inner = QWidget(self)
         self.inner.setLayout(QHBoxLayout())
         self.class_obj_list = ClassificationObjectList(self)
@@ -507,6 +507,10 @@ class KeywordWidget(QWidget):
         self.inner.layout().addWidget(self.stack_widget)
         self.filmography_widget = None
         self.add_filmography_widget()
+        self.btn_clear_all = QPushButton("Clear All Filter", self)
+        self.btn_clear_all.clicked.connect(self.clear_all)
+        self.layout().addWidget(self.btn_clear_all)
+
 
     def add_filmography_widget(self):
         stack = FilmographyWidget(self)
@@ -597,6 +601,10 @@ class KeywordWidget(QWidget):
                 print(e)
         return result
 
+    def clear_all(self):
+        for k, cb in self.keyword_map.items():
+            cb.setChecked(False)
+        self.filmography_widget.clear()
 
 class WordCheckBox(QCheckBox):
     def __init__(self, parent, word):
@@ -682,5 +690,23 @@ class FilmographyWidget(QWidget):
             query.genre = [self.genre_map[self.comboBox_Genre.currentText()]]
 
         return query
+
+    def clear(self):
+        self.lineEdit_IMDB.setText("")
+        self.spinBox_Corpus_A.setValue(0)
+        self.spinBox_Corpus_B.setValue(0)
+        self.spinBox_Corpus_C.setValue(0)
+        self.comboBox_ColorProcess.setCurrentText("")
+        self.lineEdit_Director.setText("")
+        self.lineEdit_Cinematography.setText("")
+        self.lineEdit_ColorConsultant.setText("")
+        self.lineEdit_ProductionDesign.setText("")
+        self.lineEdit_ArtDirector.setText("")
+        self.lineEdit_CostumDesign.setText("")
+        self.lineEdit_ProductionCompany.setText("")
+        self.lineEdit_ProductionCountry.setText("")
+        self.spinBox_YearA.setValue(1800)
+        self.spinBox_YearB.setValue(2100)
+        self.comboBox_Genre.setCurrentText("")
 
 
