@@ -1,14 +1,14 @@
 import os
 import os
 import sys
+import numpy as np
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt
 
 from core.gui.tools import StringList
-from visualizer.vis_main_window import *
-from core.visualization.line_plot import LinePlot
+from core.visualization2.basic_vis import VIANPlotBase, DotPlot
 
 # CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])
 class TWindow(QtWidgets.QMainWindow):
@@ -16,17 +16,13 @@ class TWindow(QtWidgets.QMainWindow):
         super(TWindow, self).__init__()
         self.w = QWidget(self)
         self.w.setLayout(QVBoxLayout())
-        self.t = LinePlot(self)
-        ys1 = np.random.randint(0, 10, 20)
-        xs1 = list(range(20))
-        ys2 = np.random.randint(0, 100, 20)
-        xs2 = list(range(20))
-
+        self.t = DotPlot(self)
         self.w.layout().addWidget(self.t)
-        self.w.layout().addWidget(self.t.get_param_widget())
-        self.t.plot(xs1, ys1, col=QColor(255, 200, 200), line_name="Bob")
-        self.t.plot(xs2, ys2, col=QColor(200, 255, 200), line_name="Susanne")
-        self.setCentralWidget(self.w)
+
+        for i in range(100):
+            q = np.random.randint(0,100,2)
+            self.t.add_dot(q[0], q[1])
+        self.setCentralWidget(self.t)
         self.resize(1200, 800)
         self.show()
 

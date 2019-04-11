@@ -2109,7 +2109,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if run_colormetry:
             self.toggle_colormetry()
         else:
-            self.timeline.timeline.set_colormetry_progress(1.0)
+            self.timeline.timeline.set_colormetry_progress(0.0)
+
+        if self.current_perspective == Perspective.CorpusVisualizer.name:
+            self.switch_perspective(Perspective.Segmentation)
 
         print("\n#### --- Loaded Project --- ####")
         print("Folder:".rjust(15), self.project.folder)

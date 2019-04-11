@@ -21,10 +21,12 @@ import traceback
 from datetime import datetime
 from threading import Thread
 
+
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
 from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtGui import QPixmap, QIcon
+
 
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow

@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
 # Activate the Environment
-source activate vian_dev
+source activate vian-env
 
-conda install -c anaconda pyqt
-conda install -c conda-forge opencv
-conda install -c anaconda requests, networkx, scikit-learn
-pip install fastcluster
+conda install -c anaconda requests networkx scikit-learn h5py sqlalchemy
+conda install -c conda-forge opencv fastcluster pyqt
+conda install -c menpo dlib
 
-conda install h5py
-conda install -c anaconda cudnn
-pip3 install tensorflow
+cudnn tensorflow-gpu
+tensorflow
+
 pip install keras
