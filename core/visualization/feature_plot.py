@@ -207,6 +207,8 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
         self.scene().clear()
         self.images.clear()
 
+    def get_scene(self):
+        return self.scene()
 
 class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
     onFeatureAdded = pyqtSignal(object)
@@ -524,6 +526,8 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         for f in raw_data['features']:
             self.create_feature(f)
 
+    def get_scene(self):
+        return self.scene()
 
 class FeatureRectItem(QGraphicsRectItem):
     def __init__(self, x, y, w, h, pen, brush):

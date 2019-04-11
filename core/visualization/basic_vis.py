@@ -57,6 +57,9 @@ class IVIANVisualization():
         except Exception as e:
             print(e)
 
+    def get_scene(self):
+        return None
+
 
 class VIANPlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, background=QColor(30, 30, 30), aspect = Qt.KeepAspectRatio, x_label_format = "value", y_label_format = "value"):
@@ -610,3 +613,4 @@ class PaletteVis(QWidget, IVIANVisualization):
             self.items.append(itm)
 
         self.view.fitInView(self.view.sceneRect())
+

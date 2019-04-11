@@ -258,7 +258,13 @@ class ExportImageDialog(EDialogWidget):
         self.orig_grid_color = self.visualization.grid_color
         self.orig_font_size = self.visualization.font_size
 
+        self.ratio = 1.0
+        self.force_ratio = False
         self.load_cache()
+
+        if self.visualization.get_scene() is not None:
+            size = self.visualization.get_scene().itemsBoundingRect()
+            self.ratio = size.height() / size.width()
 
         self.widgetNamingConvention.layout().addWidget(self.file_browser)
         self.widget_Preview.setLayout(QVBoxLayout(self))
@@ -276,6 +282,8 @@ class ExportImageDialog(EDialogWidget):
         self.spinBoxFontSize.valueChanged.connect(self.on_update)
         self.spinBoxFontSize.setValue(self.visualization.font_size)
         self.comboBoxPreset.currentTextChanged.connect(self.on_preset)
+
+        self.spinBox_Height.setEnabled(False)
 
         self.btn_Export.clicked.connect(self.on_export)
         self.btn_Cancel.clicked.connect(self.on_close)
@@ -356,9 +364,13 @@ class ExportImageDialog(EDialogWidget):
         if not self.checkBox_Transparent.isChecked():
             background.setAlpha(255)
 
-        size = QSize(self.spinBox_Width.value(), self.spinBox_Height.value())
+        width = self.spinBox_Width.value()
+        height = width * self.ratio
+        size = QSize(width, height)
         self.visualization.grid_color = grid
         self.visualization.font_size = font_size
+        print("@TODO", self.visualization)
+
         print("Rendering Image")
         image = self.visualization.render_to_image(background, size)
         print("Set Image")

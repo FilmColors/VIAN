@@ -12,7 +12,7 @@ from core.gui.classification import CheckBoxGroupWidget
 from core.visualization.dot_plot import DotPlot
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime, ImagePlotYear
 from core.visualization.palette_plot import MultiPaletteLABWidget
-from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed
+from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed, PlotSettings
 from visualizer3.screenshot_worker import ScreenshotWorker
 from visualizer3.vis_entities import VisScreenshot
 from visualizer3.worker import QueryWorker, CORPUS_PATH
@@ -103,7 +103,12 @@ class VIANVisualizer2(QMainWindow):
         self.result_wnd = PlotResultsWidget(self)
 
         # Plottypes Widget
+        self.tab_plot_settings = QTabWidget(self)
         self.w_plot_types = QWidget(self)
+        self.w_plot_settings = QWidget(self)
+        self.tab_plot_settings.addTab("Plot Selection", self.w_plot_types)
+        self.tab_plot_settings.addTab("Plot Selection", self.w_plot_settings)
+
         lt = QGridLayout(self.w_plot_types)
         self.w_plot_types.setLayout(lt)
         self.cb_segm_ab_plot = QCheckBox("AB Screenshots Plot", self.w_plot_types)
@@ -136,6 +141,9 @@ class VIANVisualizer2(QMainWindow):
         self.sp_box_K.setValue(400)
         hbox_k.addWidget(self.sp_box_K)
 
+        lt = QGridLayout(self.w_plot_settings)
+
+
         self.centralWidget().layout().addWidget(self.w_plot_types)
 
         self.centralWidget().layout().addItem(hbox_k)
@@ -148,6 +156,8 @@ class VIANVisualizer2(QMainWindow):
         self.segm_scrs = dict()
 
         self.update_recent()
+
+
         self.show()
 
     def update_recent(self):

@@ -301,4 +301,32 @@ class SegmentItem(QWidget):
         self.image_view.replace_image(self.sender().dbscreenshot.id, pixmap)
 
 
+class PlotSettings:
+    def __init__(self):
+        self.image_ab_plot = dict(
+            range_scale = None,
+            image_scale = None,
+        )
+        self.image_lc_plot = dict(
+            image_scale = None,
+            range_scale = None
+        )
+        self.image_color_dt = dict(
+            image_scale = None,
+            x_scale = None,
+            y_scale = None
+        )
+        self.image_color_dy = dict(
+            image_scale = None,
+            x_scale = None,
+            y_scale = None
+        )
+        self.palette_ab_plot = dict(
+            depth = None
+        )
+        self.dot_plot = dict(
+            range_scale = None,
+            dot_alpha = None,
+            dot_size = None
+        )
 

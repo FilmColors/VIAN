@@ -22,7 +22,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.ctrl_is_pressed = False
         self.magnification = 1.0
 
-        self.grid_color = QColor(100,100,100, 150)
+        self.grid_color = QColor(200, 200, 200, 150)
 
         self.pos_scale = 1.0
 
@@ -54,8 +54,9 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.grid = []
         if grid_type == "LA":
             pen = QPen()
-            pen.setWidth(1)
+            pen.setWidthF(0.1)
             pen.setColor(self.grid_color)
+            print(self.grid_color.red())
 
             font = QFont()
             font.setPointSize(self.font_size)
@@ -85,8 +86,9 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
         elif grid_type == "AB":
             pen = QPen()
-            pen.setWidth(1)
+            pen.setWidthF(0.1)
             pen.setColor(self.grid_color)
+            print("Hello", self.grid_color.red())
 
             font = QFont()
             font.setPointSize(self.font_size * self.magnification * 2)
@@ -358,6 +360,10 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         :return: 
         """
 
+        raw = self.raw_data.copy()
+        self.clear_view()
+        self.apply_raw_data(raw)
+
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
@@ -441,7 +447,8 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
         return w
 
-
+    def get_scene(self):
+        return self.scene()
 
 
 

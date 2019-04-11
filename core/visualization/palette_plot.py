@@ -610,6 +610,9 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         self.draw_palette(image)
         return image
 
+    def get_scene(self):
+        return self.scene()
+
 
 class MultiPaletteLABWidget(QWidget, IVIANVisualization):
     def __init__(self, parent, naming_fields=None):
@@ -647,6 +650,9 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
     def render_to_image(self, background: QColor, size: QSize):
         self.dot_plot.font_size = self.font_size
         self.dot_plot.grid_color = self.grid_color
+
+        print(self.grid_color)
+
         self.draw_palette()
         return self.dot_plot.render_to_image(background, size)
 
@@ -706,3 +712,6 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
                 rx = np.random.normal(0, jitter)
                 ry = np.random.normal(0, jitter)
                 self.dot_plot.add_point(x=lab[1] + rx, y=-lab[2] + ry, z=lab[0], col=QColor(int(rgb[2]), int(rgb[1]), int(rgb[0])))
+
+    def get_scene(self):
+        return self.dot_plot.scene()

@@ -309,6 +309,9 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
     def reset_view(self):
         self.set_highlighted([], True)
 
+    def get_scene(self):
+        return self.scene()
+
 
 class VIANPixmapGraphicsItemSignals(QObject):
     onItemSelection = pyqtSignal(object)
@@ -457,7 +460,7 @@ class ImagePlotCircular(ImagePlot):
         pen.setColor(self.grid_color)
 
         font = QFont()
-        font.setPointSize(12 * self.magnification)
+        font.setPointSize(8 * self.magnification)
 
         for i in range(7):
             self.circle0 = self.scene().addEllipse(QRectF(0,
@@ -1006,6 +1009,10 @@ class ImagePlotTime(ImagePlot):
         self.images = []
 
     def add_grid(self, set_scene_rect = True):
+        for l in self.lines:
+            self.scene().removeItem(l)
+        self.lines = []
+
         pen = QPen()
         pen.setWidth(10)
         pen.setColor(self.grid_color)
@@ -1088,7 +1095,6 @@ class ImagePlotTime(ImagePlot):
         hl3 = QHBoxLayout(w)
         hl3.addWidget(QLabel("X-Scale:", w))
 
-
         slider_imagescale = QSlider(Qt.Horizontal, w)
         slider_imagescale.setRange(1, 2000)
         slider_imagescale.valueChanged.connect(self.set_image_scale)
@@ -1096,11 +1102,9 @@ class ImagePlotTime(ImagePlot):
         slider_yscale.setRange(1, 2000)
         slider_yscale.valueChanged.connect(self.set_y_scale)
 
-
         slider_xscale = QSlider(Qt.Horizontal, w)
         slider_xscale.setRange(1, 6000)
         slider_xscale.valueChanged.connect(self.set_x_scale)
-
 
         hl1.addWidget(slider_imagescale)
         hl2.addWidget(slider_yscale)
@@ -1130,8 +1134,6 @@ class ImagePlotTime(ImagePlot):
         slider_imagescale.setValue(100)
         slider_xscale.setValue(100)
         slider_yscale.setValue(600)
-
-
 
         w.layout().addItem(hl1)
         w.layout().addItem(hl2)
