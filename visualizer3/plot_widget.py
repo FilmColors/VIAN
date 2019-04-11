@@ -96,6 +96,7 @@ class PlotResultsWidget(QMainWindow):
             .replace("None", "")\
             .replace("2100", "")\
             .replace("1800", "")\
+            .replace("__", "_")\
             .replace("__", "_")
 
         t = PlotResultsGroupWidget(self, classification_objects, name, scrs, segments)

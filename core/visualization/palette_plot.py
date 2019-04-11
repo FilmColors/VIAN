@@ -621,6 +621,7 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         self.naming_fields['plot_name'] = "palette_ab_plot"
         self.dot_plot = DotPlot(self, naming_fields=naming_fields)
         self.dot_plot.dot_size = 10
+        self.dot_plot.naming_fields['plot_name'] = "palette_ab_plot"
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.dot_plot)
         self.palette_tree = None

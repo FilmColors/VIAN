@@ -216,10 +216,10 @@ class ExportNamingConventionWidget(QWidget):
                     self.boxes[3].setCurrentText("year")
                     self.boxes[4].setCurrentText("k_images")
                     self.boxes[5].setCurrentText("classification_obj")
-                self.on_changed()
         except:
             pass
 
+        self.on_changed()
         self.show()
 
     def on_changed(self):
