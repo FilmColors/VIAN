@@ -525,6 +525,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.switch_perspective(Perspective.Segmentation.name)
         loading_screen.hide()
         self.setWindowState(Qt.WindowMaximized)
+        self.settings.apply_ui_settings()
 
         # This can be used for a oneshot forced command.
         force_file_path = os.path.abspath("install/force.txt")

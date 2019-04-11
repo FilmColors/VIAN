@@ -131,6 +131,23 @@ class UserSettings():
         """
         return self.get_qt_color(self.MAIN_FONT)
 
+    def apply_ui_settings(self):
+        family = self.FONT_NAME
+        size = self.FONT_SIZE
+
+        with open("qt_ui/themes/qt_stylesheet_very_dark.css", "r") as f:
+            css = f.read()
+
+        t = css.split("/*FFAMILY*/")
+        print(family)
+        css = "/*FFAMILY*/".join([t[0], "font-family: \""+family+"\";", t[2]])
+
+        t = css.split("/*FSIZE*/")
+        css = "/*FFAMILY*/".join([t[0], "font-size: "+str(size)+"pt;", t[2]])
+
+        # css = "QWidget{ font-family: \""+family+"\"; font-size: "+str(size)+"pt; margin: 5pt;  padding: 1pt; color: #b1b1b1; background-color: #323232;}"
+        QApplication.instance().setStyleSheet(css)
+
     def generate_dir_paths(self):
         """
         Generates the default Directory Paths
