@@ -67,7 +67,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         lt_hilbert.layout().addWidget(self.hilbert_param)
 
 
-
         #
         # self.lt.addWidget(self.palette)
         if self.use_tab_mode:
@@ -192,3 +191,23 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
     def on_loaded(self, project):
         pass
+
+    def get_settings(self):
+        return dict(
+            palette_sorting = self.palette.cb_sorting.currentText(),
+            palette_mode = self.palette.cb_mode.currentText(),
+            palette_index = self.palette.slider.value(),
+            palette_ab_index = self.lab_palette.slider.value(),
+            palette_ab_jitter = self.lab_palette.slider_jitter.value(),
+            palette_ab_scale = self.lab_palette.slider_scale.value(),
+            palette_ab_size = self.lab_palette.slider_size.value()
+        )
+
+    def apply_settings(self, settings):
+        self.palette.cb_sorting.setCurrentText(settings['palette_sorting'])
+        self.palette.cb_mode.setCurrentText(settings['palette_mode'])
+        self.palette.slider.setValue(settings['palette_index'])
+        self.lab_palette.slider.setValue(settings['palette_ab_index'])
+        self.lab_palette.slider_jitter.setValue(settings['palette_ab_jitter'])
+        self.lab_palette.slider_scale.setValue(settings['palette_ab_scale'])
+        self.lab_palette.slider_size.setValue(settings['palette_ab_size'])

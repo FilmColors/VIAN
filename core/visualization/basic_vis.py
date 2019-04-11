@@ -50,6 +50,13 @@ class IVIANVisualization():
         qp.end()
         return image
 
+    def frame_plot(self):
+        try:
+            rect = self.scene().itemsBoundingRect()
+            self.fitInView(rect, Qt.KeepAspectRatio)
+        except Exception as e:
+            print(e)
+
 
 class VIANPlot(QGraphicsView, IVIANVisualization):
     def __init__(self, parent, background=QColor(30, 30, 30), aspect = Qt.KeepAspectRatio, x_label_format = "value", y_label_format = "value"):

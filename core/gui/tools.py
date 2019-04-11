@@ -237,11 +237,11 @@ class ExportNamingConventionWidget(QWidget):
 
 class ExportImageDialog(EDialogWidget):
     last_directories = []
-    last_background = []
-    last_grid_color = []
-    last_size = []
-    last_font_size = []
-    last_preset = []
+    last_background = dict()
+    last_grid_color = dict()
+    last_size = dict()
+    last_font_size = dict()
+    last_preset = dict()
 
     def __init__(self, main_window, visualization):
         super(ExportImageDialog, self).__init__(visualization, main_window)
@@ -312,31 +312,40 @@ class ExportImageDialog(EDialogWidget):
             self.spinBox_GridA.setValue(0)
 
     def load_cache(self):
-        if len(self.last_preset) > 0:
-            self.comboBoxPreset.setCurrentText(self.last_preset[0])
+        if self.visualization.naming_fields['plot_name'] in self.last_preset:
+            last_presets = self.last_preset[self.visualization.naming_fields['plot_name']]
+            if len(last_presets) > 0:
+                self.comboBoxPreset.setCurrentText(last_presets[0])
 
-        if len(self.last_background) > 0:
-            self.spinBox_BG_R.setValue(self.last_background[0].red())
-            self.spinBox_BG_G.setValue(self.last_background[0].green())
-            self.spinBox_BG_B.setValue(self.last_background[0].blue())
-            self.spinBox_BG_A.setValue(self.last_background[0].alpha())
+        if self.visualization.naming_fields['plot_name'] in self.last_background:
+            last_backgrounds = self.last_background[self.visualization.naming_fields['plot_name']]
+            if len(last_backgrounds) > 0:
+                self.spinBox_BG_R.setValue(last_backgrounds[0].red())
+                self.spinBox_BG_G.setValue(last_backgrounds[0].green())
+                self.spinBox_BG_B.setValue(last_backgrounds[0].blue())
+                self.spinBox_BG_A.setValue(last_backgrounds[0].alpha())
 
-        if len(self.last_grid_color) > 0:
-            self.spinBox_GridR.setValue(self.last_grid_color[0].red())
-            self.spinBox_GridG.setValue(self.last_grid_color[0].green())
-            self.spinBox_GridB.setValue(self.last_grid_color[0].blue())
-            self.spinBox_GridA.setValue(self.last_grid_color[0].alpha())
+        if self.visualization.naming_fields['plot_name'] in self.last_grid_color:
+            last_grid_color =  self.last_grid_color[self.visualization.naming_fields['plot_name']]
+            if len(last_grid_color) > 0:
+                self.spinBox_GridR.setValue(last_grid_color[0].red())
+                self.spinBox_GridG.setValue(last_grid_color[0].green())
+                self.spinBox_GridB.setValue(last_grid_color[0].blue())
+                self.spinBox_GridA.setValue(last_grid_color[0].alpha())
 
-        if len(self.last_size) > 0:
-            self.spinBox_Width.setValue(self.last_size[0].width())
-            self.spinBox_Height.setValue(self.last_size[0].height())
+        if self.visualization.naming_fields['plot_name'] in self.last_size:
+            last_size = self.last_size[self.visualization.naming_fields['plot_name']]
+            if len(last_size) > 0:
+                self.spinBox_Width.setValue(last_size[0].width())
+                self.spinBox_Height.setValue(last_size[0].height())
 
-        if len(self.last_font_size) > 0:
-            self.spinBoxFontSize.setValue(self.last_font_size[0])
+        if self.visualization.naming_fields['plot_name'] in self.last_font_size:
+            last_font_size = self.last_font_size[self.visualization.naming_fields['plot_name']]
+            if len(last_font_size) > 0:
+                self.spinBoxFontSize.setValue(last_font_size[0])
 
         if len(self.last_directories) > 0:
             self.file_browser.line_edit.setText(self.last_directories[len(self.last_directories) - 1])
-
 
 
     def on_update(self):
@@ -356,17 +365,28 @@ class ExportImageDialog(EDialogWidget):
         self.preview.set_image(image)
 
         # Caching
-        self.last_background.clear()
-        self.last_grid_color.clear()
-        self.last_size.clear()
-        self.last_font_size.clear()
-        self.last_preset.clear()
+        if not self.visualization.naming_fields['plot_name'] in self.last_background:
+            self.last_background[self.visualization.naming_fields['plot_name']] = []
+        if not self.visualization.naming_fields['plot_name'] in self.last_grid_color:
+            self.last_grid_color[self.visualization.naming_fields['plot_name']] = []
+        if not self.visualization.naming_fields['plot_name'] in self.last_size:
+            self.last_size[self.visualization.naming_fields['plot_name']] = []
+        if not self.visualization.naming_fields['plot_name'] in self.last_font_size:
+            self.last_font_size[self.visualization.naming_fields['plot_name']] = []
+        if not self.visualization.naming_fields['plot_name'] in self.last_preset:
+            self.last_preset[self.visualization.naming_fields['plot_name']] = []
 
-        self.last_background.append(background)
-        self.last_grid_color.append(grid)
-        self.last_size.append(size)
-        self.last_font_size.append(font_size)
-        self.last_preset.append(self.comboBoxPreset.currentText())
+        self.last_background[self.visualization.naming_fields['plot_name']].clear()
+        self.last_grid_color[self.visualization.naming_fields['plot_name']].clear()
+        self.last_size[self.visualization.naming_fields['plot_name']].clear()
+        self.last_font_size[self.visualization.naming_fields['plot_name']].clear()
+        self.last_preset[self.visualization.naming_fields['plot_name']].clear()
+
+        self.last_background[self.visualization.naming_fields['plot_name']].append(background)
+        self.last_grid_color[self.visualization.naming_fields['plot_name']].append(grid)
+        self.last_size[self.visualization.naming_fields['plot_name']].append(size)
+        self.last_font_size[self.visualization.naming_fields['plot_name']].append(font_size)
+        self.last_preset[self.visualization.naming_fields['plot_name']].append(self.comboBoxPreset.currentText())
         return image
 
     def on_export(self):

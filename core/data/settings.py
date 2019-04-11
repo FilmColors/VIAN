@@ -303,14 +303,14 @@ class UserSettings():
         :return: None
         """
         for sett in self.dock_widgets_data:
-            try:
-                for w in dock_widgets:
+            for w in dock_widgets:
+                try:
                     if w.__class__.__name__ == sett['class_name']:
                         w.apply_settings(sett['settings'])
                         break
-            except Exception as e:
-                print(e)
-                pass
+                except Exception as e:
+                    print(e)
+                    pass
 
 
 class Contributor():

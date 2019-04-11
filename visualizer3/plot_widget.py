@@ -51,6 +51,7 @@ class PlotWidget(QDockWidget):
         self.widget.layout().addWidget(plot)
         self.widget.layout().addWidget(ExpandableWidget(self, "Plot Controls", plot.get_param_widget()))
         self.show()
+        self.plot.frame_plot()
 
 
 class ClassificationObjectSelector(QWidget):
