@@ -159,6 +159,10 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             self.set_magnification(delta.x(),delta.y())
             self.last_mouse_pos = event.pos()
 
+    def resizeEvent(self, event: QtGui.QResizeEvent):
+        super(ImagePlot, self).resizeEvent(event)
+        self.frame_default()
+
     def set_magnification(self, x, y):
         pass
 
@@ -331,6 +335,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.pixmap = pixmap
         self.curr_alpha = 1.0
         self.setAcceptHoverEvents(True)
+        self.is_shown = True
         # self.hovered = False
 
     def setPixmap(self, pixmap: QtGui.QPixmap):
@@ -536,6 +541,7 @@ class ImagePlotCircular(ImagePlot):
         self.set_image_scale(w.slider_yscale.value())
 
         return w
+
 
 class ImagePlotCircularControls(QWidget):
     def __init__(self, plot):
@@ -780,6 +786,7 @@ class ImagePlotPlane(ImagePlot):
 
         return w
 
+
 class ImagePlotPlaneControls(QWidget):
     def __init__(self, plot):
         super(ImagePlotPlaneControls, self).__init__()
@@ -827,6 +834,7 @@ class ImagePlotPlaneControls(QWidget):
         self.layout().addItem(hl1)
         self.layout().addItem(hl2)
         self.layout().addItem(hl3)
+
 
 class ImagePlotControls(QWidget):
     onLowCutChange = pyqtSignal(int)
@@ -930,20 +938,23 @@ class ImagePlotTime(ImagePlot):
         self.x_max = 0
         self.y_max = 1.0
         self.lines = []
+        self.itm_is_shown = dict()
 
-        self.pixel_size_x = 1600
-        self.pixel_size_y = 1200
+        self.pixel_size_x = 10000
+        self.pixel_size_y = 2000
 
         self.border = 10000
 
         self.labels = []
 
         self.values = []
+        self.shown_items = dict()
         super(ImagePlotTime, self).__init__(parent, range_x, range_y, title=title, naming_fields=naming_fields)
         self.naming_fields['plot_name'] = "image_color_dt"
         self.font_size = 60
         self.set_y_scale(y_scale)
         self.set_image_scale(image_scale)
+
 
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
@@ -971,6 +982,7 @@ class ImagePlotTime(ImagePlot):
 
         self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
         self.images.append(itm)
+        self.itm_is_shown[itm] = True
 
         if self.x_max < x:
             self.x_max = x
@@ -989,8 +1001,7 @@ class ImagePlotTime(ImagePlot):
             if uid in self.item_idx:
                 self.scene().removeItem(self.item_idx[uid][0])
             self.item_idx[uid] = (itm, len(self.images) - 1)
-
-        # self.set_x_scale(self.x_scale)
+            # self.set_x_scale(self.x_scale)
         # self.set_y_scale(self.y_scale)
         # self.set_image_scale(self.img_scale)
         self.update_position()
@@ -1092,7 +1103,12 @@ class ImagePlotTime(ImagePlot):
     def set_y_scale(self, value):
         self.y_scale = value * 0.1
         self.update_position()
-    
+
+    def set_y_max(self, value):
+        self.y_max = value
+        self.y_scale = (self.pixel_size_y / np.clip(self.y_max, 1, None))
+        self.update_position()
+
     def set_image_scale(self, scale):
         scale = scale / 100
         self.img_scale = scale
@@ -1103,18 +1119,32 @@ class ImagePlotTime(ImagePlot):
             itm = self.images[idx]
             x = v[0]
             y = v[1]
-            itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
+
+            if y * self.y_scale > self.pixel_size_y:
+                if self.itm_is_shown[itm]:
+                    self.scene().removeItem(itm)
+                    self.itm_is_shown[itm] = False
+            else:
+                if self.itm_is_shown[itm] is False:
+                    self.scene().addItem(itm)
+                    self.itm_is_shown[itm] = True
+
+            itm.setPos(np.nan_to_num(x * self.x_scale),
+                       np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
         super(ImagePlotTime, self).set_image_scale(self.img_scale)
         self.update_grid()
 
     def get_param_widget(self, w = None):
         if w is None:
-            w = ImagePlotCircularControls(self)
-        w.slider_yscale.valueChanged.connect(self.set_y_scale)
-        w.slider_xscale.valueChanged.connect(self.set_x_scale)
+            w = ImagePlotTimeControls(self)
 
-        self.set_y_scale(w.slider_yscale.value())
-        self.set_x_scale(w.slider_xscale.value())
+        w.slider_y_max.valueChanged.connect(self.set_y_max)
+        # w.slider_xscale.valueChanged.connect(self.set_x_scale)
+        w.slider_imagescale.valueChanged.connect(self.set_image_scale)
+
+        # self.set_y_scale(w.slider_yscale.value())
+        # self.set_x_scale(w.slider_xscale.value())
+        self.set_image_scale(w.slider_imagescale.value())
         return w
 
 
@@ -1125,51 +1155,35 @@ class ImagePlotTimeControls(QWidget):
         hl1 = QHBoxLayout(self)
         hl1.addWidget(QLabel("Image-Scale", self))
         hl2 = QHBoxLayout(self)
-        hl2.addWidget(QLabel("Y-Scale:", self))
-        hl3 = QHBoxLayout(self)
-        hl3.addWidget(QLabel("X-Scale:", self))
+        hl2.addWidget(QLabel("Y-Max:", self))
 
         self.slider_imagescale = QSlider(Qt.Horizontal, self)
         self.slider_imagescale.setRange(1, 2000)
-        self.slider_imagescale.valueChanged.connect(plot.set_image_scale)
-        self.slider_yscale = QSlider(Qt.Horizontal, self)
-        self.slider_yscale.setRange(1, 2000)
-
-        self.slider_xscale = QSlider(Qt.Horizontal, self)
-        self.slider_xscale.setRange(1, 6000)
+        self.slider_y_max = QSlider(Qt.Horizontal, self)
+        self.slider_y_max.setRange(1, 256)
 
         hl1.addWidget(self.slider_imagescale)
-        hl2.addWidget(self.slider_yscale)
-        hl3.addWidget(self.slider_xscale)
+        hl2.addWidget(self.slider_y_max)
 
         image_scale_line = QSpinBox(self)
         image_scale_line.setRange(1, 2000)
-        image_scale_line.setValue(self.x_scale)
+        image_scale_line.setValue(plot.x_scale)
         image_scale_line.valueChanged.connect(self.slider_imagescale.setValue)
         self.slider_imagescale.valueChanged.connect(image_scale_line.setValue)
         hl1.addWidget(image_scale_line)
 
         y_scale_line = QSpinBox(self)
         y_scale_line.setRange(1, 2000)
-        y_scale_line.setValue(self.y_scale)
-        y_scale_line.valueChanged.connect(self.slider_yscale.setValue)
-        self.slider_yscale.valueChanged.connect(y_scale_line.setValue)
+        y_scale_line.setValue(plot.y_scale)
+        y_scale_line.valueChanged.connect(self.slider_y_max.setValue)
+        self.slider_y_max.valueChanged.connect(y_scale_line.setValue)
         hl2.addWidget(y_scale_line)
 
-        self.x_scale_line = QSpinBox(self)
-        self.x_scale_line.setRange(1, 2000)
-        self.x_scale_line.setValue(self.x_scale)
-        self.x_scale_line.valueChanged.connect(self.slider_xscale.setValue)
-        self.slider_xscale.valueChanged.connect(self.x_scale_line.setValue)
-        hl3.addWidget(self.x_scale_line)
-
         self.slider_imagescale.setValue(100)
-        self.slider_xscale.setValue(100)
-        self.slider_yscale.setValue(600)
+        self.slider_y_max.setValue(255)
 
         self.layout().addItem(hl1)
         self.layout().addItem(hl2)
-        self.layout().addItem(hl3)
 
 
 class ImagePlotYear(ImagePlotTime):
@@ -1177,8 +1191,9 @@ class ImagePlotYear(ImagePlotTime):
         self.x_scale = 0.1
         self.years = []
         self.year_grid = []
-        self.total_width = 20000
+        # self.total_width = 20000
         super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale, naming_fields=naming_fields)
+        self.itm_is_shown = dict()
         self.naming_fields['plot_name'] = "image_color_dy"
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None):
@@ -1200,12 +1215,15 @@ class ImagePlotYear(ImagePlotTime):
         self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
         self.images.append(itm)
 
+        self.itm_is_shown[itm] = True
+
         if self.x_max < x:
             self.x_max = x
-            self.x_scale = (self.total_width / np.clip(self.x_max, 1, None))
+            self.x_scale = (self.pixel_size_x / np.clip(self.x_max, 1, None))
 
         if self.y_max < y:
             self.y_max = y
+            self.y_scale = (self.pixel_size_y / np.clip(self.y_max, 1, None))
 
         self.luminances.append([np.nan_to_num(y), itm])
         self.values.append([x, np.nan_to_num(y)])
@@ -1230,6 +1248,11 @@ class ImagePlotYear(ImagePlotTime):
         # self.x_scale = 0.01
         self.update_position()
 
+    def set_y_max(self, value):
+        self.y_max = value
+        self.y_scale = (self.pixel_size_y / np.clip(self.y_max, 1, None))
+        self.update_position()
+
     def add_year(self, value, name):
         self.years.append((value, name))
         self.update_grid()
@@ -1250,7 +1273,7 @@ class ImagePlotYear(ImagePlotTime):
 
         # Y - Axis
         font = QFont()
-        font.setPointSize(self.font_size * 2.0)
+        font.setPointSize(self.font_size)
         step = np.ceil(self.y_max / 10)
         if step == 0:
             return
@@ -1269,7 +1292,7 @@ class ImagePlotYear(ImagePlotTime):
         y_bottom_second_row = None
         for (value, name) in self.years:
             font = QFont()
-            font.setPointSize(self.font_size * 2.0)
+            font.setPointSize(self.font_size)
 
             x = value * self.x_scale
             y = self.base_line * self.y_scale
@@ -1290,7 +1313,7 @@ class ImagePlotYear(ImagePlotTime):
             #             # self.add_grid(False)
 
 
-        font.setPointSize(self.font_size * 3)
+        font.setPointSize(self.font_size * 2)
         text = self.scene().addText("Year", font)
         text.setPos(self.x_max * self.x_scale / 2 - (text.boundingRect().width() / 2), self.base_line * self.y_scale + (text.boundingRect().height() * 2.0))
         text.setDefaultTextColor(self.grid_color)
@@ -1309,6 +1332,16 @@ class ImagePlotYear(ImagePlotTime):
             itm = tpl[0]
             self.values[idx] = values
             x, y = values[0], values[1]
+
+            if y * self.y_scale > self.pixel_size_y:
+                if self.itm_is_shown[itm]:
+                    self.scene().removeItem(itm)
+                    self.itm_is_shown[itm] = False
+            else:
+                if self.itm_is_shown[itm] is False:
+                    self.scene().addItem(itm)
+                    self.itm_is_shown[itm] = True
+
             if pixmap is not None:
                 itm.setPixmap(pixmap)
             itm.setPos(itm.x(),
@@ -1321,10 +1354,10 @@ class ImagePlotYear(ImagePlotTime):
     def get_param_widget(self, w = None):
         if w is None:
             w = ImagePlotYearControls(self)
-        w.slider_yscale.valueChanged.connect(self.set_y_scale)
+        w.slider_y_max.valueChanged.connect(self.set_y_max)
         w.slider_imagescale.valueChanged.connect(self.set_image_scale)
 
-        self.set_y_scale(w.slider_yscale.value())
+        self.set_y_scale(w.slider_y_max.value())
         self.set_image_scale(w.slider_imagescale.value())
         return w
     
@@ -1336,16 +1369,16 @@ class ImagePlotYearControls(QWidget):
         hl1 = QHBoxLayout(self)
         hl1.addWidget(QLabel("Image-Scale", self))
         hl2 = QHBoxLayout(self)
-        hl2.addWidget(QLabel("Y-Scale:", self))
+        hl2.addWidget(QLabel("Y-Max:", self))
 
         self.slider_imagescale = QSlider(Qt.Horizontal, self)
         self.slider_imagescale.setRange(1, 2000)
 
-        self.slider_yscale = QSlider(Qt.Horizontal, self)
-        self.slider_yscale.setRange(1, 2000)
+        self.slider_y_max = QSlider(Qt.Horizontal, self)
+        self.slider_y_max.setRange(1, 255)
 
         hl1.addWidget(self.slider_imagescale)
-        hl2.addWidget(self.slider_yscale)
+        hl2.addWidget(self.slider_y_max)
 
         self.image_scale_line = QSpinBox(self)
         self.image_scale_line.setRange(1, 2000)
@@ -1357,12 +1390,12 @@ class ImagePlotYearControls(QWidget):
         self.y_scale_line = QSpinBox(self)
         self.y_scale_line.setRange(1, 2000)
         self.y_scale_line.setValue(plot.y_scale)
-        self.y_scale_line.valueChanged.connect(self.slider_yscale.setValue)
-        self.slider_yscale.valueChanged.connect(self.y_scale_line.setValue)
+        self.y_scale_line.valueChanged.connect(self.slider_y_max.setValue)
+        self.slider_y_max.valueChanged.connect(self.y_scale_line.setValue)
         hl2.addWidget(self.y_scale_line)
 
         self.slider_imagescale.setValue(100)
-        self.slider_yscale.setValue(600)
+        self.slider_y_max.setValue(255)
 
 
         self.layout().addItem(hl1)
