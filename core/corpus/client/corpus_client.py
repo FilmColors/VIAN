@@ -18,7 +18,19 @@ from random import sample
 import requests
 
 PAL_WIDTH = 720
+EP_ROOT = "http://127.0.0.1:5000/api/"
+# EP_VIAN_VERSION = self.ep_root + "/vian/version"
+# self.ep_get_vian_update = self.ep_root + "/vian/download_vian/"
 
+def get_vian_version():
+    q = requests.get(EP_ROOT + "vian/version").json()
+    version = q['version'].split("_")
+    version = [int(i) for i in version]
+    version_id = q['id']
+    return version, version_id
+
+def download_vian_update(version_id):
+    return requests.get(EP_ROOT + "vian/download_vian/" + str(version_id), stream=True)
 
 class CorpusClient(QObject):
     onConnectionEstablished = pyqtSignal(object)
@@ -129,7 +141,7 @@ class CorpusInterfaceSignals(QObject):
 
 
 class WebAppCorpusInterface(QObject):
-    def __init__(self, ep_root = "http://127.0.0.1:5000/api/"):
+    def __init__(self, ep_root = EP_ROOT):
         super(WebAppCorpusInterface, self).__init__()
         self.ep_root = ep_root
         self.ep_upload = self.ep_root + "upload"
@@ -140,6 +152,7 @@ class WebAppCorpusInterface(QObject):
         self.ep_query_persons = self.ep_root + "query/persons"
         self.ep_query_companies = self.ep_root + "query/companies"
         self.ep_query_color_processes = self.ep_root + "query/colorprocess"
+
         self.signals = CorpusInterfaceSignals()
         self.user_id = -1
 
@@ -376,6 +389,8 @@ class WebAppCorpusInterface(QObject):
     @pyqtSlot()
     def get_persons(self):
         return requests.get(self.ep_query_persons).json()
+
+
 
 
 class LocalCorpusInterface():

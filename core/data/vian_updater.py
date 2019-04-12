@@ -8,7 +8,7 @@ import shutil
 from core.data.interfaces import IConcurrentJob
 from PyQt5.QtWidgets import QMessageBox, QApplication
 
-
+from core.corpus.client.corpus_client import get_vian_version, download_vian_update
 import requests, zipfile, io
 import os
 
@@ -29,9 +29,9 @@ class VianUpdater(IConcurrentJob):
 
     def update(self, force = False, include_beta = False):
         try:
-            do_update = self.get_server_version(include_beta)
+            do_update, version_id = self.get_server_version(include_beta)
             if do_update or force:
-                job = VianUpdaterJob([self.app_root, self.source_dir, self.url_source])
+                job = VianUpdaterJob([self.app_root, self.source_dir, self.url_source, version_id])
                 self.main_window.run_job_concurrent(job)
         except Exception as e:
             self.main_window.print_message("Update Failed, see Console for more Information", "Red")
@@ -39,38 +39,38 @@ class VianUpdater(IConcurrentJob):
 
     def get_server_version(self, include_beta = False):
         version = None
+        version_id = None
         build = None
-        for line in urllib.request.urlopen(self.url_version):
-            if "__version__" in str(line):
-                line = line.decode()
-                version = line.replace("__version__: ", "")
-                version = version.split(".")
-                version = [int(version[0]), int(version[1]), int(version[2])]
-            elif "__build__" in str(line):
-                line = line.decode()
-                build = line.replace("__version__: ", "")
-
-        if version == None:
+        try:
+            version, version_id = get_vian_version()
+            print(version, version_id)
+        except Exception as e:
+            print("Could not fetch update version:", str(e))
+            pass
+        if version is None:
             return False
 
         if (self.current_version[0] < version[0]
             or (self.current_version[0] == version[0] and self.current_version[1] < version[1])
             or (self.current_version[0] == version[0] and self.current_version[1] == version[1] and self.current_version[2] < version[2])):
             if build == "beta":
-                return include_beta
+                print("Beta update available")
+                return include_beta, version_id
             else:
-                return True
+                print("Update available")
+                return True, version_id
         else:
-            return False
+            print("No update available")
+            return False, version_id
 
-    def fetch_folder(self):
+    def fetch_folder(self, version_id):
         if os.path.exists(self.app_root + "/update/"):
             shutil.rmtree(self.app_root + "/update/")
 
         os.mkdir(self.app_root + "/update/")
         self.temp_dir = self.app_root + "/update/"
 
-        r = requests.get(self.url_source, stream=True)
+        r = download_vian_update(version_id)
         z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(self.temp_dir)
 
@@ -99,6 +99,7 @@ class VianUpdaterJob(IConcurrentJob):
             self.app_root = args[0]
             self.source_dir = args[1]
             self.url_source = args[2]
+            version_id = args[3]
 
             sign_progress(0.1)
             if os.path.exists(self.app_root + "/update/"):
@@ -107,7 +108,7 @@ class VianUpdaterJob(IConcurrentJob):
             os.mkdir(self.app_root + "/update/")
             self.temp_dir = self.app_root + "/update/"
 
-            r = requests.get(self.url_source, stream=True)
+            r = get_vian_version(version_id)
             z = zipfile.ZipFile(io.BytesIO(r.content))
             z.extractall(self.temp_dir)
 

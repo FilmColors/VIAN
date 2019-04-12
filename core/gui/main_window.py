@@ -1018,7 +1018,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_vian(self, show_newest = True, allow_beta = False):
         try:
-            result = self.updater.get_server_version()
+            result, version_id = self.updater.get_server_version()
         except:
             return
 
