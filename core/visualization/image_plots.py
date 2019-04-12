@@ -324,7 +324,7 @@ class VIANPixmapGraphicsItemSignals(QObject):
 
 
 class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
-    def __init__(self, pixmap:QPixmap, hover_text = None, mime_data = None):
+    def __init__(self, pixmap:QPixmap, hover_text = None, mime_data = None, alternative_channels = None):
         super(VIANPixmapGraphicsItem, self).__init__(pixmap)
         if hover_text is not None:
             self.setToolTip(hover_text)
@@ -335,7 +335,11 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
         self.pixmap = pixmap
         self.curr_alpha = 1.0
         self.setAcceptHoverEvents(True)
-        self.is_shown = True
+
+        if alternative_channels is None:
+            self.alternative_channels = dict()
+        else:
+            self.alternative_channels = alternative_channels
         # self.hovered = False
 
     def setPixmap(self, pixmap: QtGui.QPixmap):
@@ -937,8 +941,11 @@ class ImagePlotTime(ImagePlot):
         self.base_line = 1000
         self.x_max = 0
         self.y_max = 1.0
+
         self.lines = []
         self.itm_is_shown = dict()
+        self.channel = "saturation"
+        self.channels = ["saturation", "chroma", "hue", "luminance"]
 
         self.pixel_size_x = 10000
         self.pixel_size_y = 2000
@@ -955,7 +962,6 @@ class ImagePlotTime(ImagePlot):
         self.set_y_scale(y_scale)
         self.set_image_scale(image_scale)
 
-
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
         self.pixel_size_y = pixel_size_y
@@ -966,17 +972,19 @@ class ImagePlotTime(ImagePlot):
 
         self.scene().setSceneRect(0, 0, x_max * self.x_scale, y_max * self.y_scale)
 
-    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None):
+    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, channels = None):
         timestamp = ms_to_string(x)
 
         # y = np.log10(y + 1.0)
         # y *= 10
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
-                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
+                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp),
+                                         mime_data=mime_data, alternative_channels=channels)
         else:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True),
-                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data)
+                                         hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data,
+                                         alternative_channels=channels)
         self.scene().addItem(itm)
         itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
@@ -1113,12 +1121,21 @@ class ImagePlotTime(ImagePlot):
         scale = scale / 100
         self.img_scale = scale
         super(ImagePlotTime, self).set_image_scale(scale)
-    
+
+    def set_channel(self, name):
+        self.channel = name
+        self.update_position()
+
     def update_position(self):
         for idx, v in enumerate(self.values):
             itm = self.images[idx]
             x = v[0]
             y = v[1]
+
+            try:
+                y = itm.alternative_channels[self.channel]
+            except Exception as e:
+                print(e)
 
             if y * self.y_scale > self.pixel_size_y:
                 if self.itm_is_shown[itm]:
@@ -1141,10 +1158,12 @@ class ImagePlotTime(ImagePlot):
         w.slider_y_max.valueChanged.connect(self.set_y_max)
         # w.slider_xscale.valueChanged.connect(self.set_x_scale)
         w.slider_imagescale.valueChanged.connect(self.set_image_scale)
+        w.cb_channel.currentTextChanged.connect(self.set_channel)
 
         # self.set_y_scale(w.slider_yscale.value())
         # self.set_x_scale(w.slider_xscale.value())
         self.set_image_scale(w.slider_imagescale.value())
+        self.set_channel(w.cb_channel.currentText())
         return w
 
 
@@ -1156,6 +1175,7 @@ class ImagePlotTimeControls(QWidget):
         hl1.addWidget(QLabel("Image-Scale", self))
         hl2 = QHBoxLayout(self)
         hl2.addWidget(QLabel("Y-Max:", self))
+        hl3 = QHBoxLayout(self)
 
         self.slider_imagescale = QSlider(Qt.Horizontal, self)
         self.slider_imagescale.setRange(1, 2000)
@@ -1179,11 +1199,17 @@ class ImagePlotTimeControls(QWidget):
         self.slider_y_max.valueChanged.connect(y_scale_line.setValue)
         hl2.addWidget(y_scale_line)
 
+        hl3.addWidget(QLabel("Channels:", self))
+        self.cb_channel = QComboBox(self)
+        self.cb_channel.addItems(plot.channels)
+        hl3.addWidget(self.cb_channel)
+
         self.slider_imagescale.setValue(100)
         self.slider_y_max.setValue(255)
 
         self.layout().addItem(hl1)
         self.layout().addItem(hl2)
+        self.layout().addItem(hl3)
 
 
 class ImagePlotYear(ImagePlotTime):
@@ -1196,7 +1222,7 @@ class ImagePlotYear(ImagePlotTime):
         self.itm_is_shown = dict()
         self.naming_fields['plot_name'] = "image_color_dy"
 
-    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None):
+    def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None, channels=None):
         if hover_text is None:
             hover_text = "Saturation:" + str(round(y, 2)) + "\nx: " + str(x)
 
@@ -1204,11 +1230,13 @@ class ImagePlotYear(ImagePlotTime):
         # y *= 10
         if convert:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img),
-                                         hover_text=hover_text, mime_data=mime_data)
+                                         hover_text=hover_text, mime_data=mime_data,
+                                         alternative_channels=channels)
         else:
             itm = VIANPixmapGraphicsItem(numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True),
                                          hover_text=hover_text,
-                                         mime_data=mime_data)
+                                         mime_data=mime_data,
+                                         alternative_channels=channels)
         self.scene().addItem(itm)
         itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
@@ -1356,9 +1384,12 @@ class ImagePlotYear(ImagePlotTime):
             w = ImagePlotYearControls(self)
         w.slider_y_max.valueChanged.connect(self.set_y_max)
         w.slider_imagescale.valueChanged.connect(self.set_image_scale)
+        w.cb_channel.currentTextChanged.connect(self.set_channel)
 
         self.set_y_scale(w.slider_y_max.value())
         self.set_image_scale(w.slider_imagescale.value())
+        self.set_channel(w.cb_channel.currentText())
+
         return w
     
     
@@ -1394,9 +1425,16 @@ class ImagePlotYearControls(QWidget):
         self.slider_y_max.valueChanged.connect(self.y_scale_line.setValue)
         hl2.addWidget(self.y_scale_line)
 
+        hl3 = QHBoxLayout(self)
+        hl3.addWidget(QLabel("Channels:", self))
+        self.cb_channel = QComboBox(self)
+        self.cb_channel.addItems(plot.channels)
+        hl3.addWidget(self.cb_channel)
+
         self.slider_imagescale.setValue(100)
         self.slider_y_max.setValue(255)
 
 
         self.layout().addItem(hl1)
         self.layout().addItem(hl2)
+        self.layout().addItem(hl3)

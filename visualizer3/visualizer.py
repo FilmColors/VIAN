@@ -1,12 +1,14 @@
 import os
 from functools import partial
 from typing import List
+import numpy as np
 
 from PyQt5 import uic
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from core.data.computation import lab_to_lch
 from core.corpus.sqlalchemy_entities import *
 from core.gui.classification import CheckBoxGroupWidget
 from core.visualization.dot_plot import DotPlot
@@ -308,17 +310,27 @@ class VIANVisualizer2(QMainWindow):
                                 data = s.features[1]
                                 ty = data[7]
                                 x = (curr_year * year_width) - miny + (j * img_width)
+
+                                l = data[0]
+                                a = data[1]
+                                b = data[2]
+
+                                lch = lab_to_lch([l, a, b])
+                                chroma = lch[1]
+                                luminance = l
+                                hue = (lch[2] + np.pi) / (2 * np.pi) * 100.0
+
                                 s.year_x = x
                                 s.onImageChanged.connect(
                                     p_dy.add_image(x, ty, img, True, mime_data=s, uid=s.dbscreenshot.id,
                                                    hover_text= "Saturation:" + str(round(ty, 2)) +
                                                               "\nYear:     " + str(curr_year) +
-                                                              "\nMovie:    " + s.dbscreenshot.movie.name).setPixmap)
+                                                              "\nMovie:    " + s.dbscreenshot.movie.name,
+                                                   channels=dict(chroma=chroma, luminance=luminance, hue=hue, saturation=ty)).setPixmap)
                                 s.onFeatureChanged.connect(partial(feature_changed, s, p_dy))
                         curr_year = scr.dbscreenshot.movie.year
                         to_add = []
                         p_counter = 0
-
 
                     if p_counter >= max_per_year:
                         continue
@@ -339,6 +351,10 @@ class VIANVisualizer2(QMainWindow):
                 x = data[1]
                 y = data[2]
                 c = QColor(data[5], data[4],data[3], 200)
+                lch = lab_to_lch([l, x, y])
+                chroma = lch[1]
+                luminance = l
+                hue = (lch[2] + np.pi) / (2 * np.pi) * 100.0
 
                 if p_ab is not None:
                     scr.onImageChanged.connect(p_ab.add_image(-x, -y, img, True, mime_data=scr, z=l, uid=scr.dbscreenshot.id).setPixmap)
@@ -347,7 +363,8 @@ class VIANVisualizer2(QMainWindow):
                     scr.onImageChanged.connect(p_lc.add_image(x, l, img, False, mime_data=scr, z=-y, uid=scr.dbscreenshot.id).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr, p_lc))
                 if p_dt is not None:
-                    scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, uid=scr.dbscreenshot.id).setPixmap)
+                    scr.onImageChanged.connect(p_dt.add_image(tx, ty, img, False, mime_data=scr, uid=scr.dbscreenshot.id,
+                                                              channels=dict(chroma=chroma, luminance=luminance, hue=hue, saturation=ty)).setPixmap)
                     scr.onFeatureChanged.connect(partial(feature_changed, scr,  p_dt))
                 if plot_ab_dot is not None:
                     plot_ab_dot.add_point(x, -y, z=l, col=c, uid=scr.dbscreenshot.id)

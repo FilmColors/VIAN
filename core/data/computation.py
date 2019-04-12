@@ -147,6 +147,7 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
 
 
 def lab_to_lch(lab):
+    lab = np.array(lab)
     if len(lab.shape) > 1:
         lch = np.empty(lab.shape, dtype=np.float32)
         lch[:, 0] = lab[:, 0]
