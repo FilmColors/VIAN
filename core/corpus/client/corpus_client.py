@@ -18,7 +18,7 @@ from random import sample
 import requests
 
 PAL_WIDTH = 720
-EP_ROOT = "http://127.0.0.1:5000/api/"
+EP_ROOT = "http://ercwebapp.westeurope.cloudapp.azure.com/api/"
 # EP_VIAN_VERSION = self.ep_root + "/vian/version"
 # self.ep_get_vian_update = self.ep_root + "/vian/download_vian/"
 
