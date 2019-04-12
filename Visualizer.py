@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 
 from core.gui.tools import StringList
-from visualizer3.visualizer import *
+from visualizer.visualizer import *
 
 DEBUG = True
 

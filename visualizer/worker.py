@@ -7,7 +7,7 @@ from PyQt5.QtCore import *
 
 from core.corpus.sqlalchemy_entities import *
 from core.corpus.client.hdf5_database import HDF5ManagerDatabase
-from visualizer3.vis_entities import VisScreenshot
+from visualizer.vis_entities import VisScreenshot
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

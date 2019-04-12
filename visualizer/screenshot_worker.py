@@ -1,5 +1,5 @@
 from PyQt5.QtCore import *
-from visualizer3.vis_entities import VisScreenshot
+from visualizer.vis_entities import VisScreenshot
 from typing import List
 from core.data.computation import *
 

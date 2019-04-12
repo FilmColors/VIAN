@@ -139,7 +139,6 @@ class UserSettings():
             css = f.read()
 
         t = css.split("/*FFAMILY*/")
-        print(family)
         css = "/*FFAMILY*/".join([t[0], "font-family: \""+family+"\";", t[2]])
 
         t = css.split("/*FSIZE*/")
@@ -265,8 +264,8 @@ class UserSettings():
             with open(self.store_path, 'w') as f:
                 json.dump(ddict, f)
         except Exception as e:
-            raise e
             print(e)
+
 
         # Some weird python is going on here, after serialize(), the CONTRIBUTOR is set as a dict.
         # for now we brute force our way through
@@ -285,7 +284,6 @@ class UserSettings():
                 data = json.load(f)
 
                 for attr, value in data.items():
-                    print(attr, value)
                     # Palettes and MAIN_FONT should not be taken into Account,
                     # CONTRIBUTOR needs special treatment
                     if not attr == "PALETTES" and not attr =="MAIN_FONT" and not attr == "CONTRIBUTOR":

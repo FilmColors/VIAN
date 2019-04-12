@@ -14,10 +14,10 @@ from core.gui.classification import CheckBoxGroupWidget
 from core.visualization.dot_plot import DotPlot
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime, ImagePlotYear
 from core.visualization.palette_plot import MultiPaletteLABWidget
-from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed, ControlsWidget
-from visualizer3.screenshot_worker import ScreenshotWorker
-from visualizer3.vis_entities import VisScreenshot
-from visualizer3.worker import QueryWorker, CORPUS_PATH
+from visualizer.plot_widget import PlotWidget, PlotResultsWidget, feature_changed, ControlsWidget
+from visualizer.screenshot_worker import ScreenshotWorker
+from visualizer.vis_entities import VisScreenshot
+from visualizer.worker import QueryWorker, CORPUS_PATH
 
 
 class ProgressBar(QWidget):

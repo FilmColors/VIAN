@@ -6,7 +6,7 @@ from core.corpus.sqlalchemy_entities import DBSegment
 from core.visualization.image_plots import *
 from core.visualization.dot_plot import DotPlot
 from core.gui.ewidgetbase import ExpandableWidget, EMultiGraphicsView
-from visualizer3.vis_entities import VisScreenshot
+from visualizer.vis_entities import VisScreenshot
 
 def feature_changed(scr, plot):
     try:

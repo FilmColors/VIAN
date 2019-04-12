@@ -51,7 +51,7 @@ from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-from visualizer3.visualizer import VIANVisualizer2
+from visualizer.visualizer import VIANVisualizer2
 from core.concurrent.worker import Worker
 
 try:
