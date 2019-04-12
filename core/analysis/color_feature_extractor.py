@@ -19,6 +19,16 @@ from core.container.screenshot import Screenshot
 from core.visualization.palette_plot import *
 
 
+"""
+array Structure: 
+
+    d = np.zeros(shape=8)
+    d[0:3] = np.array(data["color_lab"])
+    d[3:6] = np.array(data["color_bgr"])
+    d[6] = np.array(data["saturation_l"])
+    d[7] = np.array(data["saturation_p"])
+    return d
+"""
 
 class ColorFeatureAnalysis(IAnalysisJob):
     def __init__(self):

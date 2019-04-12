@@ -377,73 +377,19 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
         return image
 
-    def get_param_widget(self):
-        w = QWidget()
-        w.setLayout(QVBoxLayout())
+    def get_param_widget(self, w=None):
+        if w is None:
+            w = DotPlotControls(self)
 
-        hl1 = QHBoxLayout(w)
-        hl1.addWidget(QLabel("Range Scale:", w))
+        w.slider_xscale.valueChanged.connect(self.set_range_scale)
+        w.slider_angle.valueChanged.connect(self.rotate_view)
+        w.slider_alpha.valueChanged.connect(self.set_alpha)
+        w.slider_size.valueChanged.connect(self.set_size)
 
-        slider_xscale = QSlider(Qt.Horizontal, w)
-        slider_xscale.setRange(1, 1000)
-        slider_xscale.setValue(100)
-        slider_xscale.valueChanged.connect(self.set_range_scale)
-        hl1.addWidget(slider_xscale)
-
-        hl3 = QHBoxLayout(w)
-        hl3.addWidget(QLabel("View Angle:", w))
-
-        slider_angle = QSlider(Qt.Horizontal, w)
-        slider_angle.setRange(0, 360)
-
-        slider_angle.valueChanged.connect(self.rotate_view)
-        hl3.addWidget(slider_angle)
-
-        angle_sp = QSpinBox(w)
-        angle_sp.setRange(1, 360)
-        angle_sp.setValue(0)
-        angle_sp.valueChanged.connect(slider_angle.setValue)
-        slider_angle.valueChanged.connect(angle_sp.setValue)
-        hl3.addWidget(angle_sp)
-
-        hl4 = QHBoxLayout(w)
-        hl4.addWidget(QLabel("Dot Alpha:", w))
-
-        slider_alpha = QSlider(Qt.Horizontal, w)
-        slider_alpha.setRange(0, 255)
-        slider_alpha.setValue(100)
-
-        slider_alpha.valueChanged.connect(self.set_alpha)
-        hl4.addWidget(slider_alpha)
-
-        angle_a = QSpinBox(w)
-        angle_a.setRange(1, 255)
-        angle_a.setValue(100)
-        angle_a.valueChanged.connect(slider_alpha.setValue)
-        slider_alpha.valueChanged.connect(angle_a.setValue)
-        hl4.addWidget(angle_a)
-
-        hl5 = QHBoxLayout(w)
-        hl5.addWidget(QLabel("Dot Size:", w))
-
-        slider_size = QSlider(Qt.Horizontal, w)
-        slider_size.setRange(1, 50)
-        slider_size.setValue(self.dot_size)
-
-        slider_size.valueChanged.connect(self.set_size)
-        hl5.addWidget(slider_size)
-
-        sp_size = QSpinBox(w)
-        sp_size.setRange(1, 50)
-        sp_size.setValue(self.dot_size)
-        sp_size.valueChanged.connect(slider_size.setValue)
-        slider_size.valueChanged.connect(sp_size.setValue)
-        hl5.addWidget(sp_size)
-
-        w.layout().addItem(hl1)
-        w.layout().addItem(hl3)
-        w.layout().addItem(hl4)
-        w.layout().addItem(hl5)
+        self.set_range_scale(w.slider_xscale.value())
+        self.rotate_view(w.slider_angle.value())
+        self.set_alpha(w.slider_alpha.value())
+        self.set_size(w.slider_size.value())
 
         return w
 
@@ -451,4 +397,74 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         return self.scene()
 
 
+class DotPlotControls(QWidget):
+    def __init__(self, plot):
+        super(DotPlotControls, self).__init__()
+        self.setLayout(QVBoxLayout())
+
+        hl1 = QHBoxLayout(self)
+        hl1.addWidget(QLabel("Range Scale:", self))
+
+        self.slider_xscale = QSlider(Qt.Horizontal, self)
+        self.slider_xscale.setRange(1, 1000)
+        self.slider_xscale.setValue(100)
+
+        hl1.addWidget(self.slider_xscale)
+
+        hl3 = QHBoxLayout(self)
+        hl3.addWidget(QLabel("View Angle:", self))
+
+        self.slider_angle = QSlider(Qt.Horizontal, self)
+        self.slider_angle.setRange(0, 360)
+
+
+        hl3.addWidget(self.slider_angle)
+
+        self.angle_sp = QSpinBox(self)
+        self.angle_sp.setRange(1, 360)
+        self.angle_sp.setValue(0)
+
+        hl3.addWidget(self.angle_sp)
+
+        hl4 = QHBoxLayout(self)
+        hl4.addWidget(QLabel("Dot Alpha:", self))
+
+        self.slider_alpha = QSlider(Qt.Horizontal, self)
+        self.slider_alpha.setRange(0, 255)
+        self.slider_alpha.setValue(100)
+
+        hl4.addWidget(self.slider_alpha)
+
+        self.angle_a = QSpinBox(self)
+        self.angle_a.setRange(1, 255)
+        self.angle_a.setValue(100)
+
+        hl4.addWidget(self.angle_a)
+
+        hl5 = QHBoxLayout(self)
+        hl5.addWidget(QLabel("Dot Size:", self))
+
+        self.slider_size = QSlider(Qt.Horizontal, self)
+        self.slider_size.setRange(1, 50)
+        self.slider_size.setValue(plot.dot_size)
+
+        hl5.addWidget(self.slider_size)
+
+        self.sp_size = QSpinBox(self)
+        self.sp_size.setRange(1, 50)
+        self.sp_size.setValue(plot.dot_size)
+
+        hl5.addWidget(self.sp_size)
+
+        self.angle_sp.valueChanged.connect(self.slider_angle.setValue)
+        self.slider_angle.valueChanged.connect(self.angle_sp.setValue)
+        self.angle_a.valueChanged.connect(self.slider_alpha.setValue)
+        self.slider_alpha.valueChanged.connect(self.angle_a.setValue)
+        self.sp_size.valueChanged.connect(self.slider_size.setValue)
+        self.slider_size.valueChanged.connect(self.sp_size.setValue)
+
+        self.layout().addItem(hl1)
+        self.layout().addItem(hl3)
+        self.layout().addItem(hl4)
+        self.layout().addItem(hl5)
 

@@ -12,7 +12,7 @@ from core.gui.classification import CheckBoxGroupWidget
 from core.visualization.dot_plot import DotPlot
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime, ImagePlotYear
 from core.visualization.palette_plot import MultiPaletteLABWidget
-from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed
+from visualizer3.plot_widget import PlotWidget, PlotResultsWidget, feature_changed, ControlsWidget
 from visualizer3.screenshot_worker import ScreenshotWorker
 from visualizer3.vis_entities import VisScreenshot
 from visualizer3.worker import QueryWorker, CORPUS_PATH
@@ -45,7 +45,7 @@ class VIANVisualizer2(QMainWindow):
         super(VIANVisualizer2, self).__init__(parent)
         self.main_window = parent
         self.query_widget = KeywordWidget(self, self)
-        self.setCentralWidget(QWidget(self))
+        # self.setCentralWidget(QWidget(self))
         self.setWindowTitle("VIAN Visualizer")
         self.menu_file = self.menuBar().addMenu("File")
         self.a_open = self.menu_file.addAction("Open")
@@ -56,11 +56,13 @@ class VIANVisualizer2(QMainWindow):
         self.a_segment_view = self.menu_windows.addAction("Segment View")
         self.MAX_WIDTH = 300
 
+        self.plot_controls = ControlsWidget(self)
         self.corpus_view = CorpusWidget(self)
         self.onCorpusChanged.connect(self.corpus_view.on_corpus_changed)
         self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_view)
         self.corpus_view.hide()
         self.a_subcorpus_view.triggered.connect(self.corpus_view.show)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.plot_controls)
 
         self.segment_view = SegmentWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.segment_view)
@@ -84,16 +86,23 @@ class VIANVisualizer2(QMainWindow):
         self.onLoadScreenshots.connect(self.screenshot_loader.on_load_screenshots)
         self.onChangeScreenshotClObj.connect(self.screenshot_loader.on_change_classification_object)
 
-        self.centralWidget().setLayout(QVBoxLayout())
+        self.tab = QTabWidget(self)
+        self.setCentralWidget(self.tab)
 
         self.cb_corpus = QComboBox(self)
         self.cb_corpus.addItem("Complete")
         self.cb_query_type = QComboBox(self)
         self.cb_query_type.addItems(["Segments"])#, "Movies"])
 
-        self.centralWidget().layout().addWidget(self.cb_corpus)
-        self.centralWidget().layout().addWidget(self.cb_query_type)
-        self.centralWidget().layout().addWidget(self.query_widget)
+        w1 = QWidget(self)
+        w1.setLayout(QVBoxLayout(w1))
+        self.centralWidget().addTab(w1, "Query")
+
+        w1.layout().addWidget(self.cb_corpus)
+        w1.layout().addWidget(self.cb_query_type)
+        w1.layout().addWidget(self.query_widget)
+
+        self.centralWidget().addTab(self.plot_controls, "Plot Controls")
 
         self.btn_query = QPushButton("Query")
         self.btn_query.clicked.connect(self.on_query)
@@ -129,17 +138,17 @@ class VIANVisualizer2(QMainWindow):
         lt.addWidget(self.cb_segm_dt_plot, 1, 1)
         lt.addWidget(self.cb_segm_dy_plot, 2, 1)
         lt.addWidget(self.cb_segm_palette_dot_plot, 1, 2)
-        hbox_k = QHBoxLayout()
-        hbox_k.addWidget(QLabel("K-Images", self.centralWidget()))
-        self.sp_box_K = QSpinBox(self.centralWidget())
+        hbox_k = QHBoxLayout(w1)
+        hbox_k.addWidget(QLabel("K-Images", w1))
+        self.sp_box_K = QSpinBox(w1)
         self.sp_box_K.setRange(1, 10000)
         self.sp_box_K.setValue(400)
         hbox_k.addWidget(self.sp_box_K)
 
-        self.centralWidget().layout().addWidget(self.w_plot_types)
+        w1.layout().addWidget(self.w_plot_types)
 
-        self.centralWidget().layout().addItem(hbox_k)
-        self.centralWidget().layout().addWidget(self.btn_query)
+        w1.layout().addItem(hbox_k)
+        w1.layout().addWidget(self.btn_query)
 
         self.cb_corpus.currentTextChanged.connect(self.on_corpus_changed)
         self.sub_corpora = dict()
@@ -353,18 +362,27 @@ class VIANVisualizer2(QMainWindow):
 
         plots = []
         if p_ab is not None:
+            self.plot_controls.add_plot(p_ab)
             plots.append(PlotWidget(self.result_wnd, p_ab, "AB-Screenshots"))
         if p_dt is not None:
+            self.plot_controls.add_plot(p_dt)
             plots.append(PlotWidget(self.result_wnd, p_dt, "dT-Screenshots"))
         if p_dy is not None:
+            self.plot_controls.add_plot(p_dy)
             plots.append(PlotWidget(self.result_wnd, p_dy, "dY-Screenshots"))
         if p_lc is not None:
+            self.plot_controls.add_plot(p_lc)
             plots.append(PlotWidget(self.result_wnd, p_lc, "LC-Screenshots"))
         if plot_ab_dot is not None:
+            self.plot_controls.add_plot(plot_ab_dot)
+            plot_ab_dot.naming_fields['plot_name'] = "plot_ab_dot"
             plots.append(PlotWidget(self.result_wnd, plot_ab_dot, "LC-Dot"))
         if plot_lc_dot is not None:
+            plot_lc_dot.naming_fields['plot_name'] = "plot_lc_dot"
+            self.plot_controls.add_plot(plot_lc_dot)
             plots.append(PlotWidget(self.result_wnd, plot_lc_dot, "LC-Dot"))
         if p_palette_dot is not None:
+            self.plot_controls.add_plot(p_palette_dot)
             plots.append(PlotWidget(self.result_wnd, p_palette_dot, "Palette-Dot"))
 
         self.result_wnd.add_plots(plots, self.classification_objects, screenshots, summary_dict, segments)
@@ -379,6 +397,8 @@ class VIANVisualizer2(QMainWindow):
 
         if p_ab is not None or p_dt is not None or p_lc is not None or p_dy:
             self.onLoadScreenshots.emit(screenshots.values(),labels, 1)
+
+        self.tab.setCurrentIndex(1)
 
     def on_corpus_result(self, autofill, projects:List[DBProject], keywords:List[DBUniqueKeyword], classification_objects: List[DBClassificationObject], subcorpora):
         self.classification_objects = dict()

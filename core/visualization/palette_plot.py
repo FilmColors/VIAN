@@ -629,22 +629,16 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         self.spbox_depth = None
         self.depth = 10
 
-    def get_param_widget(self):
-        w = QWidget()
-        w.setLayout(QHBoxLayout())
-        self.slider = QSlider(Qt.Horizontal, self)
-        self.slider.setRange(1, 20)
-        self.slider.setValue(10)
-        self.slider.valueChanged.connect(self.on_depth_changed)
-        self.spbox_depth = QSpinBox(self)
-        self.spbox_depth.setValue(10)
-        self.spbox_depth.setRange(1, 20)
-        self.spbox_depth.valueChanged.connect(self.slider.setValue)
-        self.slider.valueChanged.connect(self.spbox_depth.setValue)
+    def get_param_widget(self, w = None):
+        if w is None:
+            w = MultiPaletteControls()
 
-        w.layout().addWidget(QLabel("Depth:", w))
-        w.layout().addWidget(self.slider)
-        w.layout().addWidget(self.spbox_depth)
+        w.slider.valueChanged.connect(self.on_depth_changed)
+        w.spbox_depth.valueChanged.connect(w.slider.setValue)
+        w.slider.valueChanged.connect(w.spbox_depth.setValue)
+
+        self.slider = w.slider
+        self.on_depth_changed()
 
         return w
 
@@ -716,3 +710,21 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
 
     def get_scene(self):
         return self.dot_plot.scene()
+
+
+class MultiPaletteControls(QWidget):
+    def __init__(self):
+        super(MultiPaletteControls, self).__init__()
+        self.setLayout(QHBoxLayout())
+        self.slider = QSlider(Qt.Horizontal, self)
+        self.slider.setRange(1, 20)
+        self.slider.setValue(10)
+
+        self.spbox_depth = QSpinBox(self)
+        self.spbox_depth.setValue(10)
+        self.spbox_depth.setRange(1, 20)
+
+        self.layout().addWidget(QLabel("Depth:", self))
+        self.layout().addWidget(self.slider)
+        self.layout().addWidget(self.spbox_depth)
+

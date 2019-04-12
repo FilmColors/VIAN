@@ -266,29 +266,38 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
 
         return image
 
-    def get_param_widget(self):
-        w = QWidget()
-        w.setLayout(QVBoxLayout())
-        hl2 = QHBoxLayout(w)
-        hl2.addWidget(QLabel("Y-Scale:", w))
-        hl3 = QHBoxLayout(w)
-        hl3.addWidget(QLabel("X-Scale:", w))
-
-        slider_yscale = QSlider(Qt.Horizontal, w)
-        slider_yscale.setRange(1, 1000)
-        slider_yscale.setValue(100)
-        slider_yscale.valueChanged.connect(self.set_y_scale)
-        hl2.addWidget(slider_yscale)
-
-        slider_xscale = QSlider(Qt.Horizontal, w)
-        slider_xscale.setRange(1, 1000)
-        slider_xscale.setValue(100)
-        slider_xscale.valueChanged.connect(self.set_x_scale)
-        hl3.addWidget(slider_xscale)
-
-        w.layout().addItem(hl2)
-        w.layout().addItem(hl3)
+    def get_param_widget(self, w=None):
+        if w is None:
+            w = VIANPlotControls()
+        w.slider_yscale.valueChanged.connect(self.set_y_scale)
+        w.slider_xscale.valueChanged.connect(self.set_x_scale)
         return w
+
+
+class VIANPlotControls(QWidget):
+    def __init__(self):
+        super(VIANPlotControls, self).__init__()
+        self.setLayout(QVBoxLayout())
+        hl2 = QHBoxLayout(self)
+        hl2.addWidget(QLabel("Y-Scale:", self))
+        hl3 = QHBoxLayout(self)
+        hl3.addWidget(QLabel("X-Scale:", self))
+
+        self.slider_yscale = QSlider(Qt.Horizontal, self)
+        self.slider_yscale.setRange(1, 1000)
+        self.slider_yscale.setValue(100)
+
+        hl2.addWidget(self.slider_yscale)
+
+        self.slider_xscale = QSlider(Qt.Horizontal, self)
+        self.slider_xscale.setRange(1, 1000)
+        self.slider_xscale.setValue(100)
+
+        hl3.addWidget(self.slider_xscale)
+
+
+        self.layout().addItem(hl2)
+        self.layout().addItem(hl3)
 
 
 class VIANTextGraphicsItemSignals(QObject):
@@ -501,32 +510,20 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
         img = self.scene().addPixmap(QPixmap().fromImage(self.qimage))
         self.fitInView(self.scene().itemsBoundingRect())
 
-    def get_param_widget(self):
-        w = QWidget()
-        w.setLayout(QVBoxLayout())
-        plot_floor = QCheckBox("Plot Floor")
-        plot_zeros = QCheckBox("Plot Zeros")
-        normalize = QCheckBox("Normalize")
-        draw_grid = QCheckBox("Draw Grid")
-        plot_log = QCheckBox("Plot Log")
+    def get_param_widget(self, w = None):
+        if w is None:
+            w = HistogramVisControls(self)
+        w.plot_floor.stateChanged.connect(self.set_plot_floor)
+        w.plot_zeros.stateChanged.connect(self.set_plot_zeros)
+        w.normalize.stateChanged.connect(self.set_normalize)
+        w.draw_grid.stateChanged.connect(self.set_draw_grid)
+        w.plot_log.stateChanged.connect(self.set_plot_log)
 
-        plot_floor.setChecked(self.plot_floor)
-        plot_zeros.setChecked(self.plot_zeros)
-        normalize.setChecked(self.normalize)
-        draw_grid.setChecked(self.draw_grid)
-        plot_log.setChecked(self.plot_log)
-
-        plot_floor.stateChanged.connect(self.set_plot_floor)
-        plot_zeros.stateChanged.connect(self.set_plot_zeros)
-        normalize.stateChanged.connect(self.set_normalize)
-        draw_grid.stateChanged.connect(self.set_draw_grid)
-        plot_log.stateChanged.connect(self.set_plot_log)
-
-        w.layout().addWidget(plot_floor)
-        w.layout().addWidget(plot_zeros)
-        w.layout().addWidget(normalize)
-        w.layout().addWidget(draw_grid)
-        w.layout().addWidget(plot_log)
+        self.set_plot_floor(w.plot_floor.isChecked())
+        self.set_plot_zeros(w.plot_zeros.isChecked())
+        self.set_normalize(w.normalize.isChecked())
+        self.set_draw_grid(w.draw_grid.isChecked())
+        self.set_plot_log(w.plot_log.isChecked())
 
         return w
 
@@ -579,6 +576,29 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
             super(EGraphicsView, self).mousePressEvent(event)
 
 
+class HistogramVisControls(QWidget):
+    def __init__(self, plot):
+        super(HistogramVisControls, self).__init__()
+        self.setLayout(QVBoxLayout())
+        self.plot_floor = QCheckBox("Plot Floor")
+        self.plot_zeros = QCheckBox("Plot Zeros")
+        self.normalize = QCheckBox("Normalize")
+        self.draw_grid = QCheckBox("Draw Grid")
+        self.plot_log = QCheckBox("Plot Log")
+
+        self.plot_floor.setChecked(plot.plot_floor)
+        self.plot_zeros.setChecked(plot.plot_zeros)
+        self.normalize.setChecked(plot.normalize)
+        self.draw_grid.setChecked(plot.draw_grid)
+        self.plot_log.setChecked(plot.plot_log)
+
+        self.layout().addWidget(self.plot_floor)
+        self.layout().addWidget(self.plot_zeros)
+        self.layout().addWidget(self.normalize)
+        self.layout().addWidget(self.draw_grid)
+        self.layout().addWidget(self.plot_log)
+
+
 class PaletteVis(QWidget, IVIANVisualization):
     def __init__(self, parent, naming_fields=None):
         QWidget.__init__(self, parent)
@@ -593,7 +613,6 @@ class PaletteVis(QWidget, IVIANVisualization):
         self.items = []
         # self.plt = pg.PlotItem()
         # self.view.addItem(self.plt)
-
 
     def plot(self, values, colors):
         size_factor = 1.0 / np.sum(values)

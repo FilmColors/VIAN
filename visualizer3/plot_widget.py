@@ -18,6 +18,7 @@ def feature_changed(scr, plot):
         ty = data[7]
         x = data[1]
         y = data[2]
+
         color = QColor(data[5], data[4], data[3], 200)
 
         if isinstance(plot, ImagePlotCircular):
@@ -49,7 +50,7 @@ class PlotWidget(QDockWidget):
         self.widget.setLayout(QVBoxLayout())
         self.setWidget(self.widget)
         self.widget.layout().addWidget(plot)
-        self.widget.layout().addWidget(ExpandableWidget(self, "Plot Controls", plot.get_param_widget()))
+        # self.widget.layout().addWidget(ExpandableWidget(self, "Plot Controls", plot.get_param_widget()))
         self.show()
         self.plot.frame_plot()
 
@@ -203,7 +204,6 @@ class PlotResultsGroupWidget(QDockWidget):
                 print(p.plot, name)
 
 
-
 import json
 class QuerySummary(QDockWidget):
     onGroupNameChanged = pyqtSignal(str, str)
@@ -305,6 +305,34 @@ class SegmentItem(QWidget):
     def on_image_changed(self, pixmap):
         self.image_view.replace_image(self.sender().dbscreenshot.id, pixmap)
 
+
+class ControlsWidget(QDockWidget):
+    def __init__(self, parent):
+        super(ControlsWidget, self).__init__(parent)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setWidgetResizable(True)
+        self.inner = QWidget()
+        self.inner.setLayout(QVBoxLayout(self))
+        self.scroll_area.setWidget(self.inner)
+        self.ctrl_container = QWidget(self.inner)
+        self.ctrl_container.setLayout(QVBoxLayout(self.ctrl_container))
+        self.placeholder = QWidget()
+        self.placeholder.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.inner.layout().addWidget(self.ctrl_container)
+        self.inner.layout().addWidget(self.placeholder)
+
+        self.setWidget(self.scroll_area)
+
+        self.controls = dict()
+
+    def add_plot(self, p):
+        if p.naming_fields['plot_name'] not in self.controls:
+            ctrls = p.get_param_widget()
+            self.controls[p.naming_fields['plot_name']] = ctrls
+            self.ctrl_container.layout().addWidget(ExpandableWidget(self.inner, p.naming_fields['plot_name'], ctrls))
+        else:
+            p.get_param_widget(w=self.controls[p.naming_fields['plot_name']])
 
 # class PlotSettings:
 #     def __init__(self):
