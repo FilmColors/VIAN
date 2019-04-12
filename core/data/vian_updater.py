@@ -108,7 +108,7 @@ class VianUpdaterJob(IConcurrentJob):
             os.mkdir(self.app_root + "/update/")
             self.temp_dir = self.app_root + "/update/"
 
-            r = get_vian_version(version_id)
+            r = download_vian_update(version_id)
             z = zipfile.ZipFile(io.BytesIO(r.content))
             z.extractall(self.temp_dir)
 

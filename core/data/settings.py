@@ -9,6 +9,7 @@ Everything is serialized to the settings.json file in the UserDirectory/VIAN.
 import glob
 import json
 import os
+import sys
 from collections import namedtuple
 
 from core.data.enums import ScreenshotNamingConventionOptions as naming
@@ -95,8 +96,13 @@ class UserSettings():
         # Annotation Viewer
         self.AUTO_COLLAPSE = True
 
-        self.FONT_NAME = "Lucida Console"
-        self.FONT_SIZE = 14
+        if sys.platform == "darwin":
+            self.FONT_NAME = "Helvetica Neue"
+            self.FONT_SIZE = 11
+        else:
+            self.FONT_NAME = "Bahnschrift SemiLight"
+            self.FONT_SIZE = 11
+
         self.MAIN_FONT = Font(font_family="Lucida Console", font_color=(50,50,50,255), font_size=14)
         self.PALETTES = [palette_sand, palette_grass, palette_difference, palette_beach, palette_earth, palette_gray]
 

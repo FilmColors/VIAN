@@ -200,13 +200,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
         self.color_dt = ImagePlotTime(self)
         self.color_dt_ctrls = self.color_dt.get_param_widget()
-        hl4 = QHBoxLayout(self.color_dt_ctrls)
-        hl4.addWidget(QLabel("Channel:", self.color_dt_ctrls))
-        self.color_dt_ctrls.layout().addItem(hl4)
-        cbox_channel = QComboBox(self.color_dt_ctrls)
-        cbox_channel.addItems(["Saturation", "Hue", "Chroma", "Luminance", "A", "B"])
-        cbox_channel.currentTextChanged.connect(self.color_dt_mode_changed)
-        hl4.addWidget(cbox_channel)
+        # hl4 = QHBoxLayout(self.color_dt_ctrls)
+        # hl4.addWidget(QLabel("Channel:", self.color_dt_ctrls))
+        # self.color_dt_ctrls.layout().addItem(hl4)
+        # cbox_channel = QComboBox(self.color_dt_ctrls)
+        # cbox_channel.addItems(["Saturation", "Hue", "Chroma", "Luminance", "A", "B"])
+        # cbox_channel.currentTextChanged.connect(self.color_dt_mode_changed)
+        # hl4.addWidget(cbox_channel)
 
         self.lc_view = ImagePlotPlane(self, range_y=[0, 255])
         self.color_lc_view = self.lc_view.get_param_widget()
@@ -365,7 +365,11 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
                                     y,
                                     ndarray,
                                     uid=scr.unique_id,
-                                    convert=False)
+                                    convert=False,
+                                    channels=dict(chroma=lch[1],
+                                                  luminance=lch[0],
+                                                  hue=((lch[1] + np.pi) / (2*np.pi)) * 100,
+                                                  saturation=y))
         exists = self.ab_view.update_item(scr.unique_id, [128 - lab[1], 128 - lab[2]], pixmap)
         if not exists:
             self.ab_view.add_image(128 - lab[1],

@@ -66,10 +66,10 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.7.6"
+VERSION = "0.7.7"
 
 __author__ = "Gaudenz Halter"
-__copyright__ = "Copyright 2017, Gaudenz Halter"
+__copyright__ = "Copyright 2019, Gaudenz Halter"
 __credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
 __license__ = "GPL"
 __version__ = VERSION
