@@ -32,6 +32,7 @@ def get_vian_version():
 def download_vian_update(version_id):
     return requests.get(EP_ROOT + "vian/download_vian/" + str(version_id), stream=True)
 
+
 class CorpusClient(QObject):
     onConnectionEstablished = pyqtSignal(object)
     onConnectionFailed = pyqtSignal(object)
@@ -389,8 +390,6 @@ class WebAppCorpusInterface(QObject):
     @pyqtSlot()
     def get_persons(self):
         return requests.get(self.ep_query_persons).json()
-
-
 
 
 class LocalCorpusInterface():

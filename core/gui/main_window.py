@@ -16,7 +16,7 @@ from core.data.exporters import *
 from core.data.importers import *
 from core.data.settings import UserSettings, Contributor
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
-from core.data.creation_events import VIANEventHandler, EVENT_C_SEGMENT, EVENT_C_SCREENSHOT, EVENT_C_ANNOTATION
+from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -97,7 +97,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("VIAN: ", __version__)
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
-        loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,100))
+        # loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,200))
 
 
         if PROFILE:
@@ -110,10 +110,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.forced_overlay_hidden = False
 
         self.extension_list = ExtensionList(self)
-        print("Registered Events:")
-        for itm in [EVENT_C_SCREENSHOT, EVENT_C_SEGMENT, EVENT_C_ANNOTATION]:
-            for k, v in itm.items():
-                print("\t---", k.ljust(30),v)
+        print("Registered Pipelines:")
+        for k, v in ALL_REGISTERED_PIPELINES.items():
+            print("\t---", k.ljust(30),v)
         self.is_darwin = False
 
         self.application_in_focus = True
@@ -137,8 +136,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hdf5_cache = HDF5Cache(self.settings.DIR_PROJECT + "/scr_cache.hdf5")
 
         self.clipboard_data = []
-        loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(200,200,200,100))
+        # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
+        #                            QColor(200,200,200,100))
 
         self.updater = VianUpdater(self, self.version)
 
@@ -157,8 +156,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.colormetry_running = False
         self.colormetry_job = None
 
-        loading_screen.showMessage("Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(200,200,200,100))
+        # loading_screen.showMessage("Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
+        #                            QColor(200,200,200,100))
 
         # self.numpy_data_manager = NumpyDataManager(self)
         # self.project_streamer = ProjectStreamerShelve(self)
@@ -230,8 +229,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_client = CorpusClient()
 
 
-        loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(200,200,200,100))
+        # loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
+        #                            QColor(200,200,200,100))
         print("UPDATE WORKER")
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread(self)
@@ -243,8 +242,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_thread.start()
         print("DONE")
         self.create_widget_elan_status()
-        loading_screen.showMessage("Creating GUI: Player", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: Player", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
         self.create_widget_video_player()
         # self.create_analyses_widget()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
@@ -253,12 +252,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.annotation_options.optionsChanged.connect(self.annotation_toolbar.on_options_changed)
         self.annotation_options.optionsChanged.connect(self.drawing_overlay.on_options_changed)
 
-        loading_screen.showMessage("Creating GUI: ScreenshotManager", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: ScreenshotManager", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
         self.create_screenshot_manager()
 
-        loading_screen.showMessage("Creating GUI: NodeEditor", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: NodeEditor", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
         self.create_node_editor_results()
         self.create_node_editor()
         self.create_screenshots_toolbar()
@@ -266,8 +265,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_screenshot_manager_dock_widget()
         self.create_inspector()
 
-        loading_screen.showMessage("Creating GUI: Timeline", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: Timeline", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
         self.create_timeline()
         self.create_widget_player_controls()
         self.create_perspectives_manager()
@@ -278,23 +277,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_matrix()
         self.create_query_widget()
 
-        loading_screen.showMessage("Creating GUI: Analysis", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: Analysis", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
         self.create_analysis_results_widget()
         self.create_quick_annotation_dock()
 
-        loading_screen.showMessage("Creating GUI: Colorimetry Live Widget", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: Colorimetry Live Widget", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
         self.create_colorimetry_live()
 
-        loading_screen.showMessage("Creating GUI: Experiment Editor", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: Experiment Editor", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
         self.create_experiment_editor()
 
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
-        loading_screen.showMessage("Creating GUI: Create Layout", Qt.AlignHCenter | Qt.AlignBottom,
-                                   QColor(200, 200, 200, 100))
+        # loading_screen.showMessage("Creating GUI: Create Layout", Qt.AlignHCenter | Qt.AlignBottom,
+        #                            QColor(200, 200, 200, 100))
 
         self.create_corpus_client_toolbar()
 
@@ -315,8 +314,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.concurrent_task_viewer.hide()
 
         # Tab File
-        loading_screen.showMessage("Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(250, 250, 250, 100))
+        # loading_screen.showMessage("Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
+        #                            QColor(250, 250, 250, 100))
 
         ## Action Slots ##
         # FILE MENU
@@ -507,8 +506,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget.onSpacialFrequencyChanged.connect(self.frame_update_worker.toggle_spacial_frequency)
 
         self.vian_event_handler.onException.connect(self.script_editor.print_exception)
-        loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
-                                   QColor(200,200,200,100))
+        # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
+        #                            QColor(200,200,200,100))
         self.update_recent_menu()
 
 
@@ -1267,7 +1266,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.show()
             self.player_dock_widget.show()
             self.colorimetry_live.show()
-            self.script_editor.show()
+
             self.vocabulary_matrix.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
@@ -1275,7 +1274,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
-            self.tabifyDockWidget(self.screenshots_manager_dock, self.script_editor)
+            # self.tabifyDockWidget(self.screenshots_manager_dock, self.script_editor)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)

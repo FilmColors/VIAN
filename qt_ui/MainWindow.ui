@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>images/main.ico</normaloff>images/main.ico</iconset>
+    <normaloff>images/main_round.ico</normaloff>images/main_round.ico</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>

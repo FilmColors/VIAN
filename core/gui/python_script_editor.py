@@ -7,10 +7,9 @@ import traceback
 
 from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter
+from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter,QSizePolicy
 from functools import partial
 
-from core.data.creation_events import EVENT_C_SEGMENT, EVENT_C_ANNOTATION, EVENT_C_SCREENSHOT
 
 def format(r, g, b, style=''):
     """Return a QTextCharFormat with the given attributes.
@@ -53,14 +52,15 @@ class PythonScriptEditor(QDockWidget):
         self.output = QPlainTextEdit(self.inner)
         self.output.setReadOnly(True)
 
-        self.central = QSplitter( Qt.Vertical, self.inner)
+        self.central = QSplitter(Qt.Vertical, self.inner)
+        self.central.setMaximumHeight(400)
         self.central.addWidget(self.editor)
         self.central.addWidget(self.output)
         self.highlighter = PythonHighlighter(self.editor.document())
 
         self.inner.setCentralWidget(self.central)
         self.current_file_path = ""
-        QDockWidget.setWidget(self, self.inner)
+        self.setWidget(self.inner)
 
         self.m_file = self.inner.menuBar().addMenu("File")
         self.a_new = self.m_file.addAction("New Script")
@@ -71,7 +71,10 @@ class PythonScriptEditor(QDockWidget):
         self.a_load.triggered.connect(partial(self.load, None))
         self.a_save.triggered.connect(partial(self.save, None, False))
 
-        self.font = QFont("Lucida Console")
+        if sys.platform == "darwin":
+            self.font = QFont("Consolas")
+        else:
+            self.font = QFont("Lucida Console")
         self.font.setPointSize(10)
 
         self.toolbar = self.inner.addToolBar("ScriptEditor Toolbar")
@@ -100,7 +103,6 @@ class PythonScriptEditor(QDockWidget):
             print(e)
 
     def save(self, file_path=None, save_as = False):
-        print(file_path, save_as)
         if file_path is not None:
             p = file_path
         elif save_as or self.current_file_path == "":

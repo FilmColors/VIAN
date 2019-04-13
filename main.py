@@ -21,6 +21,8 @@ import traceback
 from datetime import datetime
 from threading import Thread
 
+import logging
+logging.getLogger('tensorflow').disabled = True
 
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
@@ -33,6 +35,8 @@ from core.gui.main_window import MainWindow
 
 DEBUG = True
 MAIN_WINDOW = None
+
+
 
 class SuperFilter(QObject):
     def __init__(self, parent):
@@ -95,7 +99,13 @@ if __name__ == '__main__':
     app.setWindowIcon(QIcon("qt_ui/images/main.png"))
     set_attributes(app)
     set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
-    splash = QSplashScreen(QPixmap("qt_ui/images/loading_screen.png"))
+
+    screen = app.desktop().screenGeometry()
+
+    pixmap = QPixmap("qt_ui/images/loading_screen_round.png")
+    pixmap = pixmap.scaled(screen.height() / 2, screen.height() / 2, transformMode=Qt.SmoothTransformation)
+
+    splash = QSplashScreen(pixmap)
     splash.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.SplashScreen)
     splash.show()
     app.processEvents()
