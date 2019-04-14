@@ -48,6 +48,7 @@ from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToo
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
+from core.gui.pipeline_widget import PipelineDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
@@ -197,8 +198,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.experiment_dock = None
         self.corpus_client_toolbar = None
         self.facial_identification_dock = None
-        self.script_editor = PythonScriptEditor(self)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.script_editor)
+        self.pipeline_widget = None
+        self.script_editor = None
+        # self.addDockWidget(Qt.RightDockWidgetArea, self.script_editor)
 
         self.corpus_visualizer = VIANVisualizer2(self)
         self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
@@ -296,7 +298,8 @@ class MainWindow(QtWidgets.QMainWindow):
         #                            QColor(200, 200, 200, 100))
 
         self.create_corpus_client_toolbar()
-
+        self.create_pipeline_widget()
+        self.script_editor = self.pipeline_widget.editor
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
@@ -364,7 +367,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTimeline.triggered.connect(self.create_timeline)
         self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
-        self.actionScriptEditor.triggered.connect(self.script_editor.show)
+        self.actionScriptEditor.triggered.connect(self.pipeline_widget.show)
 
         self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup.name))
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
@@ -677,7 +680,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.drawing_overlay is not None:
             self.check_overlay_visibility()
 
-
 #OLD CODE
 
     def create_annotation_toolbar(self):
@@ -831,6 +833,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.query_widget.show()
             self.query_widget.raise_()
             self.query_widget.activateWindow()
+
+    def create_pipeline_widget(self):
+        if self.pipeline_widget is None:
+            self.pipeline_widget = PipelineDock(self, self.vian_event_handler)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.pipeline_widget)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
+        else:
+            self.pipeline_widget.show()
+            self.pipeline_widget.raise_()
+            self.pipeline_widget.activateWindow()
 
     def create_analysis_results_widget(self):
         if self.analysis_results_widget is None:
@@ -1274,13 +1286,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
-            # self.tabifyDockWidget(self.screenshots_manager_dock, self.script_editor)
+            # self.tabifyDockWidget(self.colorimetry_live, self.script_editor)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
             # self.screenshot_toolbar.show()
-            # self.screenshots_manager_dock.raise_()
+            self.screenshots_manager_dock.raise_()
             self.elan_status.stage_selector.set_stage(0, False)
 
         elif perspective == Perspective.Annotation.name:
@@ -1447,7 +1459,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_matrix.hide()
         self.analysis_results_widget_dock.hide()
         self.timeline.hide()
-        self.script_editor.hide()
+        self.pipeline_widget.hide()
         self.player_controls.hide()
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
