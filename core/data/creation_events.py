@@ -21,6 +21,10 @@ class VIANEventHandler(QObject):
         self.project = None                 # type: VIANProject
         self.current_pipeline = None        # type: VIANPipeline
 
+        self.comp_segments = False
+        self.comp_screenshots = False
+        self.comp_annotations = False
+
     @pyqtSlot(object)
     def set_project(self, project):
         self.project = project
@@ -30,9 +34,23 @@ class VIANEventHandler(QObject):
         self.project.onAnnotationAdded.connect(self.run_on_annotation_created_event)
         self.project.onSegmentAdded.connect(self.run_segment_created_event)
 
+    @pyqtSlot(bool, bool, bool)
+    def to_compute_changed(self, comp_segments, comp_screenshots, comp_annotations):
+        self.comp_segments = comp_segments
+        self.comp_screenshots = comp_screenshots
+        self.comp_annotations = comp_annotations
+
+    def set_current_pipeline(self, name):
+        try:
+            self.current_pipeline = ALL_REGISTERED_PIPELINES[name]()
+        except Exception as e:
+            self.onException.emit(traceback.format_exc())
 
     @pyqtSlot(object)
     def run_segment_created_event(self, segment):
+        print("Computing Segment", self.comp_segments)
+        if self.comp_segments is False:
+            return
         try:
             cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
             if self.current_pipeline is not None:
@@ -42,6 +60,9 @@ class VIANEventHandler(QObject):
 
     @pyqtSlot(object)
     def run_on_screenshot_created_event(self, screenshot):
+        print("Computing screenshot", self.comp_screenshots)
+        if self.comp_screenshots is False:
+            return
         try:
             if self.current_pipeline is not None:
                 self.current_pipeline.on_screenshot_created(self.project, screenshot)
@@ -50,6 +71,8 @@ class VIANEventHandler(QObject):
 
     @pyqtSlot(object)
     def run_on_annotation_created_event(self, annotation):
+        if self.comp_annotations is False:
+            return
         try:
             if self.current_pipeline is not None:
                 self.current_pipeline.on_screenshot_created(self.project, annotation)

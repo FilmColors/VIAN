@@ -41,15 +41,15 @@ STYLES = {
 
 
 class PythonScriptEditor(QDockWidget):
-    onReload = pyqtSignal(str)
+    onReload = pyqtSignal()
 
     def __init__(self, parent):
         super(PythonScriptEditor, self).__init__(parent)
         self.main_window = parent
         self.inner = QMainWindow()
         self.setWindowTitle("Script Editor")
-        self.editor = QPlainTextEdit(self.inner)
-        self.output = QPlainTextEdit(self.inner)
+        self.editor = CodePlainTextEditor(self.inner)
+        self.output = CodePlainTextEditor(self.inner)
         self.output.setReadOnly(True)
 
         self.central = QSplitter(Qt.Vertical, self.inner)
@@ -57,6 +57,9 @@ class PythonScriptEditor(QDockWidget):
         self.central.addWidget(self.editor)
         self.central.addWidget(self.output)
         self.highlighter = PythonHighlighter(self.editor.document())
+
+        self.central.setStretchFactor(0, 4)
+        self.central.setStretchFactor(1, 1)
 
         self.inner.setCentralWidget(self.central)
         self.current_file_path = ""
@@ -135,11 +138,17 @@ class PythonScriptEditor(QDockWidget):
 
         else:
             print("No Module loaded")
+        self.onReload.emit()
 
     @pyqtSlot(str)
     def print_exception(self, e):
         self.output.setPlainText(e)
         self.raise_()
+
+
+class CodePlainTextEditor(QPlainTextEdit):
+    def __init__(self, parent):
+        super(CodePlainTextEditor, self).__init__(parent)
 
 
 class PythonHighlighter (QSyntaxHighlighter):

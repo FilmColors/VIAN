@@ -456,7 +456,7 @@ class AttributesAnalysis(QWidget):
         self.show()
 
     def on_show_vis(self):
-        self.descriptor.project.main_window.switch_perspective(Perspective.Results.name)
+        self.descriptor.project.main_window.switch_perspective(Perspective.Results)
         # self.descriptor.get_visualization()
 
 

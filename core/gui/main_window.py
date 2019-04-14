@@ -233,7 +233,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
-        print("UPDATE WORKER")
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread(self)
         self.frame_update_worker.moveToThread(self.frame_update_thread)
@@ -242,7 +241,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.frame_update_thread.started.connect(self.frame_update_worker.run)
         self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
-        print("DONE")
         self.create_widget_elan_status()
         # loading_screen.showMessage("Creating GUI: Player", Qt.AlignHCenter | Qt.AlignBottom,
         #                            QColor(200, 200, 200, 100))
@@ -369,15 +367,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
         self.actionScriptEditor.triggered.connect(self.pipeline_widget.show)
 
-        self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup.name))
-        self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer.name))
-        self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation.name))
-        self.actionScreenshotsPersp.triggered.connect(partial(self.switch_perspective, Perspective.ScreenshotsManager.name))
-        self.actionNodeEditorPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses.name))
-        self.actionSegmentationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Segmentation.name))
-        self.actionResultsPersp.triggered.connect(partial(self.switch_perspective, Perspective.Results.name))
-        self.actionVocabularyPersp.triggered.connect(partial(self.switch_perspective, Perspective.Classification.name))
-        self.actionQuick_Annotation.triggered.connect(partial(self.switch_perspective, Perspective.QuickAnnotation.name))
+        self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup))
+        self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer))
+        self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation))
+        self.actionScreenshotsPersp.triggered.connect(partial(self.switch_perspective, Perspective.ScreenshotsManager))
+        self.actionNodeEditorPerspective.triggered.connect(partial(self.switch_perspective, Perspective.Analyses))
+        self.actionSegmentationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Segmentation))
+        self.actionResultsPersp.triggered.connect(partial(self.switch_perspective, Perspective.Results))
+        self.actionVocabularyPersp.triggered.connect(partial(self.switch_perspective, Perspective.Classification))
+        self.actionQuick_Annotation.triggered.connect(partial(self.switch_perspective, Perspective.QuickAnnotation))
 
         self.actionHistory.triggered.connect(self.create_history_view)
         self.actionTaksMonitor.triggered.connect(self.create_concurrent_task_viewer)
@@ -509,6 +507,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget.onSpacialFrequencyChanged.connect(self.frame_update_worker.toggle_spacial_frequency)
 
         self.vian_event_handler.onException.connect(self.script_editor.print_exception)
+        self.pipeline_widget.pipeline.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
+        self.pipeline_widget.pipeline.onPipelineActivated.connect(self.vian_event_handler.set_current_pipeline)
+
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
         self.update_recent_menu()
@@ -524,7 +525,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.show()
 
-        self.switch_perspective(Perspective.Segmentation.name)
+        self.switch_perspective(Perspective.Segmentation)
         loading_screen.hide()
         self.setWindowState(Qt.WindowMaximized)
         self.settings.apply_ui_settings()
@@ -1255,6 +1256,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.centralWidget().setParent(None)
         self.statusBar().show()
 
+        self.hide_all_widgets()
+        self.current_perspective = perspective
+        self.elan_status.stage_selector.set_stage(perspective, False)
+
         self.default_dock_locations()
 
         central = QWidget(self)
@@ -1264,15 +1269,10 @@ class MainWindow(QtWidgets.QMainWindow):
         #     self.screenshot_toolbar.show()
         #     self.annotation_toolbar.show()
 
-        if perspective == Perspective.VideoPlayer.name:
-            self.current_perspective = Perspective.VideoPlayer
-            self.hide_all_widgets()
+        if perspective == Perspective.VideoPlayer:
             self.player_dock_widget.show()
 
-        elif perspective == Perspective.Segmentation.name:
-            self.current_perspective = Perspective.Segmentation
-            self.hide_all_widgets()
-
+        elif perspective == Perspective.Segmentation:
             self.timeline.show()
             self.player_controls.show()
             self.screenshots_manager_dock.show()
@@ -1293,13 +1293,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # self.screenshot_toolbar.show()
             self.screenshots_manager_dock.raise_()
-            self.elan_status.stage_selector.set_stage(0, False)
 
-        elif perspective == Perspective.Annotation.name:
-            self.current_perspective = Perspective.Annotation
-
-            self.hide_all_widgets()
-
+        elif perspective == Perspective.Annotation:
             self.outliner.show()
             self.timeline.show()
             self.inspector.show()
@@ -1311,15 +1306,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
             self.tabifyDockWidget(self.inspector, self.annotation_options)
-            self.elan_status.stage_selector.set_stage(1, False)
             self.screenshots_manager_dock.raise_()
 
-        elif perspective == Perspective.ScreenshotsManager.name:
-            self.current_perspective = Perspective.ScreenshotsManager
+        elif perspective == Perspective.ScreenshotsManager:
             self.screenshots_manager.update_manager()
-
-            self.hide_all_widgets()
-
             self.screenshots_manager_dock.show()
             self.inspector.show()
             self.outliner.show()
@@ -1329,11 +1319,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
 
-        elif perspective == Perspective.Analyses.name:
-            self.current_perspective = Perspective.Analyses
-
-            self.hide_all_widgets()
-
+        elif perspective == Perspective.Analyses:
             self.inspector.show()
             self.outliner.show()
             self.node_editor_results.show()
@@ -1343,11 +1329,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
-        elif perspective == Perspective.Results.name:
-            self.current_perspective = Perspective.Results
-
-            self.hide_all_widgets()
-
+        elif perspective == Perspective.Results:
             self.inspector.show()
             self.outliner.show()
 
@@ -1355,13 +1337,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Horizontal)
-            self.elan_status.stage_selector.set_stage(4, False)
             self.splitDockWidget(self.outliner, self.inspector, Qt.Vertical)
 
-        elif perspective == Perspective.Classification.name:
-            self.current_perspective = Perspective.Classification
-
-            self.hide_all_widgets()
+        elif perspective == Perspective.Classification:
 
             self.timeline.show()
             self.screenshots_manager_dock.show()
@@ -1373,35 +1351,30 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.addDockWidget(Qt.RightDockWidgetArea, self.timeline, Qt.Vertical)
 
-            self.elan_status.stage_selector.set_stage(3, False)
             # self.statusBar().hide()
 
-        elif perspective == Perspective.ExperimentSetup.name:
-            self.hide_all_widgets()
+        elif perspective == Perspective.ExperimentSetup:
 
             self.outliner.show()
             self.vocabulary_manager.show()
-            self.inspector.show()
+            # self.inspector.show()
             self.experiment_dock.show()
+            self.pipeline_widget.show()
 
-            self.elan_status.stage_selector.set_stage(2, False)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Vertical)
             self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_dock)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.tabifyDockWidget(self.experiment_dock, self.pipeline_widget)
+            # self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
-        elif perspective == Perspective.QuickAnnotation.name:
-            self.hide_all_widgets()
+        elif perspective == Perspective.QuickAnnotation:
             self.player_dock_widget.show()
             self.quick_annotation_dock.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea,self.player_dock_widget)
             self.addDockWidget(Qt.BottomDockWidgetArea, self.quick_annotation_dock)
 
-        elif perspective == Perspective.Query.name:
-            self.current_perspective = Perspective.Query
-            self.hide_all_widgets()
-
+        elif perspective == Perspective.Query:
             self.timeline.show()
             self.screenshots_manager_dock.show()
             self.player_dock_widget.show()
@@ -1418,12 +1391,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.screenshot_toolbar.show()
             self.screenshots_manager_dock.raise_()
-            self.elan_status.stage_selector.set_stage(5, False)
 
-        elif perspective == Perspective.CorpusVisualizer.name:
-            self.current_perspective = Perspective.CorpusVisualizer
-            self.hide_all_widgets()
-
+        elif perspective == Perspective.CorpusVisualizer:
             self.corpus_visualizer_result_dock.show()
             self.corpus_visualizer_dock.show()
             self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
@@ -1657,7 +1626,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player.on_loaded(self.project)
 
     def on_start_visualizer(self):
-        self.switch_perspective(Perspective.CorpusVisualizer.name)
+        self.switch_perspective(Perspective.CorpusVisualizer)
         # try:
         #     visualizer = VIANVisualizer2(self)
         #     visualizer.show()

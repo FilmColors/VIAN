@@ -744,3 +744,21 @@ QHBoxLayout{
     spacing: 2px;
 }
 
+QSplitter::handle {
+     background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #303030, stop: 0.5 #303030, stop: 0.6 #303030, stop:1 #303030);
+    /*color: white;*/
+    width: 1px;
+    height: 1px;
+    padding: 1px;
+    border: 1px solid #202020;
+    spacing: 1px; /* spacing between items in the tool bar */
+}
+
+CodePlainTextEditor{
+	font-family: "Lucida Console";
+    font-size: 10pt;
+	margin: 5pt;
+    padding: 1pt;
+    color: #b1b1b1;
+    background-color: #252525;
+}

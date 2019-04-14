@@ -265,39 +265,27 @@ class StageSelector(QWidget):
         self.setStyleSheet("QPushButton{background: transparent;} QWidget:focus{border: 0px solid #383838;}")
 
         self.buttons = [
-            self.btn_Segmentation,
-            self.btn_Annotation,
-            self.btn_Experiment,
-            self.btn_Classification,
-            self.btn_Visualization,
-            self.btn_Query
+            (self.btn_Setup, Perspective.ExperimentSetup),
+            (self.btn_Segmentation, Perspective.Segmentation),
+            (self.btn_Annotation, Perspective.Annotation),
+            (self.btn_Classification, Perspective.Classification),
+            (self.btn_Query, Perspective.Query)
         ]
 
-        self.btn_Segmentation.clicked.connect(partial(self.set_stage, 0))
-        self.btn_Annotation.clicked.connect(partial(self.set_stage, 1))
-        self.btn_Experiment.clicked.connect(partial(self.set_stage, 2))
-        self.btn_Classification.clicked.connect(partial(self.set_stage, 3))
-        self.btn_Visualization.clicked.connect(partial(self.set_stage, 4))
-        self.btn_Query.clicked.connect(partial(self.set_stage, 5))
+        self.btn_Segmentation.clicked.connect(partial(self.set_stage, Perspective.Segmentation))
+        self.btn_Annotation.clicked.connect(partial(self.set_stage, Perspective.Annotation))
+        self.btn_Setup.clicked.connect(partial(self.set_stage, Perspective.ExperimentSetup))
+        self.btn_Classification.clicked.connect(partial(self.set_stage, Perspective.Classification))
+        self.btn_Query.clicked.connect(partial(self.set_stage, Perspective.Query))
 
-
-    def set_stage(self, idx, dispatch = True):
-        for i, btn in enumerate(self.buttons):
-            if i == idx:
+    def set_stage(self, idx:Perspective, dispatch = True):
+        new_perspective = None
+        for i, (btn, persp) in enumerate(self.buttons):
+            if persp == idx:
+                new_perspective = persp
                 btn.setChecked(True)
             else:
                 btn.setChecked(False)
 
-        if dispatch:
-            if idx == 0:
-                self.main_window.switch_perspective(Perspective.Segmentation.name)
-            elif idx == 1:
-                self.main_window.switch_perspective(Perspective.Annotation.name)
-            elif idx == 2:
-                self.main_window.switch_perspective(Perspective.ExperimentSetup.name)
-            elif idx == 3:
-                self.main_window.switch_perspective(Perspective.Classification.name)
-            elif idx == 4:
-                self.main_window.switch_perspective(Perspective.Results.name)
-            elif idx == 5:
-                self.main_window.switch_perspective(Perspective.Query.name)
+        if dispatch and new_perspective is not None:
+            self.main_window.switch_perspective(new_perspective)

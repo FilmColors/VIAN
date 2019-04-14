@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
-    <height>585</height>
+    <width>511</width>
+    <height>764</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,17 +47,17 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="btn_Finalize">
-        <property name="text">
-         <string>Finalize</string>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btn_Finalize">
+     <property name="text">
+      <string>Finalize</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
    <item>
