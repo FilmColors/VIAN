@@ -380,6 +380,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
 class ImagePlotCircular(ImagePlot):
     sendRangeScaleToControl = pyqtSignal(int)
+
     def __init__(self, parent, range_x = None, range_y = None, naming_fields = None):
         self.lbl_max = None
         super(ImagePlotCircular, self).__init__(parent, range_x, range_y, naming_fields=naming_fields)

@@ -7,7 +7,7 @@ import traceback
 
 from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter,QSizePolicy
+from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter,QSizePolicy, QVBoxLayout
 from functools import partial
 
 
@@ -40,13 +40,14 @@ STYLES = {
 }
 
 
-class PythonScriptEditor(QDockWidget):
+class PythonScriptEditor(QWidget):
     onReload = pyqtSignal()
 
     def __init__(self, parent):
         super(PythonScriptEditor, self).__init__(parent)
         self.main_window = parent
         self.inner = QMainWindow()
+        self.setLayout(QVBoxLayout())
         self.setWindowTitle("Script Editor")
         self.editor = CodePlainTextEditor(self.inner)
         self.output = CodePlainTextEditor(self.inner)
@@ -63,7 +64,7 @@ class PythonScriptEditor(QDockWidget):
 
         self.inner.setCentralWidget(self.central)
         self.current_file_path = ""
-        self.setWidget(self.inner)
+        self.layout().addWidget(self.inner)
 
         self.m_file = self.inner.menuBar().addMenu("File")
         self.a_new = self.m_file.addAction("New Script")

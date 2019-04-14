@@ -7,7 +7,7 @@ from PyQt5.QtGui import QColor
 from core.data.interfaces import IProjectChangeNotify
 import os
 from core.gui.python_script_editor import PythonScriptEditor
-from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
+from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script
 
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):
@@ -24,14 +24,20 @@ class PipelineDock(EDockWidget):
         self.inner.centralWidget().layout().addWidget(self.editor)
         self.editor.onReload.connect(self.pipeline.on_reload_scripts)
 
+        self.pipeline.onPipelineActivated.connect(self.on_active_pipeline_changed)
+
         self.splitter.setStretchFactor(0, 1)
         self.splitter.setStretchFactor(1, 3)
 
+    def on_active_pipeline_changed(self, name):
+        script_path = get_path_of_pipeline_script(name)
+        if script_path is not None and os.path.isfile(script_path):
+            self.editor.load(script_path)
 
 
 class PipelineWidget(QWidget):
     onPipelineActivated = pyqtSignal(str)
-    onPipelineFinalize = pyqtSignal(str)
+    onPipelineFinalize = pyqtSignal()
     onToComputeChanged = pyqtSignal(bool, bool, bool)
 
     def __init__(self, parent, event_manager: VIANEventHandler):
@@ -46,6 +52,7 @@ class PipelineWidget(QWidget):
         self.btn_onSegment.clicked.connect(self.on_update_to_compute)
         self.btn_onScreenshot.clicked.connect(self.on_update_to_compute)
         self.btn_onAnnotation.clicked.connect(self.on_update_to_compute)
+        self.btn_Finalize.clicked.connect(self.on_pipeline_finalize)
 
         self.btn_usePipeline.clicked.connect(self.on_use_pipeline)
         self.current_item = None
@@ -89,3 +96,5 @@ class PipelineWidget(QWidget):
         self.onPipelineActivated.emit(pipeline_name)
 
 
+    def on_pipeline_finalize(self):
+        self.onPipelineFinalize.emit()

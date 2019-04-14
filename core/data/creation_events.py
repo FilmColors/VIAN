@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QMessageBox
 from core.container.project import VIANProject
 import traceback
 import cv2
+import inspect
 
 ALL_REGISTERED_PIPELINES = dict()
 
@@ -42,7 +43,7 @@ class VIANEventHandler(QObject):
 
     def set_current_pipeline(self, name):
         try:
-            self.current_pipeline = ALL_REGISTERED_PIPELINES[name]()
+            self.current_pipeline = ALL_REGISTERED_PIPELINES[name][0]()
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
@@ -79,10 +80,25 @@ class VIANEventHandler(QObject):
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
+    @pyqtSlot()
+    def run_on_finalize_event(self):
+        try:
+            if self.current_pipeline is not None:
+                self.current_pipeline.on_project_finalized(self.project)
+        except Exception as e:
+            self.onException.emit(traceback.format_exc())
+
+
 def vian_pipeline(cl):
     """Register a function as a plug-in"""
-    ALL_REGISTERED_PIPELINES[cl.name] = cl
+    ALL_REGISTERED_PIPELINES[cl.name] = (cl, inspect.getfile(cl))
     return cl
+
+def get_path_of_pipeline_script(name):
+    if name in ALL_REGISTERED_PIPELINES:
+        return ALL_REGISTERED_PIPELINES[name][1]
+    else:
+        return None
 
 class VIANPipeline:
     name = "NoName"
@@ -100,3 +116,4 @@ class VIANPipeline:
 
     def on_project_finalized(self, project):
         pass
+
