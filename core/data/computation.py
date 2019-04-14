@@ -9,6 +9,7 @@ import PyQt5.QtCore as QtCore
 import subprocess
 import cv2
 import inspect
+import importlib
 
 # import matplotlib.pyplot as plt
 import numpy as np
@@ -546,7 +547,6 @@ def apply_mask(img, mask, indices, mask_size = 100):
     return result
 
 
-
 def rotate(origin, point, angle):
     """
     Rotate a point counterclockwise by a given angle around a given origin.
@@ -608,3 +608,8 @@ def handle_exception(func_name, e):
     text = "Exception in\t" + str(inspect.stack()[0][3]).rjust(25) + "with message:\t" + str(e)
     print(text)
 
+
+def import_module_from_path(path):
+    spec = importlib.util.spec_from_file_location("current_pipeline_module", path)
+    foo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(foo)

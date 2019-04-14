@@ -2058,6 +2058,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for o in self.i_project_notify_reciever:
             o.on_loaded(self.project)
+        self.pipeline_widget.pipeline.on_loaded(self.project)
 
         self.project.unload_all()
 

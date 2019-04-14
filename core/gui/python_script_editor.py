@@ -127,11 +127,13 @@ class PythonScriptEditor(QWidget):
 
     def reload(self):
         self.save()
+        print(self.current_file_path)
         if self.current_file_path != "":
             try:
-                spec = importlib.util.spec_from_file_location("module.name", self.current_file_path)
-                foo = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(foo)
+                spec = importlib.util.spec_from_file_location("current_pipeline_module", self.current_file_path)
+                module = importlib.util.module_from_spec(spec)
+                sys.modules['current_pipeline_module'] = module
+                spec.loader.exec_module(module)
                 self.output.setPlainText("Successfully imported module")
             except Exception as e:
                 self.output.setPlainText(traceback.format_exc())

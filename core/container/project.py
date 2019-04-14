@@ -140,6 +140,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.node_scripts = []                  #type: List[NodeScript]
         self.create_script(dispatch=False)
 
+        self.active_pipeline_script = None
+        self.compute_pipeline_settings = dict(segments=False, screenshots=False, annotations=False)
+        self.pipeline_scripts = []
+
         self.add_screenshot_group("All Shots", initial=True)
         self.active_screenshot_group = self.screenshot_groups[0]
         self.active_screenshot_group.is_current = True
@@ -620,17 +624,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def get_movie(self):
         return self.movie_descriptor
 
-    def get_mask_analyses(self):
-        """
-        Returns a list of all Analyses that are of type MaskAnalysis
-        :return: A list of MaskAnalyses if any
-        """
-        result = []
-        for a in self.analysis:
-            if isinstance(a, MaskAnalysis):
-                result.append(a)
-        return result
-
     #region Annotations
     def create_annotation_layer(self, name, t_start = 0, t_stop = 0):
         layer = AnnotationLayer(name, t_start, t_stop)
@@ -697,6 +690,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         if dispatch:
             self.dispatch_changed()
+    #endregion
+
+    #region Python Scripts
+    def add_pipeline_script(self, path):
+        if path not in self.pipeline_scripts:
+            self.pipeline_scripts.append(path)
+
+    def remove_pipeline_script(self, path):
+        if path in self.pipeline_scripts:
+            self.pipeline_scripts.remove(path)
+
+
     #endregion
 
     #region IO
@@ -771,7 +776,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
             vocabularies=vocabularies,
             experiments=experiments,
             meta_data = project.meta_data,
-            hdf_indices = project.hdf5_manager.get_indices()
+            hdf_indices = project.hdf5_manager.get_indices(),
+            pipeline_scripts = project.pipeline_scripts,
+            active_pipeline_script = project.active_pipeline_script,
+            compute_pipeline_settings = project.compute_pipeline_settings
         )
         if path is None:
             path = project.path
@@ -967,6 +975,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
 
+        try:
+            self.pipeline_scripts = my_dict['pipeline_scripts']
+            self.active_pipeline_script = my_dict['active_pipeline_script']
+            self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
+        except Exception as e:
+            print("Exception in Load Pipelines", str(e))
 
         if self.colormetry_analysis is not None:
             if not self.hdf5_manager.has_colorimetry():
@@ -977,12 +991,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.undo_manager.clear()
         self.sanitize_paths()
 
-    def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False):
+    def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False, pipeline=True):
         segmentations = []
         vocabularies = []
         layers = []
         node_scripts = []
         experiments = []
+        pipelines = []
 
         if segm:
             for s in self.segmentation:
@@ -996,18 +1011,23 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if scripts:
             for n in self.node_scripts:
                 node_scripts.append(n.serialize())
-
         if experiment:
             for e in self.experiments:
                 experiments.append(e.to_template())
-
+        if pipeline:
+            for p in self.pipeline_scripts:
+                if os.path.isfile(p):
+                    with open(p, "r") as f:
+                        pipelines.append((os.path.split(p)[1], f.read(), p is self.active_pipeline_script))
 
         template = dict(
             segmentations = segmentations,
             vocabularies = vocabularies,
             layers = layers,
             node_scripts=node_scripts,
-            experiments = experiments
+            experiments = experiments,
+            pipelines=pipelines,
+            compute_pipeline_settings = self.compute_pipeline_settings
         )
         return template
 
@@ -1029,7 +1049,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
-
         for l in template['layers']:
             new = AnnotationLayer(l[0])
             new.unique_id = l[1]
@@ -1041,6 +1060,21 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         for e in template['experiments']:
             new = Experiment().deserialize(e, self)
+
+        try:
+            for path, script, is_active in template['pipelines']:
+                p = os.path.join(self.path, path)
+                with open(p, "w") as f:
+                    f.write(script)
+                self.pipeline_scripts.append(p)
+                if is_active:
+                    self.active_pipeline_script = p
+
+            self.compute_pipeline_settings = template["compute_pipeline_settings"]
+
+        except Exception as e:
+            print(e)
+
 
     #endregion
 
@@ -1259,7 +1293,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.hdf5_manager = HDF5Manager()
         self.hdf5_manager.set_path(self.hdf5_path)
 
-
     def get_time_ranges_of_selected(self):
         result = []
         for s in self.selected:
@@ -1321,6 +1354,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def set_notes(self, notes):
         self.notes = notes
+
+    def get_experiment(self, name) -> Experiment:
+        for exp in self.experiments:
+            if exp.name == name:
+                return exp
+        return None
     #endregion
 
     #region Dispatchers
@@ -1336,6 +1375,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if self.inhibit_dispatch == False:
             self.main_window.dispatch_on_selected(sender,self.selected)
     #endregion
+
 
     pass
 

@@ -371,6 +371,9 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
     def on_dataset_changed(self):
         self.listWidget_Labels.itemChanged.disconnect(self.update_dataset_in_object)
         self.current_dataset_label_checkboxes = []
+        if self.selected_class_object is None:
+            return
+
         old_ds = self.selected_class_object.obj.semantic_segmentation_labels
         idx = self.comboBox_Dataset.currentIndex()
         if idx == 0:

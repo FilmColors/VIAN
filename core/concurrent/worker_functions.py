@@ -102,9 +102,12 @@ def store_project_concurrent(args, sign_progress):
         vocabularies=vocabularies,
         experiments = experiments,
         meta_data = project.meta_data,
-        hdf_indices = project.hdf5_manager.get_indices()
-
+        hdf_indices = project.hdf5_manager.get_indices(),
+        pipeline_scripts = project.pipeline_scripts,
+        active_pipeline_script = project.active_pipeline_script,
+        compute_pipeline_settings = project.compute_pipeline_settings
     )
+
     sign_progress(0.6)
     if path is None:
         path = project.path

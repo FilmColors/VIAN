@@ -6,7 +6,7 @@ as within VIAN to be called once a selector is created.
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
-from core.container.project import VIANProject
+from core.container.project import VIANProject, Segment, Annotation, Screenshot
 import traceback
 import cv2
 import inspect
@@ -49,7 +49,6 @@ class VIANEventHandler(QObject):
 
     @pyqtSlot(object)
     def run_segment_created_event(self, segment):
-        print("Computing Segment", self.comp_segments)
         if self.comp_segments is False:
             return
         try:
@@ -61,7 +60,6 @@ class VIANEventHandler(QObject):
 
     @pyqtSlot(object)
     def run_on_screenshot_created_event(self, screenshot):
-        print("Computing screenshot", self.comp_screenshots)
         if self.comp_screenshots is False:
             return
         try:
@@ -90,7 +88,7 @@ class VIANEventHandler(QObject):
 
 
 def vian_pipeline(cl):
-    """Register a function as a plug-in"""
+    """Register a class as a plug-in"""
     ALL_REGISTERED_PIPELINES[cl.name] = (cl, inspect.getfile(cl))
     return cl
 
@@ -100,20 +98,26 @@ def get_path_of_pipeline_script(name):
     else:
         return None
 
+def get_name_of_script_by_path(spath):
+    for name, (module, path) in ALL_REGISTERED_PIPELINES.items():
+        if path == spath:
+            return name
+    return None
+
 class VIANPipeline:
     name = "NoName"
     author = "NoAuthor"
     version = (0,0,0)
 
-    def on_segment_created(self, project, segment, capture):
+    def on_segment_created(self, project:VIANProject, segment:Segment, capture):
         pass
 
-    def on_screenshot_created(self, project, screenshot):
+    def on_screenshot_created(self, project:VIANProject, screenshot:Screenshot):
         pass
 
-    def on_svg_annotation_created(self, project, annotation, sub_img):
+    def on_svg_annotation_created(self, project:VIANProject, annotation:Annotation, sub_img):
         pass
 
-    def on_project_finalized(self, project):
+    def on_project_finalized(self, project:VIANProject):
         pass
 
