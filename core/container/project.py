@@ -154,8 +154,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.colormetry_analysis = None
 
-        self.add_vocabulary(get_default_vocabulary())
-
         self.hdf5_manager = None
 
         self.inhibit_dispatch = False
@@ -752,12 +750,26 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return self.movie_descriptor
 
     #region Annotations
-    def create_annotation_layer(self, name, t_start = 0, t_stop = 0):
+    def create_annotation_layer(self, name, t_start = 0, t_stop = 0) -> AnnotationLayer:
+        """
+        Creates a new AnnotationLayer instance and returns it.
+
+        :param name: The name of the layer
+        :param t_start: time of the start in milliseconds
+        :param t_stop: time of the end in milliseconds
+        :return: AnnotationLayer instance
+        """
         layer = AnnotationLayer(name, t_start, t_stop)
         self.add_annotation_layer(layer)
         return layer
 
-    def add_annotation_layer(self, layer):
+    def add_annotation_layer(self, layer) -> AnnotationLayer:
+        """
+        Adds an AnnotationLayer instance to the project.
+
+        :param layer: The AnnotationLayer instance to add.
+        :return: AnnotationLayer instance given.
+        """
         layer.set_project(self)
         self.annotation_layers.append(layer)
         self.current_annotation_layer = layer
@@ -767,8 +779,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.onAnnotationLayerAdded.emit(layer)
         self.dispatch_changed()
+        return layer
 
     def remove_annotation_layer(self, layer):
+        """
+        Removes a given AnnotationLayer instance from the project.
+
+        :param layer: The AnnotationLayer instance to remove.
+        :return: None
+        """
         if layer is self.current_annotation_layer:
             self.current_annotation_layer = None
 
@@ -785,11 +804,24 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.onAnnotationLayerRemoved.emit(layer)
         self.dispatch_changed()
 
+
     def remove_annotation(self, annotation):
+        """
+        Removes an annotation from any annotation layer it belongs to.
+
+        :param annotation: Annotation instance to remove.
+        :return: None
+        """
         for l in self.annotation_layers:
             l.remove_annotation(annotation)
 
     def get_annotation_layers(self):
+        """
+        Returns all annotation layers in the project.
+        Equivalent to VIANProject.annotation_layers.
+
+        :return:
+        """
         return self.annotation_layers
     #endregion
 
@@ -821,10 +853,22 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     #region Python Scripts
     def add_pipeline_script(self, path):
+        """
+        Adds a script at a given path to the project.
+
+        :param path: Path to the pipeline python script.
+        :return: None
+        """
         if path not in self.pipeline_scripts:
             self.pipeline_scripts.append(path)
 
     def remove_pipeline_script(self, path):
+        """
+        Removes a given script path from the project.
+
+        :param path: The path to remove.
+        :return: None
+        """
         if path in self.pipeline_scripts:
             self.pipeline_scripts.remove(path)
 
@@ -834,9 +878,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #region IO
     def store_project(self, settings, path = None):
         """
-        DEPRECATED
-        :param settings: 
-        :param global_settings: 
+        Stores the project json to the given filepath.
+        if no path is given, the default path is used.
+
+        :param settings:
         :param path: 
         :return: 
         """
@@ -925,6 +970,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
             print("Exception during Storing: ", str(e))
 
     def load_project(self, settings, path):
+        """
+        Loads a project from a given file.
+
+        :param settings:
+        :param path:
+        :return:
+        """
         if not settings.PROJECT_FILE_EXTENSION in path:
             path += settings.PROJECT_FILE_EXTENSION
 
@@ -1119,6 +1171,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.sanitize_paths()
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False, pipeline=True):
+        """
+        Returns a template dictionary from this projects.
+
+        :param segm: If segmentation info should be included
+        :param voc: If vocabulary info should be included
+        :param ann: If annotation layer info should be included
+        :param scripts: If node scripts info should be included
+        :param experiment: If experiment info should be included
+        :param pipeline: If pipeline info should be included
+        :return: a dict to be serialized.
+        """
         segmentations = []
         vocabularies = []
         layers = []
@@ -1159,6 +1222,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return template
 
     def apply_template(self, template_path):
+        """
+        Loads a template from agiven path and applies it to the project.
+
+        :param template_path: Path to the json
+        :return: None
+        """
 
         try:
             with open(template_path, "r") as f:
@@ -1206,12 +1275,27 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Vocabularies
-    def create_vocabulary(self, name="New Vocabulary"):
+    def create_vocabulary(self, name="New Vocabulary") -> Vocabulary:
+        """
+        Creates a new Vocabulary instance and adds it to the project.
+
+        :param name: The name of the Vocabulary
+        :return: Vocabulary instance created.
+        """
+
         voc = Vocabulary(name)
         self.add_vocabulary(voc)
         return voc
 
-    def add_vocabulary(self, voc, dispatch = True):
+    def add_vocabulary(self, voc, dispatch = True) -> Vocabulary:
+        """
+        Adds a given vocabulary to the project.
+        if the vocabulary is identical to a given vocabulary it is omited.
+
+        :param voc: The Vocabulary instance to add
+        :param dispatch:
+        :return: Vocabulary added
+        """
         not_ok = True
         counter = 0
         name = voc.name
@@ -1266,6 +1350,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def copy_vocabulary(self, voc, add_to_global = True):
         """
         Copies an existing Vocabulary
+
         :param voc: the Vocabulary to copy
         :param add_to_global: If True, the Copied Vocabualry is added to the Projects List
         :return: A Copy of an existing Vocabulary
@@ -1289,17 +1374,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
             model.appendRow(QStandardItem(w.name))
         return model
 
-    def get_word_object_from_name(self, name):
-
-        vocabularies = self.vocabularies
-        for v in vocabularies:
-            for w in v.words_plain:
-                if w.name == name:
-                    return w
-
-    def import_vocabulary(self, path, add_to_global = True, serialization = None, return_id_table = False):
+    def import_vocabulary(self, path, add_to_global = True, serialization = None, return_id_table = False) -> Vocabulary:
         """
         Importing a Vocabulary from json
+
         :param path: Path to the Vocabulary Json
         :param add_to_global: if True, the Vocabulary is added to the Projects Vocabulary List
         :return: An imported Vocabulary Object
@@ -1317,6 +1395,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     #region MediaObjects
     def create_media_object(self, name ,data, container: IHasMediaObject):
+        """
+        Creates a media object and adds it to the project.
+
+        :param name: Name of the MediaObject
+        :param data:
+        :param container:
+        :return:
+        """
         if ".pdf" in data:
             o_type = MediaObjectType.PDF
         elif ".png" in data or ".jpg" in data:
@@ -1352,13 +1438,23 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     #region Experiments
 
-    def create_experiment(self):
+    def create_experiment(self) -> Experiment:
+        """
+        Creates a new Experiment instance to the project.
+        :return: Experiment instance created
+        """
         new = Experiment()
         self.add_experiment(new)
         return new
         pass
 
-    def add_experiment(self, experiment):
+    def add_experiment(self, experiment) -> Experiment:
+        """
+        Adds an existing Experiment instance to the project.
+
+        :param experiment: Experiment instance to add
+        :return: Experiment instance added
+        """
         experiment.set_project(self)
         self.experiments.append(experiment)
 
@@ -1368,6 +1464,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.dispatch_changed(item=experiment)
 
     def remove_experiment(self, experiment):
+        """
+        Removes an existing experiment instance from the project.
+
+        :param experiment: Experiment instance to remove
+        :return: None
+        """
         if experiment in self.experiments:
             self.experiments.remove(experiment)
             self.remove_from_id_list(experiment)
@@ -1382,6 +1484,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     # region Setters/Getters
     def cleanup(self):
+        """
+        Clean up the project, this includes the removal of all references annotation widgets.
+
+        :return:
+        """
         # self.main_window.numpy_data_manager.clean_up([f[0] for f in self.id_list])
         for l in self.annotation_layers:
             for w in l.annotations:
@@ -1393,6 +1500,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         #     self.clean_hdf5()
 
     def clean_hdf5(self, analyses = None):
+        """
+        Copies all analyses still relevant to a new HDF5 file.
+        This is necessary since hdf5 files do not allow removal of single entries.
+
+        :param analyses: Analyses to initialize.
+        :return:
+        """
         new_h5 = HDF5Manager()
         new_h5.set_path(self.data_dir + "/clean_temp.hdf5")
         new_h5.initialize_all(analyses)
@@ -1420,17 +1534,16 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.hdf5_manager = HDF5Manager()
         self.hdf5_manager.set_path(self.hdf5_path)
 
-    def get_time_ranges_of_selected(self):
-        result = []
-        for s in self.selected:
-            if isinstance(s, ITimeRange):
-                result.append([s.get_start(), s.get_end()])
-        return result
-
     def get_name(self):
         return self.name
 
     def create_unique_id(self):
+        """
+        Creates a new unique id for a given IProjectContainer within the project.
+        This should not be used from the outside.
+
+        :return: a unique id
+        """
         is_unique = False
         item_id = 0
         while is_unique is False:
@@ -1441,8 +1554,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return item_id
 
     def add_to_id_list(self, container_object, item_id):
-        # self.id_list.append((item_id, container_object))
-        # self.id_list = sorted(self.id_list, key=lambda x: x[0])
         self.id_list[item_id] = container_object
 
     def remove_from_id_list(self, container_object):
@@ -1456,19 +1567,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 new[itm] = val
         self.id_list = new
 
-    def get_object_list(self):
-        string = ""
-        for k, v in self.id_list.items():
-            string += str(k).ljust(20) + str(v) + "\n"
-        return string
-
-    def get_all_ids(self):
-        return [itm for itm in self.id_list.keys()]
-
-    def get_by_id(self, item_id):
+    def get_by_id(self, item_id) -> IProjectContainer:
         """
-        Binary Search
-        :param id: 
+        Returns an item given by its IProjectContainer.unique_id
+
+        :param id: IProjectContainer.unique_id
         :return: 
         """
         if item_id in self.id_list:
@@ -1483,6 +1586,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.notes = notes
 
     def get_experiment(self, name) -> Experiment:
+        """
+        Get experiment by name.
+
+        :param name: The name of the experiment.
+        :return: the Experiment instance if any exists, else None
+        """
         for exp in self.experiments:
             if exp.name == name:
                 return exp
@@ -1669,16 +1778,6 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             return "Invalid Property"
 
 #endregion
-
-def get_default_vocabulary():
-    voc = Vocabulary("Scene Locations")
-    voc.create_word("House")
-    voc.create_word("Kitchen", "House")
-    voc.create_word("Bedroom", "House")
-    voc.create_word("Toilet", "House")
-
-
-    return voc
 
 
 
