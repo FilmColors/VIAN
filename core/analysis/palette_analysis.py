@@ -15,7 +15,10 @@ from PyQt5.QtWidgets import *
 from core.analysis.palette_extraction import *
 from core.visualization.palette_plot import *
 from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from core.container.hdf5_manager import vian_analysis
 
+
+@vian_analysis
 class ColorPaletteAnalysis(IAnalysisJob):
     def __init__(self):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],

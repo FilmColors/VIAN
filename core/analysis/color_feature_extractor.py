@@ -18,6 +18,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from core.analysis.palette_extraction import *
 from core.container.screenshot import Screenshot
+from core.container.hdf5_manager import vian_analysis
 from core.visualization.palette_plot import *
 
 
@@ -32,6 +33,7 @@ array Structure:
     return d
 """
 
+@vian_analysis
 class ColorFeatureAnalysis(IAnalysisJob):
     def __init__(self):
         super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],

@@ -1,11 +1,7 @@
 from sklearn.cluster.hierarchical import AgglomerativeClustering
 import numpy as np
 
-from core.gui.main_window import *
-from collections import namedtuple
-from PyQt5 import QtGui
 from core.gui.ewidgetbase import *
-from core.analysis.colorimetry.computation import calculate_histogram
 from PyQt5.QtCore import QRect, Qt
 from core.data.interfaces import IConcurrentJob
 from core.data.enums import *

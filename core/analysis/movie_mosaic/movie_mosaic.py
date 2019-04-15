@@ -10,8 +10,10 @@ from core.data.computation import ms_to_frames
 from core.container.project import *
 from core.gui.ewidgetbase import EGraphicsView  # , GraphicsViewDockWidget
 from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from core.container.hdf5_manager import vian_analysis
 
 
+@vian_analysis
 class MovieMosaicAnalysis(IAnalysisJob):
     def __init__(self):
         super(MovieMosaicAnalysis, self).__init__(name = "Movie Mosaic",

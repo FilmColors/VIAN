@@ -27,8 +27,9 @@ BARCODE_MAX_LENGTH = 1000
 # from bokeh.layouts import layout
 # from bokeh.colors import RGB
 import pickle
+from core.container.hdf5_manager import vian_analysis
 
-
+@vian_analysis
 class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
         super(BarcodeAnalysisJob, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION, SEGMENT],

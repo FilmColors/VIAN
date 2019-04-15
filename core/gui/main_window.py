@@ -50,6 +50,7 @@ from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 from core.visualizer.visualizer import VIANVisualizer2
 from core.concurrent.worker import Worker
+from core.container.hdf5_manager import print_registered_analyses
 
 try:
     import keras.backend as K
@@ -110,6 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Registered Pipelines:")
         for k, v in ALL_REGISTERED_PIPELINES.items():
             print("\t---", k.ljust(30),v)
+        print_registered_analyses()
         self.is_darwin = False
 
         self.application_in_focus = True
@@ -205,7 +207,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
         self.corpus_visualizer_result_dock = EDockWidget(self, False)
         self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
-
 
         self.progress_popup = None
         self.quick_annotation_dock = None

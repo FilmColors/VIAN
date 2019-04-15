@@ -1,39 +1,14 @@
 import h5py
 import os
-import importlib
-import sys
 import gc
 import numpy as np
-import inspect
-from core.data.interfaces import IAnalysisJob
 
-def load_analysis():
-    file_list = []
-    for root, dirs, files in os.walk("core/analysis/", topdown=False):
-        for name in files:
-            if ".py" in name and not "__init__.py" in name and not "__pycache__" in name:
-                path = os.path.join(root, name)
-                path = path.replace("\\", "/")
-                path = path.replace(".py", "")
-                path = path.replace("/", ".")
+ALL_REGISTERED_ANALYSES = dict()
 
-                file_list.append(path)
-    analyses = []
-    for f in file_list:
-        try:
-            my_module = importlib.import_module(f)
-            for name, obj in inspect.getmembers(sys.modules[my_module.__name__]):
-                if inspect.isclass(obj) and issubclass(obj, IAnalysisJob):
-                    if obj is not IAnalysisJob and obj not in analyses:
-                        analyses.append(obj)
-                        print(obj)
+def vian_analysis(cl):
+    ALL_REGISTERED_ANALYSES[cl.__name__] = cl
+    return cl
 
-        except Exception as e:
-            print(e)
-            continue
-    global ANALYSES
-    ANALYSES = analyses
-    return analyses
 
 # def load_analysis():
 #     return [
@@ -44,7 +19,6 @@ def load_analysis():
 #             eval("ColormetryAnalysis"),
 #             eval("MovieMosaicAnalysis")
 #         ]
-ANALYSES = []
 DEFAULT_SIZE = (50,)
 DS_MOVIE = "movie"
 DS_COL_HIST = "col_histograms"
@@ -55,6 +29,13 @@ DS_COL_SPATIAL_EDGE = "col_spatial_edge"
 DS_COL_SPATIAL_COLOR = "col_spatial_color"
 DS_COL_SPATIAL_HUE = "col_spatial_hue"
 DS_COL_SPATIAL_LUMINANCE = "col_spatial_luminance"
+
+
+def print_registered_analyses():
+    print("Registered Analyses:")
+    for k,v in ALL_REGISTERED_ANALYSES.items():
+        print("\t--- " + v.__name__)
+
 
 class HDF5Manager():
     def __init__(self):
@@ -88,7 +69,7 @@ class HDF5Manager():
 
     def initialize_all(self, analyses = None):
         if analyses is None or len(analyses) == 0:
-            analyses = load_analysis()
+            analyses = ALL_REGISTERED_ANALYSES.values()
         for a in analyses:
             c = a()
             self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype)

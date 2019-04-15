@@ -18,7 +18,9 @@ from core.analysis.deep_learning.labels import *
 from core.analysis.deep_learning.models import *
 from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
 from core.data.enums import DataSerialization
+from core.container.hdf5_manager import vian_analysis
 
+@vian_analysis
 class SemanticSegmentationAnalysis(IAnalysisJob):
     def __init__(self):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],

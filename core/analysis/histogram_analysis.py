@@ -12,7 +12,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from core.visualization.basic_vis import HistogramVis
 from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from core.container.hdf5_manager import vian_analysis
 
+@vian_analysis
 class ColorHistogramAnalysis(IAnalysisJob):
     def __init__(self):
         super(ColorHistogramAnalysis, self).__init__("Color Histogram", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],

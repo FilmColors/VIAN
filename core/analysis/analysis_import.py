@@ -4,6 +4,8 @@ from core.analysis.barcode_analysis import *
 from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
 from core.analysis.histogram_analysis import ColorHistogramAnalysis
+from core.container.hdf5_manager import vian_analysis
+
 import dlib
 try:
     from core.analysis.semantic_segmentation import *
@@ -17,6 +19,8 @@ except:
     from core.data.enums import DataSerialization
     from core.analysis.deep_learning.labels import *
 
+
+    @vian_analysis
     class SemanticSegmentationAnalysis(IAnalysisJob):
         def __init__(self):
             super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],

@@ -71,13 +71,11 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.widget = None
         self.image = None
 
-
         # if t_end is not set, it shall be one second after t_start
         if t_end is -1:
             self.t_end = t_start + 1000
         else:
             self.t_end = t_end
-
 
         if self.a_type == AnnotationType.Image and self.resource_path is not "":
             self.load_image()
