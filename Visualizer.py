@@ -1,13 +1,8 @@
 import os
-import os
 import sys
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt
-
-from core.gui.tools import StringList
-from visualizer.visualizer import *
 
 DEBUG = True
 

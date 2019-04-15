@@ -1,9 +1,3 @@
-import inspect
-import cProfile
-import os
-import glob
-import importlib
-
 from core.concurrent.auto_segmentation import *
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.image_loader import ClassificationObjectChangedJob
@@ -29,7 +23,6 @@ from core.gui.letterbox_widget import LetterBoxWidget
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.classification import ClassificationWindow
-from core.gui.python_script_editor import PythonScriptEditor
 from core.gui.colormetry_widget import *
 from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, \
@@ -52,7 +45,7 @@ from core.gui.pipeline_widget import PipelineDock
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-from visualizer.visualizer import VIANVisualizer2
+from core.visualizer.visualizer import VIANVisualizer2
 from core.concurrent.worker import Worker
 
 try:

@@ -1,12 +1,10 @@
-from PyQt5.QtCore import *
 from typing import List
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
 from core.corpus.sqlalchemy_entities import DBSegment
 from core.visualization.image_plots import *
 from core.visualization.dot_plot import DotPlot
 from core.gui.ewidgetbase import ExpandableWidget, EMultiGraphicsView
-from visualizer.vis_entities import VisScreenshot
+from core.visualizer.vis_entities import VisScreenshot
 
 def feature_changed(scr, plot):
     try:
