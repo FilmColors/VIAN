@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QSlider, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, QHBoxLayout, QGraphicsLineItem, QGraphicsItem
+from PyQt5.QtWidgets import QWidget, QSlider, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, QHBoxLayout, \
+    QGraphicsLineItem, QGraphicsItem, QGraphicsEllipseItem
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QPen, QColor, QPainter
+from PyQt5.QtGui import QPen, QColor, QPainter, QPainterPath, QResizeEvent
 from PyQt5 import QtCore
 import cv2
 import os
@@ -43,7 +44,6 @@ class LetterBoxWidget(EDialogWidget):
         self.resize(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH) * 0.8, self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * 0.8)
         self.pos_slider.setValue(1)
 
-
     def on_slider_change(self):
         if self.cap is None:
             return
@@ -66,7 +66,6 @@ class LetterBoxWidget(EDialogWidget):
              int(np.clip(self.view.selector_right.pos().x() - self.view.selector_left.pos().x(), 0, self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))),
              int(np.clip(self.view.selector_down.pos().y() - self.view.selector_up.pos().y(), 0, self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
         return r
-
 
 
 class LetterBoxView(QGraphicsView):
@@ -107,25 +106,40 @@ class LetterBoxView(QGraphicsView):
 
         self.frame_pmap.setZValue(-5)
 
+    def resizeEvent(self, event: QResizeEvent):
+        super(LetterBoxView, self).resizeEvent(event)
+        self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
 
-class LetterBoxSelector(QGraphicsLineItem):
+
+class LetterBoxSelector(QGraphicsItem):
     def __init__(self, x1, y1, x2, y2, orientation, view):
-        super(LetterBoxSelector, self).__init__(x1, y1, x2, y2)
-        self.setAcceptHoverEvents(False)
+        super(LetterBoxSelector, self).__init__()
+        self.setAcceptHoverEvents(True)
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges)
+        self.x1 = x1
+        self.x2 = x2
+        self.y1 = y1
+        self.y2 = y2
+
         # self.setAcceptedMouseButtons()
-        pen = QPen(QColor(255, 255, 255, 200))
-        pen.setWidth(3)
-        self.setPen(pen)
+        self.pen = QPen(QColor(255, 255, 255, 200))
+        self.pen.setWidth(1)
         self.orientation = orientation
         self.view = view
         self.old_pos = None
+        self.hovered = False
 
     def mousePressEvent(self, event: 'QGraphicsSceneMouseEvent'):
         super(LetterBoxSelector, self).mousePressEvent(event)
         self.view.modifying_selector = self
         self.old_pos = self.pos()
+
+    def hoverEnterEvent(self, event: 'QGraphicsSceneHoverEvent'):
+        self.hovered = True
+
+    def hoverLeaveEvent(self, event: 'QGraphicsSceneHoverEvent'):
+        self.hovered = False
 
     def itemChange(self, change: 'QGraphicsItem.GraphicsItemChange', value: typing.Any):
         if change == QGraphicsItem.ItemPositionChange:
@@ -136,3 +150,22 @@ class LetterBoxSelector(QGraphicsLineItem):
                 return QPointF(self.pos().x(), v.y())
 
         return super(LetterBoxSelector, self).itemChange(change, value)
+
+    def paint(self, painter: QPainter, option: 'QStyleOptionGraphicsItem', widget: typing.Optional[QWidget] = ...):
+        path = QPainterPath()
+        path.addEllipse(QRectF(self.x1 - 10,  self.y1 - 10, 20, 20))
+        if self.hovered:
+            self.pen.setColor(QColor(255,100,100,250))
+        else:
+            self.pen.setColor(QColor(255,100,100,150))
+        painter.setPen(self.pen)
+        painter.drawLine(self.x1, self.y1, self.x2, self.y2)
+
+        painter.fillPath(path, QColor(255, 160, 47, 255))
+        painter.drawPath(path)
+        self.scene().update()
+
+    def boundingRect(self):
+        r = QRectF(self.x1 - 20,  self.y1 - 20, self.x2 + 40, self.y2 + 40)
+        return r
+

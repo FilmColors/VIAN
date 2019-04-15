@@ -198,6 +198,10 @@ class PaletteView(QWidget, IVIANVisualization):
         return image
 
 
+class PaletteControls(QWidget):
+    pass
+
+
 class PaletteLABWidget(QWidget):
     def __init__(self, parent):
         super(PaletteLABWidget, self).__init__(parent)

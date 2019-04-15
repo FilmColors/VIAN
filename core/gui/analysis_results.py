@@ -20,8 +20,6 @@ from core.visualization.correlation_matrix import CorrelationVisualization, Corr
 FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
 
 
-
-
 class AnalysisResultsDock(EDockWidget):
     def __init__(self, main_window):
         super(AnalysisResultsDock, self).__init__(main_window, limit_size=False)
@@ -121,7 +119,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         tabs_widget = QTabWidget(self.analysis_widget)
         self.analysis_widget.layout().addWidget(tabs_widget)
 
-        for selector in selectors:
+        for i, selector in enumerate(selectors):
             if isinstance(selector, Screenshot) \
                     or isinstance(selector, Annotation) \
                     or isinstance(selector, Segment):
@@ -149,6 +147,9 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                     if tab['x'] > 4:
                         tab['x'] = 0
                         tab['y'] += 1
+
+            if i >= 10:
+                break
 
 
 
