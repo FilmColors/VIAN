@@ -6,20 +6,6 @@ import gc
 import numpy as np
 import inspect
 from core.data.interfaces import IAnalysisJob
-# from core.analysis.analysis_import import \
-#     SemanticSegmentationAnalysis, \
-#     BarcodeAnalysisJob, ColorPaletteAnalysis, ColorFeatureAnalysis, \
-#     ColormetryAnalysis, MovieMosaicAnalysis, ColorHistogramAnalysis
-
-# ANALYSES = [SemanticSegmentationAnalysis,
-#             BarcodeAnalysisJob,
-#             ColorPaletteAnalysis,
-#             ColorFeatureAnalysis,
-#             ColormetryAnalysis,
-#             MovieMosaicAnalysis,
-#             ColorHistogramAnalysis]
-import shutil
-
 
 def load_analysis():
     file_list = []

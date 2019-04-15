@@ -1,3 +1,6 @@
+import cProfile
+from functools import partial
+
 from core.concurrent.auto_segmentation import *
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.image_loader import ClassificationObjectChangedJob

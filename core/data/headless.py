@@ -4,10 +4,9 @@ this it can be used to perform operations in a batch process without having the 
 
 """
 
-from core.container.project import *
 from core.data.settings import UserSettings, Contributor
-from core.data.hdf5_manager import *
-from shutil import copy2, move
+from core.container.hdf5_manager import *
+from shutil import move
 # from core.gui.main_window import *
 from typing import Dict, Tuple
 from core.analysis.analysis_import import *

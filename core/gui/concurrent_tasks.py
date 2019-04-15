@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QTableWidgetItem, QTableWidget, QHBoxLayout, QProgressBar
+from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QTableWidgetItem, QTableWidget, QHBoxLayout, QProgressBar, QScrollArea
 from PyQt5 import uic
 from core.gui.ewidgetbase import EDockWidget
 from core.data.interfaces import IProjectChangeNotify

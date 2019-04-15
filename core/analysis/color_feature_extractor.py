@@ -9,8 +9,10 @@ from typing import List
 
 from core.data.computation import ms_to_frames, numpy_to_pixmap, floatify_img, labels_to_binary_mask
 import json
-from core.data.interfaces import IAnalysisJob
-from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject, IAnalysisJobAnalysis, VisualizationTab, ParameterWidget
+from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
+from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject
+from core.container.analysis import IAnalysisJobAnalysis
+
 from core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *

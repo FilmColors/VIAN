@@ -17,6 +17,8 @@ from core.container.project import *
 from core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+
 BARCODE_MODE_BOTH = 0
 BARCODE_MODE_HORIZONTAL = 1
 

@@ -1,4 +1,6 @@
 from sklearn.cluster.hierarchical import AgglomerativeClustering
+import numpy as np
+
 from core.gui.main_window import *
 from collections import namedtuple
 from PyQt5 import QtGui
@@ -9,6 +11,7 @@ from core.data.interfaces import IConcurrentJob
 from core.data.enums import *
 from core.container.project import VIANProject
 
+from core.data.computation import frame2ms
 
 AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1
@@ -16,8 +19,6 @@ AUTO_SEGM_CHIST = 1
 
 def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100):
     duration = project.movie_descriptor.duration
-
-
     if mode == AUTO_SEGM_EVEN:
         if n_segment < 0:
             n_segment = int(duration / segm_width)

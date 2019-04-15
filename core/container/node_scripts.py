@@ -1,10 +1,7 @@
 import numpy as np
 
-from core.data.enums import NODE_SCRIPT
+from core.data.enums import NODE_SCRIPT, NODE
 from .container_interfaces import IProjectContainer, IHasName, ISelectable
-from core.node_editor.node_editor import NODE
-from core.node_editor.operations import *
-from core.node_editor.datatypes import *
 
 class NodeScript(IProjectContainer, IHasName, ISelectable):
     def __init__(self, name = ""):

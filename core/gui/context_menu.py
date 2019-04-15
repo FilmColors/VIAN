@@ -1,3 +1,7 @@
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMenu
+from functools import partial
+
 from core.container.media_objects import AbstractMediaObject
 from core.container.project import *
 from core.corpus.client.corpus_client import CorpusClient

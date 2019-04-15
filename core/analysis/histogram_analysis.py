@@ -11,6 +11,7 @@ from core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from core.visualization.basic_vis import HistogramVis
+from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 
 class ColorHistogramAnalysis(IAnalysisJob):
     def __init__(self):

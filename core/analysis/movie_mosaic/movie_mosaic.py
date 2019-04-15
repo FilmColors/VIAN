@@ -5,9 +5,12 @@ from PyQt5 import uic
 import pickle
 
 from core.analysis.colorimetry.computation import *
+from core.data.enums import DataSerialization
 from core.data.computation import ms_to_frames
 from core.container.project import *
 from core.gui.ewidgetbase import EGraphicsView  # , GraphicsViewDockWidget
+from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+
 
 class MovieMosaicAnalysis(IAnalysisJob):
     def __init__(self):
@@ -36,7 +39,6 @@ class MovieMosaicAnalysis(IAnalysisJob):
 
         return args
 
-
     def process(self, args, sign_progress):
         start = args[0]
         end = args[1]
@@ -57,7 +59,6 @@ class MovieMosaicAnalysis(IAnalysisJob):
                                         parameters=param,
                                         container=args[4])
         return analysis
-
 
     def mosaic_color_patches(self, start, end, path, resolution, per_row, sign_progress):
 
@@ -93,7 +94,6 @@ class MovieMosaicAnalysis(IAnalysisJob):
             mosaic=final
         )
         return result
-
 
     def mosaic_frame_patches(self, start, end, path, resolution, per_row, sign_progress):
         capture = cv2.VideoCapture(path)
@@ -133,7 +133,6 @@ class MovieMosaicAnalysis(IAnalysisJob):
 
 
         return result
-
 
     def get_preview(self, analysis):
         gw = EGraphicsView(None, main_window=analysis.project.main_window)

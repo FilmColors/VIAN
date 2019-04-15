@@ -5,6 +5,7 @@ from core.gui.ewidgetbase import *
 from core.analysis.informative import select_rows
 from core.data.computation import ms_to_frames
 from core.container.project import *
+from core.concurrent.auto_segmentation import ApplySegmentationWindow
 
 def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, hdf5_manager):
         frame_ms = []

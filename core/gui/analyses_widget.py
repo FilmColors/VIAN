@@ -8,7 +8,7 @@ from PyQt5.QtGui import QFont
 from core.data.computation import ms_to_string
 from core.container.project import *
 from core.data.interfaces import IProjectChangeNotify, IAnalysisJob
-
+from core.data.enums import get_type_as_string
 from .ewidgetbase import EDockWidget, EDialogWidget
 
 

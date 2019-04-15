@@ -1,10 +1,19 @@
-from PyQt5 import QtWidgets, QtCore
+from functools import partial
+
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import uic
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from core.gui.ewidgetbase import EDockWidget
 
 from core.data.computation import ms_to_string
 from core.container.project import *
 from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 from core.gui.ewidgetbase import ImagePreviewPopup, TextEditPopup
+from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
+
 import time
 
 class TimelineContainer(EDockWidget):

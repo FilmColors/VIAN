@@ -1,33 +1,20 @@
-import datetime
-import json
-import cv2
-import os
+# from core.node_editor.node_editor import *
+from shutil import copy2
+from PyQt5.QtCore import QObject
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QFileDialog
 from random import randint
 
-import numpy as np
-from .container_interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable
-from core.data.undo_redo_manager import UndoRedoManager
-from core.data.computation import *
+from .hdf5_manager import HDF5Manager
+from .undo_redo_manager import UndoRedoManager
 from core.data.enums import *
-from typing import List
-
-from core.data.hdf5_manager import HDF5Manager
-
-from core.node_editor.node_editor import *
-from shutil import copy2
-
-from enum import Enum
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import QPoint, QRect, QSize
-from PyQt5.QtCore import  pyqtSignal
-
-from core.container.annotation import *
-from core.container.segmentation import *
-from core.container.screenshot import *
-from core.container.experiment import *
-from core.container.analysis import *
-from core.container.media_objects import *
-from core.container.node_scripts import *
+from .annotation import *
+from .segmentation import *
+from .screenshot import *
+from .experiment import *
+from .analysis import *
+from .media_objects import *
+from .node_scripts import *
 
 
 class VIANProject(QObject, IHasName, IClassifiable):

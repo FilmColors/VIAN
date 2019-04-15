@@ -16,7 +16,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from core.analysis.deep_learning.labels import *
 from core.analysis.deep_learning.models import *
-
+from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
+from core.data.enums import DataSerialization
 
 class SemanticSegmentationAnalysis(IAnalysisJob):
     def __init__(self):

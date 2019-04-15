@@ -14,6 +14,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from core.analysis.palette_extraction import *
 from core.visualization.palette_plot import *
+from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 
 class ColorPaletteAnalysis(IAnalysisJob):
     def __init__(self):
