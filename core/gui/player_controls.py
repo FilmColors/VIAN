@@ -42,7 +42,6 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         self.cB_fps_Mode.currentIndexChanged.connect(self.on_fps_changed)
 
 
-
         self.main_window.player.movieOpened.connect(self.update_movie)
         self.main_window.player.started.connect(self.on_start)
         self.main_window.player.stopped.connect(self.on_stopped)
@@ -54,6 +53,7 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         self.initial_values_timer.timeout.connect(self.update_movie)
 
         self.on_hide_slider()
+        self.subs = []
 
         self.fast_step_timer = QtCore.QTimer()
         self.fast_step_timer.setInterval(200)
@@ -186,7 +186,7 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
     def on_subs_changed(self, index):
         try:
             if len(self.subs) > 0:
-                self.main_window.player.set_subtitle(self.subs[index - 1][0])
+                self.main_window.player.set_subtitle(self.subs[index][0])
         except Exception as e:
             print("PlayerControls.on_subs_changed(): Could not set Subtitles:", e)
 
