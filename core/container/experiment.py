@@ -1,6 +1,6 @@
 import json
 from typing import List
-from core.container.analysis import AnalysisContainer, AnalysisParameters
+from core.container.analysis import AnalysisContainer
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from core.data.interfaces import IProjectContainer, IHasName, IClassifiable
@@ -256,16 +256,6 @@ class Vocabulary(IProjectContainer, IHasName):
                 self.create_word(w['name'], parent, unique_id=new_id)
 
         return self, id_replacing_table
-
-    def get_vocabulary_id(self):
-        vid = self.name
-        for w in self.get_vocabulary_as_list():
-            try:
-                vid += w.name[0]
-            except:
-                continue
-        print("Vocabulary ID: ", vid)
-        return vid
 
     def get_type(self):
         return VOCABULARY
@@ -676,9 +666,6 @@ class Experiment(IProjectContainer, IHasName):
 
             self.project.onScreenshotsHighlighted.emit(screenshots)
 
-
-
-    
     def get_correlation_matrix(self):
         if self.correlation_matrix is not None:
             return self.get_unique_keywords(), self.correlation_matrix
@@ -777,7 +764,7 @@ class Experiment(IProjectContainer, IHasName):
                 return obj
         return None
 
-    def add_analysis_to_pipeline(self, name, analysis:AnalysisContainer, parameters:AnalysisParameters = None, classification_object = None):
+    def add_analysis_to_pipeline(self, name, analysis:AnalysisContainer, parameters = None, classification_object = None):
         if analysis not in self.analyses:
             self.analyses.append(
                 dict(

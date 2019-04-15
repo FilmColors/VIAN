@@ -261,7 +261,6 @@ def to_webapp(project, email, password, webapp_url = "http://ercwebapp.westeurop
     interface.commit_project(project, contributor)
 
 
-
 def to_corpus(project):
     """
             Here we actually commit the project, 

@@ -2076,8 +2076,6 @@ class MainWindow(QtWidgets.QMainWindow):
             o.on_loaded(self.project)
         self.pipeline_widget.pipeline.on_loaded(self.project)
 
-        self.project.unload_all()
-
         self.frame_update_worker.set_movie_path(self.project.movie_descriptor.get_movie_path())
         self.frame_update_worker.set_project(self.project)
 

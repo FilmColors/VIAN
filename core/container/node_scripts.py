@@ -43,8 +43,6 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
         else:
             print("Not Found")
 
-
-
     def create_connection(self, connection, unique_id = -1):
         new = ConnectionDescriptor(connection.input_field, connection.output_field,
                                    connection.input_field.field_id, connection.output_field.field_id)
@@ -212,7 +210,6 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
 
     def delete(self):
         self.node_script.remove_node(self, True)
-
 
 
 class ConnectionDescriptor(IProjectContainer):

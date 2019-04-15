@@ -50,13 +50,6 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamabl
     def set_adata(self, d):
         self.data = d
 
-    def apply_loaded(self, obj):
-        self.set_adata(obj)
-
-    def sync_load(self):
-        pass
-        #self.set_adata(self.project.main_window.project_streamer.sync_load(self.unique_id))
-
     def get_name(self):
         return self.name
 
@@ -268,9 +261,6 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         if self.data is None:
             return
 
-    def apply_loaded(self, obj):
-        self.set_adata(self.project.main_window.eval_class(self.analysis_job_class)().deserialize(obj))
-
     def get_adata(self):
         if self.a_class is None:
             self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
@@ -455,84 +445,4 @@ class ColormetryAnalysis(AnalysisContainer):
         self.check_finished()
         return self
 
-
-# class MaskAnalysis(IAnalysisJobAnalysis):
-#     def __init__(self, labels, analysis_job_class, parameters, container, name="Mask Segmentation", results = None):
-#         """
-#         :param name: The Name of the Segmentation as it should appear in the Outliner
-#         :param labels: A List of labels sorted by label index (implicit)
-#         :param results:
-#         """
-#
-#         super(MaskAnalysis, self).__init__(name=name, results = None, analysis_job_class=analysis_job_class, parameters=parameters, container=container)
-#         self.masks = []
-#         self.time_ms = []
-#         self.frame_pos = []
-#         self.labels = labels
-#
-#     def insert(self, data):
-#         """
-#         Inserts a new mask sorted into the Analysis
-#         :param data: a dict(frame_pos, time_ms, mask)
-#         :return:
-#         """
-#
-#         bisect.insort(self.frame_pos, data['frame_pos'])
-#         idx = self.frame_pos.index(data['frame_pos'])
-#         self.time_ms.insert(idx, data['time_ms'])
-#         self.masks.insert(idx, data['mask'])
-#
-#     def serialize(self):
-#         data = dict(
-#             masks = self.masks,
-#             time_ms = self.time_ms,
-#             frame_pos = self.frame_pos
-#         )
-#
-#         self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data, data_type=NUMPY_OVERWRITE)
-#         serialization = dict(
-#             name=self.name,
-#             unique_id=self.unique_id,
-#             analysis_container_class=self.__class__.__name__,
-#             notes=self.notes,
-#         )
-#
-#         return serialization
-#
-#     def deserialize(self, serialization, streamer):
-#         self.name = serialization['name']
-#         self.unique_id = serialization['unique_id']
-#         self.notes = serialization['notes']
-#
-#         data = streamer.sync_load(self.unique_id)
-#         self.frame_pos = data['frame_pos']
-#         self.masks = data['masks']
-#         self.time_ms = data['time_ms']
-#
-#         return self
-
-
-class AnalysisParameters():
-    def __init__(self, target_items=None):
-        self.target_items = []
-
-        if target_items is not None:
-            self.set_targets(target_items)
-
-    def set_targets(self, project_container_list):
-        for o in project_container_list:
-            self.target_items.append(o.get_id())
-
-    def serialize(self):
-        data = dict(
-            parameter_class=self.__class__.__name__,
-            params=self.__dict__,
-        )
-
-        return data
-
-    def deserialize(self, serialization):
-        for key, val in serialization['params'].iter():
-            setattr(self, key, val)
-        return self
 

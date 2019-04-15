@@ -124,20 +124,20 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.meta_data = None
 
-        self.annotation_layers = []             #type: List[AnnotationLayer]
-        self.current_annotation_layer = None    #type: AnnotationLayer
-        self.screenshots = []                   #type: List[Screenshot]
-        self.segmentation = []                  #type: List[Segmentation]
+        self.annotation_layers = []             # type: List[AnnotationLayer]
+        self.current_annotation_layer = None    # type: AnnotationLayer
+        self.screenshots = []                   # type: List[Screenshot]
+        self.segmentation = []                  # type: List[Segmentation]
         self.main_segmentation_index = 0
         self.movie_descriptor = MovieDescriptor(project=self)
-        self.analysis = []                      #type: List[AnalysisContainer]
-        self.screenshot_groups = []             #type: List[ScreenshotGroup]
-        self.vocabularies = []                  #type: List[Vocabulary]
+        self.analysis = []                      # type: List[AnalysisContainer]
+        self.screenshot_groups = []             # type: List[ScreenshotGroup]
+        self.vocabularies = []                  # type: List[Vocabulary]
 
-        self.experiments = []                   #type: List[Experiment]
+        self.experiments = []                   # type: List[Experiment]
 
-        self.current_script = None              #type: NodeScript
-        self.node_scripts = []                  #type: List[NodeScript]
+        self.current_script = None              # type: NodeScript
+        self.node_scripts = []                  # type: List[NodeScript]
         self.create_script(dispatch=False)
 
         self.active_pipeline_script = None
@@ -162,51 +162,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.selected = []
         self.segment_screenshot_mapping = dict()
         self.headless_mode = False
-
-    def highlight_types(self, types):
-
-        for s in self.segmentation:
-            if SEGMENTATION in types:
-                s.outliner_highlighted = True
-            else:
-                s.outliner_highlighted = False
-
-            for segm in s.segments:
-                if SEGMENT in types:
-                    segm.outliner_highlighted = True
-                else:
-                    segm.outliner_highlighted = False
-
-        for s in self.screenshots:
-            if SCREENSHOT in types:
-                s.outliner_highlighted = True
-            else:
-                s.outliner_highlighted = False
-
-        for s in self.annotation_layers:
-            if ANNOTATION_LAYER in types:
-                s.outliner_highlighted = True
-            else:
-                s.outliner_highlighted = False
-
-                for ann in s.annotations:
-                    if ANNOTATION in types:
-                        ann.outliner_highlighted = True
-                    else:
-                        ann.outliner_highlighted = False
-
-        for s in self.analysis:
-            if ANALYSIS in types:
-                s.outliner_highlighted = True
-            else:
-                s.outliner_highlighted = False
-
-        if MOVIE_DESCRIPTOR in types:
-            self.movie_descriptor.outliner_highlighted = True
-        else:
-            self.movie_descriptor.outliner_highlighted = False
-
-        self.dispatch_changed()
 
     def get_type(self):
         return PROJECT
@@ -247,18 +202,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     result.append(itm)
         return result
 
-    def unload_all(self):
-        pass
-        # for c in self.get_all_containers():
-        #     if isinstance(c, IStreamableContainer):
-        #         c.unload_container(sync=True)
-
     def print_all(self, type = None):
         for c in self.get_all_containers():
             if type is not None and type == c.get_type():
                 print(str(c.unique_id).ljust(20), c)
 
     def sanitize_paths(self):
+        """
+        Makes sure that all paths are clean and do not contain any os specific forms using
+        os.path.normpath()
+
+        :return:None
+        """
         self.path = os.path.normpath(self.path)
         self.name = os.path.normpath(self.name)
         self.folder = os.path.normpath(self.folder)
@@ -267,24 +222,50 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.shots_dir = os.path.normpath(self.shots_dir)
         self.export_dir = os.path.normpath(self.export_dir)
         self.movie_descriptor.movie_path = os.path.normpath(self.movie_descriptor.movie_path)
-        print(self.folder)
 
-    def connect_hdf5(self):
+    def connect_hdf5(self) -> HDF5Manager:
+        """
+        Opens the project associated HDF5Manager.
+
+        :return: a HDF5Manager instance
+        """
         self.hdf5_manager = HDF5Manager()
         needs_init = self.hdf5_manager.set_path(self.hdf5_path)
         if needs_init:
             self.hdf5_manager.initialize_all()
+        return self.hdf5_manager
 
-    def set_active_classification_object(self, cl_obj):
+    def set_active_classification_object(self, cl_obj:ClassificationObject) -> ClassificationObject:
+        """
+        Set the currently active (therefore in the gui visualized) classification object.
+
+        :param cl_obj:
+        :return: the given ClassificationObject instance
+        """
         self.active_classification_object = cl_obj
+        return cl_obj
 
     #region Segmentation
-    def create_segmentation(self, name = None, dispatch = True):
+    def create_segmentation(self, name = None, dispatch = True) -> Segmentation:
+        """
+        Creates a new Segmentation with a given name.
+
+        :param name: The name of the Segmentation.
+        :param dispatch: If the creation should be signaled through the GUI
+        :return: a new Segmentation instance.
+        """
         s = Segmentation(name)
         self.add_segmentation(s, dispatch)
         return s
 
-    def add_segmentation(self, segmentation, dispatch=True):
+    def add_segmentation(self, segmentation:Segmentation, dispatch=True) -> Segmentation:
+        """
+        Adds a Segmentation instance to the project.
+
+        :param segmentation: an instance of a Segmentation
+        :param dispatch: If the creation should be signaled through the GUI
+        :return: the segemntation instance added
+        """
         self.segmentation.append(segmentation)
         segmentation.set_project(self)
 
@@ -292,8 +273,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.undo_manager.to_undo((self.add_segmentation, [segmentation]), (self.remove_segmentation, [segmentation]))
             self.dispatch_changed()
         self.onSegmentationAdded.emit(segmentation)
+        return segmentation
 
-    def copy_segmentation(self, segmentation):
+    def copy_segmentation(self, segmentation:Segmentation) -> Segmentation:
+        """
+        Copies an existing Segmentation.
+
+        :param segmentation: The Segmentation isntance to copy
+        :return: a copy of the existing segmentation
+        """
         new = self.create_segmentation(name = segmentation.name + "_Copy")
 
         for s in segmentation.segments:
@@ -306,8 +294,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
         print("Dispatching")
         self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
         self.dispatch_changed(item = new)
+        return segmentation
 
-    def remove_segmentation(self, segmentation):
+    def remove_segmentation(self, segmentation:Segmentation):
+        """
+        Removes a given segmentation from the project.
+
+        :param segmentation: THe instance to be removed.
+        :return: None
+        """
         if self.segmentation[self.main_segmentation_index] is segmentation:
             main_segmentation = self.segmentation[0]
         else:
@@ -316,7 +311,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.segmentation.remove(segmentation)
         self.remove_from_id_list(segmentation)
         self.undo_manager.to_undo((self.remove_segmentation, [segmentation]), (self.add_segmentation, [segmentation]))
-
 
         if main_segmentation in self.segmentation:
             self.main_segmentation_index = self.segmentation.index(main_segmentation)
@@ -328,11 +322,23 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.dispatch_changed()
 
     def has_segmentation(self):
+        """
+        Checks if any segmentation is existend within the project.
+
+        :return: True if a segmentation is present, else false.
+        """
         if len(self.segmentation) > 0:
             return True
         return False
 
-    def set_main_segmentation(self, segm):
+    def set_main_segmentation(self, segm:Segmentation) -> Segmentation:
+        """
+        Sets the current main segmentation.
+        The main segmentation is used to sort the screenshots within the screenshot manager.
+
+        :param segm: The segmentation instance to make as main segmentation
+        :return: the given segmentation instance
+        """
         if len(self.segmentation) > 1:
             self.segmentation[self.main_segmentation_index].is_main_segmentation = False
             self.undo_manager.to_undo((self.set_main_segmentation, [self.get_main_segmentation()]),
@@ -352,31 +358,48 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 s.update_scene_id(self.segmentation[index])
                 s.update_scene_id(self.segmentation[index])
 
-
         self.dispatch_changed()
+        return segm
 
     def get_main_segmentation(self) -> Segmentation:
+        """
+        Returns the main segmentation if any exists
+
+        :return: The main segmentation if any exists, else returns None
+        """
         if len(self.segmentation) > 0:
             return self.segmentation[self.main_segmentation_index]
             # return self.segmentation[0]
         else:
             return None
 
-    def remove_segment(self, segment):
+    def remove_segment(self, segment:Segment):
+        """
+        Removes a given segment instance from any segmentation it is in within the project.
+
+        :param segment: the Segment instance to remove
+        :return: None
+        """
         for s in self.segmentation:
             if segment in s.segments:
                 s.remove_segment(segment)
                 break
 
-    def get_segmentations(self):
+    def get_segmentations(self) -> List[Segmentation]:
+        """
+        Returns a list of segmentations, the same as VIANProject.segmentation
+
+        :return: A list of Segmentations
+        """
         return self.segmentation
 
-    def get_segment_of_main_segmentation(self, index):
+    def get_segment_of_main_segmentation(self, index) -> Segment:
         """
         Returns the segment of the Main Segmentation that is at index "index". 
-        Be aware, that the segment_id == index + 1. Since Segment IDS are counted from 1
-        :param index: 
-        :return: 
+        Be aware, that the segment_id = <list_index> + 1. Since Segment IDS are counted from 1
+
+        :param index: the index of the segment to choose within the main segmentation
+        :return: a given Segment if exists, else returns None
         """
         # Main Segmentation can be None or index can be out of range
         try:
@@ -386,7 +409,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
     # endregion
 
     # region Screenshots
-    def create_screenshot(self, name, frame_pos = None, time_ms = None):
+    def create_screenshot(self, name, frame_pos = None, time_ms = None) -> Screenshot:
+        """
+        Creates a Screenshot within the project.
+        Either frame_pos or time_ms has to be given,
+        if a time_ms is given, the frame pos is calculated internally into the frame position.
+
+        :param name: The name of the new screenshot
+        :param frame_pos: The frame position of the new screenshot
+        :param time_ms: The time in milliseconds of the new screenshot
+        :return: a new instance of Screenshot
+        """
         if frame_pos is None and time_ms is None:
             print("Either frame or ms has to be given")
             return
@@ -405,8 +438,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
             new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos)
             self.add_screenshot(new)
+            return new
+        return None
 
     def create_screenshot_headless(self, name, frame_pos = None, time_ms = None, fps = 29.0):
+
         if frame_pos is None and time_ms is None:
             print("Either frame or ms has to be given")
             return
@@ -420,7 +456,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.add_screenshot(new)
         return new
 
-    def add_screenshot(self, screenshot, group = 0):
+    def add_screenshot(self, screenshot, group = 0) -> Screenshot:
+        """
+        Adds a screenshot instance to the project.
+
+        :param screenshot: the instance to add
+        :param group: the group
+        :return: returns the given screenshot instance
+        """
         self.screenshots.append(screenshot)
         screenshot.set_project(self)
 
@@ -431,11 +474,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.sort_screenshots()
         self.undo_manager.to_undo((self.add_screenshot, [screenshot]),(self.remove_screenshot, [screenshot]))
 
-
-        # screenshot.to_stream(self)
-        # self.dispatch_changed()
+        return screenshot
 
     def sort_screenshots(self):
+        """
+        Sorts the screenshot by their position within the media descriptor (movie).
+
+        """
         self.segment_screenshot_mapping = dict()
         if self.get_main_segmentation():
             self.get_main_segmentation().update_segment_ids()
@@ -465,11 +510,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 shot_id_global += 1
 
     def remove_screenshot(self, screenshot):
-        # for grp in self.screenshot_groups:
-        #     for s in grp.screenshots:
-        #         if s not in self.screenshots:
-        #             self.screenshots.append(s)
+        """
+        Removes a given screenshot from the project.
 
+        :param screenshot: The screenshot instance to remove
+        :return: None
+        """
         if screenshot in self.screenshots:
             for grp in self.screenshot_groups:
                 grp.remove_screenshots(screenshot)
@@ -478,15 +524,29 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.remove_from_id_list(screenshot)
             self.sort_screenshots()
             self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
-            # self.dispatch_changed()
-        else:
-            print("Not Found")
-        print("Deleted")
 
-    def get_screenshots(self):
+    def get_screenshots(self) -> List[Screenshot]:
+        """
+        Returns all screenshots.
+        Equivalent to VIANProject.screenshots
+
+        :return: A list of screenshots
+        """
         return self.screenshots
 
-    def add_screenshot_group(self, name="New Screenshot Group", initial=False, group=None):
+    def add_screenshot_group(self, name="New Screenshot Group", initial=False, group=None) -> ScreenshotGroup:
+        """
+        Creates a new screenshot group and adds it to the project.
+        if a group is given, it is only added to the project.
+
+        @TODO this should be refactored to a create_screenshot_group and add function_screenshot_group at some point.
+
+        :param name: The name of the group
+        :param initial: if the change should be dispatched to the main window.
+        :param group: instance of a ScreenshotGroup, if given no group is created but the given is added to the project.
+
+        :return: A screenshot group instance
+        """
         if not group:
             grp = ScreenshotGroup(self, name)
         else:
@@ -499,34 +559,56 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return grp
 
     def remove_screenshot_group(self, grp):
+        """
+        Removes a ScreenshotGroup instance from the project.
+
+        :param grp: The instance to remove.
+        :return: None
+        """
         if grp is not self.screenshot_groups[0]:
             self.screenshot_groups.remove(grp)
             self.remove_from_id_list(grp)
             self.dispatch_changed()
             self.onScreenshotGroupRemoved.emit(grp)
 
-    def get_screenshots_of_segment(self, main_segm_id, segmentation = None):
-        if segmentation is None:
-            segmentation = self.get_main_segmentation()
-        result = []
-        if segmentation is not None:
-            start = segmentation.segments[main_segm_id].get_start()
-            end = segmentation.segments[main_segm_id].get_end()
+    # def get_screenshots_of_segment(self, main_segm_id, segmentation = None):
+    #     """
+    #     Returns all screenshots which are within a segment.
+    #
+    #     :param main_segm_id: The id of the segment do retrieve the screenshots from.
+    #
+    #     :param segmentation:
+    #     :return:
+    #     """
+    #     if segmentation is None:
+    #         segmentation = self.get_main_segmentation()
+    #     result = []
+    #     if segmentation is not None:
+    #         start = segmentation.segments[main_segm_id].get_start()
+    #         end = segmentation.segments[main_segm_id].get_end()
+    #
+    #         for s in self.screenshots:
+    #             if start <= s.movie_timestamp < end:
+    #                 result.append(s)
+    #
+    #     return result
 
-            for s in self.screenshots:
-                if start <= s.movie_timestamp < end:
-                    result.append(s)
+    def set_current_screenshot_group(self, grp) -> ScreenshotGroup:
+        """
+        Sets the current screenshot group within the project.
+        This is only for GUI visualization.
 
-        return result
-
-    def set_current_screenshot_group(self, grp):
+        :param grp: The ScreenshotGroup instance to be set
+        :return: the given ScreenshotGroup
+        """
         self.active_screenshot_group.is_current = False
         self.active_screenshot_group = grp
         grp.is_current = True
         self.dispatch_changed()
+        return grp
 
-    def get_active_screenshots(self):
-        return self.active_screenshot_group.screenshots
+    # def get_active_screenshots(self):
+    #     return self.active_screenshot_group.screenshots
     #endregion
 
     #region Analysis
@@ -535,7 +617,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.add_analysis(analysis)
         return analysis
 
-    def add_analysis(self, analysis, dispatch = True):
+    def add_analysis(self, analysis:AnalysisContainer, dispatch = True) -> AnalysisContainer:
+        """
+        Adds an AnalysisContainer instance to the project.
+
+        :param analysis: The AnalysisContainer instance to add.
+        :param dispatch: if the main window should be informed.
+        :return: The AnalysisContainer instance given.
+        """
         analysis.set_project(self)
         self.analysis.append(analysis)
 
@@ -544,12 +633,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if dispatch:
             self.dispatch_changed()
         self.onAnalysisAdded.emit(analysis)
+        return analysis
 
-    def add_analyses(self, analyses):
-        for a in analyses:
-            self.add_analysis(a)
+    def remove_analysis(self, analysis:AnalysisContainer):
+        """
+        Removes a given analysis from the project.
 
-    def remove_analysis(self, analysis):
+        :param analysis: The AnalysisContainer instance to remove.
+        :return: None
+        """
         if analysis in self.analysis:
             self.analysis.remove(analysis)
             self.remove_from_id_list(analysis)
@@ -557,27 +649,44 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.dispatch_changed()
             self.onAnalysisRemoved.emit(analysis)
 
-    def get_job_analyses(self):
+    def get_job_analyses(self) -> List[IAnalysisJobAnalysis]:
+        """
+        Returns a list of all IAnalysisJobAnalysis derived instances within the project.
+        @TODO this is obsolete and should be refactored.
+
+        :return: a list of IAnalysisJobAnalysis instances within the project.
+        """
         result = []
         for a in self.analysis:
             if isinstance(a, IAnalysisJobAnalysis):
                 result.append(a)
         return result
 
-    def has_analysis(self, class_name):
-        for a in self.analysis:
-            if isinstance(a, IAnalysisJobAnalysis):
-                if a.analysis_job_class == class_name:
-                    return True
-        return False
+    # def has_analysis(self, class_name):
+    #     for a in self.analysis:
+    #         if isinstance(a, IAnalysisJobAnalysis):
+    #             if a.analysis_job_class == class_name:
+    #                 return True
+    #     return False
 
     def get_colormetry(self):
+        """
+        Checks if a colorimetry exists and if it has already been computed to the end of the movie.
+
+        :return: If a colorimetry exists, it returns tuple (colorimetry_has_finished, ColorimetryAnalysis instance)
+        else it returns (False, None)
+        """
         if self.colormetry_analysis is None:
             return False, None
         else:
             return self.colormetry_analysis.has_finished, self.colormetry_analysis
 
-    def create_colormetry(self):
+    def create_colormetry(self) -> ColormetryAnalysis:
+        """
+        Creates a new colorimetry and adds the instance to the project.
+
+        :return: The ColormetryAnalysis instance created.
+        """
         print("Create Colorimetry Analysis")
         colormetry = ColormetryAnalysis()
         self.add_analysis(colormetry)
@@ -589,6 +698,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     # Getters for easier changes later in the project
     def set_selected(self,sender, selected = None):
+        """
+        Sets the current selected containers within the project.
+
+        :param sender: The widget who sent the selection
+        :param selected: A list of IProjectContainer
+        :return:
+        """
         if selected is None:
             selected = []
 
@@ -611,7 +727,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.dispatch_selected(sender)
         self.onSelectionChanged.emit(self.selected)
 
-    def get_selected(self, types = None):
+    def get_selected(self, types = None) -> List[IProjectContainer]:
+        """
+        Returns all currently selected containers.
+
+        :param types: if a type is given the result is filtered.
+        :return: List[IProjectContainer]
+        """
         result = []
         if types != None:
             for s in self.selected:
@@ -622,6 +744,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
             return self.selected
 
     def get_movie(self):
+        """
+        Equivalent to VIANProject.movie_descriptor.
+
+        :return: Returns the movie descriptor of a project.
+        """
         return self.movie_descriptor
 
     #region Annotations

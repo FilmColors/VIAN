@@ -201,7 +201,6 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
             self.color = [255, 255, 255]
         return (self.color[0], self.color[1], self.color[2])
 
-
     def add_path(self, path, color, width):
         self.free_hand_paths.append([path, color, width])
 
@@ -341,7 +340,6 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
                 self.image = qimage
         except Exception as e:
             print(e)
-
 
     def delete(self):
         self.annotation_layer.remove_annotation(self)
