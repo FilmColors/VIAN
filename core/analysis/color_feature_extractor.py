@@ -187,13 +187,13 @@ class ColorFeatureAnalysis(IAnalysisJob):
         """
         w = QWidget()
         w.setLayout(QVBoxLayout(w))
-        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.get_adata()['color_lab']), w))
-        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.get_adata()['color_bgr']), w))
-        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.get_adata()['saturation_l']), w))
-        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.get_adata()['saturation_p']), w))
+        w.layout().addWidget(QLabel("Color CIE-Lab:".rjust(20) + str(analysis.get_adata()['color_lab']), w))
+        w.layout().addWidget(QLabel("Color BGR:".rjust(20) + str(analysis.get_adata()['color_bgr']), w))
+        w.layout().addWidget(QLabel("Saturation Luebbe:".rjust(20) + str(analysis.get_adata()['saturation_l']), w))
+        w.layout().addWidget(QLabel("Saturation FilmCo:".rjust(20) + str(analysis.get_adata()['saturation_p']), w))
         view = EGraphicsView(w)
-        view.set_image(numpy_to_pixmap(np.array(([[analysis.get_adata()['color_bgr']] * 100 ] * 100)).astype(np.uint8)))
-        w.layout().addWidget(w)
+        view.set_image(numpy_to_pixmap(np.array(([[analysis.get_adata()['color_bgr']] * 100 ] * 25)).astype(np.uint8)))
+        w.layout().addWidget(view)
         return w
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):

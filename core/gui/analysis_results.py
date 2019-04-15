@@ -12,6 +12,8 @@ from core.container.analysis import IAnalysisJobAnalysis
 from core.data.interfaces import IProjectChangeNotify
 from core.container.experiment import Experiment
 from core.container.segmentation import Segment
+from core.container.screenshot import Screenshot
+from core.container.annotation import Annotation
 from core.visualization.feature_plot import GenericFeaturePlot, FeatureTuple, SegmentTuple
 from core.visualization.correlation_matrix import CorrelationVisualization, CorrelationVisualization, CorrelationFeatureTuple
 
@@ -112,6 +114,34 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         except Exception as e:
             print(e)
 
+    def activate_selector(self, selectors):
+        self.clear_analysis_widget()
+
+        tabs = dict()
+        tabs_widget = QTabWidget(self.analysis_tab)
+        for selector in selectors:
+            if isinstance(selector, Screenshot) \
+                    or isinstance(selector, Annotation) \
+                    or isinstance(selector, Segment):
+                for analysis in selector.connected_analyses:
+                    if analysis.get_name() not in tabs:
+                        w = QWidget(tabs_widget)
+                        w.setLayout(QGridLayout())
+                        tabs[analysis.get_name()] = dict(widget=w, x = 0, y = 0)
+                        tabs_widget.addTab(w, analysis.get_name())
+
+                    tab = tabs[analysis.get_name()]
+                    vis = analysis.get_visualization()[0].widget
+                    QGridLayout().addWidget(vis, tab['x'], tab['y'])
+                    vis.show()
+
+                    tab['x'] += 1
+                    if tab['x'] > 4:
+                        tab['x'] = 0
+                        tab['y'] += 1
+
+        self.analysis_tab.layout().addWidget(tabs_widget)
+
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()
         # self.current_analysis.unload_container()
@@ -121,7 +151,6 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
             self.current_visualization[0].widget.show()
             if self.fullscreen_view is not None:
                 self.fullscreen_view.update_view()
-
         else:
             self.main_window.print_message("Visualization returned None", "Red")
             self.current_visualization = []
@@ -156,6 +185,8 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                     self.activate_analysis(selected[0])
                 elif isinstance(selected[0], Experiment):
                     self.activate_classification(selected[0])
+                else:
+                    self.activate_selector(selected)
         except:
             pass
 

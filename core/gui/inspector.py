@@ -125,6 +125,10 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.lbl_Type.setText("Vocabulary")
             widgets = [AttributesVocabulary(self, target_item)]
 
+        if s_type in [SEGMENT, SCREENSHOT, ANNOTATION]:
+            for analysis in target_item.connected_analyses:
+                widgets.append(AttributesAnalysis(self, analysis))
+
         if isinstance(target_item, IHasMediaObject):
             widgets.append(AttributesMediaObject(self, target_item))
 
@@ -445,6 +449,11 @@ class AttributesAnalysis(QWidget):
         clobj_name = "Default"
         if self.descriptor.target_classification_object is not None:
             clobj_name = self.descriptor.target_classification_object.name
+
+        title = QLabel("Analysis: " + descriptor.name.replace("_", " "))
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("font-weight: bold;")
+        self.layout().addWidget(title)
         self.layout().addWidget(QLabel("Target: " + clobj_name))
 
         # index = self.descriptor.procedure_id
@@ -452,10 +461,13 @@ class AttributesAnalysis(QWidget):
         self.layout().addWidget(self.vis_button)
         self.vis_button.clicked.connect(self.on_show_vis)
         self.vis = descriptor.get_preview()
+
+        self.vis.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred))
         self.layout().addWidget(self.vis)
         self.show()
 
     def on_show_vis(self):
+        self.descriptor.project.set_selected(sender = self, selected = [self.descriptor])
         self.descriptor.project.main_window.switch_perspective(Perspective.Results)
         # self.descriptor.get_visualization()
 

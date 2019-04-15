@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
-    <height>662</height>
+    <width>441</width>
+    <height>666</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -96,6 +96,12 @@
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
@@ -107,8 +113,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>459</width>
-         <height>550</height>
+         <width>423</width>
+         <height>554</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">

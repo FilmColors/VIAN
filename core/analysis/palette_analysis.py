@@ -121,9 +121,14 @@ class ColorPaletteAnalysis(IAnalysisJob):
         """
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
-        view = PaletteWidget(None)
-        view.set_palette(analysis.get_adata()['tree'])
-        view.draw_palette()
+        view = PaletteView(None)
+        view.depth = 10
+        image = QImage(QSize(1024,256), QImage.Format_RGBA8888)
+        view.palette_layer = analysis.get_adata()['tree']
+        view.draw_palette(image)
+        pixmap = QPixmap().fromImage(image)
+        view = EGraphicsView(None)
+        view.set_image(pixmap)
         return view
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):

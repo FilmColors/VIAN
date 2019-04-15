@@ -50,7 +50,7 @@ class PaletteWidget(QWidget):
         self.hbox_ctrl.addWidget(QLabel("Sorting: ", self))
         self.hbox_ctrl.addWidget(self.cb_sorting)
 
-        self.slider.setValue(4)
+        self.slider.setValue(10)
 
         self.hbox_slider.addWidget(self.lbl_mode_hint)
         self.hbox_slider.addWidget(self.slider)
