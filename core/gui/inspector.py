@@ -462,8 +462,10 @@ class AttributesAnalysis(QWidget):
         self.vis_button.clicked.connect(self.on_show_vis)
         self.vis = descriptor.get_preview()
 
-        self.vis.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred))
-        self.layout().addWidget(self.vis)
+        # Vis could be none because of a failed Visualization creation
+        if self.vis is not None:
+            self.vis.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred))
+            self.layout().addWidget(self.vis)
         self.show()
 
     def on_show_vis(self):

@@ -118,21 +118,31 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.clear_analysis_widget()
 
         tabs = dict()
-        tabs_widget = QTabWidget(self.analysis_tab)
+        tabs_widget = QTabWidget(self.analysis_widget)
+        self.analysis_widget.layout().addWidget(tabs_widget)
+
         for selector in selectors:
             if isinstance(selector, Screenshot) \
                     or isinstance(selector, Annotation) \
                     or isinstance(selector, Segment):
                 for analysis in selector.connected_analyses:
                     if analysis.get_name() not in tabs:
-                        w = QWidget(tabs_widget)
+                        scroll = QScrollArea(tabs_widget)
+                        w = QWidget(scroll)
+                        scroll.setWidget(w)
                         w.setLayout(QGridLayout())
+                        scroll.setWidgetResizable(True)
+                        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
                         tabs[analysis.get_name()] = dict(widget=w, x = 0, y = 0)
-                        tabs_widget.addTab(w, analysis.get_name())
+                        tabs_widget.addTab(scroll, analysis.get_name())
 
                     tab = tabs[analysis.get_name()]
-                    vis = analysis.get_visualization()[0].widget
-                    QGridLayout().addWidget(vis, tab['x'], tab['y'])
+                    vis_tuple = analysis.get_visualization()[0]
+                    vis = vis_tuple.widget
+                    ctrls = vis_tuple.controls
+                    if ctrls is not None:
+                        ctrls.hide()
+                    tab['widget'].layout().addWidget(vis, tab['x'], tab['y'])
                     vis.show()
 
                     tab['x'] += 1
@@ -140,7 +150,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                         tab['x'] = 0
                         tab['y'] += 1
 
-        self.analysis_tab.layout().addWidget(tabs_widget)
+
 
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()
@@ -187,7 +197,8 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                     self.activate_classification(selected[0])
                 else:
                     self.activate_selector(selected)
-        except:
+        except Exception as e:
+            print(e)
             pass
 
 
