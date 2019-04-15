@@ -889,10 +889,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 if self.is_forward_segmenting:
                     mode = SegmentCreationMode.FORWARD
 
-        if self.selected is not None:
-            if self.selected.get_type() == SEGMENTATION:
-                self.selected.create_segment2(lst[0], lst[1], mode, inhibit_overlap=self.inhibit_overlap)
-                # self.selected.create_segment(lst[0], lst[1], forward_segmenting = forward, inhibit_overlap=self.inhibit_overlap)
+        if self.selected is not None and self.selected.get_type() == SEGMENTATION:
+            self.selected.create_segment2(lst[0], lst[1], mode, inhibit_overlap=self.inhibit_overlap)
+            # self.selected.create_segment(lst[0], lst[1], forward_segmenting = forward, inhibit_overlap=self.inhibit_overlap)
+        else:
+            self.main_window.show_info_popup(self.frame_Bars, "Please select a Segmentation before creating new Segments. ", Qt.TopLeftCorner)
+
 
     def create_layer(self, lst):
         if len(lst) == 0:

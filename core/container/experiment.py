@@ -642,9 +642,17 @@ class Experiment(IProjectContainer, IHasName):
         return EXPERIMENT
     
     def query(self, keywords:List[UniqueKeyword], promote_to_screenshots = False):
+        """
+        Query the project for all IClassifiable which are tagged with any of list of keywords.
+
+        :param keywords:
+        :param promote_to_screenshots:
+        :return:
+        """
+        t = time.time()
         result = []
         containers = self.project.get_all_containers()
-        self.project.onScreenshotsHighlighted.emit([])
+        # self.project.onScreenshotsHighlighted.emit([])
 
         for c in containers:
             if isinstance(c, IClassifiable):
@@ -662,11 +670,14 @@ class Experiment(IProjectContainer, IHasName):
             screenshots = []
             for r in result:
                 r.set_classification_highlight(True)
+
                 if r.get_type() == SEGMENT and r in self.project.segment_screenshot_mapping:
                     screenshots.extend(self.project.segment_screenshot_mapping[r])
 
-            if len(screenshots) > 0:
-                self.project.onScreenshotsHighlighted.emit(screenshots)
+            self.project.onScreenshotsHighlighted.emit(screenshots)
+
+
+
     
     def get_correlation_matrix(self):
         if self.correlation_matrix is not None:

@@ -259,12 +259,12 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         return self.heads_up_widget
 
     def set_highlighted_by_uid(self, uids, reset = False, alpha_active = 1.0, alpha_inactive = 0.0):
-        print("Highlighting")
         uids_hash = dict(zip(uids, uids))
         if len(uids) > 0:
             for k, v in self.item_idx.items():
                 if k in uids_hash:
                     v[0].set_transparency(alpha_active)
+                    uids_hash.pop(k)
                 else:
                     v[0].set_transparency(alpha_inactive)
         else:

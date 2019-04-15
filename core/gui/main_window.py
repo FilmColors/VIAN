@@ -2040,6 +2040,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return result
 
+    def show_info_popup(self, widget:QWidget, text, pos = Qt.TopRightCorner):
+        """
+        Shows a frameless popup with a given text and position to help the user understand the GUI
+
+        :param widget:
+        :param text:
+        :param pos:
+        :return:
+        """
+        loc = widget.parent().mapToGlobal(widget.pos())
+        if pos == Qt.TopRightCorner:
+            loc += QPoint(widget.width(), 0)
+        elif pos == Qt.BottomRightCorner:
+            loc += QPoint(widget.width(), widget.height())
+        elif pos == Qt.BottomLeftCorner:
+            loc += QPoint(0, widget.height())
+
+        print(loc)
+        w = InfoPopup(self, text, loc)
+        w.show()
+        print("OK")
+
+
     #region IProjectChangedNotify
 
     def dispatch_on_loaded(self):
@@ -2224,6 +2247,16 @@ class DialogFirstStart(QtWidgets.QDialog):
                                 "Some information seems to be missing, please fill out the Form.")
 
 
+class InfoPopup(QMainWindow):
+    def __init__(self, parent, text, pos):
+        super(InfoPopup, self).__init__(parent)
+        self.setWindowFlags(Qt.Popup)
+        self.setStyleSheet("QWidget { background-color: #303030; border: 4px solid #a92020; color:#ffffff; font-size: 12pt; }")
+        self.move(pos)
+        self.label = QLabel(text, self)
+        self.label.setWordWrap(True)
+        self.setWindowOpacity(0.8)
+        self.setCentralWidget(self.label)
 
 
 
