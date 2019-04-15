@@ -1,5 +1,4 @@
 import numpy as np
-# from PyQt5.QtCore import QPoint, QSize
 
 from core.data.enums import NODE_SCRIPT
 from core.data.interfaces import IProjectContainer, IHasName, ISelectable

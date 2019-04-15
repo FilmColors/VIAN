@@ -56,21 +56,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         self.masked_cache = dict()
 
-    # def to_stream(self, project = None):
-    #     obj = dict(
-    #         img_movie = self.img_movie,
-    #         img_blend=self.img_blend,
-    #     )
-    #
-    #     if project is None:
-    #         project = self.project
-    #     # project.main_window.project_streamer.async_store(self.unique_id, obj)
-    #
-    # def from_stream(self, project = None):
-    #     if project is None:
-    #         project = self.project
-    #
-    #     obj = project.streamer.from_stream(self.unique_id)
 
     def set_title(self, title):
         self.title = title

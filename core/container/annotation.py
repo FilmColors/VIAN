@@ -1,5 +1,4 @@
 import cv2
-# from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import pyqtSignal
 from core.data.computation import numpy_to_qt_image
 from core.container.media_objects import FileMediaObject, DataMediaObject
