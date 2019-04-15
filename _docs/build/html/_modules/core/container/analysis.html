@@ -17,41 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -239,7 +232,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">VIAN</a>
@@ -247,9 +240,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -279,8 +273,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -292,20 +284,24 @@
            <div itemprop="articleBody">
             
   <h1>Source code for core.container.analysis</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">cv2</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:author Gaudenz Halter</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">cv2</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">bisect</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="k">import</span> <span class="n">QMessageBox</span>
 
 <span class="kn">from</span> <span class="nn">core.data.enums</span> <span class="k">import</span> <span class="n">ANALYSIS_NODE_SCRIPT</span><span class="p">,</span> <span class="n">ANALYSIS_JOB_ANALYSIS</span>
 <span class="kn">from</span> <span class="nn">core.data.interfaces</span> <span class="k">import</span> <span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">,</span> <span class="n">ISelectable</span>
-<span class="kn">from</span> <span class="nn">core.data.project_streaming</span> <span class="k">import</span> <span class="o">*</span>
-
 <span class="kn">from</span> <span class="nn">core.data.computation</span> <span class="k">import</span> <span class="o">*</span>
 
 
-<div class="viewcode-block" id="AnalysisContainer"><a class="viewcode-back" href="../../../dev_guide/containers/analysis.html#core.container.analysis.AnalysisContainer">[docs]</a><span class="k">class</span> <span class="nc">AnalysisContainer</span><span class="p">(</span><span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">,</span> <span class="n">ISelectable</span><span class="p">,</span> <span class="n">IStreamableContainer</span><span class="p">):</span>
+<div class="viewcode-block" id="AnalysisContainer"><a class="viewcode-back" href="../../../dev_guide/containers/analysis.html#core.container.analysis.AnalysisContainer">[docs]</a><span class="k">class</span> <span class="nc">AnalysisContainer</span><span class="p">(</span><span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">,</span> <span class="n">ISelectable</span><span class="p">):</span> <span class="c1">#, IStreamableContainer):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the BaseClass of all AnalysisContainers in the VIAN Project.</span>
+
 <span class="sd">    Member Attributes:</span>
 <span class="sd">        :self.name : The Name of the Container (not the analysis)</span>
 <span class="sd">        :self.notes : Additional Notes added in the Inspector</span>
@@ -320,16 +316,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span> <span class="o">=</span> <span class="s2">&quot;Generic&quot;</span>
+
+    <span class="k">def</span> <span class="nf">set_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="n">IProjectContainer</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">)</span>
+
+        <span class="c1"># The data is only set when the container is created,</span>
+        <span class="c1"># else it should already be in the SQLite Database</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_adata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">unload_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sync</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">unload_container</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">sync</span><span class="o">=</span><span class="n">sync</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">unload_container</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_adata</span><span class="p">(),</span> <span class="n">sync</span><span class="o">=</span><span class="n">sync</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">apply_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">obj</span>
+    <span class="k">def</span> <span class="nf">get_adata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">sync_load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">project_streamer</span><span class="o">.</span><span class="n">sync_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">set_adata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">d</span>
 
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
@@ -339,26 +344,26 @@
 
     <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data_json</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adata</span><span class="p">():</span>
             <span class="n">data_json</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 
 
         <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">unique_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
-            <span class="n">notes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span>
+            <span class="n">notes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">,</span> <span class="n">streamer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">remove_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="NodeScriptAnalysis"><a class="viewcode-back" href="../../../dev_guide/containers/analysis.html#core.container.analysis.NodeScriptAnalysis">[docs]</a><span class="k">class</span> <span class="nc">NodeScriptAnalysis</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">,</span> <span class="n">IStreamableContainer</span><span class="p">):</span>
+<div class="viewcode-block" id="NodeScriptAnalysis"><a class="viewcode-back" href="../../../dev_guide/containers/analysis.html#core.container.analysis.NodeScriptAnalysis">[docs]</a><span class="k">class</span> <span class="nc">NodeScriptAnalysis</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">):</span><span class="c1"># , IStreamableContainer):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -366,6 +371,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">NodeScriptAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">script_id</span> <span class="o">=</span> <span class="n">script_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_node_ids</span> <span class="o">=</span> <span class="n">final_nodes_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span> <span class="o">=</span> <span class="s2">&quot;NodeScript&quot;</span>
 
     <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">ANALYSIS_NODE_SCRIPT</span>
@@ -395,7 +401,7 @@
 
             <span class="c1"># We want to store the analysis container if it is not already stored</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">numpy_data_manager</span><span class="o">.</span><span class="n">sync_store</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">data_json</span><span class="p">)</span>
+            <span class="c1"># self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception in NodeScriptAnalysis.serialize(): &quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
@@ -419,8 +425,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">final_node_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">data_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">numpy_data_manager</span><span class="o">.</span><span class="n">sync_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
-
+            <span class="c1"># data_json = self.project.numpy_data_manager.sync_load(self.unique_id)</span>
+            <span class="n">data_json</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1">#TODO Numpy Storing obsolete for Scripts</span>
             <span class="c1"># Loop over each final node of the Script</span>
             <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">data_json</span><span class="p">:</span>
 
@@ -445,9 +452,10 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
-<span class="k">class</span> <span class="nc">IAnalysisJobAnalysis</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">,</span> <span class="n">IStreamableContainer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;NewAnalysisJobResult&quot;</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">analysis_job_class</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJobAnalysis"><a class="viewcode-back" href="../../../dev_guide/containers/analysis.html#core.container.analysis.IAnalysisJobAnalysis">[docs]</a><span class="k">class</span> <span class="nc">IAnalysisJobAnalysis</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">):</span> <span class="c1">#, IStreamableContainer):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;NewAnalysisJobResult&quot;</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">analysis_job_class</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">container</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">target_classification_object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">IAnalysisJobAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span> <span class="o">=</span> <span class="n">container</span>
         <span class="k">if</span> <span class="n">analysis_job_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span> <span class="o">=</span> <span class="n">analysis_job_class</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="k">else</span><span class="p">:</span>
@@ -457,6 +465,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_classification_object</span> <span class="o">=</span> <span class="n">target_classification_object</span>
+        <span class="c1"># Evaluated self.analysis-job_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">get_preview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -473,20 +485,24 @@
                                                                                              <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception in get_visualization()&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="p">,</span><span class="s2">&quot;Error in Visualization&quot;</span><span class="p">,</span> <span class="s2">&quot;The Visualization of &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span>
-                                <span class="s2">&quot; has thrown an Exception.</span><span class="se">\n\n</span><span class="s2"> Please send the Console Output to the Developer.&quot;</span><span class="p">)</span>
+            <span class="c1"># QMessageBox.warning(self.project.main_window,&quot;Error in Visualization&quot;, &quot;The Visualization of &quot; + self.name +</span>
+            <span class="c1">#                     &quot; has thrown an Exception.\n\n Please send the Console Output to the Developer.&quot;)</span>
 
     <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">ANALYSIS_JOB_ANALYSIS</span>
 
-    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_target_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span> <span class="o">=</span> <span class="n">container</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span><span class="o">.</span><span class="n">add_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">project_streamer</span><span class="o">.</span><span class="n">sync_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
-        <span class="c1"># Store the data as numpy if it does not already exist (since it is immutable)</span>
-        <span class="c1"># TODO sync_load may fail from time to time (Not yet known why), so we want to make sure that</span>
-        <span class="c1"># TODO the file is not overwritten if the loaded data is None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">numpy_data_manager</span><span class="o">.</span><span class="n">sync_store</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">NUMPY_NO_OVERWRITE</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">set_target_classification_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_obj</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_classification_object</span> <span class="o">=</span> <span class="n">class_obj</span>
+
+    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_classification_object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">class_obj_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_classification_object</span><span class="o">.</span><span class="n">unique_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">class_obj_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -494,41 +510,102 @@
             <span class="n">analysis_container_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
             <span class="n">analysis_job_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
-            <span class="c1"># data_dtypes=data_dtypes,</span>
-            <span class="c1"># data_json=data_json,</span>
-            <span class="n">notes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span>
-        <span class="p">)</span>
 
+            <span class="n">notes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
+            <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
+            <span class="n">classification_obj</span> <span class="o">=</span> <span class="n">class_obj_id</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">,</span> <span class="n">streamer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;analysis_job_class&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;notes&#39;</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">streamer</span><span class="o">.</span><span class="n">sync_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+        <span class="c1"># VERSION &gt; 0.6.8</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;classification_obj&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_classification_object</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;classification_obj&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># self.data = []</span>
+        <span class="c1"># t = streamer.project.main_window.eval_class(self.analysis_job_class)</span>
+        <span class="c1"># self.data = t().deserialize(streamer.sync_load(self.unique_id))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_target_container</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;container&#39;</span><span class="p">]))</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
+    <span class="k">def</span> <span class="nf">unload_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sync</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
 
-<span class="k">class</span> <span class="nc">ColormetryAnalysis</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_adata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">eval_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span><span class="p">()</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">set_adata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">eval_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_class</span><span class="p">()</span><span class="o">.</span><span class="n">to_hdf5</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span><span class="p">()</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="SemanticSegmentationAnalysisContainer"><a class="viewcode-back" href="../../../dev_guide/containers/analysis.html#core.container.analysis.SemanticSegmentationAnalysisContainer">[docs]</a><span class="k">class</span> <span class="nc">SemanticSegmentationAnalysisContainer</span><span class="p">(</span><span class="n">IAnalysisJobAnalysis</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;NewAnalysisJobResult&quot;</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">analysis_job_class</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">container</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">target_classification_object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SemanticSegmentationAnalysisContainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">results</span> <span class="p">,</span> <span class="n">analysis_job_class</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">container</span><span class="p">,</span> <span class="n">target_classification_object</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entry_shape</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">get_adata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">eval_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span><span class="p">()</span><span class="o">.</span><span class="n">from_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">entry_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">entry_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">set_adata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">eval_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span><span class="p">()</span><span class="o">.</span><span class="n">to_hdf5</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_class</span><span class="p">()</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SemanticSegmentationAnalysisContainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;entry_shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_shape</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;analysis_container_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SemanticSegmentationAnalysisContainer</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SemanticSegmentationAnalysisContainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">serialization</span><span class="p">,</span> <span class="n">project</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entry_shape</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;entry_shape&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entry_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="ColormetryAnalysis"><a class="viewcode-back" href="../../../dev_guide/containers/analysis.html#core.container.analysis.ColormetryAnalysis">[docs]</a><span class="k">class</span> <span class="nc">ColormetryAnalysis</span><span class="p">(</span><span class="n">AnalysisContainer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span> <span class="o">=</span> <span class="mi">30</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ColormetryAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Colormetry&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">curr_location</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_idx</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_job_class</span> <span class="o">=</span> <span class="s2">&quot;Colormetry&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">=</span> <span class="mi">0</span>
@@ -544,40 +621,25 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">last_idx</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">get_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">col_histograms</span><span class="p">()</span>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">get_palette</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
         <span class="k">pass</span>
 
+    <span class="k">def</span> <span class="nf">get_frame_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_times</span><span class="p">()</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">fps</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">frames</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">frames</span>
+
     <span class="k">def</span> <span class="nf">append_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="k">pass</span>
-                    <span class="c1"># TODO</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not Convert Colormetry data to list in append_data()&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;time_ms&#39;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;hist&#39;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;frame_pos&#39;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;avg_color&#39;</span><span class="p">])</span>
-
-            <span class="c1"># self.palettes.append(data[&#39;palette&#39;].tree)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;palette&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;palette&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;palette&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">dump_colorimetry</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_finished</span><span class="p">()</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ColormetryAnalysis.append_data() raised &quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
@@ -585,160 +647,95 @@
     <span class="k">def</span> <span class="nf">get_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">frame_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ms_to_frames</span><span class="p">(</span><span class="n">time_ms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">fps</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">frame_idx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_idx</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">frame_idx</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_idx</span> <span class="ow">or</span> <span class="n">frame_idx</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_idx</span> <span class="o">=</span> <span class="n">frame_idx</span>
-            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">palette</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="p">[</span><span class="n">frame_idx</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="p">[</span><span class="n">frame_idx</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span><span class="p">[</span><span class="n">frame_idx</span><span class="p">])])</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_pal</span><span class="p">(</span><span class="n">frame_idx</span><span class="p">)</span>
+            <span class="n">hist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_hist</span><span class="p">(</span><span class="n">frame_idx</span><span class="p">)</span>
+            <span class="n">spatial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_spatial</span><span class="p">()</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_times</span><span class="p">()</span>
+            <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">d</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">),</span>
+                <span class="n">d</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span>
+                <span class="n">d</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">palette</span> <span class="o">=</span> <span class="n">layers</span><span class="p">,</span> <span class="n">histogram</span><span class="o">=</span><span class="n">hist</span><span class="p">,</span> <span class="n">spatial</span><span class="o">=</span><span class="n">spatial</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="n">frame_idx</span> <span class="o">=</span> <span class="n">frame_idx</span><span class="p">,</span> <span class="n">current_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
             <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">get_time_palette</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">time_palette_data</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="p">)):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_pal</span><span class="p">()</span>
+        <span class="n">palette_layers</span> <span class="o">=</span> <span class="n">d</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">palette_cols</span> <span class="o">=</span> <span class="n">d</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">palette_bins</span> <span class="o">=</span> <span class="n">d</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">palette_layers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">time_palette_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">palette_layers</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">palette_cols</span><span class="p">[</span><span class="n">t</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">palette_bins</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
             <span class="p">])</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">time_palette_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">set_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">duration</span> <span class="o">-</span> <span class="mi">1000</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">check_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># print(&quot;IDX&quot;, self.current_idx, self.end_idx, self.current_idx == self.end_idx)</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Colormetry truely finished&quot;</span><span class="p">)</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">curr_location</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">curr_location</span><span class="p">,</span>
-            <span class="n">time_ms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="p">,</span>
-            <span class="n">frame_pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span><span class="p">,</span>
-            <span class="n">histograms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">,</span>
-            <span class="n">avg_colors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span><span class="p">,</span>
-            <span class="n">palette_colors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="p">,</span>
-            <span class="n">palette_layers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="p">,</span>
-            <span class="n">palette_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span><span class="p">,</span>
-            <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">numpy_data_manager</span><span class="o">.</span><span class="n">sync_store</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">NUMPY_OVERWRITE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span>
 
     <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Clearing COlorimetry&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">n_frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ms_to_frames</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">movie_descriptor</span><span class="o">.</span><span class="n">fps</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">initialize_colorimetry</span><span class="p">(</span><span class="n">n_frames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_idx</span> <span class="o">=</span> <span class="n">n_frames</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">curr_location</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">30</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">curr_location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">curr_location</span><span class="p">,</span>
-            <span class="n">time_ms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="p">,</span>
-            <span class="n">frame_pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span><span class="p">,</span>
-            <span class="n">histograms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">,</span>
-            <span class="n">avg_colors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span><span class="p">,</span>
-            <span class="n">palette_colors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span><span class="p">,</span>
-            <span class="n">palette_layers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span><span class="p">,</span>
-            <span class="n">palette_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span><span class="p">,</span>
-            <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-            <span class="n">current_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">numpy_data_manager</span><span class="o">.</span><span class="n">sync_store</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">NUMPY_NO_OVERWRITE</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">numpy_data_manager</span><span class="o">.</span><span class="n">sync_store</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">NUMPY_OVERWRITE</span><span class="p">)</span>
-
         <span class="n">serialization</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">unique_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
             <span class="n">analysis_container_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">curr_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span><span class="p">,</span>
+            <span class="n">time_ms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="p">,</span>
+            <span class="n">end_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_idx</span><span class="p">,</span>
             <span class="n">notes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
             <span class="n">has_finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span>
 
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">serialization</span>
 
-    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">,</span> <span class="n">streamer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;notes&#39;</span><span class="p">]</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;has_finished&#39;</span><span class="p">]</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">streamer</span><span class="o">.</span><span class="n">sync_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;current_idx&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">curr_location</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;curr_location&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;time_ms&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span> <span class="o">=</span>  <span class="n">data</span><span class="p">[</span><span class="s1">&#39;frame_pos&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span> <span class="o">=</span>  <span class="n">data</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span> <span class="o">=</span>  <span class="n">data</span><span class="p">[</span><span class="s1">&#39;avg_colors&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;time_ms&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_idx</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;end_idx&#39;</span><span class="p">]</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;palette_colors&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;palette_layers&#39;</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;palette_bins&#39;</span><span class="p">]</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span>  <span class="n">data</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Colormetry Data Loaded&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">curr_location</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">frame_pos</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">avg_colors</span> <span class="o">=</span> <span class="p">[]</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">palette_cols</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">palette_layers</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">palette_bins</span> <span class="o">=</span> <span class="p">[]</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">30</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">has_finished</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception in Loading Analysis&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception in Loading Analysis&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_ms</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">hdf5_manager</span><span class="o">.</span><span class="n">get_colorimetry_times</span><span class="p">()[:</span><span class="bp">self</span><span class="o">.</span><span class="n">current_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_finished</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
-        <span class="k">return</span> <span class="bp">self</span>
-
-
-<span class="k">class</span> <span class="nc">AnalysisParameters</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_items</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target_items</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">if</span> <span class="n">target_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_targets</span><span class="p">(</span><span class="n">target_items</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">set_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_container_list</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">project_container_list</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">get_id</span><span class="p">())</span>
-
-    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">parameter_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-            <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">data</span>
-
-    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serialization</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iter</span><span class="p">():</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
 
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -747,11 +744,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -764,37 +761,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

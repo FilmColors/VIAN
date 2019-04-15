@@ -17,40 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Node Script Module" href="node_scripts.html" />
+    <link rel="prev" title="Experiment Module" href="experiment.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -88,7 +84,7 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User’s Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../user_interface/user_interface.html">User Interface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../user_interface/inspector.html">Inspector</a></li>
@@ -157,7 +153,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../analyses.html">IAnalysisJob</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../analyses.html#functionality">Functionality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../analyses.html#example">Example</a><ul>
@@ -169,6 +165,30 @@
 <li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../plugins.html">Plug-Ins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../DevelopersGuide.html#documentation">Documentation</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../container.html">Container Package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="experiment.html">Experiment Module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a><ul>
@@ -214,7 +234,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">VIAN</a>
@@ -222,9 +242,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -246,6 +267,10 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../DevelopersGuide.html">Developer’s Guide</a> &raquo;</li>
+        
+          <li><a href="../container.html">Container Package</a> &raquo;</li>
         
       <li>Media Objects Module</li>
     
@@ -271,84 +296,79 @@
 <dl class="class">
 <dt id="core.container.media_objects.AbstractMediaObject">
 <em class="property">class </em><code class="descclassname">core.container.media_objects.</code><code class="descname">AbstractMediaObject</code><span class="sig-paren">(</span><em>name</em>, <em>container: core.data.interfaces.IHasMediaObject</em>, <em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/container/media_objects.html#AbstractMediaObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.container.media_objects.AbstractMediaObject" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> – The Name of this Object</li>
-<li><strong>container</strong> – The Container it belongs to</li>
-<li><strong>dtype</strong> – The Type of data stored in this MediaObject</li>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="../data.html#core.data.interfaces.VisualizationTab.name" title="core.data.interfaces.VisualizationTab.name"><strong>name</strong></a> – The Name of this Object</p></li>
+<li><p><strong>container</strong> – The Container it belongs to</p></li>
+<li><p><strong>dtype</strong> – The Type of data stored in this MediaObject</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
 <dt id="core.container.media_objects.DataMediaObject">
 <em class="property">class </em><code class="descclassname">core.container.media_objects.</code><code class="descname">DataMediaObject</code><span class="sig-paren">(</span><em>name</em>, <em>data</em>, <em>container</em>, <em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/container/media_objects.html#DataMediaObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.container.media_objects.DataMediaObject" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> – The Name of this Object</li>
-<li><strong>container</strong> – The Container it belongs to</li>
-<li><strong>dtype</strong> – The Type of data stored in this MediaObject</li>
-<li><strong>data</strong> – The Data Dict of this object</li>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="../data.html#core.data.interfaces.VisualizationTab.name" title="core.data.interfaces.VisualizationTab.name"><strong>name</strong></a> – The Name of this Object</p></li>
+<li><p><strong>container</strong> – The Container it belongs to</p></li>
+<li><p><strong>dtype</strong> – The Type of data stored in this MediaObject</p></li>
+<li><p><strong>data</strong> – The Data Dict of this object</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
 <dt id="core.container.media_objects.FileMediaObject">
 <em class="property">class </em><code class="descclassname">core.container.media_objects.</code><code class="descname">FileMediaObject</code><span class="sig-paren">(</span><em>name</em>, <em>file_path</em>, <em>container</em>, <em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/container/media_objects.html#FileMediaObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.container.media_objects.FileMediaObject" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> – The Name of this Object</li>
-<li><strong>container</strong> – The Container it belongs to</li>
-<li><strong>dtype</strong> – The Type of data stored in this MediaObject</li>
-<li><strong>file_path</strong> – The File Path to this object’s source</li>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="../data.html#core.data.interfaces.VisualizationTab.name" title="core.data.interfaces.VisualizationTab.name"><strong>name</strong></a> – The Name of this Object</p></li>
+<li><p><strong>container</strong> – The Container it belongs to</p></li>
+<li><p><strong>dtype</strong> – The Type of data stored in this MediaObject</p></li>
+<li><p><strong>file_path</strong> – The File Path to this object’s source</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <ul class="simple">
-<li><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>search`cd _docs</li>
+<li><p><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>search`cd _docs</p></li>
 </ul>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="node_scripts.html" class="btn btn-neutral float-right" title="Node Script Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="experiment.html" class="btn btn-neutral float-left" title="Experiment Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -361,37 +381,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

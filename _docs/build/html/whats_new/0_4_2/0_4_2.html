@@ -17,42 +17,35 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/>
-        <link rel="up" title="What’s New" href="../../whatsnew.html"/>
-        <link rel="prev" title="VIAN 0.4.5 - 0.4.7" href="../0_4_5/0_4_5.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="VIAN 0.4.5 - 0.4.7" href="../0_4_5/0_4_5.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -141,10 +134,14 @@
 <li class="toctree-l4"><a class="reference internal" href="../../step_by_step/analyses/analyses_list.html">All Analyses of VIAN</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/experiments/experiments.html">Experiments</a><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../step_by_step/player/player.html">VIAN’s Player</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../step_by_step/player/changing_subtitles.html">Changing Subtitles</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/vian_corpus/vian_corpus.html">VIAN Corpus</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../plugins/plugins.html">Plugins</a><ul>
@@ -167,6 +164,30 @@
 <li class="toctree-l2"><a class="reference internal" href="../../dev_guide/nodes.html">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../dev_guide/plugins.html">Plug-Ins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../whatsnew.html">What’s New</a><ul class="current">
@@ -212,7 +233,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">VIAN</a>
@@ -220,9 +241,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -279,46 +301,46 @@ many windows have been hidden, to increase the size of the player and the timeli
 <p>Remember that all Windows can be opened using the <em>Window/ Menu</em> on the very top.</p>
 <p>The perspectives are now mapped as follows:</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p><strong>Keyboard Mapping</strong></p>
-<ul class="last simple">
-<li>Alt + 1: Player</li>
-<li>Alt + 2: Segmentation</li>
-<li>Alt + 3: Annotation</li>
-<li>Alt + 4: Screenshot Manager</li>
-<li>Alt + 5: Node Editor</li>
+<ul class="simple">
+<li><p>Alt + 1: Player</p></li>
+<li><p>Alt + 2: Segmentation</p></li>
+<li><p>Alt + 3: Annotation</p></li>
+<li><p>Alt + 4: Screenshot Manager</p></li>
+<li><p>Alt + 5: Node Editor</p></li>
 </ul>
 </div>
 <div class="figure align-center" id="id1">
 <a class="reference internal image-reference" href="../../_images/persp_player1.png"><img alt="map to buried treasure" src="../../_images/persp_player1.png" style="width: 960.5px; height: 509.0px;" /></a>
-<p class="caption"><span class="caption-text">Player Perspective</span></p>
+<p class="caption"><span class="caption-text">Player Perspective</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-center" id="id2">
 <a class="reference internal image-reference" href="../../_images/persp_segmentation.png"><img alt="map to buried treasure" src="../../_images/persp_segmentation.png" style="width: 960.0px; height: 508.5px;" /></a>
-<p class="caption"><span class="caption-text">Segmentation Perspective</span></p>
+<p class="caption"><span class="caption-text">Segmentation Perspective</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-center" id="id3">
 <a class="reference internal image-reference" href="../../_images/persp_annotation.png"><img alt="map to buried treasure" src="../../_images/persp_annotation.png" style="width: 960.0px; height: 508.5px;" /></a>
-<p class="caption"><span class="caption-text">Annotation Perspective</span></p>
+<p class="caption"><span class="caption-text">Annotation Perspective</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-center" id="id4">
 <a class="reference internal image-reference" href="../../_images/persp_screenshots1.png"><img alt="map to buried treasure" src="../../_images/persp_screenshots1.png" style="width: 961.0px; height: 508.5px;" /></a>
-<p class="caption"><span class="caption-text">Screenshot Perspective</span></p>
+<p class="caption"><span class="caption-text">Screenshot Perspective</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-center" id="id5">
 <a class="reference internal image-reference" href="../../_images/persp_nodeditor.png"><img alt="map to buried treasure" src="../../_images/persp_nodeditor.png" style="width: 959.5px; height: 507.5px;" /></a>
-<p class="caption"><span class="caption-text">Node Editor Perspective</span></p>
+<p class="caption"><span class="caption-text">Node Editor Perspective</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p><strong>Keyboard Mapping Windows</strong>
 To further improve the fast changing of current windows,
 one may use the new Hotkeys to toggle specific Windows:</p>
-<ol class="last arabic simple">
-<li>Ctrl + O: Outliner</li>
-<li>Ctrl + I: Inspector</li>
-<li>Ctrl + P: Screenshot Manager</li>
-<li>Ctrl + T: Timeline</li>
+<ol class="arabic simple">
+<li><p>Ctrl + O: Outliner</p></li>
+<li><p>Ctrl + I: Inspector</p></li>
+<li><p>Ctrl + P: Screenshot Manager</p></li>
+<li><p>Ctrl + T: Timeline</p></li>
 </ol>
 </div>
 </div>
@@ -333,18 +355,18 @@ on the bottom-left corner of VIAN.
 You can now choose between three different options:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li><strong>Always VLC</strong> will use VLC to read the current frame when scrubbing though a movie.</li>
-<li><strong>Always OpenCV</strong> will use OpenCV to read the current frame.</li>
-<li><dl class="first docutils">
-<dt><strong>Timeline Scale Dependent</strong> when you have zoomed out relatively far on the Timeline VLC will be used,</dt>
-<dd>if your time magnification is relatively high, OpenCV will be used.</dd>
+<li><p><strong>Always VLC</strong> will use VLC to read the current frame when scrubbing though a movie.</p></li>
+<li><p><strong>Always OpenCV</strong> will use OpenCV to read the current frame.</p></li>
+<li><dl class="simple">
+<dt><strong>Timeline Scale Dependent</strong> when you have zoomed out relatively far on the Timeline VLC will be used,</dt><dd><p>if your time magnification is relatively high, OpenCV will be used.</p>
+</dd>
 </dl>
 </li>
 </ol>
 </div></blockquote>
 <div class="figure align-center" id="id6">
 <a class="reference internal image-reference" href="../../_images/source_selection.png"><img alt="map to buried treasure" src="../../_images/source_selection.png" style="width: 354.0px; height: 196.0px;" /></a>
-<p class="caption"><span class="caption-text">Selecting the Video Source in VIAN.</span></p>
+<p class="caption"><span class="caption-text">Selecting the Video Source in VIAN.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
 </div>
 </div>
 <div class="section" id="annotation-are-time-independent-from-their-layer">
@@ -355,56 +377,54 @@ This has always been a confusing and impractical concept and has now been change
 which can be toggled with a <strong>right mouse-click/Hide Layer</strong> in the Timeline.</p>
 <div class="figure align-center" id="id7">
 <a class="reference internal image-reference" href="../../_images/annotations.png"><img alt="map to buried treasure" src="../../_images/annotations.png" style="width: 1344.6999999999998px; height: 474.59999999999997px;" /></a>
-<p class="caption"><span class="caption-text">The new look of the Timeline with each Annotation having it’s own bar.</span></p>
+<p class="caption"><span class="caption-text">The new look of the Timeline with each Annotation having it’s own bar.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
 </div>
 </div>
 <div class="section" id="extensive-list">
 <h2>Extensive List<a class="headerlink" href="#extensive-list" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>PlayerControl: has now Image based buttons to improve the look.</li>
-<li>Timeline: Slider can no longer pass the begin or end of the movie.</li>
-<li>Timeline: jumps to the next time frame when the slider reaches the end of the current time-in-view.</li>
-<li>Timeline: Small Time indicator is shown when using the Slider. This can be turned of in Timeline/Display/</li>
-<li>ScreenshotExport: Indicating Quality percentage now.</li>
-<li>ScreenshotManager: Zooming should now work reliably</li>
-<li>ScreenshotManager: Ctrl + A for selecting All</li>
-<li>ScreenshotManager: Show a Loading Sign during loading of Screenshots</li>
-<li>ScreenshotManager: Slider is deactivated when the Arrangement is dynamic to avoid confusion.</li>
-<li>Timeline: When no Project is Open, the Timeline is not active.</li>
-<li>PlayerControls: When no Project is Open, the Controls are disabled.</li>
-<li>OpenCV per Frame is now moved in it’s own thread.</li>
-<li>FPS is now collected by OpenCV as it is more reliable especially before the User has played the movie.</li>
-<li>Annotation and Segmentation Perspectives</li>
-<li>Rearranging the Windows in the perspectives</li>
-<li>Automated Text Annotations by any data from the Project</li>
-<li>Analysis: MosaicPlot added.</li>
-<li>Welcome Window is now in the Documentation</li>
-<li>OpenCV Frame is now in the Background of the Annotations</li>
-<li>Annotations are not shown in the Segmentation Perspective</li>
-<li>Numpy and Pickle implementation for Async Loading and Saving of large data</li>
+<li><p>PlayerControl: has now Image based buttons to improve the look.</p></li>
+<li><p>Timeline: Slider can no longer pass the begin or end of the movie.</p></li>
+<li><p>Timeline: jumps to the next time frame when the slider reaches the end of the current time-in-view.</p></li>
+<li><p>Timeline: Small Time indicator is shown when using the Slider. This can be turned of in Timeline/Display/</p></li>
+<li><p>ScreenshotExport: Indicating Quality percentage now.</p></li>
+<li><p>ScreenshotManager: Zooming should now work reliably</p></li>
+<li><p>ScreenshotManager: Ctrl + A for selecting All</p></li>
+<li><p>ScreenshotManager: Show a Loading Sign during loading of Screenshots</p></li>
+<li><p>ScreenshotManager: Slider is deactivated when the Arrangement is dynamic to avoid confusion.</p></li>
+<li><p>Timeline: When no Project is Open, the Timeline is not active.</p></li>
+<li><p>PlayerControls: When no Project is Open, the Controls are disabled.</p></li>
+<li><p>OpenCV per Frame is now moved in it’s own thread.</p></li>
+<li><p>FPS is now collected by OpenCV as it is more reliable especially before the User has played the movie.</p></li>
+<li><p>Annotation and Segmentation Perspectives</p></li>
+<li><p>Rearranging the Windows in the perspectives</p></li>
+<li><p>Automated Text Annotations by any data from the Project</p></li>
+<li><p>Analysis: MosaicPlot added.</p></li>
+<li><p>Welcome Window is now in the Documentation</p></li>
+<li><p>OpenCV Frame is now in the Background of the Annotations</p></li>
+<li><p>Annotations are not shown in the Segmentation Perspective</p></li>
+<li><p>Numpy and Pickle implementation for Async Loading and Saving of large data</p></li>
 </ul>
 </div></blockquote>
 <ul class="simple">
-<li><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="../0_4_5/0_4_5.html" class="btn btn-neutral" title="VIAN 0.4.5 - 0.4.7" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../0_4_5/0_4_5.html" class="btn btn-neutral float-left" title="VIAN 0.4.5 - 0.4.7" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -413,11 +433,11 @@ which can be toggled with a <strong>right mouse-click/Hide Layer</strong> in the
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -430,37 +450,15 @@ which can be toggled with a <strong>right mouse-click/Hide Layer</strong> in the
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

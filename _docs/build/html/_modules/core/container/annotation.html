@@ -17,41 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -239,7 +232,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">VIAN</a>
@@ -247,9 +240,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -279,8 +273,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -293,8 +285,8 @@
             
   <h1>Source code for core.container.annotation</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">cv2</span>
-<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
-
+<span class="c1"># from PyQt5 import QtGui, QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="k">import</span> <span class="n">pyqtSignal</span>
 <span class="kn">from</span> <span class="nn">core.data.computation</span> <span class="k">import</span> <span class="n">numpy_to_qt_image</span>
 <span class="kn">from</span> <span class="nn">core.container.media_objects</span> <span class="k">import</span> <span class="n">FileMediaObject</span><span class="p">,</span> <span class="n">DataMediaObject</span>
 <span class="kn">from</span> <span class="nn">core.data.enums</span> <span class="k">import</span> <span class="n">AnnotationType</span><span class="p">,</span> <span class="n">MediaObjectType</span><span class="p">,</span> <span class="n">ANNOTATION</span><span class="p">,</span> <span class="n">ANNOTATION_LAYER</span>
@@ -391,11 +383,11 @@
                 <span class="k">return</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">has_key</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">remove_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">set_name</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span><span class="p">]),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_name</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span>
@@ -449,12 +441,12 @@
 
     <span class="k">def</span> <span class="nf">set_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qpoint</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">set_position</span><span class="p">,</span> <span class="p">[</span><span class="n">qpoint</span><span class="p">]),</span>
-                                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_position</span><span class="p">,</span> <span class="p">[</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">1</span><span class="p">])]))</span>
+                                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_position</span><span class="p">,</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">1</span><span class="p">])]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span> <span class="o">=</span> <span class="p">(</span><span class="n">qpoint</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">qpoint</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
         <span class="c1"># self.dispatch_on_changed()</span>
 
     <span class="k">def</span> <span class="nf">get_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">old_pos</span><span class="p">,</span> <span class="n">old_size</span><span class="p">):</span>
 
@@ -493,8 +485,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
-
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
 
     <span class="k">def</span> <span class="nf">add_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">free_hand_paths</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">path</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">width</span><span class="p">])</span>
@@ -605,10 +596,10 @@
             <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s2">&quot;media_objects&quot;</span><span class="p">]:</span>
                 <span class="n">o_type</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">o_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MediaObjectType</span><span class="o">.</span><span class="n">HYPERLINK</span><span class="p">,</span> <span class="n">MediaObjectType</span><span class="o">.</span><span class="n">SOURCE</span><span class="p">]:</span>
-                    <span class="n">new</span> <span class="o">=</span> <span class="n">DataMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
-
+                    <span class="n">new</span> <span class="o">=</span> <span class="n">DataMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">new</span> <span class="o">=</span> <span class="n">FileMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+                    <span class="n">new</span> <span class="o">=</span> <span class="n">FileMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+                <span class="n">new</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">media_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
@@ -636,7 +627,6 @@
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotation_layer</span><span class="o">.</span><span class="n">remove_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -657,6 +647,10 @@
 <span class="sd">    :var notes: Additional notes set in the Inspector</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onAnnotationAdded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onAnnotationRemoved</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onAnnotationLayerChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">t_start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">t_end</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">IProjectContainer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">ILockable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -669,6 +663,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_visible</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeline_visibility</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip_height</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
     <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -718,7 +713,9 @@
         <span class="n">annotation</span><span class="o">.</span><span class="n">annotation_layer</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">,</span> <span class="p">[</span><span class="n">annotation</span><span class="p">]),</span>
                                           <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_annotation</span><span class="p">,</span> <span class="p">[</span><span class="n">annotation</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onAnnotationAdded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">onAnnotationAdded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">remove_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotation</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">annotation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">:</span>
@@ -726,7 +723,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_annotation</span><span class="p">,</span> <span class="p">[</span><span class="n">annotation</span><span class="p">]),</span>
                                               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">,</span> <span class="p">[</span><span class="n">annotation</span><span class="p">]))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onAnnotationRemoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_is_current_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_current_layer</span> <span class="o">=</span> <span class="nb">bool</span>
@@ -825,9 +823,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -836,11 +832,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -853,37 +849,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

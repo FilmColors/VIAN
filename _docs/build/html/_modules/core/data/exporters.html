@@ -17,41 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -239,7 +232,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">VIAN</a>
@@ -247,9 +240,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -278,8 +272,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -333,7 +325,7 @@
             <span class="k">if</span> <span class="n">annotation_visibility</span><span class="p">:</span>
                 <span class="n">img</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">img_blend</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">img_movie</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get_img_movie</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">smooth</span><span class="p">:</span>
                 <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">GaussianBlur</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
@@ -343,10 +335,8 @@
                 <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">file_name</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="n">cv2</span><span class="o">.</span><span class="n">IMWRITE_JPEG_QUALITY</span><span class="p">,</span> <span class="n">quality</span><span class="p">])</span>
 
             <span class="k">if</span> <span class="n">image_type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">ImageType</span><span class="o">.</span><span class="n">PNG</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-                <span class="n">compression</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">100</span> <span class="o">-</span> <span class="n">quality</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span>
-                <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">file_name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="n">cv2</span><span class="o">.</span><span class="n">IMWRITE_PNG_COMPRESSION</span><span class="p">,</span> <span class="n">compression</span><span class="p">])</span>
-
-            <span class="nb">print</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span></div>
+                <span class="n">compression</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">100</span> <span class="o">-</span> <span class="n">quality</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">file_name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="n">cv2</span><span class="o">.</span><span class="n">IMWRITE_PNG_COMPRESSION</span><span class="p">,</span> <span class="n">compression</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="SegmentationExporter"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.exporters.SegmentationExporter">[docs]</a><span class="k">class</span> <span class="nc">SegmentationExporter</span><span class="p">(</span><span class="n">IConcurrentJob</span><span class="p">):</span>
@@ -450,29 +440,13 @@
         <span class="c1"># result = &quot;&quot;</span>
 
 
-<span class="c1"># class ExperimentExporter():</span>
-<span class="c1">#     def export(self, path, experiment: Experiment, return_dict = False):</span>
-<span class="c1">#         base_vocs = []</span>
-<span class="c1">#         # Collecting all used Base Vocabularies</span>
-<span class="c1">#         for v in experiment.get_vocabulary_list():</span>
-<span class="c1">#             base = v.base_vocabulary</span>
-<span class="c1">#             if base not in base_vocs:</span>
-<span class="c1">#                 base_vocs.append(base)</span>
-<span class="c1">#                 print(base.name)</span>
-<span class="c1">#</span>
-<span class="c1">#         serialization_exp = experiment.serialize()</span>
-<span class="c1">#         serialization_vocs = [v.serialize() for v in base_vocs]</span>
-<span class="c1">#</span>
-<span class="c1">#         result = dict(</span>
-<span class="c1">#             experiment = serialization_exp,</span>
-<span class="c1">#             base_vocs = serialization_vocs,</span>
-<span class="c1">#         )</span>
-<span class="c1">#</span>
-<span class="c1">#         if not return_dict:</span>
-<span class="c1">#             with open(path, &quot;w&quot;) as f:</span>
-<span class="c1">#                 json.dump(result, f)</span>
-<span class="c1">#         else:</span>
-<span class="c1">#             return result</span>
+<span class="k">class</span> <span class="nc">XMLExchangeExporter</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">VIANProject</span><span class="p">):</span>
+        <span class="k">pass</span>
+
 
 <div class="viewcode-block" id="build_file_name"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.exporters.build_file_name">[docs]</a><span class="k">def</span> <span class="nf">build_file_name</span><span class="p">(</span><span class="n">naming</span><span class="p">,</span> <span class="n">screenshot</span><span class="p">,</span> <span class="n">movie_descriptor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -514,9 +488,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -525,11 +497,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -542,37 +514,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

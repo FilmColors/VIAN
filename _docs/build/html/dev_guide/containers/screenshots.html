@@ -17,40 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Segmentation Module" href="segmentation.html" />
+    <link rel="prev" title="Node Script Module" href="node_scripts.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -88,7 +84,7 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User’s Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../user_interface/user_interface.html">User Interface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../user_interface/inspector.html">Inspector</a></li>
@@ -157,7 +153,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../analyses.html">IAnalysisJob</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../analyses.html#functionality">Functionality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../analyses.html#example">Example</a><ul>
@@ -169,6 +165,30 @@
 <li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../plugins.html">Plug-Ins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../DevelopersGuide.html#documentation">Documentation</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../container.html">Container Package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a><ul>
@@ -214,7 +234,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">VIAN</a>
@@ -222,9 +242,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -246,6 +267,10 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../DevelopersGuide.html">Developer’s Guide</a> &raquo;</li>
+        
+          <li><a href="../container.html">Container Package</a> &raquo;</li>
         
       <li>Screenshot Module</li>
     
@@ -271,56 +296,80 @@
 <dl class="class">
 <dt id="core.container.screenshot.Screenshot">
 <em class="property">class </em><code class="descclassname">core.container.screenshot.</code><code class="descname">Screenshot</code><span class="sig-paren">(</span><em>title=''</em>, <em>image=None</em>, <em>img_blend=None</em>, <em>timestamp=''</em>, <em>scene_id=0</em>, <em>frame_pos=0</em>, <em>shot_id_global=-1</em>, <em>shot_id_segm=-1</em>, <em>annotation_item_ids=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/container/screenshot.html#Screenshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.container.screenshot.Screenshot" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
-<li><strong>title</strong> – The Name of this Screenshot</li>
-<li><strong>img_movie</strong> – Image Data of the complete frame</li>
-<li><strong>img_blend</strong> – Image Data of the Annotated Frame if Any</li>
-<li><strong>annotation_item_ids</strong> – The Annotations that have been there while rendering the img_blend</li>
-<li><strong>frame_pos</strong> – THe Position of this Frame in Frames</li>
-<li><strong>scene_id</strong> – The Id of this Screenshot within the Main Segmentation of the Project</li>
-<li><strong>shot_id_global</strong> – The Id of this screenshot over all Screenshots</li>
-<li><strong>shot_id_segm</strong> – The Id of this shot within the segment</li>
-<li><strong>movie_timestamp</strong> – The Time in MS</li>
-<li><strong>creation_timestamp</strong> – The Time of Creation in time.now() format</li>
-<li><strong>screenshot_group</strong> – The Screenshot Groupd this is asociated to</li>
-<li><strong>notes</strong> – Additional Notes set in the Inspector</li>
-<li><strong>curr_size</strong> – The size of the loaded Image relative to it’s original Size</li>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> – The Name of this Screenshot</p></li>
+<li><p><strong>img_movie</strong> – Image Data of the complete frame</p></li>
+<li><p><strong>img_blend</strong> – Image Data of the Annotated Frame if Any</p></li>
+<li><p><strong>annotation_item_ids</strong> – The Annotations that have been there while rendering the img_blend</p></li>
+<li><p><strong>frame_pos</strong> – THe Position of this Frame in Frames</p></li>
+<li><p><strong>scene_id</strong> – The Id of this Screenshot within the Main Segmentation of the Project</p></li>
+<li><p><strong>shot_id_global</strong> – The Id of this screenshot over all Screenshots</p></li>
+<li><p><strong>shot_id_segm</strong> – The Id of this shot within the segment</p></li>
+<li><p><strong>movie_timestamp</strong> – The Time in MS</p></li>
+<li><p><strong>creation_timestamp</strong> – The Time of Creation in time.now() format</p></li>
+<li><p><strong>screenshot_group</strong> – The Screenshot Groupd this is asociated to</p></li>
+<li><p><strong>notes</strong> – Additional Notes set in the Inspector</p></li>
+<li><p><strong>curr_size</strong> – The size of the loaded Image relative to it’s original Size</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
+<dl class="method">
+<dt id="core.container.screenshot.Screenshot.get_preview">
+<code class="descname">get_preview</code><span class="sig-paren">(</span><em>scale=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/container/screenshot.html#Screenshot.get_preview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.container.screenshot.Screenshot.get_preview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a resized tuple (qimage, qpixmap) from the movie-image. 
+THe Preview will be cached for fast updated
+:param scale: 
+:return:</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="core.container.screenshot.Screenshot.get_semantic_segmentations">
+<code class="descname">get_semantic_segmentations</code><span class="sig-paren">(</span><em>dataset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/container/screenshot.html#Screenshot.get_semantic_segmentations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.container.screenshot.Screenshot.get_semantic_segmentations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dict {dataset_name: SemanticSegmentationAnalysisContainer}
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.container.screenshot.ScreenshotGroup">
+<em class="property">class </em><code class="descclassname">core.container.screenshot.</code><code class="descname">ScreenshotGroup</code><span class="sig-paren">(</span><em>project</em>, <em>name='New Screenshot Group'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/container/screenshot.html#ScreenshotGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.container.screenshot.ScreenshotGroup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <ul class="simple">
-<li><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>search`cd _docs</li>
+<li><p><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>search`cd _docs</p></li>
 </ul>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="segmentation.html" class="btn btn-neutral float-right" title="Segmentation Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="node_scripts.html" class="btn btn-neutral float-left" title="Node Script Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -333,37 +382,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -17,41 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -239,7 +232,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">VIAN</a>
@@ -247,9 +240,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -279,8 +273,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -297,6 +289,7 @@
 <span class="kn">from</span> <span class="nn">core.data.interfaces</span> <span class="k">import</span> <span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">,</span> <span class="n">ISelectable</span><span class="p">,</span> <span class="n">ITimelineItem</span><span class="p">,</span> <span class="n">ILockable</span><span class="p">,</span> \
     <span class="n">AutomatedTextSource</span><span class="p">,</span> <span class="n">ITimeRange</span><span class="p">,</span> <span class="n">IClassifiable</span><span class="p">,</span> <span class="n">IHasMediaObject</span>
 
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="k">import</span> <span class="n">pyqtSignal</span>
 
 <div class="viewcode-block" id="Segmentation"><a class="viewcode-back" href="../../../dev_guide/containers/segmentation.html#core.container.segmentation.Segmentation">[docs]</a><span class="k">class</span> <span class="nc">Segmentation</span><span class="p">(</span><span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">,</span> <span class="n">ISelectable</span><span class="p">,</span> <span class="n">ITimelineItem</span><span class="p">,</span> <span class="n">ILockable</span><span class="p">,</span> <span class="n">AutomatedTextSource</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -307,6 +300,10 @@
 <span class="sd">    :var is_main_segmentation: If this is the main Segmentation</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onSegmentAdded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onSegmentDeleted</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onSegmentationChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">segments</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">IProjectContainer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">ILockable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -317,6 +314,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">timeline_visibility</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_main_segmentation</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip_height</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
             <span class="n">s</span><span class="o">.</span><span class="n">segmentation</span> <span class="o">=</span> <span class="bp">self</span>
 
@@ -331,110 +330,6 @@
             <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">get_start</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">time_ms</span> <span class="o">&lt;</span> <span class="n">s</span><span class="o">.</span><span class="n">get_end</span><span class="p">():</span>
                 <span class="k">return</span> <span class="n">s</span>
         <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="c1"># @OC</span>
-    <span class="c1"># def create_segment(self, start, stop, ID = None, from_last_threshold = 1, forward_segmenting = False,</span>
-    <span class="c1">#                    inhibit_overlap = True,  dispatch = True, annotation_body = &quot;&quot;):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Creates a new Segment</span>
-    <span class="c1">#     :param start:</span>
-    <span class="c1">#     :param stop:</span>
-    <span class="c1">#     :param ID:</span>
-    <span class="c1">#     :param from_last_threshold:</span>
-    <span class="c1">#     :param forward_segmenting:</span>
-    <span class="c1">#     :param inhibit_overlap:</span>
-    <span class="c1">#     :param dispatch:</span>
-    <span class="c1">#     :param annotation_body:</span>
-    <span class="c1">#     :return:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # Is the Segment longer than the minimal Threshold (in ms)?</span>
-    <span class="c1">#     if stop - start &lt; from_last_threshold:</span>
-    <span class="c1">#</span>
-    <span class="c1">#         # Forward Segmentation: Create a Segment from Position to next Segment or End</span>
-    <span class="c1">#         # If the new overlaps with the last: shorten the last</span>
-    <span class="c1">#         if forward_segmenting:</span>
-    <span class="c1">#             # Find the next Segment if there is one and create a segment from start to the next segment start</span>
-    <span class="c1">#</span>
-    <span class="c1">#             next = None</span>
-    <span class="c1">#             last = None</span>
-    <span class="c1">#             for s in self.segments:</span>
-    <span class="c1">#                 if s.start &lt; start:</span>
-    <span class="c1">#                     last = s</span>
-    <span class="c1">#                 if s.start &gt; start and next is None:</span>
-    <span class="c1">#                     next = s</span>
-    <span class="c1">#                 if last is not None and next is not None:</span>
-    <span class="c1">#                     break</span>
-    <span class="c1">#</span>
-    <span class="c1">#             if next is None:</span>
-    <span class="c1">#                 stop = self.project.movie_descriptor.duration</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 stop = next.get_start() - 1</span>
-    <span class="c1">#</span>
-    <span class="c1">#             if last is not None and last.end &gt; start:</span>
-    <span class="c1">#                 last.set_end(start - 1)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         # Backwards Segmentation: Create a Segment from the Last to current Position</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             last = None</span>
-    <span class="c1">#             for i, s in enumerate(self.segments):</span>
-    <span class="c1">#                 if s.start &lt; start:</span>
-    <span class="c1">#                     last = s</span>
-    <span class="c1">#             if last is not None:</span>
-    <span class="c1">#                 start = last.end</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 start = 0</span>
-    <span class="c1">#</span>
-    <span class="c1">#     if inhibit_overlap:</span>
-    <span class="c1">#         last = None</span>
-    <span class="c1">#         next = None</span>
-    <span class="c1">#</span>
-    <span class="c1">#         for i, s in enumerate(self.segments):</span>
-    <span class="c1">#             if s.start &lt; start:</span>
-    <span class="c1">#                 last = s</span>
-    <span class="c1">#                 if len(self.segments) &gt; i + 1:</span>
-    <span class="c1">#                     next = self.segments[i + 1]</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     next = None</span>
-    <span class="c1">#</span>
-    <span class="c1">#         if last is not None and last.end &gt; start:</span>
-    <span class="c1">#             start = last.end</span>
-    <span class="c1">#         if next is not None and next.start &lt; stop:</span>
-    <span class="c1">#             stop = next.start - 1</span>
-    <span class="c1">#</span>
-    <span class="c1">#     if ID is None:</span>
-    <span class="c1">#         ID = len(self.segments) + 1</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # IF the Segment is to small, we don&#39;t want to create it</span>
-    <span class="c1">#     if start &gt; stop - 100:</span>
-    <span class="c1">#         return</span>
-    <span class="c1">#</span>
-    <span class="c1">#     # if the Segment does still overlap, we don&#39;t want to create it</span>
-    <span class="c1">#     last = None</span>
-    <span class="c1">#     next = None</span>
-    <span class="c1">#     for i, s in enumerate(self.segments):</span>
-    <span class="c1">#         if s.start &lt; start:</span>
-    <span class="c1">#             last = s</span>
-    <span class="c1">#             if len(self.segments) &gt; i + 1:</span>
-    <span class="c1">#                 next = self.segments[i + 1]</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 next = None</span>
-    <span class="c1">#</span>
-    <span class="c1">#     if last is not None and last.end &gt; start:</span>
-    <span class="c1">#         return</span>
-    <span class="c1">#     if next is not None and next.start &lt; stop:</span>
-    <span class="c1">#         return</span>
-    <span class="c1">#</span>
-    <span class="c1">#     new_seg = Segment(ID = ID, start = start, end = stop, name=str(ID),</span>
-    <span class="c1">#                       segmentation = self, annotation_body=annotation_body)</span>
-    <span class="c1">#     new_seg.set_project(self.project)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     self.add_segment(new_seg, dispatch)</span>
-    <span class="c1">#</span>
-    <span class="c1">#     return new_seg</span>
-
-
-    <span class="c1"># TODO repace old create_segment method</span>
 
     <span class="k">def</span> <span class="nf">create_segment2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="n">SegmentCreationMode</span> <span class="o">=</span> <span class="n">SegmentCreationMode</span><span class="o">.</span><span class="n">BACKWARD</span><span class="p">,</span>
                         <span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -521,7 +416,9 @@
 
         <span class="k">if</span> <span class="n">dispatch</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">add_segment</span><span class="p">,</span> <span class="p">[</span><span class="n">segment</span><span class="p">]),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_segment</span><span class="p">,</span> <span class="p">[</span><span class="n">segment</span><span class="p">]))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentAdded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">onSegmentAdded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">remove_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="n">dispatch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
@@ -530,7 +427,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sort_screenshots</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">dispatch</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_segment</span><span class="p">,</span> <span class="p">[</span><span class="n">segment</span><span class="p">]),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_segment</span><span class="p">,</span> <span class="p">[</span><span class="n">segment</span><span class="p">]))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentDeleted</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">cut_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segm</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">segm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
@@ -539,7 +437,7 @@
             <span class="c1"># new = self.create_segment(time, old_end)</span>
             <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_segment2</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">old_end</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">SegmentCreationMode</span><span class="o">.</span><span class="n">INTERVAL</span><span class="p">,</span> <span class="n">dispatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">cut_segment</span><span class="p">,</span> <span class="p">[</span><span class="n">segm</span><span class="p">,</span> <span class="n">time</span><span class="p">]),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">merge_segments</span><span class="p">,</span> <span class="p">[</span><span class="n">segm</span><span class="p">,</span> <span class="n">new</span><span class="p">]))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">merge_segments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ID</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
@@ -579,7 +477,6 @@
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">start</span> <span class="o">&lt;</span> <span class="n">time</span> <span class="o">&lt;</span> <span class="n">s</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">s</span>
-
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">remove_unreal_segments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
@@ -603,6 +500,7 @@
     <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">set_name</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span><span class="p">]),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_name</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -635,20 +533,10 @@
             <span class="n">new</span><span class="o">.</span><span class="n">segmentation</span> <span class="o">=</span> <span class="bp">self</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;locked&#39;</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;locked&#39;</span><span class="p">]</span>
-
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># try:</span>
-        <span class="c1">#     for w in serialization[&quot;words&quot;]:</span>
-        <span class="c1">#         word = self.project.get_by_id(w)</span>
-        <span class="c1">#         if word is not None:</span>
-        <span class="c1">#             self.add_word(self.project.get_by_id(w))</span>
-        <span class="c1">#</span>
-        <span class="c1"># except Exception as e:</span>
-        <span class="c1">#     pass</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -659,16 +547,19 @@
         <span class="n">ILockable</span><span class="o">.</span><span class="n">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
             <span class="n">s</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">unlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ILockable</span><span class="o">.</span><span class="n">unlock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
             <span class="n">s</span><span class="o">.</span><span class="n">unlock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_timeline_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visibility</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeline_visibility</span> <span class="o">=</span> <span class="n">visibility</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_timeline_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -696,8 +587,21 @@
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">segm</span><span class="o">.</span><span class="n">get_name</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="s2">&quot;Invalid Property&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
+<div class="viewcode-block" id="Segmentation.copy_event"><a class="viewcode-back" href="../../../dev_guide/containers/segmentation.html#core.container.segmentation.Segmentation.copy_event">[docs]</a>    <span class="k">def</span> <span class="nf">copy_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This Event is raised when the user wants to copy this container into some target. </span>
+<span class="sd">        :param containers: </span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">target</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">or</span> <span class="n">target</span> <span class="o">==</span> <span class="bp">self</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">Segmentation</span><span class="p">):</span>
+            <span class="n">new_seg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">create_segmentation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
+                <span class="n">new_seg</span><span class="o">.</span><span class="n">create_segment2</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">get_start</span><span class="p">(),</span> <span class="n">s</span><span class="o">.</span><span class="n">get_end</span><span class="p">(),</span> <span class="n">body</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">annotation_body</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">:</span>
+                <span class="n">target</span><span class="o">.</span><span class="n">create_segment2</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">get_start</span><span class="p">(),</span> <span class="n">s</span><span class="o">.</span><span class="n">get_end</span><span class="p">(),</span> <span class="n">body</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">annotation_body</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="Segment"><a class="viewcode-back" href="../../../dev_guide/containers/segmentation.html#core.container.segmentation.Segment">[docs]</a><span class="k">class</span> <span class="nc">Segment</span><span class="p">(</span><span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">ITimeRange</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">,</span> <span class="n">ISelectable</span><span class="p">,</span> <span class="n">ITimelineItem</span><span class="p">,</span> <span class="n">ILockable</span><span class="p">,</span> <span class="n">IClassifiable</span><span class="p">,</span> <span class="n">IHasMediaObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -714,6 +618,8 @@
 <span class="sd">    :var notes: Additional Notes that can be set in the Inspector</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onSegmentChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ID</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">end</span>  <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">duration</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">segmentation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotation_body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;New Segment&quot;</span><span class="p">):</span>
         <span class="n">IProjectContainer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">ILockable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -734,6 +640,7 @@
 
     <span class="k">def</span> <span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ID</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">ID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
@@ -743,6 +650,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span><span class="o">.</span><span class="n">update_segment_ids</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sort_screenshots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
@@ -753,6 +661,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span><span class="o">.</span><span class="n">update_segment_ids</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sort_screenshots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -767,6 +676,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span><span class="o">.</span><span class="n">update_segment_ids</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sort_screenshots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -775,11 +685,13 @@
     <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">set_name</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span><span class="p">]),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_name</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_annotation_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotation</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">undo_manager</span><span class="o">.</span><span class="n">to_undo</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">set_annotation_body</span><span class="p">,</span> <span class="p">[</span><span class="n">annotation</span><span class="p">]),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_annotation_body</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">annotation_body</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotation_body</span> <span class="o">=</span> <span class="n">annotation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_annotation_body</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -798,10 +710,10 @@
              <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
              <span class="n">duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span>
              <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">annotation_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_body</span><span class="p">,</span>
-            <span class="n">notes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
-            <span class="n">locked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span><span class="p">,</span>
-            <span class="n">media_objects</span> <span class="o">=</span> <span class="n">media_objects</span>
+             <span class="n">annotation_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_body</span><span class="p">,</span>
+             <span class="n">notes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">,</span>
+             <span class="n">locked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">locked</span><span class="p">,</span>
+             <span class="n">media_objects</span> <span class="o">=</span> <span class="n">media_objects</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span>
 
@@ -815,39 +727,31 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;notes&#39;</span><span class="p">]</span>
 
-        <span class="c1"># Name has been introduced in 0.4.14</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Backwards Compatibility</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;locked&#39;</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;locked&#39;</span><span class="p">]</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;annotation_body&#39;</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">annotation_body</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;annotation_body&#39;</span><span class="p">]</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">annotation_body</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
-        <span class="c1"># try:</span>
-        <span class="c1">#     for w in serialization[&quot;words&quot;]:</span>
-        <span class="c1">#         word = self.project.get_by_id(w)</span>
-        <span class="c1">#         if word is not None:</span>
-        <span class="c1">#             self.add_word(self.project.get_by_id(w))</span>
-        <span class="c1">#</span>
-        <span class="c1"># except Exception as e:</span>
-        <span class="c1">#     print(e)</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s2">&quot;media_objects&quot;</span><span class="p">]:</span>
                 <span class="n">o_type</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">o_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MediaObjectType</span><span class="o">.</span><span class="n">HYPERLINK</span><span class="p">,</span> <span class="n">MediaObjectType</span><span class="o">.</span><span class="n">SOURCE</span><span class="p">]:</span>
-                    <span class="n">new</span> <span class="o">=</span> <span class="n">DataMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
-
+                    <span class="n">new</span> <span class="o">=</span> <span class="n">DataMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">new</span> <span class="o">=</span> <span class="n">FileMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+                    <span class="n">new</span> <span class="o">=</span> <span class="n">FileMediaObject</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+                <span class="n">new</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">media_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
@@ -859,6 +763,7 @@
 
     <span class="k">def</span> <span class="nf">set_timeline_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visibility</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeline_visibility</span> <span class="o">=</span> <span class="n">visibility</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onSegmentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_timeline_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -872,9 +777,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -883,11 +786,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -900,37 +803,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

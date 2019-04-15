@@ -17,43 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Step-by-Step Guides" href="../step_by_step.html"/>
-        <link rel="next" title="VIAN’s Player" href="../player/player.html"/>
-        <link rel="prev" title="All Analyses of VIAN" href="../analyses/analyses_list.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="VIAN’s Player" href="../player/player.html" />
+    <link rel="prev" title="All Analyses of VIAN" href="../analyses/analyses_list.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -241,7 +234,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">VIAN</a>
@@ -249,9 +242,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -307,7 +301,7 @@ this data by specific properties.
 An experiment consists of a set of rules about how and which data should be classified. It defines which data should
 be classified by which <strong>Vocabularies</strong> and which <strong>Classification Objects</strong>.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p><strong>Following Example should elaborate the concept:</strong>
 Bob has just segmented a film called “Alice in Wonderland” into temporal segments in the segmentation called “Main Segmentation”
 and now wants to classify them by two attributes: If the color of a segment is saturated or desaturated
@@ -320,23 +314,21 @@ supporting actors, he want’s to classify them seperately.
 He would thus create two <strong>Classification Objects</strong> “Protagonist” and “Support” and classify both by the vocabulary
 “Saturation”. He then creates a third Classification Object “Global” for the emotion since it is not focused on the
 protagonist in his case.</p>
-<p class="last">Finally he would set for all three classification objects to target his “Main Segmentation”.
+<p>Finally he would set for all three classification objects to target his “Main Segmentation”.
 VIAN will now create a questionnaire for all segments, which he can classify.</p>
 </div>
 <div class="toctree-wrapper compound">
 </div>
 <ul class="simple">
-<li><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -345,7 +337,7 @@ VIAN will now create a questionnaire for all segments, which he can classify.</p
         <a href="../player/player.html" class="btn btn-neutral float-right" title="VIAN’s Player" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../analyses/analyses_list.html" class="btn btn-neutral" title="All Analyses of VIAN" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../analyses/analyses_list.html" class="btn btn-neutral float-left" title="All Analyses of VIAN" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -354,11 +346,11 @@ VIAN will now create a questionnaire for all segments, which he can classify.</p
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -371,37 +363,15 @@ VIAN will now create a questionnaire for all segments, which he can classify.</p
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

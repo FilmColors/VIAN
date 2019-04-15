@@ -1,0 +1,521 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Computation Module &mdash; VIAN 0.4.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> VIAN
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../UserGuide.html">User’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../user_interface/user_interface.html">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/inspector.html">Inspector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/outliner.html">Outliner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/perspectives.html">Perspectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#player-perspective">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#id1">Player Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#screenshots-perspective">Screenshots Perspective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../user_interface/perspectives.html#node-scripting-perspective">Node Scripting Perspective</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_interface/timeline.html">Timeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../step_by_step/step_by_step.html">Step-by-Step Guides</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/project_management/project_management.html">Vian Projects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/project_management/create_project.html">Creating new Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/project_management/project_templates.html">Project Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/project_management/import_elan_projects.html">Importing ELAN Projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/project_management/changing_movie_paths.html">Changing Movie Paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/project_management/backups.html">Backups</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/segmentation/segmentation.html">Segmentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/create_segmentation.html">Creating Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/create_segment.html">Creating Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/cutting_segments.html">Cutting Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/merging_segments.html">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/changing_main_segmentation.html">Changing the Main Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/locking_segmentations.html">Locking Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/exporting_segmentations.html">Exporting Segmentations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/segmentation/auto_segmentation.html">Auto Segmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/annotation/annotation.html">Annotations</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/screenshots/screenshots.html">Screenshots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/screenshots/create_screenshot.html">Creating a Screenshot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/screenshots/import_screenshots.html">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/screenshots/export_screenshots.html">Exporting Screenshots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/analyses/analyses.html">Analyses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/analyses/running_analyses.html">Running Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/analyses/viewing_analyses.html">Viewing Analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/analyses/colormetry.html">Colormetry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/analyses/analyses_list.html">All Analyses of VIAN</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/experiments/experiments.html">Experiments</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/player/player.html">VIAN’s Player</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../step_by_step/player/changing_subtitles.html">Changing Subtitles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../step_by_step/vian_corpus/vian_corpus.html">VIAN Corpus</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../plugins/plugins.html">Plugins</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../plugins/imdb_finder/imdb_finder.html">IMDb Finder</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../DevelopersGuide.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analyses.html">IAnalysisJob</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../analyses.html#functionality">Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analyses.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../nodes.html">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins.html">Plug-Ins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/latest.html">VIAN 0.5.0 - 0.5.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/latest.html#attaching-files-to-annotations-and-segments">Attaching Files to Annotations and Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whats_new/latest.html#automatic-segmentation">Automatic Segmentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whats_new/latest.html#merging-segments">Merging Segments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whats_new/latest.html#importing-screenshots">Importing Screenshots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whats_new/latest.html#feature-plots">Feature Plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whats_new/latest.html#sub-corpora">Sub Corpora</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whats_new/latest.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whats_new/latest.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html">VIAN 0.4.5 - 0.4.7</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#analyses-visualization">Analyses - Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#analyses-mosaic-vis">Analyses - Mosaic Vis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#backups">Backups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#cutting-segments">Cutting Segments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#extensive-list">Extensive List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_5/0_4_5.html#hot-fixes">Hot-Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html">VIAN 0.4.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#perspectives">Perspectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#changing-the-video-source">Changing the Video-Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#annotation-are-time-independent-from-their-layer">Annotation are Time-Independent from their Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../whats_new/0_4_2/0_4_2.html#extensive-list">Extensive List</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">VIAN</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>Computation Module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/dev_guide/data/enums.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-core.data.computation">
+<span id="computation-module"></span><span id="computation"></span><h1>Computation Module<a class="headerlink" href="#module-core.data.computation" title="Permalink to this headline">¶</a></h1>
+<p>The Computation Module contains a list of often used operations in VIAN.
+These operations can be of arbitrary type and are not categorized.</p>
+<dl class="function">
+<dt id="core.data.computation.blend_transparent">
+<code class="descclassname">core.data.computation.</code><code class="descname">blend_transparent</code><span class="sig-paren">(</span><em>background</em>, <em>foreground</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#blend_transparent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.blend_transparent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alpha blending of to images
+:param background: foreground with alpha
+:param foreground: background with no alpha
+:return: a blended image</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.cart2pol">
+<code class="descclassname">core.data.computation.</code><code class="descname">cart2pol</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#cart2pol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.cart2pol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts two dimensional cartesian coordinates to polar coordinates
+:param x: 
+:param y: 
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.convertQImageToMat">
+<code class="descclassname">core.data.computation.</code><code class="descname">convertQImageToMat</code><span class="sig-paren">(</span><em>qimage</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#convertQImageToMat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.convertQImageToMat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a QImage into an opencv MAT format</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.frame2ms">
+<code class="descclassname">core.data.computation.</code><code class="descname">frame2ms</code><span class="sig-paren">(</span><em>frame</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#frame2ms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.frame2ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Frame IDX to MS
+:param frame: THE Frame IDX
+:param fps: FPS of the Film
+:return: Milliseconds of the Frame IDX</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.get_mouse_handle_by_location">
+<code class="descclassname">core.data.computation.</code><code class="descname">get_mouse_handle_by_location</code><span class="sig-paren">(</span><em>pos</em>, <em>rect</em>, <em>border_size=0.1</em>, <em>corner_size=0.1</em>, <em>min_size=40</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#get_mouse_handle_by_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.get_mouse_handle_by_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a String of where the mouse is regarding to some center</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> – </p></li>
+<li><p><strong>rect</strong> – </p></li>
+<li><p><strong>border_size</strong> – </p></li>
+<li><p><strong>corner_size</strong> – </p></li>
+<li><p><strong>min_size</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.images_to_movie">
+<code class="descclassname">core.data.computation.</code><code class="descname">images_to_movie</code><span class="sig-paren">(</span><em>imgs</em>, <em>out_file</em>, <em>time_scale=180</em>, <em>fps=30.0</em>, <em>size=(640</em>, <em>480)</em>, <em>codec='DIVX'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#images_to_movie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.images_to_movie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a movie from a list of numpy images
+:param imgs: a list of numpy images
+:param out_file: the name of the output file
+:param time_scale: How often an image should be repeated before the next one is drawn
+:param fps: the FPS of the movie
+:param size: the size of the movie
+:param codec: the Codec
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.labels_to_binary_mask">
+<code class="descclassname">core.data.computation.</code><code class="descname">labels_to_binary_mask</code><span class="sig-paren">(</span><em>multi_mask</em>, <em>labels</em>, <em>as_bool=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#labels_to_binary_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.labels_to_binary_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Label Mask to a binary mask with all indices that have a value which is in labels are set to True
+else 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multi_mask</strong> – </p></li>
+<li><p><strong>labels</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.ms_to_frames">
+<code class="descclassname">core.data.computation.</code><code class="descname">ms_to_frames</code><span class="sig-paren">(</span><em>time</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#ms_to_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.ms_to_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts Miliseconds to Frames
+:param time: Time MS
+:param fps: FPS of the Film
+:return: returns a FRAME IDX</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.ms_to_string">
+<code class="descclassname">core.data.computation.</code><code class="descname">ms_to_string</code><span class="sig-paren">(</span><em>ms</em>, <em>include_ms=False</em>, <em>include_frame=False</em>, <em>fps=24</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#ms_to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.ms_to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an Long int MS to a formatted string of type HH:MM:SS:(MS)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ms</strong> – the ms to convert</p></li>
+<li><p><strong>include_ms</strong> – if the MS should be included at the end of the string</p></li>
+<li><p><strong>include_frame</strong> – if the frame should be included at the end</p></li>
+<li><p><strong>fps</strong> – the fps of the movie to convert the frame if needed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string of selected format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.numpy_to_pixmap">
+<code class="descclassname">core.data.computation.</code><code class="descname">numpy_to_pixmap</code><span class="sig-paren">(</span><em>arr</em>, <em>cvt=4</em>, <em>target_width=None</em>, <em>with_alpha=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#numpy_to_pixmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.numpy_to_pixmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Numpy Image array to a QPixmap
+:param arr: The nUmpy array 
+:param cvt: A OpenCV Convertion if needed else NONE
+:param target_width: The width of the final Image
+:param with_alpha: if the alpha should be included
+:return: QPixmap</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.numpy_to_qt_image">
+<code class="descclassname">core.data.computation.</code><code class="descname">numpy_to_qt_image</code><span class="sig-paren">(</span><em>arr</em>, <em>cvt=4</em>, <em>target_width=None</em>, <em>with_alpha=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#numpy_to_qt_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.numpy_to_qt_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Numpy Image array to a QTImage
+:param arr: The nUmpy array 
+:param cvt: A OpenCV Convertion if needed else NONE
+:param target_width: The width of the final Image
+:param with_alpha: if the alpha should be included
+:return: (qimage, qpixmap) tuple</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.overlap_rect">
+<code class="descclassname">core.data.computation.</code><code class="descname">overlap_rect</code><span class="sig-paren">(</span><em>r1</em>, <em>r2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#overlap_rect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.overlap_rect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlapping rectangles overlap both horizontally &amp; vertically</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.pixmap_to_numpy">
+<code class="descclassname">core.data.computation.</code><code class="descname">pixmap_to_numpy</code><span class="sig-paren">(</span><em>pixmap: PyQt5.QtGui.QPixmap</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#pixmap_to_numpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.pixmap_to_numpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Pixmap to a numpy array
+:param pixmap: the Pixmap
+:return: a numpy array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.rotate">
+<code class="descclassname">core.data.computation.</code><code class="descname">rotate</code><span class="sig-paren">(</span><em>origin</em>, <em>point</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate a point counterclockwise by a given angle around a given origin.</p>
+<p>The angle should be given in radians.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.tpl_bgr_to_lab">
+<code class="descclassname">core.data.computation.</code><code class="descname">tpl_bgr_to_lab</code><span class="sig-paren">(</span><em>bgr</em>, <em>as_float=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#tpl_bgr_to_lab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.tpl_bgr_to_lab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a BGR Color Tuple to a uint8 Lab Color Tuple using OpenCV Conversion.
+:param tpl: Input Tuple BGR
+:return: Output Tuple Lab</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.tpl_bgr_to_lch">
+<code class="descclassname">core.data.computation.</code><code class="descname">tpl_bgr_to_lch</code><span class="sig-paren">(</span><em>tpl</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#tpl_bgr_to_lch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.tpl_bgr_to_lch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a BGR Color Tuple to a float32 Lab Color Tuple using OpenCV Conversion.
+:param tpl: Input Tuple BGR
+:return: Output Tuple LCH, float32</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.ts_to_ms">
+<code class="descclassname">core.data.computation.</code><code class="descname">ts_to_ms</code><span class="sig-paren">(</span><em>hour=0</em>, <em>min=0</em>, <em>sec=0</em>, <em>ms=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/core/data/computation.html#ts_to_ms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.ts_to_ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Timestamp to miliseconds
+:param hour: The given hours
+:param min: The given minutes
+:param sec: The given Seconds
+:param ms: The fiven MS
+:return: A int long MS</p>
+</dd></dl>
+
+<ul class="simple">
+<li><p><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>search`cd _docs</p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Gaudenz Halter
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

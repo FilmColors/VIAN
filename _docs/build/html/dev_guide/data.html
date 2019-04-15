@@ -17,43 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../index.html"/>
-        <link rel="up" title="Developer’s Guide" href="../DevelopersGuide.html"/>
-        <link rel="next" title="What’s New" href="../whatsnew.html"/>
-        <link rel="prev" title="Segmentation Module" href="containers/segmentation.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="What’s New" href="../whatsnew.html" />
+    <link rel="prev" title="Segmentation Module" href="containers/segmentation.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -241,7 +234,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">VIAN</a>
@@ -249,9 +242,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -313,6 +307,15 @@ These operations can be of arbitrary type and are not categorized.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="core.data.computation.cart2pol">
+<code class="descclassname">core.data.computation.</code><code class="descname">cart2pol</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#cart2pol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.cart2pol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts two dimensional cartesian coordinates to polar coordinates
+:param x: 
+:param y: 
+:return:</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="core.data.computation.convertQImageToMat">
 <code class="descclassname">core.data.computation.</code><code class="descname">convertQImageToMat</code><span class="sig-paren">(</span><em>qimage</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#convertQImageToMat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.convertQImageToMat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a QImage into an opencv MAT format</p>
@@ -331,24 +334,51 @@ These operations can be of arbitrary type and are not categorized.</p>
 <dt id="core.data.computation.get_mouse_handle_by_location">
 <code class="descclassname">core.data.computation.</code><code class="descname">get_mouse_handle_by_location</code><span class="sig-paren">(</span><em>pos</em>, <em>rect</em>, <em>border_size=0.1</em>, <em>corner_size=0.1</em>, <em>min_size=40</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#get_mouse_handle_by_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.get_mouse_handle_by_location" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a String of where the mouse is regarding to some center</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pos</strong> – </li>
-<li><strong>rect</strong> – </li>
-<li><strong>border_size</strong> – </li>
-<li><strong>corner_size</strong> – </li>
-<li><strong>min_size</strong> – </li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> – </p></li>
+<li><p><strong>rect</strong> – </p></li>
+<li><p><strong>border_size</strong> – </p></li>
+<li><p><strong>corner_size</strong> – </p></li>
+<li><p><strong>min_size</strong> – </p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.images_to_movie">
+<code class="descclassname">core.data.computation.</code><code class="descname">images_to_movie</code><span class="sig-paren">(</span><em>imgs</em>, <em>out_file</em>, <em>time_scale=180</em>, <em>fps=30.0</em>, <em>size=(640</em>, <em>480)</em>, <em>codec='DIVX'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#images_to_movie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.images_to_movie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a movie from a list of numpy images
+:param imgs: a list of numpy images
+:param out_file: the name of the output file
+:param time_scale: How often an image should be repeated before the next one is drawn
+:param fps: the FPS of the movie
+:param size: the size of the movie
+:param codec: the Codec
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.data.computation.labels_to_binary_mask">
+<code class="descclassname">core.data.computation.</code><code class="descname">labels_to_binary_mask</code><span class="sig-paren">(</span><em>multi_mask</em>, <em>labels</em>, <em>as_bool=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#labels_to_binary_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.labels_to_binary_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Label Mask to a binary mask with all indices that have a value which is in labels are set to True
+else 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multi_mask</strong> – </p></li>
+<li><p><strong>labels</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -364,23 +394,19 @@ These operations can be of arbitrary type and are not categorized.</p>
 <dt id="core.data.computation.ms_to_string">
 <code class="descclassname">core.data.computation.</code><code class="descname">ms_to_string</code><span class="sig-paren">(</span><em>ms</em>, <em>include_ms=False</em>, <em>include_frame=False</em>, <em>fps=24</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#ms_to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.ms_to_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts an Long int MS to a formatted string of type HH:MM:SS:(MS)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ms</strong> – the ms to convert</li>
-<li><strong>include_ms</strong> – if the MS should be included at the end of the string</li>
-<li><strong>include_frame</strong> – if the frame should be included at the end</li>
-<li><strong>fps</strong> – the fps of the movie to convert the frame if needed</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ms</strong> – the ms to convert</p></li>
+<li><p><strong>include_ms</strong> – if the MS should be included at the end of the string</p></li>
+<li><p><strong>include_frame</strong> – if the frame should be included at the end</p></li>
+<li><p><strong>fps</strong> – the fps of the movie to convert the frame if needed</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A string of selected format</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string of selected format</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -406,6 +432,12 @@ These operations can be of arbitrary type and are not categorized.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="core.data.computation.overlap_rect">
+<code class="descclassname">core.data.computation.</code><code class="descname">overlap_rect</code><span class="sig-paren">(</span><em>r1</em>, <em>r2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#overlap_rect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.overlap_rect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlapping rectangles overlap both horizontally &amp; vertically</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="core.data.computation.pixmap_to_numpy">
 <code class="descclassname">core.data.computation.</code><code class="descname">pixmap_to_numpy</code><span class="sig-paren">(</span><em>pixmap: PyQt5.QtGui.QPixmap</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#pixmap_to_numpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.pixmap_to_numpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a Pixmap to a numpy array
@@ -414,8 +446,15 @@ These operations can be of arbitrary type and are not categorized.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="core.data.computation.rotate">
+<code class="descclassname">core.data.computation.</code><code class="descname">rotate</code><span class="sig-paren">(</span><em>origin</em>, <em>point</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate a point counterclockwise by a given angle around a given origin.</p>
+<p>The angle should be given in radians.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="core.data.computation.tpl_bgr_to_lab">
-<code class="descclassname">core.data.computation.</code><code class="descname">tpl_bgr_to_lab</code><span class="sig-paren">(</span><em>bgr</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#tpl_bgr_to_lab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.tpl_bgr_to_lab" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">core.data.computation.</code><code class="descname">tpl_bgr_to_lab</code><span class="sig-paren">(</span><em>bgr</em>, <em>as_float=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/computation.html#tpl_bgr_to_lab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.computation.tpl_bgr_to_lab" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a BGR Color Tuple to a uint8 Lab Color Tuple using OpenCV Conversion.
 :param tpl: Input Tuple BGR
 :return: Output Tuple Lab</p>
@@ -454,6 +493,13 @@ These operations can be of arbitrary type and are not categorized.</p>
 <dt id="core.data.enums.AspectRatio">
 <em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">AspectRatio</code><a class="reference internal" href="../_modules/core/data/enums.html#AspectRatio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.AspectRatio" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enumeration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.enums.DataSerialization">
+<em class="property">class </em><code class="descclassname">core.data.enums.</code><code class="descname">DataSerialization</code><a class="reference internal" href="../_modules/core/data/enums.html#DataSerialization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.enums.DataSerialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>This Enum defines how an object is stored in the sqlite file of the Project. 
+see :module:~’core.data.project_streaming.SQLiteStreamer’</p>
 </dd></dl>
 
 <dl class="class">
@@ -518,67 +564,45 @@ These operations can be of arbitrary type and are not categorized.</p>
 <dt id="core.data.exporters.build_file_name">
 <code class="descclassname">core.data.exporters.</code><code class="descname">build_file_name</code><span class="sig-paren">(</span><em>naming</em>, <em>screenshot</em>, <em>movie_descriptor</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/exporters.html#build_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.exporters.build_file_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a Filename for the Screenshots by a given naming convention</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>naming</strong> – </li>
-<li><strong>screenshot</strong> – </li>
-<li><strong>movie_descriptor</strong> – </li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>naming</strong> – </p></li>
+<li><p><strong>screenshot</strong> – </p></li>
+<li><p><strong>movie_descriptor</strong> – </p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<span class="target" id="module-core.data.headless"></span><p>This Module enables a headless opening and closing of VIANProjects, 
-this it can be used to perform operations in a batch process without having the gui enabled.</p>
-<dl class="function">
-<dt id="core.data.headless.create_project_headless">
-<code class="descclassname">core.data.headless.</code><code class="descname">create_project_headless</code><span class="sig-paren">(</span><em>name</em>, <em>location</em>, <em>movie_path</em>, <em>screenshots_frame_pos=None</em>, <em>segmentations=None</em>, <em>move_movie='None'</em><span class="sig-paren">)</span> &#x2192; core.container.project.VIANProject<a class="reference internal" href="../_modules/core/data/headless.html#create_project_headless"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.headless.create_project_headless" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a VIANProject without the need of a MainWindow
-:param name: name of the project
-:param movie_path: path to the movie
-:param screenshots_frame_pos: a list of frame positions for the screenshots
-:param segmentations: a list of lists [name, [segments]], each containing [start_ms, end_ms, body]
-:param is_eaf: if the segmentation is a .eaf project
-:param move_movie: how to handle the movie file “None”, “move” or “copy”
-:return: a VIANProject created from the input or None if failed</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.data.headless.load_project_headless">
-<code class="descclassname">core.data.headless.</code><code class="descname">load_project_headless</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span> &#x2192; core.container.project.VIANProject<a class="reference internal" href="../_modules/core/data/headless.html#load_project_headless"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.headless.load_project_headless" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads a VIAN project without needing a VIAN instance running by emulating VIAN. 
-:param path: The path to the project to load
-:return: a loaded VIANProject or None if failed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <span class="target" id="module-core.data.interfaces"></span><p>In this Module, all interfaces used by VIAN are defined.</p>
 <dl class="class">
 <dt id="core.data.interfaces.IAnalysisJob">
-<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">IAnalysisJob</code><span class="sig-paren">(</span><em>name</em>, <em>source_types</em>, <em>help_path=''</em>, <em>author='No Author'</em>, <em>version='0.0.1'</em>, <em>multiple_result=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">IAnalysisJob</code><span class="sig-paren">(</span><em>name</em>, <em>source_types</em>, <em>dataset_name</em>, <em>dataset_shape</em>, <em>dataset_dtype</em>, <em>help_path=''</em>, <em>author='No Author'</em>, <em>version='0.0.1'</em>, <em>multiple_result=False</em>, <em>data_serialization=&lt;DataSerialization.JSON: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the BaseClass for all Analyses. 
 Subclass it to implement your own Analyses.</p>
 <dl class="method">
-<dt id="core.data.interfaces.IAnalysisJob.from_database">
-<code class="descname">from_database</code><span class="sig-paren">(</span><em>database_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.from_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.from_database" title="Permalink to this definition">¶</a></dt>
+<dt id="core.data.interfaces.IAnalysisJob.deserialize">
+<code class="descname">deserialize</code><span class="sig-paren">(</span><em>data_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.deserialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.deserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this Method if there needs to be a custom deserialization
+:param data_dict: 
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.from_json">
+<code class="descname">from_json</code><span class="sig-paren">(</span><em>database_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>The inverse of the to_database() implementation.</p>
 <p>For numpy arrays:
 numpy_array = numpy.fromstring(byte_array)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -586,14 +610,11 @@ numpy_array = numpy.fromstring(byte_array)</p>
 <code class="descname">get_parameter_widget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_parameter_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_parameter_widget" title="Permalink to this definition">¶</a></dt>
 <dd><p>If your Analysis has additional parameters which can be set by the User, Subclass the ParameterWidget, 
 and return it in this Function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Subclass of ParameterWidget</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A Subclass of ParameterWidget</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -604,16 +625,14 @@ Inspector, when the Analysis is selected.</p>
 <p>Make sure, that the creation of this widget should be fast.
 Easiest would be to render your data into an Image, convert it into a qpixamp and 
 attach it to a QLabel using QLabel(your_pixmap).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A QWidget serving as a preview</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A QWidget serving as a preview</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -629,9 +648,8 @@ attach it to a QLabel using QLabel(your_pixmap).</p>
 <dd><p>This function is called by VIAN if the User wants to display the complete Visualization of the Data. 
 While you may essentially use any type Type of Visualization, you should either:</p>
 <ol class="arabic">
-<li><p class="first">subclass QMainWindow and implement your visualization into it.</p>
-</li>
-<li><p class="first">if you use a WebBased visualization use</p>
+<li><p>subclass QMainWindow and implement your visualization into it.</p></li>
+<li><p>if you use a WebBased visualization use</p>
 <blockquote>
 <div><p>save your visualitations into the results/ directory of the project
 during the IAnalysisJob.modify_project() or IAnalysisJob.process()</p>
@@ -642,22 +660,18 @@ webbrowser.open(url/to/your/result.html)</p>
 </li>
 </ol>
 <p>When using a QMainWindow, don’t forget to call QMainWindow.show() at the end of your __init__()</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</li>
-<li><strong>result_path</strong> – The Path to the results directory of the project</li>
-<li><strong>data_path</strong> – The Path to the data directory of the project</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</p></li>
+<li><p><strong>result_path</strong> – The Path to the results directory of the project</p></li>
+<li><p><strong>data_path</strong> – The Path to the data directory of the project</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A QWidget which will be added to the Visualizations Tab</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A QWidget which will be added to the Visualizations Tab</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -665,45 +679,38 @@ webbrowser.open(url/to/your/result.html)</p>
 <code class="descname">modify_project</code><span class="sig-paren">(</span><em>project</em>, <em>result</em>, <em>main_window=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.modify_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.modify_project" title="Permalink to this definition">¶</a></dt>
 <dd><p>If your Analysis should perform any modifications to the project, except storing the analysis,
 this is the place to perform them.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>project</strong> – The Current Project to perform modifications on</li>
-<li><strong>result</strong> – The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project</strong> – The Current Project to perform modifications on</p></li>
+<li><p><strong>result</strong> – The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="core.data.interfaces.IAnalysisJob.prepare">
-<code class="descname">prepare</code><span class="sig-paren">(</span><em>project</em>, <em>targets</em>, <em>parameters</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.prepare" title="Permalink to this definition">¶</a></dt>
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>project</em>, <em>targets</em>, <em>parameters</em>, <em>fps</em>, <em>class_objs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><p>A step that should be performed in the main-thread before the processing takes place. 
 This is a good point to fetch all necessary data from the project and pack it to your needs.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>project</strong> – The current Project</li>
-<li><strong>targets</strong> – The Target IProjectContainer Objects</li>
-<li><strong>parameters</strong> – Additional Parameters as returned from your ParameterWidget.get_parameters()</li>
-<li><strong>fps</strong> – The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project</strong> – The current Project</p></li>
+<li><p><strong>targets</strong> – The Target IProjectContainer Objects</p></li>
+<li><p><strong>parameters</strong> – Additional Parameters as returned from your ParameterWidget.get_parameters()</p></li>
+<li><p><strong>fps</strong> – The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)</p></li>
+<li><p><strong>class_objs</strong> – The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A List of packed Data which will be handed to the IAnalysisJob.process()</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A List of packed Data which will be handed to the IAnalysisJob.process()</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -715,38 +722,80 @@ Make sure to <strong>NOT</strong> use the ProjectContainers within this Operatio
 <p><em>Example</em>:
 progress is a number E [0.0, … , 1.0]
 sign_progress(0.5)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>args</strong> – the Arguments as packed in IAnalysisJob.prepare()</li>
-<li><strong>sign_progress</strong> – a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – the Arguments as packed in IAnalysisJob.prepare()</p></li>
+<li><p><strong>sign_progress</strong> – a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">AnalysisJobAnalysis Object</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>AnalysisJobAnalysis Object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="core.data.interfaces.IAnalysisJob.to_database">
-<code class="descname">to_database</code><span class="sig-paren">(</span><em>container_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.to_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.to_database" title="Permalink to this definition">¶</a></dt>
+<dt id="core.data.interfaces.IAnalysisJob.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>data_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.serialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this Method if there needs to be a custom serialization
+:param data_dict: 
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><em>container_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.to_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base Method which should return a dict of byte serialized 
 nump arrays if necessary, or a dict of simple key value pairs.</p>
 <p>For numpy arrays use following: 
 byte_array = numpy_array.tostring()</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.data.interfaces.IProjectContainer">
+<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">IProjectContainer</code><a class="reference internal" href="../_modules/core/data/interfaces.html#IProjectContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IProjectContainer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="core.data.interfaces.IProjectContainer.copy_event">
+<code class="descname">copy_event</code><span class="sig-paren">(</span><em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IProjectContainer.copy_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IProjectContainer.copy_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>This Event is raised when the user wants to copy this container into some. 
+:param containers: 
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IProjectContainer.get_connected_analysis">
+<code class="descname">get_connected_analysis</code><span class="sig-paren">(</span><em>class_type=None</em>, <em>as_clobj_dict=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IProjectContainer.get_connected_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IProjectContainer.get_connected_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a List of AnalysesResults that are of class_type, and attached to this container</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>class_type</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IProjectContainer.save_delete">
+<code class="descname">save_delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IProjectContainer.save_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IProjectContainer.save_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is called in the GUI and is ment to wrap the self.delete() function, such 
+that the a GUI event can be raised if necessary, for example if the delete should raise a warning of 
+unexpected bevhaviour for the user.</p>
+<p>If not overriden, it calls the delete() function directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -761,14 +810,11 @@ desired form.</p>
 <dt id="core.data.interfaces.ParameterWidget.get_parameters">
 <code class="descname">get_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#ParameterWidget.get_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.ParameterWidget.get_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is called on_analyse, bundles your parameters and hands them to the IAnalysisJob.process()</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A List of Parameters</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A List of Parameters</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -803,18 +849,16 @@ desired form.</p>
 </dd></dl>
 
 <ul class="simple">
-<li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li>:ref:<a href="#id2"><span class="problematic" id="id3">`</span></a>search`cd _docs</li>
+<li><p><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p>:ref:<a href="#id2"><span class="problematic" id="id3">`</span></a>search`cd _docs</p></li>
 </ul>
 </div>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -823,7 +867,7 @@ desired form.</p>
         <a href="../whatsnew.html" class="btn btn-neutral float-right" title="What’s New" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="containers/segmentation.html" class="btn btn-neutral" title="Segmentation Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="containers/segmentation.html" class="btn btn-neutral float-left" title="Segmentation Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -832,11 +876,11 @@ desired form.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -849,37 +893,15 @@ desired form.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

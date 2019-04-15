@@ -17,41 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -239,7 +232,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">VIAN</a>
@@ -247,9 +240,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -279,8 +273,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -294,11 +286,35 @@
   <h1>Source code for core.container.experiment</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="nn">core.container.analysis</span> <span class="k">import</span> <span class="n">AnalysisContainer</span><span class="p">,</span> <span class="n">AnalysisParameters</span>
+<span class="kn">from</span> <span class="nn">core.container.analysis</span> <span class="k">import</span> <span class="n">AnalysisContainer</span>
 <span class="kn">from</span> <span class="nn">core.data.enums</span> <span class="k">import</span> <span class="n">VOCABULARY</span><span class="p">,</span> <span class="n">VOCABULARY_WORD</span><span class="p">,</span> <span class="n">CLASSIFICATION_OBJECT</span><span class="p">,</span> <span class="n">EXPERIMENT</span><span class="p">,</span> <span class="n">SEGMENTATION</span><span class="p">,</span> \
-    <span class="n">ANNOTATION_LAYER</span><span class="p">,</span> <span class="n">SCREENSHOT_GROUP</span>
+    <span class="n">ANNOTATION_LAYER</span><span class="p">,</span> <span class="n">SCREENSHOT_GROUP</span><span class="p">,</span> <span class="n">SEGMENT</span>
 <span class="kn">from</span> <span class="nn">core.data.interfaces</span> <span class="k">import</span> <span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">,</span> <span class="n">IClassifiable</span>
 <span class="kn">from</span> <span class="nn">core.gui.vocabulary</span> <span class="k">import</span> <span class="n">VocabularyItem</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="k">import</span> <span class="n">pyqtSignal</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="k">import</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QPushButton</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="delete_even_if_connected_msgbox"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.delete_even_if_connected_msgbox">[docs]</a><span class="k">def</span> <span class="nf">delete_even_if_connected_msgbox</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shows a Question dialog if a given keyword should be removed even if it has already been </span>
+<span class="sd">    used in the classification.</span>
+
+<span class="sd">    :param mode: &quot;voc&quot; or &quot;word&quot; </span>
+<span class="sd">    :return: an QMessageBox.Answer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;word&quot;</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;This Keyword has already been connected used to classify, removing it from the vocabulary &#39;</span>
+        <span class="s1">&#39;also removes it from the classification. Do you want to remove it anyway?&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;This Vocabulary contains keywords which have already been used to classify, removing the vocabulary&#39;</span>
+        <span class="s1">&#39;also removes the classification already done. Do you want to remove it anyway?&#39;</span>
+
+    <span class="n">answer</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Warning&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">answer</span></div>
+
 
 <div class="viewcode-block" id="Vocabulary"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.Vocabulary">[docs]</a><span class="k">class</span> <span class="nc">Vocabulary</span><span class="p">(</span><span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -309,9 +325,10 @@
 <span class="sd">    :var words_plain: A List of All VocabularyWords that are in the Vocabulary</span>
 <span class="sd">    :var was_expanded: If it is expandend in the VocabularyManager</span>
 <span class="sd">    :var category: The Category it belongs to</span>
-<span class="sd">    :var derived_vocabulary: OBSOLETE</span>
-<span class="sd">    :var base_vocabulary: OBSOLETE</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onVocabularyChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onVocabularyWordAdded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onVocabularyWordRemoved</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">IProjectContainer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -322,10 +339,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">was_expanded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">derived_vocabulary</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># TODO OBSOLETE</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">base_vocabulary</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># TODO OBSOLETE</span>
-
     <span class="k">def</span> <span class="nf">create_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent_word</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unique_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dispatch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">words_plain</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Duplicate Word&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
         <span class="n">word</span> <span class="o">=</span> <span class="n">VocabularyWord</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">vocabulary</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">word</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="n">unique_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_word</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">parent_word</span><span class="p">,</span> <span class="n">dispatch</span><span class="p">)</span>
@@ -355,12 +372,24 @@
                 <span class="n">word</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dispatch</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVocabularyWordAdded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">word</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">remove_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">dispatch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Vocabulary.remove_word"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.Vocabulary.remove_word">[docs]</a>    <span class="k">def</span> <span class="nf">remove_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">dispatch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a word from the vocabulary, cleans up all references to this word.</span>
+
+<span class="sd">        :param word:</span>
+<span class="sd">        :param dispatch:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">word</span><span class="o">.</span><span class="n">get_children_plain</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
 
+        <span class="c1"># Remove all unique keywords attached to this VocabularyWord</span>
+        <span class="n">word</span><span class="o">.</span><span class="n">cleanup_referenced_keywords</span><span class="p">()</span>
+
+        <span class="c1"># Remove all children if nesseary</span>
         <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">words_plain</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 
@@ -376,7 +405,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">remove_from_id_list</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dispatch</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_on_changed</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVocabularyWordRemoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">word</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">get_word_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">words_plain</span><span class="p">:</span>
@@ -407,22 +438,19 @@
                 <span class="n">name</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">unique_id</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
                 <span class="n">parent</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
-                <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">unique_id</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">children</span><span class="p">]</span>
+                <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">unique_id</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">children</span><span class="p">],</span>
+                <span class="n">organization_group</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">organization_group</span><span class="p">,</span>
+                <span class="n">complexity_lvl</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">complexity_lvl</span><span class="p">,</span>
+                <span class="n">complexity_group</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">complexity_group</span>
             <span class="p">)</span>
             <span class="n">words_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_vocabulary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_vocabulary</span><span class="o">.</span><span class="n">unique_id</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="n">voc_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">category</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
             <span class="n">unique_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
             <span class="n">words</span> <span class="o">=</span> <span class="n">words_data</span><span class="p">,</span>
-            <span class="n">derived</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derived_vocabulary</span><span class="p">,</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="n">base</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">voc_data</span>
@@ -436,26 +464,33 @@
             <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">])</span>
             <span class="c1"># If this is a root node in the Vocabulary</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">Vocabulary</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">create_word</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">unique_id</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">],</span> <span class="n">dispatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">word</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_word</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">unique_id</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">],</span> <span class="n">dispatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+                <span class="c1"># Fields introduced in 0.8.0</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">word</span><span class="o">.</span><span class="n">complexity_lvl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;complexity_lvl&#39;</span><span class="p">])</span>
+                    <span class="n">word</span><span class="o">.</span><span class="n">organization_group</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;organization_group&#39;</span><span class="p">])</span>
+                    <span class="n">word</span><span class="o">.</span><span class="n">complexity_group</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;complexity_group&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">create_word</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">parent</span><span class="p">,</span> <span class="n">unique_id</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">],</span> <span class="n">dispatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="c1"># Fields introduced in 0.8.0</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">word</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_word</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">parent</span><span class="p">,</span> <span class="n">unique_id</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">],</span> <span class="n">dispatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">word</span><span class="o">.</span><span class="n">complexity_lvl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;complexity_lvl&#39;</span><span class="p">])</span>
+                    <span class="n">word</span><span class="o">.</span><span class="n">organization_group</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s1">&#39;organization_group&#39;</span><span class="p">])</span>
+                    <span class="n">word</span><span class="o">.</span><span class="n">complexity_group</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;complexity_group&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">derived_vocabulary</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;derived&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">base_vocabulary</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;base&#39;</span><span class="p">])</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">derived_vocabulary</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">base_vocabulary</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">export_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Export_Vocabulary() failed with:&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">import_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">project</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">serialization</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">serialization</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -508,16 +543,6 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="p">,</span> <span class="n">id_replacing_table</span>
 
-    <span class="k">def</span> <span class="nf">get_vocabulary_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">vid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vocabulary_as_list</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">vid</span> <span class="o">+=</span> <span class="n">w</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">continue</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Vocabulary ID: &quot;</span><span class="p">,</span> <span class="n">vid</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">vid</span>
-
     <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">VOCABULARY</span>
 
@@ -526,11 +551,28 @@
 
     <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVocabularyChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">words_plain</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_word</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">dispatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">remove_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">remove_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Vocabulary.save_delete"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.Vocabulary.save_delete">[docs]</a>    <span class="k">def</span> <span class="nf">save_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">has_been_used</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">words_plain</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">unique_keywords</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">tagged_containers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">has_been_used</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+        <span class="k">if</span> <span class="n">has_been_used</span><span class="p">:</span>
+            <span class="n">answer</span> <span class="o">=</span> <span class="n">delete_even_if_connected_msgbox</span><span class="p">(</span><span class="s2">&quot;voc&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">answer</span> <span class="o">==</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="VocabularyWord"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.VocabularyWord">[docs]</a><span class="k">class</span> <span class="nc">VocabularyWord</span><span class="p">(</span><span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">):</span>
@@ -546,6 +588,8 @@
 <span class="sd">    :var connected_items: IProjectContainer objects that are connected with it # Obsolete</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onVocabularyWordChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">vocabulary</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_checkable</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">IProjectContainer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -557,15 +601,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connected_items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">organization_group</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complexity_lvl</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complexity_group</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="c1"># OBSOLETE</span>
-    <span class="k">def</span> <span class="nf">add_connected_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">connected_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_add_referenced_unique_keyword</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwd</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwd</span><span class="p">)</span>
+        <span class="n">kwd</span><span class="o">.</span><span class="n">class_obj</span><span class="o">.</span><span class="n">onUniqueKeywordsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">kwd</span><span class="p">)</span>
 
-    <span class="c1"># OBSOLETE</span>
-    <span class="k">def</span> <span class="nf">remove_connected_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_items</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">connected_items</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_remove_referenced_unique_keyword</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwd</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">kwd</span><span class="p">)</span>
+            <span class="n">kwd</span><span class="o">.</span><span class="n">class_obj</span><span class="o">.</span><span class="n">onUniqueKeywordsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">kwd</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVocabularyWordChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">add_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -594,9 +646,31 @@
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
+    <span class="k">def</span> <span class="nf">cleanup_referenced_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ukw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="p">:</span>
+            <span class="n">ukw</span><span class="o">.</span><span class="n">class_obj</span><span class="o">.</span><span class="n">unique_keywords</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ukw</span><span class="o">.</span><span class="n">class_obj</span><span class="o">.</span><span class="n">unique_keywords</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">word_obj</span> <span class="o">==</span> <span class="bp">self</span><span class="p">]</span>
+            <span class="n">to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ukw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">remove_from_id_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span><span class="o">.</span><span class="n">remove_word</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span><span class="o">.</span><span class="n">remove_word</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VocabularyWord.save_delete"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.VocabularyWord.save_delete">[docs]</a>    <span class="k">def</span> <span class="nf">save_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">has_been_used</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">tagged_containers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">has_been_used</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">has_been_used</span><span class="p">:</span>
+            <span class="n">answer</span> <span class="o">=</span> <span class="n">delete_even_if_connected_msgbox</span><span class="p">(</span><span class="s2">&quot;word&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">answer</span> <span class="o">==</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="ClassificationObject"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.ClassificationObject">[docs]</a><span class="k">class</span> <span class="nc">ClassificationObject</span><span class="p">(</span><span class="n">IProjectContainer</span><span class="p">,</span> <span class="n">IHasName</span><span class="p">):</span>
@@ -616,8 +690,13 @@
 <span class="sd">    :var classification_vocabularies: A List of Vocabularies attached to thsi ClassificationObject</span>
 <span class="sd">    :var unique_keywords: A List of Unique Keywords generated from this ClassificationObjects and its Vocabularies</span>
 <span class="sd">    :var target_container: A List of Target Containers to classify with this Classification Object</span>
+<span class="sd">    :var semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple (&quot;&lt;Name of Dataset&gt;&quot;, [Indices of assigned Mask layers])</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onClassificationObjectChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onUniqueKeywordsChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onSemanticLabelsChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">IProjectContainer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -627,6 +706,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">classification_vocabularies</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[])</span>
 
     <span class="k">def</span> <span class="nf">add_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voc</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">,</span> <span class="n">dispatch</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">external_ids</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">voc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_vocabularies</span><span class="p">:</span>
@@ -639,14 +719,15 @@
                 <span class="n">keyword</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span>
                 <span class="n">keywords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onUniqueKeywordsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">keywords</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">keywords</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">voc_obj</span> <span class="o">==</span> <span class="n">voc</span><span class="p">:</span>
                     <span class="n">keywords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onUniqueKeywordsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">keywords</span>
-
 
     <span class="k">def</span> <span class="nf">remove_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voc</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classification_vocabularies</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">voc</span><span class="p">)</span>
@@ -655,6 +736,7 @@
 
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">to_delete</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">remove_from_id_list</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onUniqueKeywordsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_vocabularies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_vocabularies</span>
@@ -664,6 +746,7 @@
 
     <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onClassificationObjectChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classification_object</span><span class="p">):</span>
         <span class="n">classification_object</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
@@ -683,6 +766,22 @@
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">c</span><span class="o">.</span><span class="n">get_children_plain</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">set_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dataset_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span> <span class="o">=</span> <span class="p">(</span><span class="n">dataset_name</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onClassificationObjectChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_dataset_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onClassificationObjectChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">remove_dataset_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">CLASSIFICATION_OBJECT</span>
 
@@ -693,9 +792,10 @@
             <span class="n">unique_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
             <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
             <span class="n">classification_vocabularies</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">unique_id</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_vocabularies</span><span class="p">],</span>
-            <span class="n">unique_keywords</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="p">],</span>
+            <span class="n">unique_keywords</span> <span class="o">=</span>  <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span><span class="p">],</span>
             <span class="n">target_container</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">unique_id</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span><span class="p">],</span>
             <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">unique_id</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">],</span>
+            <span class="n">semantic_segmentation_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">serialization</span>
@@ -714,7 +814,17 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">classification_vocabularies</span> <span class="o">=</span> <span class="p">[</span><span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;classification_vocabularies&#39;</span><span class="p">]]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_keywords</span> <span class="o">=</span> <span class="p">[</span><span class="n">UniqueKeyword</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">project</span><span class="p">)</span> <span class="k">for</span> <span class="n">ser</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;unique_keywords&#39;</span><span class="p">]]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span> <span class="o">=</span> <span class="p">[</span><span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;target_container&#39;</span><span class="p">]]</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="p">[</span><span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;target_container&#39;</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_container</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+
+        <span class="c1"># VERSION &gt; 0.6.8</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">semantic_segmentation_labels</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;semantic_segmentation_labels&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -737,6 +847,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">word_obj</span> <span class="o">=</span> <span class="n">word_obj</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">class_obj</span> <span class="o">=</span> <span class="n">class_obj</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">external_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tagged_containers</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">word_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">word_obj</span><span class="o">.</span><span class="n">_add_referenced_unique_keyword</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_obj</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
@@ -763,7 +877,7 @@
             <span class="k">pass</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">word_obj</span><span class="o">.</span><span class="n">_add_referenced_unique_keyword</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
@@ -779,25 +893,88 @@
 <span class="sd">    :var classification_results: The Classification Mapping a list of [IClassifiable, UniqueKeywords]</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">onExperimentChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onClassificationObjectAdded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onClassificationObjectRemoved</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;New Experiment&quot;</span><span class="p">):</span>
         <span class="n">IProjectContainer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classification_objects</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">analyses_parameters</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># This is a list of [IClassifiable, UniqueKeyword]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correlation_matrix</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onExperimentChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">EXPERIMENT</span>
+    
+<div class="viewcode-block" id="Experiment.query"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.Experiment.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">UniqueKeyword</span><span class="p">],</span> <span class="n">promote_to_screenshots</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Query the project for all IClassifiable which are tagged with any of list of keywords.</span>
+
+<span class="sd">        :param keywords:</span>
+<span class="sd">        :param promote_to_screenshots:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">containers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">get_all_containers</span><span class="p">()</span>
+        <span class="c1"># self.project.onScreenshotsHighlighted.emit([])</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">IClassifiable</span><span class="p">):</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">set_classification_highlight</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">promote_to_screenshots</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">set_classification_highlight</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">screenshots</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">set_classification_highlight</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">get_type</span><span class="p">()</span> <span class="o">==</span> <span class="n">SEGMENT</span> <span class="ow">and</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">segment_screenshot_mapping</span><span class="p">:</span>
+                    <span class="n">screenshots</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">segment_screenshot_mapping</span><span class="p">[</span><span class="n">r</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">onScreenshotsHighlighted</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">screenshots</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">get_correlation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_unique_keywords</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_matrix</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">keywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_unique_keywords</span><span class="p">()</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">keywords</span><span class="p">):</span>
+                <span class="n">idx</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keywords</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">keywords</span><span class="p">)))</span>
+            <span class="n">curr_classifyable</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">curr_correlations</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">curr_classifyable</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">curr_classifyable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">curr_correlations</span><span class="p">):</span>
+                            <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">curr_correlations</span><span class="p">):</span>
+                                <span class="n">matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">idx</span><span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">idx</span><span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">curr_correlations</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">curr_classifyable</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">curr_correlations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+            <span class="n">matrix</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">keywords</span><span class="p">,</span> <span class="n">matrix</span>
 
     <span class="k">def</span> <span class="nf">get_vocabularies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
@@ -832,10 +1009,12 @@
     <span class="k">def</span> <span class="nf">add_classification_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">ClassificationObject</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">obj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_objects</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">classification_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onClassificationObjectAdded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">remove_classification_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">ClassificationObject</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_objects</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">classification_objects</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onClassificationObjectRemoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Experiment.get_containers_to_classify"><a class="viewcode-back" href="../../../dev_guide/containers/experiment.html#core.container.experiment.Experiment.get_containers_to_classify">[docs]</a>    <span class="k">def</span> <span class="nf">get_containers_to_classify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -865,27 +1044,33 @@
             <span class="n">root</span><span class="o">.</span><span class="n">get_children_plain</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="k">def</span> <span class="nf">add_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span><span class="n">AnalysisContainer</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span><span class="n">AnalysisParameters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_classification_object_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClassificationObject</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_classification_objects_plain</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">obj</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">add_analysis_to_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span><span class="n">AnalysisContainer</span><span class="p">,</span> <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">classification_object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">analysis</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="n">class_name</span> <span class="o">=</span> <span class="n">analysis</span><span class="p">,</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">,</span>
+                    <span class="n">class_obj</span> <span class="o">=</span> <span class="n">classification_object</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">parameters</span> <span class="o">=</span> <span class="n">AnalysisParameters</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">analyses_parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">remove_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="p">:</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">analyses_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">remove_analysis_from_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">toggle_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">:</span> <span class="n">IClassifiable</span><span class="p">,</span> <span class="n">keyword</span><span class="p">:</span> <span class="n">UniqueKeyword</span><span class="p">):</span>
         <span class="n">tag</span> <span class="o">=</span> <span class="p">[</span><span class="n">container</span><span class="p">,</span> <span class="n">keyword</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Toggled&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tag_container</span><span class="p">(</span><span class="n">container</span><span class="p">,</span> <span class="n">keyword</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">remove</span><span class="p">([</span><span class="n">container</span><span class="p">,</span> <span class="n">keyword</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_tag</span><span class="p">(</span><span class="n">container</span><span class="p">,</span> <span class="n">keyword</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">has_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">:</span> <span class="n">IClassifiable</span><span class="p">,</span> <span class="n">keyword</span><span class="p">:</span> <span class="n">UniqueKeyword</span><span class="p">):</span>
         <span class="n">tag</span> <span class="o">=</span> <span class="p">[</span><span class="n">container</span><span class="p">,</span> <span class="n">keyword</span><span class="p">]</span>
@@ -898,10 +1083,14 @@
         <span class="n">tag</span> <span class="o">=</span> <span class="p">[</span><span class="n">container</span><span class="p">,</span> <span class="n">keyword</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">container</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keyword</span><span class="o">.</span><span class="n">tagged_containers</span><span class="p">:</span>
+                <span class="n">keyword</span><span class="o">.</span><span class="n">tagged_containers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">remove_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">:</span> <span class="n">IClassifiable</span><span class="p">,</span> <span class="n">keyword</span><span class="p">:</span> <span class="n">UniqueKeyword</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">remove</span><span class="p">([</span><span class="n">container</span><span class="p">,</span> <span class="n">keyword</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">keyword</span><span class="o">.</span><span class="n">tagged_containers</span><span class="p">:</span>
+                <span class="n">keyword</span><span class="o">.</span><span class="n">tagged_containers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
@@ -909,21 +1098,55 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">tup</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">container</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">analyses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_obj&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                    <span class="n">class_name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">],</span>
+                    <span class="n">class_obj</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_obj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique_id</span>
+                <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                    <span class="n">class_name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">],</span>
+                    <span class="n">class_obj</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">))</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">unique_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
             <span class="n">classification_objects</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_classification_objects_plain</span><span class="p">()],</span>
-            <span class="n">analyses</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="p">,</span>
+            <span class="n">analyses</span><span class="o">=</span><span class="n">analyses</span><span class="p">,</span>
             <span class="n">classification_results</span> <span class="o">=</span> <span class="p">[(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">to_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">analyses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_obj&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                    <span class="n">class_name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">],</span>
+                    <span class="n">class_obj</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_obj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique_id</span>
+                <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                    <span class="n">class_name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">],</span>
+                    <span class="n">class_obj</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">))</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">unique_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span><span class="p">,</span>
             <span class="n">classification_objects</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_classification_objects_plain</span><span class="p">()],</span>
-            <span class="n">analyses</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="p">,</span>
+            <span class="n">analyses</span><span class="o">=</span><span class="n">analyses</span><span class="p">,</span>
             <span class="n">classification_results</span><span class="o">=</span><span class="p">[]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
@@ -936,19 +1159,44 @@
         <span class="k">for</span> <span class="n">ser</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;classification_objects&#39;</span><span class="p">]:</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="n">ClassificationObject</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">project</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;analyses&#39;</span><span class="p">]</span>
+        <span class="n">analyses</span> <span class="o">=</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;analyses&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">analyses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;class_name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_obj&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                                <span class="n">name</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                                <span class="n">class_name</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">eval_class</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_name&#39;</span><span class="p">]),</span>
+                                <span class="n">params</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">],</span>
+                                <span class="n">class_obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_obj&#39;</span><span class="p">])</span>
+                            <span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+                                <span class="n">name</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                                <span class="n">class_name</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">eval_class</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;class_name&#39;</span><span class="p">]),</span>
+                                <span class="n">params</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">],</span>
+                                <span class="n">class_obj</span><span class="o">=</span><span class="kc">None</span>
+                            <span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exeption during loading ExperimentAnalysis:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">analyses</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">ser</span> <span class="ow">in</span> <span class="n">serialization</span><span class="p">[</span><span class="s1">&#39;classification_results&#39;</span><span class="p">]:</span>
                 <span class="n">c</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">ser</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">k</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">ser</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">c</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tag_container</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading Classification mapping failed: &quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exeption during Experiment.deserialize:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
             <span class="k">pass</span>
 
         <span class="k">return</span> <span class="bp">self</span>
@@ -956,12 +1204,14 @@
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">remove_experiment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
+
+
+
+
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -970,11 +1220,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -987,37 +1237,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

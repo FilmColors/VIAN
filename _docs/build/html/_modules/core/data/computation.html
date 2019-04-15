@@ -17,41 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -239,7 +232,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">VIAN</a>
@@ -247,9 +240,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -279,8 +273,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -299,8 +291,12 @@
 
 <span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="k">import</span> <span class="n">QImage</span>
 <span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="k">import</span> <span class="n">QImage</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">QIcon</span>
+<span class="kn">import</span> <span class="nn">PyQt5.QtCore</span> <span class="k">as</span> <span class="nn">QtCore</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+
 <span class="c1"># import matplotlib.pyplot as plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">cv2</span>
@@ -310,8 +306,25 @@
 <span class="kn">import</span> <span class="nn">webbrowser</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">zipfile</span> <span class="k">import</span> <span class="n">ZipFile</span>
+<span class="kn">import</span> <span class="nn">math</span>
 
-<div class="viewcode-block" id="ms_to_string"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.ms_to_string">[docs]</a><span class="k">def</span> <span class="nf">ms_to_string</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">include_ms</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">include_frame</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fps</span> <span class="o">=</span> <span class="mi">24</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">tuple2point</span><span class="p">(</span><span class="n">tpl</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">tpl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tpl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="cart2pol"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.cart2pol">[docs]</a><span class="k">def</span> <span class="nf">cart2pol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts two dimensional cartesian coordinates to polar coordinates</span>
+<span class="sd">    :param x: </span>
+<span class="sd">    :param y: </span>
+<span class="sd">    :return: </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ms_to_string"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.ms_to_string">[docs]</a><span class="k">def</span> <span class="nf">ms_to_string</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">include_ms</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">include_frame</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fps</span> <span class="o">=</span> <span class="mi">24</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts an Long int MS to a formatted string of type HH:MM:SS:(MS) </span>
 <span class="sd">    </span>
@@ -336,7 +349,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">minutes</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ts_to_ms"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.ts_to_ms">[docs]</a><span class="k">def</span> <span class="nf">ts_to_ms</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="ts_to_ms"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.ts_to_ms">[docs]</a><span class="k">def</span> <span class="nf">ts_to_ms</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a Timestamp to miliseconds</span>
 <span class="sd">    :param hour: The given hours</span>
@@ -357,7 +370,7 @@
     <span class="k">return</span> <span class="n">time</span></div>
 
 
-<div class="viewcode-block" id="tpl_bgr_to_lab"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.tpl_bgr_to_lab">[docs]</a><span class="k">def</span> <span class="nf">tpl_bgr_to_lab</span><span class="p">(</span><span class="n">bgr</span><span class="p">):</span>
+<div class="viewcode-block" id="tpl_bgr_to_lab"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.tpl_bgr_to_lab">[docs]</a><span class="k">def</span> <span class="nf">tpl_bgr_to_lab</span><span class="p">(</span><span class="n">bgr</span><span class="p">,</span> <span class="n">as_float</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a BGR Color Tuple to a uint8 Lab Color Tuple using OpenCV Conversion.</span>
 <span class="sd">    :param tpl: Input Tuple BGR</span>
@@ -365,12 +378,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bgr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">bgr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bgr</span><span class="p">)</span>
-    <span class="n">img</span> <span class="o">=</span> <span class="n">bgr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
+    <span class="k">if</span> <span class="n">as_float</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">bgr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">256</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">bgr</span>
     <span class="n">lab</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">img</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2Lab</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,:]</span>
     <span class="k">return</span> <span class="n">lab</span></div>
 
 
-<div class="viewcode-block" id="tpl_bgr_to_lch"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.tpl_bgr_to_lch">[docs]</a><span class="k">def</span> <span class="nf">tpl_bgr_to_lch</span><span class="p">(</span><span class="n">tpl</span><span class="p">):</span>
+<div class="viewcode-block" id="tpl_bgr_to_lch"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.tpl_bgr_to_lch">[docs]</a><span class="k">def</span> <span class="nf">tpl_bgr_to_lch</span><span class="p">(</span><span class="n">tpl</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a BGR Color Tuple to a float32 Lab Color Tuple using OpenCV Conversion.</span>
 <span class="sd">    :param tpl: Input Tuple BGR</span>
@@ -385,7 +401,54 @@
     <span class="k">return</span> <span class="n">lch</span></div>
 
 
-<div class="viewcode-block" id="numpy_to_qt_image"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.numpy_to_qt_image">[docs]</a><span class="k">def</span> <span class="nf">numpy_to_qt_image</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">cvt</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">,</span> <span class="n">target_width</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">with_alpha</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">lab_to_sat</span><span class="p">(</span><span class="n">lch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lab</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">implementation</span> <span class="o">=</span> <span class="s2">&quot;luebbe&quot;</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">lch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lch</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">lch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lch</span><span class="p">])</span>
+        <span class="n">lum</span> <span class="o">=</span> <span class="n">lch</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">chroma</span> <span class="o">=</span> <span class="n">lch</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">hue</span> <span class="o">=</span> <span class="n">lch</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">lab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lab</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">lab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lab</span><span class="p">])</span>
+        <span class="n">lum</span> <span class="o">=</span> <span class="n">lab</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">a_sq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">lab</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">b_sq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">lab</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">chroma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">a_sq</span><span class="p">,</span> <span class="n">b_sq</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">implementation</span> <span class="o">==</span> <span class="s2">&quot;luebbe&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span>  <span class="n">chroma</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">chroma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">lum</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">implementation</span> <span class="o">==</span> <span class="s2">&quot;phytagoras&quot;</span><span class="p">:</span> <span class="c1"># implementation == &quot;pythagoras&quot;:</span>
+        <span class="n">result</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">chroma</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">lum</span><span class="p">))</span> <span class="o">-</span> <span class="n">lum</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">chroma</span>
+        <span class="c1"># angle = np.dot(np.stack((chroma, lum), axis=1), [0, 1])</span>
+        <span class="c1"># result = angle * chroma</span>
+    <span class="c1"># print(angle)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">lab_to_lch</span><span class="p">(</span><span class="n">lab</span><span class="p">):</span>
+    <span class="n">lab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lab</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">lch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">lab</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">lch</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lab</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lch</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lab</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">lch</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">lab</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">lab</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">lab</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">lch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lch</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lab</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">lch</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">lab</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">lab</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">lch</span>
+
+
+<div class="viewcode-block" id="numpy_to_qt_image"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.numpy_to_qt_image">[docs]</a><span class="k">def</span> <span class="nf">numpy_to_qt_image</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">cvt</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">,</span> <span class="n">target_width</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">with_alpha</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a Numpy Image array to a QTImage</span>
 <span class="sd">    :param arr: The nUmpy array </span>
@@ -411,7 +474,7 @@
     <span class="k">return</span> <span class="n">qimage</span><span class="p">,</span> <span class="n">qpixmap</span></div>
 
 
-<div class="viewcode-block" id="numpy_to_pixmap"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.numpy_to_pixmap">[docs]</a><span class="k">def</span> <span class="nf">numpy_to_pixmap</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">cvt</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">,</span> <span class="n">target_width</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">with_alpha</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="numpy_to_pixmap"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.numpy_to_pixmap">[docs]</a><span class="k">def</span> <span class="nf">numpy_to_pixmap</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">cvt</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">,</span> <span class="n">target_width</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">with_alpha</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a Numpy Image array to a QPixmap</span>
 <span class="sd">    :param arr: The nUmpy array </span>
@@ -438,7 +501,7 @@
     <span class="k">return</span> <span class="n">qpixmap</span></div>
 
 
-<div class="viewcode-block" id="pixmap_to_numpy"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.pixmap_to_numpy">[docs]</a><span class="k">def</span> <span class="nf">pixmap_to_numpy</span><span class="p">(</span><span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
+<div class="viewcode-block" id="pixmap_to_numpy"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.pixmap_to_numpy">[docs]</a><span class="k">def</span> <span class="nf">pixmap_to_numpy</span><span class="p">(</span><span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a Pixmap to a numpy array</span>
 <span class="sd">    :param pixmap: the Pixmap</span>
@@ -447,7 +510,7 @@
     <span class="k">return</span> <span class="n">convertQImageToMat</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">toImage</span><span class="p">()</span><span class="o">.</span><span class="n">convertToFormat</span><span class="p">(</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_ARGB32_Premultiplied</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="convertQImageToMat"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.convertQImageToMat">[docs]</a><span class="k">def</span> <span class="nf">convertQImageToMat</span><span class="p">(</span><span class="n">qimage</span><span class="p">):</span>
+<div class="viewcode-block" id="convertQImageToMat"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.convertQImageToMat">[docs]</a><span class="k">def</span> <span class="nf">convertQImageToMat</span><span class="p">(</span><span class="n">qimage</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;  Converts a QImage into an opencv MAT format  &#39;&#39;&#39;</span>
 
     <span class="n">width</span> <span class="o">=</span> <span class="n">qimage</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
@@ -464,7 +527,7 @@
     <span class="k">return</span> <span class="n">arr</span></div>
 
 
-<div class="viewcode-block" id="blend_transparent"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.blend_transparent">[docs]</a><span class="k">def</span> <span class="nf">blend_transparent</span><span class="p">(</span><span class="n">background</span><span class="p">,</span> <span class="n">foreground</span><span class="p">):</span>
+<div class="viewcode-block" id="blend_transparent"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.blend_transparent">[docs]</a><span class="k">def</span> <span class="nf">blend_transparent</span><span class="p">(</span><span class="n">background</span><span class="p">,</span> <span class="n">foreground</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Alpha blending of to images</span>
 <span class="sd">    :param background: foreground with alpha</span>
@@ -492,7 +555,7 @@
     <span class="k">return</span> <span class="n">outImage</span></div>
 
 
-<div class="viewcode-block" id="get_mouse_handle_by_location"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.get_mouse_handle_by_location">[docs]</a><span class="k">def</span> <span class="nf">get_mouse_handle_by_location</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">rect</span><span class="p">,</span> <span class="n">border_size</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">corner_size</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">40</span><span class="p">):</span>
+<div class="viewcode-block" id="get_mouse_handle_by_location"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.get_mouse_handle_by_location">[docs]</a><span class="k">def</span> <span class="nf">get_mouse_handle_by_location</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">rect</span><span class="p">,</span> <span class="n">border_size</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">corner_size</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">40</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a String of where the mouse is regarding to some center</span>
 <span class="sd">    </span>
@@ -560,17 +623,17 @@
     <span class="k">return</span> <span class="s2">&quot;Center&quot;</span></div>
 
 
-<div class="viewcode-block" id="ms_to_frames"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.ms_to_frames">[docs]</a><span class="k">def</span> <span class="nf">ms_to_frames</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+<div class="viewcode-block" id="ms_to_frames"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.ms_to_frames">[docs]</a><span class="k">def</span> <span class="nf">ms_to_frames</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts Miliseconds to Frames</span>
 <span class="sd">    :param time: Time MS</span>
 <span class="sd">    :param fps: FPS of the Film</span>
 <span class="sd">    :return: returns a FRAME IDX</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">fps</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">fps</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="frame2ms"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.computation.frame2ms">[docs]</a><span class="k">def</span> <span class="nf">frame2ms</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+<div class="viewcode-block" id="frame2ms"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.frame2ms">[docs]</a><span class="k">def</span> <span class="nf">frame2ms</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a Frame IDX to MS</span>
 <span class="sd">    :param frame: THE Frame IDX</span>
@@ -702,18 +765,144 @@
     <span class="nb">zip</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">extractiondir</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Extraction finished&quot;</span><span class="p">)</span>
 
+
 <span class="k">def</span> <span class="nf">is_subdir</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
     <span class="n">relative</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="n">relative</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
 
+
+<div class="viewcode-block" id="images_to_movie"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.images_to_movie">[docs]</a><span class="k">def</span> <span class="nf">images_to_movie</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">time_scale</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span> <span class="n">fps</span> <span class="o">=</span> <span class="mf">30.0</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">640</span><span class="p">,</span><span class="mi">480</span><span class="p">),</span> <span class="n">codec</span> <span class="o">=</span> <span class="s1">&#39;DIVX&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a movie from a list of numpy images</span>
+<span class="sd">    :param imgs: a list of numpy images</span>
+<span class="sd">    :param out_file: the name of the output file</span>
+<span class="sd">    :param time_scale: How often an image should be repeated before the next one is drawn</span>
+<span class="sd">    :param fps: the FPS of the movie</span>
+<span class="sd">    :param size: the size of the movie</span>
+<span class="sd">    :param codec: the Codec</span>
+<span class="sd">    :return: </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">fourcc</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="s2">&quot;MJPG&quot;</span><span class="p">)</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">fourcc</span><span class="p">,</span> <span class="n">fps</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_scale</span><span class="p">):</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_CUBIC</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="labels_to_binary_mask"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.labels_to_binary_mask">[docs]</a><span class="k">def</span> <span class="nf">labels_to_binary_mask</span><span class="p">(</span><span class="n">multi_mask</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">as_bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a Label Mask to a binary mask with all indices that have a value which is in labels are set to True</span>
+<span class="sd">    else 0. </span>
+<span class="sd">    </span>
+<span class="sd">    :param multi_mask: </span>
+<span class="sd">    :param labels: </span>
+<span class="sd">    :return: </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">multi_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">multi_mask</span> <span class="o">==</span> <span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="k">if</span> <span class="n">as_bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+<span class="c1"># def labels_to_binary_mask2(multi_mask, labels):</span>
+<span class="c1">#     result = np.zeros_like(multi_mask, dtype=np.bool)</span>
+<span class="c1">#     idx = np.intersect1d(multi_mask, labels, return_indices=True)[1]</span>
+<span class="c1">#     idx = np.unravel_index(idx, multi_mask.shape)</span>
+<span class="c1">#     result[idx] = True</span>
+<span class="c1">#     return result</span>
+
+<span class="k">def</span> <span class="nf">apply_mask</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">mask_size</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">mask</span> <span class="p">,</span><span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+    <span class="c1"># if mask.shape[0] != img.shape[0] and mask.shape[1] != img.shape[1]:</span>
+    <span class="c1">#     mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="n">mask_size</span><span class="p">,</span> <span class="n">mask_size</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_NEAREST</span><span class="p">)</span>
+    <span class="n">bin_mask</span> <span class="o">=</span> <span class="n">labels_to_binary_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+    <span class="n">bin_mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">bin_mask</span><span class="p">,</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_NEAREST</span><span class="p">)</span>
+
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">alpha</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">bin_mask</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">img</span><span class="p">,</span> <span class="n">alpha</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="rotate"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.rotate">[docs]</a><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotate a point counterclockwise by a given angle around a given origin.</span>
+
+<span class="sd">    The angle should be given in radians.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ox</span><span class="p">,</span> <span class="n">oy</span> <span class="o">=</span> <span class="n">origin</span>
+    <span class="n">px</span><span class="p">,</span> <span class="n">py</span> <span class="o">=</span> <span class="n">point</span>
+
+    <span class="n">qx</span> <span class="o">=</span> <span class="n">ox</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">ox</span><span class="p">)</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">py</span> <span class="o">-</span> <span class="n">oy</span><span class="p">)</span>
+    <span class="n">qy</span> <span class="o">=</span> <span class="n">oy</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">ox</span><span class="p">)</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">py</span> <span class="o">-</span> <span class="n">oy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span></div>
+
+
+<div class="viewcode-block" id="overlap_rect"><a class="viewcode-back" href="../../../dev_guide/data/exporter.html#core.data.computation.overlap_rect">[docs]</a><span class="k">def</span> <span class="nf">overlap_rect</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Overlapping rectangles overlap both horizontally &amp; vertically</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Out1&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">r2</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">r1</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Out2&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="k">def</span> <span class="nf">contains_rect</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">r1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">r1</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r2</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">r2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">r1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">r2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">r1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">r2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">r2</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r1</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">get_heatmap_value</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">max</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">asuint8</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">asrgb</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">gray</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gray</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">val</span><span class="o">/</span><span class="nb">max</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="nb">max</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.25</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">/</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="nb">max</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">/</span> <span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">asuint8</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">*=</span> <span class="mi">255</span>
+    <span class="k">if</span> <span class="n">asrgb</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">floatify_img</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
+
+
+<span class="k">def</span> <span class="nf">handle_exception</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Exception in</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;with message:</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">import_module_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="s2">&quot;current_pipeline_module&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+    <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -722,11 +911,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -739,37 +928,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

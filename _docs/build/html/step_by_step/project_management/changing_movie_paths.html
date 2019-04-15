@@ -17,43 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Vian Projects" href="project_management.html"/>
-        <link rel="next" title="Backups" href="backups.html"/>
-        <link rel="prev" title="Importing ELAN Projects" href="import_elan_projects.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Backups" href="backups.html" />
+    <link rel="prev" title="Importing ELAN Projects" href="import_elan_projects.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -142,10 +135,14 @@
 <li class="toctree-l4"><a class="reference internal" href="../analyses/analyses_list.html">All Analyses of VIAN</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../experiments/experiments.html">Experiments</a><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../player/player.html">VIAN’s Player</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../player/changing_subtitles.html">Changing Subtitles</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../vian_corpus/vian_corpus.html">VIAN Corpus</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../plugins/plugins.html">Plugins</a><ul>
@@ -168,6 +165,30 @@
 <li class="toctree-l2"><a class="reference internal" href="../../dev_guide/nodes.html">Nodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../dev_guide/plugins.html">Plug-Ins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#deciding-which-interface-to-use">Deciding which Interface to use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../DevelopersGuide.html#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/container.html">Container Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/project.html">Project Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/analysis.html">Analysis Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/annotation.html">Annotations Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/experiment.html">Experiment Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/media_objects.html">Media Objects Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/node_scripts.html">Node Script Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/screenshots.html">Screenshot Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/containers/segmentation.html">Segmentation Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/container.html#example">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/analyses_example.html">IAnalysisJob Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../dev_guide/data.html">Data Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/data.html#module-core.data.computation">Computation Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/data.html#module-core.data.enums">Enums Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dev_guide/data.html#module-core.data.exporters">Exporter Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../whatsnew.html">What’s New</a><ul>
@@ -213,7 +234,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">VIAN</a>
@@ -221,9 +242,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -277,39 +299,37 @@
 For example, when the project has been moved to a different computer and the movie file
 is located at a different location, or when the movie file has been changed.</p>
 <ol class="arabic simple">
-<li>In the Outliner, <em>Right-Click</em> on the <strong>movie-descriptor</strong> (Indicated with a yellow color).</li>
-<li>In the appearing ContextMenu, click on <strong>Set Movie Path</strong> and choose the target movie file.</li>
+<li><p>In the Outliner, <em>Right-Click</em> on the <strong>movie-descriptor</strong> (Indicated with a yellow color).</p></li>
+<li><p>In the appearing ContextMenu, click on <strong>Set Movie Path</strong> and choose the target movie file.</p></li>
 </ol>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last"><strong>Options</strong>
+<p class="admonition-title">Note</p>
+<p><strong>Options</strong>
 1. Some <strong>Option</strong></p>
 </div>
 <div class="figure align-center" id="id2">
 <a class="reference internal image-reference" href="../../_images/elan_project.png"><img alt="map to buried treasure" src="../../_images/elan_project.png" style="width: 292.8px; height: 276.8px;" /></a>
-<p class="caption"><span class="caption-text">The VIAN Project Dialog</span></p>
+<p class="caption"><span class="caption-text">The VIAN Project Dialog</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<ul class="last simple">
-<li><a class="reference internal" href="create_project.html#new-project"><span class="std std-ref">Creating new Project</span></a></li>
-<li><a class="reference internal" href="project_templates.html#project-templates"><span class="std std-ref">Project Templates</span></a></li>
-<li><a class="reference internal" href="import_elan_projects.html#import-elan-projects"><span class="std std-ref">Importing ELAN Projects</span></a></li>
-<li><a class="reference internal" href="../../user_interface/outliner.html#outliner"><span class="std std-ref">Outliner</span></a></li>
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="create_project.html#new-project"><span class="std std-ref">Creating new Project</span></a></p></li>
+<li><p><a class="reference internal" href="project_templates.html#project-templates"><span class="std std-ref">Project Templates</span></a></p></li>
+<li><p><a class="reference internal" href="import_elan_projects.html#import-elan-projects"><span class="std std-ref">Importing ELAN Projects</span></a></p></li>
+<li><p><a class="reference internal" href="../../user_interface/outliner.html#outliner"><span class="std std-ref">Outliner</span></a></p></li>
 </ul>
 </div>
 <ul class="simple">
-<li><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="../../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -318,7 +338,7 @@ is located at a different location, or when the movie file has been changed.</p>
         <a href="backups.html" class="btn btn-neutral float-right" title="Backups" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="import_elan_projects.html" class="btn btn-neutral" title="Importing ELAN Projects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="import_elan_projects.html" class="btn btn-neutral float-left" title="Importing ELAN Projects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -327,11 +347,11 @@ is located at a different location, or when the movie file has been changed.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -344,37 +364,15 @@ is located at a different location, or when the movie file has been changed.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

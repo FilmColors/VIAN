@@ -17,41 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -239,7 +232,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">VIAN</a>
@@ -247,9 +240,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -279,8 +273,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -299,7 +291,8 @@
 <span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="k">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSlot</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="k">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSlot</span><span class="p">,</span> <span class="n">pyqtSignal</span>
+<span class="kn">from</span> <span class="nn">core.data.enums</span> <span class="k">import</span> <span class="n">DataSerialization</span>
 <span class="c1">#</span>
 <span class="c1"># from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER</span>
 <span class="n">VisualizationTab</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;VisualizationTab&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;widget&quot;</span><span class="p">,</span> <span class="s2">&quot;use_filter&quot;</span><span class="p">,</span> <span class="s2">&quot;controls&quot;</span><span class="p">])</span>
@@ -309,24 +302,30 @@
         <span class="n">dummy</span> <span class="o">=</span> <span class="n">dummy</span>
 
     <span class="k">def</span> <span class="nf">on_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IProjectChangeNotify: Not Implemented&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">on_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IProjectChangeNotify: Not Implemented&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">get_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IProjectChangeNotify: Not Implemented&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">on_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IProjectChangeNotify: Not Implemented by &quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">on_closed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
 
 <span class="k">class</span> <span class="nc">IClassifiable</span><span class="p">():</span>
+    <span class="n">onQueryHighlightChanged</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">voc_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_query_highlighted</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">set_classification_highlight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onQueryHighlightChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_parent_container</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -355,7 +354,10 @@
         <span class="c1"># word.remove_connected_item(self)</span>
 
 
-<span class="k">class</span> <span class="nc">IProjectContainer</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<div class="viewcode-block" id="IProjectContainer"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IProjectContainer">[docs]</a><span class="k">class</span> <span class="nc">IProjectContainer</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="n">onAnalysisAdded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">onAnalysisRemoved</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">QObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
@@ -364,11 +366,73 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected_analyses</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_id</span>
 
     <span class="k">def</span> <span class="nf">set_expanded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expanded</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outliner_expanded</span> <span class="o">=</span> <span class="n">expanded</span>
+
+    <span class="k">def</span> <span class="nf">add_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected_analyses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+        <span class="n">analysis</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onAnalysisAdded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">remove_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_analyses</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connected_analyses</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onAnalysisRemoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IProjectContainer.get_connected_analysis"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IProjectContainer.get_connected_analysis">[docs]</a>    <span class="k">def</span> <span class="nf">get_connected_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">as_clobj_dict</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a List of AnalysesResults that are of class_type, and attached to this container</span>
+<span class="sd">        </span>
+<span class="sd">        :param class_type: </span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">class_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">to_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_analyses</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">to_return</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">class_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="n">class_type</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="n">class_type</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_analyses</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">analysis_job_class</span> <span class="o">==</span> <span class="n">class_name</span><span class="p">:</span>
+                    <span class="n">to_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">as_clobj_dict</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">to_return</span><span class="p">:</span>
+                <span class="n">cl_obj</span> <span class="o">=</span>  <span class="n">t</span><span class="o">.</span><span class="n">target_classification_object</span>
+                <span class="k">if</span> <span class="n">cl_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">cl_obj</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+                <span class="k">elif</span> <span class="n">cl_obj</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Global&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;default&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">cl_obj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">cl_obj</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">cl_obj</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">to_return</span></div>
+
+<div class="viewcode-block" id="IProjectContainer.save_delete"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IProjectContainer.save_delete">[docs]</a>    <span class="k">def</span> <span class="nf">save_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is called in the GUI and is ment to wrap the self.delete() function, such </span>
+<span class="sd">        that the a GUI event can be raised if necessary, for example if the delete should raise a warning of </span>
+<span class="sd">        unexpected bevhaviour for the user. </span>
+<span class="sd">        </span>
+<span class="sd">        If not overriden, it calls the delete() function directly. </span>
+<span class="sd">        </span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not Implemented in &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -392,8 +456,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">notes</span>
         <span class="c1"># self.dispatch_on_changed(item=self)</span>
 
+<div class="viewcode-block" id="IProjectContainer.copy_event"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IProjectContainer.copy_event">[docs]</a>    <span class="k">def</span> <span class="nf">copy_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This Event is raised when the user wants to copy this container into some. </span>
+<span class="sd">        :param containers: </span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
     <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
 
 
 <span class="k">class</span> <span class="nc">ITimeRange</span><span class="p">():</span>
@@ -457,6 +529,7 @@
 
     <span class="k">def</span> <span class="nf">remove_media_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">media_object</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">media_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">media_objects</span><span class="p">:</span>
+            <span class="n">media_object</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">media_objects</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">media_object</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">dispatch_changed</span><span class="p">()</span>
 
@@ -490,7 +563,10 @@
 <span class="sd">    Subclass it to implement your own Analyses. </span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source_types</span><span class="p">,</span> <span class="n">help_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;No Author&quot;</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;0.0.1&quot;</span><span class="p">,</span> <span class="n">multiple_result</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">source_types</span><span class="p">,</span>
+                 <span class="n">dataset_name</span><span class="p">,</span> <span class="n">dataset_shape</span><span class="p">,</span> <span class="n">dataset_dtype</span><span class="p">,</span>
+                 <span class="n">help_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s2">&quot;No Author&quot;</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;0.0.1&quot;</span><span class="p">,</span>
+                 <span class="n">multiple_result</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">data_serialization</span> <span class="o">=</span> <span class="n">DataSerialization</span><span class="o">.</span><span class="n">JSON</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        </span>
 <span class="sd">        :param name: The name of the Analysis, used in the UI.</span>
@@ -503,15 +579,22 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source_types</span> <span class="o">=</span> <span class="n">source_types</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span> <span class="o">=</span> <span class="n">dataset_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_shape</span> <span class="o">=</span> <span class="n">dataset_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_dtype</span> <span class="o">=</span> <span class="n">dataset_dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">help_path</span> <span class="o">=</span> <span class="n">help_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="n">author</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">multiple_result</span> <span class="o">=</span> <span class="n">multiple_result</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_serialization</span> <span class="o">=</span> <span class="n">data_serialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hdf5_manager</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_class_obj</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-<div class="viewcode-block" id="IAnalysisJob.prepare"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">fps</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.prepare"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">fps</span><span class="p">,</span> <span class="n">class_objs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A step that should be performed in the main-thread before the processing takes place. </span>
 <span class="sd">        This is a good point to fetch all necessary data from the project and pack it to your needs.</span>
@@ -520,9 +603,11 @@
 <span class="sd">        :param targets: The Target IProjectContainer Objects</span>
 <span class="sd">        :param parameters: Additional Parameters as returned from your ParameterWidget.get_parameters()</span>
 <span class="sd">        :param fps: The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)</span>
+<span class="sd">        :param class_objs: The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)</span>
 <span class="sd">        :return: A List of packed Data which will be handed to the IAnalysisJob.process()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;prepare not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_class_obj</span> <span class="o">=</span> <span class="n">class_objs</span>
+
         <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="IAnalysisJob.process"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>
@@ -609,7 +694,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_types</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.to_database"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.to_database">[docs]</a>    <span class="k">def</span> <span class="nf">to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">serialization_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_serialization</span>
+
+<div class="viewcode-block" id="IAnalysisJob.to_json"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Base Method which should return a dict of byte serialized </span>
 <span class="sd">        nump arrays if necessary, or a dict of simple key value pairs.</span>
@@ -621,7 +709,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="IAnalysisJob.from_database"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.from_database">[docs]</a>    <span class="k">def</span> <span class="nf">from_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_data</span><span class="p">):</span>
+<div class="viewcode-block" id="IAnalysisJob.from_json"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.from_json">[docs]</a>    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The inverse of the to_database() implementation. </span>
 
@@ -630,6 +718,28 @@
 
 <span class="sd">        :return: </span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="IAnalysisJob.serialize"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Override this Method if there needs to be a custom serialization</span>
+<span class="sd">        :param data_dict: </span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">data_dict</span></div>
+
+<div class="viewcode-block" id="IAnalysisJob.deserialize"><a class="viewcode-back" href="../../../dev_guide/data.html#core.data.interfaces.IAnalysisJob.deserialize">[docs]</a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Override this Method if there needs to be a custom deserialization</span>
+<span class="sd">        :param data_dict: </span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">data_dict</span></div>
+
+    <span class="k">def</span> <span class="nf">from_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">db_data</span>
+
+    <span class="k">def</span> <span class="nf">to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
@@ -672,7 +782,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">aborted</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">run_concurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">sign_progress</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;run_concurrent not implemented by&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -687,9 +797,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -698,11 +806,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -715,37 +823,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -17,43 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="VIAN 0.4.0 documentation" href="../index.html"/>
-        <link rel="up" title="Developer’s Guide" href="../DevelopersGuide.html"/>
-        <link rel="next" title="IAnalysisJob Example" href="analyses_example.html"/>
-        <link rel="prev" title="Developer’s Guide" href="../DevelopersGuide.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IAnalysisJob Example" href="analyses_example.html" />
+    <link rel="prev" title="Developer’s Guide" href="../DevelopersGuide.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -241,7 +234,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">VIAN</a>
@@ -249,9 +242,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -305,46 +299,51 @@ Your analysis will then automatically appear in the Analysis/Extensions Menu of 
 <p>Once the user has triggered the Button in the MainWindow menu, following process will take place:</p>
 <p><strong>Analysis</strong></p>
 <ol class="arabic simple">
-<li>A Dialog Appears where the user can select all targets and additional Parameters defined by your function.</li>
-<li>On Accept, the analysis will take place as follows:</li>
+<li><p>A Dialog Appears where the user can select all targets and additional Parameters defined by your function.</p></li>
+<li><p>On Accept, the analysis will take place as follows:</p></li>
 </ol>
 <p>3.1 <strong>IAnalysisJob.prepare()</strong> will be performed, where you will pack all information needed into a list.</p>
 <p>3.2 <strong>IAnalysisJob.process()</strong> will be performed in an external Thread. All information packed in the last step will be available for you, and no more!</p>
 <p>3.3 <strong>IAnalysisJob.modify_project()</strong> Once the process() function has finished the Thread will be destroyed and the your result will be sent back to the Main-Thread into the IAnalysisJob.modify_project() function. Here you can perform any modifications to the Project if necessary.</p>
 <ol class="arabic simple" start="4">
-<li>You Analysis will be stored in the Project</li>
+<li><p>You Analysis will be stored in the Project</p></li>
 </ol>
 <p><strong>Visualization</strong></p>
 <p>If the user triggers the Visualization, a new QMainWindow or a Webbrower will be opened and all results of your analysis will be
 handed to the widget, or url in case of a webbrowser.</p>
 <div class="figure align-center" id="id4">
 <a class="reference internal image-reference" href="../_images/ianalysisparameterwidget.png"><img alt="map to buried treasure" src="../_images/ianalysisparameterwidget.png" style="width: 555.0px; height: 562.0px;" /></a>
-<p class="caption"><span class="caption-text">The AnalysisDialog, note the Widget beneath <em>Parameters</em> is returned by IAnalysisJob.get_parameter_widget()</span></p>
+<p class="caption"><span class="caption-text">The AnalysisDialog, note the Widget beneath <em>Parameters</em> is returned by IAnalysisJob.get_parameter_widget()</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
 <p><strong>IAnalysisJob.get_preview()</strong></p>
 <div class="figure align-center" id="id5">
 <a class="reference internal image-reference" href="../_images/analysis_preview.png"><img alt="map to buried treasure" src="../_images/analysis_preview.png" style="width: 453.0px; height: 652.0px;" /></a>
-<p class="caption"><span class="caption-text">The Preview Widget as shown in the Inspector when an Analysis is selected. Here as a QWebView</span></p>
+<p class="caption"><span class="caption-text">The Preview Widget as shown in the Inspector when an Analysis is selected. Here as a QWebView</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
 </div>
 <dl class="class">
 <dt id="core.data.interfaces.IAnalysisJob">
-<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">IAnalysisJob</code><span class="sig-paren">(</span><em>name</em>, <em>source_types</em>, <em>help_path=''</em>, <em>author='No Author'</em>, <em>version='0.0.1'</em>, <em>multiple_result=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">core.data.interfaces.</code><code class="descname">IAnalysisJob</code><span class="sig-paren">(</span><em>name</em>, <em>source_types</em>, <em>dataset_name</em>, <em>dataset_shape</em>, <em>dataset_dtype</em>, <em>help_path=''</em>, <em>author='No Author'</em>, <em>version='0.0.1'</em>, <em>multiple_result=False</em>, <em>data_serialization=&lt;DataSerialization.JSON: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the BaseClass for all Analyses. 
 Subclass it to implement your own Analyses.</p>
 <dl class="method">
-<dt id="core.data.interfaces.IAnalysisJob.from_database">
-<code class="descname">from_database</code><span class="sig-paren">(</span><em>database_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.from_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.from_database" title="Permalink to this definition">¶</a></dt>
+<dt id="core.data.interfaces.IAnalysisJob.deserialize">
+<code class="descname">deserialize</code><span class="sig-paren">(</span><em>data_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.deserialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.deserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this Method if there needs to be a custom deserialization
+:param data_dict: 
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.from_json">
+<code class="descname">from_json</code><span class="sig-paren">(</span><em>database_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>The inverse of the to_database() implementation.</p>
 <p>For numpy arrays:
 numpy_array = numpy.fromstring(byte_array)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -352,14 +351,11 @@ numpy_array = numpy.fromstring(byte_array)</p>
 <code class="descname">get_parameter_widget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.get_parameter_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.get_parameter_widget" title="Permalink to this definition">¶</a></dt>
 <dd><p>If your Analysis has additional parameters which can be set by the User, Subclass the ParameterWidget, 
 and return it in this Function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Subclass of ParameterWidget</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A Subclass of ParameterWidget</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -370,16 +366,14 @@ Inspector, when the Analysis is selected.</p>
 <p>Make sure, that the creation of this widget should be fast.
 Easiest would be to render your data into an Image, convert it into a qpixamp and 
 attach it to a QLabel using QLabel(your_pixmap).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A QWidget serving as a preview</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A QWidget serving as a preview</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -395,9 +389,8 @@ attach it to a QLabel using QLabel(your_pixmap).</p>
 <dd><p>This function is called by VIAN if the User wants to display the complete Visualization of the Data. 
 While you may essentially use any type Type of Visualization, you should either:</p>
 <ol class="arabic">
-<li><p class="first">subclass QMainWindow and implement your visualization into it.</p>
-</li>
-<li><p class="first">if you use a WebBased visualization use</p>
+<li><p>subclass QMainWindow and implement your visualization into it.</p></li>
+<li><p>if you use a WebBased visualization use</p>
 <blockquote>
 <div><p>save your visualitations into the results/ directory of the project
 during the IAnalysisJob.modify_project() or IAnalysisJob.process()</p>
@@ -408,22 +401,18 @@ webbrowser.open(url/to/your/result.html)</p>
 </li>
 </ol>
 <p>When using a QMainWindow, don’t forget to call QMainWindow.show() at the end of your __init__()</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</li>
-<li><strong>result_path</strong> – The Path to the results directory of the project</li>
-<li><strong>data_path</strong> – The Path to the data directory of the project</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>analysis</strong> – The IAnalysisJobAnalysis Object created in IAnalysisJob.process()</p></li>
+<li><p><strong>result_path</strong> – The Path to the results directory of the project</p></li>
+<li><p><strong>data_path</strong> – The Path to the data directory of the project</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A QWidget which will be added to the Visualizations Tab</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A QWidget which will be added to the Visualizations Tab</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -431,45 +420,38 @@ webbrowser.open(url/to/your/result.html)</p>
 <code class="descname">modify_project</code><span class="sig-paren">(</span><em>project</em>, <em>result</em>, <em>main_window=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.modify_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.modify_project" title="Permalink to this definition">¶</a></dt>
 <dd><p>If your Analysis should perform any modifications to the project, except storing the analysis,
 this is the place to perform them.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>project</strong> – The Current Project to perform modifications on</li>
-<li><strong>result</strong> – The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project</strong> – The Current Project to perform modifications on</p></li>
+<li><p><strong>result</strong> – The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="core.data.interfaces.IAnalysisJob.prepare">
-<code class="descname">prepare</code><span class="sig-paren">(</span><em>project</em>, <em>targets</em>, <em>parameters</em>, <em>fps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.prepare" title="Permalink to this definition">¶</a></dt>
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>project</em>, <em>targets</em>, <em>parameters</em>, <em>fps</em>, <em>class_objs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><p>A step that should be performed in the main-thread before the processing takes place. 
 This is a good point to fetch all necessary data from the project and pack it to your needs.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>project</strong> – The current Project</li>
-<li><strong>targets</strong> – The Target IProjectContainer Objects</li>
-<li><strong>parameters</strong> – Additional Parameters as returned from your ParameterWidget.get_parameters()</li>
-<li><strong>fps</strong> – The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project</strong> – The current Project</p></li>
+<li><p><strong>targets</strong> – The Target IProjectContainer Objects</p></li>
+<li><p><strong>parameters</strong> – Additional Parameters as returned from your ParameterWidget.get_parameters()</p></li>
+<li><p><strong>fps</strong> – The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)</p></li>
+<li><p><strong>class_objs</strong> – The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A List of packed Data which will be handed to the IAnalysisJob.process()</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A List of packed Data which will be handed to the IAnalysisJob.process()</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -481,38 +463,39 @@ Make sure to <strong>NOT</strong> use the ProjectContainers within this Operatio
 <p><em>Example</em>:
 progress is a number E [0.0, … , 1.0]
 sign_progress(0.5)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>args</strong> – the Arguments as packed in IAnalysisJob.prepare()</li>
-<li><strong>sign_progress</strong> – a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – the Arguments as packed in IAnalysisJob.prepare()</p></li>
+<li><p><strong>sign_progress</strong> – a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">AnalysisJobAnalysis Object</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>AnalysisJobAnalysis Object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="core.data.interfaces.IAnalysisJob.to_database">
-<code class="descname">to_database</code><span class="sig-paren">(</span><em>container_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.to_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.to_database" title="Permalink to this definition">¶</a></dt>
+<dt id="core.data.interfaces.IAnalysisJob.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>data_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.serialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this Method if there needs to be a custom serialization
+:param data_dict: 
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.data.interfaces.IAnalysisJob.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><em>container_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/core/data/interfaces.html#IAnalysisJob.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data.interfaces.IAnalysisJob.to_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base Method which should return a dict of byte serialized 
 nump arrays if necessary, or a dict of simple key value pairs.</p>
 <p>For numpy arrays use following: 
 byte_array = numpy_array.tostring()</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -526,19 +509,17 @@ byte_array = numpy_array.tostring()</p>
 </ul>
 </div>
 <ul class="simple">
-<li>:ref:’_IAnalysisJobExample’</li>
-<li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li>:ref:<a href="#id2"><span class="problematic" id="id3">`</span></a>search`cd _docs</li>
+<li><p>:ref:’_IAnalysisJobExample’</p></li>
+<li><p><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p>:ref:<a href="#id2"><span class="problematic" id="id3">`</span></a>search`cd _docs</p></li>
 </ul>
 </div>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -547,7 +528,7 @@ byte_array = numpy_array.tostring()</p>
         <a href="analyses_example.html" class="btn btn-neutral float-right" title="IAnalysisJob Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../DevelopersGuide.html" class="btn btn-neutral" title="Developer’s Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../DevelopersGuide.html" class="btn btn-neutral float-left" title="Developer’s Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -556,11 +537,11 @@ byte_array = numpy_array.tostring()</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Gaudenz Halter.
+        &copy; Copyright 2017, Gaudenz Halter
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -573,37 +554,15 @@ byte_array = numpy_array.tostring()</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.4.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>
