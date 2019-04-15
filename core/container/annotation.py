@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 from core.data.computation import numpy_to_qt_image
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import AnnotationType, MediaObjectType, ANNOTATION, ANNOTATION_LAYER
-from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, \
+from .container_interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, \
     IHasMediaObject, ITimelineItem
 
 

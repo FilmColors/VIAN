@@ -1,6 +1,6 @@
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
-from core.data.interfaces import IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, \
+from core.container.container_interfaces import IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, \
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject
 
 from PyQt5.QtCore import pyqtSignal

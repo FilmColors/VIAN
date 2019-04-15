@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
-from core.data.interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
+from core.container.container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
 from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from core.container.analysis import SemanticSegmentationAnalysisContainer
 

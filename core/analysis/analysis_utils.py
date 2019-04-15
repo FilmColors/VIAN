@@ -1,5 +1,6 @@
 from threading import Lock
-from core.data.interfaces import IAnalysisJob, IProjectContainer
+from core.data.interfaces import IAnalysisJob
+from core.container.container_interfaces import IProjectContainer
 from typing import List, Dict
 from core.container.project import ClassificationObject, VIANProject
 

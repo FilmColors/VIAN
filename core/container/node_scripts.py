@@ -1,7 +1,7 @@
 import numpy as np
 
 from core.data.enums import NODE_SCRIPT
-from core.data.interfaces import IProjectContainer, IHasName, ISelectable
+from .container_interfaces import IProjectContainer, IHasName, ISelectable
 from core.node_editor.node_editor import NODE
 from core.node_editor.operations import *
 from core.node_editor.datatypes import *

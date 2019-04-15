@@ -1,24 +1,21 @@
 import datetime
 import json
 import cv2
-from shutil import copy2
 import os
 from random import randint
-import shelve
-from core.data.computation import blend_transparent
+
 import numpy as np
-from core.data.interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable
+from .container_interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable
 from core.data.undo_redo_manager import UndoRedoManager
 from core.data.computation import *
-from core.gui.vocabulary import VocabularyItem
 from core.data.enums import *
 from typing import List
-# from core.data.project_streaming import IStreamableContainer
 
 from core.data.hdf5_manager import HDF5Manager
 
 from core.node_editor.node_editor import *
 from shutil import copy2
+
 from enum import Enum
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import QPoint, QRect, QSize

@@ -3,7 +3,7 @@ from typing import List
 from core.container.analysis import AnalysisContainer
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
-from core.data.interfaces import IProjectContainer, IHasName, IClassifiable
+from .container_interfaces import IProjectContainer, IHasName, IClassifiable
 from core.gui.vocabulary import VocabularyItem
 import time
 from PyQt5.QtCore import pyqtSignal

@@ -8,7 +8,7 @@ import bisect
 from typing import List
 
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
-from core.data.interfaces import IProjectContainer, IHasName, ISelectable
+from .container_interfaces import IProjectContainer, IHasName, ISelectable
 from core.data.computation import *
 
 

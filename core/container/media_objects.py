@@ -1,5 +1,5 @@
 from core.data.enums import MEDIA_OBJECT, MediaObjectType
-from core.data.interfaces import IProjectContainer, IHasName, IHasMediaObject
+from .container_interfaces import IProjectContainer, IHasName, IHasMediaObject
 from core.data.computation import *
 
 class AbstractMediaObject(IProjectContainer, IHasName):

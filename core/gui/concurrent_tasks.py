@@ -17,7 +17,6 @@ class ConcurrentTaskDock(EDockWidget, IProjectChangeNotify):
         self.scroll_area.setWidgetResizable(True)
         self.show()
 
-
     def add_task(self, task_id, task_name, task_object, job = None):
         self.task_list_widget.add_task(task_id, task_name, task_object, job)
 
