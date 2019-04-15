@@ -2,10 +2,6 @@
 In this Module, all interfaces used by VIAN are defined.
 """
 
-from random import randint
-from collections import namedtuple
-
-
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 
 

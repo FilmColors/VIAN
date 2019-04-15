@@ -28,6 +28,7 @@ BARCODE_MAX_LENGTH = 1000
 # from bokeh.colors import RGB
 import pickle
 
+
 class BarcodeAnalysisJob(IAnalysisJob):
     def __init__(self):
         super(BarcodeAnalysisJob, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION, SEGMENT],

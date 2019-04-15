@@ -386,7 +386,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 else:
                     checkbox.setChecked(k in self.current_query_keywords)
                     checkbox.stateChanged.connect(partial(self.on_query_changed, checkbox))
-                self.all_checkboxes[k.k.unique_id] = checkbox
+                self.all_checkboxes[k.unique_id] = checkbox
                 group.items.append(checkbox)
             for g in self.checkbox_groups:
                 g.finalize()
