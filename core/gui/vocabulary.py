@@ -50,9 +50,22 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.show()
 
     def add_vocabulary(self, voc):
-        self.vocabulary_model.appendRow(voc.get_vocabulary_item_model())
+        self.vocabulary_model.appendRow(self.get_vocabulary_item_model(voc))
         self.treeView.setModel(self.vocabulary_model)
         # self.treeView = QTreeView()
+
+    def get_vocabulary_item_model(self, voc):
+        root = VocabularyItem(voc.name, voc)
+        for w in voc.words:
+            self.get_children(root, w)
+        return root
+
+    def get_children(self, parent_item, word):
+        item = VocabularyItem(word.name, word)
+        parent_item.appendRow(item)
+        if len(word.children) > 0:
+            for c in word.children:
+                self.get_children(item, c)
 
     def add_word(self):
         name = self.lineEdit_Item.text()

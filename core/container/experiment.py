@@ -1,14 +1,16 @@
 import json
+import time
+import numpy as np
+
 from typing import List
+
 from core.container.analysis import AnalysisContainer
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from .container_interfaces import IProjectContainer, IHasName, IClassifiable
-from core.gui.vocabulary import VocabularyItem
-import time
+
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QMessageBox, QPushButton
-import numpy as np
+from PyQt5.QtWidgets import QMessageBox
 
 
 def delete_even_if_connected_msgbox(mode="word"):
@@ -43,6 +45,7 @@ class Vocabulary(IProjectContainer, IHasName):
     onVocabularyChanged = pyqtSignal(object)
     onVocabularyWordAdded = pyqtSignal(object)
     onVocabularyWordRemoved = pyqtSignal(object)
+
     def __init__(self, name):
         IProjectContainer.__init__(self)
         self.name = name
@@ -129,11 +132,11 @@ class Vocabulary(IProjectContainer, IHasName):
                 return w
         return None
 
-    def get_vocabulary_item_model(self):
-        root = VocabularyItem(self.name, self)
+    def get_vocabulary_tree(self):
+        item = dict(name=self.name, vocabulary=self, children = [])
         for w in self.words:
-            w.get_children(root)
-        return root
+            w.get_children(item)
+        return item
 
     def get_vocabulary_as_list(self):
         result = []
@@ -342,8 +345,8 @@ class VocabularyWord(IProjectContainer, IHasName):
             self.children.append(children)
 
     def get_children(self, parent_item):
-        item = VocabularyItem(self.name, self)
-        parent_item.appendRow(item)
+        item = dict(name=self.name, word=self, children = [])
+        parent_item['children'].append(item)
         if len(self.children) > 0:
             for c in self.children:
                 c.get_children(item)

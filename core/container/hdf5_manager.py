@@ -5,20 +5,12 @@ import numpy as np
 
 ALL_REGISTERED_ANALYSES = dict()
 
+
 def vian_analysis(cl):
     ALL_REGISTERED_ANALYSES[cl.__name__] = cl
     return cl
 
 
-# def load_analysis():
-#     return [
-#             eval("SemanticSegmentationAnalysis"),
-#             eval("BarcodeAnalysisJob"),
-#             eval("ColorPaletteAnalysis"),
-#             eval("ColorFeatureAnalysis"),
-#             eval("ColormetryAnalysis"),
-#             eval("MovieMosaicAnalysis")
-#         ]
 DEFAULT_SIZE = (50,)
 DS_MOVIE = "movie"
 DS_COL_HIST = "col_histograms"
@@ -218,7 +210,7 @@ class HDF5Manager():
 
     def col_histograms(self):
         return self.h5_file[DS_COL_HIST]
-    #endregion
+    # endregion
 
     def cleanup(self):
         new_file = h5py.File(self.path.replace("analyses", "temp"), mode="w")
@@ -231,7 +223,6 @@ class HDF5Manager():
         os.remove(self.path)
         os.rename(self.path.replace("analyses", "temp"), self.path)
         self.h5_file = h5py.File(self.path, "r+")
-
 
     def get_indices(self):
         return dict(curr_pos=self._index, uidmapping=self._uid_index)
