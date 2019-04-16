@@ -230,12 +230,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
              )
         return d
 
-    def from_json(self, database_data):
-        return json.loads(database_data)
-
-    def to_json(self, container_data):
-        return json.dumps(self.serialize(container_data))
-
     def to_hdf5(self, data):
         d = np.zeros(shape=8)
         d[0:3] = np.array(data["color_lab"])

@@ -180,12 +180,6 @@ class ColorPaletteAnalysis(IAnalysisJob):
         ]
         return dict(dist = data_dict['dist'], tree=layers)
 
-    def from_json(self, database_data):
-        return self.deserialize(json.loads(database_data))
-
-    def to_json(self, container_data):
-        return json.dumps(self.serialize(container_data))
-
     def to_hdf5(self, data):
         d = np.zeros(shape=(COLOR_PALETTES_MAX_LENGTH, 6))
         count = COLOR_PALETTES_MAX_LENGTH

@@ -153,14 +153,6 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         )
         return data
 
-    def from_json(self, database_data):
-        # return json.loads(database_data)
-        return pickle.loads(database_data)
-
-    def to_json(self, container_data):
-        return pickle.dumps(container_data)
-        # return json.dumps(self.serialize(container_data))
-
     def to_hdf5(self, data):
         entry = np.zeros(self.dataset_shape, self.dataset_dtype)
 

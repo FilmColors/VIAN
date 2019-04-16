@@ -152,12 +152,6 @@ class ColorHistogramAnalysis(IAnalysisJob):
     def deserialize(self, data_dict):
         return data_dict
 
-    def from_json(self, database_data):
-        return database_data
-
-    def to_json(self, container_data):
-        return json.dumps(container_data)
-
     def to_hdf5(self, data):
         return data
 

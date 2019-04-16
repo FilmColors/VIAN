@@ -26,7 +26,7 @@ BARCODE_MAX_LENGTH = 1000
 # from bokeh.plotting import figure,save
 # from bokeh.layouts import layout
 # from bokeh.colors import RGB
-import pickle
+
 from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
@@ -219,12 +219,6 @@ class BarcodeAnalysisJob(IAnalysisJob):
         activates the Analysis.
         """
         return BarcodeParameterWidget()
-
-    def from_json(self, database_data):
-        return pickle.loads(database_data)
-
-    def to_json(self, container_data):
-        return pickle.dumps(container_data)
 
 
 class BarcodeParameterWidget(ParameterWidget):
