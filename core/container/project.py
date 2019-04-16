@@ -16,6 +16,8 @@ from .analysis import *
 from .media_objects import *
 from .node_scripts import *
 
+from core.data.importers import ImportDevice
+from core.data.exporters import ExportDevice
 
 class VIANProject(QObject, IHasName, IClassifiable):
     """
@@ -1254,6 +1256,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         except Exception as e:
             print(e)
+
+    def export(self, device: ExportDevice, path):
+        device.export(self, path)
+
+    def import_(self, device: ImportDevice, path):
+        device.import_(self, path)
 
 
     #endregion

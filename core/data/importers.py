@@ -16,6 +16,23 @@ from core.container.project import *
 from core.visualization.feature_plot import *
 from core.visualization.image_plots import *
 
+class ImportDevice:
+    def import_(self, project, path):
+        pass
+
+
+class ELANImportDevice(ImportDevice):
+    pass
+
+
+class CSVImportDevice(ImportDevice):
+    pass
+
+
+class ScreenshotImportDevice(ImportDevice):
+    pass
+
+
 class ELANProjectImporter():
     def __init__(self, main_window, remote_movie = False, import_screenshots = False, movie_formats = None):
         self.main_window = main_window
@@ -391,12 +408,13 @@ class CSVImporter():
         self.delimiter = ";"
 
     def get_fields(self, path, delimiter = ";"):
+        self.delimiter = delimiter
+
         try:
             with open(path, 'r') as csvfile:
                 reader = csv.reader((line.replace('\0','') for line in csvfile) , delimiter=delimiter)
                 for row in reader:
-                    print(row)
-                    self.delimiter = delimiter
+
                     return True, row
         except Exception as e:
             print(e)

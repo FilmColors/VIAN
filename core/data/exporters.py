@@ -15,6 +15,92 @@ def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
 
 
+
+class ExportDevice:
+    def export(self, project, path):
+        pass
+
+
+class CSVExportDevice(ExportDevice):
+    def export(self, project, path):
+        pass
+
+
+class ScreenshotsExportDevice(ExportDevice):
+    """
+    A Class that is able to export Screenshots from a Project
+    """
+    def __init__(self, naming, annotation_visibility = None,
+                 image_type = ImageType.JPG, quality = 100, smooth = False):
+        self.naming = naming
+        self.smooth = smooth
+        self.quality = quality
+        self.image_type = image_type,
+        self.annotation_visibility = annotation_visibility,
+
+    def export(self, project, path):
+        for s in project.screenshots:
+            name = self.build_file_name(self.naming, s, project.movie_descriptor)
+            file_name = os.path.join(path, name)
+
+            if self.annotation_visibility is None:
+                annotation_visibility = s.annotation_is_visible
+
+            if self.annotation_visibility:
+                img = s.img_blend
+            else:
+                img = s.get_img_movie(True)
+
+            if self.smooth:
+                img = cv2.GaussianBlur(img, (3, 3), 0)
+            # Export depending on the image Type selected
+
+            if self.image_type == ImageType.JPG:
+                cv2.imwrite(file_name + ".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, self.quality])
+
+            if self.image_type == ImageType.PNG:
+                compression = int(np.clip(float(100 - self.quality) / 10,0,9))
+                cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
+
+
+    def build_file_name(self, naming, screenshot, movie_descriptor):
+        """
+        Generates a Filename for the Screenshots by a given naming convention
+
+        :param naming:
+        :param screenshot:
+        :param movie_descriptor:
+        :return:
+        """
+        file_name = "/"
+
+        for i, name in enumerate(naming):
+            if name is not ScreenshotNamingConventionOptions.empty.name:
+                value = get_enum_value(ScreenshotNamingConventionOptions, name)
+                object_type = value[0]
+                object_attr = value[1]
+
+                if object_type == "Screenshot":
+                    if object_attr == "screenshot_group":
+                        file_name = file_name[:-1]
+                    file_name += str(getattr(screenshot, object_attr))
+
+                if object_type == "Movie":
+                    file_name += str(getattr(movie_descriptor, object_attr))
+                    print(file_name)
+
+                if i < len(naming) - 1:
+                    if get_enum_value(ScreenshotNamingConventionOptions, naming[i + 1])[1] == 0:
+                        break
+                    else:
+                        file_name += "_"
+
+        file_name = file_name.replace("__", "")
+        file_name = file_name.replace("All Shots_", "_")
+
+        return file_name
+
+
 class ScreenshotsExporter():
     """
     A Class that is able to export Screenshots from a Project
@@ -31,7 +117,6 @@ class ScreenshotsExporter():
             else:
                 name = build_file_name(self.naming, s, self.project.movie_descriptor)
             file_name = dir + name
-
 
             if annotation_visibility is None:
                 annotation_visibility = s.annotation_is_visible
@@ -70,7 +155,6 @@ class SegmentationExporter(IConcurrentJob):
         self.t_end = t_end
         self.t_duration = t_duration
         self.export_ms = export_ms
-
 
     def export(self, segmentations):
         # tab = "\t"
@@ -193,7 +277,6 @@ def build_file_name(naming, screenshot, movie_descriptor):
                     break
                 else:
                     file_name += "_"
-
 
     file_name = file_name.replace("__", "")
     file_name = file_name.replace("All Shots_", "_")
