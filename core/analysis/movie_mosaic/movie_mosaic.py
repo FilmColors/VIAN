@@ -149,12 +149,12 @@ class MovieMosaicAnalysis(IAnalysisJob):
     def get_parameter_widget(self):
         return MovieMosaicPreferences()
 
-    def from_json(self, database_data):
-        s =  pickle.loads(database_data)
-        return s
+    def to_hdf5(self, data):
+        pass
 
-    def to_json(self, container_data):
-        return pickle.dumps(container_data)
+    def from_hdf5(self, db_data):
+        pass
+
 
 
 class MovieMosaicPreferences(ParameterWidget):

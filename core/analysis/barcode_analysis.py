@@ -31,7 +31,7 @@ from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class BarcodeAnalysisJob(IAnalysisJob):
-    def __init__(self):
+    def __init__(self, resolution = 30):
         super(BarcodeAnalysisJob, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION, SEGMENT],
                                                  dataset_name="Barcodes",
                                                  dataset_shape=(BARCODE_MAX_LENGTH, 3),
@@ -39,6 +39,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
                                                  author="Gaudenz Halter",
                                                  version="1.0.0",
                                                  multiple_result=True)
+        self.resolution = resolution
 
     def prepare(self, project: VIANProject, targets: List[Segmentation], parameters, fps, class_objs = None):
         """
@@ -70,7 +71,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
             else:
                 segments.append([ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps)])
 
-            args.append([segments, parameters, movie_path, name, tgt.get_id()])
+            args.append([segments, movie_path, name, tgt.get_id()])
 
         return args
 
@@ -87,11 +88,10 @@ class BarcodeAnalysisJob(IAnalysisJob):
         sign_progress(0.0)
 
         segments = args[0]
-        parameters = args[1]
-        movie_path = args[2]
-        name = args[3]
+        movie_path = args[1]
+        name = args[2]
 
-        resolution = parameters['resolution']
+        resolution = self.resolution
 
         # Creating the VideoCapture
         video_capture = cv2.VideoCapture(movie_path)
@@ -151,7 +151,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         analysis = IAnalysisJobAnalysis(name="Barcode_" + name,
                                         results=dict(barcode=barcode, width=width),
                                         analysis_job_class=self.__class__,
-                                        parameters=parameters,
+                                        parameters=dict(resolution=self.resolution),
                                         container=args[4])
 
         sign_progress(1.0)

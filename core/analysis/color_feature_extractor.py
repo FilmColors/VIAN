@@ -35,7 +35,7 @@ array Structure:
 
 @vian_analysis
 class ColorFeatureAnalysis(IAnalysisJob):
-    def __init__(self):
+    def __init__(self, resolution = 30):
         super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorFeatures",
                                                    dataset_shape=(8,),
@@ -43,6 +43,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                                    author="Gaudenz Halter",
                                                    version="1.0.0",
                                                    multiple_result=False)
+        self.resolution = resolution
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -69,7 +70,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
                 args.append([tgt.frame_pos,
                              tgt.frame_pos,
                              project.movie_descriptor.movie_path,
-                             parameters,
                              tgt.get_id(),
                              project.movie_descriptor.get_letterbox_rect(),
                              semseg])
@@ -78,7 +78,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
                 ms_to_frames(tgt.get_start(), fps),
                 ms_to_frames(tgt.get_end(), fps),
                 project.movie_descriptor.movie_path,
-                parameters,
                 tgt.get_id(),
                 project.movie_descriptor.get_letterbox_rect(),
                 None])
@@ -98,9 +97,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
             start = args[0]
             stop = args[1]
             movie_path = args[2]
-            params = args[3]
-            margins = args[5]
-            semseg = args[6]
+            margins = args[4]
+            semseg = args[5]
             colors_lab = []
             colors_bgr = []
 
@@ -109,8 +107,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
             cap.set(cv2.CAP_PROP_POS_FRAMES, start)
             c = start
 
-            while (c < stop + params['resolution']):
-                if c % params['resolution'] != 0:
+            while (c < stop + self.resolution):
+                if c % self.resolution != 0:
                     c += 1
                     continue
 
@@ -165,8 +163,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                saturation_p = saturation_p
                                ),
                 analysis_job_class=self.__class__,
-                parameters=params,
-                container=args[4]
+                parameters=dict(resolution = self.resolution),
+                container=args[3]
             )
             )
         return result

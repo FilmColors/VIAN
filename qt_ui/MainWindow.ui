@@ -188,8 +188,6 @@
     <property name="title">
      <string>Analysis</string>
     </property>
-    <addaction name="actionMovie_Barcode"/>
-    <addaction name="actionMovie_Mosaic"/>
     <addaction name="actionColorFeatures"/>
     <addaction name="actionColor_Histogram"/>
     <addaction name="actionColor_Palette"/>

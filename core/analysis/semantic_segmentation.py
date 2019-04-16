@@ -22,7 +22,7 @@ from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class SemanticSegmentationAnalysis(IAnalysisJob):
-    def __init__(self):
+    def __init__(self, resolution=30, model = "LIP"):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
                                                            dataset_name="SemanticSegementations",
                                                            dataset_shape=(1024, 1024),
@@ -31,6 +31,8 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                                                            version="1.0.0",
                                                            multiple_result=False,
                                                            data_serialization=DataSerialization.MASKS)
+        self.model = model
+        self.resolution = resolution
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -45,17 +47,21 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         for tgt in targets:
             if tgt.get_type() == SCREENSHOT_GROUP:
                 for s in tgt.screenshots:
-                    args.append([ms_to_frames(s.get_start(), fps), ms_to_frames(s.get_end(), fps), project.movie_descriptor.movie_path, parameters, s.get_id()])
+                    args.append([ms_to_frames(s.get_start(), fps),
+                                 ms_to_frames(s.get_end(), fps),
+                                 project.movie_descriptor.movie_path,
+                                 s.get_id()])
             else:
-                args.append([ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps),
-                             project.movie_descriptor.movie_path, parameters, tgt.get_id()])
+                args.append([ms_to_frames(tgt.get_start(), fps),
+                             ms_to_frames(tgt.get_end(), fps),
+                             project.movie_descriptor.movie_path,
+                             tgt.get_id()])
         return args
 
     def process(self, args, sign_progress):
         sign_progress(0.0)
 
         # Signal the Progress
-        params = args[0][3]
 
         results = []
         tot = len(args)
@@ -72,7 +78,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
             KTF.set_session(session)
 
             model = None
-            if params['model'] == "LIP":
+            if self.model == "LIP":
                 model = PSPNetModelVIAN(input_shape=(512, 512, 3))
                 model.load_weights(KERAS_LIP_WEIGHTS)
                 model_name = DATASET_NAME_LIP
@@ -98,8 +104,8 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                     name="Semantic Segmentation",
                     results=np.argmax(masks, axis=2).astype(np.uint8),
                     analysis_job_class=self.__class__,
-                    parameters=params,
-                    container=arg[4],
+                    parameters=dict(model = self.model, resolution=self.resolution),
+                    container=arg[3],
                     dataset=model_name
                 ))
 

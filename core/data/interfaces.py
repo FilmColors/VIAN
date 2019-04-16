@@ -92,6 +92,11 @@ class IAnalysisJob(QObject):
         """
         self.target_class_obj = class_objs
 
+        # Apply the given parameters
+        for k, v in parameters.items():
+            if hasattr(self, k):
+                setattr(self, k, v)
+
         return None
 
     def process(self, args, sign_progress):

@@ -149,11 +149,11 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
     # Resizing all to same dimension
     fx = image_size / frame.shape[0]
     frame = cv2.resize(frame, None, None, fx, fx, cv2.INTER_CUBIC)
-    labels = cv2.resize(labels, None, None, fx, fx, cv2.INTER_CUBIC)
+    labels = cv2.resize(labels, None, None, fx, fx, cv2.INTER_NEAREST)
     frame_bgr = cv2.cvtColor(frame, cv2.COLOR_LAB2BGR)
 
     if mask is not None:
-        mask = cv2.resize(mask, None, None, fx, fx, cv2.INTER_CUBIC)
+        mask = cv2.resize(mask, (labels.shape[1], labels.shape[0]), None, cv2.INTER_NEAREST)
 
         if mask_inverse:
             labels[np.where(mask == mask_index)] = 255

@@ -20,7 +20,7 @@ from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class ColorPaletteAnalysis(IAnalysisJob):
-    def __init__(self):
+    def __init__(self, resolution = 30):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorPalettes",
                                                    dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6), #(Distance, Layer, L, A, B, N)
@@ -28,6 +28,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
                                                    author="Gaudenz Halter",
                                                      version="1.0.0",
                                                      multiple_result=True)
+        self.resolution = resolution
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -51,7 +52,6 @@ class ColorPaletteAnalysis(IAnalysisJob):
             args.append([ms_to_frames(tgt.get_start(), fps),
                          ms_to_frames(tgt.get_end(), fps),
                          project.movie_descriptor.movie_path,
-                         parameters,
                          tgt.get_id(),
                          project.movie_descriptor.get_letterbox_rect(),
                          semseg])
@@ -65,9 +65,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
         start = args[0]
         stop = args[1]
         movie_path = args[2]
-        params = args[3]
-        margins = args[5]
-        semseg = args[6]
+        margins = args[4]
+        semseg = args[5]
         bin_mask = None
         if semseg is not None:
             name, labels = self.target_class_obj.semantic_segmentation_labels
@@ -80,8 +79,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
         cap.set(cv2.CAP_PROP_POS_FRAMES, start)
         c = start
 
-        while (c < stop + params['resolution']):
-            if c % params['resolution'] != 0:
+        while c < stop + self.resolution:
+            if c % self.resolution != 0:
                 c += 1
                 continue
             sign_progress((c - start) / ((stop - start) + 1))
@@ -110,7 +109,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
             name="Color-Palette",
             results = dict(tree=result.tree, dist = result.merge_dists),
             analysis_job_class=self.__class__,
-            parameters=params, container=args[4]
+            parameters=dict(resolution=self.resolution),
+            container=args[3]
         )
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
