@@ -36,7 +36,7 @@ class HeadlessMainWindow(QObject):
         self.project = None
         self.settings = HeadlessUserSettings()
 
-        self.thread_pool = QThreadPool(self)
+        # self.thread_pool = QThreadPool(self)
         # self.corpus_interface = LocalCorpusInterface()
 
     def print_message(self, msg, color):
@@ -47,8 +47,8 @@ class HeadlessMainWindow(QObject):
         # self.project_streamer.on_closed()
 
     #region Analysis
-    def start_worker(self, worker, name = "New Task"):
-        self.thread_pool.start(worker)
+    # def start_worker(self, worker, name = "New Task"):
+    #     self.thread_pool.start(worker)
 
     def run_analysis(self, analysis:IAnalysisJob, targets:List[IProjectContainer], parameters:Dict, class_objs:List[ClassificationObject], fps):
         for clobj in class_objs:
@@ -89,25 +89,15 @@ class HeadlessMainWindow(QObject):
                     t.join()
 
     def worker_progress(self, tpl):
-        return
-        print(tpl)
+        pass
 
     def worker_error(self, args):
         print("Error", args)
 
     def worker_finished(self, args):
         print("Error", args)
-
-
-
     #endregion
 
-    # #region Corpus
-    # def connect_local_corpus(self, user, path):
-    #     self.corpus_interface.connect_user(user, path)
-    # def commit_local(self, user, project):
-    #     self.corpus_interface.commit_project(user, project)
-    # #endregion
 
     #region Dispatcher
     def dispatch_on_changed(self, receiver=None, item=None):
@@ -165,7 +155,8 @@ def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
         return None, None
 
 
-def create_project_headless(name, location, movie_path, screenshots_frame_pos = None, segmentations = None, move_movie="None", template_path = "") -> VIANProject:
+def create_project_headless(name, location, movie_path, screenshots_frame_pos = None,
+                            segmentations = None, move_movie="None", template_path = "") -> VIANProject:
     """
     Creates a VIANProject without the need of a MainWindow
     :param name: name of the project
@@ -184,7 +175,7 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         project = VIANProject(mw, name=name, folder=location, path=location + "/" + name)
         mw.project = project
         project.inhibit_dispatch = False
-        print(project.path)
+
         if os.path.isdir(project.folder):
             c = 0
             while(os.path.isdir(project.folder + "_" +str(c).zfill(2))):
@@ -216,14 +207,13 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
         # Import Segmentation
         if segmentations is not None:
             for s in segmentations:
-                print(s)
-
                 segmentat = None
                 # Check if there already exists a segmentation with this name
                 for segm in project.segmentation:
                     if segm.get_name() == s[0]:
                         segmentat = s
                         break
+
                 # if not create a new Segentation
                 if segmentat is None:
                     segmentat = project.create_segmentation(s[0])
@@ -237,11 +227,13 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
             fps = cap.get(cv2.CAP_PROP_FPS)
             for i, s in enumerate(screenshots_frame_pos):
                 project.create_screenshot_headless("Screenshot_" + str(i).zfill(3), frame_pos=s, fps=fps)
+
         # Store the project
         project.store_project(HeadlessUserSettings(), project.path)
         project.connect_hdf5()
-        project.hdf5_manager.initialize_all([SemanticSegmentationAnalysis, ColorPaletteAnalysis, ColorFeatureAnalysis, BarcodeAnalysisJob, MovieMosaicAnalysis])
+        project.hdf5_manager.initialize_all()
         project.hdf5_manager.initialize_colorimetry(int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 30))
+
         return project
     except Exception as e:
         raise e

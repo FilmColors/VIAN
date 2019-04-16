@@ -40,14 +40,7 @@ class ITimeStepDepending():
         print("ITimeStepDepending: Not Implemented by", self)
 
 
-class ILiveWidgetExposing():
-    def get_live_widget(self):
-        pass
-    def compute_widget(self, frame, data):
-        pass
-
-
-class IAnalysisJob(ILiveWidgetExposing):
+class IAnalysisJob(QObject):
     """
     This is the BaseClass for all Analyses. 
     Subclass it to implement your own Analyses. 
@@ -67,6 +60,7 @@ class IAnalysisJob(ILiveWidgetExposing):
         :param multiple_result: Whether the Analysis should run for each input container 
         seperately or once for all input containers
         """
+        super(IAnalysisJob, self).__init__()
         self.name = name
         self.source_types = source_types
         self.dataset_name = dataset_name
@@ -187,28 +181,6 @@ class IAnalysisJob(ILiveWidgetExposing):
     def serialization_type(self):
         return self.data_serialization
 
-    def to_json(self, container_data):
-        """
-        Base Method which should return a dict of byte serialized 
-        nump arrays if necessary, or a dict of simple key value pairs.
-
-        For numpy arrays use following: 
-        byte_array = numpy_array.tostring()
-
-        :return: 
-        """
-        return dict()
-
-    def from_json(self, database_data):
-        """
-        The inverse of the to_database() implementation. 
-
-        For numpy arrays:
-        numpy_array = numpy.fromstring(byte_array)
-
-        :return: 
-        """
-
     def serialize(self, data_dict):
         """
         Override this Method if there needs to be a custom serialization
@@ -244,8 +216,6 @@ class ParameterWidget(QWidget):
     """
     def __init__(self):
         super(ParameterWidget, self).__init__(None)
-
-
 
     def get_parameters(self):
         """

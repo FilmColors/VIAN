@@ -216,7 +216,8 @@ class GenericXMLDevice():
                         path = "No Export"
                     else:
                         path += ".json"
-                        data_string = eval(a.analysis_job_class)().to_json(a.get_adata())
+                        # data_string = eval(a.analysis_job_class)().to_json(a.get_adata())
+                        data_string = str(a.analysis_job_class)
                         with open(out_path + path, "w") as f:
                             f.write(data_string)
 
