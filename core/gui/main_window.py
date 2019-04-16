@@ -1,4 +1,6 @@
 import cProfile
+import glob
+
 from functools import partial
 
 from core.concurrent.auto_segmentation import *
@@ -1493,7 +1495,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
 
     def analysis_triggered(self, analysis):
-
         targets = []
         for sel in self.project.selected:
             if sel.get_type() in analysis.source_types:
@@ -1633,12 +1634,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #     print(e)
 
     def on_start_visualizer_legacy(self):
-        try:
-            contributor = DBContributor(self.settings.CONTRIBUTOR.full_name, "", email=self.settings.CONTRIBUTOR.email)
-            visualizer = VIANVisualizer(self, contributor=contributor)
-            visualizer.show()
-        except Exception as e:
-            print(e)
+        pass
 
     def on_export_screenshots(self):
         dialog = DialogScreenshotExporter(self, self.screenshots_manager)
@@ -1971,9 +1967,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #region Corpus
     def on_create_corpus(self):
-        dialog = CreateCorpusDialog(self)
-        dialog.show()
-        dialog.onCreated.connect(self.on_corpus_created)
+        pass
 
     @pyqtSlot(object)
     def on_corpus_created(self,  corpus):
@@ -1988,10 +1982,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print(e)
 
     def open_remote_corpus(self):
-        dialog = CorpusConnectRemoteDialog(self, self.corpus_client.metadata.contributor)
-        dialog.onConnectRemote.connect(self.corpus_client.connect_remote)
-        self.corpus_client_toolbar.show()
-        dialog.show()
+        pass
 
     def connect_to_corpus(self, corpus):
         pass

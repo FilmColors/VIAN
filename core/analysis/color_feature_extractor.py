@@ -40,9 +40,9 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                                    dataset_name="ColorFeatures",
                                                    dataset_shape=(8,),
                                                    dataset_dtype=np.float16,
-                                                    author="Gaudenz Halter",
-                                                     version="1.0.0",
-                                                     multiple_result=False)
+                                                   author="Gaudenz Halter",
+                                                   version="1.0.0",
+                                                   multiple_result=False)
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
