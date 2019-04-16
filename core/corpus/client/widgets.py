@@ -155,7 +155,9 @@ class CorpusCommitDialog(EDialogWidget):
             self.persons = self.corpus_client.corpus_interface.get_persons()
             self.processes = self.corpus_client.corpus_interface.get_color_processes()
         except Exception as e:
-            self.persons = None
+            self.persons = []
+            self.persons = []
+            self.processes = []
             print(e)
 
         self.filmography = FilmographyWidget(self, main_window.project, persons=self.persons, processes=self.processes)

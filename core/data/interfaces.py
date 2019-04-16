@@ -91,7 +91,6 @@ class IAnalysisJob(QObject):
         :return: A List of packed Data which will be handed to the IAnalysisJob.process()
         """
         self.target_class_obj = class_objs
-
         # Apply the given parameters
         for k, v in parameters.items():
             if hasattr(self, k):

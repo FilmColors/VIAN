@@ -359,34 +359,36 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
             else:
                  pixmap = numpy_to_pixmap(ndarray, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
 
-        exists = self.color_dt.update_item(scr.unique_id, [x, y], pixmap)
-        if not exists:
-            self.color_dt.add_image(x,
-                                    y,
-                                    ndarray,
-                                    uid=scr.unique_id,
-                                    convert=False,
-                                    channels=dict(chroma=lch[1],
-                                                  luminance=lch[0],
-                                                  hue=((lch[1] + np.pi) / (2*np.pi)) * 100,
-                                                  saturation=y))
-        exists = self.ab_view.update_item(scr.unique_id, [128 - lab[1], 128 - lab[2]], pixmap)
-        if not exists:
-            self.ab_view.add_image(128 - lab[1],
-                                   128 - lab[2],
-                                   ndarray,
-                                   to_float=True,
-                                   convert=False,
-                                   uid=scr.unique_id)
-        exists = self.lc_view.update_item(scr.unique_id, [lab[1], lab[0], lab[2]], pixmap)
-        if not exists:
-            self.lc_view.add_image(lab[1],
-                                   lab[0],
-                                   ndarray,
-                                   convert=False,
-                                   uid=scr.unique_id,
-                                   z=lab[2])
-
+        try:
+            exists = self.color_dt.update_item(scr.unique_id, [x, y], pixmap)
+            if not exists:
+                self.color_dt.add_image(x,
+                                        y,
+                                        ndarray,
+                                        uid=scr.unique_id,
+                                        convert=False,
+                                        channels=dict(chroma=lch[1],
+                                                      luminance=lch[0],
+                                                      hue=((lch[1] + np.pi) / (2*np.pi)) * 100,
+                                                      saturation=y))
+            exists = self.ab_view.update_item(scr.unique_id, [128 - lab[1], 128 - lab[2]], pixmap)
+            if not exists:
+                self.ab_view.add_image(128 - lab[1],
+                                       128 - lab[2],
+                                       ndarray,
+                                       to_float=True,
+                                       convert=False,
+                                       uid=scr.unique_id)
+            exists = self.lc_view.update_item(scr.unique_id, [lab[1], lab[0], lab[2]], pixmap)
+            if not exists:
+                self.lc_view.add_image(lab[1],
+                                       lab[0],
+                                       ndarray,
+                                       convert=False,
+                                       uid=scr.unique_id,
+                                       z=lab[2])
+        except Exception as e:
+            print(e)
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """

@@ -18,7 +18,8 @@ from random import sample
 import requests
 
 PAL_WIDTH = 720
-EP_ROOT = "http://ercwebapp.westeurope.cloudapp.azure.com/api/"
+# EP_ROOT = "http://ercwebapp.westeurope.cloudapp.azure.com/api/"
+EP_ROOT = "http://127.0.0.1:5000/api/"
 # EP_VIAN_VERSION = self.ep_root + "/vian/version"
 # self.ep_get_vian_update = self.ep_root + "/vian/download_vian/"
 
@@ -218,7 +219,7 @@ class WebAppCorpusInterface(QObject):
            """
         try:
             # region -- PREPARE --
-            if self.verify_project() == False:
+            if not self.verify_project():
                 return
 
             export_root = project.folder + "/corpus_export/"
@@ -302,6 +303,8 @@ class WebAppCorpusInterface(QObject):
                                 masks_to_export.append(dict(obj_name=cobj.name, ds_name=ds_name, labels=sem_labels))
                         masks_to_export_names = [m['ds_name'] for m in masks_to_export]
 
+                        print(masks_to_export)
+                        print(masks_to_export_names)
                         for counter, entry in enumerate(masks_to_export):
                             # Find the correct Mask Analysis
                             for a in scr.connected_analyses:
@@ -315,12 +318,8 @@ class WebAppCorpusInterface(QObject):
                                     # data = project.main_window.eval_class(a.analysis_job_class)().from_json(data)
 
                                     if dataset in masks_to_export_names:
-                                        # mask = cv2.resize(data.astype(np.uint8), (img.shape[1], img.shape[0]),
-                                        #                   interpolation=cv2.INTER_NEAREST)
-
                                         mask_path = mask_dir + dataset + "_" + str(scr.scene_id) + "_" + str(
                                             scr.shot_id_segm) + ".png"
-                                        # cv2.imwrite(mask_path, mask, [cv2.IMWRITE_PNG_COMPRESSION, PNG_COMPRESSION_RATE])
 
                                         if scr.unique_id not in mask_index:
                                             mask_index[int(scr.unique_id)] = []
@@ -360,17 +359,13 @@ class WebAppCorpusInterface(QObject):
                                   headers=dict(type="upload", authorization=contributor.token.encode())).text
                 print("Redceived", r)
             except Exception as e:
-                raise e
-                print(e)
+                pass
+
             finally:
                 fin.close()
 
-            commit_result = dict(success=True, dbproject=DBProject().to_database(True))
-            if commit_result['success']:
-                self.onCommited.emit(True, DBProject().from_database(commit_result['dbproject']), project)
-            else:
-                self.onCommited.emit(False, None, project)
-
+            # commit_result = dict(success=True, dbproject=DBProject().to_database(True))
+            # if commit_result['success']:
         except Exception as e:
             print("Exception in RemoteCorpusClient.commit_project(): ", str(e))
 
