@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 import sip
 from core.data.settings import Contributor
 import os
+import numpy as np
 from PyQt5 import uic
 from core.data.computation import create_icon
 from core.corpus.client.corpus_client import CorpusClient
@@ -117,11 +118,13 @@ class CorpusProgressWidget(QWidget):
                         if found:
                             n_analyses_done += 1
                         else:
-                            if q[0] not in self.missing_analyses:
-                                self.missing_analyses[q[0]] = dict()
-                            if q[1] not in self.missing_analyses[q[0]]:
-                                self.missing_analyses[q[0]][q[1]] = []
-                            self.missing_analyses[q[0]][q[1]] .append(s)
+                            if q[2] not in self.missing_analyses:
+                                self.missing_analyses[q[2]] = dict()
+                            if q[0] not in self.missing_analyses[q[2]]:
+                                self.missing_analyses[q[2]][q[0]] = dict()
+                            if q[1] not in self.missing_analyses[q[2]][q[0]]:
+                                self.missing_analyses[q[2]][q[0]][q[1]] = []
+                            self.missing_analyses[q[2]][q[0]][q[1]] .append(s)
 
                 if "SegmentAnalyses" not in self.items:
                     bar = ProgressItem("SegmentAnalyses")
@@ -129,7 +132,7 @@ class CorpusProgressWidget(QWidget):
                     self.items["SegmentAnalyses"] = bar
                 else:
                     bar = self.items["SegmentAnalyses"]
-                bar.progress_bar.setValue(n_analyses_done / n_analyses * 100)
+                bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
 
             if "screenshot_analyses" in data:
                 n_analyses = len(self.main_window.project.screenshots) * len(data["screenshot_analyses"])
@@ -147,11 +150,13 @@ class CorpusProgressWidget(QWidget):
                         if found:
                             n_analyses_done += 1
                         else:
-                            if q[0] not in self.missing_analyses:
-                                self.missing_analyses[q[0]] = dict()
-                            if q[1] not in self.missing_analyses[q[0]]:
-                                self.missing_analyses[q[0]][q[1]] = []
-                            self.missing_analyses[q[0]][q[1]].append(s)
+                            if q[2] not in self.missing_analyses:
+                                self.missing_analyses[q[2]] = dict()
+                            if q[0] not in self.missing_analyses[q[2]]:
+                                self.missing_analyses[q[2]][q[0]] = dict()
+                            if q[1] not in self.missing_analyses[q[2]][q[0]]:
+                                self.missing_analyses[q[2]][q[0]][q[1]] = []
+                            self.missing_analyses[q[2]][q[0]][q[1]].append(s)
 
                 if "ScreenshotAnalyses" not in self.items:
                     bar = ProgressItem("ScreenshotAnalyses")
@@ -159,25 +164,27 @@ class CorpusProgressWidget(QWidget):
                     self.items["ScreenshotAnalyses"] = bar
                 else:
                     bar = self.items["ScreenshotAnalyses"]
-                bar.progress_bar.setValue(n_analyses_done / n_analyses * 100)
+                bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
             pass
 
     def run_all(self):
-        for analysis_name in self.missing_analyses.keys():
-            analysis = self.main_window.eval_class(analysis_name)
-            for clobj_name, containers in self.missing_analyses[analysis_name].items():
-                clobj = self.main_window.project.experiments[0].get_classification_object_by_name(clobj_name)
+        for priority in sorted(self.missing_analyses.keys()):
+            for analysis_name in self.missing_analyses[priority].keys():
+                analysis = self.main_window.eval_class(analysis_name)
+                for clobj_name, containers in self.missing_analyses[priority][analysis_name].items():
+                    clobj = self.main_window.project.experiments[0].get_classification_object_by_name(clobj_name)
 
-                if clobj is None:
-                    print("Not found")
-                    continue
-                d = dict(
-                    analysis= analysis(),
-                    targets = containers,
-                    parameters = None,
-                    classification_objs = clobj
-                )
-                self.main_window.on_start_analysis(d)
+                    if clobj is None:
+                        print("Not found")
+                        continue
+                    d = dict(
+                        analysis= analysis(),
+                        targets = containers,
+                        parameters = None,
+                        classification_objs = clobj
+                    )
+                    print(priority, analysis_name)
+                    self.main_window.on_start_analysis(d)
         pass
 
 

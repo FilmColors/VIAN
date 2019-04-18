@@ -167,10 +167,10 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
 
     data = []
 
-    #region SEEDS
+    # region SEEDS
     hist = np.histogram(labels, bins = bins)
 
-    #Make sure the normalization factor is not too low
+    #M ake sure the normalization factor is not too low
     normalization_f = np.amin(hist[0])
     if normalization_f < normalization_lower_bound:
         normalization_f = normalization_lower_bound

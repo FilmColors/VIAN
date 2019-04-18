@@ -235,5 +235,4 @@ class AnalysisWorker(QObject):
             return None
 
     def _on_progress(self, float_value):
-        print(self.current_task_id, float_value)
         self.signals.sign_task_manager_progress.emit(self.current_task_id, float_value)

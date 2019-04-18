@@ -13,18 +13,18 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
     author = "ERC Advanced Grant FilmColors, VMML"
 
     requirements = dict(segment_analyses = [
-                            (ColorFeatureAnalysis.__name__, "Global"),
-                            (ColorPaletteAnalysis.__name__, "Global"),
-                            (ColorHistogramAnalysis.__name__, "Global")
+                            (ColorFeatureAnalysis.__name__, "Global", 0),
+                            (ColorPaletteAnalysis.__name__, "Global", 0),
+                            (ColorHistogramAnalysis.__name__, "Global", 0)
                         ],
                         screenshot_analyses = [
-                            (SemanticSegmentationAnalysis.__name__, "Global"),
-                            (ColorFeatureAnalysis.__name__, "Foreground"),
-                            (ColorFeatureAnalysis.__name__, "Background"),
-                            (ColorFeatureAnalysis.__name__, "Global"),
-                            (ColorPaletteAnalysis.__name__, "Foreground"),
-                            (ColorPaletteAnalysis.__name__, "Background"),
-                            (ColorPaletteAnalysis.__name__, "Global")
+                            (SemanticSegmentationAnalysis.__name__, "Global", 0),
+                            (ColorFeatureAnalysis.__name__, "Foreground", 1),
+                            (ColorFeatureAnalysis.__name__, "Background", 1),
+                            (ColorFeatureAnalysis.__name__, "Global", 1),
+                            (ColorPaletteAnalysis.__name__, "Foreground", 1),
+                            (ColorPaletteAnalysis.__name__, "Background", 1),
+                            (ColorPaletteAnalysis.__name__, "Global", 1)
                         ],
                         annotation_analyses=[]
                         )

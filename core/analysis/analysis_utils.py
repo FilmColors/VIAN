@@ -31,3 +31,4 @@ def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IPro
             with PROJECT_LOCK:
                 analysis.modify_project(project, res)
                 project.add_analysis(res)
+
