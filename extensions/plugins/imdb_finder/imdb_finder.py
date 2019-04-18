@@ -7,7 +7,7 @@ import csv
 from core.data.plugin import *
 from imdb import IMDb
 import requests
-from core.concurrent.worker import MinimalThreadWorker, run_minimal_worker
+from core.concurrent.worker import MinimalThreadWorker
 from core.data.computation import open_web_browser
 from collections import namedtuple
 

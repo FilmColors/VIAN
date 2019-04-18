@@ -7,7 +7,7 @@ from core.concurrent.auto_segmentation import *
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
-from core.concurrent.worker import MinimalThreadWorker
+from core.concurrent.worker import MinimalThreadWorker, WorkerManager
 from core.concurrent.worker_functions import *
 from core.corpus.client.widgets import *
 from core.data.cache import HDF5Cache
@@ -89,6 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onCorpusConnected = pyqtSignal(object)
     onCorpusDisconnected = pyqtSignal(object)
     currentClassificationObjectChanged = pyqtSignal(object)
+    onAnalysisIntegrated = pyqtSignal()
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -152,17 +153,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vian_event_handler = VIANEventHandler(self)
         self.vian_event_handler.moveToThread(self.vian_event_handler_thread)
         self.vian_event_handler_thread.start()
-        # self.thread_pool.setMaxThreadCount(8)
 
         self.colormetry_running = False
         self.colormetry_job = None
-
-        # loading_screen.showMessage("Create Data Stream Database", Qt.AlignHCenter|Qt.AlignBottom,
-        #                            QColor(200,200,200,100))
-
-        # self.numpy_data_manager = NumpyDataManager(self)
-        # self.project_streamer = ProjectStreamerShelve(self)
-        # self.project_streamer = SQLiteStreamer(self)
 
         self.video_capture = None
 
@@ -200,7 +193,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.facial_identification_dock = None
         self.pipeline_widget = None
         self.script_editor = None
-        # self.addDockWidget(Qt.RightDockWidgetArea, self.script_editor)
 
         self.corpus_visualizer = VIANVisualizer2(self)
         self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
@@ -221,78 +213,48 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drawing_editor = None
         self.concurrent_task_viewer = None
 
-        # self.player = Player_VLC(self)
+
         self.player = Player_VLC(self)
-        # self.player = Player_Qt(self)
         self.player_dock_widget = None
 
         self.project = VIANProject(self, "", "Default Project")
         self.corpus_client = CorpusClient()
 
 
-        # loading_screen.showMessage("Creating GUI", Qt.AlignHCenter|Qt.AlignBottom,
-        #                            QColor(200,200,200,100))
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread(self)
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
 
-        # self.frame_update_thread.started.connect(self.frame_update_worker.run)
         self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
         self.create_widget_elan_status()
-        # loading_screen.showMessage("Creating GUI: Player", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
         self.create_widget_video_player()
-        # self.create_analyses_widget()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
         self.create_annotation_toolbar()
         self.create_annotation_dock()
         self.annotation_options.optionsChanged.connect(self.annotation_toolbar.on_options_changed)
         self.annotation_options.optionsChanged.connect(self.drawing_overlay.on_options_changed)
-
-        # loading_screen.showMessage("Creating GUI: ScreenshotManager", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
         self.create_screenshot_manager()
-
-        # loading_screen.showMessage("Creating GUI: NodeEditor", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
         self.create_node_editor_results()
         self.create_node_editor()
         self.create_screenshots_toolbar()
         self.create_outliner()
         self.create_screenshot_manager_dock_widget()
         self.create_inspector()
-
-        # loading_screen.showMessage("Creating GUI: Timeline", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
         self.create_timeline()
         self.create_widget_player_controls()
         self.create_perspectives_manager()
         self.create_history_view()
         self.create_concurrent_task_viewer()
-
         self.create_vocabulary_manager()
         self.create_vocabulary_matrix()
         self.create_query_widget()
-
-        # loading_screen.showMessage("Creating GUI: Analysis", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
         self.create_analysis_results_widget()
         self.create_quick_annotation_dock()
-
-        # loading_screen.showMessage("Creating GUI: Colorimetry Live Widget", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
         self.create_colorimetry_live()
-
-        # loading_screen.showMessage("Creating GUI: Experiment Editor", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
         self.create_experiment_editor()
-
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
-
-        # loading_screen.showMessage("Creating GUI: Create Layout", Qt.AlignHCenter | Qt.AlignBottom,
-        #                            QColor(200, 200, 200, 100))
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
@@ -313,12 +275,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.history_view.hide()
         self.concurrent_task_viewer.hide()
 
-        # Tab File
-        # loading_screen.showMessage("Initializing Callbacks", Qt.AlignHCenter|Qt.AlignBottom,
-        #                            QColor(250, 250, 250, 100))
+        self.worker_manager = WorkerManager(self)
 
-        ## Action Slots ##
-        # FILE MENU
+        self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
+
         self.actionNew.triggered.connect(self.action_new_project)
         self.actionLoad.triggered.connect(self.on_load_project)
         self.actionSave.triggered.connect(self.on_save_project)
@@ -456,7 +416,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.experiment_dock.experiment_editor,
                                     # self.corpus_client,
                                     self.colorimetry_live,
-                                    self.query_widget
+                                    self.query_widget,
+                                    self.worker_manager
                                           ]
 
         self.menus_list = [
@@ -1168,7 +1129,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def worker_progress(self, tpl):
         # self.progress_bar.set_progress(float)
         total = self.concurrent_task_viewer.update_progress(tpl[0],tpl[1])
-        self.progress_bar.set_progress(float(total)/100)
+        self.progress_bar.set_progress(float(total))
 
     def worker_abort(self, int):
         self.concurrent_task_viewer.remove_task(int)
@@ -1504,44 +1465,52 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.onAnalyse.connect(self.on_start_analysis)
         dialog.show()
 
-
     def on_start_analysis(self, from_dialog):
         analysis = from_dialog['analysis']
         targets = from_dialog['targets']
         parameters = from_dialog['parameters']
         class_objs = from_dialog['classification_objs']
         fps = self.player.get_fps()
+        self.worker_manager.push(self.project, analysis, targets, parameters, fps, class_objs)
 
-        args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
+        # args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
+        #
+        # if analysis.multiple_result:
+        #     for arg in args:
+        #         worker = Worker(analysis.process, self, self.analysis_result, arg,
+        #                         msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
+        #         self.start_worker(worker, analysis.get_name())
+        # else:
+        #     worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
+        #     self.start_worker(worker, analysis.get_name())
 
-        if analysis.multiple_result:
-            for arg in args:
-                worker = Worker(analysis.process, self, self.analysis_result, arg,
-                                msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
-                self.start_worker(worker, analysis.get_name())
-        else:
-            worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
-            self.start_worker(worker, analysis.get_name())
+    # @pyqtSlot(object, object, object, object)
+    # def on_analysis_prepare(self, analysis, targets, parameters, class_objs):
+    #     fps = self.player.get_fps()
+    #     args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
 
     def analysis_result(self, result):
-        analysis = result[1]
-        result = result[0]
+        pass
+        # analysis = result[1]
+        # result = result[0]
+        #
+        # try:
+        #     if isinstance(result, list):
+        #         for r in result:
+        #             analysis.modify_project(self.project, r, main_window = self)
+        #             self.project.add_analysis(r, dispatch = False)
+        #             r.unload_container()
+        #     else:
+        #         analysis.modify_project(self.project, result, main_window=self)
+        #         self.project.add_analysis(result)
+        #         result.unload_container()
+        # except Exception as e:
+        #     print("Exception in MainWindow.analysis_result", str(e))
+        # self.project.dispatch_changed(item=self.project)
+        #
+        # # Let the Analysis Worker know to start the next analysis
+        # self.onAnalysisIntegrated.emit()
 
-        try:
-            if isinstance(result, list):
-                for r in result:
-                    analysis.modify_project(self.project, r, main_window = self)
-                    self.project.add_analysis(r, dispatch = False)
-                    r.unload_container()
-            else:
-                analysis.modify_project(self.project, result, main_window=self)
-                self.project.add_analysis(result)
-                result.unload_container()
-        except Exception as e:
-            raise e
-            print("Exception in MainWindow.analysis_result", str(e))
-        self.project.dispatch_changed(item=self.project)
-        # Unload the analysis from Memory
 
     def on_classification_object_changed(self, cl_obj):
         self.project.set_active_classification_object(cl_obj)

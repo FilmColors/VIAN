@@ -10,6 +10,7 @@ import subprocess
 import cv2
 import inspect
 import importlib
+import random
 
 # import matplotlib.pyplot as plt
 import numpy as np
@@ -613,3 +614,13 @@ def import_module_from_path(path):
     spec = importlib.util.spec_from_file_location("current_pipeline_module", path)
     foo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(foo)
+
+def generate_id(not_list = None):
+    if not_list is None:
+        not_list = []
+
+    new_id = random.randint(0, 9999999)
+    while new_id in not_list:
+        new_id = random.randint(0, 9999999)
+
+    return new_id

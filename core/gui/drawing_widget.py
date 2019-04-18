@@ -17,8 +17,6 @@ from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu
 from core.gui.hsv_color_picker import HSVColorPicker
 
-
-from core.concurrent.worker import LiveWidgetThreadWorker, run_minimal_worker
 from .ewidgetbase import EDockWidget, EToolBar
 
 

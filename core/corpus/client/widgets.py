@@ -68,6 +68,7 @@ class WebAppCorpusDock(EDockWidget):
         self.progress_widget.update_state()
         pass
 
+
 class CorpusProgressWidget(QWidget):
     def __init__(self, parent, main_window):
         super(CorpusProgressWidget, self).__init__(parent)
@@ -187,7 +188,6 @@ class ProgressItem(QWidget):
         self.layout().addWidget(QLabel(name, self))
         self.progress_bar = QProgressBar(self)
         self.layout().addWidget(self.progress_bar)
-
 
 
 class CorpusClientWidget(QWidget):

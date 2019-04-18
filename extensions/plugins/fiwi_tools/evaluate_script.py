@@ -17,7 +17,6 @@ from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
 from core.gui.ewidgetbase import EDialogWidget
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from core.concurrent.worker import SimpleWorker
 
 from PyQt5 import uic
 from core.data.interfaces import IConcurrentJob
