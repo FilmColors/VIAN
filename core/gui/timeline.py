@@ -14,6 +14,8 @@ from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 from core.gui.ewidgetbase import ImagePreviewPopup, TextEditPopup
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
 
+from core.analysis.color_feature_extractor import ColorFeatureAnalysis
+
 import time
 
 class TimelineContainer(EDockWidget):
@@ -65,6 +67,10 @@ class TimelineContainer(EDockWidget):
         self.a_show_time_indicator.setCheckable(True)
         self.a_show_time_indicator.setChecked(True)
 
+        self.a_use_features = self.menu_display.addAction("\tUse Segment Average Colors")
+        self.a_use_features.setCheckable(True)
+        self.a_use_features.setChecked(True)
+
         self.menu_options = self.inner.menuBar().addMenu("Options")
         self.a_inhibit_overlap = self.menu_options.addAction("\tInhibit Overlap")
         self.a_inhibit_overlap.setCheckable(True)
@@ -85,7 +91,7 @@ class TimelineContainer(EDockWidget):
         self.a_use_grid.setCheckable(True)
         self.a_use_grid.setChecked(self.main_window.settings.USE_GRID)
         self.a_use_grid.triggered.connect(self.update_settings)
-
+        self.a_use_features.triggered.connect(self.update_settings)
         self.a_show_id.triggered.connect(self.update_settings)
         self.a_show_name.triggered.connect(self.update_settings)
         self.a_show_text.triggered.connect(self.update_settings)
@@ -129,6 +135,7 @@ class TimelineContainer(EDockWidget):
 
         self.timeline.is_forward_segmenting = self.a_forward_segmentation.isChecked()
         self.timeline.keep_slider_in_view = self.a_kee_slider_in_view.isChecked()
+        self.timeline.use_color_features = self.a_use_features.isChecked()
 
         self.timeline.on_timeline_settings_update()
 
@@ -217,6 +224,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.show_text = True
         self.is_forward_segmenting = False
         self.keep_slider_in_view = True
+        self.use_color_features = True
 
         self.inhibit_overlap = True
         self.show_time_indicator = True
@@ -886,6 +894,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             for bar in s[1]:
                 for slice in bar.slices:
                     slice.update_text()
+                    slice.set_color(None)
 
     def create_segment(self, lst = None, mode=SegmentCreationMode.BACKWARD):
         # If Nothing is handed in, we're performing a fast-segmentation
@@ -1251,6 +1260,9 @@ class TimebarSlice(QtWidgets.QWidget):
         self.previous_slice = None
         self.next_slice = None
 
+    def set_color(self):
+        pass
+
     def set_query_highlighted(self, state):
         self.query_highlighted = state
         self.update()
@@ -1433,7 +1445,6 @@ class TimebarSlice(QtWidgets.QWidget):
         if not self.locked:
             self.is_hovered = True
 
-
     def leaveEvent(self, QEvent):
         if not self.locked:
             self.is_hovered = False
@@ -1581,8 +1592,23 @@ class TimelineSegmentationBar(TimelineBar):
 class TimebarSegmentationSlice(TimebarSlice):
     def __init__(self, parent:TimelineSegmentationBar, item:Segment, timeline):
         super(TimebarSegmentationSlice, self).__init__(parent, item, timeline, color = (54,146,182, 100))
+        self.default_color = (54, 146, 182, 100)
         item.onSegmentChanged.connect(self.update_text)
+        item.onAnalysisAdded.connect(self.set_color)
 
+        self.set_color(None)
+
+
+
+    @pyqtSlot(object)
+    def set_color(self, analysis):
+        color_analysis = self.item.get_connected_analysis(ColorFeatureAnalysis, None)
+        if len(color_analysis) > 0 and self.timeline.use_color_features is True:
+            color_analysis = color_analysis[0]
+            data = color_analysis.get_adata()['color_bgr']
+            self.color = (data[2], data[1], data[0], 100)
+        else:
+            self.color = self.default_color
 
 class TimelineAnnotationBar(TimelineBar):
     onHeightChanged = pyqtSignal(int)
