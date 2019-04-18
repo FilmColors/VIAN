@@ -108,6 +108,11 @@ class VIANPipeline:
     name = "NoName"
     author = "NoAuthor"
     version = (0,0,0)
+    requirements = dict(segment_analyses=[],
+                        screenshot_analyses=[],
+                        annotation_analyses=[]
+                        )
+    finished_threshold = 0.95
 
     def on_segment_created(self, project:VIANProject, segment:Segment, capture):
         pass

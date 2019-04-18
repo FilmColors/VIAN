@@ -92,6 +92,8 @@ class IAnalysisJob(QObject):
         """
         self.target_class_obj = class_objs
         # Apply the given parameters
+        if parameters is None:
+            return
         for k, v in parameters.items():
             if hasattr(self, k):
                 setattr(self, k, v)

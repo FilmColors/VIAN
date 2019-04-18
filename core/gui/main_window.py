@@ -881,8 +881,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_corpus_client_toolbar(self):
         if self.corpus_client_toolbar is None:
-            self.corpus_client_toolbar = CorpusClientToolBar(self, self.corpus_client)
-            self.addToolBar(self.corpus_client_toolbar)
+            self.corpus_client_toolbar = WebAppCorpusDock(self, self.corpus_client)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_client_toolbar)
             self.corpus_client_toolbar.show()
 
         else:
@@ -1504,6 +1504,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.onAnalyse.connect(self.on_start_analysis)
         dialog.show()
 
+
     def on_start_analysis(self, from_dialog):
         analysis = from_dialog['analysis']
         targets = from_dialog['targets']
@@ -2060,7 +2061,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hdf5_cache.cleanup()
 
         self.vian_event_handler.set_project(self.project)
-
+        self.project.onAnalysisAdded.connect(self.corpus_client_toolbar.on_analyses_changed)
 
         screenshot_position = []
         screenshot_annotation_dicts = []

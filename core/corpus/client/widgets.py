@@ -8,6 +8,7 @@ from PyQt5 import uic
 from core.data.computation import create_icon
 from core.corpus.client.corpus_client import CorpusClient
 from core.gui.Dialogs.new_project_dialog import FilmographyWidget
+from functools import partial
 
 from core.gui.ewidgetbase import *
 from core.gui.tools import StringList
@@ -15,32 +16,178 @@ import json
 import socket
 import threading
 import hashlib, uuid
+from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
+from core.analysis.analysis_utils import run_analysis
+# class CorpusClientToolBar(QToolBar):
+#     def __init__(self, parent, corpus_client:CorpusClient):
+#         super(CorpusClientToolBar, self).__init__(parent)
+#         self.setWindowTitle("Corpus Toolbar")
+#         self.spacer = QWidget()
+#         self.spacer.setLayout(QHBoxLayout())
+#         self.spacer.layout().addItem(QSpacerItem(1,1,QSizePolicy.Expanding, QSizePolicy.Fixed))
+#         self.addWidget(self.spacer)
+#
+#         self.addAction(CorpusClientWidgetAction(self, corpus_client, parent))
+#
+#     def get_client(self):
+#         return self.corpus_client
+#
+#
+# class CorpusClientWidgetAction(QWidgetAction):
+#     def __init__(self, parent, corpus_client:CorpusClient, main_window):
+#         super(CorpusClientWidgetAction, self).__init__(parent)
+#         self.p = parent
+#         self.corpus_client = corpus_client
+#         self.main_window = main_window
+#
+#     def createWidget(self, parent: QWidget):
+#         return CorpusClientWidget(parent,  self.corpus_client, self.main_window)
 
-
-class CorpusClientToolBar(QToolBar):
-    def __init__(self, parent, corpus_client:CorpusClient):
-        super(CorpusClientToolBar, self).__init__(parent)
-        self.setWindowTitle("Corpus Toolbar")
-        self.spacer = QWidget()
-        self.spacer.setLayout(QHBoxLayout())
-        self.spacer.layout().addItem(QSpacerItem(1,1,QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.addWidget(self.spacer)
-
-        self.addAction(CorpusClientWidgetAction(self, corpus_client, parent))
-
-    def get_client(self):
-        return self.corpus_client
-
-
-class CorpusClientWidgetAction(QWidgetAction):
-    def __init__(self, parent, corpus_client:CorpusClient, main_window):
-        super(CorpusClientWidgetAction, self).__init__(parent)
-        self.p = parent
+class WebAppCorpusDock(EDockWidget):
+    def __init__(self, main_window, corpus_client:CorpusClient):
+        super(WebAppCorpusDock, self).__init__(main_window, False)
+        self.central = QWidget(self)
+        self.setWidget(self.central)
+        self.central.setLayout(QVBoxLayout())
         self.corpus_client = corpus_client
-        self.main_window = main_window
+        self.corpus_widget = CorpusClientWidget(self, corpus_client, main_window)
+        # self.corpus_widget.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.central.layout().addWidget(self.corpus_widget)
+        self.stack = QStackedWidget(self)
+        self.central.layout().addWidget(self.stack)
+        self.progress_widget = CorpusProgressWidget(self, main_window)
+        self.filmography_widget = FilmographyWidget(self)
+        self.stack.addWidget(self.progress_widget)
+        self.stack.addWidget( self.filmography_widget)
+        self.btn_Commit = QPushButton("Commit Project", self.central)
+        self.central.layout().addWidget(self.btn_Commit)
+        self.btn_Commit.clicked.connect(partial(self.stack.setCurrentIndex, 1))
 
-    def createWidget(self, parent: QWidget):
-        return CorpusClientWidget(parent,  self.corpus_client, self.main_window)
+    @pyqtSlot()
+    def on_analyses_changed(self):
+        self.progress_widget.update_state()
+        pass
+
+class CorpusProgressWidget(QWidget):
+    def __init__(self, parent, main_window):
+        super(CorpusProgressWidget, self).__init__(parent)
+        self.main_window = main_window
+        self.setLayout(QVBoxLayout())
+        self.btn_checkFiles = QPushButton("Check Project")
+        self.btn_checkFiles.clicked.connect(self.update_state)
+        self.layout().addWidget(self.btn_checkFiles)
+        self.list_widget = QWidget(self)
+        self.list_widget.setLayout(QVBoxLayout())
+        self.layout().addWidget(self.list_widget)
+        self.spacer = QWidget()
+        self.spacer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
+
+        self.btn_RunAll = QPushButton("Run all Missing Analyses")
+        self.btn_RunAll.clicked.connect(self.run_all)
+        self.layout().addWidget(self.spacer)
+        self.layout().addWidget(self.btn_RunAll)
+
+        self.requirements = ERCFilmColorsVIANPipeline.requirements
+        self.items = dict()
+        self.missing_analyses = dict()
+
+    @pyqtSlot()
+    def update_state(self):
+        data = self.requirements
+        if data is None:
+            return
+        self.missing_analyses = dict()
+
+        if self.main_window.project is not None:
+            if "segment_analyses" in data:
+                n_analyses = len(self.main_window.project.get_main_segmentation().segments) * len(data["segment_analyses"])
+                n_analyses_done = 0
+                analyses_to_do = data["segment_analyses"]
+
+                for s in self.main_window.project.get_main_segmentation().segments:
+                    for q in analyses_to_do:
+                        found = False
+                        for a in s.connected_analyses:
+                            if a.target_classification_object is None:
+                                continue
+                            if a.analysis_job_class == q[0] and a.target_classification_object.name == q[1]:
+                                found = True
+                                break
+                        if found:
+                            n_analyses_done += 1
+                        else:
+                            if q[0] not in self.missing_analyses:
+                                self.missing_analyses[q[0]] = dict()
+                            if q[1] not in self.missing_analyses[q[0]]:
+                                self.missing_analyses[q[0]][q[1]] = []
+                            self.missing_analyses[q[0]][q[1]] .append(s)
+
+                if "SegmentAnalyses" not in self.items:
+                    bar = ProgressItem("SegmentAnalyses")
+                    self.list_widget.layout().addWidget(bar)
+                    self.items["SegmentAnalyses"] = bar
+                else:
+                    bar = self.items["SegmentAnalyses"]
+                bar.progress_bar.setValue(n_analyses_done / n_analyses * 100)
+
+            if "screenshot_analyses" in data:
+                n_analyses = len(self.main_window.project.screenshots) * len(data["screenshot_analyses"])
+                n_analyses_done = 0
+                analyses_to_do = data["screenshot_analyses"]
+                for s in self.main_window.project.screenshots:
+                    for q in analyses_to_do:
+                        found = False
+                        for a in s.connected_analyses:
+                            if a.target_classification_object is None:
+                                continue
+                            if a.analysis_job_class == q[0] and a.target_classification_object.name == q[1]:
+                                found = True
+                                break
+                        if found:
+                            n_analyses_done += 1
+                        else:
+                            if q[0] not in self.missing_analyses:
+                                self.missing_analyses[q[0]] = dict()
+                            if q[1] not in self.missing_analyses[q[0]]:
+                                self.missing_analyses[q[0]][q[1]] = []
+                            self.missing_analyses[q[0]][q[1]].append(s)
+
+                if "ScreenshotAnalyses" not in self.items:
+                    bar = ProgressItem("ScreenshotAnalyses")
+                    self.list_widget.layout().addWidget(bar)
+                    self.items["ScreenshotAnalyses"] = bar
+                else:
+                    bar = self.items["ScreenshotAnalyses"]
+                bar.progress_bar.setValue(n_analyses_done / n_analyses * 100)
+            pass
+
+    def run_all(self):
+        for analysis_name in self.missing_analyses.keys():
+            analysis = self.main_window.eval_class(analysis_name)
+            for clobj_name, containers in self.missing_analyses[analysis_name].items():
+                clobj = self.main_window.project.experiments[0].get_classification_object_by_name(clobj_name)
+
+                if clobj is None:
+                    print("Not found")
+                    continue
+                d = dict(
+                    analysis= analysis(),
+                    targets = containers,
+                    parameters = None,
+                    classification_objs = clobj
+                )
+                self.main_window.on_start_analysis(d)
+        pass
+
+
+class ProgressItem(QWidget):
+    def __init__(self, name):
+        super(ProgressItem, self).__init__()
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(QLabel(name, self))
+        self.progress_bar = QProgressBar(self)
+        self.layout().addWidget(self.progress_bar)
+
 
 
 class CorpusClientWidget(QWidget):
@@ -50,7 +197,7 @@ class CorpusClientWidget(QWidget):
         uic.loadUi(path, self)
         self.corpus_client = corpus_client
         self.main_window = main_window
-
+        self.btn_Connect.setStyleSheet("QPushButton{background-color: rgb(17, 17, 17);}")
         self.dbproject = None
         self.checkout_state = 0
 
