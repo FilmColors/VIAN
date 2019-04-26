@@ -151,6 +151,7 @@ def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
         mw.dispatch_on_loaded()
         return project, mw
     except Exception as e:
+        raise e
         print(e)
         return None, None
 

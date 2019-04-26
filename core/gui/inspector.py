@@ -50,7 +50,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
     def set_voc_words(self):
         if self.item is not None and isinstance(self.item, IClassifiable):
             text = ""
-            for word in self.item.voc_list:
+            for word in self.item.tag_keywords:
                 text += word.name + ", "
             self.textEdit_VocList.setPlainText(text)
 

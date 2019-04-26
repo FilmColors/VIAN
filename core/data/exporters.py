@@ -9,10 +9,19 @@ from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
 from core.container.project import *
 import os
+import csv
 import shutil
 
 def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
+
+
+def get_keyword_columns(project:VIANProject, container_type = None):
+    keywords = dict()
+    for e in project.experiments:
+        for kwd in e.get_unique_keywords(container_type):
+            keywords[kwd.get_full_name()] = kwd
+    return keywords
 
 
 
@@ -244,6 +253,44 @@ class XMLExchangeExporter():
 
     def export(self, project:VIANProject):
         pass
+
+
+class CSVExporter(ExportDevice):
+    def __init__(self, export_segmentations = True, export_screenshots=True, export_annotations=True,
+                 export_keywords = True, timestamp_format = "ms"):
+        self.export_segm = export_segmentations
+        self.export_ann = export_annotations
+        self.export_scr = export_screenshots
+        self.export_keywords = export_keywords
+
+    def export(self, project, path):
+        if self.export_segm:
+            segm_outfile = path + "_segm.csv"
+
+            headers = ["UID", "Time Start", "Time End", "Body"]
+            keyword_mapping = get_keyword_columns(project)
+            keyword_columns = keyword_mapping.keys()
+            headers.extend(keyword_columns)
+            segments = []
+            [segments.extend(s.segments) for s in project.segmentation]
+            with open(segm_outfile, "w", newline="") as out_file:
+                writer = csv.writer(out_file, delimiter=";")
+                writer.writerow(headers)
+                for s in segments: #type:Segment
+                    row = [s.unique_id, s.start, s.end, s.annotation_body]
+                    row.extend([False] * (len(headers) - 4))
+                    for k in s.tag_keywords:
+                        name = k.get_full_name()
+                        row[headers.index(name)] = True
+                    print(s.tag_keywords)
+                    writer.writerow(row)
+
+
+
+
+
+
+
 
 
 def build_file_name(naming, screenshot, movie_descriptor):

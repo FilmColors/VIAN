@@ -572,6 +572,9 @@ class UniqueKeyword(IProjectContainer):
     def get_name(self):
         return self.word_obj.get_name()
 
+    def get_full_name(self):
+        return ":".join([self.class_obj.name, self.voc_obj.name, self.word_obj.name])
+
     def serialize(self):
         data = dict(
             unique_id = self.unique_id,
@@ -708,7 +711,7 @@ class Experiment(IProjectContainer, IHasName):
             parent.add_child(obj)
         return obj
 
-    def get_unique_keywords(self, container_type = None):
+    def get_unique_keywords(self, container_type = None) -> List[UniqueKeyword]:
         """
         :return: Returns a List of UniqueKeywords used in this Experiment's Classification Objects
         """
@@ -802,6 +805,7 @@ class Experiment(IProjectContainer, IHasName):
             self.classification_results.append(tag)
             if container not in keyword.tagged_containers:
                 keyword.tagged_containers.append(container)
+                container.add_word()
 
     def remove_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         try:

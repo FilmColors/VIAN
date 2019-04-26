@@ -1155,6 +1155,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.sort_screenshots()
         self.undo_manager.clear()
         self.sanitize_paths()
+        print(self.hdf5_manager)
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False, pipeline=True):
         """

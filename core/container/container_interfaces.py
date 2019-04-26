@@ -9,7 +9,7 @@ class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)
 
     def __init__(self):
-        self.voc_list = []
+        self.tag_keywords = []
         self.is_query_highlighted = False
 
     def set_classification_highlight(self, state):
