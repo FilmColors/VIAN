@@ -242,7 +242,6 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         try:
             if serialization['classification_obj'] > 0:
                 self.target_classification_object = project.get_by_id(serialization['classification_obj'])
-                print(self.target_classification_object.name)
         except Exception as e:
             print(e)
             pass

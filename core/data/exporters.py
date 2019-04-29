@@ -12,6 +12,16 @@ import os
 import csv
 import shutil
 
+
+DEFAULT_NAMING_SCREENSHOTS = [
+    ScreenshotNamingConventionOptions.Scene_ID.name,
+    ScreenshotNamingConventionOptions.Shot_ID_Segment.name,
+    ScreenshotNamingConventionOptions.Movie_ID.name,
+    ScreenshotNamingConventionOptions.Movie_Name.name,
+    ScreenshotNamingConventionOptions.Movie_Year.name,
+    ScreenshotNamingConventionOptions.Movie_Source.name,
+        ]
+
 def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
 
@@ -24,18 +34,12 @@ def get_keyword_columns(project:VIANProject, container_type = None):
     return keywords
 
 
-
 class ExportDevice:
     def export(self, project, path):
         pass
 
 
-class CSVExportDevice(ExportDevice):
-    def export(self, project, path):
-        pass
-
-
-class ScreenshotsExportDevice(ExportDevice):
+class _ScreenshotExporter(ExportDevice):
     """
     A Class that is able to export Screenshots from a Project
     """
@@ -49,7 +53,10 @@ class ScreenshotsExportDevice(ExportDevice):
 
     def export(self, project, path):
         for s in project.screenshots:
-            name = self.build_file_name(self.naming, s, project.movie_descriptor)
+            if self.naming is None:
+                name = build_file_name(DEFAULT_NAMING_SCREENSHOTS, s, project.movie_descriptor)
+            else:
+                name = build_file_name(self.naming, s, project.movie_descriptor)
             file_name = os.path.join(path, name)
 
             if self.annotation_visibility is None:
@@ -268,9 +275,10 @@ class CSVExporter(ExportDevice):
             segm_outfile = path + "_segm.csv"
 
             headers = ["UID", "Time Start", "Time End", "Body"]
-            keyword_mapping = get_keyword_columns(project)
-            keyword_columns = keyword_mapping.keys()
-            headers.extend(keyword_columns)
+            if self.export_keywords:
+                keyword_mapping = get_keyword_columns(project)
+                keyword_columns = keyword_mapping.keys()
+                headers.extend(keyword_columns)
             segments = []
             [segments.extend(s.segments) for s in project.segmentation]
             with open(segm_outfile, "w", newline="") as out_file:
@@ -278,13 +286,32 @@ class CSVExporter(ExportDevice):
                 writer.writerow(headers)
                 for s in segments: #type:Segment
                     row = [s.unique_id, s.start, s.end, s.annotation_body]
-                    row.extend([False] * (len(headers) - 4))
-                    for k in s.tag_keywords:
-                        name = k.get_full_name()
-                        row[headers.index(name)] = True
-                    print(s.tag_keywords)
+                    if self.export_keywords:
+                        row.extend([False] * (len(headers) - 4))
+                        for k in s.tag_keywords:
+                            name = k.get_full_name()
+                            row[headers.index(name)] = True
                     writer.writerow(row)
+        if self.export_scr:
+            segm_outfile = path + "_scr.csv"
 
+            headers = ["UID", "Time Start"]
+            if self.export_keywords:
+                keyword_mapping = get_keyword_columns(project)
+                keyword_columns = keyword_mapping.keys()
+                headers.extend(keyword_columns)
+            with open(segm_outfile, "w", newline="") as out_file:
+                writer = csv.writer(out_file, delimiter=";")
+                writer.writerow(headers)
+
+                for s in project.screenshots: # type: Screenshot
+                    row = [s.unique_id, s.movie_timestamp]
+                    if self.export_keywords:
+                        row.extend([False] * (len(headers) - 4))
+                        for k in s.tag_keywords:
+                            name = k.get_full_name()
+                            row[headers.index(name)] = True
+                    writer.writerow(row)
 
 
 

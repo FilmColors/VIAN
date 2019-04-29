@@ -200,7 +200,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.complexity_group = w['complexity_group']
                 except:
                     continue
-            print(word.__dict__)
 
         return self
 
@@ -394,7 +393,7 @@ class ClassificationObject(IProjectContainer, IHasName):
     """
     A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
     Several ClassificationTargets may form a Tree. 
-    
+
     Example: Say one wants to analyse the Foreground and Background Color of a given Film using his homemade 
     Vocabulary called "ColorVocabulary". 
     
@@ -535,7 +534,6 @@ class ClassificationObject(IProjectContainer, IHasName):
         for t in ts:
             if t is not None:
                 self.target_container.append(t)
-
 
         # VERSION > 0.6.8
         try:
@@ -805,13 +803,14 @@ class Experiment(IProjectContainer, IHasName):
             self.classification_results.append(tag)
             if container not in keyword.tagged_containers:
                 keyword.tagged_containers.append(container)
-                container.add_word()
+                container.add_word(keyword)
 
     def remove_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         try:
             self.classification_results.remove([container, keyword])
             if container in keyword.tagged_containers:
                 keyword.tagged_containers.remove(container)
+                container.remove_word(keyword)
         except Exception as e:
             print(e)
 

@@ -18,28 +18,22 @@ class IClassifiable():
     def get_parent_container(self):
         return None
 
-    def has_word(self, word):
-        pass
-        # return word in self.voc_list
+    def has_word(self, keyword):
+        return keyword in self.tag_keywords
 
-    def toggle_word(self, word):
-        pass
-        # if word in self.voc_list:
-        #     self.remove_word(word)
-        # else:
-        #     self.add_word(word)
+    def toggle_word(self, keyword):
+        if self.has_word(keyword):
+            self.remove_word(keyword)
+        else:
+            self.add_word(keyword)
 
-    def add_word(self, word):
-        pass
-        # if word not in self.voc_list:
-        #     self.voc_list.append(word)
-        #     word.add_connected_item(self)
+    def add_word(self, keyword):
+        if keyword not in self.tag_keywords:
+            self.tag_keywords.append(keyword)
 
-    def remove_word(self, word):
-        pass
-        # if word in self.voc_list:
-        #     self.voc_list.remove(word)
-        # word.remove_connected_item(self)
+    def remove_word(self, keyword):
+        if keyword in self.tag_keywords:
+            self.tag_keywords.remove(keyword)
 
 
 class IProjectContainer(QObject):

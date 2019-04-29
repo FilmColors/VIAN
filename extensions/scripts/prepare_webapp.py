@@ -4,10 +4,9 @@ from threading import Thread
 
 ALL_ANALYSES = [BarcodeAnalysisJob, MovieMosaicAnalysis, ColorHistogramAnalysis, ColorFeatureAnalysis, ColorPaletteAnalysis, SemanticSegmentationAnalysis]
 
-for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
+for file in glob.glob("C:\\Users\\gaude\\Desktop\\input_projects\\*\\*.eext"):
     print(file)
-    if "3460_1_1_" in file or "256_1_1" in file or "184_1_1_" in file or "229_1_1_" in file:
-        continue
+
     # ping_webapp("gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
     try:
         # # file = "F:\\_webapp\\new\\016_1_1_The Age of Innocence_1993\\016_1_1_The Age of Innocence_1993.eext"
@@ -54,12 +53,10 @@ for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
         project.sort_screenshots()
         project.store_project(HeadlessUserSettings())
 
-        to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
-
-        # to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://127.0.0.1:5000/api/")
+        # to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
+        to_webapp(project, None, None)
 
     except Exception as e:
-        raise e
         print(e)
         continue
 
