@@ -1,12 +1,11 @@
 from functools import partial
-
+import os
 from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QTableWidgetItem, QTableWidget, QHBoxLayout, QProgressBar, QScrollArea
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
 from core.gui.ewidgetbase import EDockWidget
 from core.data.interfaces import IProjectChangeNotify
-from core.container.project import *
 from core.data.computation import ms_to_string, numpy_to_qt_image
 from core.data.enums import MovieSource
 

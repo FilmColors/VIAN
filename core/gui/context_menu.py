@@ -1,9 +1,11 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMenu
 from functools import partial
-
+from typing import List
 from core.container.media_objects import AbstractMediaObject
-from core.container.project import *
+from core.container.project import MOVIE_DESCRIPTOR, SEGMENTATION, ANNOTATION, SEGMENT, ANNOTATION_LAYER, \
+    SCREENSHOT, SCREENSHOT_GROUP, NODE_SCRIPT,MEDIA_OBJECT,EXPERIMENT, CLASSIFICATION_OBJECT, VIANProject, Screenshot,\
+    Experiment
 from core.corpus.client.corpus_client import CorpusClient
 from core.corpus.sqlalchemy_entities import DBProject
 
@@ -79,96 +81,6 @@ def open_context_menu(main_window, pos, containers, project, screenshot_root = F
             return cm
 
     return cm
-#
-# class ContextMenu(QMainWindow):
-#     def __init__(self, parent, position, project):
-#         super(ContextMenu, self).__init__(parent)
-#         path = os.path.abspath("qt_ui/ContextWidget.ui")
-#         self.setStyleSheet(
-#             "QPushButton{border-radius: 1; padding-left: 1px; padding-right: 1px;} "
-#             "QWidget{border-radius: 1; padding-left: 1px; padding-right: 1px; "
-#             "color: #b1b1b1; background-color: #323232;} ")
-#         uic.loadUi(path, self)
-#         self.project = project
-#         self.setWindowFlags(Qt.FramelessWindowHint|Qt.Popup)
-#
-#         # self.vlayout = QVBoxLayout(self)
-#         # self.button_container.setLayout(self.vlayout)
-#         self.move(position)
-#
-#         self.btn_delete = QPushButton(self)
-#         self.btn_delete.setText("Delete")
-#         self.btn_delete.clicked.connect(self.on_delete)
-#
-#         self.buttons = [self.btn_delete]
-#         self.create_ui()
-#
-#
-#
-#     def create_ui(self):
-#
-#         for btn in self.buttons:
-#             self.centralWidget().layout().addWidget(btn)
-#
-#         self.centralWidget().layout().addWidget(self.btn_delete)
-#         self.resize(200, self.button_container.size().height())
-#         self.show()
-#
-#     def on_delete(self):
-#         print "Deleted"
-#         self.close()
-#
-# class SegmentationContextMenu(ContextMenu):
-#     def __init__(self, parent, position, project, segmentation):
-#         super(SegmentationContextMenu, self).__init__(parent, position, project)
-#         self.segmentation = segmentation
-#         self.btn_hide_in_timeline = QPushButton(self)
-#         self.btn_hide_in_timeline.setText("Hide in Timeline")
-#         self.btn_hide_in_timeline.clicked.connect(self.on_hide_in_timeline)
-#
-#         self.btn_show_in_timeline = QPushButton(self)
-#         self.btn_show_in_timeline.setText("Show in Timeline")
-#         self.btn_show_in_timeline.clicked.connect(self.on_show_in_timeline)
-#
-#
-#         self.buttons.extend([self.btn_hide_in_timeline,
-#                              self.btn_show_in_timeline])
-#
-#         self.create_ui()
-#
-#     def on_hide_in_timeline(self):
-#         for i in self.segmentation:
-#             i.set_timeline_visibility(False)
-#         self.close()
-#
-#     def on_show_in_timeline(self):
-#         for i in self.segmentation:
-#             i.set_timeline_visibility(True)
-#         self.close()
-#
-#
-# class LayerContextMenu(ContextMenu):
-#     def __init__(self, parent, position, project, annotation_layers):
-#         super(LayerContextMenu, self).__init__(parent, position, project)
-#         self.annotation_layers = annotation_layers
-#
-#     def on_delete(self):
-#         for l in self.annotation_layers:
-#             print "OK", l.get_type() == con.ANNOTATION_LAYER, l.get_type()
-#             if l.get_type() == con.ANNOTATION_LAYER:
-#                 self.project.remove_annotation_layer(l)
-#         self.close()
-#
-# class AnnotationContextMenu(ContextMenu):
-#     def __init__(self, parent, position, project, annotations):
-#         super(AnnotationContextMenu, self).__init__(parent, position, project)
-#         self.annotations = annotations
-#
-#
-#     def on_delete(self):
-#         for a in self.annotations:
-#             self.project.remove_annotation(a)
-#         self.close()
 
 class ContextMenu(QMenu):
     def __init__(self, parent, pos):

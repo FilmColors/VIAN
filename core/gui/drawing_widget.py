@@ -8,9 +8,8 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFontDialog, QSizePolicy, QTabWidget, QSlider
 from PyQt5.QtGui import QIcon, QFont
 
-from core.data.computation import *
-from core.container.annotation import Annotation, AnnotationLayer
-from core.data.enums import *
+from core.data.computation import create_icon, parse_file_path, tuple2point, get_mouse_handle_by_location
+from core.container.annotation import Annotation, AnnotationLayer, ANNOTATION_LAYER, ANNOTATION, AnnotationType
 from core.gui.perspectives import Perspective
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending, IConcurrentJob
 from core.gui.color_palette import ColorSelector

@@ -666,7 +666,6 @@ class Experiment(IProjectContainer, IHasName):
 
                 if r.get_type() == SEGMENT and r in self.project.segment_screenshot_mapping:
                     screenshots.extend(self.project.segment_screenshot_mapping[r])
-
             self.project.onScreenshotsHighlighted.emit(screenshots)
 
     def get_correlation_matrix(self):

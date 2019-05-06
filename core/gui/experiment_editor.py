@@ -1,3 +1,4 @@
+import os
 from functools import partial
 
 from PyQt5 import uic
@@ -5,9 +6,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from core.gui.ewidgetbase import EDockWidget
 
-from core.container.project import *
 from core.data.interfaces import IProjectChangeNotify
-from core.container.project import *
+from core.container.project import SEGMENT, SCREENSHOT, ClassificationObject, \
+    ANNOTATION, ANNOTATION_LAYER, SCREENSHOT_GROUP, Experiment, IProjectContainer, EXPERIMENT, CLASSIFICATION_OBJECT
 from core.analysis.deep_learning.labels import VIAN_SEGMENTATION_DATASETS
 
 
