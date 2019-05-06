@@ -129,7 +129,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                 if self.hilbert_vis.isVisible():
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
                 # print("Hilbert",  time.time() - t)
-                t = time.time()
                 if self.spatial_complexity_vis.isVisible():
                     self.spatial_complexity_vis.clear_view()
                     colors = [
@@ -145,7 +144,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                         self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
                                                          line_name=key,
                                                          force_xmax=self.main_window.project.movie_descriptor.duration)
-                t = time.time()
             except Exception as e:
                 raise e
                 print("Exception in ColormetryWidget.update_timestep()", str(e))

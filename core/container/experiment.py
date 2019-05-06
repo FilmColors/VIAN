@@ -643,7 +643,6 @@ class Experiment(IProjectContainer, IHasName):
         :param promote_to_screenshots:
         :return:
         """
-        t = time.time()
         result = []
         containers = self.project.get_all_containers()
         # self.project.onScreenshotsHighlighted.emit([])
@@ -651,19 +650,15 @@ class Experiment(IProjectContainer, IHasName):
         for c in containers:
             if isinstance(c, IClassifiable):
                 c.set_classification_highlight(False)
-        print("Higlight = False", time.time() - t)
-        t = time.time()
+
         for k in self.classification_results:
             if k[1] in keywords:
                 result.append(k[0])
         result = list(set(result))
-        print("Finding results", time.time() - t)
-        t = time.time()
 
         if not promote_to_screenshots:
             for r in result:
                 r.set_classification_highlight(True)
-            print("Highlighting", time.time() - t)
         else:
             screenshots = []
             for r in result:
@@ -671,11 +666,8 @@ class Experiment(IProjectContainer, IHasName):
 
                 if r.get_type() == SEGMENT and r in self.project.segment_screenshot_mapping:
                     screenshots.extend(self.project.segment_screenshot_mapping[r])
-            print("Highlighting Segmentation", time.time() - t)
-            t = time.time()
 
             self.project.onScreenshotsHighlighted.emit(screenshots)
-            print("Highlighting Screenshots", time.time() - t)
 
     def get_correlation_matrix(self):
         if self.correlation_matrix is not None:

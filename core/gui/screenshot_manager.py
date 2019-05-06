@@ -296,19 +296,10 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
             self.ab_view.set_highlighted([], True)
             self.lc_view.set_highlighted([], True)
         else:
-            t = time.time()
             uids = [scr.unique_id for scr in screenshots]
-            print("Get scrs", time.time() - t)
-            t = time.time()
             self.color_dt.set_highlighted_by_uid(uids)
-            print("DT scrs", time.time() - t)
-            t = time.time()
             self.ab_view.set_highlighted_by_uid(uids)
-            print("AB scrs", time.time() - t)
-            t = time.time()
             self.lc_view.set_highlighted_by_uid(uids)
-            print("LC scrs", time.time() - t)
-            t = time.time()
 
     def connect_scr_group(self, grp):
         grp.onScreenshotAdded.connect(self.add_screenshot)
@@ -525,7 +516,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         current_segment_id = 0
         current_sm_object = None
         new_qimage_cache = dict()
-        t = time.time()
         for s in self.project.screenshots:
             # If this Screenshot belongs to a new Segment, append the last SMObject to the list
             if s.scene_id != current_segment_id:
@@ -588,7 +578,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         self.qimage_cache = new_qimage_cache
         self.clear_selection_frames()
-        t = time.time()
         self.arrange_images()
 
     def clear_manager(self):
