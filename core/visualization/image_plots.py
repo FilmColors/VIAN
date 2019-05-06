@@ -367,14 +367,7 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
     def set_transparency(self, alpha):
         if self.curr_alpha != alpha:
-            img = QImage(self.pixmap.size(), QImage.Format_ARGB32_Premultiplied)
-            img.fill(Qt.transparent)
-            qp = QPainter(img)
-            qp.begin(img)
-            qp.setOpacity(alpha)
-            qp.drawPixmap(0,0, self.pixmap)
-            qp.end()
-            super(VIANPixmapGraphicsItem, self).setPixmap(QPixmap(img))
+            self.setOpacity(alpha)
             self.curr_alpha = alpha
 
 
