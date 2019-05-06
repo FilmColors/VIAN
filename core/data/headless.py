@@ -246,12 +246,15 @@ def ping_webapp(email, password, webapp_url = "http://ercwebapp.westeurope.cloud
     interface.login(contributor)
 
 
-def to_webapp(project, email, password, webapp_url = "http://ercwebapp.westeurope.cloudapp.azure.com:5000/api/"):
+def to_webapp(project, email = "", password = "", webapp_url = "http://ercwebapp.westeurope.cloudapp.azure.com:5000/api/", bake_only = False):
     contributor = Contributor(email=email, password=password)
-    interface = WebAppCorpusInterface(webapp_url)
-    interface.login(contributor)
-    interface.commit_project(project, contributor)
-
+    if bake_only:
+        interface = WebAppCorpusInterface(webapp_url)
+        interface.commit_project(project, None)
+    else:
+        interface = WebAppCorpusInterface(webapp_url)
+        interface.login(contributor)
+        interface.commit_project(project, contributor)
 
 def to_corpus(project):
     """

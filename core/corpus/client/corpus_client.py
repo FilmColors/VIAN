@@ -347,7 +347,7 @@ class WebAppCorpusInterface(QObject):
             # endregion
 
             if contributor is None:
-                self.onCommited.emit(False, None, project)
+                self.signals.onCommitFinished.emit(project)
                 return
 
             # --- Sending the File --

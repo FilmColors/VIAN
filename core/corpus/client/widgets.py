@@ -102,6 +102,8 @@ class CorpusProgressWidget(QWidget):
 
         if self.main_window.project is not None:
             if "segment_analyses" in data:
+                if self.main_window.project.get_main_segmentation():
+                    return
                 n_analyses = len(self.main_window.project.get_main_segmentation().segments) * len(data["segment_analyses"])
                 n_analyses_done = 0
                 analyses_to_do = data["segment_analyses"]
