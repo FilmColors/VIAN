@@ -26,9 +26,6 @@ class TimelineContainer(EDockWidget):
         self.setWindowTitle("Timeline")
         self.resize(self.width(), 400)
 
-
-        # self.toolbar = EToolBar(self)
-        # self.toolbar.setWindowTitle("Timeline Toolbar")
         self.menu_create = self.inner.menuBar().addMenu("Create")
         self.a_create_segmentation = self.menu_create.addAction("New Segmentation")
         self.a_create_annotation_layer = self.menu_create.addAction("New Annotation Layer")
@@ -45,8 +42,6 @@ class TimelineContainer(EDockWidget):
         self.a_tools_toolbar.triggered.connect(self.show_toolbar)
         self.a_tools_toolbar.setCheckable(True)
         self.a_tools_toolbar.setChecked(True)
-        # self.a_merge_segments = self.menu_tools.addAction("Merge Segments")
-        # self.a_merge_segments.triggered.connect(self.on_cut_tools)
 
         self.menu_display = self.inner.menuBar().addMenu("Display")
         self.a_show_id = self.menu_display.addAction("\tID")
@@ -1609,6 +1604,7 @@ class TimebarSegmentationSlice(TimebarSlice):
             self.color = (data[2], data[1], data[0], 100)
         else:
             self.color = self.default_color
+
 
 class TimelineAnnotationBar(TimelineBar):
     onHeightChanged = pyqtSignal(int)

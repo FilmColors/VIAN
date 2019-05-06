@@ -129,6 +129,11 @@ class HeadlessMainWindow(QObject):
             ret, frame = cap.read()
             s.set_img_movie(frame)
 
+    def plot(self, analysis:IAnalysisJobAnalysis):
+        mw = QMainWindow()
+        mw.setCentralWidget(analysis.get_visualization())
+        mw.show()
+
 
 def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:
     """
@@ -255,6 +260,7 @@ def to_webapp(project, email = "", password = "", webapp_url = "http://ercwebapp
         interface = WebAppCorpusInterface(webapp_url)
         interface.login(contributor)
         interface.commit_project(project, contributor)
+
 
 def to_corpus(project):
     """
@@ -385,6 +391,7 @@ def to_corpus(project):
         shutil.make_archive(archive_file, 'zip', export_project_dir)
     except Exception as e:
         print(e)
+
 
 if __name__ == '__main__':
     pass

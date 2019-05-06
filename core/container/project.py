@@ -86,7 +86,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     onSelectionChanged = pyqtSignal(object)
 
-
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
         QObject.__init__(self)
@@ -1470,8 +1469,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.onExperimentRemoved.emit(experiment)
             self.dispatch_changed()
 
-
-
     #endregion
 
     # region Setters/Getters
@@ -1604,8 +1601,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.main_window.dispatch_on_selected(sender,self.selected)
     #endregion
 
-
-    pass
 
 #region MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
