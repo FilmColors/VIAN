@@ -669,7 +669,8 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         layers = self.palette_tree[:, 1]
         if self.slider is not None:
             self.slider.setRange(0, len(np.unique(layers)) - 1)
-            self.spbox_depth.setRange(0, len(np.unique(layers)) - 1)
+            if self.spbox_depth is not None:
+                self.spbox_depth.setRange(0, len(np.unique(layers)) - 1)
 
         if not (0 <= self.depth <= len(np.unique(layers)) - 1):
             self.depth = len(np.unique(layers)) - 1

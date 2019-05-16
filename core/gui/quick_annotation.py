@@ -13,6 +13,7 @@ from .ewidgetbase import EDockWidget
 class QuickAnnotationDock(EDockWidget):
     def __init__(self, main_window):
         super(QuickAnnotationDock, self).__init__(main_window, limit_size=False)
+        self.setWindowTitle("Quick Annotation Dock")
         self.quick_annotation_widget = QuickAnnotationWidget(main_window)
         self.setWidget(self.quick_annotation_widget)
 

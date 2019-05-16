@@ -113,8 +113,7 @@ class ConcurrentTaskEntry(QWidget):
 
         if job is not None:
             self.btn_abort.clicked.connect(self.job.abort)
-        else:
-            print(name, " has no job()")
+
         self.btn_abort.clicked.connect(self.abort)
 
         self.layout().addWidget(self.lbl_name)

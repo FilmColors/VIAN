@@ -10,7 +10,7 @@ from typing import List
 from core.data.computation import ms_to_frames, numpy_to_pixmap, floatify_img, labels_to_binary_mask
 import json
 from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
-from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject
+from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject, Segmentation
 from core.container.analysis import IAnalysisJobAnalysis
 
 from core.gui.ewidgetbase import EGraphicsView
@@ -73,6 +73,16 @@ class ColorFeatureAnalysis(IAnalysisJob):
                              tgt.get_id(),
                              project.movie_descriptor.get_letterbox_rect(),
                              semseg])
+            elif isinstance(tgt, Segmentation):
+                for s in tgt.segments:
+                    args.append([
+                        ms_to_frames(s.get_start(), fps),
+                        ms_to_frames(s.get_end(), fps),
+                        project.movie_descriptor.movie_path,
+                        s.get_id(),
+                        project.movie_descriptor.get_letterbox_rect(),
+                        None])
+
             else:
                 args.append([
                 ms_to_frames(tgt.get_start(), fps),
@@ -203,14 +213,14 @@ class ColorFeatureAnalysis(IAnalysisJob):
         This function should show the complete Visualization
         """
         w = QWidget()
-        w.setLayout(QVBoxLayout())
-        w.layout().addWidget(QLabel("Color CIE-Lab:\t" + str(analysis.get_adata()['color_lab']), w))
-        w.layout().addWidget(QLabel("    Color BGR:\t" + str(analysis.get_adata()['color_bgr']), w))
-        w.layout().addWidget(QLabel("Saturation Luebbe:\t" + str(analysis.get_adata()['saturation_l']), w))
-        w.layout().addWidget(QLabel("Saturation FilmCo:\t" + str(analysis.get_adata()['saturation_p']), w))
+        w.setLayout(QVBoxLayout(w))
+        w.layout().addWidget(QLabel("Color CIE-Lab:".rjust(20) + str(analysis.get_adata()['color_lab']), w))
+        w.layout().addWidget(QLabel("Color BGR:".rjust(20) + str(analysis.get_adata()['color_bgr']), w))
+        w.layout().addWidget(QLabel("Saturation Luebbe:".rjust(20) + str(analysis.get_adata()['saturation_l']), w))
+        w.layout().addWidget(QLabel("Saturation FilmCo:".rjust(20) + str(analysis.get_adata()['saturation_p']), w))
         view = EGraphicsView(w)
-        view.set_image(numpy_to_pixmap(np.array(([[analysis.get_adata()['color_bgr']] * 100 ] * 100)).astype(np.uint8)))
-        w.layout().addWidget(w)
+        view.set_image(numpy_to_pixmap(np.array(([[analysis.get_adata()['color_bgr']] * 100] * 25)).astype(np.uint8)))
+        w.layout().addWidget(view)
         return [VisualizationTab(widget=w, name="Color-Features", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):

@@ -170,7 +170,7 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
     # region SEEDS
     hist = np.histogram(labels, bins = bins)
 
-    #M ake sure the normalization factor is not too low
+    # Make sure the normalization factor is not too low
     normalization_f = np.amin(hist[0])
     if normalization_f < normalization_lower_bound:
         normalization_f = normalization_lower_bound
@@ -236,7 +236,6 @@ def combine_palettes(palette_assets: List[PaletteAsset], width=1000, height=100,
             layer = sub_img
         else:
             layer = np.vstack((layer, sub_img))
-
 
     layer = cv2.resize(layer, (1000, 1000), interpolation=cv2.INTER_CUBIC)
     layer = cv2.cvtColor(layer, cv2.COLOR_BGR2LAB)

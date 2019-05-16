@@ -199,8 +199,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.corpus_visualizer_dock = EDockWidget(self, False)
         self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
+        self.corpus_visualizer_dock.setWindowTitle("Corpus Visualizer Query")
         self.corpus_visualizer_result_dock = EDockWidget(self, False)
         self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
+        self.corpus_visualizer_result_dock.setWindowTitle("Corpus Visualizer Results")
 
         self.progress_popup = None
         self.quick_annotation_dock = None

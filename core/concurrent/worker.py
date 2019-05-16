@@ -142,11 +142,10 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
     def _start(self):
         if len(self.queue) > 0:
+            print("Queue", len(self.queue), [q[0].__class__ for q in self.queue])
             analysis, params = self.queue.pop(0)
             self.running = analysis
-
             args = analysis.prepare(*params)
-
             if analysis.multiple_result:
                 for arg in args:
                     self.onPushTask.emit(analysis, arg)
@@ -214,6 +213,7 @@ class AnalysisWorker(QObject):
     def run_worker(self):
         n_jobs = len(self.scheduled_task.keys())
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
+            print(args)
             self.current_task_id = task_id
             result = self._run_task(*args)
             if result is not None:
@@ -226,9 +226,10 @@ class AnalysisWorker(QObject):
         self.finished_tasks = dict()
 
     def _run_task(self, task_id, analysis, args, on_progress):
+        print("Running Analysis", analysis.__class__)
         try:
             return analysis.process(args, on_progress)
-        except:
+        except Exception as e:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.sign_error.emit((exctype, value, traceback.format_exc()))

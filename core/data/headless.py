@@ -15,10 +15,62 @@ from random import sample
 from core.corpus.client.corpus_client import WebAppCorpusInterface
 
 PROJECT_LOCK = Lock()
-VERSION = "0.6.6"
+_INIT_LOCK = Lock()
 
+VERSION = "0.6.6"
+MAIN_WINDOW = None
 PAL_WIDTH = 720
 PNG_COMPRESSION_RATE = 9
+
+attributes = None
+
+
+
+class PlotWindow(QMainWindow):
+    def __init__(self):
+        super(PlotWindow, self).__init__()
+
+    @pyqtSlot(object)
+    def on_plot(self, analysis):
+        if isinstance(analysis, list):
+            for x in analysis:
+                for v in x.get_visualization():
+                    mw = QMainWindow(MAIN_WINDOW)
+                    mw.setCentralWidget(v.widget)
+                    mw.show()
+        else:
+            for v in analysis.get_visualization():
+                mw = QMainWindow(MAIN_WINDOW)
+                mw.setCentralWidget(v.widget)
+                mw.show()
+
+
+def my_exception_hook(exctype, value, traceback):
+    # Print the error and traceback
+    print((exctype, value, traceback))
+    # Call the normal Exception hook after
+    sys._excepthook(exctype, value, traceback)
+    sys.exit(1)
+
+def _init_application():
+    sys._excepthook = sys.excepthook
+    sys.excepthook = my_exception_hook
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("qt_ui/images/main.png"))
+
+    style_sheet = open("E:\\Programming\\Git\\visual-movie-annotator\\qt_ui\\themes\\qt_stylesheet_very_dark.css", 'r')
+    style_sheet = style_sheet.read()
+    app.setStyleSheet(style_sheet)
+
+    global MAIN_WINDOW
+    MAIN_WINDOW = PlotWindow()
+    print("Running", MAIN_WINDOW)
+    sys.exit(app.exec_())
+
+
+_window_thread = thread = Thread(target=_init_application)
+_window_thread.start()
+while(MAIN_WINDOW is None): pass
 
 class HeadlessUserSettings():
     def __init__(self):
@@ -27,6 +79,7 @@ class HeadlessUserSettings():
 
 
 class HeadlessMainWindow(QObject):
+    onShowPlot = pyqtSignal(object)
     def __init__(self):
         super(HeadlessMainWindow, self).__init__()
         self.thread_pool = QThreadPool()
@@ -35,6 +88,7 @@ class HeadlessMainWindow(QObject):
         self.version = VERSION
         self.project = None
         self.settings = HeadlessUserSettings()
+        self.onShowPlot.connect(MAIN_WINDOW.on_plot)
 
         # self.thread_pool = QThreadPool(self)
         # self.corpus_interface = LocalCorpusInterface()
@@ -130,9 +184,8 @@ class HeadlessMainWindow(QObject):
             s.set_img_movie(frame)
 
     def plot(self, analysis:IAnalysisJobAnalysis):
-        mw = QMainWindow()
-        mw.setCentralWidget(analysis.get_visualization())
-        mw.show()
+        self.onShowPlot.emit(analysis)
+
 
 
 def load_project_headless(path) -> Tuple[VIANProject, HeadlessMainWindow]:

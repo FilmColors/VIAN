@@ -47,6 +47,7 @@ from core.analysis.analysis_utils import run_analysis
 class WebAppCorpusDock(EDockWidget):
     def __init__(self, main_window, corpus_client:CorpusClient):
         super(WebAppCorpusDock, self).__init__(main_window, False)
+        self.setWindowTitle("WebApp")
         self.central = QWidget(self)
         self.setWidget(self.central)
         self.central.setLayout(QVBoxLayout())
@@ -63,6 +64,7 @@ class WebAppCorpusDock(EDockWidget):
         self.btn_Commit = QPushButton("Commit Project", self.central)
         self.central.layout().addWidget(self.btn_Commit)
         self.btn_Commit.clicked.connect(partial(self.stack.setCurrentIndex, 1))
+
 
     @pyqtSlot()
     def on_analyses_changed(self):
@@ -96,18 +98,16 @@ class CorpusProgressWidget(QWidget):
     @pyqtSlot()
     def update_state(self):
         data = self.requirements
+        print("Requirements:", data)
         if data is None:
             return
         self.missing_analyses = dict()
 
         if self.main_window.project is not None:
-            if "segment_analyses" in data:
-                if self.main_window.project.get_main_segmentation():
-                    return
+            if "segment_analyses" in data and self.main_window.project.get_main_segmentation() is not None:
                 n_analyses = len(self.main_window.project.get_main_segmentation().segments) * len(data["segment_analyses"])
                 n_analyses_done = 0
                 analyses_to_do = data["segment_analyses"]
-
                 for s in self.main_window.project.get_main_segmentation().segments:
                     for q in analyses_to_do:
                         found = False
@@ -167,7 +167,12 @@ class CorpusProgressWidget(QWidget):
                 else:
                     bar = self.items["ScreenshotAnalyses"]
                 bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
-            pass
+
+        for priority in sorted(self.missing_analyses.keys()):
+            for analysis_name in self.missing_analyses[priority].keys():
+                analysis = self.main_window.eval_class(analysis_name)
+                for clobj_name, containers in self.missing_analyses[priority][analysis_name].items():
+
 
     def run_all(self):
         for priority in sorted(self.missing_analyses.keys()):
@@ -185,9 +190,9 @@ class CorpusProgressWidget(QWidget):
                         parameters = None,
                         classification_objs = clobj
                     )
-                    print(priority, analysis_name)
+                    print(priority, analysis_name, clobj_name)
                     self.main_window.on_start_analysis(d)
-        pass
+
 
 
 class ProgressItem(QWidget):

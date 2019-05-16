@@ -96,22 +96,30 @@ class ColorPaletteAnalysis(IAnalysisJob):
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
-            palettes.append(color_palette(frame, mask=bin_mask, mask_index=255))
+            try:
+                pal = color_palette(frame, mask=bin_mask, mask_index=255)
+            except Exception as e:
+                print(e)
+                pal = None
+            if pal is not None:
+                palettes.append(pal)
             c += 1
 
-        if len(palettes) > 1:
-            result = combine_palettes(palettes)
-        else:
-            result = palettes[0]
+        if len(palettes) > 0:
+            if len(palettes) > 1:
+                result = combine_palettes(palettes)
+            else:
+                result = palettes[0]
 
-        sign_progress(1.0)
-        return IAnalysisJobAnalysis(
-            name="Color-Palette",
-            results = dict(tree=result.tree, dist = result.merge_dists),
-            analysis_job_class=self.__class__,
-            parameters=dict(resolution=self.resolution),
-            container=args[3]
-        )
+            sign_progress(1.0)
+            return IAnalysisJobAnalysis(
+                name="Color-Palette",
+                results = dict(tree=result.tree, dist = result.merge_dists),
+                analysis_job_class=self.__class__,
+                parameters=dict(resolution=self.resolution),
+                container=args[3]
+            )
+        return None
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
         """

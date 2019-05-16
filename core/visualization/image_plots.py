@@ -204,6 +204,15 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
                 itm.setScale(self.img_scale)
 
         else:
+            t = 0
+            if event.angleDelta().y() > 0.0:
+                t = 0.1
+
+            elif event.angleDelta().y() < 0.0:
+                t = -0.1
+
+            if 0 < self.pos_scale + t < 100:
+                self.scale_pos(t)
             super(QGraphicsView, self).wheelEvent(event)
 
         # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
@@ -540,6 +549,16 @@ class ImagePlotCircular(ImagePlot):
 
         return w
 
+    def wheelEvent(self, event: QWheelEvent):
+        t = 0
+        if event.angleDelta().y() > 0.0:
+            t = (self.pos_scale + 0.1) * 100
+
+        elif event.angleDelta().y() < 0.0:
+            t = (self.pos_scale - 0.1) * 100
+
+        if 0 < t / 100 < 100:
+            self.set_range_scale(t)
 
 class ImagePlotCircularControls(QWidget):
     def __init__(self, plot):
@@ -784,6 +803,16 @@ class ImagePlotPlane(ImagePlot):
 
         return w
 
+    def wheelEvent(self, event: QWheelEvent):
+        t = 0
+        if event.angleDelta().y() > 0.0:
+            t = (self.curr_scale + 0.1) * 100
+
+        elif event.angleDelta().y() < 0.0:
+            t = (self.curr_scale - 0.1) * 100
+
+        if 0 < t / 100 < 100:
+            self.set_scale(t)
 
 class ImagePlotPlaneControls(QWidget):
     def __init__(self, plot):
@@ -1160,6 +1189,16 @@ class ImagePlotTime(ImagePlot):
         self.set_channel(w.cb_channel.currentText())
         return w
 
+    def wheelEvent(self, event: QWheelEvent):
+        t = 0
+        if event.angleDelta().y() > 0.0:
+            t = self.y_max + 5
+
+        elif event.angleDelta().y() < 0.0:
+            t = self.y_max - 5
+
+        if 0 < t < 1000:
+            self.scale_pos(t)
 
 class ImagePlotTimeControls(QWidget):
     def __init__(self, plot):
