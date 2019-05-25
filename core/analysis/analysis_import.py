@@ -6,12 +6,13 @@ from core.analysis.colorimetry.colormetry2 import *
 from core.analysis.histogram_analysis import ColorHistogramAnalysis
 from core.container.hdf5_manager import vian_analysis
 
-import dlib
+# import dlib
 try:
     from core.analysis.semantic_segmentation import *
     from core.analysis.deep_learning.face_identification import *
     import os
     import tensorflow as tf
+    tf.test.is_gpu_available()
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     tf.logging.set_verbosity(tf.logging.FATAL)
 
@@ -124,12 +125,15 @@ except:
                 self.cascade_side = cv2.CascadeClassifier(cascPathside)
             else:
                 self.cascade_side = None
-            if os.path.isfile(predictor_path):
+
+            try:
                 self.predictor = dlib.shape_predictor(predictor_path)
-            else:
+                self.detector = dlib.get_frontal_face_detector()
+            except:
                 self.predictor = None
+                self.detector = None
             self.weights_path = weights_path
-            self.detector = dlib.get_frontal_face_detector()
+
             self.dnn_model = None
             self.nose_point_idx = 30
 

@@ -624,7 +624,7 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "palette_ab_plot"
         self.dot_plot = DotPlot(self, naming_fields=naming_fields)
-        self.dot_plot.dot_size = 10
+        self.dot_plot.dot_size = 15
         self.dot_plot.naming_fields['plot_name'] = "palette_ab_plot"
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.dot_plot)
@@ -649,9 +649,6 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
     def render_to_image(self, background: QColor, size: QSize):
         self.dot_plot.font_size = self.font_size
         self.dot_plot.grid_color = self.grid_color
-
-        print(self.grid_color)
-
         self.draw_palette()
         return self.dot_plot.render_to_image(background, size)
 

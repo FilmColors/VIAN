@@ -1,7 +1,7 @@
 import os
 
 import cv2
-import dlib
+# import dlib
 import numpy as np
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Activation, Dense, Dropout, Flatten
@@ -67,18 +67,28 @@ class FaceRecognitionModel():
                  serving = False):
         self.disabled = False
         if os.path.isfile(cascPath) and os.path.isfile(cascPathside) and os.path.isfile(predictor_path):
-            self.cascade = cv2.CascadeClassifier(cascPath)
-            self.cascade_side = cv2.CascadeClassifier(cascPathside)
-            self.predictor = dlib.shape_predictor(predictor_path)
+            try:
+                self.cascade = cv2.CascadeClassifier(cascPath)
+                self.cascade_side = cv2.CascadeClassifier(cascPathside)
+                self.predictor = dlib.shape_predictor(predictor_path)
+                self.detector = dlib.get_frontal_face_detector()
+            except:
+                self.cascade = None
+                self.cascade_side = None
+                self.predictor = None
+                self.disabled = True
+                self.detector = None
+
         else:
             self.cascade = None
             self.cascade_side = None
             self.predictor = None
             self.disabled = True
+            self.detector = None
             print("FaceRecognitionModel Error: weights not found")
 
         self.weights_path = weights_path
-        self.detector = dlib.get_frontal_face_detector()
+        # self.detector = dlib.get_frontal_face_detector()
         self.dnn_model = None
         self.nose_point_idx = 30
         self.dropout = 0.25

@@ -172,6 +172,7 @@ class CorpusProgressWidget(QWidget):
             for analysis_name in self.missing_analyses[priority].keys():
                 analysis = self.main_window.eval_class(analysis_name)
                 for clobj_name, containers in self.missing_analyses[priority][analysis_name].items():
+                    pass
 
 
     def run_all(self):

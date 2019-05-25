@@ -398,9 +398,9 @@ class ColormetryAnalysis(AnalysisContainer):
             self.has_finished = True
         return self.has_finished
 
-    def clear(self):
+    def clear(self, resolution = 30):
         print("Clearing COlorimetry")
-        self.resolution = 30
+        self.resolution = resolution
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
         self.end_idx = n_frames
