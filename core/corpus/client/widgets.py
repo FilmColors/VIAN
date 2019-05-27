@@ -195,7 +195,6 @@ class CorpusProgressWidget(QWidget):
                     self.main_window.on_start_analysis(d)
 
 
-
 class ProgressItem(QWidget):
     def __init__(self, name):
         super(ProgressItem, self).__init__()

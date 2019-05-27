@@ -1982,6 +1982,7 @@ class MainWindow(QtWidgets.QMainWindow):
             m = self.menus_list[i]
             for e in m.actions():
                 e.setDisabled(not state)
+        self.actionPreferences.setEnabled(True)
 
     def get_version_as_string(self):
 
