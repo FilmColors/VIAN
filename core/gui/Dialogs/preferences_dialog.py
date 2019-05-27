@@ -64,10 +64,10 @@ class DialogPreferences(EDialogWidget):
         self.checkBox_AutoColormetry.setChecked(self.settings.AUTO_START_COLORMETRY)
         self.spinBox_GridSize.setValue(self.settings.GRID_SIZE)
 
-        self.lineEdit_UserName.setText(self.settings.USER_NAME)
-        self.lineEdit_CorpusIP.setText(self.settings.CORPUS_IP)
-        self.lineEdit_CorpusPort.setText(str(self.settings.COPRUS_PORT))
-        self.lineEdit_CorpusPW.setText(self.settings.COPRUS_PW)
+        # self.lineEdit_UserName.setText(self.settings.USER_NAME)
+        # self.lineEdit_CorpusIP.setText(self.settings.CORPUS_IP)
+        # self.lineEdit_CorpusPort.setText(str(self.settings.COPRUS_PORT))
+        # self.lineEdit_CorpusPW.setText(self.settings.COPRUS_PW)
 
         self.checkBox_UseCorpus.setChecked(self.settings.USE_CORPUS)
         self.checkBox_UseELANRemote.setChecked(self.settings.USE_ELAN)
