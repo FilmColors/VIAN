@@ -17,3 +17,4 @@ data/models/
 idea/
 *.mp4
 *.vscode/
+.DS_Store
