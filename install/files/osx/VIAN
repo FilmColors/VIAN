@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo "Root Directory:" "${0%/*}"
 cd "${0%/*}"
 MiniCondaDir="${0%/*}""/miniconda/"
