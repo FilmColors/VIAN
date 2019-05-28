@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "Root Directory:" ${0%/*}
+cd ${0%/*}
+MiniCondaDir=${0%/*}"/miniconda/"
+
+source $MiniCondaDir/bin/activate vian-osx
+cd vian
+python main.py 
+
+
+
