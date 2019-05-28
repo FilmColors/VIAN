@@ -314,12 +314,6 @@ class CSVExporter(ExportDevice):
                     writer.writerow(row)
 
 
-
-
-
-
-
-
 def build_file_name(naming, screenshot, movie_descriptor):
     """
     Generates a Filename for the Screenshots by a given naming convention

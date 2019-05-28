@@ -23,6 +23,8 @@ EP_ROOT = "http://127.0.0.1:5000/api/"
 # EP_VIAN_VERSION = self.ep_root + "/vian/version"
 # self.ep_get_vian_update = self.ep_root + "/vian/download_vian/"
 
+# http://ercwebapp.westeurope.cloudapp.azure.com/api/vian/version
+# http://ercwebapp.westeurope.cloudapp.azure.com/api/vian/download_vian
 def get_vian_version():
     q = requests.get(EP_ROOT + "vian/version").json()
     version = q['version'].split("_")
