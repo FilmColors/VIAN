@@ -100,7 +100,6 @@ class MainWindow(QtWidgets.QMainWindow):
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
         # loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,200))
 
-
         if PROFILE:
             self.profiler = cProfile.Profile()
             self.profiler.enable()
@@ -1982,6 +1981,7 @@ class MainWindow(QtWidgets.QMainWindow):
             m = self.menus_list[i]
             for e in m.actions():
                 e.setDisabled(not state)
+        self.actionPreferences.setEnabled(True)
 
     def get_version_as_string(self):
 

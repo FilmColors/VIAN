@@ -63,13 +63,14 @@ class WebAppCorpusDock(EDockWidget):
         self.stack.addWidget( self.filmography_widget)
         self.btn_Commit = QPushButton("Commit Project", self.central)
         self.central.layout().addWidget(self.btn_Commit)
-        self.btn_Commit.clicked.connect(partial(self.stack.setCurrentIndex, 1))
-
+        self.btn_Commit.clicked.connect(partial(self.corpus_widget.on_commit))
 
     @pyqtSlot()
     def on_analyses_changed(self):
         self.progress_widget.update_state()
         pass
+
+
 
 
 class CorpusProgressWidget(QWidget):
@@ -195,7 +196,6 @@ class CorpusProgressWidget(QWidget):
                     self.main_window.on_start_analysis(d)
 
 
-
 class ProgressItem(QWidget):
     def __init__(self, name):
         super(ProgressItem, self).__init__()
@@ -286,10 +286,6 @@ class WebAppLoginDialog(EDialogWidget):
         else:
             QMessageBox.warning(self, "Could not Establish Connection",
                                 "It has not been possible to login on the FilmColors Webapp, check your credentials again or create an account.")
-
-
-
-
 
     def on_login_tried(self):
         pass
