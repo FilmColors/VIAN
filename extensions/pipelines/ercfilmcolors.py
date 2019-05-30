@@ -32,6 +32,26 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
 
     def __init__(self):
         super(ERCFilmColorsVIANPipeline, self).__init__()
+        try:
+            self.graph = tf.Graph()
+            config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+            config.log_device_placement = True  # to log device placement (on which device the operation ran)
+            config.gpu_options.per_process_gpu_memory_fraction = 0.4
+
+            with self.graph.as_default():
+                self.session = tf.Session(config=config)
+                KTF.set_session(self.session)
+                self.model = PSPNetModelVIAN(input_shape=(512, 512, 3))
+                self.model.load_weights(KERAS_LIP_WEIGHTS)
+                self.model_name = DATASET_NAME_LIP
+        except Exception as e:
+            print(e)
+            self.model = None
+            self.model_name = "LIP"
+            self.session = None
+        print(self.model, self.model_name)
+
 
     def on_segment_created(self, project:VIANProject, segment:Segment, capture:cv2.VideoCapture):
         """
@@ -52,7 +72,18 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
         :param screenshot: the Screenshot instance created
         :return: None
         """
-        pass
+        cl_objs = [
+            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Global"),
+            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Foreground"),
+            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Background")
+                         ]
+
+        run_analysis(project, SemanticSegmentationAnalysis(model=self.model, model_name="LIP",
+                                                           graph=self.graph, session=self.session ),
+                     [screenshot], dict(model_name="LIP"), [cl_objs[0]])
+        run_analysis(project, ColorFeatureAnalysis(), [screenshot], dict(resolution=30), cl_objs)
+        run_analysis(project, ColorPaletteAnalysis(), [screenshot], dict(resolution=30), cl_objs)
+
 
     def on_svg_annotation_created(self, project, annotation, sub_img):
         """

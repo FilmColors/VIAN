@@ -13,6 +13,7 @@ import inspect
 
 ALL_REGISTERED_PIPELINES = dict()
 
+
 class VIANEventHandler(QObject):
     onException = pyqtSignal(str)
 
@@ -25,6 +26,9 @@ class VIANEventHandler(QObject):
         self.comp_segments = False
         self.comp_screenshots = False
         self.comp_annotations = False
+
+        self.queue = []
+        self.queue_running = False
 
     @pyqtSlot(object)
     def set_project(self, project):
@@ -54,7 +58,7 @@ class VIANEventHandler(QObject):
         try:
             cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
             if self.current_pipeline is not None:
-                self.current_pipeline.on_segment_created(self.project, segment, cap)
+                self._push(self.current_pipeline.on_segment_created, (self.project, segment, cap))
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
@@ -64,7 +68,7 @@ class VIANEventHandler(QObject):
             return
         try:
             if self.current_pipeline is not None:
-                self.current_pipeline.on_screenshot_created(self.project, screenshot)
+                self._push(self.current_pipeline.on_screenshot_created, (self.project, screenshot))
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
@@ -74,7 +78,7 @@ class VIANEventHandler(QObject):
             return
         try:
             if self.current_pipeline is not None:
-                self.current_pipeline.on_screenshot_created(self.project, annotation)
+                self._push(self.current_pipeline.on_screenshot_created, (self.project, annotation))
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
@@ -86,6 +90,24 @@ class VIANEventHandler(QObject):
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
+    def _push(self, func, args):
+        self.queue.append((func, args))
+        print("is Queue Running: ", self.queue_running)
+        if not self.queue_running:
+            self._run()
+
+    def _run(self):
+        print("Queue:", self.queue_running, len(self.queue))
+        if len(self.queue) > 0:
+            self.queue_running = True
+            (func, args) = self.queue.pop(0)
+            try:
+                func(*args)
+            except Exception as e:
+                self.onException.emit(traceback.format_exc())
+            self._run()
+        else:
+            self.queue_running = False
 
 def vian_pipeline(cl):
     """Register a class as a plug-in"""
@@ -104,7 +126,7 @@ def get_name_of_script_by_path(spath):
             return name
     return None
 
-class VIANPipeline:
+class VIANPipeline(QObject):
     name = "NoName"
     author = "NoAuthor"
     version = (0,0,0)
@@ -113,7 +135,9 @@ class VIANPipeline:
                         annotation_analyses=[]
                         )
     finished_threshold = 0.95
-
+    def __init__(self):
+        super(VIANPipeline, self).__init__()
+    
     def on_segment_created(self, project:VIANProject, segment:Segment, capture):
         pass
 

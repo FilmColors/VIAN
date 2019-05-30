@@ -16,13 +16,14 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from core.analysis.deep_learning.labels import *
 from core.analysis.deep_learning.models import *
+
 from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
 from core.data.enums import DataSerialization
 from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class SemanticSegmentationAnalysis(IAnalysisJob):
-    def __init__(self, resolution=30, model = "LIP"):
+    def __init__(self, resolution=30, model_name = "LIP", model = None, graph = None, session = None):
         super(SemanticSegmentationAnalysis, self).__init__("Semantic Segmentation", [SCREENSHOT, SCREENSHOT_GROUP],
                                                            dataset_name="SemanticSegementations",
                                                            dataset_shape=(1024, 1024),
@@ -31,8 +32,15 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                                                            version="1.0.0",
                                                            multiple_result=False,
                                                            data_serialization=DataSerialization.MASKS)
+        self.model_name = model_name
         self.model = model
         self.resolution = resolution
+        self.session = session
+
+        if graph is None:
+            self.graph = tf.Graph()
+        else:
+            self.graph = graph
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
         """
@@ -66,24 +74,29 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         results = []
         tot = len(args)
         counter = 0
-        config = tf.ConfigProto()
 
+        config = tf.ConfigProto()
         config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
         config.log_device_placement = True  # to log device placement (on which device the operation ran)
-
         config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
-        with tf.Graph().as_default():
-            session = tf.Session(config=config)
-            KTF.set_session(session)
+        with self.graph.as_default():
+            if self.session is None:
+                self.session = tf.Session(config=config)
+            KTF.set_session(self.session)
 
             model = None
-            if self.model == "LIP":
+            if self.model is not None:
+                model = self.model
+                model_name = DATASET_NAME_LIP
+            elif self.model_name == "LIP":
                 model = PSPNetModelVIAN(input_shape=(512, 512, 3))
                 model.load_weights(KERAS_LIP_WEIGHTS)
                 model_name = DATASET_NAME_LIP
+                print(self.model)
             else:
                 raise Exception("Model not Found")
+
 
             for arg in args:
                 start = arg[0]
@@ -104,12 +117,13 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                     name="Semantic Segmentation",
                     results=np.argmax(masks, axis=2).astype(np.uint8),
                     analysis_job_class=self.__class__,
-                    parameters=dict(model = self.model, resolution=self.resolution),
+                    parameters=dict(model = self.model_name, resolution=self.resolution),
                     container=arg[3],
                     dataset=model_name
                 ))
 
         sign_progress(1.0)
+        print("Done", results)
         return results
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
@@ -211,7 +225,7 @@ class SemanticSegmentationParameterWidget(ParameterWidget):
             return
 
         parameters = dict(
-            model = model,
+            model_name = model,
             resolution=resolution,
         )
         return parameters

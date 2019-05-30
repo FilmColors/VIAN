@@ -27,6 +27,7 @@ SCALING_MODE_WIDTH = 1
 SCALING_MODE_HEIGHT = 2
 SCALING_MODE_BOTH = 3
 
+from threading import Lock
 
 #TODO we should move the ProjectChanged Loaded and Closed Dispatcher into the ScreenshotManagerDockWidget
 class ScreenshotsToolbar(EToolBar):
@@ -100,7 +101,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.a_ab_plot = self.m_plots.addAction("AB-Plot")
         self.a_lc_plot = self.m_plots.addAction("LC-Plot")
         self.a_dt_plot = self.m_plots.addAction("Color-dT")
-
 
         self.inner.resize(400, self.height())
         self.tab = None
@@ -390,6 +390,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         except Exception as e:
             print(e)
 
+
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
@@ -437,6 +438,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.scr_captions = []
         self.selected = []
         self.selection_frames = []
+
+        self.write_lock = Lock()
 
         self.selected = []
 
@@ -505,7 +508,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         Recreating the Data Structures
         :return: 
         """
-
+        print("Updating")
         if self.project is None:
             return
         last_items = dict()
@@ -517,6 +520,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         current_sm_object = None
         new_qimage_cache = dict()
         for s in self.project.screenshots:
+
             # If this Screenshot belongs to a new Segment, append the last SMObject to the list
             if s.scene_id != current_segment_id:
                 if current_sm_object is not None:
@@ -552,7 +556,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                             qpixmap = numpy_to_pixmap(image)
 
                         self.qimage_cache[str(s.unique_id)] = qpixmap
-                    except:
+                    except Exception as e:
+                        print(e)
                         continue
                     # new_qimage_cache[str(s.unique_id)] = qpixmap
                 else:
@@ -585,8 +590,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         for img in self.images_plain:
             self.scene.removeItem(img)
-        for cap in self.captions:
-            self.scene.removeItem(cap)
+        self.images_plain = []
+        self.clear_captions()
 
         self.clear_selection_frames()
         if self.current_segment_frame is not None:
@@ -597,9 +602,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.scene.removeItem(self.loading_icon)
         if self.loading_text is not None:
             self.scene.removeItem(self.loading_text)
-
-        self.images_plain = []
-        self.captions = []
         self.images_segmentation = []
 
     def arrange_images(self):
@@ -613,7 +615,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             y_offset = int(img_height / 7)
             y_offset = x_offset
             caption_width = int(img_width / 1.5)
-
 
             self.scene.setSceneRect(self.sceneRect().x(), self.sceneRect().y(), self.n_per_row * (img_width + x_offset), self.sceneRect().width())
         else:
@@ -632,7 +633,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.add_caption(100, y + 100, segm.segm_id)
                 if self.show_segment_name:
                     self.add_caption(100, y + 250, segm.segm_name)
-
 
                 x_counter = 0
                 x = caption_width - (x_offset + img_width)
@@ -699,16 +699,17 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.selection_frames = []
 
     def clear_captions(self):
-        for cap in self.captions:
-            self.scene.removeItem(cap)
-
-        self.captions = []
+        with self.write_lock:
+            for cap in self.captions:
+                self.scene.removeItem(cap)
+            self.captions = []
 
     def clear_scr_captions(self):
-        for cap in self.scr_captions:
-            self.scene.removeItem(cap)
+        with self.write_lock:
+            for cap in self.scr_captions:
+                self.scene.removeItem(cap)
 
-        self.scr_captions = []
+            self.scr_captions = []
 
     def select_image(self, images, dispatch = True):
         self.selected = images
@@ -822,6 +823,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.current_segment_frame = None
 
     def on_loaded(self, project):
+        self.clear_manager()
         self.setEnabled(True)
         self.project = project
         self.update_manager()
@@ -829,7 +831,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def on_changed(self, project, item):
         if item is not None and item.get_type() not in [SEGMENT, SEGMENTATION, SCREENSHOT, SCREENSHOT_GROUP]:
             return
-        self.project = project
+        # self.project = project
+
         self.update_manager()
         self.on_selected(None, project.get_selected())
 

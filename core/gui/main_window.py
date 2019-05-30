@@ -150,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.thread_pool = QThreadPool.globalInstance()
         self.vian_event_handler_thread = QThread()
-        self.vian_event_handler = VIANEventHandler(self)
+        self.vian_event_handler = VIANEventHandler(None)
         self.vian_event_handler.moveToThread(self.vian_event_handler_thread)
         self.vian_event_handler_thread.start()
 
@@ -2021,7 +2021,6 @@ class MainWindow(QtWidgets.QMainWindow):
         w = InfoPopup(self, text, loc)
         w.show()
         print("OK")
-
 
     #region IProjectChangedNotify
 

@@ -11,10 +11,11 @@ try:
     from core.analysis.semantic_segmentation import *
     from core.analysis.deep_learning.face_identification import *
     import os
-    import tensorflow as tf
-    tf.test.is_gpu_available()
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    tf.logging.set_verbosity(tf.logging.FATAL)
+    import tensorflow as tf
+    # tf.test.is_gpu_available()
+    # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    # tf.logging.set_verbosity(tf.logging.FATAL)
 
 except:
     from core.data.enums import DataSerialization

@@ -600,7 +600,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.add_analysis(analysis)
         return analysis
 
-    def add_analysis(self, analysis:AnalysisContainer, dispatch = True) -> AnalysisContainer:
+    def add_analysis(self, analysis:AnalysisContainer, dispatch = False) -> AnalysisContainer:
         """
         Adds an AnalysisContainer instance to the project.
 

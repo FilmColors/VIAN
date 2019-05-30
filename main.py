@@ -13,6 +13,7 @@ Visualization and MultimediaLab
 
 
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import platform
 import sys
 from time import sleep
@@ -23,6 +24,7 @@ from threading import Thread
 
 import logging
 logging.getLogger('tensorflow').disabled = True
+
 
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox

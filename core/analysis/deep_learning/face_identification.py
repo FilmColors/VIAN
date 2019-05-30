@@ -111,7 +111,7 @@ class FaceRecognitionModel():
 
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-        config.log_device_placement = True  # to log device placement (on which device the operation ran)
+        config.log_device_placement = False  # to log device placement (on which device the operation ran)
 
         with self.graph.as_default():
             self.dnn_model = FaceRecKeras(n_classes, dropout)

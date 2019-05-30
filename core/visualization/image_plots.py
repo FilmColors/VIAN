@@ -695,14 +695,17 @@ class ImagePlotPlane(ImagePlot):
         t.translate(x, y)
 
     def set_scale(self, v=None):
-        if v is not None:
-            self.curr_scale = v / 100
-        for idx, itm in enumerate(self.raw_data):
-            x, z = rotate((0, 0), (itm.x, itm.z), self.curr_angle)
-            self.images[idx].setPos(np.nan_to_num(x * self.magnification) * self.curr_scale,
-                                    np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification * self.curr_scale))
-            self.images[idx].setZValue(z)
-        self.add_grid()
+        try:
+            if v is not None:
+                self.curr_scale = v / 100
+            for idx, itm in enumerate(self.raw_data):
+                x, z = rotate((0, 0), (itm.x, itm.z), self.curr_angle)
+                self.images[idx].setPos(np.nan_to_num(x * self.magnification) * self.curr_scale,
+                                        np.nan_to_num(self.range_y[1] * self.magnification - itm.y * self.magnification * self.curr_scale))
+                self.images[idx].setZValue(z)
+            self.add_grid()
+        except Exception as e:
+            print(e)
 
     def rotate_view(self, angle_rad):
         angle = (angle_rad / 360 * np.pi) * 2
