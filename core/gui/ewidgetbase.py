@@ -30,8 +30,11 @@ def line_separator(Orientation):
 
 
 class ExpandableWidget(QWidget):
-    def __init__(self, parent, expand_title = "Expand", inner = None, expanded = False):
+    def __init__(self, parent, expand_title = "Expand", inner = None, expanded = False, popup = False):
         super(ExpandableWidget, self).__init__(parent)
+        self.popup = popup
+        self.expand_title = expand_title
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
         self.setLayout(QVBoxLayout())
         self.btn_expand = QPushButton(expand_title, self)
         self.layout().addWidget(self.btn_expand)
@@ -45,7 +48,6 @@ class ExpandableWidget(QWidget):
         if expanded:
             self.toggle_expanded()
 
-
     def set_inner(self, inner):
         if self.inner is not None:
             self.layout().removeWidget(self.inner)
@@ -57,10 +59,26 @@ class ExpandableWidget(QWidget):
         state = None
         if self.inner is None:
             return
+        if self.popup:
+            ExpandablePopup(self, self)
         if state is None:
             self.inner.setVisible(not self.inner.isVisible())
         else:
             self.inner.setVisible(state)
+
+class ExpandablePopup(QMainWindow):
+    def __init__(self, parent, expandable):
+        super(ExpandablePopup, self).__init__(parent)
+        self.expandable = expandable
+        self.setCentralWidget(expandable.inner)
+        self.setWindowTitle(self.expandable.expand_title)
+        self.resize(600,50)
+        self.show()
+
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        self.expandable.layout().addWidget(self.expandable.inner)
+        self.expandable.inner.setVisible(False)
+        super(ExpandablePopup, self).closeEvent(a0)
 
 
 class EProgressPopup(QDialog):
