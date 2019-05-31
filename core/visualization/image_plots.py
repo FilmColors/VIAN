@@ -560,6 +560,7 @@ class ImagePlotCircular(ImagePlot):
         if 0 < t / 100 < 100:
             self.set_range_scale(t)
 
+
 class ImagePlotCircularControls(QWidget):
     def __init__(self, plot):
         super(ImagePlotCircularControls, self).__init__()
@@ -816,6 +817,7 @@ class ImagePlotPlane(ImagePlot):
 
         if 0 < t / 100 < 100:
             self.set_scale(t)
+
 
 class ImagePlotPlaneControls(QWidget):
     def __init__(self, plot):
@@ -1202,6 +1204,7 @@ class ImagePlotTime(ImagePlot):
 
         if 0 < t < 1000:
             self.scale_pos(t)
+
 
 class ImagePlotTimeControls(QWidget):
     def __init__(self, plot):
