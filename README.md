@@ -19,9 +19,12 @@ If you are interested in the source code or want to contribute to VIAN, you are 
 - Download and install [VLC 64-bit](https://www.videolan.org/vlc/index.html)
 
 ---
-Note: 
+
+***Note***
+
     You can also install VIAN with a another python 3 distribution than anaconda, however
     this is not tested yet, so no guarantees. 
+    
 ---
 
 ### Setting up the development environment
