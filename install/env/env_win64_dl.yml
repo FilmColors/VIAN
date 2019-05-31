@@ -1,4 +1,4 @@
-name: vian-dev-dl
+name: vian-win
 channels:
   - menpo
   - anaconda
