@@ -18,3 +18,4 @@ idea/
 *.mp4
 *.vscode/
 .DS_Store
+install/.DS_Store
