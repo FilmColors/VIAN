@@ -29,7 +29,7 @@ If you are interested in the source code or want to contribute to VIAN, you are 
 
 ### Setting up the development environment
 1. Clone this repository on your computer
-2. Download the models from [OneDrive](https://1drv.ms/u/s!Avol1nnS24kLldQ6sI0KucWUrWWF6g?e=edYQSV) and copy it into the VIAN/data directory
+2. Download the models from [OneDrive](https://1drv.ms/f/s!Avol1nnS24kLldQ6sI0KucWUrWWF6g) and copy it into the VIAN/data directory
 3. cd to the root of the VIAN directory
 
     ```cd path/to/my/VIAN/```
