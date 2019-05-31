@@ -11,7 +11,7 @@ If you are interested in the desktop application, please visit
 [this page](http://ercwebapp.westeurope.cloudapp.azure.com/vian) 
 to download VIAN for users. 
 
-##VIAN for Developers
+## VIAN for Developers
 If you are interested in the source code or want to contribute to VIAN, you are correct here. 
 
 ### Prerequisites
