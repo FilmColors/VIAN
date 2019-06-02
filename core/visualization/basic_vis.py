@@ -12,6 +12,7 @@ from core.gui.tools import ExportImageDialog
 class IVIANVisualization():
     def __init__(self, naming_fields = None):
         self.grid_color = QColor(20,20,20,150)
+        self.grid_line_width = 1
         self.font_size = 12
         self.naming_fields = dict()
         if naming_fields is not None:

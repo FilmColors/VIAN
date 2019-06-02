@@ -51,6 +51,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.range_y = range_y
         self.font_size = 8
         self.title = title
+        self.grid_line_width = 10
 
         self.left_button_pressed = False
         self.last_mouse_pos = QPoint()
@@ -468,7 +469,7 @@ class ImagePlotCircular(ImagePlot):
             self.lbl_max = None
         self.grid = []
         pen = QPen()
-        pen.setWidth(10)
+        pen.setWidth(self.grid_line_width)
         pen.setColor(self.grid_color)
 
         font = QFont()
@@ -739,7 +740,7 @@ class ImagePlotPlane(ImagePlot):
             self.scene().removeItem(itm)
         self.grid = []
         pen = QPen()
-        pen.setWidth(10)
+        pen.setWidth(self.grid_line_width)
         pen.setColor(self.grid_color)
 
         font = QFont()
@@ -989,6 +990,7 @@ class ImagePlotTime(ImagePlot):
         self.font_size = 60
         self.set_y_scale(y_scale)
         self.set_image_scale(image_scale)
+        self.grid_line_width = 2
 
     def create_scene(self, x_max, y_max, pixel_size_x = 500, pixel_size_y = 500):
         self.pixel_size_x = pixel_size_x
@@ -1083,7 +1085,7 @@ class ImagePlotTime(ImagePlot):
         self.lines = []
 
         pen = QPen()
-        pen.setWidth(1)
+        pen.setWidth(self.grid_line_width)
         pen.setColor(self.grid_color)
 
         font = QFont()
@@ -1260,6 +1262,7 @@ class ImagePlotYear(ImagePlotTime):
         super(ImagePlotYear, self).__init__(parent, range_x, range_y, title, image_scale, y_scale, naming_fields=naming_fields)
         self.itm_is_shown = dict()
         self.naming_fields['plot_name'] = "image_color_dy"
+        self.grid_line_width = 2
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, hover_text = None, channels=None):
         if hover_text is None:
@@ -1337,6 +1340,7 @@ class ImagePlotYear(ImagePlotTime):
 
         pen = QPen()
         pen.setColor(self.grid_color)
+        pen.setWidth(self.grid_line_width)
 
         # Y - Axis
         font = QFont()
