@@ -973,8 +973,8 @@ class ImagePlotTime(ImagePlot):
 
         self.lines = []
         self.itm_is_shown = dict()
-        self.channel = "saturation"
-        self.channels = ["saturation", "chroma", "hue", "luminance"]
+        self.channel = "Saturation"
+        self.channels = ["Saturation", "Chroma", "Hue", "Luminance"]
 
         self.pixel_size_x = 10000
         self.pixel_size_y = 2000
@@ -1004,7 +1004,6 @@ class ImagePlotTime(ImagePlot):
 
     def add_image(self, x, y, img, convert=True, mime_data = None, z = 0, uid = None, channels = None):
         timestamp = ms_to_string(x)
-
         # y = np.log10(y + 1.0)
         # y *= 10
         if convert:
@@ -1055,7 +1054,7 @@ class ImagePlotTime(ImagePlot):
             if pixmap is not None:
                 itm.setPixmap(pixmap)
             itm.setPos(np.nan_to_num(x * self.x_scale),
-                       np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height())
+                       np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale))# - itm.boundingRect().height())
                        )
 
             update_grid = False
@@ -1112,7 +1111,7 @@ class ImagePlotTime(ImagePlot):
         text.setDefaultTextColor(self.grid_color)
         self.lines.append(text)
 
-        text = self.scene().addText("Saturation", font)
+        text = self.scene().addText(self.channel, font)
         text.setRotation(-90)
         text.setPos(-(text.boundingRect().height() * 3), self.base_line * self.y_scale - (self.y_max * self.y_scale / 2) + text.boundingRect().width() / 2)
         text.setDefaultTextColor(self.grid_color)
@@ -1154,6 +1153,7 @@ class ImagePlotTime(ImagePlot):
 
     def set_channel(self, name):
         self.channel = name
+        self.update_grid()
         self.update_position()
 
     def update_position(self):
@@ -1163,7 +1163,7 @@ class ImagePlotTime(ImagePlot):
             y = v[1]
 
             try:
-                y = itm.alternative_channels[self.channel]
+                y = itm.alternative_channels[self.channel.lower()]
             except Exception as e:
                 print(e)
 
@@ -1177,7 +1177,7 @@ class ImagePlotTime(ImagePlot):
                     self.itm_is_shown[itm] = True
 
             itm.setPos(np.nan_to_num(x * self.x_scale),
-                       np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
+                       np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale)))
         super(ImagePlotTime, self).set_image_scale(self.img_scale)
         self.update_grid()
 
