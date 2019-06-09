@@ -1,10 +1,9 @@
 import os
 from functools import partial
-from random import randint
 from PyQt5 import QtCore, uic, QtGui
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit, QMainWindow
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit
+from PyQt5.QtGui import QIcon
 
 from core.data.computation import ms_to_string
 from core.data.interfaces import IProjectChangeNotify
@@ -12,7 +11,7 @@ from core.container.project import VIANProject
 from core.gui.context_menu import open_context_menu, CorpusProjectContextMenu
 from .ewidgetbase import EDockWidget
 from core.corpus.client.corpus_client import CorpusClient
-from core.corpus.sqlalchemy_entities import DBProject
+from core.corpus.legacy.sqlalchemy_entities import DBProject
 
 class Outliner(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window, corpus_client:CorpusClient):

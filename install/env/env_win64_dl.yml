@@ -97,5 +97,5 @@ dependencies:
     - sqlalchemy-searchable==1.0.3
     - sqlalchemy-utils==0.33.9
     - validators==0.12.3
-prefix: C:\dev\anaconda\envs\vian-dev-dl
+prefix: C:\dev\anaconda\envs\vian-win
 
