@@ -28,6 +28,7 @@ def line_separator(Orientation):
 
     return frame
 
+import typing
 
 class ExpandableWidget(QWidget):
     def __init__(self, parent, expand_title = "Expand", inner = None, expanded = False, popup = False):
@@ -65,6 +66,7 @@ class ExpandableWidget(QWidget):
             self.inner.setVisible(not self.inner.isVisible())
         else:
             self.inner.setVisible(state)
+
 
 class ExpandablePopup(QMainWindow):
     def __init__(self, parent, expandable):
@@ -482,10 +484,11 @@ class EToolBar(QToolBar):
         self.show_indicator_frame = False
         self.indicator_color = QColor(255,160,47)
 
-        if QScreen.physicalDotsPerInch(QApplication.screens()[0]) > 300:
-            self.setIconSize(QSize(128,128))
-        else:
-            self.setIconSize(QSize(64, 64))
+        self.setIconSize(QSize(40, 40))
+        # if QScreen.physicalDotsPerInch(QApplication.screens()[0]) > 300:
+        #     self.setIconSize(QSize(128,128))
+        # else:
+        #     self.setIconSize(QSize(64, 64))
 
     def paintEvent(self, QPaintEvent):
         super(EToolBar, self).paintEvent(QPaintEvent)

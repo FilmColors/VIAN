@@ -38,6 +38,10 @@ class ScreenshotsToolbar(EToolBar):
         self.manager = screenshot_manager
         self.action_export = self.addAction(create_icon("qt_ui/icons/icon_export_screenshot.png"), "")
         self.toggle_annotation = self.addAction(create_icon("qt_ui/icons/icon_toggle_annotations.png"), "")
+
+        self.toggle_annotation.setToolTip("Toggle Annotations on Screenshots")
+        self.action_export.setToolTip("Export Screenshots")
+
         self.action_export.triggered.connect(self.on_export)
         self.toggle_annotation.triggered.connect(self.on_toggle_annotations)
 

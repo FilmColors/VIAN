@@ -2059,7 +2059,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.settings.AUTO_START_COLORMETRY:
                 run_colormetry = True
             else:
-                self.set_overlay_visibility(False)
+                self.open_dialogs.append("Dummy")
+                self.check_overlay_visibility()
                 answer = QMessageBox.question(self, "Colormetry",
                                               "Do you want to start the Colormetry Analysis now?"
                                               "\n\n"
@@ -2067,7 +2068,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                               "but will need quite some resources of your computer.")
                 if answer == QMessageBox.Yes:
                     run_colormetry = True
-                self.set_overlay_visibility(True)
+                self.open_dialogs.remove("Dummy")
+                self.check_overlay_visibility()
 
         if run_colormetry:
             self.toggle_colormetry()

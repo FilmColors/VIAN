@@ -18,6 +18,7 @@ import socket
 import threading
 import hashlib, uuid
 from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
+
 from core.analysis.analysis_utils import run_analysis
 # class CorpusClientToolBar(QToolBar):
 #     def __init__(self, parent, corpus_client:CorpusClient):
@@ -69,8 +70,6 @@ class WebAppCorpusDock(EDockWidget):
     def on_analyses_changed(self):
         self.progress_widget.update_state()
         pass
-
-
 
 
 class CorpusProgressWidget(QWidget):
