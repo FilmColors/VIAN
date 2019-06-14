@@ -153,7 +153,7 @@ class FaceIdentificatorWidget(QWidget):
 
         self.main_window = main_window
         self.worker = IdentificationWorker()
-        self.worker_thread = QThread(self)
+        self.worker_thread = QThread()
         self.worker.moveToThread(self.worker_thread)
 
         self.onCollectFaces.connect(self.worker.find_faces, Qt.QueuedConnection)

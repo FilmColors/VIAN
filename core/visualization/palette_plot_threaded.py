@@ -17,7 +17,7 @@ from core.visualization.dot_plot import DotPlot
 
 from random import randint
 import numpy as np
-
+from core.concurrent.worker import MinimalThreadWorker
 
 class PaletteWidget(QWidget):
     def __init__(self, parent):
@@ -208,6 +208,133 @@ class PaletteView(QWidget, IVIANVisualization):
 class PaletteControls(QWidget):
     pass
 
+class DrawingThreadSignals(QObject):
+    onDrawn = pyqtSignal(object)
+
+class DrawingThread(QObject):
+    def __init__(self, width, height, background, rect, size, grid_color,
+                 scale, show_grid, depth, palette_layer, jitter, dot_size):
+        super(DrawingThread, self).__init__()
+        self.signals = DrawingThreadSignals()
+        self.image = None
+        self.width = width
+        self.height = height
+        self.background = background
+        self.rect = rect
+        self.dot_size = dot_size
+        self.size = size
+        self.grid_color = grid_color
+        self.scale = scale
+        self.show_grid = show_grid
+        self.depth = depth
+        self.palette_layer = palette_layer
+        self.jitter = jitter
+
+    def set_attributes(self, width, height, background, rect, size, grid_color,
+                 scale, show_grid, depth, palette_layer, jitter, dot_size):
+        self.width = width
+        self.height = height
+        self.background = background
+        self.rect = rect
+        self.size = size
+        self.grid_color = grid_color
+        self.scale = scale
+        self.show_grid = show_grid
+        self.depth = depth
+        self.palette_layer = palette_layer
+        self.jitter = jitter
+        self.dot_size = dot_size
+
+    def draw_palette(self):
+        target = None
+        if self.palette_layer is None:
+            return
+        self.image = QImage(self.size, QImage.Format_RGBA8888)
+        qp = QPainter()
+        pen = QPen()
+        pen.setWidthF(0.5)
+
+        if target is None:
+            qp.begin(self.image)
+            t_width = self.width
+            t_height = self.height
+        else:
+            qp.begin(target)
+            t_width = target.width()
+            t_height = target.height()
+
+        qp.setRenderHint(QPainter.Antialiasing)
+        if target is None:
+            if self.background == "White":
+                qp.fillRect(self.rect, QColor(self.background))
+                pen.setColor(QColor(0, 0, 0, 200))
+                self.grid_color = QColor(0, 0, 0, 255)
+            elif self.background == "Light-Gray":
+                qp.fillRect(self.rect, QColor(130, 130, 130))
+                pen.setColor(QColor(0, 0, 0, 200))
+            elif self.background == "Dark-Gray":
+                qp.fillRect(self.rect, QColor(37, 37, 37))
+                pen.setColor(QColor(255, 255, 255, 200))
+            else:
+                qp.fillRect(self.rect, QColor(0, 0, 0))
+                pen.setColor(QColor(255, 255, 255, 200))
+
+        qp.setPen(pen)
+        pen.setColor(self.grid_color)
+
+        if self.show_grid:
+            qp.drawLine(0, t_height / 2, t_width, t_height / 2)
+            qp.drawLine(t_width / 2, 0, t_width / 2, t_height)
+            qp.drawEllipse(t_width / 2 - self.scale * 128, t_height / 2 - self.scale * 128, self.scale * 256,
+                           self.scale * 256)
+            qp.drawEllipse(t_width / 2 - self.scale * 64, t_height / 2 - self.scale * 64, self.scale * 128,
+                           self.scale * 128)
+            qp.drawEllipse(t_width / 2 - self.scale * 32, t_height / 2 - self.scale * 32, self.scale * 64,
+                           self.scale * 64)
+            if self.scale > 5:
+                qp.drawEllipse(t_width / 2 - self.scale * 16, t_height / 2 - self.scale * 16, self.scale * 32,
+                               self.scale * 32)
+            if self.scale > 6:
+                qp.drawEllipse(t_width / 2 - self.scale * 8, t_height / 2 - self.scale * 8, self.scale * 16,
+                               self.scale * 16)
+            if self.scale > 7:
+                qp.drawEllipse(t_width / 2 - self.scale * 4, t_height / 2 - self.scale * 4, self.scale * 8,
+                               self.scale * 8)
+            if self.scale > 8:
+                qp.drawEllipse(t_width / 2 - self.scale * 2, t_height / 2 - self.scale * 2, self.scale * 4,
+                               self.scale * 4)
+        counter = 0
+
+        layer_idx = np.unique(self.palette_layer[0])[self.depth]
+        indices = np.where(self.palette_layer[0] == layer_idx)
+        cols_to_draw = self.palette_layer[1][indices]
+        bins_to_draw = self.palette_layer[2][indices]
+
+        for q in range(cols_to_draw.shape[0]):
+            color = cols_to_draw[q]
+            radius = self.dot_size
+            lab = tpl_bgr_to_lab(color)
+
+            # increase the visible number of dots:
+            if self.jitter > 1:
+                ndot_factor = self.jitter / 2
+            else:
+                ndot_factor = 1
+            for i in range(int(bins_to_draw[q] * ndot_factor)):
+                counter += 1
+                path = QPainterPath()
+                if self.jitter > 0:
+                    rx = np.random.uniform(-self.jitter, self.jitter)
+                    ry = np.random.uniform(-self.jitter, self.jitter)
+                else:
+                    rx, ry = 0, 0
+                path.addEllipse((t_width / 2) + ((self.scale * (1.0 * lab[1]) - radius) + rx),
+                                (t_height / 2) + ((self.scale * (-1.0 * lab[2]) - radius) + ry),
+                                radius, radius)
+                qp.fillPath(path, QColor(int(color[2]), int(color[1]), int(color[0])))
+        qp.end()
+        self.signals.onDrawn.emit(self.image)
+
 
 class PaletteLABWidget(QWidget):
     def __init__(self, parent):
@@ -297,8 +424,6 @@ class PaletteLABWidget(QWidget):
         self.cb_show_grid.stateChanged.connect(self.on_settings_changed)
         self.cb_background.currentTextChanged.connect(self.on_settings_changed)
 
-
-
         self.w_ctrls2.setVisible(False)
         self.show()
 
@@ -331,8 +456,7 @@ class PaletteLABWidget(QWidget):
         self.lbl_depth.setText(str(np.amax(self.palette_tree[0]) - np.unique(self.palette_tree[0])[self.slider.value()]))
         self.view.mode = self.cb_mode.currentText()
         self.view.depth = self.slider.value()
-        self.view.draw_palette()
-        self.view.update()
+        self.on_settings_changed()
 
     def clear_view(self):
         self.view.palette_layer = None
@@ -340,6 +464,8 @@ class PaletteLABWidget(QWidget):
 
 
 class PaletteLABView(QWidget, IVIANVisualization):
+    onUpdateDrawing = pyqtSignal()
+
     def __init__(self, parent, naming_fields = None):
         QWidget.__init__(self, parent)
         IVIANVisualization.__init__(self, naming_fields)
@@ -354,94 +480,27 @@ class PaletteLABView(QWidget, IVIANVisualization):
         self.background = "Light-Gray"
         self.jitter = 10
         self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.drawing_thread = QThread()
+        self.drawing_worker = DrawingThread(self.width(), self.height(),
+                                            self.background, self.rect(), self.size(), self.grid_color,
+                                            self.scale, self.show_grid, self.depth,
+                                            self.palette_layer, self.jitter, self.dot_size)
+        self.drawing_worker.moveToThread(self.drawing_thread)
+        self.drawing_thread.start()
+        self.drawing_worker.signals.onDrawn.connect(self.draw)
+        self.onUpdateDrawing.connect(self.drawing_worker.draw_palette)
+
 
     def draw_palette(self, target = None):
-        if self.palette_layer is None:
-            return
-        self.image = QImage(self.size(), QImage.Format_RGBA8888)
-        qp = QPainter()
-        pen = QPen()
-        pen.setWidthF(0.5)
+        self.drawing_worker.set_attributes(self.width(), self.height(),
+                                            self.background, self.rect(), self.size(), self.grid_color,
+                                            self.scale, self.show_grid, self.depth,
+                                            self.palette_layer, self.jitter, self.dot_size)
+        self.drawing_worker.palette_layer = self.palette_layer
+        self.onUpdateDrawing.emit()
 
-        if target is None:
-            qp.begin(self.image)
-            t_width = self.width()
-            t_height = self.height()
-        else:
-            qp.begin(target)
-            t_width = target.width()
-            t_height = target.height()
-
-        qp.setRenderHint(QPainter.Antialiasing)
-        if target is None:
-            if self.background == "White":
-                qp.fillRect(self.rect(), QColor(self.background))
-                pen.setColor(QColor(0,0,0,200))
-                self.grid_color = QColor(0,0,0,255)
-            elif self.background == "Light-Gray":
-                qp.fillRect(self.rect(), QColor(130,130,130))
-                pen.setColor(QColor(0,0,0,200))
-            elif self.background == "Dark-Gray":
-                qp.fillRect(self.rect(), QColor(37, 37, 37))
-                pen.setColor(QColor(255, 255, 255, 200))
-            else:
-                qp.fillRect(self.rect(), QColor(0,0,0))
-                pen.setColor(QColor(255, 255, 255, 200))
-
-        qp.setPen(pen)
-        pen.setColor(self.grid_color)
-
-        if self.show_grid:
-            qp.drawLine(0, t_height / 2, t_width, t_height / 2)
-            qp.drawLine(t_width / 2, 0, t_width / 2, t_height)
-            qp.drawEllipse(t_width / 2 - self.scale * 128, t_height / 2 - self.scale * 128, self.scale * 256, self.scale * 256)
-            qp.drawEllipse(t_width / 2 - self.scale * 64, t_height / 2 - self.scale * 64, self.scale * 128, self.scale * 128)
-            qp.drawEllipse(t_width / 2 - self.scale * 32, t_height / 2 - self.scale * 32, self.scale * 64, self.scale * 64)
-            if self.scale > 5:
-                qp.drawEllipse(t_width / 2 - self.scale * 16, t_height / 2 - self.scale * 16, self.scale * 32,
-                               self.scale * 32)
-            if self.scale > 6:
-                qp.drawEllipse(t_width / 2 - self.scale * 8, t_height / 2 - self.scale * 8, self.scale * 16,
-                               self.scale * 16)
-            if self.scale > 7:
-                qp.drawEllipse(t_width / 2 - self.scale * 4, t_height / 2 - self.scale * 4, self.scale * 8,
-                               self.scale * 8)
-            if self.scale > 8:
-                qp.drawEllipse(t_width / 2 - self.scale * 2, t_height / 2 - self.scale * 2, self.scale * 4,
-                               self.scale * 4)
-        counter = 0
-
-        layer_idx = np.unique(self.palette_layer[0])[self.depth]
-        indices = np.where(self.palette_layer[0] == layer_idx)
-        cols_to_draw = self.palette_layer[1][indices]
-        bins_to_draw = self.palette_layer[2][indices]
-
-        for q in range(cols_to_draw.shape[0]):
-            color = cols_to_draw[q]
-            radius = self.dot_size
-            lab = tpl_bgr_to_lab(color)
-
-            color_rgb  = QColor(int(color[2]), int(color[1]), int(color[0]))
-            # increase the visible number of dots:
-            if self.jitter > 1:
-                ndot_factor = 1
-            else:
-                ndot_factor = 1
-
-            print(int(bins_to_draw[q] * ndot_factor))
-            for i in range(int(bins_to_draw[q] * ndot_factor)):
-                counter += 1
-                path = QPainterPath()
-                if self.jitter > 0:
-                    rx = np.random.randint(-self.jitter, self.jitter)
-                    ry = np.random.randint(-self.jitter, self.jitter)
-                else:
-                    rx, ry = 0,0
-                path.addEllipse((t_width / 2) + ((self.scale * (1.0 * lab[1]) - radius) + rx),
-                                (t_height / 2) + ((self.scale * (-1.0 * lab[2]) - radius) + ry),
-                                radius, radius)
-                qp.fillPath(path, color_rgb)
-        qp.end()
+    def draw(self, image):
+        self.image = image
 
     def paintEvent(self, a0: QPaintEvent):
         if self.image is None:

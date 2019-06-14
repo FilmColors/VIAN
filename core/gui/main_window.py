@@ -91,6 +91,7 @@ class MainWindow(QtWidgets.QMainWindow):
     currentClassificationObjectChanged = pyqtSignal(object)
     onAnalysisIntegrated = pyqtSignal()
 
+
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
@@ -223,12 +224,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.frame_update_worker = TimestepUpdateWorkerSingle()
-        self.frame_update_thread = QThread(self)
+        self.frame_update_thread = QThread()
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
-
         self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
+
         self.create_widget_elan_status()
         self.create_widget_video_player()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
@@ -418,7 +419,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     # self.corpus_client,
                                     self.colorimetry_live,
                                     self.query_widget,
-                                    self.worker_manager
+                                    self.worker_manager,
+                                          self.corpus_client_toolbar
                                           ]
 
         self.menus_list = [

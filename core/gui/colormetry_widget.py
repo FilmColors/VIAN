@@ -25,6 +25,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.inner.setCentralWidget(self.central)
         self.use_tab_mode = False
 
+        self.is_drawing = False
+
         self.m_visualization = self.inner.menuBar().addMenu("Visualizations")
         self.a_palette = self.m_visualization.addAction("Palette")
         self.a_palette_ab = self.m_visualization.addAction("Palette AB")
@@ -107,6 +109,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     @pyqtSlot(object, int)
     def update_timestep(self, data, time_ms):
         if data is not None:
+            self.is_drawing = True
             try:
                 t = time.time()
 
@@ -145,9 +148,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                                                          line_name=key,
                                                          force_xmax=self.main_window.project.movie_descriptor.duration)
             except Exception as e:
-                raise e
                 print("Exception in ColormetryWidget.update_timestep()", str(e))
-
+            self.is_drawing = False
     @pyqtSlot(int)
     def on_time_step(self, time_ms):
         self.spatial_complexity_vis.set_time_indicator(time_ms)

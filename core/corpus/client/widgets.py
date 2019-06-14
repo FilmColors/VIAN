@@ -10,7 +10,7 @@ from core.data.computation import create_icon
 from core.corpus.client.corpus_client import CorpusClient
 from core.gui.Dialogs.new_project_dialog import FilmographyWidget
 from functools import partial
-
+from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import *
 from core.gui.tools import StringList
 import json
@@ -19,33 +19,8 @@ import threading
 import hashlib, uuid
 from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
 
-from core.analysis.analysis_utils import run_analysis
-# class CorpusClientToolBar(QToolBar):
-#     def __init__(self, parent, corpus_client:CorpusClient):
-#         super(CorpusClientToolBar, self).__init__(parent)
-#         self.setWindowTitle("Corpus Toolbar")
-#         self.spacer = QWidget()
-#         self.spacer.setLayout(QHBoxLayout())
-#         self.spacer.layout().addItem(QSpacerItem(1,1,QSizePolicy.Expanding, QSizePolicy.Fixed))
-#         self.addWidget(self.spacer)
-#
-#         self.addAction(CorpusClientWidgetAction(self, corpus_client, parent))
-#
-#     def get_client(self):
-#         return self.corpus_client
-#
-#
-# class CorpusClientWidgetAction(QWidgetAction):
-#     def __init__(self, parent, corpus_client:CorpusClient, main_window):
-#         super(CorpusClientWidgetAction, self).__init__(parent)
-#         self.p = parent
-#         self.corpus_client = corpus_client
-#         self.main_window = main_window
-#
-#     def createWidget(self, parent: QWidget):
-#         return CorpusClientWidget(parent,  self.corpus_client, self.main_window)
 
-class WebAppCorpusDock(EDockWidget):
+class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window, corpus_client:CorpusClient):
         super(WebAppCorpusDock, self).__init__(main_window, False)
         self.setWindowTitle("WebApp")
@@ -65,14 +40,29 @@ class WebAppCorpusDock(EDockWidget):
         self.btn_Commit = QPushButton("Commit Project", self.central)
         self.central.layout().addWidget(self.btn_Commit)
         self.btn_Commit.clicked.connect(partial(self.corpus_widget.on_commit))
+        self.btn_Commit.setEnabled(False)
+
+        self.progress_widget.onThresholdReached.connect(self.on_threshold_reached)
+
+
 
     @pyqtSlot()
     def on_analyses_changed(self):
         self.progress_widget.update_state()
         pass
 
+    def on_loaded(self, project):
+        self.btn_Commit.setEnabled(False)
+        self.progress_widget.btn_RunAll.setEnabled(False)
+
+
+
+    def on_threshold_reached(self):
+        self.btn_Commit.setEnabled(True)
 
 class CorpusProgressWidget(QWidget):
+    onThresholdReached = pyqtSignal()
+
     def __init__(self, parent, main_window):
         super(CorpusProgressWidget, self).__init__(parent)
         self.main_window = main_window
@@ -95,6 +85,7 @@ class CorpusProgressWidget(QWidget):
         self.items = dict()
         self.missing_analyses = dict()
 
+
     @pyqtSlot()
     def update_state(self):
         data = self.requirements
@@ -102,6 +93,9 @@ class CorpusProgressWidget(QWidget):
         if data is None:
             return
         self.missing_analyses = dict()
+
+        progress_segmentation = 0.0
+        progress_screenshots = 0.0
 
         if self.main_window.project is not None:
             if "segment_analyses" in data and self.main_window.project.get_main_segmentation() is not None:
@@ -135,6 +129,7 @@ class CorpusProgressWidget(QWidget):
                 else:
                     bar = self.items["SegmentAnalyses"]
                 bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
+                progress_segmentation = n_analyses_done / n_analyses
 
             if "screenshot_analyses" in data:
                 n_analyses = len(self.main_window.project.screenshots) * len(data["screenshot_analyses"])
@@ -167,12 +162,14 @@ class CorpusProgressWidget(QWidget):
                 else:
                     bar = self.items["ScreenshotAnalyses"]
                 bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
+                progress_screenshots = n_analyses_done / n_analyses
 
-        for priority in sorted(self.missing_analyses.keys()):
-            for analysis_name in self.missing_analyses[priority].keys():
-                analysis = self.main_window.eval_class(analysis_name)
-                for clobj_name, containers in self.missing_analyses[priority][analysis_name].items():
-                    pass
+            if progress_screenshots >= ERCFilmColorsVIANPipeline.finished_threshold and \
+                progress_segmentation >= ERCFilmColorsVIANPipeline.finished_threshold:
+                self.onThresholdReached.emit()
+                self.btn_RunAll.setEnabled(False)
+            else:
+                self.btn_RunAll.setEnabled(True)
 
 
     def run_all(self):
