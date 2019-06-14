@@ -57,7 +57,7 @@ class DialogPreferences(EDialogWidget):
         self.spinBox_GridSize.valueChanged.connect(self.set_grid_size)
 
 
-        self.lineEdit_ProjectsFolder.setText(self.settings.DIR_PROJECT)
+        self.lineEdit_ProjectsFolder.setText(self.settings.DIR_PROJECTS)
         self.lineEdit_UpdateSource.setText(self.settings.UPDATE_SOURCE)
         self.spinBox_AutosaveTime.setValue(self.settings.AUTOSAVE_TIME)
 

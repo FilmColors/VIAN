@@ -513,7 +513,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         Recreating the Data Structures
         :return: 
         """
-        print("Updating")
         if self.project is None:
             return
         last_items = dict()
