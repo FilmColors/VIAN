@@ -1215,6 +1215,7 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def switch_perspective(self, perspective):
+        print("Switch Perspective", perspective)
         self.centralWidget().setParent(None)
         self.statusBar().show()
 
@@ -1359,6 +1360,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.corpus_visualizer_dock.show()
             self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
+
+        elif perspective == Perspective.WebApp:
+            self.timeline.show()
+            self.inspector.show()
+            self.player_dock_widget.show()
+            self.tabifyDockWidget(self.inspector, self.corpus_client_toolbar)
+            self.corpus_client_toolbar.show()
+            self.corpus_client_toolbar.raise_()
 
         self.setCentralWidget(central)
 

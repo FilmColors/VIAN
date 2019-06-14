@@ -35,6 +35,7 @@ class Perspective(Enum):
         QuickAnnotation = 9
         Query = 10
         CorpusVisualizer = 11
+        WebApp = 12
 
 
 

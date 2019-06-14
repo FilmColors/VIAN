@@ -269,7 +269,8 @@ class StageSelector(QWidget):
             (self.btn_Segmentation, Perspective.Segmentation),
             (self.btn_Annotation, Perspective.Annotation),
             (self.btn_Classification, Perspective.Classification),
-            (self.btn_Query, Perspective.Query)
+            (self.btn_Query, Perspective.Query),
+            (self.btn_WebApp, Perspective.WebApp)
         ]
 
         self.btn_Segmentation.clicked.connect(partial(self.set_stage, Perspective.Segmentation))
@@ -277,6 +278,7 @@ class StageSelector(QWidget):
         self.btn_Setup.clicked.connect(partial(self.set_stage, Perspective.ExperimentSetup))
         self.btn_Classification.clicked.connect(partial(self.set_stage, Perspective.Classification))
         self.btn_Query.clicked.connect(partial(self.set_stage, Perspective.Query))
+        self.btn_WebApp.clicked.connect(partial(self.set_stage, Perspective.WebApp, True))
 
     def set_stage(self, idx:Perspective, dispatch = True):
         new_perspective = None
@@ -286,6 +288,6 @@ class StageSelector(QWidget):
                 btn.setChecked(True)
             else:
                 btn.setChecked(False)
-
+        print(dispatch, new_perspective)
         if dispatch and new_perspective is not None:
             self.main_window.switch_perspective(new_perspective)
