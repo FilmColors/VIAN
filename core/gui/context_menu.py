@@ -7,7 +7,7 @@ from core.container.project import MOVIE_DESCRIPTOR, SEGMENTATION, ANNOTATION, S
     SCREENSHOT, SCREENSHOT_GROUP, NODE_SCRIPT,MEDIA_OBJECT,EXPERIMENT, CLASSIFICATION_OBJECT, VIANProject, Screenshot,\
     Experiment
 from core.corpus.client.corpus_client import CorpusClient
-from core.corpus.sqlalchemy_entities import DBProject
+from core.corpus.legacy.sqlalchemy_entities import DBProject
 
 
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):

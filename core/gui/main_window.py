@@ -134,7 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.load()
 
         print("HDF5")
-        self.hdf5_cache = HDF5Cache(self.settings.DIR_PROJECT + "/scr_cache.hdf5")
+        self.hdf5_cache = HDF5Cache(self.settings.DIR_ROOT + "/scr_cache.hdf5")
 
         self.clipboard_data = []
         # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
@@ -1183,7 +1183,7 @@ class MainWindow(QtWidgets.QMainWindow):
         answer = QMessageBox.question(self, "Backup", "Do you want to store the Backup into the default Directory?",
                                       buttons=QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
         if answer == QMessageBox.No:
-            path = QFileDialog.getExistingDirectory(self, directory = self.settings.DIR_PROJECT)[0] + "/"
+            path = QFileDialog.getExistingDirectory(self, directory = self.settings.DIR_ROOT)[0] + "/"
         elif answer == QMessageBox.Yes:
             path = self.settings.DIR_BACKUPS
         else:
@@ -1689,7 +1689,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.on_save_project()
 
         self.check_overlay_visibility()
-        path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECT)
+        path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECTS)
         path = path[0]
         self.close_project()
         try:
@@ -2059,7 +2059,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.settings.AUTO_START_COLORMETRY:
                 run_colormetry = True
             else:
-                self.set_overlay_visibility(False)
+                self.open_dialogs.append("Dummy")
+                self.check_overlay_visibility()
                 answer = QMessageBox.question(self, "Colormetry",
                                               "Do you want to start the Colormetry Analysis now?"
                                               "\n\n"
@@ -2067,7 +2068,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                               "but will need quite some resources of your computer.")
                 if answer == QMessageBox.Yes:
                     run_colormetry = True
-                self.set_overlay_visibility(True)
+                self.open_dialogs.remove("Dummy")
+                self.check_overlay_visibility()
 
         if run_colormetry:
             self.toggle_colormetry()

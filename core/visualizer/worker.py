@@ -5,7 +5,7 @@ from enum import Enum
 import numpy as np
 from PyQt5.QtCore import *
 
-from core.corpus.sqlalchemy_entities import *
+from core.corpus.legacy.sqlalchemy_entities import *
 from core.corpus.client.hdf5_database import HDF5ManagerDatabase
 from core.visualizer.vis_entities import VisScreenshot
 

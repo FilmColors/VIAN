@@ -19,3 +19,5 @@ idea/
 *.vscode/
 .DS_Store
 install/.DS_Store
+_docs/build/*
+

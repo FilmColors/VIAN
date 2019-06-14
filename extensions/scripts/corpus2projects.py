@@ -8,7 +8,7 @@ import glob
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from core.corpus.sqlalchemy_entities import *
+from core.corpus.legacy.sqlalchemy_entities import *
 from core.data.headless import *
 
 

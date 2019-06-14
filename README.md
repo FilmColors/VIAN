@@ -1,4 +1,4 @@
-# VIAN - Visual Film Annotation
+# VIAN - Visual Film Annotation (Beta)
 
 ![alt text](qt_ui/images/github-title.png)
 

@@ -287,6 +287,7 @@ class ExportImageDialog(EDialogWidget):
         self.spinBoxFontSize.valueChanged.connect(self.on_update)
         self.spinBoxFontSize.setValue(self.visualization.font_size)
         self.comboBoxPreset.currentTextChanged.connect(self.on_preset)
+        self.spinBox_GridLine.valueChanged.connect(self.on_update)
 
         self.spinBox_Height.setEnabled(False)
 
@@ -373,6 +374,7 @@ class ExportImageDialog(EDialogWidget):
         size = QSize(width, height)
         self.visualization.grid_color = grid
         self.visualization.font_size = font_size
+        self.visualization.grid_line_width = self.spinBox_GridLine.value()
         print("@TODO", self.visualization)
 
         print("Rendering Image")

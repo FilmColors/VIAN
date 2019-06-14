@@ -9,7 +9,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from core.data.computation import lab_to_lch
-from core.corpus.sqlalchemy_entities import *
+from core.corpus.legacy.sqlalchemy_entities import *
 from core.gui.classification import CheckBoxGroupWidget
 from core.visualization.dot_plot import DotPlot
 from core.visualization.image_plots import ImagePlotCircular, ImagePlotPlane, ImagePlotTime, ImagePlotYear

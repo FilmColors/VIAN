@@ -24,7 +24,7 @@ class NewProjectDialog(EDialogWidget):
 
         self.elan_segmentation = elan_segmentation
         if movie_path is "":
-            self.project_dir = settings.DIR_PROJECT
+            self.project_dir = settings.DIR_PROJECTS
         else:
             mp = movie_path.replace("\\", "/")
             mp = movie_path.split("/")
@@ -193,7 +193,7 @@ class NewProjectDialog(EDialogWidget):
         # Checking if the project dir is existing
         if not os.path.isdir(self.project_dir):
             self.settings.integritiy_check()
-            self.project_dir = self.settings.DIR_PROJECT
+            self.project_dir = self.settings.DIR_PROJECTS
         try:
             if not os.path.isdir(self.project_dir + "/" + self.project_name):
                 try:
@@ -237,7 +237,7 @@ class NewProjectDialog(EDialogWidget):
 
         print(self.project.folder, "\n",
               self.project.path, "\n",
-              self.settings.DIR_PROJECT)
+              self.settings.DIR_PROJECTS)
 
         # vocabularies = []
         # for c in self.voc_cbs:

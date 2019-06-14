@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>510</width>
+    <width>612</width>
     <height>38</height>
    </rect>
   </property>
@@ -163,6 +163,27 @@
      </property>
      <property name="checked">
       <bool>false</bool>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btn_WebApp">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>icons/icon_persp_webapp_unc.png</normaloff>
+       <activeoff>icons/icon_persp_webapp_clc.png</activeoff>icons/icon_persp_webapp_unc.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>90</width>
+       <height>30</height>
+      </size>
      </property>
      <property name="flat">
       <bool>true</bool>

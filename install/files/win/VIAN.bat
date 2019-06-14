@@ -13,7 +13,7 @@
 ::egkzugNsPRvcWATEpCI=
 ::dAsiuh18IRvcCxnZtBJQ
 ::cRYluBh/LU+EWAnk
-::YxY4rhs+aU+IeA==
+::YxY4rhs+aU+JeA==
 ::cxY6rQJ7JhzQF1fEqQJQ
 ::ZQ05rAF9IBncCkqN+0xwdVs0
 ::ZQ05rAF9IAHYFVzEqQJQ
@@ -27,11 +27,11 @@
 ::Zg8zqx1/OA3MEVWAtB9wSA==
 ::dhA7pRFwIByZRRnk
 ::Zh4grVQjdCqDJGmW+0UiKRZZRQqFAEyzEokK4fvu7ubKr0ILXedyeYHV1aCPNO8B1kzqZoIs2nZmnsIACQhkaRulUjkdiEAMs3yAVw==
-::YB416Ek+ZG8=
+::YB416Ek+ZW8=
 ::
 ::
 ::978f952a14a936cc963da21a135fa983
 cd %~dp0
-miniconda/Scripts/activate vian_win
+miniconda/Scripts/activate vian-win
 cd vian
 python main.py

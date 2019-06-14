@@ -28,6 +28,8 @@ palette_beach = Palette(palette_name="Ocean", palette_colors=[[3,63,99],[40,102,
 palette_earth = Palette(palette_name="Earth", palette_colors=[[252,170,103],[176,65,62],[255,255,199],[84,134,135],[71,51,53]])
 palette_gray = Palette(palette_name="Gray", palette_colors=[[0,0,0],[50,50,50],[100,100,100],[150,150,150],[200,200,200],[255,255,255]])
 
+with open("data/config.json", "r") as f:
+    CONFIG = json.load(f)
 
 class UserSettings():
     """
@@ -75,18 +77,19 @@ class UserSettings():
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
-        self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
-        self.DIR_PLUGINS = self.DIR_PROJECT + "/plugins/"
-        self.store_path = self.DIR_PROJECT + path
+        self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+        self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
+        self.store_path = self.DIR_ROOT + path
         self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
-        self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
-        self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
-        self.DIR_CORPORA = self.DIR_PROJECT + "/corpora/"
+        self.DIR_TEMPLATES = self.DIR_ROOT + "/templates/"
+        self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
+        self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
+        self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
 
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
-        if not os.path.isdir(self.DIR_PROJECT):
-            os.mkdir(self.DIR_PROJECT)
+        if not os.path.isdir(self.DIR_ROOT):
+            os.mkdir(self.DIR_ROOT)
 
         if not os.path.isdir(self.DIR_TEMPLATES):
             os.mkdir(self.DIR_TEMPLATES)
@@ -162,15 +165,16 @@ class UserSettings():
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
-        self.DIR_PROJECT = self.DIR_USERHOME + "documents/VIAN/"
-        self.DIR_PLUGINS = self.DIR_PROJECT + "/plugins/"
-        self.DIR_BACKUPS = self.DIR_PROJECT + "backups/"
-        self.store_path = self.DIR_PROJECT + "settings.json"
+        self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+        self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
+        self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
+        self.store_path = self.DIR_ROOT + "settings.json"
         self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
-        self.DIR_TEMPLATES = self.DIR_PROJECT + "/templates/"
-        self.DIR_CORPORA = self.DIR_PROJECT + "/corpora/"
+        self.DIR_TEMPLATES = self.DIR_ROOT + "/templates/"
+        self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
+        self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
 
-        for d in [self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS, self.DIR_CORPORA]:
+        for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS, self.DIR_CORPORA, self.DIR_PROJECTS]:
             if not os.path.isdir(d):
                 os.mkdir(d)
                 print(d + "\t Directory created.")
@@ -183,7 +187,7 @@ class UserSettings():
         """
 
         integer = True
-        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_PROJECT, self.DIR_TEMPLATES, self.DIR_PLUGINS, self.DIR_CORPORA]:
+        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_PLUGINS, self.DIR_CORPORA]:
             if not os.path.isdir(dir):
                 self.generate_dir_paths()
                 integer = False

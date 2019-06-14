@@ -35,6 +35,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.dot_size = 20
         self.grid = []
         self.lbl_max = None
+        self.grid_line_width = 1.0
 
         self.raw_data = []
         self.points = []
@@ -54,7 +55,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.grid = []
         if grid_type == "LA":
             pen = QPen()
-            pen.setWidthF(0.1)
+            pen.setWidthF(self.grid_line_width)
             pen.setColor(self.grid_color)
             print(self.grid_color.red())
 
@@ -86,7 +87,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
 
         elif grid_type == "AB":
             pen = QPen()
-            pen.setWidthF(0.1)
+            pen.setWidthF(self.grid_line_width / 10)
             pen.setColor(self.grid_color)
             print("Hello", self.grid_color.red())
 

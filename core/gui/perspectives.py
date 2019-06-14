@@ -19,8 +19,6 @@ class PerspectiveManager(EDockWidget):
         self.comboBox_Perspective.setCurrentText(Perspective.Annotation.name)
         self.comboBox_Perspective.currentIndexChanged.connect(self.on_perspective_changed)
 
-
-
     def on_perspective_changed(self):
         self.main_window.switch_perspective(self.comboBox_Perspective.currentText())
 
