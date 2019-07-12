@@ -521,6 +521,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print(segment)
 
     def test_function(self):
+        from core.data.io.web_annotation import WebAnnotationDevice
+        WebAnnotationDevice().export("test.json", self.project, self.settings.CONTRIBUTOR, self.version)
         print(self.settings.CONTRIBUTOR)
 
     def toggle_colormetry(self):
