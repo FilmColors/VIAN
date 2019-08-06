@@ -16,7 +16,6 @@ from core.container.segmentation import *
 from core.data.settings import Contributor
 
 
-
 class WebAnnotationDevice():
     def export(self, file_path, project:VIANProject, contributor:Contributor, version):
         result = []

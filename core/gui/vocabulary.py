@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent
 from PyQt5 import uic
+from core.container.experiment import Vocabulary, VocabularyWord
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 from core.data.interfaces import IProjectChangeNotify
 import os
@@ -39,6 +40,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         uic.loadUi(path, self)
         self.main_window = main_window
         self.project = main_window.project
+        self.current_item = None
 
         self.treeView = VocabularyTreeView(self, self)
         self.inner.layout().addWidget(self.treeView)
@@ -47,6 +49,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
         self.btn_addItem.clicked.connect(self.add_word)
         self.lineEdit_Item.returnPressed.connect(self.add_word)
+
         self.show()
 
     def add_vocabulary(self, voc):
@@ -67,6 +70,19 @@ class VocabularyView(QWidget, IProjectChangeNotify):
             for c in word.children:
                 self.get_children(item, c)
 
+    def set_current(self, current):
+        print(current)
+        if current is None:
+            return
+        self.lineEditName.setText(current.name)
+        self.textEditDescription.setPlainText(current.comment)
+        if isinstance(current, VocabularyWord):
+            pass
+        elif isinstance(current, Vocabulary):
+            pass
+
+        self.current_item = current
+
     def add_word(self):
         name = self.lineEdit_Item.text()
         if name != "" and len(self.treeView.selectedIndexes()) > 0:
@@ -82,11 +98,6 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
             else:
                 print("FAILED TO CREAE WORD")
-            # if isinstance(selected_item, Vocabulary):
-            #     selected_item.add_word(VocabularyWord(name))
-            # elif isinstance(selected_item, VocabularyWord):
-            #     selected_item.add_children(VocabularyWord(name))
-
             self.add_to_tree(selected, item)
         self.lineEdit_Item.setText("")
 
@@ -101,6 +112,11 @@ class VocabularyView(QWidget, IProjectChangeNotify):
     def on_loaded(self, project):
         self.project = project
         self.recreate_tree()
+
+    def on_closed(self):
+        self.current_item = None
+        self.lineEditName.setText("")
+        self.textEditDescription.setPlainText("")
 
     def on_changed(self, project, item):
         if item is None:
@@ -133,6 +149,8 @@ class VocabularyTreeView(QTreeView):
                 obj = current_item.voc_object
                 if obj is not None:
                     self.vocabulary_manager.main_window.project.set_selected(sender=None, selected=[obj])
+                    self.vocabulary_manager.set_current(obj)
+                    print(obj)
 
     def open_context_menu(self, QMouseEvent):
         pos = self.mapToGlobal(QMouseEvent.pos())
