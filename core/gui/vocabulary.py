@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent
 from PyQt5 import uic
+from core.gui.drop_image_container import DropImageContainer
 from core.container.experiment import Vocabulary, VocabularyWord
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 from core.data.interfaces import IProjectChangeNotify
@@ -45,10 +46,16 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.treeView = VocabularyTreeView(self, self)
         self.inner.layout().addWidget(self.treeView)
 
+        self.image_drop = DropImageContainer(self)
+        self.widgetImageContainer.setLayout(QVBoxLayout())
+        self.widgetImageContainer.layout().addWidget(self.image_drop)
         self.vocabulary_model = QStandardItemModel(self.treeView)
 
         self.btn_addItem.clicked.connect(self.add_word)
         self.lineEdit_Item.returnPressed.connect(self.add_word)
+
+        self.lineEditName.textChanged.connect(self.on_name_changed)
+        self.textEditDescription.textChanged.connect(self.on_description_changed)
 
         self.show()
 
@@ -71,7 +78,12 @@ class VocabularyView(QWidget, IProjectChangeNotify):
                 self.get_children(item, c)
 
     def set_current(self, current):
-        print(current)
+        """
+        Sets the current item to be edited in the right widget.
+
+        :param current: The item to be edited
+        """
+        self.current_item = None
         if current is None:
             return
         self.lineEditName.setText(current.name)
@@ -80,7 +92,6 @@ class VocabularyView(QWidget, IProjectChangeNotify):
             pass
         elif isinstance(current, Vocabulary):
             pass
-
         self.current_item = current
 
     def add_word(self):
@@ -108,6 +119,16 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
     def add_to_tree(self, selected, item):
         selected.appendRow(item)
+
+    def on_name_changed(self):
+        name = self.lineEditName.text()
+        if self.current_item is not None:
+            self.current_item.name = name
+
+    def on_description_changed(self):
+        description = self.textEditDescription.toPlainText()
+        if self.current_item is not None:
+            self.current_item.comment = description
 
     def on_loaded(self, project):
         self.project = project

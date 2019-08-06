@@ -1137,7 +1137,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     if node is not None:
                         node.operation.result = res
 
-        self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
+        # self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
 
         try:
             self.pipeline_scripts = my_dict['pipeline_scripts']
@@ -1602,7 +1602,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
 
-#region MovieDescriptor
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
     """
     :var movie_name: The Name of the Movie
@@ -1696,6 +1695,8 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 
     def get_movie_path(self):
         if self.is_relative:
+            print(self.project.folder)
+            print(self.movie_path)
             abs_path = os.path.normpath(self.project.folder + "/" + self.movie_path)
             if os.path.isfile(abs_path):
                 return abs_path
@@ -1706,7 +1707,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
                 return ""
 
         else:
-            return self.movie_path
+            return os.path.normpath(self.movie_path)
 
     def set_movie_path(self, path):
         """
@@ -1715,29 +1716,18 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         :param path: 
         :return: 
         """
-        if self.project.folder in path:
+        if os.path.normpath(self.project.folder) in os.path.normpath(path):
             common = os.path.commonpath([self.project.path, path])
             self.movie_path = path.replace(common, "/")
             self.is_relative = True
         else:
             self.movie_path = os.path.normpath(path)
             self.is_relative = False
-        print("New Final Moviepath", self.movie_path, "Relative:", self.is_relative)
-        # try:
-        #     if os.path.commonpath([self.project.folder]) == os.path.commonpath([self.project.folder, path]):
-        #         self.movie_path = os.path.basename(path)
-        #         self.is_relative = True
-        #     else:
-        #         self.movie_path = path
-        #         self.is_relative = False
-        # except Exception as e:
-        #     print(e)
-        #     self.movie_path = path
-        #     self.is_relative = False
+        print("MoviePath set", self.movie_path, "Relative:", self.is_relative)
 
         cap = cv2.VideoCapture(self.get_movie_path())
         self.fps = cap.get(cv2.CAP_PROP_FPS)
-        print("MoviePath set: ", path, " to \"" ,self.movie_path, "\"  ", self.is_relative)
+
 
     def get_movie_id_list(self):
         return self.movie_id.split("_")
@@ -1764,7 +1754,6 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         else:
             return "Invalid Property"
 
-#endregion
 
 
 

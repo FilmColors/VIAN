@@ -54,6 +54,7 @@ class Vocabulary(IProjectContainer, IHasName):
         self.words = []
         self.words_plain = []
         self.was_expanded = False
+        self.image_urls = []
         self.category = "default"
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
@@ -158,7 +159,8 @@ class Vocabulary(IProjectContainer, IHasName):
                 children = [a.unique_id for a in w.children],
                 organization_group = w.organization_group,
                 complexity_lvl = w.complexity_lvl,
-                complexity_group = w.complexity_group
+                complexity_group = w.complexity_group,
+                image_urls = w.image_urls
             )
             words_data.append(data)
 
@@ -168,6 +170,7 @@ class Vocabulary(IProjectContainer, IHasName):
             category = self.category,
             unique_id = self.unique_id,
             words = words_data,
+            image_urls = w.image_urls
         )
 
         return voc_data
@@ -189,8 +192,11 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
-                    continue
-
+                    print("Exception during Vocabulary:deserialize", e)
+                try:
+                    word.image_urls = w['image_urls']
+                except Exception as e:
+                    print("Exception during Vocabulary:deserialize (II)", e)
             else:
                 # Fields introduced in 0.8.0
                 try:
@@ -200,6 +206,11 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.complexity_group = w['complexity_group']
                 except:
                     continue
+
+                try:
+                    word.image_urls = w['image_urls']
+                except Exception as e:
+                    print("Exception during Vocabulary:deserialize (II)", e)
 
         return self
 
@@ -316,6 +327,7 @@ class VocabularyWord(IProjectContainer, IHasName):
         self.was_expanded = False
         self.parent = parent
         self.children = []
+        self.image_urls = []
         self.connected_items = []
         self.unique_keywords = []
         self.organization_group = 0

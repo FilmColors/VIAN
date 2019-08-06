@@ -33,7 +33,6 @@ dname = os.path.dirname(abspath)
 import logging
 logging.getLogger('tensorfyylow').disabled = True
 
-
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
 from PyQt5.QtCore import Qt, QObject, QEvent

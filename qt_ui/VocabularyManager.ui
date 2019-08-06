@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>841</width>
-    <height>445</height>
+    <width>949</width>
+    <height>661</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -165,7 +165,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QWidget" name="widget_3" native="true">
+          <widget class="QWidget" name="widgetImageContainer" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
