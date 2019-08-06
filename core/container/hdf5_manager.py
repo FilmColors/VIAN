@@ -95,6 +95,12 @@ class HDF5Manager():
         pos = self._uid_index[unique_id]
         return self.h5_file[pos[0]][pos[1]]
 
+    def get_location(self, unique_id):
+        if self.h5_file is None:
+            raise IOError("HDF5 File not opened yet")
+        pos = self._uid_index[unique_id]
+        return pos
+
     def set_indices(self, d):
         for k, v in dict(d['curr_pos']).items():
             self._index[k] = v
