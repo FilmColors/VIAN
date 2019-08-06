@@ -1,3 +1,4 @@
+#!bin/bash
 """
 VIAN - Visual Movie Annotation and Analysis
 
@@ -25,9 +26,9 @@ from threading import Thread
 
 abspath = os.path.abspath(sys.executable)
 dname = os.path.dirname(abspath)
-os.chdir(dname)
-print(dname)
-print(os.getcwd())
+# os.chdir(dname)
+# print(dname)
+# print(os.getcwd())
 
 import logging
 logging.getLogger('tensorfyylow').disabled = True

@@ -85,6 +85,7 @@ class UserSettings():
         self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
         self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
         self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
+        self.DIR_VOCABULARIES = self.DIR_ROOT + "/vocabularies/"
 
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 

@@ -1329,9 +1329,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pipeline_widget.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Vertical)
             self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_dock)
             self.tabifyDockWidget(self.experiment_dock, self.pipeline_widget)
+            self.tabifyDockWidget(self.experiment_dock, self.vocabulary_manager)
             # self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
         elif perspective == Perspective.QuickAnnotation:
@@ -1524,7 +1524,6 @@ class MainWindow(QtWidgets.QMainWindow):
         #
         # # Let the Analysis Worker know to start the next analysis
         # self.onAnalysisIntegrated.emit()
-
 
     def on_classification_object_changed(self, cl_obj):
         self.project.set_active_classification_object(cl_obj)
