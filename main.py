@@ -22,8 +22,15 @@ import traceback
 from datetime import datetime
 from threading import Thread
 
+
+abspath = os.path.abspath(sys.executable)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+print(dname)
+print(os.getcwd())
+
 import logging
-logging.getLogger('tensorflow').disabled = True
+logging.getLogger('tensorfyylow').disabled = True
 
 
 import PyQt5
@@ -37,7 +44,6 @@ from core.gui.main_window import MainWindow
 
 DEBUG = True
 MAIN_WINDOW = None
-
 
 class SuperFilter(QObject):
     def __init__(self, parent):

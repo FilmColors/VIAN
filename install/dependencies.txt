@@ -1,15 +1,3 @@
-conda install -c anaconda pyqt
-conda install -c conda-forge opencv
-conda install -c anaconda requests
-conda install -c anaconda networkx
-conda install -c anaconda sqlalchemy
-conda install -c anaconda h5py
-pip install dataset
-pip install fastcluster
-conda install -c menpo dlib
-
-
-conda install -c anaconda pyqt networkx sqlalchemy h5py requests
-conda install -c menpo dlib
-pip install dataset fastcluster
-conda install -c conda-forge opencv
+conda install -c anaconda tensorflow keras requests networkx scikit-learn sqlalchemy h5py pyqt
+conda install -c conda-source fastcluster opencv
+pip install python-vlc
