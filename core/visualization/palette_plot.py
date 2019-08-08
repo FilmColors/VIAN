@@ -428,7 +428,6 @@ class PaletteLABView(QWidget, IVIANVisualization):
             else:
                 ndot_factor = 1
 
-            print(int(bins_to_draw[q] * ndot_factor))
             for i in range(int(bins_to_draw[q] * ndot_factor)):
                 counter += 1
                 path = QPainterPath()

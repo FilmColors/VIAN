@@ -518,7 +518,6 @@ class SegmentationImporter(CSVImporter):
 
             for row in reader:
                 counter += 1
-                print(counter, row)
                 if counter == 0:
                     idx_f_start = row.index(f_start)
                     idx_f_end = row.index(f_end)

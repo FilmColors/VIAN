@@ -248,9 +248,7 @@ class WebAnnotationDevice():
 
     def _add_keyword(self, keywords, project, container, selector, creator_tag, generator_tag):
         for i, k in enumerate(container.tag_keywords): #type:UniqueKeyword
-            print(container.tag_keywords)
             url = ""
-            print("Here", i, k)
             if k.external_id is not None:
                 url = "http://ercwebapp.westeurope.cloudapp.azure.com/api/vocabularies/get_concept/"  + str(k.external_id)
             keywords.append(dict(

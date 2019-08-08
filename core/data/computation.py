@@ -607,7 +607,7 @@ def floatify_img(img):
 
 def handle_exception(func_name, e):
     text = "Exception in\t" + str(inspect.stack()[0][3]).rjust(25) + "with message:\t" + str(e)
-    print(text)
+    print("handle_exception", text)
 
 
 def import_module_from_path(path):

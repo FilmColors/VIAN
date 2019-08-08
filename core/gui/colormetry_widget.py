@@ -117,21 +117,22 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                 # print(self.palette.isVisible(), self.lab_palette.isVisible(), self.hilbert_vis.isVisible(),
                 #       self.spatial_complexity_vis.isVisible())
 
-                # print("Spacial Complexity", t - time.time())
+                print("Spacial Complexity", t - time.time())
                 t = time.time()
+
                 if self.palette.isVisible():
                     self.palette.set_palette(data['palette'])
                     self.palette.draw_palette()
-                # print("Palette", time.time() - t )
+                print("Palette", time.time() - t )
                 t = time.time()
                 if self.lab_palette.isVisible():
                     self.lab_palette.set_palette(data['palette'])
                     self.lab_palette.draw_palette()
-                # print("Palette AB", time.time() - t)
+                print("Palette AB", time.time() - t)
                 t = time.time()
                 if self.hilbert_vis.isVisible():
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
-                # print("Hilbert",  time.time() - t)
+                print("Hilbert",  time.time() - t)
                 if self.spatial_complexity_vis.isVisible():
                     self.spatial_complexity_vis.clear_view()
                     colors = [

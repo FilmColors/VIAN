@@ -185,7 +185,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
     @pyqtSlot(tuple)
     def on_signal_progress(self, progress):
-        print(progress)
+        print("on_signal_progress", progress)
         # total = self.concurrent_task_viewer.update_progress(progress[0], progress[1])
         # self.main_window.progress_bar.set_progress(float(total) / 100)
 
@@ -213,7 +213,6 @@ class AnalysisWorker(QObject):
     def run_worker(self):
         n_jobs = len(self.scheduled_task.keys())
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
-            print(args)
             self.current_task_id = task_id
             result = self._run_task(*args)
             if result is not None:

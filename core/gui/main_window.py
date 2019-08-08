@@ -222,7 +222,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project = VIANProject(self, "", "Default Project")
         self.corpus_client = CorpusClient()
 
-
         self.frame_update_worker = TimestepUpdateWorkerSingle()
         self.frame_update_thread = QThread()
         self.frame_update_worker.moveToThread(self.frame_update_thread)
@@ -1861,7 +1860,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         t = self.time
         if t > 0:
-
             if self.project is not None and t > self.project.movie_descriptor.duration - self.settings.EARLY_STOP:
                 self.player.pause()
             self.dispatch_on_timestep_update(t)

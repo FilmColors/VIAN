@@ -76,6 +76,7 @@ class DropImage(QWidget):
         self.setMaximumWidth(self.pixmap.width())
         self.setMaximumHeight(self.pixmap.height())
 
+
 class DropImagePlaceholder(QWidget):
     def __init__(self, parent):
         super(DropImagePlaceholder, self).__init__(parent)

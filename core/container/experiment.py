@@ -83,6 +83,7 @@ class Vocabulary(IProjectContainer, IHasName):
                 parent = self.get_word_by_name(parent_word)
             else:
                 parent = parent_word
+
             if parent is not None:
                 word.parent = parent
                 parent.add_children(word)

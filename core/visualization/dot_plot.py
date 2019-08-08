@@ -57,7 +57,6 @@ class DotPlot(QGraphicsView, IVIANVisualization):
             pen = QPen()
             pen.setWidthF(self.grid_line_width)
             pen.setColor(self.grid_color)
-            print(self.grid_color.red())
 
             font = QFont()
             font.setPointSize(self.font_size)
@@ -89,7 +88,6 @@ class DotPlot(QGraphicsView, IVIANVisualization):
             pen = QPen()
             pen.setWidthF(self.grid_line_width / 10)
             pen.setColor(self.grid_color)
-            print("Hello", self.grid_color.red())
 
             font = QFont()
             font.setPointSize(self.font_size * self.magnification * 2)

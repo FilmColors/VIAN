@@ -109,7 +109,6 @@ class CorrelationBarplot(BarPlot):
         if self.current_feature is not None and self.matrix is not None:
             row = self.current_feature.id
             for f in self.active_features:
-                print(f.id, row)
                 b = self.add_bar(f.name, self.matrix[row][f.id])
         self.frame_default()
 

@@ -1,3 +1,9 @@
+import os
+import glob
+import json
+from random import randint
+from functools import partial
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent
@@ -6,13 +12,36 @@ from core.gui.drop_image_container import DropImageContainer
 from core.container.experiment import Vocabulary, VocabularyWord
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 from core.data.interfaces import IProjectChangeNotify
-import os
-from functools import partial
 from core.data.enums import *
-
 
 #region --DEFINITIONS--
 #endregion
+
+class VocabularyCollection():
+    def __init__(self):
+        self.vocabularies = []
+        self.loaded_objs = dict()
+
+    def _fetch_vocabularies(self):
+        for p in glob.glob("data/vocabularies/*.json"):
+            with open(p, "r") as f:
+                voc = Vocabulary("").deserialize(json.load(f), self)
+                self.vocabularies.append(voc)
+        pass
+
+    def get_by_id(self, uid):
+        if uid in self.loaded_objs:
+            return self.loaded_objs[uid]
+        return None
+
+    def add_to_id_list(self, obj, uid):
+        self.loaded_objs[uid] = obj
+
+    def create_unique_id(self):
+        idx = randint(0,9999999)
+        if idx in self.loaded_objs:
+            return self.create_unique_id()
+        return idx
 
 
 class VocabularyManager(EDockWidget, IProjectChangeNotify):
@@ -43,6 +72,9 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.project = main_window.project
         self.current_item = None
 
+        self.vocabulary_collection = VocabularyCollection()
+        self.vocabulary_collection._fetch_vocabularies()
+
         self.treeView = VocabularyTreeView(self, self)
         self.inner.layout().addWidget(self.treeView)
 
@@ -57,6 +89,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.lineEditName.textChanged.connect(self.on_name_changed)
         self.textEditDescription.textChanged.connect(self.on_description_changed)
 
+        self.recreate_tree()
         self.show()
 
     def add_vocabulary(self, voc):
@@ -114,7 +147,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
     def recreate_tree(self):
         self.vocabulary_model.clear()
-        for v in self.project.vocabularies:
+        for v in self.vocabulary_collection.vocabularies:
             self.add_vocabulary(v)
 
     def add_to_tree(self, selected, item):

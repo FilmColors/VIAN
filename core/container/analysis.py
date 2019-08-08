@@ -345,7 +345,6 @@ class ColormetryAnalysis(AnalysisContainer):
     def get_frame_pos(self):
         times = self.project.hdf5_manager.get_colorimetry_times()
         frames = np.multiply(np.divide(times, 1000), self.project.movie_descriptor.fps).astype(np.int).tolist()
-        print(times, "\n", frames)
         return frames
 
     def append_data(self, data):
@@ -399,7 +398,7 @@ class ColormetryAnalysis(AnalysisContainer):
         return self.has_finished
 
     def clear(self, resolution = 30):
-        print("Clearing COlorimetry")
+        print("Clearing Colorimetry")
         self.resolution = resolution
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
