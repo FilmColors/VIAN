@@ -1598,7 +1598,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def dispatch_selected(self, sender):
         if self.inhibit_dispatch == False:
-            self.main_window.dispatch_on_selected(sender,self.selected)
+            self.main_window.dispatch_on_selected(sender, self.selected)
     #endregion
 
 

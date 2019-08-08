@@ -74,6 +74,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
+        self.visibilityChanged.connect(self.on_visibility_changed)
+
         if self.behaviour == "query":
             self.btn_StartClassification.hide()
             self.btn_StopClassification.hide()
@@ -132,7 +134,15 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.stackedWidget.setCurrentIndex(1)
             self.update_widget()
 
+    @pyqtSlot(bool)
+    def on_visibility_changed(self, visibility):
+        if visibility:
+            if self.main_window.project is not None:
+                self.on_selected(None, self.main_window.project.selected)
+
     def on_selected(self, sender, selected):
+        if not self.isVisible():
+            return
         if self.behaviour == "classification":
             if sender is self:
                 return
@@ -218,6 +228,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             return
         if self.tab_sorting_mode == "categories":
             self.update_layout_categories()
+
         elif self.tab_sorting_mode == "class-obj":
             self.update_layout_class_obj()
 
@@ -235,7 +246,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             if self.current_container is None:
                 return
 
-            # Check if we need to rebuild the layout or if the checkboxes stay the same,
+            # Check  if we need to rebuild the layout or if the checkboxes stay the same,
             # if so apply the classification of the current container
             if set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())]):
                 print("No Rebuild")

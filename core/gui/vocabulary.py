@@ -204,7 +204,7 @@ class VocabularyTreeView(QTreeView):
                 if obj is not None:
                     self.vocabulary_manager.main_window.project.set_selected(sender=None, selected=[obj])
                     self.vocabulary_manager.set_current(obj)
-                    print(obj)
+
 
     def open_context_menu(self, QMouseEvent):
         pos = self.mapToGlobal(QMouseEvent.pos())

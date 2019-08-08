@@ -111,7 +111,6 @@ class PythonScriptEditor(QWidget):
             p = file_path
         elif save_as or self.current_file_path == "":
             p = QFileDialog.getSaveFileName(self, filter="*.py")[0]
-            print(p)
         else:
             p = self.current_file_path
 

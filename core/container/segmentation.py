@@ -464,7 +464,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
                     new = DataMediaObject(None, None, self, None).deserialize(w)
                 else:
                     new = FileMediaObject(None, None, self, None).deserialize(w)
-                print(self.project)
                 new.set_project(self.project)
                 self.media_objects.append(new)
         except Exception as e:

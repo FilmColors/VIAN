@@ -148,7 +148,6 @@ class AnnotationOptionsDock(EDockWidget, IProjectChangeNotify):
 
     def onOptionsChange(self, **args):
         font = self.font_picker.currentFont()
-        print(self.color_picker.colorRGB())
         self.optionsChanged.emit(font.family(), font.pointSize(), self.width_slider.value(), self.color_picker.colorRGB())
         self.lbl_width.setText(str(self.width_slider.value()))
 

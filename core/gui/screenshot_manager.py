@@ -366,7 +366,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         try:
             exists = self.color_dt.update_item(scr.unique_id, [x, y], pixmap)
             if not exists:
-                print(lch[2])
                 self.color_dt.add_image(x,
                                         y,
                                         ndarray,

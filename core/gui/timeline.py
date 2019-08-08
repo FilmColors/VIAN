@@ -264,7 +264,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         return self.parent().parent().project()
 
     def scroll_h(self):
-        value= int(self.scrollArea.horizontalScrollBar().value())
+        value = int(self.scrollArea.horizontalScrollBar().value())
         self.frame_Controls.move(self.scrollArea.mapToParent(QtCore.QPoint(value, 0)))
         self.relative_corner = QtCore.QPoint(value, self.relative_corner.y())
         self.time_bar.move(self.relative_corner)
@@ -410,6 +410,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def move_scrubber(self, pos):
         pos = np.clip(pos, 0, self.duration / self.scale)
         self.time_scrubber.move(pos, 0)
+
         self.main_window.player.set_media_time(pos * self.scale)
 
         self.time_label.setText(ms_to_string(pos * self.scale, True))
@@ -487,7 +488,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 ctrl.onHeightChanged.emit((ctrl.height() - ctrl.timeline.group_height) / np.clip(len(ctrl.groups), 1, None))
             else:
                 ctrl.onHeightChanged.emit(ctrl.height() / n_bars)
-
 
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
@@ -625,7 +625,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.scrollArea.horizontalScrollBar().setValue(self.time_scrubber.pos().x() - self.controls_width)
 
         self.update_time_bar()
-        self.update()
+        # self.update()
 
     def keyPressEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Control:
@@ -1215,7 +1215,7 @@ class TimebarSlice(QtWidgets.QWidget):
         self.show()
         self.mode = "center"
         self.setMouseTracking(True)
-        self.border_width = 10
+        self.border_width = 15
         self.offset = QtCore.QPoint(0,0)
         self.text = ""
         self.curr_pos = self.pos()
@@ -1375,11 +1375,13 @@ class TimebarSlice(QtWidgets.QWidget):
                             self.max_possible = self.timeline.duration * self.timeline.scale
 
                     self.is_selected = True
+                    print("AA")
                     self.timeline.project().set_selected(None, self.item)
+                    print("BB")
                     self.offset = self.mapToParent(QMouseEvent.pos())
                     self.curr_size = self.size()
                     self.curr_pos = self.pos()
-                self.timeline.update()
+                # self.timeline.update()
 
             if QMouseEvent.buttons() & Qt.RightButton:
                 if self.timeline.is_cutting:
@@ -1871,7 +1873,7 @@ class TimelineScrubber(QtWidgets.QWidget):
     def mouseMoveEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
             pos = self.mapToParent(QMouseEvent.pos())# - self.offset
-            self.timeline.move_scrubber(pos.x())
+            self.timeline.move_scrubber(pos.x() - self.width()/2)
             # self.move(self.curr_pos.x() + pos.x() + 5, 0)
             # self.player.set_media_time((self.curr_pos.x() + pos.x() + 5) * self.timeline.scale)
 
@@ -1880,7 +1882,7 @@ class TimelineScrubber(QtWidgets.QWidget):
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
             else:
                 pos = self.mapToParent(QMouseEvent.pos()).x()
-                self.timeline.move_scrubber(pos)
+                self.timeline.move_scrubber(pos - self.width()/2)
                 # self.timeline.time_scrubber.move(pos, 0)
                 # self.timeline.main_window.player.set_media_time(pos * self.timeline.scale)
             # QMouseEvent.ignore()

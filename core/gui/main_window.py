@@ -91,7 +91,6 @@ class MainWindow(QtWidgets.QMainWindow):
     currentClassificationObjectChanged = pyqtSignal(object)
     onAnalysisIntegrated = pyqtSignal()
 
-
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
@@ -226,7 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_thread = QThread()
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
-        self.frame_update_worker.signals.onMessage.connect(self.print_time)
+        # self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
 
         self.create_widget_elan_status()
@@ -1244,6 +1243,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.show()
             self.player_dock_widget.show()
             self.colorimetry_live.show()
+            self.analysis_results_widget_dock.show()
 
             self.vocabulary_matrix.show()
 
@@ -1254,6 +1254,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             # self.tabifyDockWidget(self.colorimetry_live, self.script_editor)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
@@ -2027,7 +2028,6 @@ class MainWindow(QtWidgets.QMainWindow):
         elif pos == Qt.BottomLeftCorner:
             loc += QPoint(0, widget.height())
 
-        print(loc)
         w = InfoPopup(self, text, loc)
         w.show()
         print("OK")
@@ -2095,7 +2095,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Movie Path:".rjust(15),self.project.movie_descriptor.movie_path)
         if self.project.colormetry_analysis is not None:
             print("Colorimetry:".rjust(15), self.project.colormetry_analysis.has_finished)
-        print("\n")
+        self.x = print("\n")
 
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is None or not self.allow_dispatch_on_change:
@@ -2111,12 +2111,14 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is None:
             return
 
+
         self.elan_status.set_selection(selected)
         for o in self.i_project_notify_reciever:
-                ttime = time.time()
-                o.on_selected(sender, selected)
-                # print(sender, o.__class__.__name__, time.time() - ttime)
+            # ttime = time.time()
+            o.on_selected(sender, selected)
+            # print(sender, o.__class__.__name__, time.time() - ttime)
 
+    @pyqtSlot(int)
     def dispatch_on_timestep_update(self, time):
         if self.project is None:
             return
@@ -2128,7 +2130,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.project.get_main_segmentation() is not None:
             current_segment = self.project.get_main_segmentation().get_segment_of_time(time)
-
             if current_segment is not None and self.last_segment_index != current_segment.ID - 1:
                 self.last_segment_index = current_segment.ID - 1
                 self.onSegmentStep.emit(self.last_segment_index)
@@ -2152,6 +2153,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                 a.is_visible = False
                                 a.widget.hide()
             self.drawing_overlay.update()
+
 
     def dispatch_on_closed(self):
         self.autosave_timer.stop()

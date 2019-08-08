@@ -70,6 +70,7 @@ class TimestepUpdateWorkerSingle(QObject):
     def set_opencv_frame(self, state):
         self.opencv_frame = state
 
+    @pyqtSlot(bool)
     def set_colormetry_update(self, state):
         self.update_colormetry = state
 
@@ -103,11 +104,8 @@ class TimestepUpdateWorkerSingle(QObject):
                     if data is not False:
                         self.signals.onColormetryUpdate.emit(data, self.position_ms)
 
-
-
         except Exception as e:
             print(e)
-            raise e
             self.signals.onError.emit([e])
 
     def get_opencv_frame(self, time_frame):

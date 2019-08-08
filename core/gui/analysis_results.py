@@ -34,6 +34,8 @@ class AnalysisResultsDock(EDockWidget):
     def set_analysis_widget(self, analysis_result_widget):
         self.setWidget(analysis_result_widget)
         self.analysis_widget = analysis_result_widget
+        self.analysis_widget.dock_widget = self
+        self.visibilityChanged.connect(self.analysis_widget.on_visibility_changed)
 
     def on_fullscreen(self):
         view = AnalysisFullScreenWindow(self.main_window, self.analysis_widget)
@@ -49,6 +51,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.tab = QTabWidget(self)
         self.analysis_tab = QWidget()
         self.setLayout(QHBoxLayout())
+        self.dock_widget = None
         self.classification_tab = QSplitter(Qt.Horizontal, self)
         self.classification_tab.setLayout(QHBoxLayout())
 
@@ -70,8 +73,10 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.analysis_tab.layout().addWidget(self.analysis_widget)
         self.current_visualization = []
         self.current_analysis = None
+        self.dock_widget_visible = False
         self.fullscreen_view = None
         self.analysis_widget.setLayout(QHBoxLayout(self))
+
 
     def frame_visualizations(self):
         self.correlation_tab.barplot.frame_default()
@@ -151,8 +156,6 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
             if i >= 10:
                 break
 
-
-
     def apply_analysis(self):
         visualizations = self.current_analysis.get_visualization()
         # self.current_analysis.unload_container()
@@ -189,8 +192,17 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         self.clear_analysis_widget()
         pass
 
+    @pyqtSlot(bool)
+    def on_visibility_changed(self, visibility):
+        self.dock_widget_visible = visibility
+        if visibility:
+            if self.main_window.project is not None:
+                self.on_selected(None, self.main_window.project.selected)
+
     def on_selected(self, sender, selected):
         try:
+            if not self.dock_widget_visible:
+                return
             if len(selected) > 0:
                 if isinstance(selected[0], IAnalysisJobAnalysis):
                     self.activate_analysis(selected[0])
@@ -201,6 +213,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         except Exception as e:
             print(e)
             pass
+
 
 
 class AnalysisFullScreenWindow(QMainWindow):

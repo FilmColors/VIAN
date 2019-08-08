@@ -17,7 +17,7 @@ from core.visualization.dot_plot import DotPlot
 
 from random import randint
 import numpy as np
-
+import time
 
 class PaletteWidget(QWidget):
     def __init__(self, parent):
@@ -409,7 +409,6 @@ class PaletteLABView(QWidget, IVIANVisualization):
             if self.scale > 8:
                 qp.drawEllipse(t_width / 2 - self.scale * 2, t_height / 2 - self.scale * 2, self.scale * 4,
                                self.scale * 4)
-        counter = 0
 
         layer_idx = np.unique(self.palette_layer[0])[self.depth]
         indices = np.where(self.palette_layer[0] == layer_idx)
@@ -422,22 +421,15 @@ class PaletteLABView(QWidget, IVIANVisualization):
             lab = tpl_bgr_to_lab(color)
 
             color_rgb  = QColor(int(color[2]), int(color[1]), int(color[0]))
-            # increase the visible number of dots:
-            if self.jitter > 1:
-                ndot_factor = 1
-            else:
-                ndot_factor = 1
 
-            for i in range(int(bins_to_draw[q] * ndot_factor)):
-                counter += 1
-                path = QPainterPath()
-                if self.jitter > 0:
-                    rx = np.random.randint(-self.jitter, self.jitter)
-                    ry = np.random.randint(-self.jitter, self.jitter)
-                else:
-                    rx, ry = 0,0
-                path.addEllipse((t_width / 2) + ((self.scale * (1.0 * lab[1]) - radius) + rx),
-                                (t_height / 2) + ((self.scale * (-1.0 * lab[2]) - radius) + ry),
+            path = QPainterPath()
+
+            heights = ([self.scale * (1.0 * lab[1]) - radius] * bins_to_draw[q]) + np.random.normal(0, self.jitter, bins_to_draw[q])
+            widths =  ([self.scale * (1.0 * lab[2]) - radius] * bins_to_draw[q]) + np.random.normal(0, self.jitter, bins_to_draw[q])
+
+            for i in range(len(heights)):
+                path.addEllipse((t_width / 2) + heights[i],
+                                (t_height / 2) + widths[i],
                                 radius, radius)
                 qp.fillPath(path, color_rgb)
         qp.end()

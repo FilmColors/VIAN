@@ -480,15 +480,6 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             new.annotation_layer = self
             self.annotations.append(new)
 
-        # try:
-        #     for w in serialization["words"]:
-        #         word = self.project.get_by_id(w)
-        #         if word is not None:
-        #             self.add_word(self.project.get_by_id(w))
-        #
-        # except Exception as e:
-        #     pass
-
         try:
             self.is_visible = serialization['is_visible']
         except Exception as e:

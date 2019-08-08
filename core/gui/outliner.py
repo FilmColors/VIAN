@@ -1,7 +1,7 @@
 import os
 from functools import partial
 from PyQt5 import QtCore, uic, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit
 from PyQt5.QtGui import QIcon
 
@@ -32,6 +32,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.analyses_roots = dict()
         self.item_list = []
         self.item_index = dict()
+        self.visibilityChanged.connect(self.on_visibility_changed)
         self.show()
 
     def recreate_tree(self):
@@ -219,34 +220,42 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.project_item = None
         self.setDisabled(True)
 
+    @pyqtSlot(bool)
+    def on_visibility_changed(self, visibility):
+        if visibility:
+            if self.main_window.project is not None:
+                self.on_selected(None, self.main_window.project.selected)
+
     def on_selected(self, sender, selected):
         if sender is self or selected is None:
             return
+        self.tree.selection_dispatch = False
+        items = []
+        to_select = []
+        top = self.tree.topLevelItem(0)
 
-        else:
-            self.tree.selection_dispatch = False
-            items = []
-            to_select = []
-            top = self.tree.topLevelItem(0)
-            top.get_children(items)
+        if top is None:
+            return
 
-            if self.tree.selectionMode() == self.tree.SingleSelection:
-                self.tree.clearSelection()
+        top.get_children(items)
 
-            for i in items:
-                if i.has_item:
-                    for s in selected:
-                        if i.get_container() is s:
-                            to_select.append(i)
-                            i.parent().setExpanded(True)
-                            try:
-                                i.parent().parent().setExpanded(True)
-                            except:
-                                pass
+        if self.tree.selectionMode() == self.tree.SingleSelection:
+            self.tree.clearSelection()
+
+        for i in items:
+            if i.has_item:
+                for s in selected:
+                    if i.get_container() is s:
+                        to_select.append(i)
+                        i.parent().setExpanded(True)
+                        try:
+                            i.parent().parent().setExpanded(True)
+                        except:
+                            pass
 
 
-            self.tree.select(to_select, False)
-            self.tree.selection_dispatch = True
+        self.tree.select(to_select, False)
+        self.tree.selection_dispatch = True
 
     def keyPressEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key_Shift:

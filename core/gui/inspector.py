@@ -23,6 +23,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.btn_VocMatrix.clicked.connect(self.main_window.create_vocabulary_matrix)
 
+        self.visibilityChanged.connect(self.on_visibility_changed)
         # self.lineEdit_Vocabulary.keyPressEvent.connect(self.vocabulary_key_press)
         self.lineEdit_Vocabulary.setCompleter(self.completer)
 
@@ -66,8 +67,14 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         if item is not None and not isinstance(item, AbstractMediaObject):
             self.on_selected(None, [item])
 
+    @pyqtSlot(bool)
+    def on_visibility_changed(self, visibility):
+        if visibility:
+            if self.main_window.project is not None:
+                self.on_selected(None, self.main_window.project.selected)
+
     def on_selected(self,sender, selected):
-        if sender is self:
+        if sender is self or not self.isVisible():
             return
         self.cleanup()
 

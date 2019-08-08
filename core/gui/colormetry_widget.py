@@ -13,7 +13,24 @@ import numpy as np
 
 from core.visualization.basic_vis import *
 
+
+class ColorimetryWorker(QObject):
+    def __init__(self, func):
+        super(ColorimetryWorker, self).__init__()
+        self.function = func
+
+    @pyqtSlot(object)
+    def run(self, data):
+        try:
+            self.function(data)
+        except Exception as e:
+            print(e)
+
+
+
+
 class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
+    draw = pyqtSignal(object)
     def __init__(self, main_window):
         super(ColorimetryLiveWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Colorimetry")
@@ -22,6 +39,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.central.setFixedWidth(1)
         self.central.setLayout(self.lt)
 
+        self.visibilityChanged.connect(self.main_window.frame_update_worker.set_colormetry_update)
         self.inner.setCentralWidget(self.central)
         self.use_tab_mode = False
 
@@ -38,6 +56,13 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         # self.lt.addWidget(self.vis_tab)
         self.hilbert_table, self.hilbert_colors = create_hilbert_transform(16)
 
+        self.drawing_worker = ColorimetryWorker(self.work)
+        self.worker_thread = QThread()
+        self.draw.connect(self.drawing_worker.run)
+        self.drawing_worker.moveToThread(self.worker_thread)
+        self.worker_thread.start()
+
+        self.current_data = None
         # self.h_bgr = create_hilbert_color_pattern(8, multiplier=32, color_space=cv2.COLOR_Lab2RGB)
         # self.h_indices = hilbert_mapping_3d(8, np.zeros(shape=(8,8,8)), HilbertMode.Indices_All)
         #
@@ -104,50 +129,50 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
 
         self.main_window.onTimeStep.connect(self.on_time_step)
+        self.visibilityChanged.connect(self.on_visibility_changed)
         # self.vis_tab.addTab(self.histogram, "Histogram")
 
     @pyqtSlot(object, int)
     def update_timestep(self, data, time_ms):
         if data is not None:
+            self.current_data = data
+            if not self.isVisible():
+                return
+
+            self.draw.emit(data)
+
+            if self.spatial_complexity_vis.isVisible():
+                self.spatial_complexity_vis.clear_view()
+                colors = [
+                    QColor(200, 61, 50),
+                    QColor(98, 161, 169),
+                    QColor(153, 175, 93),
+                    QColor(230, 183, 64)
+                ]
+                cidx = data['current_idx']
+                for i, key in enumerate(data['spatial'].keys()):
+                    xs = data['times']
+                    ys = data['spatial'][key]
+                    self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
+                                                     line_name=key,
+                                                     force_xmax=self.main_window.project.movie_descriptor.duration)
+
+    def work(self, data):
+        if data is not None:
             self.is_drawing = True
             try:
-                t = time.time()
-
-
-                # print(self.palette.isVisible(), self.lab_palette.isVisible(), self.hilbert_vis.isVisible(),
-                #       self.spatial_complexity_vis.isVisible())
-
-                print("Spacial Complexity", t - time.time())
-                t = time.time()
-
                 if self.palette.isVisible():
                     self.palette.set_palette(data['palette'])
                     self.palette.draw_palette()
-                print("Palette", time.time() - t )
-                t = time.time()
+
                 if self.lab_palette.isVisible():
                     self.lab_palette.set_palette(data['palette'])
                     self.lab_palette.draw_palette()
-                print("Palette AB", time.time() - t)
-                t = time.time()
+
                 if self.hilbert_vis.isVisible():
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
-                print("Hilbert",  time.time() - t)
-                if self.spatial_complexity_vis.isVisible():
-                    self.spatial_complexity_vis.clear_view()
-                    colors = [
-                        QColor(200, 61, 50),
-                        QColor(98, 161, 169),
-                        QColor(153, 175, 93),
-                        QColor(230, 183, 64)
-                    ]
-                    cidx = data['current_idx']
-                    for i, key in enumerate(data['spatial'].keys()):
-                        xs = data['times']
-                        ys = data['spatial'][key]
-                        self.spatial_complexity_vis.plot(xs[:cidx], ys[:cidx, 0], colors[i],
-                                                         line_name=key,
-                                                         force_xmax=self.main_window.project.movie_descriptor.duration)
+
+
             except Exception as e:
                 print("Exception in ColormetryWidget.update_timestep()", str(e))
             self.is_drawing = False
@@ -179,6 +204,13 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     def resizeEvent(self, *args, **kwargs):
         super(ColorimetryLiveWidget, self).resizeEvent(*args, **kwargs)
         self.on_tab_changed()
+
+    @pyqtSlot(bool)
+    def on_visibility_changed(self, visibility):
+        if visibility:
+            if self.main_window.project is not None:
+                data = self.main_window.project.colormetry_analysis.get_update(self.main_window.player.get_media_time())
+                self.update_timestep(data, None)
 
     def on_selected(self, sender, selected):
         pass
