@@ -25,7 +25,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.n_per_row = 20
         self.behaviour = behaviour
         if self.behaviour == "classification":
-            self.setWindowTitle("Classification Window")
+            self.setWindowTitle("Classification")
         else:
             self.setWindowTitle("Query Window")
 

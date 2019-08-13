@@ -53,7 +53,7 @@ from extensions.extension_list import ExtensionList
 from core.visualizer.visualizer import VIANVisualizer2
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses
-
+from core.gui.toolbar_widgets import WidgetsToolbar
 try:
     import keras.backend as K
     from core.analysis.semantic_segmentation import *
@@ -255,6 +255,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_colorimetry_live()
         self.create_experiment_editor()
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
+
+        self.window_toolbar = WidgetsToolbar(self)
+        self.addToolBar(self.window_toolbar)
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
@@ -640,8 +643,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
 
         else:
-            self.player_dock_widget.set_player(self.player)
-            self.player_dock_widget.show()
+            if not self.player_dock_widget.isVisible():
+                self.player_dock_widget.set_player(self.player)
+                self.player_dock_widget.show()
+            else:
+                self.player_dock_widget.show()
+                self.player_dock_widget.raise_()
+                self.player_dock_widget.activateWindow()
         if self.drawing_overlay is not None:
             self.check_overlay_visibility()
 
@@ -746,8 +754,12 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.screenshots_manager_dock.isVisible():
                 self.screenshots_manager_dock.hide()
             else:
-                self.screenshots_manager_dock.show()
-                self.screenshots_manager_dock.activateWindow()
+                if self.screenshots_manager_dock.isVisible():
+                    self.screenshots_manager_dock.hide()
+                else:
+                    self.screenshots_manager_dock.show()
+                    self.screenshots_manager_dock.raise_()
+                    self.screenshots_manager_dock.activateWindow()
 
     def create_node_editor(self):
         if self.node_editor_dock is None:
@@ -768,36 +780,50 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_vocabulary_manager(self):
         if self.vocabulary_manager is None:
             self.vocabulary_manager = VocabularyManager(self)
-            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_manager, QtCore.Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.vocabulary_manager, QtCore.Qt.Vertical)
         else:
-            self.vocabulary_manager.show()
-            self.vocabulary_manager.activateWindow()
+            if self.vocabulary_manager.isVisible():
+                self.vocabulary_manager.hide()
+            else:
+                self.vocabulary_manager.show()
+                self.vocabulary_manager.raise_()
+                self.vocabulary_manager.activateWindow()
 
     def create_experiment_editor(self):
         if self.experiment_dock is None:
             self.experiment_dock = ExperimentEditorDock(self)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.experiment_dock, QtCore.Qt.Vertical)
         else:
-            self.experiment_dock.show()
-            self.experiment_dock.activateWindow()
+            if self.experiment_dock.isVisible():
+                self.experiment_dock.hide()
+            else:
+                self.experiment_dock.show()
+                self.experiment_dock.raise_()
+                self.experiment_dock.activateWindow()
 
     def create_vocabulary_matrix(self):
         if self.vocabulary_matrix is None:
             self.vocabulary_matrix = ClassificationWindow(self)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_matrix, QtCore.Qt.Vertical)
         else:
-            self.vocabulary_matrix.show()
-            self.vocabulary_matrix.raise_()
-            self.vocabulary_matrix.activateWindow()
+            if self.vocabulary_matrix.isVisible():
+                self.vocabulary_matrix.hide()
+            else:
+                self.vocabulary_matrix.show()
+                self.vocabulary_matrix.raise_()
+                self.vocabulary_matrix.activateWindow()
 
     def create_query_widget(self):
         if self.query_widget is None:
             self.query_widget = ClassificationWindow(self, behaviour="query")
             self.tabifyDockWidget(self.player_dock_widget, self.query_widget)
         else:
-            self.query_widget.show()
-            self.query_widget.raise_()
-            self.query_widget.activateWindow()
+            if self.query_widget.isVisible():
+                self.query_widget.hide()
+            else:
+                self.query_widget.show()
+                self.query_widget.raise_()
+                self.query_widget.activateWindow()
 
     def create_pipeline_widget(self):
         if self.pipeline_widget is None:
@@ -805,9 +831,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, self.pipeline_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
         else:
-            self.pipeline_widget.show()
-            self.pipeline_widget.raise_()
-            self.pipeline_widget.activateWindow()
+            if self.pipeline_widget.isVisible():
+                self.pipeline_widget.hide()
+            else:
+                self.pipeline_widget.show()
+                self.pipeline_widget.raise_()
+                self.pipeline_widget.activateWindow()
 
     def create_analysis_results_widget(self):
         if self.analysis_results_widget is None:
@@ -816,12 +845,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.analysis_results_widget_dock.set_analysis_widget(self.analysis_results_widget)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Vertical)
         else:
-            if self.analysis_results_widget.isVisible():
-                self.analysis_results_widget.hide()
+            if self.analysis_results_widget_dock.isVisible():
+                self.analysis_results_widget_dock.hide()
             else:
-                self.analysis_results_widget.show()
-                self.analysis_results_widget.raise_()
-                self.analysis_results_widget.activateWindow()
+                self.analysis_results_widget_dock.show()
+                self.analysis_results_widget_dock.raise_()
+                self.analysis_results_widget_dock.activateWindow()
 
     def create_quick_annotation_dock(self):
         if self.quick_annotation_dock is None:
@@ -850,7 +879,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.corpus_client_toolbar.show()
 
         else:
-            self.screenshot_toolbar.show()
+            if self.corpus_client_toolbar.isVisible():
+                self.corpus_client_toolbar.hide()
+            else:
+                self.corpus_client_toolbar.show()
+                self.corpus_client_toolbar.raise_()
+                self.corpus_client_toolbar.activateWindow()
 
     def create_facial_identification_dock(self):
         if self.facial_identification_dock is None:
@@ -1242,16 +1276,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_controls.show()
             self.screenshots_manager_dock.show()
             self.player_dock_widget.show()
-            self.colorimetry_live.show()
-            self.analysis_results_widget_dock.show()
-
-            self.vocabulary_matrix.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             # self.tabifyDockWidget(self.colorimetry_live, self.script_editor)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)

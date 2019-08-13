@@ -23,7 +23,7 @@ FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
 class AnalysisResultsDock(EDockWidget):
     def __init__(self, main_window):
         super(AnalysisResultsDock, self).__init__(main_window, limit_size=False)
-        self.setWindowTitle("Analysis Results")
+        self.setWindowTitle("Analysis")
 
         self.menu_display = self.inner.menuBar().addMenu("Display")
         self.a_fullscreen = self.menu_display.addAction("Fullscreen")

@@ -51,6 +51,8 @@ class PlayerDockWidget(EDockWidget):
         self.a_face_rec.setCheckable(True)
         self.a_face_rec.triggered.connect(self.on_face_rec_changed)
 
+        self.setFeatures(EDockWidget.NoDockWidgetFeatures | EDockWidget.DockWidgetClosable)
+
 
 
     def on_spacial_frequency_changed(self, method):

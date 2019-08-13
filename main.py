@@ -101,6 +101,7 @@ if __name__ == '__main__':
 
 
     app = QApplication(sys.argv)
+    app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
     # filter = SuperFilter(app)
     # app.installEventFilter(filter)
     app.setWindowIcon(QIcon("qt_ui/images/main.png"))
