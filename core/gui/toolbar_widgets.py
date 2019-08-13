@@ -56,7 +56,7 @@ class WidgetsToolbar(EToolBar):
         self.a_classification.triggered.connect(self.main_window.create_vocabulary_matrix)
         self.a_query.triggered.connect(partial(self.main_window.switch_perspective, Perspective.Query))
         self.a_upload.triggered.connect(self.main_window.create_corpus_client_toolbar)
-        self.a_screenshot_manager.triggered.connect(self.main_window.create_screenshot_manager)
+        self.a_screenshot_manager.triggered.connect(self.main_window.create_screenshot_manager_dock_widget)
         self.a_colorimetry.triggered.connect(self.main_window.create_colorimetry_live)
 
         self.show()

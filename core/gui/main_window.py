@@ -66,7 +66,7 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.7.7"
+VERSION = "0.7.16"
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2019, Gaudenz Halter"
@@ -257,7 +257,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
         self.window_toolbar = WidgetsToolbar(self)
-        self.addToolBar(self.window_toolbar)
+        self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()

@@ -85,8 +85,8 @@ def set_style_sheet(app, path):
 
 def set_attributes(app):
     app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    if sys.platform == "darwin":
-        app.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
+    # if sys.platform == "darwin":
+    #     app.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
 
 
 if __name__ == '__main__':
