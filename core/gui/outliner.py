@@ -26,8 +26,8 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
         self.corpus_client = corpus_client
 
-        self.corpus_client.onConnectionEstablished.connect(self.recreate_tree)
-        self.corpus_client.onDisconnect.connect(self.recreate_tree)
+        # self.corpus_client.onConnectionEstablished.connect(self.recreate_tree)
+        # self.corpus_client.onDisconnect.connect(self.recreate_tree)
         # self.corpus_client.onCorpusChanged.connect(self.recreate_tree)
         self.analyses_roots = dict()
         self.item_list = []
