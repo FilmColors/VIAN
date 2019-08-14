@@ -729,7 +729,7 @@
   </action>
   <action name="actionColormetry">
    <property name="text">
-    <string>Start Colormetry</string>
+    <string>Start Colorimetry</string>
    </property>
   </action>
   <action name="actionExportExperiment">
@@ -802,7 +802,7 @@
   </action>
   <action name="actionClearColormetry">
    <property name="text">
-    <string>Clear Colormetry</string>
+    <string>Clear Colorimetry</string>
    </property>
   </action>
   <action name="actionColor_Palette">

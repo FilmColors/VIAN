@@ -20,24 +20,24 @@ from core.data.computation import create_icon
 class WidgetsToolbar(EToolBar):
     def __init__(self, main_window):
         super(WidgetsToolbar, self).__init__(main_window, "Windows Toolbar")
-        self.setWindowTitle("Windows")
+        self.setWindowTitle("Windows Toolbar")
 
-
+        self.a_player = self.addAction(create_icon("qt_ui/icons/icon_player.png"), "Player")
         self.a_outliner = self.addAction(create_icon("qt_ui/icons/icon_outliner.png"), "Outliner")
         self.a_timeline = self.addAction(create_icon("qt_ui/icons/icon_timeline.png"), "Timeline")
         self.a_player_controls = self.addAction(create_icon("qt_ui/icons/icon_player_controls.png"), "Player Controls")
-
-        self.addSeparator()
-        self.a_setup = self.addAction(create_icon("qt_ui/icons/icon_settings_plot.png"), "Setup")
-        self.a_vocabulary = self.addAction(create_icon("qt_ui/icons/icon_vocabulary.png"), "Vocabulary")
 
         self.addSeparator()
         self.a_screenshot_manager = self.addAction(create_icon("qt_ui/icons/icon_screenshot_manager.png"), "Screenshot Manager")
         self.a_colorimetry = self.addAction(create_icon("qt_ui/icons/icon_colorimetry.png"), "Colorimetry")
         self.a_analyses = self.addAction(create_icon("qt_ui/icons/icon_analyses.png"), "Analyses")
         self.a_classification = self.addAction(create_icon("qt_ui/icons/icon_classification.png"), "Classification")
-        self.a_query = self.addAction(create_icon("qt_ui/icons/icon_query.png"), "Query")
         self.a_upload = self.addAction(create_icon("qt_ui/icons/icon_upload.png"), "Upload")
+
+        self.addSeparator()
+        self.a_setup = self.addAction(create_icon("qt_ui/icons/icon_settings_plot.png"), "Setup")
+        self.a_vocabulary = self.addAction(create_icon("qt_ui/icons/icon_vocabulary.png"), "Vocabulary")
+        self.a_query = self.addAction(create_icon("qt_ui/icons/icon_query.png"), "Query")
 
         self.a_outliner.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_O))
         self.a_timeline.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_T))
@@ -58,5 +58,6 @@ class WidgetsToolbar(EToolBar):
         self.a_upload.triggered.connect(self.main_window.create_corpus_client_toolbar)
         self.a_screenshot_manager.triggered.connect(self.main_window.create_screenshot_manager_dock_widget)
         self.a_colorimetry.triggered.connect(self.main_window.create_colorimetry_live)
+        self.a_player.triggered.connect(self.main_window.create_widget_video_player)
 
         self.show()

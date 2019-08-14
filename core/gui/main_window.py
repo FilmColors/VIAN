@@ -66,7 +66,7 @@ except Exception as e:
     KERAS_AVAILABLE = False
 
 
-VERSION = "0.7.16"
+VERSION = "0.8.0"
 
 __author__ = "Gaudenz Halter"
 __copyright__ = "Copyright 2019, Gaudenz Halter"
@@ -643,9 +643,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
 
         else:
-            if not self.player_dock_widget.isVisible():
-                self.player_dock_widget.set_player(self.player)
-                self.player_dock_widget.show()
+            if self.player_dock_widget.isVisible():
+                self.player_dock_widget.hide()
             else:
                 self.player_dock_widget.show()
                 self.player_dock_widget.raise_()
@@ -871,6 +870,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.colorimetry_live.hide()
             else:
                 self.colorimetry_live.show()
+                self.colorimetry_live.raise_()
+                self.colorimetry_live.activateWindow()
 
     def create_corpus_client_toolbar(self):
         if self.corpus_client_toolbar is None:

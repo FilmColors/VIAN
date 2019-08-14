@@ -21,7 +21,7 @@ class StatusBar(QtWidgets.QWidget):
 
         self.stage_selector = StageSelector(self, main_window)
         self.layout.addWidget(self.stage_selector)
-        self.layout.addItem(QSpacerItem(100, 20))
+        self.layout.addItem(QSpacerItem(100, 10))
 
         self.label_selection = QtWidgets.QLabel(self)
         self.label_selection.setText("Selection: ")
@@ -31,7 +31,7 @@ class StatusBar(QtWidgets.QWidget):
         self.label_selection_length.setStyleSheet("QLabel{background: transparent;}")
         self.layout.addWidget(self.label_selection)
         self.layout.addWidget(self.label_selection_length)
-        self.layout.addItem(QSpacerItem(20,20))
+        self.layout.addItem(QSpacerItem(20,10))
 
         self.show()
 

@@ -433,6 +433,14 @@ QToolBar
     color: white;
 }
 
+QToolBar::separator
+{
+    /* background: #323232;*/
+    /* background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #161616, stop: 0.5 #151515, stop: 0.6 #212121, stop:1 #343434);*/
+    height: 2px;
+    background-color: #000000;
+    color: white;
+}
 
 QToolBar::handle
 {

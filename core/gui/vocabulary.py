@@ -22,7 +22,7 @@ class VocabularyCollection():
         self.vocabularies = []
         self.loaded_objs = dict()
 
-    def _fetch_vocabularies(self):
+    def fetch_vocabularies(self):
         for p in glob.glob("data/vocabularies/*.json"):
             with open(p, "r") as f:
                 voc = Vocabulary("").deserialize(json.load(f), self)
@@ -73,7 +73,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.current_item = None
 
         self.vocabulary_collection = VocabularyCollection()
-        self.vocabulary_collection._fetch_vocabularies()
+        self.vocabulary_collection.fetch_vocabularies()
 
         self.treeView = VocabularyTreeView(self, self)
         self.inner.layout().addWidget(self.treeView)
