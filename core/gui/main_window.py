@@ -12,7 +12,7 @@ from core import version
 from core.version import *
 from core.concurrent.worker_functions import *
 from core.corpus.client.widgets import *
-from core.data.cache import HDF5Cache, GLOBAL_CACHE
+from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
 from core.data.settings import UserSettings, Contributor
@@ -2128,7 +2128,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Movie Path:".rjust(15),self.project.movie_descriptor.movie_path)
         if self.project.colormetry_analysis is not None:
             print("Colorimetry:".rjust(15), self.project.colormetry_analysis.has_finished)
-        self.x = print("\n")
+        print("\n")
 
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is None or not self.allow_dispatch_on_change:

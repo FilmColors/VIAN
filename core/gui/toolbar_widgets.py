@@ -39,6 +39,9 @@ class WidgetsToolbar(EToolBar):
         self.a_vocabulary = self.addAction(create_icon("qt_ui/icons/icon_vocabulary.png"), "Vocabulary")
         self.a_query = self.addAction(create_icon("qt_ui/icons/icon_query.png"), "Query")
 
+        self.addSeparator()
+        self.a_cl_obj = self.addAction(create_icon("qt_ui/icons/icon_classification_object.png"), "Select Classification Object")
+
         self.a_outliner.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_O))
         self.a_timeline.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_T))
         self.a_player_controls.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_P))
@@ -60,4 +63,23 @@ class WidgetsToolbar(EToolBar):
         self.a_colorimetry.triggered.connect(self.main_window.create_colorimetry_live)
         self.a_player.triggered.connect(self.main_window.create_widget_video_player)
 
+        self.a_cl_obj.triggered.connect(self.show_classification_selector)
         self.show()
+
+    def show_classification_selector(self):
+        if self.main_window.project is None:
+            return
+
+        pos = self.mapToGlobal(self.widgetForAction(self.a_cl_obj).pos())
+        menu = QMenu(self)
+        for exp in self.main_window.project.experiments:
+            for clobj in exp.get_classification_objects_plain():
+                a = menu.addAction(clobj.name)
+                a.triggered.connect(partial(self.main_window.on_classification_object_changed, clobj))
+
+        menu.show()
+        if pos.x() > self.main_window.x() + self.main_window.width() / 2:
+            pos -= QPoint(menu.width(), 0)
+        if pos.y() > self.main_window.y() + self.main_window.height() / 2:
+            pos -= QPoint(0, menu.height())
+        menu.move(pos)

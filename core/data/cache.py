@@ -114,5 +114,3 @@ class HDF5Cache():
         self._index = dict()
         self._uid_scr = dict()
         self._uid_index = dict()
-
-GLOBAL_CACHE = None

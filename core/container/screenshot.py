@@ -5,7 +5,6 @@ from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from core.container.container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
 from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from core.container.analysis import SemanticSegmentationAnalysisContainer
-from core.data.cache import GLOBAL_CACHE
 from PyQt5.QtCore import pyqtSignal
 import datetime
 
