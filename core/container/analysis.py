@@ -10,6 +10,7 @@ from typing import List
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
 from .container_interfaces import IProjectContainer, IHasName, ISelectable
 from core.data.computation import *
+from .hdf5_manager import get_analysis_by_name
 
 
 class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamableContainer):
@@ -186,17 +187,24 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
 
     def get_preview(self):
         try:
-            return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
+            #return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
+            return get_analysis_by_name(self.analysis_job_class)().get_preview(self)
         except Exception as e:
             print("Preview:", e)
 
     def get_visualization(self):
         try:
-            return self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
-                                                                                             self.project.results_dir,
-                                                                                             self.project.data_dir,
-                                                                                             self.project,
-                                                                                             self.project.main_window)
+            # return self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
+            #                                                                                  self.project.results_dir,
+            #                                                                                  self.project.data_dir,
+            #                                                                                  self.project,
+            #                                                                                  self.project.main_window)
+            return get_analysis_by_name(self.analysis_job_class)().get_visualization(self,
+                 self.project.results_dir,
+                 self.project.data_dir,
+                 self.project,
+                 self.project.main_window
+            )
         except Exception as e:
             print("Exception in get_visualization()", e)
             # QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
@@ -263,12 +271,14 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
 
     def get_adata(self):
         if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            # self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
         return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
 
     def set_adata(self, d):
         if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            # self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
         self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
 
@@ -281,13 +291,15 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
 
     def get_adata(self):
         if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            # self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
         data = self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
         return data[0:self.entry_shape[0], 0:self.entry_shape[1]]
 
     def set_adata(self, d):
         if self.a_class is None:
-            self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            # self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
         d, self.entry_shape = self.a_class().to_hdf5(d)
         self.project.hdf5_manager.dump(d, self.a_class().dataset_name, self.unique_id)
         self.data = None

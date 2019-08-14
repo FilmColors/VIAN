@@ -1503,12 +1503,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
             try:
                 if isinstance(a, SemanticSegmentationAnalysisContainer):
                     if a.a_class is None:
-                        a.a_class = self.main_window.eval_class(a.analysis_job_class)
+                        # a.a_class = self.main_window.eval_class(a.analysis_job_class)
+                        a.a_class = get_analysis_by_name(a.analysis_job_class)
                     data, shape = a.a_class().to_hdf5(a.get_adata())
                     new_h5.dump(data, a.a_class().dataset_name, a.unique_id)
                 elif isinstance(a, IAnalysisJobAnalysis):
                     if a.a_class is None:
-                        a.a_class = self.main_window.eval_class(a.analysis_job_class)
+                        # a.a_class = self.main_window.eval_class(a.analysis_job_class)
+                        a.a_class = get_analysis_by_name(a.analysis_job_class)
                     data = a.a_class().to_hdf5(a.get_adata())
                     new_h5.dump(data, a.a_class().dataset_name, a.unique_id)
             except Exception as e:

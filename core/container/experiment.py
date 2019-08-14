@@ -8,6 +8,7 @@ from core.container.analysis import AnalysisContainer
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from .container_interfaces import IProjectContainer, IHasName, IClassifiable
+from .hdf5_manager import get_analysis_by_name
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
@@ -902,14 +903,16 @@ class Experiment(IProjectContainer, IHasName):
                         if a['class_obj'] != None:
                             self.analyses.append(dict(
                                 name=a['name'],
-                                class_name = project.main_window.eval_class(a['class_name']),
+                                # class_name = project.main_window.eval_class(a['class_name']),
+                                class_name = get_analysis_by_name(a['class_name']),
                                 params = a['params'],
                                 class_obj = project.get_by_id(a['class_obj'])
                             ))
                         else:
                             self.analyses.append(dict(
                                 name=a['name'],
-                                class_name=project.main_window.eval_class(a['class_name']),
+                                # class_name = project.main_window.eval_class(a['class_name']),
+                                class_name=get_analysis_by_name(a['class_name']),
                                 params=a['params'],
                                 class_obj=None
                             ))

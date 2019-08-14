@@ -10,6 +10,12 @@ def vian_analysis(cl):
     ALL_REGISTERED_ANALYSES[cl.__name__] = cl
     return cl
 
+def get_analysis_by_name(name):
+    if name in ALL_REGISTERED_ANALYSES:
+        return ALL_REGISTERED_ANALYSES[name]
+    else:
+        print("No Such Visualization")
+        raise ImportError("Analysis " +name+" not existent in the current environment.")
 
 DEFAULT_SIZE = (50,)
 DS_MOVIE = "movie"
