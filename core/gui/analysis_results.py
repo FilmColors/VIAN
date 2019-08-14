@@ -140,7 +140,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                         tabs_widget.addTab(scroll, analysis.get_name())
 
                     tab = tabs[analysis.get_name()]
-                    vis_tuple = analysis.get_visualization()[0]
+                    vis_tuple = analysis.get_visualization(self.main_window)[0]
                     vis = vis_tuple.widget
                     ctrls = vis_tuple.controls
                     if ctrls is not None:
@@ -157,7 +157,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                 break
 
     def apply_analysis(self):
-        visualizations = self.current_analysis.get_visualization()
+        visualizations = self.current_analysis.get_visualization(self.main_window)
         # self.current_analysis.unload_container()
         if visualizations is not None:
             self.analysis_widget.layout().addWidget(visualizations[0].widget)

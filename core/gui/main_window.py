@@ -8,6 +8,8 @@ from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from core.concurrent.worker import MinimalThreadWorker, WorkerManager
+from core import version
+from core.version import *
 from core.concurrent.worker_functions import *
 from core.corpus.client.widgets import *
 from core.data.cache import HDF5Cache, GLOBAL_CACHE
@@ -68,14 +70,7 @@ except Exception as e:
 
 VERSION = "0.8.0"
 
-__author__ = "Gaudenz Halter"
-__copyright__ = "Copyright 2019, Gaudenz Halter"
-__credits__ = ["Gaudenz Halter", "FIWI, University of Zurich", "VMML, University of Zurich"]
-__license__ = "GPL"
-__version__ = VERSION
-__maintainer__ = "Gaudenz Halter"
-__email__ = "gaudenz.halter@uzh.ch"
-__status__ = "Development, (BETA)"
+
 
 
 PROFILE = False
@@ -96,7 +91,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
-        print("VIAN: ", __version__)
+        print("VIAN: ", version.__version__)
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
         # loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,200))
@@ -107,7 +102,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setAcceptDrops(True)
         self.has_open_project = False
-        self.version = __version__
+        self.version = version.__version__
         self.forced_overlay_hidden = False
 
         self.extension_list = ExtensionList(self)
@@ -1050,7 +1045,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     self.print_message("Update Aborted", "Orange")
             else:
-                self.print_message("VIAN is up to date with version: " + str(__version__), "Green")
+                self.print_message("VIAN is up to date with version: " + str(version.__version__), "Green")
 
     def open_preferences(self):
         dialog = DialogPreferences(self)
@@ -1612,10 +1607,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_about(self):
         about = ""
-        about += "Author:".ljust(12) + __author__ + "\n"
-        about += "Copyright:".ljust(12) + __copyright__ + "\n"
-        about += "Version:".ljust(12) + __version__ + "\n"
-        about += "Credits:".ljust(12) + str(__credits__) + "\n"
+        about += "Author:".ljust(12) + version.__author__ + "\n"
+        about += "Copyright:".ljust(12) + version.__copyright__ + "\n"
+        about += "Version:".ljust(12) + version.__version__ + "\n"
+        about += "Credits:".ljust(12) + str(version.__credits__) + "\n"
         QMessageBox.about(self, "About", about)
 
     def increase_playrate(self):
@@ -1773,7 +1768,7 @@ class MainWindow(QtWidgets.QMainWindow):
         new = VIANProject(self)
         print("Loading Project Path", path)
         new.inhibit_dispatch = True
-        new.load_project(self.settings ,path)
+        new.load_project(self.settings ,path, main_window=self)
 
         self.project = new
         self.settings.add_to_recent_files(self.project)
@@ -2035,17 +2030,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def get_version_as_string(self):
 
         result = "VIAN - Visual Movie Annotation\n"
-        result += "Version: ".ljust(15) + __version__ + "\n"
+        result += "Version: ".ljust(15) + version.__version__ + "\n"
         result += "\n\n"
-        result += "Author: ".ljust(15) + __author__ + "\n"
-        result += "Copyright: ".ljust(15) + __copyright__ + "\n"
-        result += "Credits: ".ljust(15) + str(__credits__[0]) + "\n"
-        for i in range(1, len(__credits__)):
-            result += "".ljust(15) + str(__credits__[i]) + "\n"
-        result += "License: ".ljust(15) + __license__ + "\n"
-        result += "Maintainer: ".ljust(15) + __maintainer__ + "\n"
-        result += "Email: ".ljust(15) + __email__ + "\n"
-        result += "Status: ".ljust(15) + __status__ + "\n"
+        result += "Author: ".ljust(15) + version.__author__ + "\n"
+        result += "Copyright: ".ljust(15) + version.__copyright__ + "\n"
+        result += "Credits: ".ljust(15) + str(version.__credits__[0]) + "\n"
+        for i in range(1, len(version.__credits__)):
+            result += "".ljust(15) + str(version.__credits__[i]) + "\n"
+        result += "License: ".ljust(15) + version.__license__ + "\n"
+        result += "Maintainer: ".ljust(15) + version.__maintainer__ + "\n"
+        result += "Email: ".ljust(15) + version.__email__ + "\n"
+        result += "Status: ".ljust(15) + version.__status__ + "\n"
 
         return result
 

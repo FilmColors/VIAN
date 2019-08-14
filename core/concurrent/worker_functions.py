@@ -3,6 +3,7 @@ import json
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 
+from core import version
 from core.gui.main_window import *
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
@@ -96,7 +97,7 @@ def store_project_concurrent(args, sign_progress):
         segmentation=segmentations,
         analyzes=analyzes,
         movie_descriptor=project.movie_descriptor.serialize(),
-        version=project.main_window.version,
+        version=version.__version__,
         screenshot_groups=screenshot_groups,
         scripts = scripts,
         vocabularies=vocabularies,
@@ -198,7 +199,7 @@ class LoadScreenshotsJob(IConcurrentJob):
         #
         # # sign_progress(100)
 
-        project.main_window.screenshots_manager.set_loading(False)
+        main_window.screenshots_manager.set_loading(False)
 
 
 class CreateScreenshotJob(IConcurrentJob):

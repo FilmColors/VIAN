@@ -5,6 +5,7 @@ from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QFileDialog
 from random import randint
 
+from core import version
 from .hdf5_manager import HDF5Manager
 from .undo_redo_manager import UndoRedoManager
 from core.data.enums import *
@@ -88,11 +89,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
     onProjectLoaded = pyqtSignal()
     onProjectChanged = pyqtSignal(object, object)
 
-    def __init__(self, main_window, path = "", name = "", folder=""):
+    def __init__(self, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
         QObject.__init__(self)
         self.undo_manager = UndoRedoManager()
-        self.main_window = main_window
         # self.streamer = main_window.project_streamer
         self.inhibit_dispatch = True
 
@@ -151,7 +151,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def get_type(self):
         return PROJECT
 
-    def reset_file_paths(self, folder, file, main_window = None):
+    def reset_file_paths(self, folder, file):
         self.path = file
         self.folder = folder
         root = self.folder
@@ -166,7 +166,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         #     self.main_window.project_streamer.on_loaded(self)
 
     def create_file_structure(self):
-        self.reset_file_paths(self.folder, self.path, None)
+        self.reset_file_paths(self.folder, self.path)
         if not os.path.isdir(self.data_dir):
             os.mkdir(self.data_dir)
         if not os.path.isdir(self.results_dir):
@@ -928,7 +928,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             segmentation=segmentations,
             analyzes=analyzes,
             movie_descriptor=project.movie_descriptor.serialize(),
-            version=project.main_window.version,
+            version=version.__version__,
             screenshot_groups=screenshot_groups,
             scripts=scripts,
             vocabularies=vocabularies,
@@ -955,7 +955,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         except Exception as e:
             print("Exception during Storing: ", str(e))
 
-    def load_project(self, settings, path):
+    def load_project(self, settings, path, main_window = None):
         """
         Loads a project from a given file.
 
@@ -1016,9 +1016,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         # Migrating the Project to the new FileSystem
         if move_project_to_directory_project:
-            answer = QMessageBox.question(self.main_window, "Project Migration", "This Project seems to be older than 0.2.9.\n\n"
+            if main_window is not None:
+
+                answer = QMessageBox.question(main_window, "Project Migration", "This Project seems to be older than 0.2.9.\n\n"
                                                             "VIAN uses a directory System since 0.2.10,\n "
                                                             "do you want to move the Project to the new System now?")
+            else:
+                answer = QMessageBox.Yes
             if answer == QMessageBox.Yes:
                 try:
                     old_path = self.path

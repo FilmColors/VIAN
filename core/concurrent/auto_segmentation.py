@@ -13,7 +13,7 @@ AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1
 
 
-def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100):
+def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100):
     duration = project.movie_descriptor.duration
     if mode == AUTO_SEGM_EVEN:
         if n_segment < 0:
@@ -44,7 +44,7 @@ def auto_segmentation(project:VIANProject, mode, n_segment = -1, segm_width = 10
              nth_frame,
              [n_cluster_lb, n_cluster_hb]
              ])
-        project.main_window.run_job_concurrent(job)
+        main_window.run_job_concurrent(job)
 
 
 class DialogAutoSegmentation(EDialogWidget):
@@ -99,7 +99,7 @@ class DialogAutoSegmentation(EDialogWidget):
         else:
             n_segments = -1
             segment_width = self.spinBox_SegmentLength.value()
-        auto_segmentation(self.project, self.comboBox_Mode.currentIndex(),
+        auto_segmentation(self.project, self.comboBox_Mode.currentIndex(), self.main_window,
                           n_segments,
                           segment_width,
                           self.spinBox_nthFrame.value(),

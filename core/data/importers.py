@@ -178,7 +178,6 @@ class ScreenshotImporter(IConcurrentJob):
         segment_ranges = args['segment_ranges']
         timestamps = args['timestamps']
 
-
         if mode == 0:
             return self.mode_time(movie_path, timestamps, scr_paths, sign_progress)
 
