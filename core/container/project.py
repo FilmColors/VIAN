@@ -84,7 +84,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
     onAnnotationAdded = pyqtSignal(object)
     onSegmentAdded = pyqtSignal(object)
 
-    onSelectionChanged = pyqtSignal(object)
+    onSelectionChanged = pyqtSignal(object, object)
+    onProjectLoaded = pyqtSignal()
+    onProjectChanged = pyqtSignal(object, object)
 
     def __init__(self, main_window, path = "", name = "", folder=""):
         IClassifiable.__init__(self)
@@ -708,7 +710,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.current_annotation_layer = l
 
         self.dispatch_selected(sender)
-        self.onSelectionChanged.emit(self.selected)
 
     def get_selected(self, types = None) -> List[IProjectContainer]:
         """
@@ -1055,8 +1056,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 self.add_vocabulary(voc)
 
         except Exception as e:
-            self.main_window.print_message("Loading Vocabularies failed", "Red")
-            self.main_window.print_message(e, "Red")
+            print("Loading Vocabulary failed", e)
+            # self.main_window.print_message("Loading Vocabularies failed", "Red")
+            # self.main_window.print_message(e, "Red")
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
@@ -1085,7 +1087,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         except Exception as e:
             self.screenshot_groups = old
-            self.main_window.print_message("Loading Screenshot Group failed.", "Red")
+            # self.main_window.print_message("Loading Screenshot Group failed.", "Red")
+            print("Loading Vocabulary failed", e)
 
         try:
             old_script = self.node_scripts[0]
@@ -1099,8 +1102,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 self.add_script(old_script)
                 self.current_script = old_script
         except Exception as e:
-            self.main_window.print_message("Loading Node Scripts failed", "Red")
-            self.main_window.print_message(e, "Red")
+            print("Loading Node Scripts failed", e)
+            # self.main_window.print_message("Loading Node Scripts failed", "Red")
+            # self.main_window.print_message(e, "Red")
 
 
         try:
@@ -1592,15 +1596,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #region Dispatchers
     def dispatch_changed(self, receiver = None, item = None):
         if self.inhibit_dispatch == False:
-            self.main_window.dispatch_on_changed(receiver, item = item)
+            self.onProjectChanged.emit(receiver, item)
 
     def dispatch_loaded(self):
         if self.inhibit_dispatch == False:
-            self.main_window.dispatch_on_loaded()
+            self.onProjectLoaded.emit()
 
     def dispatch_selected(self, sender):
         if self.inhibit_dispatch == False:
-            self.main_window.dispatch_on_selected(sender, self.selected)
+            self.onSelectionChanged.emit(sender, self.selected)
     #endregion
 
 

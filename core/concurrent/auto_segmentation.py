@@ -169,7 +169,7 @@ class AutoSegmentingJob(IConcurrentJob):
 
     def modify_project(self, project, result, sign_progress=None, main_window = None):
         if result is not None:
-            widget = self.get_widget(project.main_window, result)
+            widget = self.get_widget(main_window, result)
             widget.show()
 
     def get_widget(self, parent, result):

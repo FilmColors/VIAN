@@ -452,6 +452,7 @@ class AttributesAnalysis(QWidget):
         super(AttributesAnalysis, self).__init__(parent)
         self.descriptor = descriptor
         self.setLayout(QVBoxLayout(self))
+        self.main_window = parent.main_window
 
         clobj_name = "Default"
         if self.descriptor.target_classification_object is not None:
@@ -477,7 +478,7 @@ class AttributesAnalysis(QWidget):
 
     def on_show_vis(self):
         self.descriptor.project.set_selected(sender = self, selected = [self.descriptor])
-        self.descriptor.project.main_window.switch_perspective(Perspective.Results)
+        self.main_window.switch_perspective(Perspective.Results)
         # self.descriptor.get_visualization()
 
 

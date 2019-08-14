@@ -306,7 +306,7 @@ class ScreenshotImporter(IConcurrentJob):
             frame_pos = r[0]
             frame = r[1]
             name = r[2]
-            time_stamp = frame2ms(frame_pos, fps = project.main_window.player.get_fps())
+            time_stamp = frame2ms(frame_pos, fps = main_window.player.get_fps())
             project.add_screenshot(Screenshot(title=name, image=frame, frame_pos=int(frame_pos), timestamp=time_stamp))
         project.sort_screenshots()
         project.inhibit_dispatch = False

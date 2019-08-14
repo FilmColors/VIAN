@@ -10,7 +10,7 @@ from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from core.concurrent.worker import MinimalThreadWorker, WorkerManager
 from core.concurrent.worker_functions import *
 from core.corpus.client.widgets import *
-from core.data.cache import HDF5Cache
+from core.data.cache import HDF5Cache, GLOBAL_CACHE
 from core.data.exporters import *
 from core.data.importers import *
 from core.data.settings import UserSettings, Contributor
@@ -79,6 +79,7 @@ __status__ = "Development, (BETA)"
 
 
 PROFILE = False
+
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
     onUpdateFrame = pyqtSignal(int, int)
@@ -135,6 +136,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         print("HDF5")
         self.hdf5_cache = HDF5Cache(self.settings.DIR_ROOT + "/scr_cache.hdf5")
+
 
         self.clipboard_data = []
         # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
@@ -1560,7 +1562,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_classification_object_changed(self, cl_obj):
         self.project.set_active_classification_object(cl_obj)
-        job = ClassificationObjectChangedJob(self.project, self.project.hdf5_manager, cl_obj)
+        job = ClassificationObjectChangedJob(self.project, self.project.hdf5_manager, cl_obj, hdf5_cache=self.hdf5_cache)
         self.run_job_concurrent(job)
 
     def on_save_custom_perspective(self):
@@ -1777,6 +1779,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.add_to_recent_files(self.project)
         self.update_recent_menu()
 
+        self.project.onProjectLoaded.connect(self.dispatch_on_loaded)
+        self.project.onProjectChanged.connect(self.dispatch_on_changed)
+        self.project.onSelectionChanged.connect(self.dispatch_on_selected)
         new.inhibit_dispatch = False
         try:
             self.dispatch_on_loaded()
@@ -2140,11 +2145,10 @@ class MainWindow(QtWidgets.QMainWindow):
             for o in self.i_project_notify_reciever:
                 o.on_changed(self.project, item)
 
+    pyqtSlot(object, object)
     def dispatch_on_selected(self, sender, selected):
         if self.project is None:
             return
-
-
         self.elan_status.set_selection(selected)
         for o in self.i_project_notify_reciever:
             # ttime = time.time()

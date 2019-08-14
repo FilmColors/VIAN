@@ -5,7 +5,7 @@ from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from core.container.container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
 from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from core.container.analysis import SemanticSegmentationAnalysisContainer
-
+from core.data.cache import GLOBAL_CACHE
 from PyQt5.QtCore import pyqtSignal
 import datetime
 
@@ -115,14 +115,14 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         else:
             return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
-    def set_classification_object(self, clobj, recompute = False):
+    def set_classification_object(self, clobj, recompute = False, hdf5_cache=None):
         if not recompute and clobj.unique_id in self.masked_cache:
             result = self.masked_cache[clobj.unique_id]
         elif clobj is None or clobj.semantic_segmentation_labels[0] == "":
             result = self.img_movie
         else:
             result = None
-            cached = self.project.main_window.hdf5_cache.get_screenshot(clobj.get_id(), self.unique_id)
+            cached = hdf5_cache.get_screenshot(clobj.get_id(), self.unique_id)
             if cached is None:
                 a = self.get_semantic_segmentations(clobj.semantic_segmentation_labels[0])
                 lbls = clobj.semantic_segmentation_labels[1]
@@ -133,7 +133,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
                     masked = apply_mask(self.img_movie, mask, lbls)
                     h = CACHE_WIDTH / masked.shape[0] * masked.shape[1]
                     masked = cv2.resize(masked, (int(h), CACHE_WIDTH), interpolation=cv2.INTER_CUBIC)
-                    self.project.main_window.hdf5_cache.dump_screenshot(clobj.get_id(), self.unique_id, masked)
+                    hdf5_cache.dump_screenshot(clobj.get_id(), self.unique_id, masked)
                     result = masked
             else:
                 result = cached
