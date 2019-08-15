@@ -1,1 +1,1 @@
-{"unique_id": 2388085749, "base": -1, "derived": false, "words": [{"unique_id": 7648400093, "name": "ship", "children": [], "parent": 2388085749}], "category": "ELAN Data", "name": "location"}
+{"name": "location", "uuid": "b166fc72-e6e7-43d5-92ce-b24a25ee223f", "category": "ELAN Data", "unique_id": 1869312799, "words": [{"name": "ship", "unique_id": 9880991612, "uuid": "cba99fe8-25a5-4570-98b8-182df6099a80", "parent": 1869312799, "children": [], "organization_group": 0, "complexity_lvl": 0, "complexity_group": "", "image_urls": []}], "image_urls": []}

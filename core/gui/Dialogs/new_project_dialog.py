@@ -33,7 +33,7 @@ class NewProjectDialog(EDialogWidget):
                 path += mp[i] + "/"
             self.project_dir = path
 
-        self.project = VIANProject(parent, path ="", name="")
+        self.project = VIANProject(path ="", name="")
 
         self.path_set_from_dialog = False
 

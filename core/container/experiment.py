@@ -1,5 +1,6 @@
 import json
 import time
+from uuid import uuid4
 import numpy as np
 
 from typing import List
@@ -49,6 +50,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def __init__(self, name):
         IProjectContainer.__init__(self)
+        self.uuid = str(uuid4())
         self.name = name
         self.comment = ""
         self.info_url = ""
@@ -157,6 +159,7 @@ class Vocabulary(IProjectContainer, IHasName):
             data = dict(
                 name = w.name,
                 unique_id = w.unique_id,
+                uuid = str(w.uuid),
                 parent = w.parent.unique_id,
                 children = [a.unique_id for a in w.children],
                 organization_group = w.organization_group,
@@ -166,13 +169,13 @@ class Vocabulary(IProjectContainer, IHasName):
             )
             words_data.append(data)
 
-
         voc_data = dict(
             name = self.name,
+            uuid = str(self.uuid),
             category = self.category,
             unique_id = self.unique_id,
             words = words_data,
-            image_urls = w.image_urls
+            image_urls = self.image_urls
         )
 
         return voc_data
@@ -182,6 +185,13 @@ class Vocabulary(IProjectContainer, IHasName):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.category = serialization['category']
+
+        try:
+            self.uuid = serialization['uuid']
+        except:
+            print("No UUID found in this vocabulary", self.name)
+            pass
+
         for w in serialization['words']:
             parent = self.project.get_by_id(w['parent'])
             # If this is a root node in the Vocabulary
@@ -199,20 +209,31 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.image_urls = w['image_urls']
                 except Exception as e:
                     print("Exception during Vocabulary:deserialize (II)", e)
+                try:
+                    word.uuid = w['uuid']
+                except:
+                    print("No UUID found in this vocabulary", self.name)
+                    pass
             else:
                 # Fields introduced in 0.8.0
                 try:
                     word = self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
+
+                    # Fields introduced in 0.8.0
                     word.complexity_lvl = int(w['complexity_lvl'])
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
-                except:
-                    continue
-
+                except Exception as e:
+                    print("Exception during Vocabulary:deserialize", e)
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
                     print("Exception during Vocabulary:deserialize (II)", e)
+                try:
+                    word.uuid = w['uuid']
+                except:
+                    print("No UUID found in this vocabulary", self.name)
+                    pass
 
         return self
 
@@ -235,9 +256,8 @@ class Vocabulary(IProjectContainer, IHasName):
         old_id = serialization['unique_id']
         new_id = project.create_unique_id()
         self.unique_id = new_id
-
+        self.uuid = serialization['uuid']
         id_replacing_table.append([old_id, new_id])
-
 
         # Replace all IDs with new one:
         for w in serialization['words']:
@@ -265,12 +285,68 @@ class Vocabulary(IProjectContainer, IHasName):
             parent = self.project.get_by_id(new_parent)
             # If this is a root node in the Vocabulary
             if isinstance(parent, Vocabulary):
-                self.create_word(w['name'], unique_id=new_id)
+                word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
 
+                # Fields introduced in 0.8.0
+                try:
+                    word.complexity_lvl = int(w['complexity_lvl'])
+                    word.organization_group = int(w['organization_group'])
+                    word.complexity_group = w['complexity_group']
+                except Exception as e:
+                    print("Exception during Vocabulary:deserialize", e)
+                try:
+                    word.image_urls = w['image_urls']
+                except Exception as e:
+                    print("Exception during Vocabulary:deserialize (II)", e)
+                try:
+                    word.uuid = w['uuid']
+                except:
+                    print("No UUID found in this vocabulary", self.name)
+                    pass
             else:
-                self.create_word(w['name'], parent, unique_id=new_id)
+
+                word = self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
+                # Fields introduced in 0.8.0
+                try:
+                    word.complexity_lvl = int(w['complexity_lvl'])
+                    word.organization_group = int(w['organization_group'])
+                    word.complexity_group = w['complexity_group']
+                except Exception as e:
+                    print("Exception during Vocabulary:deserialize", e)
+                try:
+                    word.image_urls = w['image_urls']
+                except Exception as e:
+                    print("Exception during Vocabulary:deserialize (II)", e)
+                try:
+                    word.uuid = w['uuid']
+                except:
+                    print("No UUID found in this vocabulary", self.name)
+                    pass
 
         return self, id_replacing_table
+
+    def update_vocabulary(self, new_voc):
+        for attr in VOC_COMPARE_ATTRS:
+            setattr(self, attr, getattr(new_voc, attr))
+
+        words = dict()
+        to_remove = []
+
+        for w in new_voc.words_plain:
+            words[w.uuid] = w
+        for w in self.words_plain:
+            if w.uuid in words:
+                for attr in WORD_COMPARE_ATTRS:
+                    setattr(w, attr, getattr(words[w.uuid], attr))
+                words.pop(w.uuid)
+            else:
+                to_remove.append(w)
+
+        for w in to_remove:
+            self.remove_word(w)
+        for w in words.values():
+            self.add_word(w)
+
 
     def get_type(self):
         return VOCABULARY
@@ -322,6 +398,7 @@ class VocabularyWord(IProjectContainer, IHasName):
     def __init__(self, name, vocabulary, parent = None, is_checkable = False):
         IProjectContainer.__init__(self)
         self.name = name
+        self.uuid = str(uuid4())
         self.comment = ""
         self.info_url = ""
         self.vocabulary = vocabulary
@@ -939,6 +1016,71 @@ class Experiment(IProjectContainer, IHasName):
         self.project.remove_experiment(self)
 
 
+VOC_COMPARE_ATTRS = [
+    "uuid",
+    "name",
+    "comment",
+    "info_url",
+    "image_urls",
+    "category"
+]
+
+WORD_COMPARE_ATTRS = [
+    "uuid",
+    "name",
+    "comment",
+    "info_url",
+    "image_urls",
+    "organization_group",
+    "complexity_lvl",
+    "complexity_group"
+]
 
 
+def compare_vocabularies(voc1: Vocabulary, voc2: Vocabulary):
+    changes = []
+    for attr in VOC_COMPARE_ATTRS:
+        if getattr(voc1, attr) != getattr(voc2, attr):
+            changes.append(dict(modification="Modified Vocabulary",
+                                name=attr,
+                                text=str(getattr(voc1, attr)) + " to " + str(getattr(voc2, attr))))
 
+    uuid_map_voc1 = dict()
+    for w in voc1.words_plain: #type:VocabularyWord
+        uuid_map_voc1[w.uuid] = w
+
+    uuid_map_voc2 = dict()
+    for w in voc2.words_plain:  # type:VocabularyWord
+        uuid_map_voc2[w.uuid] = w
+
+    words_to_add = []
+    for uuid in uuid_map_voc1:
+        if uuid not in uuid_map_voc2:
+            words_to_add.append(uuid_map_voc1[uuid])
+
+    words_to_remove = []
+    for uuid in uuid_map_voc2:
+        if uuid not in uuid_map_voc1:
+            words_to_remove.append(uuid_map_voc2[uuid])
+
+    for uuid in uuid_map_voc1:
+        if uuid not in uuid_map_voc2:
+            continue
+        w1 = uuid_map_voc1[uuid]
+        w2 = uuid_map_voc2[uuid]
+        for attr in WORD_COMPARE_ATTRS:
+            if getattr(w1, attr) != getattr(w2, attr):
+                changes.append(dict(modification="Modified Word",
+                                    name=attr,
+                                    text=str(getattr(w1, attr)) + " to " + str(getattr(w2, attr))))
+
+    for w in words_to_add:
+        changes.append(dict(modification="Added Word",
+                            name=w,
+                            text="Added new word " + w.name))
+    for w in words_to_remove:
+        changes.append(dict(modification="Removed Word",
+                            name=w,
+                            text="Removed new word " + w.name))
+
+    return changes

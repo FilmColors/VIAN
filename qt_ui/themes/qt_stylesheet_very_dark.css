@@ -382,7 +382,9 @@ QDockWidget::title
 QDockWidget::close-button, QDockWidget::float-button
 {
     text-align: center;
-    padding: 2px;
+    icon-size: 12px;
+    padding: 1px;
+
     spacing: 1px; /* spacing between items in the tool bar */
     background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #303030, stop: 0.5 #303030, stop:1 #303030);
 }
