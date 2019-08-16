@@ -37,7 +37,7 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
         self.filmography_widget = FilmographyWidget(self)
         self.stack.addWidget(self.progress_widget)
         self.stack.addWidget( self.filmography_widget)
-        self.btn_Commit = QPushButton("Commit Project", self.central)
+        self.btn_Commit = QPushButton("3. Commit Project", self.central)
         self.central.layout().addWidget(self.btn_Commit)
         self.btn_Commit.clicked.connect(partial(self.corpus_widget.on_commit))
         self.btn_Commit.setEnabled(False)
@@ -67,7 +67,7 @@ class CorpusProgressWidget(QWidget):
         super(CorpusProgressWidget, self).__init__(parent)
         self.main_window = main_window
         self.setLayout(QVBoxLayout())
-        self.btn_checkFiles = QPushButton("Check Project")
+        self.btn_checkFiles = QPushButton("1. Check Project")
         self.btn_checkFiles.clicked.connect(self.update_state)
         self.layout().addWidget(self.btn_checkFiles)
         self.list_widget = QWidget(self)
@@ -76,7 +76,7 @@ class CorpusProgressWidget(QWidget):
         self.spacer = QWidget()
         self.spacer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
 
-        self.btn_RunAll = QPushButton("Run all Missing Analyses")
+        self.btn_RunAll = QPushButton("2. Run all Missing Analyses")
         self.btn_RunAll.clicked.connect(self.run_all)
         self.layout().addWidget(self.spacer)
         self.layout().addWidget(self.btn_RunAll)
@@ -170,9 +170,12 @@ class CorpusProgressWidget(QWidget):
                 self.btn_RunAll.setEnabled(False)
             else:
                 self.btn_RunAll.setEnabled(True)
-
+        else:
+            QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
 
     def run_all(self):
+        if self.main_window.project is None:
+            QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
         for priority in sorted(self.missing_analyses.keys()):
             for analysis_name in self.missing_analyses[priority].keys():
                 analysis = self.main_window.eval_class(analysis_name)
@@ -230,6 +233,9 @@ class CorpusClientWidget(QWidget):
         self.show()
 
     def on_connect(self):
+        if self.corpus_client.is_connected:
+            QMessageBox.information(self, "Already Connected", "You are already connected to the WebApp.")
+            return
         self.on_connected(None)
         ret = False
         if self.main_window.settings.CONTRIBUTOR.token is not None:
@@ -271,6 +277,7 @@ class WebAppLoginDialog(EDialogWidget):
         self.btn_Login.clicked.connect(self.on_ok)
         self.lineEdit_Email.setText(self.main_window.settings.CONTRIBUTOR.email)
         self.lineEdit_Password.setText(self.main_window.settings.CONTRIBUTOR.password)
+        self.lineEdit_Password.setEchoMode(QLineEdit.Password)
 
     def on_ok(self):
         self.main_window.settings.CONTRIBUTOR.email = self.lineEdit_Email.text()
