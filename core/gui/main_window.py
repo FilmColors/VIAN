@@ -124,10 +124,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.plugin_menu)
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
 
+        QApplication.instance().setAttribute(Qt.AA_DontUseNativeMenuBar)
         self.dock_widgets = []
         self.open_dialogs = []
         self.settings = UserSettings()
         self.settings.load()
+
 
         print("HDF5")
         self.hdf5_cache = HDF5Cache(self.settings.DIR_ROOT + "/scr_cache.hdf5")

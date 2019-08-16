@@ -108,7 +108,7 @@ class EDockWidget(QDockWidget):
         super(EDockWidget, self).__init__()
         self.main_window = main_window
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
-        self.setAttribute(Qt.WA_AlwaysStackOnTop, False)
+        # self.setAttribute(Qt.WA_AlwaysStackOnTop, False)
         self.limit_size = limit_size
         self.setLayout(QVBoxLayout(self))
         self.default_width = width
@@ -117,6 +117,7 @@ class EDockWidget(QDockWidget):
         #NEWCODE
         self.inner = QMainWindow(None)
         self.init = True
+
         self.setWidget(self.inner)
 
         if QScreen.physicalDotsPerInch(QApplication.screens()[0]) > 300:

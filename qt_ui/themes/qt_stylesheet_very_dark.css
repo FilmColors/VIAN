@@ -364,16 +364,18 @@ QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
 QDockWidget
 {
     margin: 10px;
-    font-size: 10pt;
     border: 1px solid #121212;
     padding: 2px;
+    titlebar-close-icon: url(qt_ui/icons/icon_close_dock.png);
+    titlebar-normal-icon: url(qt_ui/icons/icon_tear_dock.png);
 
 }
 
 QDockWidget::title
 {
     text-align: center;
-    font-size: 10pt;
+  subcontrol-position: right;
+  subcontrol-origin: margin;
     padding: 2px;
     spacing: 2px; /* spacing between items in the tool bar */
     background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #303030, stop: 0.5 #303030, stop:1 #303030);
@@ -381,23 +383,39 @@ QDockWidget::title
 
 QDockWidget::close-button, QDockWidget::float-button
 {
-    text-align: center;
-    icon-size: 12px;
+    border-radius: 8px;
     padding: 1px;
-
-    spacing: 1px; /* spacing between items in the tool bar */
-    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #303030, stop: 0.5 #303030, stop:1 #303030);
+    spacing: 10px; /* spacing between items in the tool bar */
+    /*background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #303030, stop: 0.5 #ff3030, stop:1 #303030);*/
 }
 
-QDockWidget::close-button:hover, QDockWidget::float-button:hover
+QDockWidget::close-button{
+    border: solid black;
+    icon-size: 20px;
+}
+
+QDockWidget::float-button{
+    border: solid black;
+    icon-size: 20px;
+}
+
+
+
+QDockWidget::close-button:hover
 {
-    background: #242424;
+    background:  	#c51d1d;
 }
+QDockWidget::float-button:hover
+{
+    background:  #006442;
+}
+
 
 QDockWidget::close-button:pressed, QDockWidget::float-button:pressed
 {
     padding: 1px -1px -1px 1px;
 }
+
 
 EDockWidgetTitleBar
 {
@@ -485,6 +503,7 @@ QTabBar::tab {
 
 }
 
+
 QTabWidget::pane {
     border: 1px solid #444;
     top: 1px;
@@ -493,6 +512,7 @@ QTabWidget::pane {
 QTabWidget::tab-bar {
     border: 1px solid #444;
     left: 0;
+    top: 0;
     spacing:1px;
 }
 
