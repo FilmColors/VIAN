@@ -124,7 +124,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     self.comboBox_Experiment.addItem(e.get_name())
             else:
                 self.setEnabled(False)
-
             self.stackedWidget.setCurrentIndex(0)
         else:
             if len(project.experiments) > 0:
@@ -133,6 +132,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 self.current_experiment = project.experiments[0]
             self.stackedWidget.setCurrentIndex(1)
             self.update_widget()
+
+        project.onExperimentAdded.connect(self.enable_classification)
+
+    @pyqtSlot(object)
+    def enable_classification(self, s):
+        self.setEnabled(True)
 
     @pyqtSlot(bool)
     def on_visibility_changed(self, visibility):
@@ -249,7 +254,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             # Check  if we need to rebuild the layout or if the checkboxes stay the same,
             # if so apply the classification of the current container
             if set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())]):
-                print("No Rebuild")
                 for checkbox in self.all_checkboxes.values():
                     checkbox.stateChanged.disconnect()
                     checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
@@ -320,8 +324,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 for g in self.checkbox_groups:
                     g.finalize()
             except Exception as e:
-                raise e
                 print(e)
+                raise e
         for g in self.tabs:
             for t in g:
                 t.widget().layout().addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))

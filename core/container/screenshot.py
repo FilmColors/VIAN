@@ -45,7 +45,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.shot_id_segm = shot_id_segm
         self.movie_timestamp = timestamp
         self.creation_timestamp = str(datetime.datetime.now())
-        self.screenshot_group = ""
+        self.screenshot_group = None
         self.notes = ""
         self.annotation_is_visible = False
         self.timeline_visibility = True
@@ -270,7 +270,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     def set_name(self, name):
         self.name = name
         for s in self.screenshots:
-            s.screenshot_group = self.name
+            s.screenshot_group = self
         self.onScreenshotGroupChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
@@ -279,7 +279,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
             shots = [shots]
         for s in shots:
             self.screenshots.append(s)
-            s.screenshot_group = self.get_name()
+            s.screenshot_group = self
             self.onScreenshotAdded.emit(s)
             self.project.onScreenshotAdded.emit(s)
         # self.dispatch_on_changed(item=self)
@@ -315,7 +315,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
         for s in serialization['shots']:
             shot = self.project.get_by_id(s)
-            shot.screenshot_group = self.name
+            shot.screenshot_group = self
             self.screenshots.append(shot)
 
         return self

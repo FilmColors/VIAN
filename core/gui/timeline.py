@@ -1375,9 +1375,7 @@ class TimebarSlice(QtWidgets.QWidget):
                             self.max_possible = self.timeline.duration * self.timeline.scale
 
                     self.is_selected = True
-                    print("AA")
                     self.timeline.project().set_selected(None, self.item)
-                    print("BB")
                     self.offset = self.mapToParent(QMouseEvent.pos())
                     self.curr_size = self.size()
                     self.curr_pos = self.pos()
