@@ -8,7 +8,7 @@ import numpy as np
 from PyQt5 import uic
 from core.data.computation import create_icon
 from core.corpus.client.corpus_client import CorpusClient
-from core.gui.Dialogs.new_project_dialog import FilmographyWidget
+from core.gui.Dialogs.new_project_dialog import FilmographyWidget2
 from functools import partial
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import *
@@ -34,7 +34,7 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
         self.stack = QStackedWidget(self)
         self.central.layout().addWidget(self.stack)
         self.progress_widget = CorpusProgressWidget(self, main_window)
-        self.filmography_widget = FilmographyWidget(self)
+        self.filmography_widget = FilmographyWidget2(self)
         self.stack.addWidget(self.progress_widget)
         self.stack.addWidget( self.filmography_widget)
         self.btn_Commit = QPushButton("3. Commit Project", self.central)
@@ -59,6 +59,7 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
 
     def on_threshold_reached(self):
         self.btn_Commit.setEnabled(True)
+
 
 class CorpusProgressWidget(QWidget):
     onThresholdReached = pyqtSignal()
@@ -129,7 +130,7 @@ class CorpusProgressWidget(QWidget):
                 else:
                     bar = self.items["SegmentAnalyses"]
                 bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
-                progress_segmentation = n_analyses_done / n_analyses
+                progress_segmentation = n_analyses_done /  np.clip(n_analyses, 1, None)
 
             if "screenshot_analyses" in data:
                 n_analyses = len(self.main_window.project.screenshots) * len(data["screenshot_analyses"])
@@ -315,13 +316,21 @@ class CorpusCommitDialog(EDialogWidget):
             self.movies = self.corpus_client.corpus_interface.get_movies()
             self.persons = self.corpus_client.corpus_interface.get_persons()
             self.processes = self.corpus_client.corpus_interface.get_color_processes()
+            self.genres = self.corpus_client.corpus_interface.get_genres()
+            self.countries = self.corpus_client.corpus_interface.get_countries()
+            self.companies = self.corpus_client.corpus_interface.get_companies()
         except Exception as e:
             self.persons = []
             self.persons = []
             self.processes = []
+            self.genres = []
+            self.countries = []
+            self.companies = []
             print(e)
 
-        self.filmography = FilmographyWidget(self, main_window.project, persons=self.persons, processes=self.processes)
+        self.filmography = FilmographyWidget2(self, main_window.project, persons=self.persons,
+                                              processes=self.processes, genres=self.genres,
+                                              countries = self.countries, companies=self.companies)
         self.horizontalLayoutUpper.addWidget(self.filmography)
         self.pushButton_Commit.clicked.connect(self.on_commit)
         self.pushButton_Cancel.clicked.connect(self.close)

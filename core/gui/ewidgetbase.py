@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 
 from core.data.computation import pixmap_to_numpy, numpy_to_pixmap
 import cv2
+from functools import partial
 from PyQt5 import uic
 import os
 import sys
@@ -678,6 +679,63 @@ class FileBrowseBar(QWidget):
 
     def get_path(self):
         return self.line_edit.text()
+
+
+class MultiItemTextInput(QWidget):
+    def __init__(self, parent, title, autocompleter = None):
+        super(MultiItemTextInput, self).__init__(parent)
+        self.setLayout(QHBoxLayout(self))
+        lbl = QLabel(title, self)
+        lbl.setFixedWidth(150)
+        self.layout().addWidget(lbl)
+        self.input = QLineEdit(self)
+        self.added_list = QWidget(self)
+        self.added_list.setLayout(QHBoxLayout(self.added_list))
+        self.layout().addWidget(self.input)
+        self.layout().addWidget(self.added_list)
+        self.added_list.setContentsMargins(0,0,0,0)
+        self.added_list.layout().setContentsMargins(0,0,0,0)
+        self.input.setFixedWidth(200)
+        self.input.returnPressed.connect(self.on_add_item)
+
+
+        self.items = []
+        if autocompleter is not None:
+            self.input.setCompleter(autocompleter)
+
+    def setCompleter(self, completer):
+        self.input.setCompleter(completer)
+
+    def on_add_item(self):
+        name = self.input.text()
+        self.input.setText("")
+
+        item = MultiItemTextInputItem(self, name)
+        self.added_list.layout().addWidget(item)
+        self.items.append(item)
+        item.onRemove.connect(self.on_remove)
+
+
+    def on_remove(self, item):
+        if item in self.items:
+            self.items.remove(item)
+            item.deleteLater()
+
+    def get_items(self):
+        return [n.name for n in self.items]
+
+class MultiItemTextInputItem(QWidget):
+    onRemove = pyqtSignal(object)
+
+    def __init__(self, parent, name):
+        super(MultiItemTextInputItem, self).__init__(parent)
+        path = os.path.abspath("qt_ui/multiitemedititem.ui")
+        uic.loadUi(path, self)
+        self.lblName.setText(name)
+        self.btn_remove.clicked.connect(partial(self.onRemove.emit, self))
+
+
+
 #region POPUPS
 class CreateSegmentationPopup(QMainWindow):
     def __init__(self, parent, project, name = "New Segmentation", callback = None):

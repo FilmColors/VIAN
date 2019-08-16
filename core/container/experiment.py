@@ -676,6 +676,7 @@ class UniqueKeyword(IProjectContainer):
         return data
 
     def deserialize(self, serialization, project):
+        print(serialization)
         self.unique_id = serialization['unique_id']
         self.voc_obj = project.get_by_id(serialization['voc_obj'])
         self.word_obj = project.get_by_id(serialization['word_obj'])

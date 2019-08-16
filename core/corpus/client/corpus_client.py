@@ -157,6 +157,9 @@ class WebAppCorpusInterface(QObject):
         self.ep_query_persons = self.ep_root + "query/persons"
         self.ep_query_companies = self.ep_root + "query/companies"
         self.ep_query_color_processes = self.ep_root + "query/colorprocess"
+        self.ep_query_genres = self.ep_root + "query/genre"
+        self.ep_query_countries = self.ep_root + "query/country"
+
 
         self.signals = CorpusInterfaceSignals()
         self.user_id = -1
@@ -271,7 +274,7 @@ class WebAppCorpusInterface(QObject):
 
                     img = cv2.cvtColor(scr.get_img_movie(True), cv2.COLOR_BGR2BGRA)
                     # # Export the Screenshot as extracted from the movie
-                    grp_name = scr.screenshot_group
+                    grp_name = scr.screenshot_group.name
                     name = scr_dir + grp_name + "_" \
                            + str(scr.scene_id) + "_" \
                            + str(scr.shot_id_segm) + ".jpg"
@@ -362,6 +365,7 @@ class WebAppCorpusInterface(QObject):
                                   headers=dict(type="upload", authorization=contributor.token.encode())).text
                 print("Redceived", r)
             except Exception as e:
+                raise e
                 pass
 
             finally:
@@ -388,6 +392,18 @@ class WebAppCorpusInterface(QObject):
     @pyqtSlot()
     def get_persons(self):
         return requests.get(self.ep_query_persons).json()
+
+    @pyqtSlot()
+    def get_genres(self):
+        return requests.get(self.ep_query_genres).json()
+
+    @pyqtSlot()
+    def get_countries(self):
+        return requests.get(self.ep_query_countries).json()
+
+    @pyqtSlot()
+    def get_companies(self):
+        return requests.get(self.ep_query_companies).json()
 
 
 class LocalCorpusInterface():

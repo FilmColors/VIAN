@@ -1356,9 +1356,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :return: A Copy of an existing Vocabulary
         """
         self.inhibit_dispatch = True
-        voc.export_vocabulary(self.data_dir + "/temp_voc.json")
-        new = self.import_vocabulary(self.data_dir + "/temp_voc.json", add_to_global)
-        os.remove(self.data_dir + "/temp_voc.json")
+        new = self.import_vocabulary(None, add_to_global, serialization=voc.serialize())
         self.inhibit_dispatch = False
         return new
 

@@ -314,7 +314,7 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
     print(len(exp.get_unique_keywords()))
 
     # Add Analyses
-    sem_seg_params = dict(model="ADE20K", resolution=50)
+    sem_seg_params = dict(model="LIP_Dataset", resolution=50)
     palette_params = dict(resolution=50)
     feature_params = dict(resolution=50)
     exp.add_analysis_to_pipeline("Fg/Bg Segmentation", SemanticSegmentationAnalysis, sem_seg_params)
@@ -344,7 +344,8 @@ def glossary_to_template(glossary_path, template_path, export_voc_dir = None):
 
 
 if __name__ == '__main__':
-    gl_path = "E:\Programming\Git\ERC_FilmColors\\resources\\glossary_complexities.csv"
+    gl_path = "/Users/gaudenzhalter/Desktop/GlossaryDB.csv"
+    # gl_path = "E:\Programming\Git\ERC_FilmColors\\resources\\glossary_complexities.csv"
     voc_export = "C:/Users/Gaudenz Halter/Documents/VIAN/vocabularies"
     template_path = "C:/Users/Gaudenz Halter/Documents/VIAN/templates/ERC_FilmColors.viant"
     glossary_to_template(gl_path, template_path, voc_export)

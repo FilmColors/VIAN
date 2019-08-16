@@ -38,6 +38,7 @@ from PyQt5.QtGui import QPixmap, QIcon
 
 from core.data.settings import UserSettings
 from core.gui.drop_image_container import DropImageContainer
+from core.gui.ewidgetbase import MultiItemTextInput
 DEBUG = True
 MAIN_WINDOW = None
 
@@ -72,7 +73,7 @@ app.setWindowIcon(QIcon("qt_ui/images/main.png"))
 set_attributes(app)
 set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
 
-main = MW(DropImageContainer(None))
+main = MW(MultiItemTextInput(None, "TestInput"))
 main.show()
 sys.exit(app.exec_())
 
