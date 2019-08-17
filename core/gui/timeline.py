@@ -8,6 +8,7 @@ from PyQt5.QtCore import *
 from core.gui.ewidgetbase import EDockWidget
 
 from core.data.computation import ms_to_string
+from core.data.interfaces import TimelineDataset
 from core.container.project import *
 from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
@@ -100,6 +101,7 @@ class TimelineContainer(EDockWidget):
     def resizeEvent(self, *args, **kwargs):
         super(TimelineContainer, self).resizeEvent(*args, **kwargs)
         self.timeline.update_time_bar()
+        self.timeline.update_visualizations()
 
     def on_cut_tools(self):
         self.timeline.activate_cutting_tool()
@@ -175,9 +177,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.is_merging = False
         self.sticky_move = False #If true, the adjacent slice is edited as well
 
+        self.show_audio_volume = True
+
         self.item_segments = []
         self.item_screenshots = []
         self.item_ann_layers = []
+        self.item_visualizations = dict()
         self.items = []
 
         self.bar_height_min = 10
@@ -229,6 +234,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.merge_containers = None
 
         self.update_time_bar()
+        self.update_visualizations()
         self.update_ui()
 
         self.scrollArea.wheelEvent = self.func_tes
@@ -268,6 +274,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.frame_Controls.move(self.scrollArea.mapToParent(QtCore.QPoint(value, 0)))
         self.relative_corner = QtCore.QPoint(value, self.relative_corner.y())
         self.time_bar.move(self.relative_corner)
+        self.update_visualizations()
 
     def scroll_v(self):
         value = self.scrollArea.verticalScrollBar().value()
@@ -276,6 +283,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_bar.move(self.relative_corner)
         self.time_bar.raise_()
         self.time_scrubber.raise_()
+
+    @pyqtSlot(object)
+    def add_visualization(self, dataset:TimelineDataset):
+        # if self.show_audio_volume:
+        control = TimelineVisualizationControl(self.frame_Controls, self, dataset, name=dataset.get_name())
+        bars = TimelineAreaPlot(self.frame_Bars, self, control, dataset=dataset)
+        item = [control, [bars], self.bar_height_min]
+        self.item_visualizations[dataset.get_name().replace(" ", "-")] = item
+        self.update_ui()
 
     @pyqtSlot(object)
     def add_segmentation(self, segmentation:Segmentation):
@@ -394,6 +410,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_segments = []
         self.item_ann_layers = []
         self.item_screenshots = []
+        self.clear_visualizations()
 
     def update_location(self):
         # self.curr_movie_time = self.main_window.player.get_media_time() / 1000
@@ -444,6 +461,20 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_bar.update()
         # self.time_bar.show()
 
+    def update_visualizations(self):
+        for v in self.item_visualizations.values():
+            v = v[1][0]
+            v.move(self.relative_corner.x(), v.y())
+            v.setFixedWidth(self.width() - self.controls_width)
+            v.setFixedHeight(v.height())
+            v.update()
+
+    def clear_visualizations(self):
+        for v in self.item_visualizations.values():
+            v[1][0].close()
+            v[0].close()
+        self.item_visualizations = dict()
+
     def update_ui(self):
         # self.time_scrubber.move(self.curr_movie_time, 0)
         value = self.scrollArea.horizontalScrollBar().value()
@@ -456,7 +487,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_scrubber.resize(self.scrubber_width, h)
 
         loc_y = self.time_bar_height
-        self.items = self.item_segments + self.item_ann_layers + self.item_screenshots
+
+
+        self.items = self.item_segments + self.item_ann_layers + self.item_screenshots + list(self.item_visualizations.values())
+
         for c, i in enumerate(self.items):
             bar_start = loc_y
             ctrl_height = 6
@@ -489,10 +523,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             else:
                 ctrl.onHeightChanged.emit(ctrl.height() / n_bars)
 
+
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
         self.time_scrubber.setFixedHeight(self.frame_Bars.height())
+        self.update_visualizations()
         self.time_bar.raise_()
 
     def on_loaded(self, project):
@@ -517,6 +553,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         project.onScreenshotGroupRemoved.connect(self.recreate_timeline)
 
         self.update_time_bar()
+        self.update_visualizations()
         self.update_ui()
         self.scroll_h()
 
@@ -566,6 +603,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.clear()
         self.set_colormetry_progress(0.0)
         self.setDisabled(True)
+
 
     def recreate_timeline(self, args = None):
         vlocation = self.scrollArea.verticalScrollBar().value()
@@ -625,6 +663,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.scrollArea.horizontalScrollBar().setValue(self.time_scrubber.pos().x() - self.controls_width)
 
         self.update_time_bar()
+        self.update_visualizations()
         # self.update()
 
     def keyPressEvent(self, QKeyEvent):
@@ -694,6 +733,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.abort_cutting()
         self.abort_merge_tool()
         self.close_selector()
+
+    def get_current_t_start(self):
+        return float(self.time_bar.pos().x()) * self.scale
+
+    def get_current_t_end(self):
+        t_start = self.get_current_t_start()
+        return t_start + float(self.time_bar.width() * self.scale)
 
     #region CuttingTool
     def activate_cutting_tool(self):
@@ -1561,9 +1607,6 @@ class TimebarSlice(QtWidgets.QWidget):
         if self.item.get_type() == SEGMENT:
             popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
 
-    def update(self, *__args):
-        super(TimebarSlice, self).update(*__args)
-
 
 class TimelineSegmentationBar(TimelineBar):
     onHeightChanged = pyqtSignal(int)
@@ -2185,9 +2228,109 @@ class SelectorContextMenu(QtWidgets.QMenu):
         super(SelectorContextMenu, self).closeEvent(*args, **kwargs)
 
 
+class TimelineVisualizationControl(TimelineControl):
+    def __init__(self, parent,timeline, item = None, name = "No Name"):
+        super(TimelineVisualizationControl, self).__init__(parent,timeline, item, name)
+
+
 class TimelineVisualization(TimelineBar):
-    def __init__(self, parent, timeline, control, height = 45):
+    def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height = 45):
         super(TimelineVisualization, self).__init__(parent, timeline, control, height)
-        self.dataset = None
+        self.dataset = dataset
+
+from core.visualization.line_plot import LinePlot
+class TimelineLinePlot(TimelineVisualization):
+    def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height=45):
+        super(TimelineLinePlot, self).__init__(parent, timeline, control, height)
+        self.dataset = dataset
+
+    def on_height_changed(self, height):
+        super(TimelineLinePlot, self).on_height_changed(height)
+        self.setFixedHeight(height)
+
+    def paintEvent(self, QPaintEvent):
+        t_start = self.timeline.get_current_t_start()
+        t_end = self.timeline.get_current_t_end()
+        data, ms = self.dataset.get_data_range(t_start, t_end)
+
+        qp = QtGui.QPainter()
+        pen = QtGui.QPen()
+        qp.begin(self)
+        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        pen.setColor(QtGui.QColor(255, 255, 255))
+        qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
+        for i in range(data.shape[0]):
+            x = ((ms[i] - t_start)) / self.timeline.scale
+            y = self.height() - (data[i] * self.height())
+            if i == 0:
+                path = QPainterPath(QPointF(x, y))
+            else:
+                path.lineTo(QPointF(x, y))
+        qp.drawPath(path)
+        qp.end()
+
+class TimelineAreaPlot(TimelineVisualization):
+    def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height=45):
+        super(TimelineAreaPlot, self).__init__(parent, timeline, control, height)
+        self.dataset = dataset
+        self.fill_color = QColor(200,100,20)
+        self.image = None
+
+        self.last_values = (0,0,0,0)
+
+    def on_height_changed(self, height):
+        super(TimelineAreaPlot, self).on_height_changed(height)
+        self.setFixedHeight(height)
+
+
+    def render_image(self):
+        t_start = self.timeline.get_current_t_start()
+        t_end = self.timeline.get_current_t_end()
+        data, ms = self.dataset.get_data_range(t_start, t_end)
+
+        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
+        qimage.fill(QtCore.Qt.transparent)
+        qp = QtGui.QPainter(qimage)
+        pen = QtGui.QPen()
+        qp.begin(qimage)
+        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        pen.setColor(QtGui.QColor(255, 255, 255))
+        qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
+        itms = list(range(data.shape[0]))
+        for i in itms:
+            x = ((ms[i] - t_start)) / self.timeline.scale
+            y = self.height() - (0.5 * self.height()) + ((data[i]) * self.height() / 2)
+            if i == 0:
+                path = QPainterPath(QPointF(x, y))
+            else:
+                path.lineTo(QPointF(x, y))
+
+        for i in itms[::-1]:
+            x = ((ms[i] - t_start)) / self.timeline.scale
+            y = self.height() - (0.5 * self.height()) - ((data[i]) * self.height() / 2)
+            path.lineTo(QPointF(x, y))
+
+        qp.drawPath(path)
+        qp.fillPath(path, QColor(self.fill_color))
+        qp.end()
+        self.image = qimage
+
+    def paintEvent(self, QPaintEvent):
+        t_start = self.timeline.get_current_t_start()
+        t_end = self.timeline.get_current_t_end()
+        values = (t_start, t_end, self.height(), self.width())
+
+        if self.last_values != values or self.image is None:
+            self.render_image()
+            self.last_values = values
+
+        qp = QtGui.QPainter()
+        pen = QtGui.QPen()
+        qp.begin(self)
+        qp.drawImage(QRectF(self.rect()), self.image)
+
+        qp.end()
 
 

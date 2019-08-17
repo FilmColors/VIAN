@@ -16,6 +16,7 @@ from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
 from core.data.settings import UserSettings, Contributor
+from core.data.audio_handler import AudioHandler
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
@@ -86,6 +87,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onCorpusDisconnected = pyqtSignal(object)
     currentClassificationObjectChanged = pyqtSignal(object)
     onAnalysisIntegrated = pyqtSignal()
+    onProjectOpened = pyqtSignal(object)
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -213,7 +215,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drawing_editor = None
         self.concurrent_task_viewer = None
 
-
         self.player = Player_VLC(self)
         self.player_dock_widget = None
 
@@ -226,6 +227,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
         # self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
+
+        self.audio_handler = AudioHandler(resolution=0.1, callback=print)
+        self.audio_handler_thread = QThread()
+        self.audio_handler.moveToThread(self.audio_handler_thread)
+        self.audio_handler_thread.start()
+        self.onProjectOpened.connect(self.audio_handler.project_changed)
+
 
         self.create_widget_elan_status()
         self.create_widget_video_player()
@@ -280,6 +288,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.worker_manager = WorkerManager(self)
 
         self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
+        self.audio_handler.audioProcessed.connect(self.timeline.timeline.add_visualization)
 
         self.actionNew.triggered.connect(self.action_new_project)
         self.actionLoad.triggered.connect(self.on_load_project)
@@ -1780,6 +1789,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onProjectLoaded.connect(self.dispatch_on_loaded)
         self.project.onProjectChanged.connect(self.dispatch_on_changed)
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
+        self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False
         try:
             self.dispatch_on_loaded()

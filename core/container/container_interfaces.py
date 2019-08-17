@@ -3,6 +3,7 @@ In this Module, all interfaces used by VIAN are defined.
 """
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
+from core.data.enums import GENERIC
 
 
 class IClassifiable():
@@ -183,6 +184,13 @@ class ILockable():
 
 
 class ITimelineItem:
+
+    def get_type(self):
+        return GENERIC
+
+    def get_name(self):
+        return "No Name"
+
     def set_timeline_visibility(self, visibility):
         print("ITimelineItem: Not Implemented", self)
 

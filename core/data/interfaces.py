@@ -1,12 +1,14 @@
 """
 In this Module, all interfaces used by VIAN are defined. 
 """
-
+import numpy as np
 from random import randint
 from collections import namedtuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import DataSerialization
+from scipy.signal import savgol_filter, resample
+from core.container.container_interfaces import ITimelineItem
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
 VisualizationTab = namedtuple("VisualizationTab", ["name", "widget", "use_filter", "controls"])
@@ -255,14 +257,48 @@ class IConcurrentJob():
         self.aborted = True
 
 
-class TimelineDataset:
+class TimelineDataset(ITimelineItem):
     """
     A Dataset which can be displayed in the timeline.
     The get_data_range function has to be overwritten accordingly.
 
     """
-    def __init__(self, data):
+    def __init__(self, name, data, ms_to_idx = 1.0):
         self.data = data
+        self.strip_height = 45
+        self.name = name
+        self.ms_to_idx = ms_to_idx
 
-    def get_data_range(self, t_start, t_end):
-        return None
+    def get_data_range(self, t_start, t_end, norm=True, subsample=True):
+        idx_a = int(np.floor(t_start / self.ms_to_idx))
+        idx_b = int(np.ceil(t_end / self.ms_to_idx))
+
+        offset = (t_start / self.ms_to_idx) - int(np.floor(t_start / self.ms_to_idx))
+
+        ms = np.array(list(range(idx_a, idx_b)))
+        ms = np.multiply(ms, self.ms_to_idx)
+        ms = np.subtract(ms, offset)
+
+        data = self.data[idx_a:idx_b].copy()
+        if data.shape[0] > 1000:
+            k = int(data.shape[0] / 1000)
+            if k % 2 == 0:
+                f = k + 1
+                # order = np.clip(f, 1, k-1)
+            else:
+                f = k
+                # order = np.clip(f, 1, k - 1)
+
+            data = resample(data, data[0::k].shape[0])
+            # data = data[0::k]
+            ms = ms[0::k]
+        if norm:
+            data /= np.amax(self.data)
+        try:
+            return data, ms
+        except Exception as e:
+            raise e
+        return [], []
+
+    def get_name(self):
+        return self.name
