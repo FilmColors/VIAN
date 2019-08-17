@@ -2185,3 +2185,9 @@ class SelectorContextMenu(QtWidgets.QMenu):
         super(SelectorContextMenu, self).closeEvent(*args, **kwargs)
 
 
+class TimelineVisualization(TimelineBar):
+    def __init__(self, parent, timeline, control, height = 45):
+        super(TimelineVisualization, self).__init__(parent, timeline, control, height)
+        self.dataset = None
+
+

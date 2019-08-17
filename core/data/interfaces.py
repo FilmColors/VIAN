@@ -48,8 +48,11 @@ class IAnalysisJob(QObject):
     """
     def __init__(self, name, source_types,
                  dataset_name, dataset_shape, dataset_dtype,
-                 help_path = "", author="No Author", version = "0.0.1",
-                 multiple_result = False, data_serialization = DataSerialization.JSON):
+                 help_path = "",
+                 author="No Author",
+                 version = "0.0.1",
+                 multiple_result = False,
+                 data_serialization = DataSerialization.JSON):
         """
         
         :param name: The name of the Analysis, used in the UI.
@@ -252,3 +255,14 @@ class IConcurrentJob():
         self.aborted = True
 
 
+class TimelineDataset:
+    """
+    A Dataset which can be displayed in the timeline.
+    The get_data_range function has to be overwritten accordingly.
+
+    """
+    def __init__(self, data):
+        self.data = data
+
+    def get_data_range(self, t_start, t_end):
+        return None

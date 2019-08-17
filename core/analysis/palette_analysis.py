@@ -26,8 +26,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
                                                    dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6), #(Distance, Layer, L, A, B, N)
                                                    dataset_dtype=np.float16,
                                                    author="Gaudenz Halter",
-                                                     version="1.0.0",
-                                                     multiple_result=True)
+                                                   version="1.0.0",
+                                                   multiple_result=True)
         self.resolution = resolution
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
