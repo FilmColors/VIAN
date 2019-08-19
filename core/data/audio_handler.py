@@ -5,7 +5,7 @@ moviepy.
 
 import numpy as np
 from moviepy.editor import *
-
+from typing import List, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.interfaces import TimelineDataset
 from core.container.project import VIANProject
@@ -32,6 +32,7 @@ class AudioHandler(QObject):
 
         self.audio_samples = None   #type: np.ndarray
         self.audio_volume = None    #type: np.ndarray
+        self.project = None
 
     @pyqtSlot(object)
     def project_changed(self, project:VIANProject):
@@ -46,6 +47,8 @@ class AudioHandler(QObject):
         # We have to aquire a Lock from the HDF5Manager, since moviepy (or its dependencies)
         # Lock all files references by the process, we have to make sure that the HDF5 manager doesn't
         # try to clean (replace) the HDF5 file during reading the audio samples.
+
+        self.project = project
 
         with HDF5_FILE_LOCK:
             self._read(project.movie_descriptor.movie_path)
@@ -63,11 +66,20 @@ class AudioHandler(QObject):
 
     @pyqtSlot(str)
     def _read(self, path:str):
+        """
+        Reads a movie into memory
+        :param path: Path to the movie file as string
+        """
         self._videoclip = VideoFileClip(path)
         self._audioclip = self._videoclip.audio
 
     @pyqtSlot(float, object)
-    def _sample_audio(self, callback = None):
+    def _sample_audio(self, callback = None) -> np.ndarray:
+        """
+        Samples a audio source of a movie into a numpy array
+        :param callback: a function to call for signalling progress
+        :return: an array of shape (length, 2) stereo signal, np.ndarray
+        """
         vals = []
         for i in range(int(self._audioclip.duration / self.resolution)):
             vals.append(self._audioclip.get_frame(i / (1.0 / self.resolution)))
@@ -76,3 +88,22 @@ class AudioHandler(QObject):
         return np.array(vals)
 
 
+    @pyqtSlot(object, str, object)
+    def export_segments(self, segments:List[Tuple[int, int]], directory, callback = None):
+        """
+        Writes a number of given segments to new movie files
+        :param segments: A list of Tuples (t_start_ms, t_end_ms) given in milliseconds.
+        :return:
+        """
+        if self.project is None:
+            return
+
+        with HDF5_FILE_LOCK:
+            self._read(self.project.movie_descriptor.movie_path)
+            for i, s in enumerate(segments):
+                clip = self._videoclip.subclip(s[0] / 1000, s[1] / 1000)
+                name = os.path.join(directory, str(i + 1) + ".mp4")
+                clip.write_videofile(name)
+                if callback is not None:
+                    callback(i / len(segments))
+            self._videoclip.close()

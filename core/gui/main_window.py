@@ -313,6 +313,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionZip_Project.triggered.connect(self.on_zip_project)
         self.actionExit.triggered.connect(self.on_exit)
         self.actionScreenshotsExport.triggered.connect(self.on_export_screenshots)
+        self.actionExportMovie_Segment.triggered.connect(self.on_export_movie_segments)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -2001,6 +2002,24 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.print_message("Zipping Project Failed", "Red")
             self.print_message(str(e), "Red")
+
+    def on_export_movie_segments(self):
+        if self.project is not None:
+            to_export = []
+            for s in self.project.selected:
+                if isinstance(s, Segment):
+                    to_export.append((s.get_start(), s.get_end()))
+
+            if len(to_export) > 0:
+                directory = QFileDialog.getExistingDirectory(directory=self.project.export_dir)
+                if os.path.isdir(directory):
+                    self.audio_handler.export_segments(to_export, directory=directory, callback=print)
+                else:
+                    return
+            else:
+                dialog = QMessageBox.information(self, "Export Segments", "You first have to select some segments to export.")
+                dialog.show()
+        pass
 
     #endregion
 

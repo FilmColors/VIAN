@@ -72,6 +72,8 @@
      <addaction name="action_ExportSegmentation"/>
      <addaction name="separator"/>
      <addaction name="actionZip_Project"/>
+     <addaction name="separator"/>
+     <addaction name="actionExportMovie_Segment"/>
     </widget>
     <widget class="QMenu" name="menuRecently_Opened">
      <property name="title">
@@ -869,6 +871,11 @@
   <action name="actionScriptEditor">
    <property name="text">
     <string>Script Editor</string>
+   </property>
+  </action>
+  <action name="actionExportMovie_Segment">
+   <property name="text">
+    <string>Movie Segment</string>
    </property>
   </action>
  </widget>
