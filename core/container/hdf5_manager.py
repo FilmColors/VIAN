@@ -1,3 +1,4 @@
+from threading import Lock
 import h5py
 import os
 import gc
@@ -28,6 +29,9 @@ DS_COL_SPATIAL_COLOR = "col_spatial_color"
 DS_COL_SPATIAL_HUE = "col_spatial_hue"
 DS_COL_SPATIAL_LUMINANCE = "col_spatial_luminance"
 
+
+HDF5_WRITE_LOCK = Lock()
+HDF5_FILE_LOCK = Lock()
 
 def print_registered_analyses():
     print("Registered Analyses:")
@@ -79,21 +83,22 @@ class HDF5Manager():
             self._index[name] = 0
 
     def dump(self, d, dataset_name, unique_id):
-        if self.h5_file is None:
-            raise IOError("HDF5 File not opened yet")
-        if dataset_name not in self.h5_file:
-            self.initialize_all()
-        if not dataset_name in self._index:
-            self._index[dataset_name] = 0
+        with HDF5_WRITE_LOCK:
+            if self.h5_file is None:
+                raise IOError("HDF5 File not opened yet")
+            if dataset_name not in self.h5_file:
+                self.initialize_all()
+            if not dataset_name in self._index:
+                self._index[dataset_name] = 0
 
-        pos = self._index[dataset_name]
-        if pos > 0 and pos % DEFAULT_SIZE[0] == 0:
-            self.h5_file[dataset_name].resize((pos + DEFAULT_SIZE[0], ) + self.h5_file[dataset_name].shape[1:])
-        self.h5_file[dataset_name][pos] = d
+            pos = self._index[dataset_name]
+            if pos > 0 and pos % DEFAULT_SIZE[0] == 0:
+                self.h5_file[dataset_name].resize((pos + DEFAULT_SIZE[0], ) + self.h5_file[dataset_name].shape[1:])
+            self.h5_file[dataset_name][pos] = d
 
-        self._uid_index[unique_id] = (dataset_name, pos)
-        self._index[dataset_name] += 1
-        self.h5_file.flush()
+            self._uid_index[unique_id] = (dataset_name, pos)
+            self._index[dataset_name] += 1
+            self.h5_file.flush()
 
     def load(self, unique_id):
         if self.h5_file is None:
@@ -231,16 +236,17 @@ class HDF5Manager():
     # endregion
 
     def cleanup(self):
-        new_file = h5py.File(self.path.replace("analyses", "temp"), mode="w")
-        for name in self.h5_file.keys():
-            ds = self.h5_file[name]
-            nds = new_file.create_dataset(name, ds.shape, ds.dtype, maxshape=(None, ) + ds.shape[1:], chunks = True)
-            nds[:] = ds[:]
-        new_file.close()
-        self.h5_file.close()
-        os.remove(self.path)
-        os.rename(self.path.replace("analyses", "temp"), self.path)
-        self.h5_file = h5py.File(self.path, "r+")
+        with HDF5_FILE_LOCK:
+            new_file = h5py.File(self.path.replace("analyses", "temp"), mode="w")
+            for name in self.h5_file.keys():
+                ds = self.h5_file[name]
+                nds = new_file.create_dataset(name, ds.shape, ds.dtype, maxshape=(None, ) + ds.shape[1:], chunks = True)
+                nds[:] = ds[:]
+            new_file.close()
+            self.h5_file.close()
+            os.remove(self.path)
+            os.rename(self.path.replace("analyses", "temp"), self.path)
+            self.h5_file = h5py.File(self.path, "r+")
 
     def get_indices(self):
         return dict(curr_pos=self._index, uidmapping=self._uid_index)

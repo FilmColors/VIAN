@@ -24,13 +24,11 @@ class ColormetryJob2(QObject):
     def prepare(self, project:VIANProject):
         if project.colormetry_analysis is None:
             self.colormetry_analysis = project.create_colormetry(resolution=self.resolution)
-            self.colormetry_analysis.clear(self.resolution)
+            self.colormetry_analysis.clear()
             start = 0
         else:
-
-
             self.colormetry_analysis = project.colormetry_analysis
-            self.colormetry_analysis.resolution = self.resolution
+            self.resolution = self.colormetry_analysis.resolution
             start = self.colormetry_analysis.current_idx
         self.duration = project.movie_descriptor.duration
         frame_duration = ms_to_frames(self.duration, project.movie_descriptor.fps)

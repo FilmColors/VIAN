@@ -372,7 +372,6 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def get_update(self, time_ms):
         try:
-            print("Get Update,", self.resolution)
             frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
             if frame_idx == self.last_idx or frame_idx > self.current_idx:
                 return False
@@ -411,10 +410,10 @@ class ColormetryAnalysis(AnalysisContainer):
             self.has_finished = True
         return self.has_finished
 
-    def clear(self, resolution = 30):
+    def clear(self):
         print("Clearing Colorimetry, Resolution:", self.resolution)
-        self.resolution = resolution
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
+        print(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) , self.resolution)
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
         self.end_idx = n_frames
         self.curr_location = 0
