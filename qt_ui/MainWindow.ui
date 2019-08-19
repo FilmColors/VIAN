@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1083</width>
-    <height>909</height>
+    <height>919</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -226,6 +226,9 @@
     <addaction name="actionAuto_Screenshots"/>
    </widget>
    <widget class="QMenu" name="menuCorpus">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Corpus</string>
     </property>
@@ -745,6 +748,9 @@
    </property>
   </action>
   <action name="actionCreateCorpus">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Create Corpus</string>
    </property>

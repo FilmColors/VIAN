@@ -361,8 +361,7 @@ class WebAppCorpusInterface(QObject):
             files = {'file': fin}
             try:
                 print(files, self.ep_upload, dict(type="upload", authorization=contributor.token.encode()))
-                r = requests.post(self.ep_upload, files=files,
-                                  headers=dict(type="upload", authorization=contributor.token.encode())).text
+                r = requests.post(self.ep_upload, files=files, headers=dict(type="upload", authorization=contributor.token.encode())).text
                 print("Redceived", r)
             except Exception as e:
                 raise e
