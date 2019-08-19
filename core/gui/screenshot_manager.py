@@ -839,10 +839,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.update_manager()
         self.on_selected(None, project.get_selected())
 
-        if self.follow_time:
-            self.frame_segment(self.current_segment_index)
-        else:
-            self.center_images()
+        # if self.follow_time:
+        #     self.frame_segment(self.current_segment_index)
+        # else:
+        #     self.center_images()
 
     @QtCore.pyqtSlot(object)
     def on_classification_object_changed(self):

@@ -1,12 +1,5 @@
 import xml.etree.cElementTree as et
 import xml.dom.minidom as md
-from core.container.segmentation import *
-from core.container.analysis import *
-from core.container.project import *
-from core.container.experiment import *
-from core.container.screenshot import *
-from core.container.annotation import *
-from core.container.media_objects import *
 
 from core.analysis.analysis_import import *
 class GenericXMLDevice():

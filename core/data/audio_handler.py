@@ -11,6 +11,7 @@ from core.data.interfaces import TimelineDataset
 from core.container.project import VIANProject
 from core.container.hdf5_manager import HDF5_FILE_LOCK
 
+
 class AudioHandler(QObject):
     """
     Handles reading audio data from the movie file.
