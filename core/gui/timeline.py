@@ -288,10 +288,18 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def add_visualization(self, dataset:TimelineDataset):
         # if self.show_audio_volume:
         control = TimelineVisualizationControl(self.frame_Controls, self, dataset, name=dataset.get_name())
-        bars = TimelineAreaPlot(self.frame_Bars, self, control, dataset=dataset)
-        item = [control, [bars], self.bar_height_min]
-        self.item_visualizations[dataset.get_name().replace(" ", "-")] = item
-        self.update_ui()
+        if dataset.vis_type == TimelineDataset.VIS_TYPE_LINE:
+            tp = TimelineLinePlot
+        elif dataset.vis_type == TimelineDataset.VIS_TYPE_AREA:
+            tp = TimelineAreaPlot
+        else:
+            tp = None
+
+        if tp is not None:
+            bars = tp(self.frame_Bars, self, control, dataset=dataset)
+            item = [control, [bars], self.bar_height_min]
+            self.item_visualizations[dataset.get_name().replace(" ", "-")] = item
+            self.update_ui()
 
     @pyqtSlot(object)
     def add_segmentation(self, segmentation:Segmentation):
@@ -2239,6 +2247,8 @@ class TimelineVisualization(TimelineBar):
         self.dataset = dataset
 
 from core.visualization.line_plot import LinePlot
+
+
 class TimelineLinePlot(TimelineVisualization):
     def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height=45):
         super(TimelineLinePlot, self).__init__(parent, timeline, control, height)
@@ -2260,6 +2270,7 @@ class TimelineLinePlot(TimelineVisualization):
         qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
         pen.setColor(QtGui.QColor(255, 255, 255))
         qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
+        path = None
         for i in range(data.shape[0]):
             x = ((ms[i] - t_start)) / self.timeline.scale
             y = self.height() - (data[i] * self.height())
@@ -2267,8 +2278,18 @@ class TimelineLinePlot(TimelineVisualization):
                 path = QPainterPath(QPointF(x, y))
             else:
                 path.lineTo(QPointF(x, y))
-        qp.drawPath(path)
+        if path is not None:
+            qp.drawPath(path)
+
+        pen = QtGui.QPen()
+        pen.setColor(QColor(37,37, 37))
+
+        qp.setPen(pen)
+        r = self.rect()
+        r.adjust(1, 1, -1, -1)
+        qp.drawRect(r)
         qp.end()
+
 
 class TimelineAreaPlot(TimelineVisualization):
     def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height=45):
@@ -2299,6 +2320,7 @@ class TimelineAreaPlot(TimelineVisualization):
         pen.setColor(QtGui.QColor(255, 255, 255))
         qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
         itms = list(range(data.shape[0]))
+        path = None
         for i in itms:
             x = ((ms[i] - t_start)) / self.timeline.scale
             y = self.height() - (0.5 * self.height()) + ((data[i]) * self.height() / 2)
@@ -2312,8 +2334,9 @@ class TimelineAreaPlot(TimelineVisualization):
             y = self.height() - (0.5 * self.height()) - ((data[i]) * self.height() / 2)
             path.lineTo(QPointF(x, y))
 
-        qp.drawPath(path)
-        qp.fillPath(path, QColor(self.fill_color))
+        if path is not None:
+            qp.drawPath(path)
+            qp.fillPath(path, QColor(self.fill_color))
         qp.end()
         self.image = qimage
 
@@ -2328,8 +2351,13 @@ class TimelineAreaPlot(TimelineVisualization):
 
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
+        pen.setColor(QColor(37,37, 37))
+        qp.setPen(pen)
         qp.begin(self)
         qp.drawImage(QRectF(self.rect()), self.image)
+        r = self.rect()
+        r.adjust(1, 1, -1, -1)
+        qp.drawRect(r)
 
         qp.end()
 

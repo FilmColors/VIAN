@@ -7,7 +7,7 @@ from fastcluster import linkage
 import numpy as np
 import cv2
 from typing import List
-
+import time
 
 class PaletteAsset():
     def __init__(self, tree, merge_dists):
@@ -136,7 +136,6 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
 def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, image_size = 400.0, seeds_model = None,
                   n_pixels = 200, out_path = "", n_merge_per_lvl = 10, plot = False, mask_inverse = False, normalization_lower_bound = 100.0,
                   seeds_input_width = 600):
-
     if seeds_input_width < frame.shape[0]:
         rx = seeds_input_width / frame.shape[0]
         frame = cv2.resize(frame, None, None, rx, rx, cv2.INTER_CUBIC)
@@ -166,7 +165,6 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
         bins = np.unique(labels)
 
     data = []
-
     # region SEEDS
     hist = np.histogram(labels, bins = bins)
 
@@ -193,8 +191,11 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
         all_cols.extend([avg_color] * int(np.round(bin / normalization_f)) * 2)
         all_labels.extend([lbl] * int(np.round(bin / normalization_f)) * 2)
 
+
     data = np.array(data)
+
     Z = linkage(data, 'ward')
+
     tree, merge_dists = to_cluster_tree(Z, all_labels, all_cols, n_merge_steps, n_merge_per_lvl)
     return PaletteAsset(tree, merge_dists)
 

@@ -18,18 +18,19 @@ class ColormetryJob2(QObject):
         self.colormetry_analysis = None
         self.main_window = main_window
         self.duration =  None
+        self.profile = False
         self.aborted = False
 
     def prepare(self, project:VIANProject):
         if project.colormetry_analysis is None:
-            self.colormetry_analysis = project.create_colormetry()
-            self.colormetry_analysis.clear()
+            self.colormetry_analysis = project.create_colormetry(resolution=self.resolution)
+            self.colormetry_analysis.clear(self.resolution)
             start = 0
         else:
-            # if project.colormetry_analysis.current_idx == 0:
-            #     project.colormetry_analysis.clear()
+
 
             self.colormetry_analysis = project.colormetry_analysis
+            self.colormetry_analysis.resolution = self.resolution
             start = self.colormetry_analysis.current_idx
         self.duration = project.movie_descriptor.duration
         frame_duration = ms_to_frames(self.duration, project.movie_descriptor.fps)
@@ -61,6 +62,7 @@ class ColormetryJob2(QObject):
 
         progress_counter = 0
         hist_counter = 0
+        model = None
 
         for i in range(length):
             if i % resolution == 0:
@@ -78,13 +80,27 @@ class ColormetryJob2(QObject):
                 # cv2.imshow("", frame)
                 # cv2.waitKey(5)
 
+            t = time.time()
+            t_total = time.time()
+
             # Colorspace Conversion
             frame_lab = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2Lab)
-
+            palette_input_width = 300
+            if model is None:
+                rx = palette_input_width / frame.shape[0]
+                frame_lab_input = cv2.resize(frame_lab, None, None, rx, rx, cv2.INTER_CUBIC)
+                model = PaletteExtractorModel(frame_lab_input, n_pixels=400, num_levels=8)
+            t_read = time.time() - t
+            t = time.time()
             # Histogram
             hist = np.divide(calculate_histogram(frame_lab, 16), (width * height))
+            t_hist = time.time() - t
+            t = time.time()
             # hist = None
-            palette = color_palette(frame_lab, n_merge_steps=200, n_merge_per_lvl=20, image_size=150.0, n_pixels=400, seeds_input_width=400)
+            palette = color_palette(frame_lab, n_merge_steps=200, n_merge_per_lvl=20, image_size=150.0, n_pixels=400,
+                                    seeds_input_width=palette_input_width, seeds_model=model)
+            t_palette = time.time() - t
+            t = time.time()
             # palette = None
 
             # Color Features
@@ -98,12 +114,18 @@ class ColormetryJob2(QObject):
             feature_mat[6] = lab_to_sat(lab=color_lab, implementation="luebbe")
             feature_mat[7] = lab_to_sat(lab=color_lab, implementation="pythagoras")
 
+            t_features = time.time() - t
+            t = time.time()
             # Spatial
+            rx = 250 / frame.shape[0]
+            frame = cv2.resize(frame, None, None, rx, rx, cv2.INTER_CUBIC)
             eout, enorm, edenorm = get_spacial_frequency_heatmap(frame, method="edge-mean", normalize=False)
             cout, cnorm, cdenorm = get_spacial_frequency_heatmap(frame, method="color-var", normalize=False)
             hout, hnorm, hdenorm = get_spacial_frequency_heatmap(frame, method="hue-var", normalize=False)
             lout, lnorm, ldenorm = get_spacial_frequency_heatmap(frame, method="luminance-var", normalize=False)
 
+            t_spatial = time.time() - t
+            t = time.time()
             if self.aborted:
                 return
 
@@ -128,6 +150,15 @@ class ColormetryJob2(QObject):
                                   spatial_luminance = np.array([np.amax(ldenorm), np.mean(ldenorm)], dtype=np.float32))
             callback.emit([yielded_result, (i + start) / end])
 
+            t_store = time.time() -t
+            if self.profile:
+                print("Total", round(time.time() - t_total, 4),
+                      "Read", round(t_read, 4),
+                      "Features", round(t_features, 4),
+                      "Histogram:", round(t_hist, 4),
+                      "Palette" ,round(t_palette, 4),
+                      "Spatial", round(t_spatial, 4),
+                      "Store", round(t_store, 4))
             hist_counter += 1
             progress_counter += 1
 

@@ -536,7 +536,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def toggle_colormetry(self):
         if self.colormetry_running is False:
-            job = ColormetryJob2(30, self)
+            print("toggle colormetry", self.project.movie_descriptor.fps / 2)
+            job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self)
             args = job.prepare(self.project)
             self.actionColormetry.setText("Pause Colormetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)
@@ -561,6 +562,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.colormetry_analysis.check_finished()
             if self.project.colormetry_analysis.has_finished:
                 self.timeline.timeline.set_colormetry_progress(1.0)
+                print(self.project.colormetry_analysis.resolution)
+                res = self.project.colormetry_analysis.resolution
+                fps = self.project.movie_descriptor.fps
+                ms_to_idx = 1000 / (fps / res)
+                print(ms_to_idx, fps, res)
+                self.timeline.timeline.add_visualization(
+                    TimelineDataset("Colorimetry: Luminance",
+                         self.project.hdf5_manager.get_colorimetry_feat()[:,0],
+                         ms_to_idx=ms_to_idx,
+                         vis_type=TimelineDataset.VIS_TYPE_LINE))
         except Exception as e:
             print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
@@ -2127,10 +2138,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.open_dialogs.remove("Dummy")
                 self.check_overlay_visibility()
 
-        if run_colormetry:
-            self.toggle_colormetry()
+            if run_colormetry:
+                self.toggle_colormetry()
+            else:
+                self.timeline.timeline.set_colormetry_progress(0.0)
         else:
-            self.timeline.timeline.set_colormetry_progress(0.0)
+            self.on_colormetry_finished(None)
 
         if self.current_perspective == Perspective.CorpusVisualizer.name:
             self.switch_perspective(Perspective.Segmentation)

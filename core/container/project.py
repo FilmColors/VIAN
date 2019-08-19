@@ -666,14 +666,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             return self.colormetry_analysis.has_finished, self.colormetry_analysis
 
-    def create_colormetry(self) -> ColormetryAnalysis:
+    def create_colormetry(self, resolution=30) -> ColormetryAnalysis:
         """
         Creates a new colorimetry and adds the instance to the project.
 
         :return: The ColormetryAnalysis instance created.
         """
-        print("Create Colorimetry Analysis")
-        colormetry = ColormetryAnalysis()
+        print("Create Colorimetry Analysis, ", resolution)
+        colormetry = ColormetryAnalysis(resolution=resolution)
         self.add_analysis(colormetry)
         self.colormetry_analysis = colormetry
         # self.colormetry_analysis.clear()

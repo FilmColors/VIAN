@@ -9,7 +9,7 @@ class AudioHandler(QObject):
 
     def __init__(self, resolution = 0.1, callback=None):
         super(AudioHandler, self).__init__()
-        self.videoclip = None
+        self.videoclip = None       #type: VideoFileClip
         self.audioclip = None       #type: AudioClip
         self.resolution = resolution
         self.callback = callback
@@ -23,7 +23,9 @@ class AudioHandler(QObject):
         self.audio_samples = self._sample_audio(self.callback)
         self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
 
-        self.audioProcessed.emit(TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000)))
+        self.audioProcessed.emit(TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
+                                                 vis_type=TimelineDataset.VIS_TYPE_AREA))
+        self.videoclip.close()
 
     @pyqtSlot(str)
     def _read(self, path):

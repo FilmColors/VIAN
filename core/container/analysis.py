@@ -331,6 +331,7 @@ class ColormetryAnalysis(AnalysisContainer):
 
         self.analysis_job_class = "Colormetry"
 
+        print("Colormetry Analysis Constructor", resolution)
         self.resolution = resolution
         self.has_finished = False
 
@@ -371,6 +372,7 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def get_update(self, time_ms):
         try:
+            print("Get Update,", self.resolution)
             frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
             if frame_idx == self.last_idx or frame_idx > self.current_idx:
                 return False
@@ -410,7 +412,7 @@ class ColormetryAnalysis(AnalysisContainer):
         return self.has_finished
 
     def clear(self, resolution = 30):
-        print("Clearing Colorimetry")
+        print("Clearing Colorimetry, Resolution:", self.resolution)
         self.resolution = resolution
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
