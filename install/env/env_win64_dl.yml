@@ -1,4 +1,4 @@
-name: vian-dev
+name: vian-win
 channels:
   - conda-forge
   - anaconda
@@ -50,7 +50,6 @@ dependencies:
   - libpq=11.2=h3235a2c_0
   - libprotobuf=3.7.1=h7bd577a_0
   - librosa=0.6.3=py_0
-  - libtiff=4.0.10=h36446d0_1001
   - libwebp=1.0.2=hfa6e2cd_2
   - llvmlite=0.29.0=py36hed17590_1
   - markdown=3.1=py36_0
@@ -117,5 +116,5 @@ dependencies:
     - proglog==0.1.9
     - python-vlc==3.0.6109
     - pyyaml==5.1
-prefix: D:\Programming\anaconda\envs\vian-dev
+
 

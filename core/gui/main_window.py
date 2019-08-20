@@ -87,7 +87,9 @@ class MainWindow(QtWidgets.QMainWindow):
     onCorpusDisconnected = pyqtSignal(object)
     currentClassificationObjectChanged = pyqtSignal(object)
     onAnalysisIntegrated = pyqtSignal()
+
     onProjectOpened = pyqtSignal(object)
+    onMovieOpened = pyqtSignal(object)
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -232,8 +234,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.audio_handler_thread = QThread()
         self.audio_handler.moveToThread(self.audio_handler_thread)
         self.audio_handler_thread.start()
-        self.onProjectOpened.connect(self.audio_handler.project_changed)
-
 
         self.create_widget_elan_status()
         self.create_widget_video_player()
@@ -464,6 +464,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
         self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
         self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
+        self.onMovieOpened.connect(self.audio_handler.project_changed)
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
         # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
@@ -1801,6 +1802,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onProjectLoaded.connect(self.dispatch_on_loaded)
         self.project.onProjectChanged.connect(self.dispatch_on_changed)
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
+
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False
         try:
@@ -2124,6 +2126,27 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.has_open_project = True
 
+        # Check if the file exists locally
+        success = True
+        if not os.path.isfile(self.project.movie_descriptor.movie_path):
+            exists = False
+            if self.project.movie_descriptor.movie_path == "":
+                exists = False
+            if not exists:
+                QMessageBox.information(self, "Could not find movie",
+                                        "Could not find movie: " + str(self.project.movie_descriptor.movie_path) +
+                                        "\nPlease set it manually after clicking \"OK\".")
+                path = QtWidgets.QFileDialog.getOpenFileName(self)[0]
+                if os.path.isfile(path):
+                    self.project.movie_descriptor.set_movie_path(path)
+                else:
+                    success = False
+
+        if not success:
+            self.close_project()
+            return
+
+        self.onMovieOpened.emit(self.project)
         for o in self.i_project_notify_reciever:
             o.on_loaded(self.project)
         self.pipeline_widget.pipeline.on_loaded(self.project)

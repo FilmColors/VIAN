@@ -170,7 +170,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
     @pyqtSlot()
     def save_vocabularies(self):
         if len(self.vocabulary_view.treeView.selected_vocabularies) == 0:
-            vocabularies = self.vocabulary_view.vocabulary_indexit
+            vocabularies = self.vocabulary_view.vocabulary_index
         else:
             vocabularies = dict()
             for v in self.vocabulary_view.treeView.selected_vocabularies:
@@ -335,6 +335,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
     def add_vocabulary(self, voc):
         self.vocabulary_model.appendRow(self.get_vocabulary_item_model(voc))
         self.treeView.setModel(self.vocabulary_model)
+        self.vocabulary_index[voc.uuid] = dict(voc=voc, path="", edited=False)
         # self.treeView = QTreeView()
 
     def get_vocabulary_item_model(self, voc):
@@ -548,7 +549,6 @@ class VocabularyExportDialog(EDialogWidget):
 
         self.entries = []
         for voc in self.project.vocabularies:
-
             item = QWidget(self.vocList)
             item.setLayout(QHBoxLayout(item))
             item.layout().addWidget(QLabel(voc.name, item))

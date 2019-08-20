@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['/Users/gaudenzhalter/Documents/GitHub/VIAN'],
+             pathex=['E:\Programming\Git\visual-movie-annotator\'],
              binaries=[],
              datas=[("data", "data"), ("install", "install"), ("qt_ui", "qt_ui")],
              hiddenimports=['cython', 'sklearn', 'sklearn.neighbors.typedefs',

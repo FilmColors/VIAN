@@ -48,10 +48,12 @@ class AudioHandler(QObject):
         # Lock all files references by the process, we have to make sure that the HDF5 manager doesn't
         # try to clean (replace) the HDF5 file during reading the audio samples.
 
+        print("AudioHandlerPath:", project.movie_descriptor.get_movie_path())
+
         self.project = project
 
         with HDF5_FILE_LOCK:
-            self._read(project.movie_descriptor.movie_path)
+            self._read(project.movie_descriptor.get_movie_path())
             self.audio_samples = self._sample_audio(self.callback)
             self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
 
@@ -99,7 +101,7 @@ class AudioHandler(QObject):
             return
 
         with HDF5_FILE_LOCK:
-            self._read(self.project.movie_descriptor.movie_path)
+            self._read(self.project.movie_descriptor.get_movie_path())
             for i, s in enumerate(segments):
                 clip = self._videoclip.subclip(s[0] / 1000, s[1] / 1000)
                 name = os.path.join(directory, str(i + 1) + ".mp4")

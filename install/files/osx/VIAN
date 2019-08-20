@@ -1,8 +1,8 @@
-#!/bin/bash
-echo "Root Directory:" "${0%/*}"
+#!/bin/sh
+echo “Root Directory:” "${0%/*}"
 cd "${0%/*}"
-MiniCondaDir="${0%/*}""/miniconda/"
+MiniCondaDir="${0%/*}" “/miniconda/“
 
-source $MiniCondaDir/bin/activate vian-osx
+source miniconda/bin/activate vian-osx
 cd src
 python main.py
