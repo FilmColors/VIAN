@@ -163,7 +163,7 @@ class CorpusProgressWidget(QWidget):
                 else:
                     bar = self.items["ScreenshotAnalyses"]
                 bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
-                progress_screenshots = n_analyses_done / n_analyses
+                progress_screenshots = n_analyses_done / np.clip(n_analyses, 1, None)
 
             if progress_screenshots >= ERCFilmColorsVIANPipeline.finished_threshold and \
                 progress_segmentation >= ERCFilmColorsVIANPipeline.finished_threshold:

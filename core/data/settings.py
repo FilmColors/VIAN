@@ -12,6 +12,8 @@ import os
 import sys
 from collections import namedtuple
 
+
+
 from core.data.enums import ScreenshotNamingConventionOptions as naming
 from PyQt5.QtGui import QFont, QColor
 
@@ -77,7 +79,10 @@ class UserSettings():
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
-        self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+        if sys.platform.startswith('linux'):
+            self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
+        else:
+            self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
         self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
         self.store_path = self.DIR_ROOT + path
         self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
@@ -166,7 +171,10 @@ class UserSettings():
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
-        self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+        if sys.platform.startswith('linux'):
+            self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
+        else:
+            self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
         self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
         self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
         self.store_path = self.DIR_ROOT + "settings.json"
