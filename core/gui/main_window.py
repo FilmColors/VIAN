@@ -138,7 +138,6 @@ class MainWindow(QtWidgets.QMainWindow):
         print("HDF5")
         self.hdf5_cache = HDF5Cache(self.settings.DIR_ROOT + "/scr_cache.hdf5")
 
-
         self.clipboard_data = []
         # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
@@ -464,7 +463,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
         self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
         self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
-        self.onMovieOpened.connect(self.audio_handler.project_changed)
+        # self.onMovieOpened.connect(self.audio_handler.project_changed)
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
         # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))

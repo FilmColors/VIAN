@@ -12,8 +12,6 @@ import os
 import sys
 from collections import namedtuple
 
-
-
 from core.data.enums import ScreenshotNamingConventionOptions as naming
 from PyQt5.QtGui import QFont, QColor
 
