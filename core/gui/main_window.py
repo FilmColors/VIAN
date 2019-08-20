@@ -71,9 +71,6 @@ except Exception as e:
 
 VERSION = "0.8.0"
 
-
-
-
 PROFILE = False
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -261,6 +258,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_colorimetry_live()
         self.create_experiment_editor()
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
+
 
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
