@@ -1455,6 +1455,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param experiment: Experiment instance to add
         :return: Experiment instance added
         """
+        names = [e.get_name() for e in self.experiments]
+
+        c = 0
+        while experiment.get_name() in names:
+            experiment.name = "New Experiment_" + str(c).zfill(2)
+            c += 1
+
         experiment.set_project(self)
         self.experiments.append(experiment)
 

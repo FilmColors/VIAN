@@ -49,6 +49,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.inhibit_ui_signals = False
 
         self.curr_parameter_widget = None
+        self.project_selector_dict = dict()
 
         for ds in VIAN_SEGMENTATION_DATASETS:
             self.comboBox_Dataset.addItem(ds[0])
@@ -84,6 +85,9 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.listWidget_Analyses.itemSelectionChanged.connect(self.on_selected_analysis_changed)
         self.lineEdit_AnalysisName.textChanged.connect(self.on_analysis_name_changed)
 
+        self.comboBoxExperiment.currentTextChanged.connect(self.on_experiment_combo_changed)
+        self.pushButton_CreateExperiment.clicked.connect(self.main_window.on_create_experiment)
+
         self.analysis_index = dict()
         self.analyses_entries = []
         for a in self.main_window.analysis_list:
@@ -93,12 +97,39 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         # Disable all controls that need a selected Classification Object:
         self.on_class_selection_changed()
 
+
+    def on_experiment_combo_changed(self):
+        if self.comboBoxExperiment.currentText() in self.project_selector_dict:
+            self.on_selected(None, [self.project_selector_dict[self.comboBoxExperiment.currentText()]])
+
     def update_ui(self):
-        if self.current_experiment is None or self.main_window.project is None:
+        self.widgetNoExperiment.setVisible(False)
+        if self.main_window.project is None:
             self.set_enabled(False)
+            self.current_experiment = None
+            return
+
+        if self.current_experiment is not None:
+            if self.current_experiment not in self.main_window.project.experiments:
+                self.current_experiment = None
+
+        self.project_selector_dict = dict()
+        self.comboBoxExperiment.clear()
+        for e in self.main_window.project.experiments:
+            self.comboBoxExperiment.addItem(e.get_name())
+            self.project_selector_dict[e.get_name()] = e
+
+        if self.current_experiment is None:
+            if len(self.main_window.project.experiments) == 0:
+                self.set_enabled(False)
+                self.widgetNoExperiment.setVisible(True)
+                self.widgetSelector.setEnabled(False)
+            else:
+                self.on_selected(None, [self.main_window.project.experiments[0]])
+                self.widgetSelector.setEnabled(True)
         else:
             self.set_enabled(True)
-
+            self.widgetSelector.setEnabled(True)
             self.lineEdit_ExperimentName.setText(self.current_experiment.name)
             self.update_classification_object_tree()
             self.update_vocabulary_view()
@@ -417,18 +448,21 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         for c in self.children():
             if isinstance(c, QWidget):
                 c.setEnabled(state)
+        self.widgetNoExperiment.setEnabled(True)
+        self.widgetSelector.setEnabled(True)
 
     def on_selected(self, sender, selected):
         self.inhibit_ui_signals = True
         if len(selected) > 0:
             if selected[0].get_type() == EXPERIMENT:
-                self.set_enabled(True)
                 self.current_experiment = selected[0]
-            else:
-                self.set_enabled(False)
             self.update_ui()
         else:
-            self.set_enabled(False)
+            self.update_ui()
+        if self.current_experiment is not None:
+            self.comboBoxExperiment.currentTextChanged.disconnect(self.on_experiment_combo_changed)
+            self.comboBoxExperiment.setCurrentText(self.current_experiment.get_name())
+            self.comboBoxExperiment.currentTextChanged.connect(self.on_experiment_combo_changed)
         self.inhibit_ui_signals = False
 
     def on_loaded(self, project):
@@ -444,9 +478,14 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.update_ui()
 
     def on_changed(self, project, item):
-        print("ON-Changed", project, item)
+        if not self.isVisible():
+            return
 
+        # if item is None and not self.isVisible():
+        #     return
+        # else:
         if item is None:
+            self.update_ui()
             return
 
         if isinstance(item, IProjectContainer) and item.get_type() == EXPERIMENT or item.get_type() == CLASSIFICATION_OBJECT:

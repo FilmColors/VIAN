@@ -33,6 +33,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.item_list = []
         self.item_index = dict()
         self.visibilityChanged.connect(self.on_visibility_changed)
+
         self.show()
 
     def recreate_tree(self):
@@ -168,9 +169,9 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.item_list.append(experiment_item)
         self.item_index[s.get_id()] = experiment_item
 
-
     def remove_experiment(self, s):
         if s.get_id() in self.item_index:
+            self.experiment_group.removeChild(self.item_index[s.get_id()])
             self.item_list.remove(self.item_index[s.get_id()])
             self.item_index.pop(s.get_id())
 
