@@ -94,7 +94,7 @@ class AudioHandler(QObject):
         for i in range(int(self._audioclip.duration / self.resolution)):
             arr[i] = self._audioclip.get_frame(i / (1.0 / self.resolution))
             if callback is not None and  i % 100 == 0:
-                callback("Audio Extraction:\t" + str(round(i / int(self._audioclip.duration / self.resolution * 100), 2)) + "%")
+                callback("Audio Extraction:\t" + str(round(i / int(self._audioclip.duration / self.resolution)* 100, 2)) + "%")
         return arr
 
 
