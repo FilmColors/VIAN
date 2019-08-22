@@ -347,7 +347,6 @@ class Vocabulary(IProjectContainer, IHasName):
         for w in words.values():
             self.add_word(w)
 
-
     def get_type(self):
         return VOCABULARY
 

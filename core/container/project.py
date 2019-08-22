@@ -1600,15 +1600,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     #region Dispatchers
     def dispatch_changed(self, receiver = None, item = None):
-        if self.inhibit_dispatch == False:
+        if self.inhibit_dispatch is False:
             self.onProjectChanged.emit(receiver, item)
 
     def dispatch_loaded(self):
-        if self.inhibit_dispatch == False:
+        if self.inhibit_dispatch is False:
             self.onProjectLoaded.emit()
 
     def dispatch_selected(self, sender):
-        if self.inhibit_dispatch == False:
+        if self.inhibit_dispatch is False:
             self.onSelectionChanged.emit(sender, self.selected)
     #endregion
 

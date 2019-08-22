@@ -259,7 +259,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_experiment_editor()
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
-
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
 
@@ -2210,6 +2209,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is None:
             return
         self.elan_status.set_selection(selected)
+
+        if not isinstance(selected, list):
+            selected = []
+
         for o in self.i_project_notify_reciever:
             # ttime = time.time()
             o.on_selected(sender, selected)

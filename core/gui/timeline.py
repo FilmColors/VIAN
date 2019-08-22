@@ -1644,16 +1644,17 @@ class TimebarSegmentationSlice(TimebarSlice):
 
         self.set_color(None)
 
-
-
     @pyqtSlot(object)
     def set_color(self, analysis):
         color_analysis = self.item.get_connected_analysis(ColorFeatureAnalysis, None)
-        if len(color_analysis) > 0 and self.timeline.use_color_features is True:
-            color_analysis = color_analysis[0]
-            data = color_analysis.get_adata()['color_bgr']
-            self.color = (data[2], data[1], data[0], 100)
-        else:
+        try:
+            if len(color_analysis) > 0 and self.timeline.use_color_features is True:
+                color_analysis = color_analysis[0]
+                data = color_analysis.get_adata()['color_bgr']
+                self.color = (data[2], data[1], data[0], 100)
+            else:
+                self.color = self.default_color
+        except:
             self.color = self.default_color
 
 

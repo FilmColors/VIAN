@@ -411,9 +411,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 if cb.checkState() == Qt.Checked:
                     self.selected_class_object.obj.add_dataset_label(cb.label.value)
 
-
-
-
     # endregion
 
     def set_enabled(self, state):
@@ -447,6 +444,8 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.update_ui()
 
     def on_changed(self, project, item):
+        print("ON-Changed", project, item)
+
         if item is None:
             return
 
