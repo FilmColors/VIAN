@@ -729,6 +729,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.opencv_pixmap = None
         super(DrawingOverlay, self).hideEvent(a0)
 
+
 class DrawingBase(QtWidgets.QWidget):
     def __init__(self, parent, annotation_object):
         super(DrawingBase, self).__init__(parent)

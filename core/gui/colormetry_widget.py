@@ -227,8 +227,11 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     def on_visibility_changed(self, visibility):
         if visibility:
             if self.main_window.project is not None:
-                data = self.main_window.project.colormetry_analysis.get_update(self.main_window.player.get_media_time())
-                self.update_timestep(data, None)
+                try:
+                    data = self.main_window.project.colormetry_analysis.get_update(self.main_window.player.get_media_time())
+                    self.update_timestep(data, None)
+                except Exception as e:
+                    print(e)
 
     def on_selected(self, sender, selected):
         pass
