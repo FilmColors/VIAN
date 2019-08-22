@@ -191,6 +191,9 @@ class ITimelineItem:
     def get_name(self):
         return "No Name"
 
+    def get_notes(self):
+        return ""
+
     def set_timeline_visibility(self, visibility):
         print("ITimelineItem: Not Implemented", self)
 

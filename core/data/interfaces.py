@@ -308,3 +308,6 @@ class TimelineDataset(ITimelineItem):
 
     def get_name(self):
         return self.name
+
+    def get_notes(self):
+        return ""

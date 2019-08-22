@@ -37,7 +37,7 @@ from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, Annotat
     ALWAYS_VLC
 from core.analysis.analysis_import import *
 from core.gui.experiment_editor import ExperimentEditorDock
-from core.gui.face_identificator import FaceIdentificatorDock
+# from core.gui.face_identificator import FaceIdentificatorDock
 from core.gui.history import HistoryView
 from core.gui.inspector import Inspector
 from core.gui.outliner import Outliner
@@ -379,9 +379,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.actionSemanticSegmentation.triggered.connect(partial(self.analysis_triggered, SemanticSegmentationAnalysis()))
             self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
             self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
-            self.create_facial_identification_dock()
+            # self.create_facial_identification_dock()
             self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
-            self.facial_identification_dock.identificator.onModelTrained.connect(self.frame_update_worker.load_face_rec_model)
+            # self.facial_identification_dock.identificator.onModelTrained.connect(self.frame_update_worker.load_face_rec_model)
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
@@ -460,7 +460,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
         self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
         self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
-        # self.onMovieOpened.connect(self.audio_handler.project_changed)
+        self.onMovieOpened.connect(self.audio_handler.project_changed)
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
         # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))

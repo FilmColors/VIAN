@@ -297,8 +297,6 @@ class PaletteLABWidget(QWidget):
         self.cb_show_grid.stateChanged.connect(self.on_settings_changed)
         self.cb_background.currentTextChanged.connect(self.on_settings_changed)
 
-
-
         self.w_ctrls2.setVisible(False)
         self.show()
 
@@ -362,7 +360,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
         qp = QPainter()
         pen = QPen()
         pen.setWidthF(0.5)
-
+        self.scale = np.clip(self.scale, 1, None)
         if target is None:
             qp.begin(self.image)
             t_width = self.width()
@@ -460,6 +458,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
             self.view.slider_scale.setValue(self.scale)
         else:
             a0.ignore()
+        self.scale = np.clip(self.scale, 1, None)
 
     def render_to_image(self, background: QColor, size: QSize):
         image = super(PaletteLABView, self).render_to_image(background, size)

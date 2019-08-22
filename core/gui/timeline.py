@@ -2247,6 +2247,7 @@ class TimelineVisualization(TimelineBar):
         super(TimelineVisualization, self).__init__(parent, timeline, control, height)
         self.dataset = dataset
 
+
 from core.visualization.line_plot import LinePlot
 
 
@@ -2254,22 +2255,31 @@ class TimelineLinePlot(TimelineVisualization):
     def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height=45):
         super(TimelineLinePlot, self).__init__(parent, timeline, control, height)
         self.dataset = dataset
+        self.image = None
+        self.last_values = None
+        self.line_color = QColor(98, 161, 169)
 
     def on_height_changed(self, height):
         super(TimelineLinePlot, self).on_height_changed(height)
         self.setFixedHeight(height)
 
-    def paintEvent(self, QPaintEvent):
+    def render_image(self):
         t_start = self.timeline.get_current_t_start()
         t_end = self.timeline.get_current_t_end()
         data, ms = self.dataset.get_data_range(t_start, t_end)
 
-        qp = QtGui.QPainter()
+        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
+        qimage.fill(QtCore.Qt.transparent)
+        qp = QtGui.QPainter(qimage)
+
         pen = QtGui.QPen()
-        qp.begin(self)
+        pen.setColor(self.line_color)
+
+        qp.setPen(pen)
+        qp.begin(qimage)
         qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
         qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
-        pen.setColor(QtGui.QColor(255, 255, 255))
+
         qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
         path = None
         for i in range(data.shape[0]):
@@ -2283,12 +2293,35 @@ class TimelineLinePlot(TimelineVisualization):
             qp.drawPath(path)
 
         pen = QtGui.QPen()
-        pen.setColor(QColor(37,37, 37))
+        pen.setColor(QColor(37, 37, 37))
 
         qp.setPen(pen)
         r = self.rect()
         r.adjust(1, 1, -1, -1)
         qp.drawRect(r)
+        qp.end()
+        self.image = qimage
+
+
+    def paintEvent(self, QPaintEvent):
+        t_start = self.timeline.get_current_t_start()
+        t_end = self.timeline.get_current_t_end()
+        values = (t_start, t_end, self.height(), self.width())
+
+        if self.last_values != values or self.image is None:
+            self.render_image()
+            self.last_values = values
+
+        qp = QtGui.QPainter()
+        pen = QtGui.QPen()
+        pen.setColor(QColor(37, 37, 37))
+        qp.setPen(pen)
+        qp.begin(self)
+        qp.drawImage(QRectF(self.rect()), self.image)
+        r = self.rect()
+        r.adjust(1, 1, -1, -1)
+        qp.drawRect(r)
+
         qp.end()
 
 
@@ -2304,7 +2337,6 @@ class TimelineAreaPlot(TimelineVisualization):
     def on_height_changed(self, height):
         super(TimelineAreaPlot, self).on_height_changed(height)
         self.setFixedHeight(height)
-
 
     def render_image(self):
         t_start = self.timeline.get_current_t_start()

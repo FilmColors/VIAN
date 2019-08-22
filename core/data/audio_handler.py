@@ -2,6 +2,7 @@
 This file contains the AudioHandle to read audio data from the movie file using
 moviepy.
 """
+import gc
 
 import numpy as np
 from moviepy.editor import *
@@ -22,6 +23,7 @@ class AudioHandler(QObject):
     are set.
     """
     audioProcessed = pyqtSignal(object)
+    audioExtracted = pyqtSignal(str)
 
     def __init__(self, resolution = 0.1, callback=None):
         super(AudioHandler, self).__init__()
@@ -33,6 +35,8 @@ class AudioHandler(QObject):
         self.audio_samples = None   #type: np.ndarray
         self.audio_volume = None    #type: np.ndarray
         self.project = None
+
+        self.export_audio = False
 
     @pyqtSlot(object)
     def project_changed(self, project:VIANProject):
@@ -57,14 +61,19 @@ class AudioHandler(QObject):
             self.audio_samples = self._sample_audio(self.callback)
             self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
 
+            print("Size", self.audio_samples.nbytes / 10 ** 6)
+            print("Size", self.audio_volume.nbytes / 10 ** 6)
             project_audio_path = os.path.join(project.data_dir, "audio.mp3")
             self.audioProcessed.emit(
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
                                 vis_type=TimelineDataset.VIS_TYPE_AREA))
-            if not os.path.isfile(project_audio_path):
-                self._audioclip.write_audiofile(os.path.join(project.data_dir, "audio.mp3"))
-
+            try:
+                if not os.path.isfile(project_audio_path) and self.export_audio:
+                    self._audioclip.write_audiofile(os.path.join(project.data_dir, "audio.mp3"))
+            except Exception as e:
+                print(e)
             self._videoclip.close()
+            self._audioclip.close()
 
     @pyqtSlot(str)
     def _read(self, path:str):
@@ -82,12 +91,13 @@ class AudioHandler(QObject):
         :param callback: a function to call for signalling progress
         :return: an array of shape (length, 2) stereo signal, np.ndarray
         """
-        vals = []
+        length = int(self._audioclip.duration / self.resolution)
+        arr = np.zeros(shape=(length, 2), dtype=np.float32)
         for i in range(int(self._audioclip.duration / self.resolution)):
-            vals.append(self._audioclip.get_frame(i / (1.0 / self.resolution)))
+            arr[i] = self._audioclip.get_frame(i / (1.0 / self.resolution))
             if callback is not None and  i % 100 == 0:
-                callback(i / int(self._audioclip.duration / self.resolution))
-        return np.array(vals)
+                callback("Audio Extraction:\t" + str(round(i / int(self._audioclip.duration / self.resolution)* 100, 2)) + "%")
+        return arr
 
 
     @pyqtSlot(object, str, object)

@@ -15,6 +15,7 @@ from core.visualization.basic_vis import *
 
 
 class ColorimetryWorker(QObject):
+    onProcessingDone = pyqtSignal()
     def __init__(self, func):
         super(ColorimetryWorker, self).__init__()
         self.function = func
@@ -23,6 +24,7 @@ class ColorimetryWorker(QObject):
     def run(self, data):
         try:
             self.function(data)
+            self.onProcessingDone.emit()
         except Exception as e:
             print(e)
 
@@ -56,9 +58,13 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         # self.lt.addWidget(self.vis_tab)
         self.hilbert_table, self.hilbert_colors = create_hilbert_transform(16)
 
+        self.worker_ready = True
+        self.latest_worker_data = None
+
         self.drawing_worker = ColorimetryWorker(self.work)
         self.worker_thread = QThread()
         self.draw.connect(self.drawing_worker.run)
+        self.drawing_worker.onProcessingDone.connect(self.on_worker_ready)
         self.drawing_worker.moveToThread(self.worker_thread)
         self.worker_thread.start()
 
@@ -132,6 +138,11 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.visibilityChanged.connect(self.on_visibility_changed)
         # self.vis_tab.addTab(self.histogram, "Histogram")
 
+    def on_worker_ready(self):
+        self.worker_ready = True
+        if self.latest_worker_data is not None:
+            self.update_timestep(self.latest_worker_data, None)
+
     @pyqtSlot(object, int)
     def update_timestep(self, data, time_ms):
         if data is not None:
@@ -139,7 +150,14 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             if not self.isVisible():
                 return
 
-            self.draw.emit(data)
+            if not self.worker_ready:
+                self.latest_worker_data = data
+                return
+            else:
+                self.latest_worker_data = None
+
+            self.worker_ready = False
+            self.draw.emit(data.copy())
 
             if self.spatial_complexity_vis.isVisible():
                 self.spatial_complexity_vis.clear_view()
@@ -171,7 +189,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
                 if self.hilbert_vis.isVisible():
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
-
 
             except Exception as e:
                 print("Exception in ColormetryWidget.update_timestep()", str(e))
@@ -209,8 +226,11 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     def on_visibility_changed(self, visibility):
         if visibility:
             if self.main_window.project is not None:
-                data = self.main_window.project.colormetry_analysis.get_update(self.main_window.player.get_media_time())
-                self.update_timestep(data, None)
+                try:
+                    data = self.main_window.project.colormetry_analysis.get_update(self.main_window.player.get_media_time())
+                    self.update_timestep(data, None)
+                except Exception as e:
+                    print(e)
 
     def on_selected(self, sender, selected):
         pass
