@@ -36,6 +36,8 @@ class AudioHandler(QObject):
         self.audio_volume = None    #type: np.ndarray
         self.project = None
 
+        self.export_audio = False
+
     @pyqtSlot(object)
     def project_changed(self, project:VIANProject):
         """
@@ -66,7 +68,7 @@ class AudioHandler(QObject):
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
                                 vis_type=TimelineDataset.VIS_TYPE_AREA))
             try:
-                if not os.path.isfile(project_audio_path):
+                if not os.path.isfile(project_audio_path) and self.export_audio:
                     self._audioclip.write_audiofile(os.path.join(project.data_dir, "audio.mp3"))
             except Exception as e:
                 print(e)

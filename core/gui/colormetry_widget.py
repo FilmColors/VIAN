@@ -190,7 +190,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                 if self.hilbert_vis.isVisible():
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
 
-
             except Exception as e:
                 print("Exception in ColormetryWidget.update_timestep()", str(e))
             self.is_drawing = False
