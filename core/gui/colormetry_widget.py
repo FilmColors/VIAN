@@ -157,7 +157,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                 self.latest_worker_data = None
 
             self.worker_ready = False
-            self.draw.emit(data)
+            self.draw.emit(data.copy())
 
             if self.spatial_complexity_vis.isVisible():
                 self.spatial_complexity_vis.clear_view()
