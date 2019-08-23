@@ -117,8 +117,13 @@ class VianUpdaterJob(IConcurrentJob):
             z.extractall(self.temp_dir)
 
             sign_progress(0.5)
+            if sys.platform == "darwin":
+                t = "/src/"
+            else:
+                t = "/VIAN/"
+
             root_src_dir = (self.temp_dir).replace("\\", "/")
-            root_dst_dir = (self.app_root + "/VIAN/").replace("\\", "/")
+            root_dst_dir = (self.app_root + t).replace("\\", "/")
 
             total = sum([len(files) for r, d, files in os.walk(root_src_dir)])
             counter = 1.0
