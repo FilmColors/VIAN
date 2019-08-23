@@ -75,10 +75,14 @@ class VianUpdater(IConcurrentJob):
         z.extractall(self.temp_dir)
 
     def replace_files(self):
-        to_remove = self.app_root + "/VIAN/"
+        if sys.platform == "darwin":
+            t = "/src/"
+        else:
+            t = "VIAN"
+        to_remove = self.app_root + t
 
-        root_src_dir = (self.temp_dir + "VIAN/").replace("\\", "/")
-        root_dst_dir = (self.app_root + "/VIAN/").replace("\\", "/")
+        root_src_dir = (self.temp_dir + t).replace("\\", "/")
+        root_dst_dir = (self.app_root + t).replace("\\", "/")
 
         for src_dir, dirs, files in os.walk(root_src_dir):
             src_dir = src_dir.replace("\\", "/")
