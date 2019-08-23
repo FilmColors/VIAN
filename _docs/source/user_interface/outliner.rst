@@ -3,9 +3,9 @@
 Outliner
 ========
 
-The **Outliner** always shows the all entities of the current project. All Screenshots, Segmentations, etc. are represented
+The **Outliner** always shows all entities of the current project. It can be activated by **ALT-O** or via the menu bar. All Screenshots, Segmentations, etc. are represented
 beneath their corresponding categories.
-Many modifications as creating, deleting and moving Entities can be performed in the Outliner.
+Many modifications as creating, deleting and moving entities can be performed in the Outliner.
 
 .. figure:: Outliner.png
    :scale: 100 %
