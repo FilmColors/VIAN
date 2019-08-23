@@ -22,3 +22,4 @@ install/.DS_Store
 _docs/build/*
 dist/*
 build/*
+log-files/*

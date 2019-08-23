@@ -18,8 +18,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import platform
 import sys
 from time import sleep
+import time
 import cProfile
-import traceback
+import traceback as tb
 from datetime import datetime
 from threading import Thread
 
@@ -40,9 +41,9 @@ from PyQt5.QtGui import QPixmap, QIcon
 
 
 from core.data.settings import UserSettings
-from core.gui.main_window import MainWindow
+from core.gui.main_window import MainWindow, version
 
-DEBUG = True
+DEBUG = False
 MAIN_WINDOW = None
 
 class SuperFilter(QObject):
@@ -65,12 +66,35 @@ def my_exception_hook(exctype, value, traceback):
         sys._excepthook(exctype, value, traceback)
         sys.exit(1)
     else:
+        if not os.path.isdir("log-files"):
+            os.mkdir("log-files")
+
+        timestr = time.strftime("%Y%m%d-%H%M%S") + ".txt"
+
+        with open(os.path.join("log-files", timestr), "w") as f:
+            f.write("Plaform:  " + sys.platform + "\n")
+            f.write("Date:     " + timestr + "\n")
+            f.write("Version:  " + version.__version__ + "\n")
+            f.write("\n\n#### Traceback ####\n\n")
+            tb.print_tb(traceback, file=f)
+            f.write("\n\n#### Exception ####\n\n")
+            tb.print_exception(exctype, value, traceback, file=f)
+            f.write("\n")
+
         global MAIN_WINDOW
         # print("CRASH")
         # sys._excepthook(exctype, value, traceback)
         QMessageBox.warning(MAIN_WINDOW, "Error occured", "Oups, there has gone something wrong.\n"
-                                                          "Probably you can just work on, probably not.\n"
-                                                          "Best you make a backup of your project now. ")
+                                                          "Maybe you can just work on, maybe not.\n"
+                                                          "Best you make a backup of your project now. \n" 
+                                                          "Also, don't forget to send us the log files in /Your/VIAN/Directory/log-files/")
+
+        import subprocess
+        if sys.platform == "win32":
+            subprocess.call("explorer log-files", shell=True)
+        else:
+            subprocess.call(["open", "-R", "log-files"])
+
 
 
 def handler(msg_type, msg_log_context, msg_string):
