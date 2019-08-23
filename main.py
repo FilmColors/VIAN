@@ -21,6 +21,7 @@ from time import sleep
 import time
 import cProfile
 import traceback as tb
+import subprocess
 from datetime import datetime
 from threading import Thread
 
@@ -89,11 +90,16 @@ def my_exception_hook(exctype, value, traceback):
                                                           "Best you make a backup of your project now. \n" 
                                                           "Also, don't forget to send us the log files in /Your/VIAN/Directory/log-files/")
 
-        import subprocess
         if sys.platform == "win32":
-            subprocess.call("explorer log-files", shell=True)
+            subprocess.run("explorer log-files", shell=True)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", "-R", "log-files"])
         else:
-            subprocess.call(["open", "-R", "log-files"])
+            try:
+                subprocess.run(["nautilus", "log-files"])
+            except:
+                pass
+
 
 
 
