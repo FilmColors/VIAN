@@ -126,7 +126,6 @@ class PythonScriptEditor(QWidget):
 
     def reload(self):
         self.save()
-        print(self.current_file_path)
         if self.current_file_path != "":
             try:
                 spec = importlib.util.spec_from_file_location("current_pipeline_module", self.current_file_path)

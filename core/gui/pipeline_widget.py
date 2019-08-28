@@ -63,10 +63,10 @@ class PipelineDock(EDockWidget):
         self.splitter = QSplitter(Qt.Horizontal)
         self.inner.setCentralWidget(self.splitter)
         self.inner.centralWidget().setLayout(QHBoxLayout())
-
-        self.inner.centralWidget().addWidget(self.pipeline)
+        
+        self.splitter.addWidget(self.pipeline)
         self.editor = PythonScriptEditor(self.inner.centralWidget())
-        self.inner.centralWidget().layout().addWidget(self.editor)
+        self.splitter.addWidget(self.editor)
         self.editor.onReload.connect(self.pipeline.on_reload_scripts)
 
         self.pipeline.onPipelineActivated.connect(self.on_active_pipeline_changed)
@@ -116,7 +116,7 @@ class PipelineWidget(QWidget):
 
         self.listWidget_Pipelines.clear()
         self.all_items.clear()
-#        self.listWidget_Pipelines = QListWidget()
+
         for pipeline in ALL_REGISTERED_PIPELINES.keys():
             itm = QListWidgetItem(pipeline)
             self.listWidget_Pipelines.addItem(itm)
