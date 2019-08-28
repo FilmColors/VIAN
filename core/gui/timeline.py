@@ -659,6 +659,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.project().set_selected(self, self.selected)
         self.update()
 
+    @pyqtSlot(int)
     def on_timestep_update(self, time):
         self.curr_movie_time = time
         self.time_scrubber.move(self.curr_movie_time / self.scale - 5, 0)

@@ -718,9 +718,11 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         if event.key() == Qt.Key_Shift:
             self.multi_selection = False
 
+    @pyqtSlot(int)
     def on_timestep_update(self, time):
         self.current_time = time
 
+    @pyqtSlot(object)
     def assign_opencv_image(self, qpixmap):
         self.opencv_pixmap = qpixmap.scaled(self.size(), Qt.KeepAspectRatio)
         self.update()

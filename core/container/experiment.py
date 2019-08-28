@@ -204,11 +204,13 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize", e)
+                    # print("Exception during Vocabulary:deserialize", e)
+                    pass
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize (II)", e)
+                    # print("Exception during Vocabulary:deserialize (II)", e)
+                    pass
                 try:
                     word.uuid = w['uuid']
                 except:
@@ -224,15 +226,17 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize", e)
+                    pass
+                    # print("Exception during Vocabulary:deserialize", e)
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize (II)", e)
+                    pass
+                    # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
                     word.uuid = w['uuid']
                 except:
-                    print("No UUID found in this vocabulary", self.name)
+                    # print("No UUID found in this vocabulary", self.name)
                     pass
 
         return self
@@ -293,11 +297,13 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize", e)
+                    pass
+                    # print("Exception during Vocabulary:deserialize", e)
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize (II)", e)
+                    pass
+                    # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
                     word.uuid = w['uuid']
                 except:
@@ -312,11 +318,13 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize", e)
+                    pass
+                    # print("Exception during Vocabulary:deserialize", e)
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
-                    print("Exception during Vocabulary:deserialize (II)", e)
+                    pass
+                    # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
                     word.uuid = w['uuid']
                 except:
@@ -676,10 +684,13 @@ class UniqueKeyword(IProjectContainer):
 
     def deserialize(self, serialization, project):
         print(serialization)
+        print(project.get_by_id(serialization['class_obj']))
+
         self.unique_id = serialization['unique_id']
         self.voc_obj = project.get_by_id(serialization['voc_obj'])
         self.word_obj = project.get_by_id(serialization['word_obj'])
         self.class_obj = project.get_by_id(serialization['class_obj'])
+
         try:
             self.external_id = serialization['external_id']
         except:

@@ -1,15 +1,59 @@
-from core.gui.ewidgetbase import EDockWidget
+from core.gui.ewidgetbase import EDockWidget, EToolBar
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QPixmap, QIcon
 from core.data.interfaces import IProjectChangeNotify
 import os
 from core.gui.python_script_editor import PythonScriptEditor
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
 from core.container.project import VIANProject
-from core.data.computation import import_module_from_path
+from core.data.computation import import_module_from_path, create_icon
+
+class PipelineToolbar(EToolBar):
+    onToComputeChanged = pyqtSignal(bool, bool, bool)
+
+    def __init__(self, main_window):
+        super(PipelineToolbar, self).__init__(main_window, "Windows Toolbar")
+        self.setWindowTitle("Windows Toolbar")
+
+        self.a_auto_screenshot = self.addAction(create_icon("qt_ui/icons/icon_pipeline_screenshot_off.png"), "Auto Pipeline Screenshots")
+        self.a_auto_screenshot.setCheckable(True)
+        self.a_auto_screenshot.triggered.connect(self.on_screenshot_checked_changed)
+
+        self.a_auto_segment = self.addAction(create_icon("qt_ui/icons/icon_pipeline_segment_off.png"), "Auto Pipeline Segments")
+        self.a_auto_segment.setCheckable(True)
+        self.a_auto_segment.triggered.connect(self.on_segment_checked_changed)
+
+        self.a_pipeline_settings = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Pipeline Configuration")
+        self.a_pipeline_settings.triggered.connect(self.main_window.create_pipeline_widget)
+
+    def on_screenshot_checked_changed(self):
+        if self.a_auto_screenshot.isChecked():
+            self.a_auto_screenshot.setIcon(create_icon("qt_ui/icons/icon_pipeline_screenshot_on.png"))
+        else:
+            self.a_auto_screenshot.setIcon(create_icon("qt_ui/icons/icon_pipeline_screenshot_off.png"))
+        self.on_update_to_compute()
+
+    def on_segment_checked_changed(self):
+        if self.a_auto_segment.isChecked():
+            self.a_auto_segment.setIcon(create_icon("qt_ui/icons/icon_pipeline_segment_on.png"))
+        else:
+            self.a_auto_segment.setIcon(create_icon("qt_ui/icons/icon_pipeline_segment_off.png"))
+        self.on_update_to_compute()
+
+    def on_update_to_compute(self):
+        comp_segments = self.a_auto_screenshot.isChecked()
+        comp_annotations = self.a_auto_segment.isChecked()
+        comp_screenshots = False
+
+        if self.main_window.project is not None:
+            self.main_window.project.compute_pipeline_settings = dict(segments=comp_segments,
+                                                          screenshots=comp_screenshots,
+                                                          annotations=comp_annotations)
+
+        self.onToComputeChanged.emit(comp_segments, comp_screenshots, comp_annotations)
 
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):
@@ -20,7 +64,6 @@ class PipelineDock(EDockWidget):
         self.inner.setCentralWidget(self.splitter)
         self.inner.centralWidget().setLayout(QHBoxLayout())
 
-        #self.setWidget(self.inner)
         self.inner.centralWidget().addWidget(self.pipeline)
         self.editor = PythonScriptEditor(self.inner.centralWidget())
         self.inner.centralWidget().layout().addWidget(self.editor)
@@ -106,7 +149,6 @@ class PipelineWidget(QWidget):
         self.current_item = self.listWidget_Pipelines.currentItem()
         if self.current_item is not None:
             self.current_item.setForeground(QColor(69, 200, 69))
-            print("Done")
 
         self.onPipelineActivated.emit(pipeline_name)
         if self.project is not None and pipeline_name in ALL_REGISTERED_PIPELINES:

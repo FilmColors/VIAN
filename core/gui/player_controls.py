@@ -64,6 +64,7 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         self.main_window.player.movieOpened.connect(self.initial_values_timer.start)
         self.show()
 
+    @QtCore.pyqtSlot(int)
     def on_timestep_update(self, time):
         if not self.is_clicked:
             d = np.clip(self.main_window.player.duration, 1, None)

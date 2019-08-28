@@ -173,7 +173,7 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
     :return: (qimage, qpixmap) tuple
     """
     if cvt is not None:
-            arr = cv2.cvtColor(arr,cvt)
+            arr = cv2.cvtColor(arr, cvt)
 
     if target_width is not None:
         factor = float(target_width) / arr.shape[1]
@@ -185,7 +185,6 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
     else:
         qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format_RGBA8888)
         qpixmap = QPixmap(qimage)
-
     return qimage, qpixmap
 
 

@@ -193,9 +193,11 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             except Exception as e:
                 print("Exception in ColormetryWidget.update_timestep()", str(e))
             self.is_drawing = False
+
     @pyqtSlot(int)
     def on_time_step(self, time_ms):
-        self.spatial_complexity_vis.set_time_indicator(time_ms)
+        if self.spatial_complexity_vis.isVisible():
+            self.spatial_complexity_vis.set_time_indicator(time_ms)
 
     def on_tab_changed(self):
         if self.project() is None:

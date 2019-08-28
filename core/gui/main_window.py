@@ -49,7 +49,7 @@ from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToo
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
-from core.gui.pipeline_widget import PipelineDock
+from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
@@ -261,6 +261,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
+
+        self.pipeline_toolbar = PipelineToolbar(self)
+        self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
@@ -481,6 +484,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_widget.pipeline.onPipelineActivated.connect(self.vian_event_handler.set_current_pipeline)
         self.pipeline_widget.pipeline.onPipelineFinalize.connect(self.vian_event_handler.run_on_finalize_event)
 
+        self.pipeline_toolbar.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
         self.update_recent_menu()
@@ -621,7 +625,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_controls = PlayerControls(self)
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.player_controls, Qt.Vertical)
         else:
-            if self.player_controls.isVisible():
+            if not self.player_controls.visibleRegion().isEmpty():
                 self.player_controls.hide()
             else:
                 self.player_controls.show()
@@ -646,7 +650,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_options = AnnotationOptionsDock(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.annotation_options, Qt.Horizontal)
         else:
-            if self.annotation_options.isVisible():
+            if not self.annotation_options.visibleRegion().isEmpty():
                 self.annotation_options.hide()
             else:
                 self.annotation_options.show()
@@ -660,7 +664,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
 
         else:
-            if self.player_dock_widget.isVisible():
+            if not self.player_dock_widget.visibleRegion().isEmpty():
                 self.player_dock_widget.hide()
             else:
                 self.player_dock_widget.show()
@@ -683,7 +687,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.inspector = Inspector(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
         else:
-            if self.inspector.isVisible():
+            if not self.inspector.visibleRegion().isEmpty():
                 self.inspector.hide()
             else:
                 self.inspector.show()
@@ -695,7 +699,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.concurrent_task_viewer = ConcurrentTaskDock(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.concurrent_task_viewer)
         else:
-            if self.concurrent_task_viewer.isVisible():
+            if not self.concurrent_task_viewer.visibleRegion().isEmpty():
                 self.concurrent_task_viewer.hide()
             else:
                 self.concurrent_task_viewer.show()
@@ -707,7 +711,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.history_view = HistoryView(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.history_view)
         else:
-            if self.history_view.isVisible():
+            if not self.history_view.visibleRegion().isEmpty():
                 self.history_view.hide()
             else:
                 self.history_view.show()
@@ -735,7 +739,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.outliner = Outliner(self, self.corpus_client)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.outliner)
         else:
-            if self.outliner.isVisible():
+            if not self.outliner.visibleRegion().isEmpty():
                 self.outliner.hide()
             else:
                 self.outliner.show()
@@ -748,7 +752,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.timeline, QtCore.Qt.Vertical)
             # self.on_movie_updated()
         else:
-            if self.timeline.isVisible():
+            if not self.timeline.visibleRegion().isEmpty():
                 self.timeline.hide()
             else:
                 self.timeline.show()
@@ -767,15 +771,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Horizontal)
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
         else:
-            if self.screenshots_manager_dock.isVisible():
+            if not self.screenshots_manager_dock.visibleRegion().isEmpty():
                 self.screenshots_manager_dock.hide()
             else:
-                if self.screenshots_manager_dock.isVisible():
-                    self.screenshots_manager_dock.hide()
-                else:
-                    self.screenshots_manager_dock.show()
-                    self.screenshots_manager_dock.raise_()
-                    self.screenshots_manager_dock.activateWindow()
+                self.screenshots_manager_dock.show()
+                self.screenshots_manager_dock.raise_()
+                self.screenshots_manager_dock.activateWindow()
 
     def create_node_editor(self):
         if self.node_editor_dock is None:
@@ -798,7 +799,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_manager = VocabularyManager(self)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.vocabulary_manager, QtCore.Qt.Vertical)
         else:
-            if self.vocabulary_manager.isVisible():
+            if not self.vocabulary_manager.visibleRegion().isEmpty():
                 self.vocabulary_manager.hide()
             else:
                 self.vocabulary_manager.show()
@@ -810,7 +811,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.experiment_dock = ExperimentEditorDock(self)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.experiment_dock, QtCore.Qt.Vertical)
         else:
-            if self.experiment_dock.isVisible():
+            if not self.experiment_dock.visibleRegion().isEmpty():
                 self.experiment_dock.hide()
             else:
                 self.experiment_dock.show()
@@ -822,7 +823,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_matrix = ClassificationWindow(self)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_matrix, QtCore.Qt.Vertical)
         else:
-            if self.vocabulary_matrix.isVisible():
+            if not self.vocabulary_matrix.visibleRegion().isEmpty():
                 self.vocabulary_matrix.hide()
             else:
                 self.vocabulary_matrix.show()
@@ -834,7 +835,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.query_widget = ClassificationWindow(self, behaviour="query")
             self.tabifyDockWidget(self.player_dock_widget, self.query_widget)
         else:
-            if self.query_widget.isVisible():
+            if not self.query_widget.visibleRegion().isEmpty():
                 self.query_widget.hide()
             else:
                 self.query_widget.show()
@@ -847,7 +848,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, self.pipeline_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
         else:
-            if self.pipeline_widget.isVisible():
+            if not self.pipeline_widget.visibleRegion().isEmpty():
                 self.pipeline_widget.hide()
             else:
                 self.pipeline_widget.show()
@@ -861,7 +862,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.analysis_results_widget_dock.set_analysis_widget(self.analysis_results_widget)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Vertical)
         else:
-            if self.analysis_results_widget_dock.isVisible():
+            if not self.analysis_results_widget_dock.visibleRegion().isEmpty():
                 self.analysis_results_widget_dock.hide()
             else:
                 self.analysis_results_widget_dock.show()
@@ -873,7 +874,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.quick_annotation_dock = QuickAnnotationDock(self)
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.quick_annotation_dock, Qt.Vertical)
         else:
-            if self.quick_annotation_dock.isVisible():
+            if not self.quick_annotation_dock.visibleRegion().isEmpty():
                 self.quick_annotation_dock.hide()
             else:
                 self.quick_annotation_dock.show()
@@ -883,7 +884,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.colorimetry_live = ColorimetryLiveWidget(self)
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.colorimetry_live, Qt.Vertical)
         else:
-            if self.colorimetry_live.isVisible():
+            if not self.colorimetry_live.visibleRegion().isEmpty():
                 self.colorimetry_live.hide()
             else:
                 self.colorimetry_live.show()
@@ -897,21 +898,21 @@ class MainWindow(QtWidgets.QMainWindow):
             self.corpus_client_toolbar.show()
 
         else:
-            if self.corpus_client_toolbar.isVisible():
+            if not self.corpus_client_toolbar.visibleRegion().isEmpty():
                 self.corpus_client_toolbar.hide()
             else:
                 self.corpus_client_toolbar.show()
                 self.corpus_client_toolbar.raise_()
                 self.corpus_client_toolbar.activateWindow()
 
-    def create_facial_identification_dock(self):
-        if self.facial_identification_dock is None:
-            self.facial_identification_dock = FaceIdentificatorDock(self)
-            self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
-            self.facial_identification_dock.show()
-
-        else:
-            self.facial_identification_dock.show()
+    # def create_facial_identification_dock(self):
+    #     if self.facial_identification_dock is None:
+    #         self.facial_identification_dock = FaceIdentificatorDock(self)
+    #         self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
+    #         self.facial_identification_dock.show()
+    #
+    #     else:
+    #         self.facial_identification_dock.show()
     #endregion
 
     #region QEvent Overrides
@@ -2252,7 +2253,8 @@ class MainWindow(QtWidgets.QMainWindow):
                             if a.widget is not None:
                                 a.is_visible = False
                                 a.widget.hide()
-            self.drawing_overlay.update()
+            if len(self.project.annotation_layers) > 0:
+                self.drawing_overlay.update()
 
 
     def dispatch_on_closed(self):

@@ -76,10 +76,11 @@ class TimestepUpdateWorkerSingle(QObject):
 
     def setMSPosition(self, ms, frame):
         if self.position_frame == frame:
-            return
+            return False
 
         self.position_ms = ms
         self.position_frame = frame
+        return True
 
     @pyqtSlot()
     def abort_thread(self):
@@ -87,8 +88,9 @@ class TimestepUpdateWorkerSingle(QObject):
 
     @pyqtSlot(int, int)
     def perform(self, time, frame):
-        self.setMSPosition(time, frame)
-        self.run()
+        ret = self.setMSPosition(time, frame)
+        if ret:
+            self.run()
 
     @pyqtSlot()
     def run(self):
@@ -97,6 +99,7 @@ class TimestepUpdateWorkerSingle(QObject):
             if self.opencv_frame:
                 frame_pixmap = self.get_opencv_frame(self.position_frame)
                 if frame_pixmap is not None:
+                    pass
                     self.signals.onOpenCVFrameUpdate.emit(frame_pixmap)
             if self.update_colormetry:
                 if self.project is not None and self.project.colormetry_analysis is not None:

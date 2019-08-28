@@ -1251,6 +1251,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         for e in template['experiments']:
             new = Experiment().deserialize(e, self)
+            print([c.name for c in new.get_classification_objects_plain()])
 
         try:
             for path, script, is_active in template['pipelines']:
