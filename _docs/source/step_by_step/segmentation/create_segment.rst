@@ -17,7 +17,7 @@ Time Slice Dragging
 1. In the Timeline, **click** on the name of the Segmentation you want to add a Segment to.
 2. The Segmentation should now be highlighted with a steel-blue color.
 3. On the *Timeline-Scale*, **Right-Press** and drag (while holding the the Right Button down) from the segment start to the Segment end and **Release**.
-4. In the appearing Context Menu, choose **New Segment**.
+4. In the appearing Context Menu, choose **Add Segment**.
 
 .. note:: **Options**
 
@@ -43,7 +43,7 @@ Fast Segmentation
 .. note::
    Alternatively, one can create a new Segment using the Main Menu by triggering:
 
-   **Tools/Add Segment**
+   **Create/Add Segment**
 
 .. note::
    **Forward vs. Backward Segmentation**

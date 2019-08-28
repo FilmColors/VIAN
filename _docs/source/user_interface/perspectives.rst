@@ -2,13 +2,13 @@ Perspectives
 ============
 VIAN uses **Perspectives** to give you the necessary tools for a specific step of your workflow.
 
-Current, there are four Perspectives implemented in VIAN which can be selected with **ALT + 1, (2,3,4)**.
+Current, there are four Perspectives implemented in VIAN which can be selected with **ALT-1, (2,3,4)**.
 each of these have a distinct purpose.
 
-* Player Perspective (ALT + 1)
-* Annotation Perspective (ALT + 2)
-* Screenshots Perspective (ALT + 3)
-* Node Scripting Perspective (ALT + 4)
+* Player Perspective (ALT-1)
+* Annotation Perspective (ALT-2)
+* Screenshots Perspective (ALT-3)
+* Node Scripting Perspective (ALT-4)
 
 Player Perspective
 ******************
