@@ -20,10 +20,12 @@ class PipelineToolbar(EToolBar):
 
         self.a_auto_screenshot = self.addAction(create_icon("qt_ui/icons/icon_pipeline_screenshot_off.png"), "Auto Pipeline Screenshots")
         self.a_auto_screenshot.setCheckable(True)
+        self.a_auto_screenshot.setEnabled(False)
         self.a_auto_screenshot.triggered.connect(self.on_screenshot_checked_changed)
 
         self.a_auto_segment = self.addAction(create_icon("qt_ui/icons/icon_pipeline_segment_off.png"), "Auto Pipeline Segments")
         self.a_auto_segment.setCheckable(True)
+        self.a_auto_segment.setEnabled(False)
         self.a_auto_segment.triggered.connect(self.on_segment_checked_changed)
 
         self.a_pipeline_settings = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Pipeline Configuration")
@@ -55,6 +57,15 @@ class PipelineToolbar(EToolBar):
 
         self.onToComputeChanged.emit(comp_segments, comp_screenshots, comp_annotations)
 
+    @pyqtSlot(object)
+    def on_current_pipeline_changed(self, pipeline):
+        if pipeline is None:
+            self.a_auto_segment.setEnabled(False)
+            self.a_auto_screenshot.setEnabled(False)
+        else:
+            self.a_auto_screenshot.setEnabled(True)
+            self.a_auto_segment.setEnabled(True)
+
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):
         super(PipelineDock, self).__init__(parent, False)
@@ -63,7 +74,7 @@ class PipelineDock(EDockWidget):
         self.splitter = QSplitter(Qt.Horizontal)
         self.inner.setCentralWidget(self.splitter)
         self.inner.centralWidget().setLayout(QHBoxLayout())
-        
+
         self.splitter.addWidget(self.pipeline)
         self.editor = PythonScriptEditor(self.inner.centralWidget())
         self.splitter.addWidget(self.editor)
@@ -142,6 +153,7 @@ class PipelineWidget(QWidget):
             self.current_item.setForeground(QColor(69,69,69))
 
         if self.listWidget_Pipelines.currentItem() is None:
+            print("no Pipeline")
             return
 
         pipeline_name = self.listWidget_Pipelines.currentItem().text()
@@ -160,6 +172,8 @@ class PipelineWidget(QWidget):
 
     @pyqtSlot(object)
     def on_loaded(self, project:VIANProject):
+        self.project = project
+
         for p in project.pipeline_scripts:
             try:
                 import_module_from_path(p)
@@ -167,6 +181,7 @@ class PipelineWidget(QWidget):
                 print("Exception during loading of Script:", e)
         self.on_reload_scripts()
         module_name = get_name_of_script_by_path(project.active_pipeline_script)
+
         if module_name is not None and module_name in self.all_items:
             self.listWidget_Pipelines.setCurrentItem(self.all_items[module_name])
 
@@ -174,6 +189,6 @@ class PipelineWidget(QWidget):
         self.btn_onScreenshot.setChecked(project.compute_pipeline_settings['screenshots'])
         self.btn_onAnnotation.setChecked(project.compute_pipeline_settings['annotations'])
 
+        print("On Use Pipeline")
         self.on_use_pipeline()
         self.on_update_to_compute()
-        self.project = project

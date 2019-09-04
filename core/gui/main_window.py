@@ -87,6 +87,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     onProjectOpened = pyqtSignal(object)
     onMovieOpened = pyqtSignal(object)
+    onProjectClosed = pyqtSignal()
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -479,7 +480,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_worker.signals.onColormetryUpdate.connect(self.colorimetry_live.update_timestep)
         self.player_dock_widget.onSpacialFrequencyChanged.connect(self.frame_update_worker.toggle_spacial_frequency)
 
+        self.onProjectClosed.connect(self.vian_event_handler.on_close)
         self.vian_event_handler.onException.connect(self.script_editor.print_exception)
+        self.vian_event_handler.onCurrentPipelineChanged.connect(self.pipeline_toolbar.on_current_pipeline_changed)
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
         self.pipeline_widget.pipeline.onPipelineActivated.connect(self.vian_event_handler.set_current_pipeline)
         self.pipeline_widget.pipeline.onPipelineFinalize.connect(self.vian_event_handler.run_on_finalize_event)
@@ -2258,6 +2261,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def dispatch_on_closed(self):
+        self.onProjectClosed.emit()
         self.autosave_timer.stop()
         for o in self.i_project_notify_reciever:
             o.on_closed()

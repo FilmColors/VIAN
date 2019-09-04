@@ -15,6 +15,7 @@ ALL_REGISTERED_PIPELINES = dict()
 
 
 class VIANEventHandler(QObject):
+    onCurrentPipelineChanged = pyqtSignal(object)
     onException = pyqtSignal(str)
 
     def __init__(self, parent):
@@ -39,15 +40,32 @@ class VIANEventHandler(QObject):
         self.project.onAnnotationAdded.connect(self.run_on_annotation_created_event)
         self.project.onSegmentAdded.connect(self.run_segment_created_event)
 
+    @pyqtSlot()
+    def on_close(self):
+        self.project = None
+        self.current_pipeline = None
+
+        self.comp_segments = False
+        self.comp_screenshots = False
+        self.comp_annotations = False
+
+        self.queue = []
+        self.queue_running = False
+        self.onCurrentPipelineChanged.emit(None)
+
+
     @pyqtSlot(bool, bool, bool)
     def to_compute_changed(self, comp_segments, comp_screenshots, comp_annotations):
         self.comp_segments = comp_segments
         self.comp_screenshots = comp_screenshots
         self.comp_annotations = comp_annotations
 
+    @pyqtSlot(str)
     def set_current_pipeline(self, name):
+        print("Pipeline", name)
         try:
             self.current_pipeline = ALL_REGISTERED_PIPELINES[name][0]()
+            self.onCurrentPipelineChanged.emit(self.current_pipeline)
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
