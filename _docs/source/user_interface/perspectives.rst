@@ -16,7 +16,7 @@ each of these have a distinct purpose.
 Player Perspective
 ******************
 
-The Player Perspective remove all UI-Elements, allowing to have the full screen displaying the
+The Player Perspective removes all UI-Elements, allowing to have the full screen displaying the
 current movie.
 
 .. figure:: persp_player.png
@@ -28,7 +28,8 @@ current movie.
 
 Normal Perspective
 ******************
-The Annotation Perspective displays all necessary widgets for *Segmenting* and *Annotating* a film, including the
+
+The Normal Perspective rearranges all the elements to the state when the program is started.
 *Timeline*, *Outliner*, *Inspector* and the Toolbars.
 
 .. figure:: user_interface.png
@@ -41,7 +42,7 @@ The Annotation Perspective displays all necessary widgets for *Segmenting* and *
 Annotation Perspective
 ***********************
 The Annotation Perspective displays all necessary widgets for *Segmenting* and *Annotating* a film, including the
-*Timeline*, *Outliner*, *Inspector* and the Toolbars.
+*Timeline*, *Outliner*, and the Toolbars.
 
 .. figure:: persp_screenshots.png
    :scale: 100 %
@@ -52,6 +53,7 @@ The Annotation Perspective displays all necessary widgets for *Segmenting* and *
 
 Screenshot Perspective
 **************************
+The Screenshot Perspective shows all screenshots token so far in a big window on the left side, on the right sight are thi *Inspector* and *Outliner* modules.
 .. figure:: persp_node_editor.png
    :scale: 100 %
    :align: center
@@ -61,8 +63,7 @@ Screenshot Perspective
 
 Classification Perspective
 ***********************
-The Annotation Perspective displays all necessary widgets for *Segmenting* and *Annotating* a film, including the
-*Timeline*, *Outliner*, *Inspector* and the Toolbars.
+The Classification Perspective focuses on the classification widget including the *Timeline* on the right side, while on the left are the *video-Player* and the *Screenshot* widget.
 
 .. figure:: persp_screenshots.png
    :scale: 100 %
@@ -73,8 +74,7 @@ The Annotation Perspective displays all necessary widgets for *Segmenting* and *
 
 Analysis Perspective
 ***********************
-The Annotation Perspective displays all necessary widgets for *Segmenting* and *Annotating* a film, including the
-*Timeline*, *Outliner*, *Inspector* and the Toolbars.
+The Analysis Perspective provides the widgets used for analysing the colors of a selected entity (e.g. sreenshot etc.), which is being displayed in the *Inspector* beneath the *Outliner* on the left.
 
 .. figure:: persp_screenshots.png
    :scale: 100 %
@@ -85,8 +85,7 @@ The Annotation Perspective displays all necessary widgets for *Segmenting* and *
 
 Node Scripting Perspective
 ***********************
-The Annotation Perspective displays all necessary widgets for *Segmenting* and *Annotating* a film, including the
-*Timeline*, *Outliner*, *Inspector* and the Toolbars.
+TO DO
 
 .. figure:: persp_screenshots.png
    :scale: 100 %
