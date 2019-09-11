@@ -103,7 +103,6 @@ class _ScreenshotExporter(ExportDevice):
 
                 if object_type == "Movie":
                     file_name += str(getattr(movie_descriptor, object_attr))
-                    print(file_name)
 
                 if i < len(naming) - 1:
                     if get_enum_value(ScreenshotNamingConventionOptions, naming[i + 1])[1] == 0:
@@ -338,7 +337,6 @@ def build_file_name(naming, screenshot, movie_descriptor):
 
             if object_type == "Movie":
                 file_name += str(getattr(movie_descriptor, object_attr))
-                print(file_name)
 
             if i < len(naming) - 1:
                 if get_enum_value(ScreenshotNamingConventionOptions, naming[i + 1])[1] == 0:

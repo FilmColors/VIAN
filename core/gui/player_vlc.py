@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from core.gui.ewidgetbase import EDockWidget
 from core.data.computation import parse_file_path
 from core.data.interfaces import IProjectChangeNotify
+from core.data.log import log_error, log_info, log_debug
 import vlc
 # from core.vlc.v3_0_3 import vlc
 import os
@@ -119,116 +120,116 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
 
     # *** EXTENSION METHODS *** #
     def get_frame(self):
-        print(NotImplementedError("Method <get_frame> not implemented"))
+        log_debug(NotImplementedError("Method <get_frame> not implemented"))
 
     def init_ui(self):
-        print(NotImplementedError("Method <init_ui> not implemented"))
+        log_debug(NotImplementedError("Method <init_ui> not implemented"))
 
     def get_size(self):
-        print(NotImplementedError("Method <get_size> not implemented"))
+        log_debug(NotImplementedError("Method <get_size> not implemented"))
 
     def set_initial_values(self):
-        print(NotImplementedError("Method <set_initial_values> not implemented"))
+        log_debug(NotImplementedError("Method <set_initial_values> not implemented"))
 
     def play_pause(self):
-        print(NotImplementedError("Method <play_pause> not implemented"))
+        log_debug(NotImplementedError("Method <play_pause> not implemented"))
     # *** ELAN INTERFACE METHODS *** #
     def open_movie(self, path):
-        print(NotImplementedError("Method <open_movie> not implemented"))
+        log_debug(NotImplementedError("Method <open_movie> not implemented"))
 
     def play(self):
-        print(NotImplementedError("Method <play> not implemented"))
+        log_debug(NotImplementedError("Method <play> not implemented"))
 
     def pause(self):
-        print(NotImplementedError("Method <pause> not implemented"))
+        log_debug(NotImplementedError("Method <pause> not implemented"))
 
     def stop(self):
-        print(NotImplementedError("Method <stop> not implemented"))
+        log_debug(NotImplementedError("Method <stop> not implemented"))
 
     def is_playing(self):
         """
         :return: bool
         """
-        print(NotImplementedError("Method <is_playing> not implemented"))
+        log_debug(NotImplementedError("Method <is_playing> not implemented"))
 
     def play_interval(self, start_ms, stop_ms):
-        print(NotImplementedError("Method <play_interval> not implemented"))
+        log_debug(NotImplementedError("Method <play_interval> not implemented"))
 
     def set_offset(self):
         """
         
         :return: Long
         """
-        print(NotImplementedError("Method <set_offset> not implemented"))
+        log_debug(NotImplementedError("Method <set_offset> not implemented"))
 
     def get_offset(self):
-        print(NotImplementedError("Method <get_offset> not implemented"))
+        log_debug(NotImplementedError("Method <get_offset> not implemented"))
 
     def set_stop_time(self, time):
-        print(NotImplementedError("Method <set_stop_time> not implemented"))
+        log_debug(NotImplementedError("Method <set_stop_time> not implemented"))
 
     def next_frame(self):
-        print(NotImplementedError("Method <next_frame> not implemented"))
+        log_debug(NotImplementedError("Method <next_frame> not implemented"))
 
     def previous_frame(self):
-        print(NotImplementedError("Method <previous_frame> not implemented"))
+        log_debug(NotImplementedError("Method <previous_frame> not implemented"))
 
     def set_frame_steps_to_frame_begin(self, bool):
-        print(NotImplementedError("Method <set_frame_steps_to_frame_begin> not implemented"))
+        log_debug(NotImplementedError("Method <set_frame_steps_to_frame_begin> not implemented"))
 
     def set_media_time(self, time):
-        print(NotImplementedError("Method <set_media_time> not implemented"))
+        log_debug(NotImplementedError("Method <set_media_time> not implemented"))
 
     def get_media_time(self):
-        print(NotImplementedError("Method <get_media_time> not implemented"))
+        log_debug(NotImplementedError("Method <get_media_time> not implemented"))
 
     def set_rate(self, rate):
-        print(NotImplementedError("Method <set_rate> not implemented"))
+        log_debug(NotImplementedError("Method <set_rate> not implemented"))
 
     def get_rate(self):
-        print(NotImplementedError("Method <get_rate> not implemented"))
+        log_debug(NotImplementedError("Method <get_rate> not implemented"))
 
     def is_frame_rate_auto_detected(self):
-        print(NotImplementedError("Method <is_frame_rate_auto_detected> not implemented"))
+        log_debug(NotImplementedError("Method <is_frame_rate_auto_detected> not implemented"))
 
     def get_media_duration(self):
-        print(NotImplementedError("Method <get_media_duration> not implemented"))
+        log_debug(NotImplementedError("Method <get_media_duration> not implemented"))
 
     def set_volume(self, volume):
-        print(NotImplementedError("Method <set_volume> not implemented"))
+        log_debug(NotImplementedError("Method <set_volume> not implemented"))
 
     def get_volume(self):
-        print(NotImplementedError("Method <get_volume> not implemented"))
+        log_debug(NotImplementedError("Method <get_volume> not implemented"))
 
     def set_sub_volume(self, volume):
-        print(NotImplementedError("Method <set_sub_volume> not implemented"))
+        log_debug(NotImplementedError("Method <set_sub_volume> not implemented"))
 
     def get_sub_volume(self):
-        print(NotImplementedError("Method <get_sub_colume> not implemented"))
+        log_debug(NotImplementedError("Method <get_sub_colume> not implemented"))
 
     def set_mute(self, mute):
-        print(NotImplementedError("Method <set_mute> not implemented"))
+        log_debug(NotImplementedError("Method <set_mute> not implemented"))
 
     def get_mute(self):
-        print(NotImplementedError("Method <get_mute> not implemented"))
+        log_debug(NotImplementedError("Method <get_mute> not implemented"))
 
     def get_source_width(self):
-        print(NotImplementedError("Method <get_source_width> not implemented"))
+        log_debug(NotImplementedError("Method <get_source_width> not implemented"))
 
     def get_source_height(self):
-        print(NotImplementedError("Method <get_source_height> not implemented"))
+        log_debug(NotImplementedError("Method <get_source_height> not implemented"))
 
     def get_aspect_ratio(self):
-        print(NotImplementedError("Method <get_aspect_ratio> not implemented"))
+        log_debug(NotImplementedError("Method <get_aspect_ratio> not implemented"))
 
     def set_aspect_ratio(self, ratio):
-        print(NotImplementedError("Method <set_aspect_ratio> not implemented"))
+        log_debug(NotImplementedError("Method <set_aspect_ratio> not implemented"))
 
     def get_miliseconds_per_sample(self):
-        print(NotImplementedError("Method <get_miliseconds_per_sample> not implemented"))
+        log_debug(NotImplementedError("Method <get_miliseconds_per_sample> not implemented"))
 
     def set_miliseconds_per_sample(self, ms):
-        print(NotImplementedError("Method <set_miliseconds_per_sample> not implemented"))
+        log_debug(NotImplementedError("Method <set_miliseconds_per_sample> not implemented"))
 
     def on_loaded(self, project):
         pass
@@ -431,20 +432,20 @@ class Player_VLC(VideoPlayer):
         return self.playing
 
     def play_interval(self, start_ms, stop_ms):
-        print(NotImplementedError("Method <play_interval> not implemented"))
+        log_debug(NotImplementedError("Method <play_interval> not implemented"))
 
     def set_offset(self):
         """
 
         :return: Long
         """
-        print(NotImplementedError("Method <set_offset> not implemented"))
+        log_debug(NotImplementedError("Method <set_offset> not implemented"))
 
     def get_offset(self):
-        print(NotImplementedError("Method <get_offset> not implemented"))
+        log_debug(NotImplementedError("Method <get_offset> not implemented"))
 
     def set_stop_time(self, time):
-        print(NotImplementedError("Method <set_stop_time> not implemented"))
+        log_debug(NotImplementedError("Method <set_stop_time> not implemented"))
 
     def next_frame(self):
         if self.media_player is None:
@@ -455,7 +456,7 @@ class Player_VLC(VideoPlayer):
         pass
 
     def set_frame_steps_to_frame_begin(self, bool):
-        print(NotImplementedError("Method <set_frame_steps_to_frame_begin> not implemented"))
+        log_debug(NotImplementedError("Method <set_frame_steps_to_frame_begin> not implemented"))
 
     def set_media_time(self, time):
         if self.media_player is None:
@@ -538,13 +539,13 @@ class Player_VLC(VideoPlayer):
         return t
 
     def set_aspect_ratio(self, ratio):
-        print(NotImplementedError("Method <set_aspect_ratio> not implemented"))
+        log_debug(NotImplementedError("Method <set_aspect_ratio> not implemented"))
 
     def get_miliseconds_per_sample(self):
         return 0
 
     def set_miliseconds_per_sample(self, ms):
-        print(NotImplementedError("Method <set_miliseconds_per_sample> not implemented"))
+        log_debug(NotImplementedError("Method <set_miliseconds_per_sample> not implemented"))
 
     def get_fps(self):
         if self.use_user_fps:

@@ -4,6 +4,7 @@ import numpy as np
 from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import QComboBox, QSpinBox, QLayout
 
+from core.data.log import log_error, log_info
 from core.data.computation import ms_to_string
 from core.gui.ewidgetbase import EDockWidget
 from core.data.interfaces import ITimeStepDepending
@@ -189,6 +190,6 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
             if len(self.subs) > 0:
                 self.main_window.player.set_subtitle(self.subs[index][0])
         except Exception as e:
-            print("PlayerControls.on_subs_changed(): Could not set Subtitles:", e)
+            log_error("PlayerControls.on_subs_changed(): Could not set Subtitles:", e)
 
 

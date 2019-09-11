@@ -10,6 +10,7 @@ import numpy as np
 
 from core.container.analysis import IAnalysisJobAnalysis
 from core.data.interfaces import IProjectChangeNotify
+from core.data.log import log_error
 from core.container.experiment import Experiment
 from core.container.segmentation import Segment
 from core.container.screenshot import Screenshot
@@ -115,7 +116,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                 features.append(CorrelationFeatureTuple(k.word_obj.get_name(), k.voc_obj.get_name(), k.class_obj.get_name(), i))
             self.correlation_tab.set_data(features, matrix)
         except Exception as e:
-            print(e)
+            log_error(e)
 
     def activate_selector(self, selectors):
         self.clear_analysis_widget()
@@ -211,7 +212,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                 else:
                     self.activate_selector(selected)
         except Exception as e:
-            print(e)
+            log_error(e)
             pass
 
 

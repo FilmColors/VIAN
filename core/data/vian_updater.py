@@ -6,6 +6,7 @@ import tempfile as tmp
 from shutil import copytree, move
 import shutil
 from core.data.interfaces import IConcurrentJob
+from core.data.log import log_error, log_info, log_warning, log_debug
 from PyQt5.QtWidgets import QMessageBox, QApplication
 
 from core.corpus.client.corpus_client import get_vian_version, download_vian_update
@@ -35,7 +36,7 @@ class VianUpdater(IConcurrentJob):
                 self.main_window.run_job_concurrent(job)
         except Exception as e:
             self.main_window.print_message("Update Failed, see Console for more Information", "Red")
-            print(e)
+            log_error(e)
 
     def get_server_version(self, include_beta = False):
         version = None
@@ -43,9 +44,9 @@ class VianUpdater(IConcurrentJob):
         build = None
         try:
             version, version_id = get_vian_version()
-            print(version, version_id)
+            log_info("Server Version:", version, version_id)
         except Exception as e:
-            print("Could not fetch update version:", str(e))
+            log_error("Could not fetch update version:", str(e))
             pass
         if version is None:
             return False
@@ -54,13 +55,13 @@ class VianUpdater(IConcurrentJob):
             or (self.current_version[0] == version[0] and self.current_version[1] < version[1])
             or (self.current_version[0] == version[0] and self.current_version[1] == version[1] and self.current_version[2] < version[2])):
             if build == "beta":
-                print("Beta update available")
+                log_info("Beta update available")
                 return include_beta, version_id
             else:
-                print("Update available")
+                log_info("Update available")
                 return True, version_id
         else:
-            print("No update available")
+            log_info("No update available")
             return False, version_id
 
     def fetch_folder(self, version_id):
@@ -144,15 +145,15 @@ class VianUpdaterJob(IConcurrentJob):
                                 os.remove(dst_file)
                             move(src_file, dst_dir)
                         except Exception as e:
-                            print("Could not Copy File:", str(src_file), str(e))
+                            log_error("Could not Copy File:", str(src_file), str(e))
                             continue
             try:
                 shutil.rmtree(self.app_root + "/update/", ignore_errors=True)
             except Exception as e:
-                print(e)
+                log_error(e)
             return [True]
         except Exception as e:
-            print(e)
+            log_error(e)
             return [False]
 
     def modify_project(self, project, result, sign_progress = None, main_window = None):

@@ -14,6 +14,7 @@ from core.visualization.basic_vis import IVIANVisualization, ExportImageDialog
 from core.data.computation import *
 from core.gui.ewidgetbase import EGraphicsView, ExpandableWidget
 from core.visualization.dot_plot import DotPlot
+from core.data.log import log_error, log_info
 
 from random import randint
 import numpy as np
@@ -665,7 +666,7 @@ class MultiPaletteLABWidget(QWidget, IVIANVisualization):
         try:
             self.palette_tree = np.vstack(tuple(palettes.copy()))
         except Exception as e:
-            print("Exception in set_palettes()", palettes)
+            log_error("Exception in set_palettes()", palettes)
             return
         layers = self.palette_tree[:, 1]
         if self.slider is not None:

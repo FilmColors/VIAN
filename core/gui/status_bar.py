@@ -8,6 +8,8 @@ from PyQt5 import uic
 from functools import partial
 import os
 
+from core.data.log import log_info, log_debug
+
 from core.gui.perspectives import *
 import threading
 
@@ -38,7 +40,6 @@ class StatusBar(QtWidgets.QWidget):
     def closeEvent(self, QCloseEvent):
         self.main_window.elan_status = None
         super(StatusBar, self).closeEvent(QCloseEvent)
-
 
     def set_selection(self, selection):
         self.label_selection_length.setText(str(len(selection)) + " Items")
@@ -98,7 +99,6 @@ class OutputLine(QtWidgets.QWidget):
             if color is not "":
                 self.setStyleSheet("QLabel{color : " + color + ";}")
 
-            print("LOG: ", str(msg))
             self.message_log.append(curr_msg)
             self.text_time.start()
             if self.log_wnd is not None:
@@ -239,10 +239,10 @@ class MessageLogWindow(QMainWindow):
                 self.main_window.project.print_object_list()
 
             elif cmd == "list_threads":
-                print(threading.enumerate())
+                log_info(threading.enumerate())
 
             elif cmd == "help":
-                print("list_containers -- Listing all Container Objects of the Project")
+                log_info("list_containers -- Listing all Container Objects of the Project")
 
             else:
                 # cmd = cmd.replace("print", "self.main_window.print_message")
@@ -251,7 +251,7 @@ class MessageLogWindow(QMainWindow):
                 eval(cmd)
 
         except Exception as e:
-            print (e)
+            log_debug (e)
 
         self.input_line.clear()
 
@@ -288,6 +288,5 @@ class StageSelector(QWidget):
                 btn.setChecked(True)
             else:
                 btn.setChecked(False)
-        print(dispatch, new_perspective)
         if dispatch and new_perspective is not None:
             self.main_window.switch_perspective(new_perspective)

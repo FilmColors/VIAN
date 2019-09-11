@@ -7,6 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QPoint
 from core.data.computation import pixmap_to_numpy
+from core.data.log import log_error
 from core.gui.ewidgetbase import EDialogWidget, EGraphicsView, FileBrowseBar
 import cv2
 
@@ -235,7 +236,6 @@ class ExportNamingConventionWidget(QWidget):
                 if v != "":
                     name.append(v)
             self.last_convention.append(cb.currentText())
-        print(self.last_convention)
         name.append(self.naming_fields['plot_name'])
         return "_".join(name)
 
@@ -375,11 +375,8 @@ class ExportImageDialog(EDialogWidget):
         self.visualization.grid_color = grid
         self.visualization.font_size = font_size
         self.visualization.grid_line_width = self.spinBox_GridLine.value()
-        print("@TODO", self.visualization)
 
-        print("Rendering Image")
         image = self.visualization.render_to_image(background, size)
-        print("Set Image")
         self.preview.set_image(image)
 
         # Caching
@@ -462,7 +459,7 @@ class ExportImageDialog(EDialogWidget):
             cv2.imwrite(file_name, img)
             self.on_close()
         except Exception as e:
-            print(e)
+            log_error(e)
             pass
 
     def on_close(self):

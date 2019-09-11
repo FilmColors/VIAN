@@ -9,6 +9,7 @@ from moviepy.editor import *
 from typing import List, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.interfaces import TimelineDataset
+from core.data.log import log_error, log_info, log_warning, log_debug
 from core.container.project import VIANProject
 from core.container.hdf5_manager import HDF5_FILE_LOCK
 
@@ -52,7 +53,7 @@ class AudioHandler(QObject):
         # Lock all files references by the process, we have to make sure that the HDF5 manager doesn't
         # try to clean (replace) the HDF5 file during reading the audio samples.
 
-        print("AudioHandlerPath:", project.movie_descriptor.get_movie_path())
+        log_info("AudioHandlerPath:", project.movie_descriptor.get_movie_path())
 
         self.project = project
 
@@ -61,8 +62,8 @@ class AudioHandler(QObject):
             self.audio_samples = self._sample_audio(self.callback)
             self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
 
-            print("Size", self.audio_samples.nbytes / 10 ** 6)
-            print("Size", self.audio_volume.nbytes / 10 ** 6)
+            log_info("Size", self.audio_samples.nbytes / 10 ** 6)
+            log_info("Size", self.audio_volume.nbytes / 10 ** 6)
             project_audio_path = os.path.join(project.data_dir, "audio.mp3")
             self.audioProcessed.emit(
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
@@ -71,7 +72,7 @@ class AudioHandler(QObject):
                 if not os.path.isfile(project_audio_path) and self.export_audio:
                     self._audioclip.write_audiofile(os.path.join(project.data_dir, "audio.mp3"))
             except Exception as e:
-                print(e)
+                log_error(e)
             self._videoclip.close()
             self._audioclip.close()
 

@@ -35,7 +35,6 @@ class SegmentationImporterDialog(EDialogWidget):
     def check_file(self):
         path = self.path
         if os.path.isfile(path):
-            print(path)
             if self.comboBox_Seperator.currentIndex() == 0:
                 delimiter = ";"
             else:

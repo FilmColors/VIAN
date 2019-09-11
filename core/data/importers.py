@@ -12,6 +12,7 @@ from core.container.analysis import IAnalysisJobAnalysis
 from core.data.interfaces import *
 from core.data.computation import *
 from core.container.segmentation import Segment
+from core.data.log import log_info, log_warning, log_error
 from core.container.project import *
 from core.visualization.feature_plot import *
 from core.visualization.image_plots import *
@@ -196,7 +197,7 @@ class ScreenshotImporter(IConcurrentJob):
                                                 segment_ranges[u][0],
                                                 segment_ranges[u][1]))
                 except IndexError as e:
-                    print("There is no Segment with Index:" + u + " in the Segmentation, skipped images:" + str(p_paths))
+                    log_warning("There is no Segment with Index:" + u + " in the Segmentation, skipped images:" + str(p_paths))
 
             return result
 
@@ -290,7 +291,7 @@ class ScreenshotImporter(IConcurrentJob):
             # best_value = np.amin(match_table[:, i, 1])
             best_idx = np.argmin(match_table[:, i, 1])
             frame_idx = match_table[best_idx, i, 0]
-            print("RESULT, ", frame_idx, frame_idx + start)
+            log_info("RESULT, ", frame_idx, frame_idx + start)
             frame_idx = frame_idx + start
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
             ret, frame = cap.read()
@@ -382,10 +383,10 @@ class FileMakerVocImporter():
 
                     segments.append(segm)
             else:
-                print("No Such Category:", category.replace(" ", "_"))
+                log_warning("No Such Category:", category.replace(" ", "_"))
 
         main_seg = project.get_main_segmentation()
-        print("Main Segmentation Length: ",len(main_seg.segments))
+        log_info("Main Segmentation Length: ",len(main_seg.segments))
         for s in segments:
             idx = s[0]
             objs = s[1]
@@ -395,11 +396,11 @@ class FileMakerVocImporter():
                 # for word in objs:
                 #     main_seg.segments[idx].add_word(word)
             else:
-                print("Sub-Segmentation Ignored")
+                log_warning("Sub-Segmentation Ignored")
 
-        print("Filemaker Data Loaded")
-        print("Skipped: ", skipped)
-        print("  Added: ", added)
+        log_info("Filemaker Data Loaded")
+        log_info("Skipped: ", skipped)
+        log_info("  Added: ", added)
 
 
 class CSVImporter():
@@ -416,7 +417,7 @@ class CSVImporter():
 
                     return True, row
         except Exception as e:
-            print(e)
+            log_error(e)
             return False, []
 
 
@@ -558,7 +559,7 @@ class SegmentationImporter(CSVImporter):
                     segments.append([t_start, t_end])
 
                 except Exception as e:
-                    print("Error in Import Segmentation:", e)
+                    log_error("Error in Import Segmentation:", e)
                     continue
 
         mode = SegmentCreationMode.INTERVAL

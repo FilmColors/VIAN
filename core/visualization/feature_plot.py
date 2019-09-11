@@ -78,7 +78,7 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
                 if w not in names:
                     self.remove_feature(self.features[i])
         except Exception as e:
-            print(str(e))
+            log_error(e)
         self.update_segment_lines()
 
     def remove_feature(self, feature):

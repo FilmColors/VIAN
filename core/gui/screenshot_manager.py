@@ -392,7 +392,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
                                        uid=scr.unique_id,
                                        z=lab[2])
         except Exception as e:
-            print(e)
+            log_error(e)
 
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
@@ -560,7 +560,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
                         self.qimage_cache[str(s.unique_id)] = qpixmap
                     except Exception as e:
-                        print(e)
+                        log_error(e)
                         continue
                     # new_qimage_cache[str(s.unique_id)] = qpixmap
                 else:
@@ -754,7 +754,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.fitInView(rect, Qt.KeepAspectRatio)
                 self.curr_scale = self.sceneRect().width() / rect.width()
                 break
-        print("Not Found")
 
     def frame_segment(self, segment_index, center = True):
         self.current_segment_index = segment_index

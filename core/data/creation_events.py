@@ -7,6 +7,7 @@ as within VIAN to be called once a selector is created.
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
 from core.container.project import VIANProject, Segment, Annotation, Screenshot
+from core.data.log import log_info, log_error, log_debug, log_warning
 import traceback
 import cv2
 import inspect
@@ -62,7 +63,7 @@ class VIANEventHandler(QObject):
 
     @pyqtSlot(str)
     def set_current_pipeline(self, name):
-        print("Pipeline", name)
+        log_info("Pipeline", name)
         try:
             self.current_pipeline = ALL_REGISTERED_PIPELINES[name][0]()
             self.onCurrentPipelineChanged.emit(self.current_pipeline)
@@ -110,12 +111,12 @@ class VIANEventHandler(QObject):
 
     def _push(self, func, args):
         self.queue.append((func, args))
-        print("is Queue Running: ", self.queue_running)
+        # log_info("is Queue Running: ", self.queue_running)
         if not self.queue_running:
             self._run()
 
     def _run(self):
-        print("Queue:", self.queue_running, len(self.queue))
+        # log_info("Queue:", self.queue_running, len(self.queue))
         if len(self.queue) > 0:
             self.queue_running = True
             (func, args) = self.queue.pop(0)

@@ -4,7 +4,7 @@ import sys
 import re
 import importlib.util
 import traceback
-
+from core.data.log import log_info, log_error, log_debug, log_warning
 from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter,QSizePolicy, QVBoxLayout
@@ -104,7 +104,7 @@ class PythonScriptEditor(QWidget):
                 self.editor.setPlainText(f.read())
             self.current_file_path = file_path
         except IOError as e:
-            print(e)
+            log_error(e)
 
     def save(self, file_path=None, save_as = False):
         if file_path is not None:
@@ -122,7 +122,7 @@ class PythonScriptEditor(QWidget):
                 f.write(self.editor.toPlainText())
             self.current_file_path = p
         except IOError as e:
-            print(e)
+            log_error(e)
 
     def reload(self):
         self.save()
@@ -138,7 +138,7 @@ class PythonScriptEditor(QWidget):
                 pass
 
         else:
-            print("No Module loaded")
+            log_info("No Module loaded")
         self.onReload.emit()
 
     @pyqtSlot(str)

@@ -8,6 +8,7 @@ from core.data.interfaces import IProjectChangeNotify
 import os
 from core.gui.python_script_editor import PythonScriptEditor
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
+from core.data.log import log_error, log_info
 from core.container.project import VIANProject
 from core.data.computation import import_module_from_path, create_icon
 
@@ -153,7 +154,6 @@ class PipelineWidget(QWidget):
             self.current_item.setForeground(QColor(69,69,69))
 
         if self.listWidget_Pipelines.currentItem() is None:
-            print("no Pipeline")
             return
 
         pipeline_name = self.listWidget_Pipelines.currentItem().text()
@@ -178,7 +178,7 @@ class PipelineWidget(QWidget):
             try:
                 import_module_from_path(p)
             except Exception as e:
-                print("Exception during loading of Script:", e)
+                log_error("Exception during loading of Script:", e)
         self.on_reload_scripts()
         module_name = get_name_of_script_by_path(project.active_pipeline_script)
 
@@ -189,6 +189,5 @@ class PipelineWidget(QWidget):
         self.btn_onScreenshot.setChecked(project.compute_pipeline_settings['screenshots'])
         self.btn_onAnnotation.setChecked(project.compute_pipeline_settings['annotations'])
 
-        print("On Use Pipeline")
         self.on_use_pipeline()
         self.on_update_to_compute()

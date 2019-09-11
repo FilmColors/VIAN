@@ -12,6 +12,7 @@ import os
 import sys
 from collections import namedtuple
 
+from core.data.log import *
 from core.data.enums import ScreenshotNamingConventionOptions as naming
 from PyQt5.QtGui import QFont, QColor
 
@@ -184,7 +185,7 @@ class UserSettings():
         for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS, self.DIR_CORPORA, self.DIR_PROJECTS]:
             if not os.path.isdir(d):
                 os.mkdir(d)
-                print(d + "\t Directory created.")
+                log_info(d + "\t Directory created.")
 
     def integritiy_check(self):
         """
@@ -198,14 +199,14 @@ class UserSettings():
             if not os.path.isdir(dir):
                 self.generate_dir_paths()
                 integer = False
-                print("Recreated Missing Directories")
+                log_info("Recreated Missing Directories")
                 break
 
 
         if not integer:
-            print("Settings regenerated")
+            log_info("Settings regenerated")
         else:
-            print("Successfully Loaded Settings from: ", self.store_path)
+            log_info("Successfully Loaded Settings from: ", self.store_path)
 
     def add_to_recent_files(self, project):
         """
@@ -281,7 +282,7 @@ class UserSettings():
             with open(self.store_path, 'w') as f:
                 json.dump(ddict, f)
         except Exception as e:
-            print(e)
+            log_error(e)
 
 
         # Some weird python is going on here, after serialize(), the CONTRIBUTOR is set as a dict.
@@ -312,7 +313,7 @@ class UserSettings():
                             self.CONTRIBUTOR = Contributor().deserialize(value)
 
         except IOError as e:
-            print("No Settings found", e)
+            log_error("No Settings found", e)
 
         self.integritiy_check()
 
@@ -341,7 +342,7 @@ class UserSettings():
                         w.apply_settings(sett['settings'])
                         break
                 except Exception as e:
-                    print(e)
+                    log_error(e)
                     pass
 
 

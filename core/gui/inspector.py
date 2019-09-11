@@ -414,7 +414,7 @@ class AttributesMediaObject(QWidget):
             media_object = self.descriptor.media_objects[self.listWidget_AttachedMedia.currentIndex().row()]
             open_context_menu(self.inspector.main_window, pos, [media_object], media_object.project)
         except Exception as e:
-            print(e)
+            log_error(e)
             pass
 
 
@@ -591,7 +591,7 @@ class DefaultValueVector(AttributesNodeDefaultValues):
             self.slot.default_value = np.array(result)
             super(DefaultValueVector, self).on_value_changed()
         except:
-            print("error", n)
+            log_error("error", n)
 
 
 class DefaultValueVector2(AttributesNodeDefaultValues):

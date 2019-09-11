@@ -124,7 +124,6 @@ class DialogPreferences(EDialogWidget):
             css = f.read()
 
         t = css.split("/*FFAMILY*/")
-        print(family)
         css = "/*FFAMILY*/".join([t[0], "font-family: \""+family+"\";", t[2]])
 
         t = css.split("/*FSIZE*/")

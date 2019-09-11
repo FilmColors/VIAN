@@ -8,6 +8,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout, QLabel
 
 from core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
+from core.data.log import log_error, log_info, log_debug, log_warning
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import EDockWidget
 
@@ -324,7 +325,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 for g in self.checkbox_groups:
                     g.finalize()
             except Exception as e:
-                print(e)
+                log_error(e)
                 raise e
         for g in self.tabs:
             for t in g:

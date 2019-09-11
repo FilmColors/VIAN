@@ -57,15 +57,16 @@ from core.visualizer.visualizer import VIANVisualizer2
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses
 from core.gui.toolbar_widgets import WidgetsToolbar
+from core.data.log import log_warning, log_debug, log_info, log_error
 try:
     import keras.backend as K
     from core.analysis.semantic_segmentation import *
-    print("KERAS Found, Deep Learning available.")
+    log_info("KERAS Found, Deep Learning available.")
     KERAS_AVAILABLE = True
 except Exception as e:
     from core.analysis.deep_learning.labels import *
-    print("Could not import Deep-Learning Module, features disabled.")
-    print(e)
+    log_info("Could not import Deep-Learning Module, features disabled.")
+    log_info(e)
     KERAS_AVAILABLE = False
 
 
@@ -93,7 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
-        print("VIAN: ", version.__version__)
+        log_info("VIAN: ", version.__version__)
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
         # loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,200))
@@ -108,9 +109,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.forced_overlay_hidden = False
 
         self.extension_list = ExtensionList(self)
-        print("Registered Pipelines:")
+        log_info("Registered Pipelines:")
         for k, v in ALL_REGISTERED_PIPELINES.items():
-            print("\t---", k.ljust(30),v)
+            log_info("\t---", k.ljust(30),v)
         print_registered_analyses()
         self.is_darwin = False
 
@@ -132,8 +133,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings = UserSettings()
         self.settings.load()
 
-
-        print("HDF5")
         self.hdf5_cache = HDF5Cache(self.settings.DIR_ROOT + "/scr_cache.hdf5")
 
         self.clipboard_data = []
@@ -517,7 +516,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.settings.store(self.dock_widgets)
                 self.show_welcome()
             except Exception as e:
-                print(e)
+                log_error(e)
 
         if self.settings.SHOW_WELCOME:
             self.show_welcome()
@@ -526,22 +525,22 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show_first_start()
         else:
             try:
-                print("Contributor:", self.settings.CONTRIBUTOR.full_name)
-                print("Contributor:", self.settings.CONTRIBUTOR.email)
+                log_info("Contributor:", self.settings.CONTRIBUTOR.full_name)
+                log_info("Contributor:", self.settings.CONTRIBUTOR.email)
             except:
                 pass
 
     def print_time(self, segment):
-        print(segment)
+        log_info(segment)
 
     def test_function(self):
         from core.data.io.web_annotation import WebAnnotationDevice
         WebAnnotationDevice().export("test.json", self.project, self.settings.CONTRIBUTOR, self.version)
-        print(self.settings.CONTRIBUTOR)
+        log_debug("Test Function", self.settings.CONTRIBUTOR)
 
     def toggle_colormetry(self):
         if self.colormetry_running is False:
-            print("toggle colormetry", self.project.movie_descriptor.fps / 2)
+            log_debug("toggle colormetry", self.project.movie_descriptor.fps / 2)
             job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self)
             args = job.prepare(self.project)
             self.actionColormetry.setText("Pause Colormetry")
@@ -567,18 +566,18 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.colormetry_analysis.check_finished()
             if self.project.colormetry_analysis.has_finished:
                 self.timeline.timeline.set_colormetry_progress(1.0)
-                print(self.project.colormetry_analysis.resolution)
+                log_debug(self.project.colormetry_analysis.resolution)
                 res = self.project.colormetry_analysis.resolution
                 fps = self.project.movie_descriptor.fps
                 ms_to_idx = 1000 / (fps / res)
-                print(ms_to_idx, fps, res)
+                log_debug(ms_to_idx, fps, res)
                 self.timeline.timeline.add_visualization(
                     TimelineDataset("Colorimetry: Luminance",
                          self.project.hdf5_manager.get_colorimetry_feat()[:,0],
                          ms_to_idx=ms_to_idx,
                          vis_type=TimelineDataset.VIS_TYPE_LINE))
         except Exception as e:
-            print("Exception in MainWindow.on_colormetry_finished(): ", str(e))
+            log_error("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
     def clear_colormetry(self):
         if self.project is not None:
@@ -592,10 +591,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_copy(self):
         if self.project is not None:
             self.clipboard_data = self.project.selected
-        print("Copy:", self.clipboard_data)
+        log_debug("Copy:", self.clipboard_data)
 
     def on_paste(self):
-        print("Paste:", self.clipboard_data, self.project, len(self.clipboard_data))
+        log_debug("Paste:", self.clipboard_data, self.project, len(self.clipboard_data))
         if self.project is not None and len(self.clipboard_data) > 0:
             for s in self.clipboard_data:
                 s.copy_event(self.project.selected[0])
@@ -965,7 +964,7 @@ class MainWindow(QtWidgets.QMainWindow):
             file_extension = str(event.mimeData().urls()[0]).split(".").pop()
             files = event.mimeData().urls()
             if "eaf" in file_extension:
-                print("Importing ELAN Project")
+                log_debug("Importing ELAN Project")
                 self.import_elan_project(str(event.mimeData().urls()[0]), False)
             elif "png" in file_extension or "jpg" in file_extension:
                 res_files = []
@@ -1046,7 +1045,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         module = importlib.import_module(c[1])
                         return getattr(module, class_name)
             except Exception as e:
-                print(e)
+                log_error(e)
 
     def update_vian(self, show_newest = True, allow_beta = False):
         try:
@@ -1117,7 +1116,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for d in to_delete:
                 d.save_delete()
         except Exception as e:
-            print(e)
+            log_error(e)
         self.project.inhibit_dispatch = False
         self.dispatch_on_changed()
 
@@ -1181,9 +1180,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_bar.on_finished()
 
     def worker_error(self, error):
-        print("*********ERROR**IN**WORKER***********")
-        print(error)
-        print("*************************************")
+        log_error("*********ERROR**IN**WORKER***********")
+        log_error(error)
+        log_error("*************************************")
 
     def worker_progress(self, tpl):
         # self.progress_bar.set_progress(float)
@@ -1253,7 +1252,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         filename = time.strftime("%Y_%m_%d_%H_%M_%S", time.gmtime(time.time()))+"_"+self.project.name + "_backup"
         try:
-            print(path + filename)
+            log_debug(path + filename)
             zip_project(path + filename, self.project.folder)
             self.print_message("Backup sucessfully stored to: " + path + filename + ".zip", "Green")
         except Exception as e:
@@ -1273,7 +1272,7 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def switch_perspective(self, perspective):
-        print("Switch Perspective", perspective)
+        log_debug("Switch Perspective", perspective)
         self.centralWidget().setParent(None)
         self.statusBar().show()
 
@@ -1307,6 +1306,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
             # self.tabifyDockWidget(self.colorimetry_live, self.script_editor)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
@@ -1723,12 +1723,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # Importing all Vocabularies
         if vocabularies is not None:
             for i, v in enumerate(vocabularies):
-                print("Importing: " + str(i) + " " + v + "\r")
+                log_debug("Importing: " + str(i) + " " + v + "\r")
                 self.project.import_vocabulary(v)
 
         if copy_movie == "Copy":
             new_path = self.project.folder + os.path.basename(self.project.movie_descriptor.movie_path)
-            print("Copy: ", new_path, self.project.movie_descriptor.movie_path)
+            log_debug("Copy: ", new_path, self.project.movie_descriptor.movie_path)
             shutil.copy(self.project.movie_descriptor.movie_path, new_path)
             self.project.movie_descriptor.set_movie_path(new_path)
 
@@ -1762,7 +1762,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.load_project(path)
         except Exception as e:
-            print(e)
+            log_error(e)
             QMessageBox.warning(self, "Failed to Load", "File is corrupt and could not be loaded")
 
     def close_project(self):
@@ -1791,7 +1791,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         new = VIANProject(self)
-        print("Loading Project Path", path)
+        log_info("Loading Project Path", path)
         new.inhibit_dispatch = True
         new.load_project(self.settings ,path, main_window=self)
 
@@ -1837,7 +1837,7 @@ class MainWindow(QtWidgets.QMainWindow):
             worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
             self.start_worker(worker, "Saving Project")
 
-        print(self.project.folder)
+        log_info("Saving to:", self.project.folder)
         self.settings.add_to_recent_files(self.project)
         self.project.undo_manager.no_changes = True
 
@@ -1963,7 +1963,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     importer.apply_import(self.project, segmentation)
                     self.dispatch_on_changed()
         except Exception as e:
-            print(e)
+            log_error(e)
 
     def import_csv_vocabulary(self):
         dialog = CSVVocabularyImportDialog(self, self.project)
@@ -2039,7 +2039,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.corpus_client.on_connect_local(path)
             self.corpus_client_toolbar.show()
         except Exception as e:
-            print(e)
+            log_error(e)
 
     def open_remote_corpus(self):
         pass
@@ -2108,7 +2108,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         w = InfoPopup(self, text, loc)
         w.show()
-        print("OK")
 
     #region IProjectChangedNotify
 
@@ -2190,13 +2189,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.current_perspective == Perspective.CorpusVisualizer.name:
             self.switch_perspective(Perspective.Segmentation)
 
-        print("\n#### --- Loaded Project --- ####")
-        print("Folder:".rjust(15), self.project.folder)
-        print("Path:".rjust(15),self.project.path)
-        print("Movie Path:".rjust(15),self.project.movie_descriptor.movie_path)
+        log_info("\n#### --- Loaded Project --- ####")
+        log_info("Folder:".rjust(15), self.project.folder)
+        log_info("Path:".rjust(15),self.project.path)
+        log_info("Movie Path:".rjust(15),self.project.movie_descriptor.movie_path)
         if self.project.colormetry_analysis is not None:
-            print("Colorimetry:".rjust(15), self.project.colormetry_analysis.has_finished)
-        print("\n")
+            log_info("Colorimetry:".rjust(15), self.project.colormetry_analysis.has_finished)
+        log_info("\n")
 
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is None or not self.allow_dispatch_on_change:

@@ -8,6 +8,7 @@ from core.container.project import MOVIE_DESCRIPTOR, SEGMENTATION, ANNOTATION, S
     Experiment
 from core.corpus.client.corpus_client import CorpusClient
 from core.corpus.legacy.sqlalchemy_entities import DBProject
+from core.data.log import log_error, log_info, log_debug, log_warning
 
 
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):
@@ -139,7 +140,7 @@ class SegmentationContextMenu(ContextMenu):
                 else:
                     s.unlock()
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
 
     def toggle_timeline_visiblity(self):
@@ -149,7 +150,7 @@ class SegmentationContextMenu(ContextMenu):
             try:
                 s.set_timeline_visibility(visibility)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
 
     def on_delete(self):
@@ -158,7 +159,7 @@ class SegmentationContextMenu(ContextMenu):
             try:
                 s.project.remove_segmentation(s)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
         self.close()
 
@@ -167,7 +168,7 @@ class SegmentationContextMenu(ContextMenu):
         try:
             self.segmentation[0].project.set_main_segmentation(self.segmentation[0])
         except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
         self.close()
 
 
@@ -203,7 +204,7 @@ class LayerContextMenu(ContextMenu):
             try:
                 l.project.remove_annotation_layer(l)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
         self.close()
 
@@ -219,7 +220,7 @@ class LayerContextMenu(ContextMenu):
             try:
                 s.set_timeline_visibility(visibility)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
         self.hide()
 
@@ -234,10 +235,10 @@ class LayerContextMenu(ContextMenu):
                     else:
                         s.unlock()
                 except Exception as e:
-                    print("ContextMenu Error", e)
+                    log_error("ContextMenu Error", e)
                     continue
         except Exception as e:
-            print("ContextMenu Error", e)
+            log_error("ContextMenu Error", e)
 
 
 class AnnotationContextMenu(ContextMenu):
@@ -266,7 +267,7 @@ class AnnotationContextMenu(ContextMenu):
             try:
                 a.remove_keys()
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
 
         self.close()
@@ -277,7 +278,7 @@ class AnnotationContextMenu(ContextMenu):
             try:
                 a.project.remove_annotation(a)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
         self.close()
 
@@ -312,7 +313,7 @@ class ScreenshotContextMenu(ContextMenu):
             try:
                 s.project.remove_screenshot(s)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
         self.close()
 
@@ -323,7 +324,7 @@ class ScreenshotContextMenu(ContextMenu):
             self.main_window.player.pause()
             self.main_window.player.set_media_time(last.movie_timestamp)
         except Exception as e:
-            print("ContextMenu Error", e)
+            log_error("ContextMenu Error", e)
 
         self.close()
 
@@ -357,7 +358,7 @@ class SegmentContexMenu(ContextMenu):
             try:
                 s.project.remove_segment(s)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
         self.close()
 
@@ -403,7 +404,7 @@ class ScreenshotGroupContexMenu(ContextMenu):
         try:
             self.project.remove_screenshot_group(self.screenshot_group)
         except Exception as e:
-            print("ContextMenu Error", e)
+            log_error("ContextMenu Error", e)
 
     def on_set_active(self):
         self.project.set_current_screenshot_group(self.screenshot_group)
@@ -446,14 +447,14 @@ class NodeScriptContextMenu(ContextMenu):
             try:
                 self.project.remove_script(script)
             except Exception as e:
-                print("ContextMenu Error", e)
+                log_error("ContextMenu Error", e)
                 continue
 
     def on_open_script(self):
         try:
             self.project.set_current_script(self.scripts[0])
         except Exception as e:
-            print("ContextMenu Error", e)
+            log_error("ContextMenu Error", e)
 
 
 class NodeScriptRootContextMenu(ContextMenu):
@@ -503,7 +504,7 @@ class MediaObjectContextMenu(ContextMenu):
             for obj in self.media_object:
                 obj.container.remove_media_object(obj)
         except Exception as e:
-            print(e)
+            log_error(e)
             pass
 
 

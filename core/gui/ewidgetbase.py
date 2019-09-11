@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from core.data.log import log_error
 from core.data.computation import pixmap_to_numpy, numpy_to_pixmap
 import cv2
 from functools import partial
@@ -179,7 +180,7 @@ class EDockWidget(QDockWidget):
         try:
             return self.main_window.project
         except TypeError:
-            print(self.__class__.__name__, ".main_window attributed of ", self, \
+            log_error(self.__class__.__name__, ".main_window attributed of ", self, \
                 " doesn't seem to be from derived from class MainWindow")
 
     def set_ui_enabled(self, state):

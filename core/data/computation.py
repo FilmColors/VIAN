@@ -5,6 +5,7 @@ These operations can be of arbitrary type and are not categorized.
 
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
+from core.data.log import *
 import PyQt5.QtCore as QtCore
 import subprocess
 import cv2
@@ -470,14 +471,14 @@ def open_file(file_name):
             subprocess.call([opener, file_name])
         return True
     except Exception as e:
-        print(e)
+        log_error(e)
         return False
 
 
 def extract_zip(zipfilepath, extractiondir):
     zip = ZipFile(zipfilepath)
     zip.extractall(path=extractiondir)
-    print("Extraction finished")
+    log_info("Extraction finished")
 
 
 def is_subdir(path, directory):
@@ -566,11 +567,9 @@ def overlap_rect(r1, r2):
     '''
 
     if (r1[0] > r2[0] + r2[2]) or (r1[0] + r1[2] < r2[0]):
-        print("Out1")
         return False
 
     if (r1[1] < r2[1] + r2[3]) or (r1[1] + r1[3] < r2[1]):
-        print("Out2")
         return False
     return True
 

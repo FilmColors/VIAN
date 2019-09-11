@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import DataSerialization
 from scipy.signal import savgol_filter, resample
+from core.data.log import log_debug, log_info, log_error
 from core.container.container_interfaces import ITimelineItem
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
@@ -39,7 +40,7 @@ class ITimeStepDepending():
         dummy = dummy
 
     def on_timestep_update(self, time):
-        print("ITimeStepDepending: Not Implemented by", self)
+        log_debug("ITimeStepDepending: Not Implemented by", self)
 
 
 class IAnalysisJob(QObject):
@@ -121,7 +122,7 @@ class IAnalysisJob(QObject):
         :param sign_progress: a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])
         :return: AnalysisJobAnalysis Object
         """
-        print("get_name not implemented by", self)
+        log_debug("get_name not implemented by", self)
 
     def modify_project(self, project, result, main_window = None):
         """
@@ -165,7 +166,7 @@ class IAnalysisJob(QObject):
         :param data_path: The Path to the data directory of the project
         :return: A QWidget which will be added to the Visualizations Tab
         """
-        print("get_name not implemented by", self)
+        log_debug("get_name not implemented by", self)
 
     def get_preview(self, analysis):
         """
@@ -248,7 +249,7 @@ class IConcurrentJob():
         pass
 
     def run_concurrent(self, args, sign_progress):
-        print("run_concurrent not implemented by", self)
+        log_debug("run_concurrent not implemented by", self)
 
     def modify_project(self, project, result, sign_progress = None, main_window = None):
         pass

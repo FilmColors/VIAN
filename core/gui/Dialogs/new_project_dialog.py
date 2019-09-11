@@ -143,7 +143,6 @@ class NewProjectDialog(EDialogWidget):
 
     def on_browse_project_path(self):
         path = QFileDialog.getExistingDirectory(directory=self.project_dir)
-        print(path)
         self.project_dir = path
         self.lineEdit_ProjectPath.setText(self.project.folder)
 
@@ -155,7 +154,6 @@ class NewProjectDialog(EDialogWidget):
             self.path_set_from_dialog = True
         else:
             self.image_paths = QFileDialog.getOpenFileNames()[0]
-            print(self.image_paths)
 
     def on_desc_name_changed(self):
         self.project.movie_descriptor.movie_name = self.lineEdit_Name.text()
@@ -234,10 +232,6 @@ class NewProjectDialog(EDialogWidget):
             self.lineEdit_MoviePath.setText(path)
 
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
-
-        print(self.project.folder, "\n",
-              self.project.path, "\n",
-              self.settings.DIR_PROJECTS)
 
         # vocabularies = []
         # for c in self.voc_cbs:

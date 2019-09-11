@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent, QColor
 from PyQt5 import uic
 from core.data.computation import create_icon
+from core.data.log import log_error, log_info, log_warning, log_debug
 from core.container.project import VIANProject
 from core.gui.drop_image_container import DropImageContainer
 from core.container.experiment import Vocabulary, VocabularyWord, compare_vocabularies
@@ -66,7 +67,6 @@ class VocabularySaveDialog(QDialog):
     def on_save(self, save_as = False):
         if save_as:
             folder = QFileDialog.getExistingDirectory()
-            print(folder)
         else:
             folder = None
         for itm in self.itms:
@@ -78,9 +78,9 @@ class VocabularySaveDialog(QDialog):
                     path = os.path.join(folder, voc.name + ".json")
                 voc.export_vocabulary(path)
 
-                print("Saving", itm['voc'])
+                log_info("Saving", itm['voc'])
             else:
-                print("Not Saving", itm['voc'])
+                log_info("Not Saving", itm['voc'])
 
 
 class VocabularyCompareDialog(QDialog):
@@ -98,7 +98,6 @@ class VocabularyCompareDialog(QDialog):
         self.itms = []
         self.callback = callback
         for v in comparisons:
-            print(v)
             voc = v['voc']
             changes = v['changes']
             itm = QListWidgetItem(str(voc.name) + "\t" + str(changes))
@@ -182,10 +181,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
     def import_vocabularies(self):
         files = QFileDialog.getOpenFileNames(filter="*.json")[0]
         for f in files:
-            print(f)
             self.vocabulary_view.vocabulary_collection.import_vocabulary(f)
-
-        print(files)
 
     def synchronize_from_library_to_project(self):
         if len(self.vocabulary_view.treeView.selected_vocabularies) == 0:
@@ -382,7 +378,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
                 item = VocabularyItem(word.name, word)
 
             else:
-                print("FAILED TO CREAE WORD")
+                log_error("Failed to create word")
             self.add_to_tree(selected, item)
         self.lineEdit_Item.setText("")
 

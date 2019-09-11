@@ -2,6 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from core.gui.ewidgetbase import EDockWidget
+from core.data.log import log_error
 import numpy as np
 import os
 """
@@ -280,7 +281,7 @@ class RecentColors(QScrollArea):
         try:
             self.recent_colors.remove(c)
         except Exception as e:
-            print(e)
+            log_error(e)
 
         self.update_widgets()
 

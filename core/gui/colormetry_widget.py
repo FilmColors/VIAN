@@ -3,6 +3,7 @@ from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from core.data.interfaces import IProjectChangeNotify
+from core.data.log import log_error, log_info
 from core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_mapping_3d, HilbertMode
 from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
 from core.visualization.basic_vis import HistogramVis
@@ -26,7 +27,7 @@ class ColorimetryWorker(QObject):
             self.function(data)
             self.onProcessingDone.emit()
         except Exception as e:
-            print(e)
+            log_error(e)
 
 
 
@@ -191,7 +192,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                     self.hilbert_vis.plot_color_histogram(data['histogram'])
 
             except Exception as e:
-                print("Exception in ColormetryWidget.update_timestep()", str(e))
+                log_error("Exception in ColormetryWidget.update_timestep()", str(e))
             self.is_drawing = False
 
     @pyqtSlot(int)
@@ -216,8 +217,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         try:
             self.time_palette.set_palette(data[0], data[1])
             self.time_palette.draw_palette()
-        except:
-            print("Exception in ColorimetryLiveWidget::plot_time_palette()")
+        except Exception as e:
+            log_error("Exception in ColorimetryLiveWidget::plot_time_palette()", e)
             pass
 
     def resizeEvent(self, *args, **kwargs):
@@ -232,7 +233,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
                     data = self.main_window.project.colormetry_analysis.get_update(self.main_window.player.get_media_time())
                     self.update_timestep(data, None)
                 except Exception as e:
-                    print(e)
+                    log_error("Visibility Changed Exception", e)
 
     def on_selected(self, sender, selected):
         pass

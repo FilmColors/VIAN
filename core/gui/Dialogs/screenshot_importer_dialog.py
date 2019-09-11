@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QFileDialog
 from core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ScreenshotImporter
+from core.data.log import log_error, log_info
 from core.data.computation import ts_to_ms, ms_to_frames
 from functools import partial
 from core.container.project import VIANProject
@@ -75,7 +76,7 @@ class DialogScreenshotImport(EDialogWidget):
                 self.label_P1.setText(text_full)
                 self.label_P1.setVisible(True)
             except Exception as e:
-                print(e)
+                log_error(e)
 
         else:
             self.label_P0.setVisible(False)
@@ -134,8 +135,7 @@ class DialogScreenshotImport(EDialogWidget):
                         scr_paths.append(f)
 
                     except Exception as e:
-                        raise e
-                        print("Error in Screenshot Import", str(e))
+                        log_error("Error in Screenshot Import", str(e))
                         continue
 
             elif idx_segment >= 0:
@@ -150,7 +150,7 @@ class DialogScreenshotImport(EDialogWidget):
                         scr_paths.append(f)
                         segment_ids.append(segment_id - 1)
                     except Exception as e:
-                        print("Error in Screenshot Import", str(e))
+                        log_error("Error in Screenshot Import", str(e))
                         continue
                 for s in project.get_main_segmentation().segments:
                     segment_ranges.append([ms_to_frames(s.get_start(), fps), ms_to_frames(s.get_end(), fps)])

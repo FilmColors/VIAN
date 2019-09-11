@@ -807,7 +807,8 @@ class DrawingBase(QtWidgets.QWidget):
             qp.end()
 
     def drawShape(self, qp, rect = None):
-        print("not Implemented")
+        pass
+        # print("not Implemented")
 
     def renderDrawing(self,qp, offset, size, scale = 1.0):
 
