@@ -917,6 +917,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     #region CONTEXT MENU BINDINGS
     def new_segment(self):
+        if self.main_window.project is None:
+            return
         if self.selector is not None and self.selected is not None:
             if self.selected.get_type() == SEGMENTATION:
                 self.selected.create_segment2(self.selector.start,
@@ -951,6 +953,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # which means, that the segment is created from the last segments end to the current movie-time
 
         forward = False
+        if self.project() is None:
+            return
 
         if not lst:
                 lst = [self.curr_movie_time - 1, self.curr_movie_time]
@@ -963,13 +967,16 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         else:
             self.main_window.show_info_popup(self.frame_Bars, "Please select a Segmentation before creating new Segments. ", Qt.TopLeftCorner)
 
-
     def create_layer(self, lst):
+        if self.project() is None:
+            return
         if len(lst) == 0:
             lst = [self.curr_movie_time, self.duration]
         self.project().create_annotation_layer("New Layer", lst[0], lst[1])
 
     def create_segmentation(self):
+        if self.project() is None:
+            return
         self.project().create_segmentation("New Segmentation")
     #endregion
 
@@ -1972,7 +1979,6 @@ class TimelineTimemark(QtWidgets.QWidget):
         pen = QtGui.QPen()
         qp.begin(self)
 
-
         qp.setRenderHint(QtGui.QPainter.Antialiasing)
         pen.setColor(self.color)
         pen.setWidth(3)
@@ -2038,35 +2044,37 @@ class TimebarDrawing(QtWidgets.QWidget):
         else:
             decimal_heximal = 1.0
 
+        h_text = 15
         h = 15
+        h2 = 45
         for i in range(int(t_start * res_factor), int(t_end * res_factor)):
             pos = round((float(i / res_factor) - t_start) / self.timeline.scale * 1000 + self.time_offset)
 
             if (i * 1000 / res_factor) % (((10 ** (p_break))* 1000) * decimal_heximal) == 0:
                 s = ms_to_string(i * (1000 / res_factor), include_ms=p_break < 0.01)
-                qp.drawText(QtCore.QPoint(pos - (len(s) / 2) * 7, 8), s)
+                qp.drawText(QtCore.QPoint(pos - (len(s) / 2) * 7, h_text), s)
 
             if (i * 1000 / res_factor) % (((10 ** p_break * 1000)) * decimal_heximal) == 0:
-                h = 10
+                h = 25
                 pen.setWidth(1)
                 qp.setPen(pen)
                 a = QtCore.QPoint(pos, h)
-                b = QtCore.QPoint(pos, 30)
+                b = QtCore.QPoint(pos, h2)
                 qp.drawLine(a, b)
 
             elif (i * 1000 / res_factor) % int(((10 ** p_break * 1000)* decimal_heximal / 2)) == 0:
-                h = 15
+                h = 30
                 pen.setWidth(1)
                 qp.setPen(pen)
                 a = QtCore.QPoint(pos, h)
-                b = QtCore.QPoint(pos, 30)
+                b = QtCore.QPoint(pos, h2)
                 qp.drawLine(a, b)
             elif (i * 1000 / res_factor) % int(((10 ** (p_break - 1)) * 1000)) == 0:
-                h = 20
+                h = 35
                 pen.setWidth(1)
                 qp.setPen(pen)
                 a = QtCore.QPoint(pos, h)
-                b = QtCore.QPoint(pos, 30)
+                b = QtCore.QPoint(pos, h2)
                 qp.drawLine(a, b)
 
         # Draw the colormetry progress Bar
@@ -2247,7 +2255,31 @@ class TimelineVisualization(TimelineBar):
     def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height = 45):
         super(TimelineVisualization, self).__init__(parent, timeline, control, height)
         self.dataset = dataset
+        self.line_color = QColor(98, 161, 169)
 
+    def render_image(self):
+        t_start = self.timeline.get_current_t_start()
+        t_end = self.timeline.get_current_t_end()
+        data, ms = self.dataset.get_data_range(t_start, t_end)
+
+        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
+        qimage.fill(QtCore.Qt.transparent)
+        qp = QtGui.QPainter(qimage)
+
+        pen = QtGui.QPen()
+
+        qp.setPen(pen)
+        qp.begin(qimage)
+        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+
+        rect = QRect(self.rect().x(),
+                     self.rect().y(),
+                     np.clip(self.rect().width(), None, self.timeline.duration / self.timeline.scale),
+                     self.rect().height())
+
+        qp.fillRect(rect, QtGui.QColor(12, 12, 12))
+        return qimage, qp, data, t_start, t_end, ms
 
 from core.visualization.line_plot import LinePlot
 
@@ -2265,23 +2297,32 @@ class TimelineLinePlot(TimelineVisualization):
         self.setFixedHeight(height)
 
     def render_image(self):
-        t_start = self.timeline.get_current_t_start()
-        t_end = self.timeline.get_current_t_end()
-        data, ms = self.dataset.get_data_range(t_start, t_end)
-
-        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
-        qimage.fill(QtCore.Qt.transparent)
-        qp = QtGui.QPainter(qimage)
-
+        # t_start = self.timeline.get_current_t_start()
+        # t_end = self.timeline.get_current_t_end()
+        # data, ms = self.dataset.get_data_range(t_start, t_end)
+        #
+        # qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
+        # qimage.fill(QtCore.Qt.transparent)
+        # qp = QtGui.QPainter(qimage)
+        #
+        # pen = QtGui.QPen()
+        # pen.setColor(self.line_color)
+        #
+        # qp.setPen(pen)
+        # qp.begin(qimage)
+        # qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        # qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        #
+        # rect = QRect(self.rect().x(),
+        #              self.rect().y(),
+        #              np.clip(self.rect().width(), None, self.timeline.duration/self.timeline.scale),
+        #              self.rect().height())
+        #
+        # qp.fillRect(rect, QtGui.QColor(12, 12, 12))
+        qimage, qp, data, t_start, t_end, ms = super(TimelineLinePlot, self).render_image()
         pen = QtGui.QPen()
         pen.setColor(self.line_color)
-
         qp.setPen(pen)
-        qp.begin(qimage)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
-
-        qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
         path = None
         for i in range(data.shape[0]):
             x = ((ms[i] - t_start)) / self.timeline.scale
@@ -2340,19 +2381,20 @@ class TimelineAreaPlot(TimelineVisualization):
         self.setFixedHeight(height)
 
     def render_image(self):
-        t_start = self.timeline.get_current_t_start()
-        t_end = self.timeline.get_current_t_end()
-        data, ms = self.dataset.get_data_range(t_start, t_end)
-
-        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
-        qimage.fill(QtCore.Qt.transparent)
-        qp = QtGui.QPainter(qimage)
-        pen = QtGui.QPen()
-        qp.begin(qimage)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
-        pen.setColor(QtGui.QColor(255, 255, 255))
-        qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
+        # t_start = self.timeline.get_current_t_start()
+        # t_end = self.timeline.get_current_t_end()
+        # data, ms = self.dataset.get_data_range(t_start, t_end)
+        #
+        # qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
+        # qimage.fill(QtCore.Qt.transparent)
+        # qp = QtGui.QPainter(qimage)
+        # pen = QtGui.QPen()
+        # qp.begin(qimage)
+        # qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        # qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        # pen.setColor(QtGui.QColor(255, 255, 255))
+        # qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
+        qimage, qp, data, t_start, t_end, ms = super(TimelineAreaPlot, self).render_image()
         itms = list(range(data.shape[0]))
         path = None
         for i in itms:

@@ -21,15 +21,18 @@ from PyQt5.QtWidgets import *
 from PyQt5 import uic
 from core.data.interfaces import IConcurrentJob
 
-class FiwiGlossaryEvaluationPlugin(GAPlugin):
-    def __init__(self, main_window):
-        super(FiwiGlossaryEvaluationPlugin, self).__init__(main_window)
-        self.plugin_name = "GlossaryDB Evaluation"
-        self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
+## TODO Remove this code
+## This is deprecated
 
-    def get_window(self, parent):
-        wnd = FiwiGlossaryEvaluationPluginDialog(self.main_window)
-        wnd.show()
+# class FiwiGlossaryEvaluationPlugin(GAPlugin):
+#     def __init__(self, main_window):
+#         super(FiwiGlossaryEvaluationPlugin, self).__init__(main_window)
+#         self.plugin_name = "GlossaryDB Evaluation"
+#         self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
+#
+#     def get_window(self, parent):
+#         wnd = FiwiGlossaryEvaluationPluginDialog(self.main_window)
+#         wnd.show()
 
 class FiwiGlossaryEvaluationPluginDialog(EDialogWidget):
     def __init__(self, main_window):
@@ -50,8 +53,7 @@ class FiwiGlossaryEvaluationPluginDialog(EDialogWidget):
                                                                  args = [self.lineEdit_DB.text(),
                                                                          self.lineEdit_Glossary.text(),
                                                                          self.lineEdit_Result.text()
-                                                                         ])
-                )
+                                                                         ]))
             self.close()
         except Exception as e:
             print(e)
