@@ -286,7 +286,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 if self.behaviour == "query":
                     keywords = self.current_experiment.get_unique_keywords()
                 else:
-                    keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+                    keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container(),
+                                                                           return_all_if_none=True)
 
                 keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
 

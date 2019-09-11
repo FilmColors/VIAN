@@ -21,4 +21,4 @@ if __name__ == '__main__':
                 if len(clobj.target_container) == 0:
                     clobj.target_container.append(segm)
 
-        p.store_project(HeadlessUserSettings())
+        p.store_project()

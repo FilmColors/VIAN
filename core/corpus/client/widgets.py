@@ -6,6 +6,7 @@ from core.data.settings import Contributor
 import os
 import numpy as np
 from PyQt5 import uic
+from core.data.log import log_warning, log_info, log_error, log_debug
 from core.data.computation import create_icon
 from core.corpus.client.corpus_client import CorpusClient
 from core.gui.Dialogs.new_project_dialog import FilmographyWidget2
@@ -177,6 +178,11 @@ class CorpusProgressWidget(QWidget):
     def run_all(self):
         if self.main_window.project is None:
             QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
+            return
+        if len(self.main_window.project.experiments) == 0:
+            QMessageBox.information(self, "No Experiment created.", "You first have to create a experiment with the FilmColorsTemplate.")
+            return
+
         for priority in sorted(self.missing_analyses.keys()):
             for analysis_name in self.missing_analyses[priority].keys():
                 analysis = self.main_window.eval_class(analysis_name)
@@ -184,7 +190,7 @@ class CorpusProgressWidget(QWidget):
                     clobj = self.main_window.project.experiments[0].get_classification_object_by_name(clobj_name)
 
                     if clobj is None:
-                        print("Not found")
+                        log_warning("Classification Object not found")
                         continue
                     d = dict(
                         analysis= analysis(),
@@ -192,7 +198,7 @@ class CorpusProgressWidget(QWidget):
                         parameters = None,
                         classification_objs = clobj
                     )
-                    print(priority, analysis_name, clobj_name)
+                    log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
                     self.main_window.on_start_analysis(d)
 
 
@@ -326,7 +332,7 @@ class CorpusCommitDialog(EDialogWidget):
             self.genres = []
             self.countries = []
             self.companies = []
-            print(e)
+            log_error(e)
 
         self.filmography = FilmographyWidget2(self, main_window.project, persons=self.persons,
                                               processes=self.processes, genres=self.genres,

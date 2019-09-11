@@ -273,7 +273,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.project = main_window.project
         self.current_item = None
 
-        self.vocabulary_collection = VIANProject()
+        self.vocabulary_collection = VIANProject(name="VocabularyCollection")
         self.vocabulary_index = dict()
         self.fetch_vocabularies()
 
@@ -325,8 +325,6 @@ class VocabularyView(QWidget, IProjectChangeNotify):
                 to_add.append(v)
             else:
                 compared.append(compare_vocabularies(v, vocabularies_in_project[v.uuid]))
-
-
 
     def add_vocabulary(self, voc):
         self.vocabulary_model.appendRow(self.get_vocabulary_item_model(voc))

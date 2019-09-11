@@ -5,11 +5,12 @@ import cv2
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
-from core.container.project import VIANProject
+from core.container.project import VIANProject, VIAN_PROJECT_EXTENSION
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ELANProjectImporter
 from core.data.computation import images_to_movie
+
 
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path = "", vocabularies = None, elan_segmentation = None):
@@ -110,7 +111,7 @@ class NewProjectDialog(EDialogWidget):
 
 
         self.project.folder = self.project_dir
-        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + self.settings.PROJECT_FILE_EXTENSION
+        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
 
         if self.auto_naming:
             self.project_name = self.get_movie_id() + "_" + \
@@ -118,12 +119,10 @@ class NewProjectDialog(EDialogWidget):
                                 str(self.spinBox_Year.value()) + "_" + \
                                 self.comboBox_Source.currentText()
             self.lineEdit_ProjectName.setText(self.project_name)
-            # self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
 
             self.lineEdit_ProjectPath.setText(self.project.folder)
         else:
             self.project.name = self.project_name
-            # self.lineEdit_ProjectPath.setText(self.project.path + self.project_name + self.settings.PROJECT_FILE_EXTENSION)
             self.lineEdit_ProjectPath.setText(self.project.folder)
 
     def on_proj_name_changed(self):
@@ -209,7 +208,7 @@ class NewProjectDialog(EDialogWidget):
                 self.main_window.print_message("Project Creating failed due to an error in the settings file")
                 return
 
-        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + self.main_window.settings.PROJECT_FILE_EXTENSION
+        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
 
         if self.checkBox_FromImages.isChecked():

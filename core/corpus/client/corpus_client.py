@@ -347,7 +347,7 @@ class WebAppCorpusInterface(QObject):
 
                 # -- Creating the Archive --
                 print("Export to:", export_project_dir)
-                project.store_project(UserSettings(), os.path.join(export_project_dir, project.name + ".eext"))
+                project.store_project(os.path.join(export_project_dir, project.name + ".eext"))
                 shutil.make_archive(archive_file, 'zip', export_project_dir)
 
             # endregion

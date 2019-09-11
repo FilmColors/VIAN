@@ -72,6 +72,7 @@ _window_thread = thread = Thread(target=_init_application)
 _window_thread.start()
 while(MAIN_WINDOW is None): pass
 
+
 class HeadlessUserSettings():
     def __init__(self):
         self.PROJECT_FILE_EXTENSION = ".eext"
@@ -288,7 +289,7 @@ def create_project_headless(name, location, movie_path, screenshots_frame_pos = 
                 project.create_screenshot_headless("Screenshot_" + str(i).zfill(3), frame_pos=s, fps=fps)
 
         # Store the project
-        project.store_project(HeadlessUserSettings(), project.path)
+        project.store_project(project.path)
         project.connect_hdf5()
         project.hdf5_manager.initialize_all()
         project.hdf5_manager.initialize_colorimetry(int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 30))
@@ -439,7 +440,7 @@ def to_corpus(project):
 
         # -- Creating the Archive --
         print("Export to:", export_project_dir)
-        project.store_project(UserSettings(), os.path.join(export_project_dir, project.name + ".eext"))
+        project.store_project(os.path.join(export_project_dir, project.name + ".eext"))
         archive_file = os.path.join(export_root, project.name)
         shutil.make_archive(archive_file, 'zip', export_project_dir)
     except Exception as e:

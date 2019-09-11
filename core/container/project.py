@@ -20,6 +20,7 @@ from .node_scripts import *
 
 # from core.data.importers import ImportDevice
 # from core.data.exporters import ExportDevice
+VIAN_PROJECT_EXTENSION = ".eext"
 
 class VIANProject(QObject, IHasName, IClassifiable):
     """
@@ -90,7 +91,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
     onProjectLoaded = pyqtSignal()
     onProjectChanged = pyqtSignal(object, object)
 
-    def __init__(self, path = "", name = "", folder=""):
+    def __init__(self, name = "NewProject", path = None, folder=None):
+        if path is None and name is None:
+            raise ValueError("Either name or path has to be given to VIANProject.")
+        elif name is None:
+            name = os.path.split(path)[1].replace(VIAN_PROJECT_EXTENSION, "")
+
+        if folder is None and path is not None:
+            folder = os.path.split(path)[0]
+
         IClassifiable.__init__(self)
         QObject.__init__(self)
         self.undo_manager = UndoRedoManager()
@@ -863,7 +872,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region IO
-    def store_project(self, settings, path = None):
+    def store_project(self, path = None):
         """
         Stores the project json to the given filepath.
         if no path is given, the default path is used.
@@ -942,13 +951,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         )
         if path is None:
             path = project.path
-        path = path.replace(settings.PROJECT_FILE_EXTENSION, "")
+        path = path.replace(VIAN_PROJECT_EXTENSION, "")
 
         numpy_path = path + "_scr"
         project_path = path + ".eext"
-
-        if settings.SCREENSHOTS_STATIC_SAVE:
-            np.savez(numpy_path, imgs=screenshots_img, annotations=screenshots_ann, empty=[True])
 
         try:
             with open(project_path, 'w') as f:
@@ -956,7 +962,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         except Exception as e:
             print("Exception during Storing: ", str(e))
 
-    def load_project(self, settings, path, main_window = None):
+    def load_project(self, path, main_window = None):
         """
         Loads a project from a given file.
 
@@ -964,8 +970,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param path:
         :return:
         """
-        if not settings.PROJECT_FILE_EXTENSION in path:
-            path += settings.PROJECT_FILE_EXTENSION
+        if not VIAN_PROJECT_EXTENSION in path:
+            path += VIAN_PROJECT_EXTENSION
 
         if not os.path.isfile(path):
             print("File not Found: ", path)
@@ -1033,7 +1039,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     self.path = self.folder + "/" + self.name
                     os.mkdir(self.folder)
                     self.create_file_structure()
-                    copy2(old_path, self.path + settings.PROJECT_FILE_EXTENSION)
+                    copy2(old_path, self.path + VIAN_PROJECT_EXTENSION)
 
                 except Exception as e:
                     print(e)
@@ -1273,6 +1279,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def import_(self, device, path):
         device.import_(self, path)
 
+    def __enter__(self):
+        if self.folder is not None:
+            self.create_file_structure()
+            self.connect_hdf5()
+            self.store_project()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.hdf5_manager is not None:
+            self.hdf5_manager.on_close()
+
+
     #endregion
 
     #region Vocabularies
@@ -1439,12 +1457,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     #region Experiments
 
-    def create_experiment(self) -> Experiment:
+    def create_experiment(self, name="New Experiment") -> Experiment:
         """
         Creates a new Experiment instance to the project.
         :return: Experiment instance created
         """
-        new = Experiment()
+        new = Experiment(name=name)
         self.add_experiment(new)
         return new
         pass

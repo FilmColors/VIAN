@@ -577,3 +577,41 @@ class SegmentationImporter(CSVImporter):
 
         project.dispatch_changed()
 
+
+class ExperimentTemplateImporter(ImportDevice):
+    def import_(self, project:VIANProject, path):
+        with open(path, "r") as f:
+            data = json.load(f)
+        experiment = project.create_experiment(data['experiment']['name'])
+        cl_objs_index = dict()
+        for entry in data['classification_objects']:
+            clobj = experiment.create_class_object(entry['name'])
+            clobj.semantic_segmentation_labels = (entry['semantic_segmentation_dataset'], [lbl for lbl in entry['semantic_segmentation_label_ids']])
+            cl_objs_index[entry['id']] = clobj
+
+        words_index = dict()
+        for entry in data['vocabularies']:
+            voc = project.create_vocabulary(name=entry['name'])
+            voc.category = entry['vocabulary_category']
+            for w in entry['words']:
+                word = voc.create_word(name = w['name'])
+                word.complexity_group = w['complexity_group']
+                word.complexity_lvl = w['complexity']
+                word.organization_group = w['arrangement_group']
+                words_index[w['id']] = word
+
+        vocs_to_add = []
+        unique_keywords = dict()
+        for entry in data['unique_keywords']:
+            clobj = cl_objs_index[entry['classification_object']]
+            word = words_index[entry['word']]
+            if (word.vocabulary, clobj) not in vocs_to_add:
+                vocs_to_add.append((word.vocabulary, clobj))
+                unique_keywords[word.vocabulary.unique_id] = dict()
+                unique_keywords[word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
+            else:
+                unique_keywords[word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
+        for vocabulary, clobj in vocs_to_add:
+            clobj.add_vocabulary(vocabulary,unique_keywords=unique_keywords[vocabulary.unique_id])
+
+        print(experiment.classification_objects)

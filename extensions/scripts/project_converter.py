@@ -41,4 +41,4 @@ if __name__ == '__main__':
         for a in new_analyses:
             old_project.add_analysis(a)
 
-        old_project.store_project(HeadlessUserSettings())
+        old_project.store_project()

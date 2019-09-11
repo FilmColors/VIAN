@@ -29,4 +29,4 @@ if __name__ == '__main__':
             project.add_analysis(analyis)
             analyis.set_adata(mask)
 
-    project.store_project(HeadlessUserSettings())
+    project.store_project()

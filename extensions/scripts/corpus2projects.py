@@ -170,4 +170,4 @@ if __name__ == '__main__':
                 except Exception as e:
                     print(e)
 
-        project.store_project(HeadlessUserSettings(), project.path)
+        project.store_project(project.path)

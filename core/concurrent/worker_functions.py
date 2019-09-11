@@ -9,6 +9,7 @@ from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
 from core.container.screenshot import *
 from core.data.computation import frame2ms
+from core.container.project import VIAN_PROJECT_EXTENSION
 
 def create_screenshot(args, sign_progress):
 
@@ -34,7 +35,6 @@ def create_screenshot(args, sign_progress):
 def store_project_concurrent(args, sign_progress):
     project = args[0]
     path = args[1]
-    settings = args[2]
 
     a_layer = []
     screenshots = []
@@ -112,13 +112,10 @@ def store_project_concurrent(args, sign_progress):
     sign_progress(0.6)
     if path is None:
         path = project.path
-    path = path.replace(settings.PROJECT_FILE_EXTENSION, "")
+    path = path.replace(VIAN_PROJECT_EXTENSION, "")
 
     numpy_path = path + "_scr"
     project_path = path + ".eext"
-
-    if settings.SCREENSHOTS_STATIC_SAVE:
-        np.savez(numpy_path, imgs=screenshots_img, annotations=screenshots_ann, empty=[True])
 
     sign_progress(0.8)
     try:

@@ -93,14 +93,11 @@ class ConcurrentJobEvaluationParser(IConcurrentJob):
         parse(glossary_path, database_path, outfile, sign_progress)
 
 def parse(glossary_path,database_path, outfile, on_progress):
-
-
     # Parse the Glossary
     glossary_words = []
     glossary_ids = []
     glossary_categories = []
     glossary_omit = []
-
 
     with open(glossary_path, 'r') as input_file:
         reader = csv.reader(input_file, delimiter=';')

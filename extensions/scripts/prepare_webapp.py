@@ -55,7 +55,7 @@ for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
         project.movie_descriptor.movie_name = t[3]
         project.movie_descriptor.movie_id = "_".join(t[:3])
         project.sort_screenshots()
-        project.store_project(HeadlessUserSettings())
+        project.store_project()
 
         # to_webapp(project, "gaudenz.halter@uzh.ch", "Graz@VMML", "http://ercwebapp.westeurope.cloudapp.azure.com/api/")
         to_webapp(project, bake_only=True)

@@ -522,12 +522,15 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.target_container = []
         self.semantic_segmentation_labels = ("", [])
 
-    def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None):
+    def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None, unique_keywords = None):
         if voc not in self.classification_vocabularies:
             self.classification_vocabularies.append(voc)
             keywords = []
             for i, w in enumerate(voc.words_plain):
-                keyword = UniqueKeyword(self.experiment, voc, w, self)
+                if unique_keywords is not None:
+                    keyword = unique_keywords[w.unique_id]
+                else:
+                    keyword = UniqueKeyword(self.experiment, voc, w, self)
                 if external_ids is not None:
                     keyword.external_id = external_ids[i]
                 keyword.set_project(self.project)
@@ -800,7 +803,9 @@ class Experiment(IProjectContainer, IHasName):
             result.extend(clobj.get_vocabularies())
         return result
 
-    def create_class_object(self, name, parent):
+    def create_class_object(self, name, parent=None):
+        if parent is None:
+            parent = self
         obj = ClassificationObject(name, self, parent)
         if parent is self:
             obj.set_project(self.project)
@@ -809,7 +814,7 @@ class Experiment(IProjectContainer, IHasName):
             parent.add_child(obj)
         return obj
 
-    def get_unique_keywords(self, container_type = None) -> List[UniqueKeyword]:
+    def get_unique_keywords(self, container_type = None, return_all_if_none = False) -> List[UniqueKeyword]:
         """
         :return: Returns a List of UniqueKeywords used in this Experiment's Classification Objects
         """
@@ -820,7 +825,9 @@ class Experiment(IProjectContainer, IHasName):
                 keywords.extend(k.unique_keywords)
         else:
             for k in objects:
-                if container_type in k.target_container:
+                if len(k.target_container) == 0 and return_all_if_none:
+                    keywords.extend(k.unique_keywords)
+                elif container_type in k.target_container:
                     keywords.extend(k.unique_keywords)
         return keywords
 

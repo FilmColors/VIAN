@@ -216,7 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player = Player_VLC(self)
         self.player_dock_widget = None
 
-        self.project = VIANProject(self, "", "Default Project")
+        self.project = VIANProject(name="Default Project", path=None)
         self.corpus_client = CorpusClient()
 
         self.frame_update_worker = TimestepUpdateWorkerSingle()
@@ -303,6 +303,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportVocabulary.triggered.connect(partial(self.import_vocabulary, None))
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
+        self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
 
         ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
@@ -1737,7 +1738,7 @@ class MainWindow(QtWidgets.QMainWindow):
             shutil.move(self.project.movie_descriptor.movie_path, new_path)
             self.project.movie_descriptor.set_movie_path(new_path)
 
-        self.project.store_project(self.settings)
+        self.project.store_project()
 
         self.project.inhibit_dispatch = False
 
@@ -1746,8 +1747,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
         dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
 
-        # if finish_callback is not None:
-        #     finish_callback()
 
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
@@ -1756,7 +1755,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.on_save_project()
 
         self.check_overlay_visibility()
-        path = QFileDialog.getOpenFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION, directory=self.settings.DIR_PROJECTS)
+        path = QFileDialog.getOpenFileName(filter="*" + VIAN_PROJECT_EXTENSION, directory=self.settings.DIR_PROJECTS)
         path = path[0]
         self.close_project()
         try:
@@ -1790,10 +1789,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message("Not Loaded, Path was Empty")
             return
 
-        new = VIANProject(self)
+        new = VIANProject()
         log_info("Loading Project Path", path)
         new.inhibit_dispatch = True
-        new.load_project(self.settings ,path, main_window=self)
+        new.load_project(path, main_window=self)
 
         self.project = new
         self.settings.add_to_recent_files(self.project)
@@ -1813,9 +1812,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_save_project(self, open_dialog=False, sync = False):
         if open_dialog is True or self.project.path is "" or self.project.name is "":
 
-            path = QFileDialog.getSaveFileName(filter="*" + self.settings.PROJECT_FILE_EXTENSION)
+            path = QFileDialog.getSaveFileName(filter="*" + VIAN_PROJECT_EXTENSION)
 
-            path = path[0].replace(self.settings.PROJECT_FILE_EXTENSION, "")
+            path = path[0].replace(VIAN_PROJECT_EXTENSION, "")
             path = path.replace("\\", "/")
             split = path.split("/")
             path = ""
@@ -1827,9 +1826,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.movie_descriptor.set_movie_path(self.player.movie_path)
 
             path = self.project.path
-            args = [self.project, path, self.settings]
+            args = [self.project, path]
         else:
-            args = [self.project, self.project.path, self.settings]
+            args = [self.project, self.project.path]
 
         if sync:
             store_project_concurrent(args, self.dummy_func)
@@ -2022,6 +2021,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 dialog = QMessageBox.information(self, "Export Segments", "You first have to select some segments to export.")
                 dialog.show()
         pass
+
+    def import_experiment(self):
+        if self.project is None:
+            QMessageBox.warning(self, "No Project loaded", "You first have to create a "
+                                                           "new project or load an existing to do this.")
+            return
+        file = QFileDialog.getOpenFileName()[0]
+        self.project.import_(ExperimentTemplateImporter(), file)
 
     #endregion
 
