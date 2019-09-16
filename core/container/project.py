@@ -1413,7 +1413,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :return: An imported Vocabulary Object
         """
         new_voc, id_table = Vocabulary("New").import_vocabulary(path, self, serialization)
-        print(path, new_voc.uuid)
         if add_to_global:
             self.add_vocabulary(new_voc)
 

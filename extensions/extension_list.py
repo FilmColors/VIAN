@@ -8,6 +8,7 @@ from functools import partial
 from PyQt5.QtWidgets import QMenu
 from core.data.interfaces import IAnalysisJob
 from core.data.plugin import GAPlugin
+from core.data.log import log_warning, log_error, log_info, log_debug
 
 
 class ExtensionList:
@@ -20,17 +21,17 @@ class ExtensionList:
         self.load_analysis()
         self.load_pipelines()
 
-        print("\n#### --- Extensions --- #####")
+        log_info("\n")
+        log_info("#### --- Extensions --- #####")
         if len(self.analyses) > 0:
-            print("Loaded Analyses")
+            log_info("Loaded Analyses")
             for a in self.analyses:
-                print(" --", a.__class__.__name__)
+                log_info(" --", a.__class__.__name__)
         if len(self.plugins) > 0:
-            print("Loaded Plugins")
+            log_info("Loaded Plugins")
             for a in self.plugins:
-                print(" --", a.__class__.__name__)
-
-        print("\n")
+                log_info(" --", a.__class__.__name__)
+        log_info("\n")
 
     def load_plugins(self):
         file_list = []
@@ -97,19 +98,19 @@ class ExtensionList:
         # print (os.path.abspath(os.path.curdir))
         for root, dirs, files in os.walk("extensions/pipelines/", topdown=False):
             for name in files:
-                if ".py" in name and not "__init__.py" in name and not "__pycache__" in name:
+                if "py" in name:
                     path = os.path.join(root, name)
                     path = path.replace("\\", "/")
                     path = path.replace(".py", "")
                     path = path.replace("/", ".")
-
-                    file_list.append(path)
+                    if not "__init__" in path and not "__pycache__" in path:
+                        file_list.append(path)
 
         for f in file_list:
             try:
                 importlib.import_module(f)
             except Exception as e:
-                print("Exception in load_pipelines():" ,e)
+                log_error("Exception in load_pipelines():" ,e)
                 continue
 
     def get_plugin_menu(self, parent):

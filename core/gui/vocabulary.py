@@ -111,7 +111,6 @@ class VocabularyCompareDialog(QDialog):
         hlt.addWidget(self.btn_apply)
         self.btn_apply.clicked.connect(self.on_apply)
 
-
     def on_apply(self):
         to_update = []
         for v in self.itms:
@@ -493,6 +492,7 @@ class VocabularyTreeView(QTreeView):
             self.setSelectionMode(self.SingleSelection)
         else:
             QKeyEvent.ignore()
+
 
 class VocabularyContextMenu(QMenu):
     def __init__(self, parent, pos, model_item, item, voc_collection, item_model):

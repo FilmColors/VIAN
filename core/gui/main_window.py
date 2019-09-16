@@ -113,6 +113,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for k, v in ALL_REGISTERED_PIPELINES.items():
             log_info("\t---", k.ljust(30),v)
         print_registered_analyses()
+        log_info("\n")
         self.is_darwin = False
 
         self.application_in_focus = True

@@ -4,6 +4,7 @@ import os
 import gc
 import numpy as np
 
+from core.data.log import log_info
 ALL_REGISTERED_ANALYSES = dict()
 
 
@@ -34,9 +35,9 @@ HDF5_WRITE_LOCK = Lock()
 HDF5_FILE_LOCK = Lock()
 
 def print_registered_analyses():
-    print("Registered Analyses:")
+    log_info("Registered Analyses:")
     for k,v in ALL_REGISTERED_ANALYSES.items():
-        print("\t--- " + v.__name__)
+        log_info("\t--- " + v.__name__)
 
 
 class HDF5Manager():
@@ -56,16 +57,16 @@ class HDF5Manager():
     def set_path(self, path):
         self.path = path
         init = False
-        print("HDF5: ", self.path)
+        log_info("HDF5: ", self.path)
         if not os.path.isfile(self.path):
             h5py.File(self.path, "w")
             init = True
         self.h5_file = h5py.File(self.path, "r+")
-        print("Datasets in HDF5 File:")
+        log_info("Datasets in HDF5 File:")
         for k in self.h5_file.keys():
-            print("\t-- ", k)
+            log_info("\t-- ", k)
             if k == "ColorPalettes" and self.h5_file["ColorPalettes"].shape[1] != 1024:
-                print("Deleting Palettes")
+                log_info("Deleting Palettes")
                 del self.h5_file["ColorPalettes"]
         return init
 
@@ -78,7 +79,7 @@ class HDF5Manager():
 
     def initialize_dataset(self, name, shape, dtype):
         if name not in self.h5_file:
-            print("Init:", name, shape, dtype)
+            log_info("Init:", name, shape, dtype)
             self.h5_file.create_dataset(name=name, shape=shape, dtype=dtype, maxshape=(None, ) + shape[1:], chunks=True)
             self._index[name] = 0
 

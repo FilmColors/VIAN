@@ -209,7 +209,6 @@ def create_hilbert_transform(s):
         c.append(t[2])
         colors.append([t[0][0] * s, t[1][0] * s, t[2][0] * s])
     colors = np.array([colors, colors]).astype(np.uint8)
-    print(colors.shape)
     colors = cv2.cvtColor(colors, cv2.COLOR_LAB2RGB)[0]
     return (a,b,c), colors
 
