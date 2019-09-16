@@ -42,7 +42,6 @@ class AudioHandler(QObject):
             if callback is not None and  i % 100 == 0:
                 callback(i / int(self.audioclip.duration / resolution))
         return arr
-        # for r in self.audioclip.duration:
 
 
 

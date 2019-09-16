@@ -10,11 +10,14 @@ from core.data.enums import DataSerialization
 from scipy.signal import savgol_filter, resample
 from core.data.log import log_debug, log_info, log_error
 from core.container.container_interfaces import ITimelineItem
+from core.container.analysis import AnalysisContainer
+
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from core.container.project import VIANProject
+    from core.container.analysis import AnalysisContainer
 
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
@@ -86,6 +89,7 @@ class IAnalysisJob(QObject):
         self.hdf5_manager = None
 
         self.target_class_obj = None
+        self.aborted = False
 
     def get_name(self):
         return self.name
@@ -126,7 +130,7 @@ class IAnalysisJob(QObject):
         return args, sign_progress
         # log_debug("get_name not implemented by", self)
 
-    def modify_project(self, project, result, main_window = None, clobj = None):
+    def modify_project(self, project, result, main_window = None):
         """
         If your Analysis should perform any modifications to the project, except storing the analysis,
         this is the place to perform them. 
@@ -211,7 +215,7 @@ class IAnalysisJob(QObject):
         """
         return data_dict
 
-    def fit(self, targets, class_objs = None, callback=print):
+    def fit(self, targets, class_objs = None, callback=print) -> AnalysisContainer:
         """
         Performs the analysis for given target containers and classification objects.
         If no classification object is given, a default one with the name "Global" is created.
@@ -227,12 +231,13 @@ class IAnalysisJob(QObject):
 
         if class_objs is None:
             clobj = project.get_classification_object_global("Global")
-            self._fit_single(project, targets, clobj, callback=callback)
+            X = self._fit_single(project, targets, clobj, callback=callback)
         else:
             if not isinstance(class_objs, list):
                 class_objs = [class_objs]
-            for clobj in class_objs:
-                self._fit_single(project, targets, clobj, callback=callback)
+            X = [self._fit_single(project, targets, clobj, callback=callback) for clobj in class_objs]
+
+        return X
 
     def _fit_single(self, project, targets, clobj, callback):
         fps = project.movie_descriptor.fps
@@ -254,10 +259,11 @@ class IAnalysisJob(QObject):
                     project.add_analysis(r)
         else:
             if res is None:
-                return
+                return None
             with project.project_lock:
                 self.modify_project(project, res)
                 project.add_analysis(res)
+        return res
 
     def from_hdf5(self, db_data):
         return db_data

@@ -58,21 +58,23 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamabl
         pass
 
     def serialize(self):
-        data_json = []
-        for d in self.get_adata():
-            data_json.append(np.array(d).tolist())
-
-
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
             notes=self.notes,
+            data = self.data,
+            analysis_job_class = self.analysis_job_class
         )
 
         return data
 
     def deserialize(self, serialization, project):
-        pass
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.notes = serialization['notes']
+        self.data = serialization['data']
+        self.analysis_job_class = serialization['analysis_job_class']
+
 
     def delete(self):
         self.project.remove_analysis(self)

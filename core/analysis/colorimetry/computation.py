@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 
 
-def calculate_histogram(image_stack, n_bins = 16, range_min = 0, range_max = 255):
+def calculate_histogram(image_stack, n_bins = 16, range_min = 0, range_max = 255, lab_mode = False):
     """
     Calculates the 3d histogram of a stack of images
     
@@ -34,10 +34,15 @@ def calculate_histogram(image_stack, n_bins = 16, range_min = 0, range_max = 255
     else:
         data = image_stack
     # Calculating the Histogram
-
-    hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
-                        [n_bins, n_bins, n_bins],
-                        [range_min, range_max, range_min, range_max,
-                         range_min, range_max])
+    if lab_mode:
+        hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+                            [n_bins, n_bins, n_bins],
+                            [0, 100, -128, 128,
+                             -128, 128])
+    else:
+        hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+                            [n_bins, n_bins, n_bins],
+                            [range_min, range_max, range_min, range_max,
+                             range_min, range_max])
     return hist.astype(np.uint64)
 
