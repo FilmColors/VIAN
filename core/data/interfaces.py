@@ -10,6 +10,12 @@ from core.data.enums import DataSerialization
 from scipy.signal import savgol_filter, resample
 from core.data.log import log_debug, log_info, log_error
 from core.container.container_interfaces import ITimelineItem
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.container.project import VIANProject
+
 #
 # from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
 VisualizationTab = namedtuple("VisualizationTab", ["name", "widget", "use_filter", "controls"])
@@ -203,31 +209,46 @@ class IAnalysisJob(QObject):
         return data_dict
 
     def fit(self, targets, class_objs = None):
+        """
+        Performs the analysis for given target containers and classification objects.
+        If no classification object is given, a default one with the name "Global" is created.
+
+        :param targets: The Target IProjectContainer Objects
+        :param class_objs: The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)
+        """
         if isinstance(targets, list):
-            project = targets[0].project
+            project = targets[0].project #type:VIANProject
         else:
             project = targets.project
 
-        for clobj in class_objs:
-            args = self.prepare(project, targets, parameters, fps, clobj)
+        if class_objs is None:
+            clobj = project.get_classification_object_global("Global")
+            self._fit_single(project, targets, clobj)
+        else:
+            for clobj in class_objs:
+                self._fit_single(project, targets, clobj)
 
-            res = []
-            if analysis.multiple_result:
-                for i, arg in enumerate(args):
-                    res.append(analysis.process(arg, progress_dummy))
-            else:
-                res = analysis.process(args, progress_dummy)
+    def _fit_single(self, project, targets, clobj):
+        fps = project.movie_descriptor.fps
+        args = self.prepare(project, targets, fps, clobj)
 
-            if isinstance(res, list):
-                for r in res:
-                    with PROJECT_LOCK:
-                        analysis.modify_project(project, r)
-                        project.add_analysis(r)
-            else:
-                with PROJECT_LOCK:
-                    analysis.modify_project(project, res)
-                    project.add_analysis(res)
+        res = []
+        if self.multiple_result:
+            for i, arg in enumerate(args):
+                res.append(self.process(arg, print))
+        else:
+            res = self.process(args, print)
 
+        if isinstance(res, list):
+            for r in res:
+                print(r)
+                with project.project_lock:
+                    self.modify_project(project, r)
+                    project.add_analysis(r)
+        else:
+            with project.project_lock:
+                self.modify_project(project, res)
+                project.add_analysis(res)
 
     def from_hdf5(self, db_data):
         return db_data

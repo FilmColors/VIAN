@@ -8,13 +8,13 @@ os.mkdir("test")
 
 try:
     project = VIANProject(path="test/test_project.eext",
-                          movie_path="C:\\Users\gaude\Documents\VIAN\projects\\Netflix3\\trailer.mp4").__enter__()
+                          movie_path="C:\\Users\\gaude\\Documents\\VIAN\\projects\\trailer.mp4").__enter__()
     project.store_project()
 
     segmentation = project.create_segmentation("Some Segmentation")
     segment = segmentation.create_segment2(0, 1000, body="Region to Analyse")
 
-    ColorPaletteAnalysis().fit(segment, [])
+    ColorPaletteAnalysis().fit(segment)
 
 
 

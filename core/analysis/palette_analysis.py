@@ -39,6 +39,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
         super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
         args = []
         fps = project.movie_descriptor.fps
+        if not isinstance(targets, list):
+            targets = [targets]
         for tgt in targets:
             semseg = None
             if isinstance(tgt, Screenshot):

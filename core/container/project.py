@@ -1,5 +1,7 @@
 # from core.node_editor.node_editor import *
 from shutil import copy2
+from threading import Lock
+
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QFileDialog
@@ -157,6 +159,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.selected = []
         self.segment_screenshot_mapping = dict()
         self.headless_mode = False
+
+        self.project_lock = Lock()
 
         if movie_path is not None:
             self.movie_descriptor.set_movie_path(movie_path)
@@ -1508,6 +1512,25 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.onExperimentRemoved.emit(experiment)
             self.dispatch_changed()
 
+    def get_classification_object_global(self, name) -> ClassificationObject:
+        """
+        Looks in all experiments if a specific classification object is present.
+        If no experiment is present or no classification object with given name,
+        the experiment and classification object is created.
+
+        :return: a classification object
+        """
+        cl_obj = None
+        for e in self.experiments:
+            t = e.get_classification_object_by_name(name)
+            if t is not None:
+                cl_obj = t
+                break
+        if cl_obj is None:
+            exp = self.create_experiment("Default Experiment")
+            cl_obj = exp.create_class_object(name)
+
+        return cl_obj
     #endregion
 
     # region Setters/Getters
