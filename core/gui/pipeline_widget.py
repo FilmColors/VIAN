@@ -12,6 +12,7 @@ from core.data.log import log_error, log_info
 from core.container.project import VIANProject
 from core.data.computation import import_module_from_path, create_icon
 
+
 class PipelineToolbar(EToolBar):
     onToComputeChanged = pyqtSignal(bool, bool, bool)
 
@@ -66,6 +67,7 @@ class PipelineToolbar(EToolBar):
         else:
             self.a_auto_screenshot.setEnabled(True)
             self.a_auto_segment.setEnabled(True)
+
 
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):

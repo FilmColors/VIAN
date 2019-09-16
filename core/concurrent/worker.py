@@ -6,6 +6,7 @@ import cv2
 from core.data.computation import numpy_to_pixmap, generate_id
 from core.data.interfaces import IProjectChangeNotify
 
+
 class WorkerSignals(QObject):
     sign_finished = pyqtSignal(tuple)
     sign_error = pyqtSignal(tuple)
@@ -136,7 +137,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.worker.signals.sign_task_manager_progress.connect(self.main_window.concurrent_task_viewer.update_progress)
 
     def push(self, project, analysis, targets, parameters, fps, class_objs):
-        self.queue.append((analysis, (project, targets, parameters, fps, class_objs)))
+        self.queue.append((analysis, (project, targets, fps, class_objs)))
         if self.running is None:
             self._start()
 

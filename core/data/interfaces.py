@@ -84,7 +84,7 @@ class IAnalysisJob(QObject):
     def get_name(self):
         return self.name
 
-    def prepare(self, project, targets, parameters, fps, class_objs = None):
+    def prepare(self, project, targets, fps, class_objs = None):
         """
         A step that should be performed in the main-thread before the processing takes place. 
         This is a good point to fetch all necessary data from the project and pack it to your needs.
@@ -97,13 +97,6 @@ class IAnalysisJob(QObject):
         :return: A List of packed Data which will be handed to the IAnalysisJob.process()
         """
         self.target_class_obj = class_objs
-        # Apply the given parameters
-        if parameters is None:
-            return
-        for k, v in parameters.items():
-            if hasattr(self, k):
-                setattr(self, k, v)
-
         return None
 
     def process(self, args, sign_progress):
@@ -208,6 +201,33 @@ class IAnalysisJob(QObject):
         :return: 
         """
         return data_dict
+
+    def fit(self, targets, class_objs = None):
+        if isinstance(targets, list):
+            project = targets[0].project
+        else:
+            project = targets.project
+
+        for clobj in class_objs:
+            args = self.prepare(project, targets, parameters, fps, clobj)
+
+            res = []
+            if analysis.multiple_result:
+                for i, arg in enumerate(args):
+                    res.append(analysis.process(arg, progress_dummy))
+            else:
+                res = analysis.process(args, progress_dummy)
+
+            if isinstance(res, list):
+                for r in res:
+                    with PROJECT_LOCK:
+                        analysis.modify_project(project, r)
+                        project.add_analysis(r)
+            else:
+                with PROJECT_LOCK:
+                    analysis.modify_project(project, res)
+                    project.add_analysis(res)
+
 
     def from_hdf5(self, db_data):
         return db_data

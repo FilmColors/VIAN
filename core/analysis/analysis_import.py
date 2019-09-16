@@ -34,13 +34,13 @@ except:
                                                                multiple_result=False,
                                                                data_serialization=DataSerialization.MASKS)
 
-        def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs=None):
+        def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs=None):
             """
             This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project,
             and gather all data we need.
 
             """
-            super(SemanticSegmentationAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
+            super(SemanticSegmentationAnalysis, self).prepare(project, targets, fps, class_objs)
 
             args = []
             fps = project.movie_descriptor.fps
@@ -48,10 +48,10 @@ except:
                 if tgt.get_type() == SCREENSHOT_GROUP:
                     for s in tgt.screenshots:
                         args.append([ms_to_frames(s.get_start(), fps), ms_to_frames(s.get_end(), fps),
-                                     project.movie_descriptor.movie_path, parameters, s.get_id()])
+                                     project.movie_descriptor.movie_path, s.get_id()])
                 else:
                     args.append([ms_to_frames(tgt.get_start(), fps), ms_to_frames(tgt.get_end(), fps),
-                                 project.movie_descriptor.movie_path, parameters, tgt.get_id()])
+                                 project.movie_descriptor.movie_path, tgt.get_id()])
             return args
 
         def process(self, args, sign_progress):

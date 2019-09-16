@@ -1,8 +1,26 @@
+import os
+import shutil
+from core.container.project import VIANProject
 
-from core.data.headless import load_project_headless
-from core.data.exporters import CSVExporter, _ScreenshotExporter, ImageType
+from core.analysis.analysis_utils import run_analysis
+from core.analysis.palette_analysis import ColorPaletteAnalysis
+os.mkdir("test")
 
-project, context = load_project_headless("F:\\_projects\\328_1_1_Total Recall\\328_1_1_Total Recall.eext")
-# context.load_screenshots()
+try:
+    project = VIANProject(path="test/test_project.eext",
+                          movie_path="C:\\Users\gaude\Documents\VIAN\projects\\Netflix3\\trailer.mp4").__enter__()
+    project.store_project()
 
-context.plot(project.analysis[150])
+    segmentation = project.create_segmentation("Some Segmentation")
+    segment = segmentation.create_segment2(0, 1000, body="Region to Analyse")
+
+    ColorPaletteAnalysis().fit(segment, [])
+
+
+
+
+
+except Exception as e:
+    project.close()
+    shutil.rmtree("test")
+    raise e

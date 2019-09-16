@@ -21,5 +21,14 @@ class TestCreate(unittest.TestCase):
             project.store_project()
             self.assertTrue(os.path.isfile("data/test_project.eext"))
 
+    def test_entities(self):
+        with VIANProject(name="TestProject", path="data/test_project.eext") as project:
+            segmentation = project.create_segmentation("SomeSegmentation")
+            self.assertTrue(len(self.project.segmentation) > 0)
+            segmentation.create_segment2(0, 1000, body="Some Annotation")
+            self.assertTure(len(segmentation.segments) > 0)
+            segmentation.create_segment2(1000, 2000, body="Another Annotation")
+
+
 if __name__ == '__main__':
     unittest.main()

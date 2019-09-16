@@ -30,13 +30,13 @@ class ColorPaletteAnalysis(IAnalysisJob):
                                                    multiple_result=True)
         self.resolution = resolution
 
-    def prepare(self, project: VIANProject, targets: List[IProjectContainer], parameters, fps, class_objs = None):
+    def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
         """
         This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
         and gather all data we need.
 
         """
-        super(ColorPaletteAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
+        super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
         args = []
         fps = project.movie_descriptor.fps
         for tgt in targets:

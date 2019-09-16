@@ -41,13 +41,13 @@ class BarcodeAnalysisJob(IAnalysisJob):
                                                  multiple_result=True)
         self.resolution = resolution
 
-    def prepare(self, project: VIANProject, targets: List[Segmentation], parameters, fps, class_objs = None):
+    def prepare(self, project: VIANProject, targets: List[Segmentation], fps, class_objs = None):
         """
         This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
         and gather all data we need.
         
         """
-        super(BarcodeAnalysisJob, self).prepare(project, targets, parameters, fps, class_objs)
+        super(BarcodeAnalysisJob, self).prepare(project, targets, fps, class_objs)
         # Since multiple_result is True, we want to generate a Barcode for each Segmentation
         # Thus an array of arguments has to be returned. For each Segmentation one argument Array
         args = []

@@ -27,8 +27,8 @@ class MovieMosaicAnalysis(IAnalysisJob):
                                                   multiple_result=True,
                                                   data_serialization=DataSerialization.MASKS)
 
-    def prepare(self, project, targets, parameters, fps, class_objs = None):
-        super(MovieMosaicAnalysis, self).prepare(project, targets, parameters, fps, class_objs)
+    def prepare(self, project, targets, fps, class_objs = None):
+        super(MovieMosaicAnalysis, self).prepare(project, targets, fps, class_objs)
         args = []
         for t in targets:
             if t.get_type() == MOVIE_DESCRIPTOR:
@@ -37,7 +37,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
             else:
                 start = ms_to_frames(t.get_start(), fps)
                 end = ms_to_frames(t.get_end(), fps)
-            args.append([start, end, project.movie_descriptor.get_movie_path(), parameters, t.get_id()])
+            args.append([start, end, project.movie_descriptor.get_movie_path(), t.get_id()])
 
         return args
 

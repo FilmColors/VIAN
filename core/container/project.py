@@ -91,7 +91,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     onProjectLoaded = pyqtSignal()
     onProjectChanged = pyqtSignal(object, object)
 
-    def __init__(self, name = "NewProject", path = None, folder=None):
+    def __init__(self, name = "NewProject", path = None, folder=None, movie_path = None):
         if path is None and name is None:
             raise ValueError("Either name or path has to be given to VIANProject.")
         elif name is None:
@@ -157,6 +157,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.selected = []
         self.segment_screenshot_mapping = dict()
         self.headless_mode = False
+
+        if movie_path is not None:
+            self.movie_descriptor.set_movie_path(movie_path)
 
     def get_type(self):
         return PROJECT
@@ -1287,10 +1290,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def close(self):
         if self.hdf5_manager is not None:
             self.hdf5_manager.on_close()
-
-
     #endregion
 
     #region Vocabularies
