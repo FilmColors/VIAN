@@ -1,8 +1,10 @@
 from core.analysis.deep_learning.pspnet import *
 import cv2
 import keras.backend.tensorflow_backend as KTF
-import tensorflow as tf
+from core.analysis.import_tensortflow import tf
 from core.analysis.deep_learning.labels import *
+
+from core.data.log import log_info
 
 DIR_WEIGHTS_BUILT_IN = "/data/models/"
 KERAS_LIP_WEIGHTS = "data/models/semantic_segmentation/LIP_PSPNET50_Weights.hdf5"
@@ -59,9 +61,9 @@ class PSPNetModelVIAN(VIANKerasModel):
                 upsample_type="deconv")
 
     def load_weights(self, path):
-        print("Loading Weights...")
+        log_info("Loading Weights...")
         self.model.load_weights(path)
-        print("Done")
+        log_info("Done")
 
     def forward(self, frame, threshold = -1.0):
         resized = cv2.resize(frame, (self.input_shape[0], self.input_shape[1]), interpolation=cv2.INTER_CUBIC)[:, :, ::-1]
@@ -117,7 +119,7 @@ if __name__ == '__main__':
 
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-        config.log_device_placement = True  # to log device placement (on which device the operation ran)
+        # config.log_device_placement = True  # to log device placement (on which device the operation ran)
 
         session = tf.Session(config)
         KTF.set_session(session)

@@ -4,7 +4,7 @@ In this Module, all interfaces used by VIAN are defined.
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import GENERIC
-
+from core.data.log import log_error, log_warning
 
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)
@@ -118,7 +118,7 @@ class IProjectContainer(QObject):
         self.delete()
 
     def delete(self):
-        print("Not Implemented in ", self)
+        log_error("Not Implemented in ", self)
 
     def set_project(self, project):
         if project is not None:
@@ -154,19 +154,19 @@ class IProjectContainer(QObject):
 class ITimeRange():
 
     def get_start(self):
-        print("ITimelineItem: Not implemented", self)
+        log_warning("ITimelineItem: Not implemented", self)
 
     def get_end(self):
-        print("ITimelineItem: Not Implemented", self)
+        log_warning("ITimelineItem: Not Implemented", self)
 
     def set_start(self, start):
-        print("ITimelineItem: Not Implemented", self)
+        log_warning("ITimelineItem: Not Implemented", self)
 
     def set_end(self, end):
-        print("ITimelineItem: Not Implemented", self)
+        log_warning("ITimelineItem: Not Implemented", self)
 
     def move(self, start, end):
-        print("ITimelineItem: Not Implemented", self)
+        log_warning("ITimelineItem: Not Implemented", self)
 
 
 class ILockable():
@@ -195,10 +195,10 @@ class ITimelineItem:
         return ""
 
     def set_timeline_visibility(self, visibility):
-        print("ITimelineItem: Not Implemented", self)
+        log_warning("ITimelineItem: Not Implemented", self)
 
     def get_timeline_visibility(self):
-        print("ITimelineItem: Not Implemented", self)
+        log_warning("ITimelineItem: Not Implemented", self)
 
 
 class IHasName():
@@ -206,10 +206,10 @@ class IHasName():
         dummy = dummy
 
     def get_name(self):
-        print("IHasName: Not Implemented by", self)
+        log_warning("IHasName: Not Implemented by", self)
 
     def set_name(self, name):
-        print("IHasName: Not Implemented by", self)
+        log_warning("IHasName: Not Implemented by", self)
 
 
 class IHasMediaObject():
@@ -232,7 +232,7 @@ class ISelectable():
         dummy = dummy
 
     def get_type(self):
-        print("ISelectable: Not Implemented by", self)
+        log_warning("ISelectable: Not Implemented by", self)
 
 
 class AutomatedTextSource():

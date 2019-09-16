@@ -91,7 +91,7 @@ class CorpusProgressWidget(QWidget):
     @pyqtSlot()
     def update_state(self):
         data = self.requirements
-        print("Requirements:", data)
+        log_debug("Requirements:", data)
         if data is None:
             return
         self.missing_analyses = dict()
@@ -179,15 +179,18 @@ class CorpusProgressWidget(QWidget):
         if self.main_window.project is None:
             QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
             return
-        if len(self.main_window.project.experiments) == 0:
-            QMessageBox.information(self, "No Experiment created.", "You first have to create a experiment with the FilmColorsTemplate.")
+        experiment = self.main_window.project.get_experiment_by_name(ERCFilmColorsVIANPipeline.template)
+        if experiment is None:
+            QMessageBox.information(self, "No Experiment created.",
+                                    "You first have to create a experiment with the"
+                                    + ERCFilmColorsVIANPipeline.template + " template")
             return
 
         for priority in sorted(self.missing_analyses.keys()):
             for analysis_name in self.missing_analyses[priority].keys():
                 analysis = self.main_window.eval_class(analysis_name)
                 for clobj_name, containers in self.missing_analyses[priority][analysis_name].items():
-                    clobj = self.main_window.project.experiments[0].get_classification_object_by_name(clobj_name)
+                    clobj = experiment.get_classification_object_by_name(clobj_name)
 
                     if clobj is None:
                         log_warning("Classification Object not found")

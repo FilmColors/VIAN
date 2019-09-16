@@ -60,7 +60,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return args
 
     def process(self, args, sign_progress):
-
+        args, sign_progress = super(ColorPaletteAnalysis, self).process(args, sign_progress)
         # Signal the Progress
         sign_progress(0.0)
 
@@ -101,7 +101,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
             try:
                 pal = color_palette(frame, mask=bin_mask, mask_index=255)
             except Exception as e:
-                print(e)
+                log_error(e)
                 pal = None
             if pal is not None:
                 palettes.append(pal)

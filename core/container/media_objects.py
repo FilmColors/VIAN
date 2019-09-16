@@ -75,7 +75,7 @@ class FileMediaObject(AbstractMediaObject):
         try:
             os.remove(self.file_path)
         except Exception as e:
-            print(e)
+            log_error(e)
             pass
 
     def preview(self):

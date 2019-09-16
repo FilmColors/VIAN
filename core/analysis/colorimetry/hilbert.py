@@ -170,7 +170,6 @@ def create_hilbert_3d_to_2d_coordinates(n):
 
 def create_hilbert_conversion_tables(dir, n1=13, n2=256):
     if not os.path.exists(dir + str("hilbert_conversion.npz")):
-        print("Creating Hilbert Conversion Table")
         indices_hilbert_3d_list = []
         indices_hilbert_2d_list = []
 
@@ -184,11 +183,6 @@ def create_hilbert_conversion_tables(dir, n1=13, n2=256):
 
         np.savez(dir + str("hilbert_conversion.npz"), hilbert_2d=indices_hilbert_2d_list, hilbert_3d=indices_hilbert_3d)
 
-    else:
-        print("Hilbert Conversion Table loaded from File")
-
-
-    print("Done")
     loaded = np.load(dir + str("hilbert_conversion.npz"))
     return loaded['hilbert_2d'], loaded['hilbert_3d']
 

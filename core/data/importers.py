@@ -604,14 +604,15 @@ class ExperimentTemplateImporter(ImportDevice):
         unique_keywords = dict()
         for entry in data['unique_keywords']:
             clobj = cl_objs_index[entry['classification_object']]
+            if clobj.unique_id not in unique_keywords:
+                unique_keywords[clobj.unique_id] = dict()
             word = words_index[entry['word']]
             if (word.vocabulary, clobj) not in vocs_to_add:
                 vocs_to_add.append((word.vocabulary, clobj))
-                unique_keywords[word.vocabulary.unique_id] = dict()
-                unique_keywords[word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
+                unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
+                unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
             else:
-                unique_keywords[word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
-        for vocabulary, clobj in vocs_to_add:
-            clobj.add_vocabulary(vocabulary,unique_keywords=unique_keywords[vocabulary.unique_id])
+                unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
 
-        print(experiment.classification_objects)
+        for vocabulary, clobj in vocs_to_add:
+            clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])

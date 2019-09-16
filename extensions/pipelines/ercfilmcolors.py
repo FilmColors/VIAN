@@ -5,10 +5,12 @@ from core.data.creation_events import VIANPipeline, vian_pipeline
 from core.container.project import *
 from core.analysis.analysis_import import *
 from core.analysis.analysis_utils import run_analysis
+from core.data.log import log_error, log_info, log_debug, log_warning
 
 @vian_pipeline
 class ERCFilmColorsVIANPipeline(VIANPipeline):
     name = "ERCFilmColors Pipeline"
+    template = "ERC Advanced Grant FilmColors"
     version = (0,1,0)
     author = "ERC Advanced Grant FilmColors, VMML"
 
@@ -36,7 +38,6 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
             self.graph = tf.Graph()
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-            config.log_device_placement = True  # to log device placement (on which device the operation ran)
             config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
             with self.graph.as_default():
@@ -46,11 +47,11 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
                 self.model.load_weights(KERAS_LIP_WEIGHTS)
                 self.model_name = DATASET_NAME_LIP
         except Exception as e:
-            print(e)
+            log_error(e)
             self.model = None
             self.model_name = "LIP"
             self.session = None
-        print(self.model, self.model_name)
+        log_info(self.model, self.model_name)
 
 
     def on_segment_created(self, project:VIANProject, segment:Segment, capture:cv2.VideoCapture):
@@ -78,11 +79,18 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
             project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Background")
                          ]
 
-        run_analysis(project, SemanticSegmentationAnalysis(model=self.model, model_name="LIP",
-                                                           graph=self.graph, session=self.session ),
-                     [screenshot], dict(model_name="LIP"), [cl_objs[0]])
-        run_analysis(project, ColorFeatureAnalysis(), [screenshot], dict(resolution=30), cl_objs)
-        run_analysis(project, ColorPaletteAnalysis(), [screenshot], dict(resolution=30), cl_objs)
+        semseg = SemanticSegmentationAnalysis(model=self.model, model_name="LIP", graph=self.graph, session=self.session)
+        semseg.fit(screenshot, cl_objs[0])
+
+        # run_analysis(project, SemanticSegmentationAnalysis(model=self.model, model_name="LIP",
+        #                                                    graph=self.graph, session=self.session ),
+        #              [screenshot], dict(model_name="LIP"), [cl_objs[0]])
+        # run_analysis(project, ColorFeatureAnalysis(), [screenshot], dict(resolution=30), cl_objs)
+        # run_analysis(project, ColorPaletteAnalysis(), [screenshot], dict(resolution=30), cl_objs)
+
+        ColorFeatureAnalysis().fit(screenshot, cl_objs)
+        ColorPaletteAnalysis().fit(screenshot, cl_objs)
+
 
 
     def on_svg_annotation_created(self, project, annotation, sub_img):

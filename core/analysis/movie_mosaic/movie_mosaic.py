@@ -42,6 +42,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
         return args
 
     def process(self, args, sign_progress):
+        args, sign_progress = super(MovieMosaicAnalysis, self).process(args, sign_progress)
         start = args[0]
         end = args[1]
         path = args[2]

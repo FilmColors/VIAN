@@ -2,7 +2,7 @@ from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
 from core.container.container_interfaces import IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, \
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject
-
+from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
 
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
@@ -467,7 +467,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
                 new.set_project(self.project)
                 self.media_objects.append(new)
         except Exception as e:
-            print(e)
+            log_error(e)
 
         return self
 

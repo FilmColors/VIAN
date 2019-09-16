@@ -54,6 +54,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
         return args
 
     def process(self, args, sign_progress):
+        args, sign_progress = super(ColorHistogramAnalysis, self).process(args, sign_progress)
 
         # Signal the Progress
         sign_progress(0.0)

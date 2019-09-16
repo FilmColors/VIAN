@@ -8,7 +8,7 @@ from keras.layers import Activation, Dense, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
 import keras.backend as K
-import tensorflow as tf
+from core.analysis.import_tensortflow import tf
 import keras.backend.tensorflow_backend as KTF
 
 from sklearn.cluster.hierarchical import AgglomerativeClustering
@@ -111,7 +111,7 @@ class FaceRecognitionModel():
 
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-        config.log_device_placement = False  # to log device placement (on which device the operation ran)
+        # config.log_device_placement = False  # to log device placement (on which device the operation ran)
 
         with self.graph.as_default():
             self.dnn_model = FaceRecKeras(n_classes, dropout)

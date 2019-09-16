@@ -95,7 +95,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
         return args
 
     def process(self, argst, sign_progress):
-
+        argst, sign_progress = super(ColorFeatureAnalysis, self).process(argst, sign_progress)
         result = []
         # Signal the Progress
         cap = None

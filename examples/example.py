@@ -14,13 +14,14 @@ try:
     segmentation = project.create_segmentation("Some Segmentation")
     segment = segmentation.create_segment2(0, 1000, body="Region to Analyse")
 
-    ColorPaletteAnalysis().fit(segment)
+    ColorPaletteAnalysis().fit(segment, callback=None)
 
 
 
 
 
 except Exception as e:
+    raise e
+finally:
     project.close()
     shutil.rmtree("test")
-    raise e

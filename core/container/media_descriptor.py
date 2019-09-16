@@ -139,7 +139,6 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         cap = cv2.VideoCapture(self.get_movie_path())
         self.fps = cap.get(cv2.CAP_PROP_FPS)
 
-
     def get_movie_id_list(self):
         return self.movie_id.split("_")
 

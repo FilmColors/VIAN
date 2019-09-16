@@ -3,8 +3,10 @@ import time
 from uuid import uuid4
 import numpy as np
 
+
 from typing import List
 
+from core.data.log import log_warning, log_debug, log_info, log_error
 from core.container.analysis import AnalysisContainer
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
@@ -62,7 +64,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
         if name in [w.name for w in self.words_plain]:
-            print("Duplicate Word")
+            log_warning("Duplicate Word", name)
             return
         word = VocabularyWord(name, vocabulary=self)
         word.unique_id = unique_id
@@ -189,7 +191,7 @@ class Vocabulary(IProjectContainer, IHasName):
         try:
             self.uuid = serialization['uuid']
         except:
-            print("No UUID found in this vocabulary", self.name)
+            log_warning("No UUID found in this vocabulary", self.name)
             pass
 
         for w in serialization['words']:
@@ -214,7 +216,7 @@ class Vocabulary(IProjectContainer, IHasName):
                 try:
                     word.uuid = w['uuid']
                 except:
-                    print("No UUID found in this vocabulary", self.name)
+                    log_warning("No UUID found in this vocabulary", self.name)
                     pass
             else:
                 # Fields introduced in 0.8.0
@@ -328,7 +330,7 @@ class Vocabulary(IProjectContainer, IHasName):
                 try:
                     word.uuid = w['uuid']
                 except:
-                    print("No UUID found in this vocabulary", self.name)
+                    log_warning("No UUID found in this vocabulary", self.name)
                     pass
 
         return self, id_replacing_table
@@ -522,13 +524,22 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.target_container = []
         self.semantic_segmentation_labels = ("", [])
 
-    def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None, unique_keywords = None):
+    def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None, keyword_override = None):
+        """
+        Adds a vocabulary to this classification object and generates the keywords.
+
+        :param voc:
+        :param dispatch:
+        :param external_ids:
+        :param keyword_override: A dict of keywords dict(w.unique_id : UniqueKeyword Object)
+        :return:
+        """
         if voc not in self.classification_vocabularies:
             self.classification_vocabularies.append(voc)
             keywords = []
             for i, w in enumerate(voc.words_plain):
-                if unique_keywords is not None:
-                    keyword = unique_keywords[w.unique_id]
+                if keyword_override is not None:
+                    keyword = keyword_override[w.unique_id]
                 else:
                     keyword = UniqueKeyword(self.experiment, voc, w, self)
                 if external_ids is not None:
@@ -537,6 +548,7 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.unique_keywords.append(keyword)
                 keywords.append(keyword)
             self.onUniqueKeywordsChanged.emit(self)
+
             return keywords
         else:
             keywords = []
@@ -575,7 +587,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.children.remove(classification_object)
             self.project.remove_from_id_list(classification_object)
         else:
-            print("NOT FOUND")
+            log_warning("Classification Object not found.")
 
     def get_children_plain(self, list):
         list.append(self)
@@ -603,7 +615,6 @@ class ClassificationObject(IProjectContainer, IHasName):
         return CLASSIFICATION_OBJECT
 
     def serialize(self):
-
         serialization = dict(
             name=self.name,
             unique_id = self.unique_id,
@@ -640,7 +651,7 @@ class ClassificationObject(IProjectContainer, IHasName):
         try:
             self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
         except Exception as e:
-            print(e)
+            log_error(e)
 
         return self
 
@@ -686,9 +697,6 @@ class UniqueKeyword(IProjectContainer):
         return data
 
     def deserialize(self, serialization, project):
-        print(serialization)
-        print(project.get_by_id(serialization['class_obj']))
-
         self.unique_id = serialization['unique_id']
         self.voc_obj = project.get_by_id(serialization['voc_obj'])
         self.word_obj = project.get_by_id(serialization['word_obj'])
@@ -919,7 +927,7 @@ class Experiment(IProjectContainer, IHasName):
                 keyword.tagged_containers.remove(container)
                 container.remove_word(keyword)
         except Exception as e:
-            print(e)
+            log_error(e)
 
     def remove_all_tags_with_container(self, container):
         self.classification_results[:] = [tup for tup in self.classification_results if not tup[0] is container]
@@ -1012,7 +1020,7 @@ class Experiment(IProjectContainer, IHasName):
                                 class_obj=None
                             ))
                 except Exception as e:
-                    print("Exeption during loading ExperimentAnalysis:", e)
+                    log_error("Exeption during loading ExperimentAnalysis:", e)
                     self.analyses = []
 
         try:
@@ -1022,10 +1030,10 @@ class Experiment(IProjectContainer, IHasName):
                 if c is not None and k is not None:
                     self.tag_container(c, k)
                 else:
-                    print("Loading Classification mapping failed: ", c, k)
+                    log_error("Loading Classification mapping failed: ", c, k)
 
         except Exception as e:
-            print("Exeption during Experiment.deserialize:", e)
+            log_error("Exeption during Experiment.deserialize:", e)
             pass
 
         return self

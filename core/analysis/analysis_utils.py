@@ -9,12 +9,12 @@ PROJECT_LOCK = Lock()
 def progress_dummy(args, **kwargs):
     pass
 
-def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IProjectContainer], parameters: Dict=None,
+def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IProjectContainer],
                  class_objs: List[ClassificationObject]=None):
     fps = project.movie_descriptor.fps
 
     for clobj in class_objs:
-        args = analysis.prepare(project, targets, parameters, fps, clobj)
+        args = analysis.prepare(project, targets, fps, clobj)
 
         res = []
         if analysis.multiple_result:

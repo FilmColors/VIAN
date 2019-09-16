@@ -84,6 +84,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         
         Once done, we create an Analysis Object from it.
         """
+        args, sign_progress = super(BarcodeAnalysisJob, self).process(args, sign_progress)
         # Signal the Progress
         sign_progress(0.0)
 
@@ -144,7 +145,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
                     if idx < barcode.shape[0]:
                         barcode[idx] = np.mean(frame, axis=(0,1))
                     else:
-                        print("Out of Bound")
+                        log_warning("Out of Bound")
                     idx += 1
 
         # Creating an IAnalysisJobAnalysis Object that will be handed back to the Main-Thread

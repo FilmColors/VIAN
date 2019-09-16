@@ -67,6 +67,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         return args
 
     def process(self, args, sign_progress):
+        args, sign_progress = super(SemanticSegmentationAnalysis, self).process(args, sign_progress)
         sign_progress(0.0)
 
         # Signal the Progress
@@ -77,7 +78,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
 
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-        config.log_device_placement = True  # to log device placement (on which device the operation ran)
+        # config.log_device_placement = True  # to log device placement (on which device the operation ran)
         config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
         with self.graph.as_default():
@@ -121,7 +122,6 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                 ))
 
         sign_progress(1.0)
-        print("Done", results)
         return results
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):

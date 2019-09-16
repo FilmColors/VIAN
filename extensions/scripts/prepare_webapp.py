@@ -1,5 +1,6 @@
 import glob
 from core.data.headless import *
+from core.data.log import log_warning, log_error
 from threading import Thread
 
 ALL_ANALYSES = [BarcodeAnalysisJob, MovieMosaicAnalysis, ColorHistogramAnalysis, ColorFeatureAnalysis, ColorPaletteAnalysis, SemanticSegmentationAnalysis]
@@ -61,6 +62,6 @@ for file in glob.glob("F:\\_webapp\\new\\*\\*.eext"):
         to_webapp(project, bake_only=True)
 
     except Exception as e:
-        print(e)
+        log_error(e)
         continue
 

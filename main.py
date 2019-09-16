@@ -34,6 +34,7 @@ dname = os.path.dirname(abspath)
 
 import logging
 logging.getLogger('tensorfyylow').disabled = True
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox

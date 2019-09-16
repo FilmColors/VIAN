@@ -163,7 +163,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.project_lock = Lock()
 
         if movie_path is not None:
-            self.movie_descriptor.set_movie_path(movie_path)
+            if os.path.isfile(movie_path):
+                self.movie_descriptor.set_movie_path(movie_path)
+            else:
+                raise FileNotFoundError("Could not open movie at: " + movie_path)
 
     def get_type(self):
         return PROJECT
@@ -1130,6 +1133,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 new = Experiment().deserialize(e, self)
 
         except Exception as e:
+            # raise e
             print(e)
 
         for d in my_dict['analyzes']:
@@ -1531,6 +1535,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
             cl_obj = exp.create_class_object(name)
 
         return cl_obj
+
+    def get_experiment_by_name(self, name):
+        for e in self.experiments:
+            if e.name == name:
+                return e
+        return None
     #endregion
 
     # region Setters/Getters

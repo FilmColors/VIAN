@@ -43,7 +43,6 @@ class HDF5ManagerDatabase():
             self.h5_file.close()
         self.h5_file = h5py.File(self.path, "r+")
         self.initialize_all()
-        print(self._index)
         return init
 
     def initialize_all(self):

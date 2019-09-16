@@ -11,11 +11,12 @@ try:
     from core.analysis.semantic_segmentation import *
     from core.analysis.deep_learning.face_identification import *
     import os
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    import tensorflow as tf
+    # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    from core.analysis.import_tensortflow import tf
     # tf.test.is_gpu_available()
     # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    # tf.logging.set_verbosity(tf.logging.FATAL)
+    tf.logging.set_verbosity(tf.logging.FATAL)
+    log_info("Verbosity", tf.logging.get_verbosity())
 
 except:
     from core.data.enums import DataSerialization
@@ -55,7 +56,8 @@ except:
             return args
 
         def process(self, args, sign_progress):
-            print("No KERAS Backend Installed, you can not peform this analysis")
+            args, sign_progress = super(SemanticSegmentationAnalysis, self).process(args, sign_progress)
+            log_warning("No KERAS Backend Installed, you can not peform this analysis")
 
         def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
             """

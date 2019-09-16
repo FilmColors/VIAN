@@ -121,9 +121,12 @@ class IAnalysisJob(QObject):
         :param sign_progress: a function to signal the current Progress. usage: sign_progress(float E[0.0,..1.0])
         :return: AnalysisJobAnalysis Object
         """
-        log_debug("get_name not implemented by", self)
+        if sign_progress is None:
+            sign_progress = self.dummy_callback
+        return args, sign_progress
+        # log_debug("get_name not implemented by", self)
 
-    def modify_project(self, project, result, main_window = None):
+    def modify_project(self, project, result, main_window = None, clobj = None):
         """
         If your Analysis should perform any modifications to the project, except storing the analysis,
         this is the place to perform them. 
@@ -208,7 +211,7 @@ class IAnalysisJob(QObject):
         """
         return data_dict
 
-    def fit(self, targets, class_objs = None):
+    def fit(self, targets, class_objs = None, callback=print):
         """
         Performs the analysis for given target containers and classification objects.
         If no classification object is given, a default one with the name "Global" is created.
@@ -220,32 +223,38 @@ class IAnalysisJob(QObject):
             project = targets[0].project #type:VIANProject
         else:
             project = targets.project
+            targets = [targets]
 
         if class_objs is None:
             clobj = project.get_classification_object_global("Global")
-            self._fit_single(project, targets, clobj)
+            self._fit_single(project, targets, clobj, callback=callback)
         else:
+            if not isinstance(class_objs, list):
+                class_objs = [class_objs]
             for clobj in class_objs:
-                self._fit_single(project, targets, clobj)
+                self._fit_single(project, targets, clobj, callback=callback)
 
-    def _fit_single(self, project, targets, clobj):
+    def _fit_single(self, project, targets, clobj, callback):
         fps = project.movie_descriptor.fps
         args = self.prepare(project, targets, fps, clobj)
 
         res = []
         if self.multiple_result:
             for i, arg in enumerate(args):
-                res.append(self.process(arg, print))
+                res.append(self.process(arg, callback))
         else:
-            res = self.process(args, print)
+            res = self.process(args, callback)
 
         if isinstance(res, list):
             for r in res:
-                print(r)
+                if r is None:
+                    continue
                 with project.project_lock:
                     self.modify_project(project, r)
                     project.add_analysis(r)
         else:
+            if res is None:
+                return
             with project.project_lock:
                 self.modify_project(project, res)
                 project.add_analysis(res)
@@ -259,6 +268,8 @@ class IAnalysisJob(QObject):
     def abort(self):
         pass
 
+    def dummy_callback(*args):
+        pass
 
 class ParameterWidget(QWidget):
     """
