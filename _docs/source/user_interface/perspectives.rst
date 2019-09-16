@@ -54,7 +54,8 @@ The Annotation Perspective displays all necessary widgets for *Segmenting* and *
 Screenshot Perspective
 **************************
 The Screenshot Perspective shows all screenshots token so far in a big window on the left side, on the right sight are thi *Inspector* and *Outliner* modules.
-.. figure:: persp_node_editor.png
+
+.. figure:: persp_screenshots.png
    :scale: 100 %
    :align: center
    :alt: map to buried treasure
@@ -87,7 +88,7 @@ Node Scripting Perspective
 ***********************
 TO DO
 
-.. figure:: persp_screenshots.png
+.. figure:: persp_node_editor.png
    :scale: 100 %
    :align: center
    :alt: map to buried treasure
