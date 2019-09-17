@@ -81,10 +81,16 @@ def store_project_concurrent(args, sign_progress):
         except Exception as e:
             print("Exception in Analysis.serialize()", e)
 
+    if project.hdf5_manager is None:
+        hdf_indices = dict(curr_pos=dict(), uidmapping=dict())
+    else:
+        hdf_indices = project.hdf5_manager.get_indices()
+
     data = dict(
         path=project.path,
         name=project.name,
         corpus_id = project.corpus_id,
+        uuid = project.uuid,
         annotation_layers=a_layer,
         notes=project.notes,
         current_annotation_layer=None,
@@ -103,7 +109,7 @@ def store_project_concurrent(args, sign_progress):
         vocabularies=vocabularies,
         experiments = experiments,
         meta_data = project.meta_data,
-        hdf_indices = project.hdf5_manager.get_indices(),
+        hdf_indices = hdf_indices,
         pipeline_scripts = project.pipeline_scripts,
         active_pipeline_script = project.active_pipeline_script,
         compute_pipeline_settings = project.compute_pipeline_settings

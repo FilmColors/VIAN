@@ -21,6 +21,7 @@ from sklearn.cluster.hierarchical import AgglomerativeClustering
 
 MAX_CLUSTER = 500
 MAX_DEPTH = 500
+
 @vian_analysis
 class ShotSegmentationAnalysis(IAnalysisJob):
     """
@@ -182,10 +183,10 @@ class ShotSegmentationAnalysis(IAnalysisJob):
         Returning a ParameterWidget subclass which will be displayed in the Analysis Dialog, when the user
         activates the Analysis.
         """
-        return BarcodeParameterWidget()
+        return ShotSegmentationParameterWidget()
 
 
-class BarcodeParameterWidget(ParameterWidget):
+class ShotSegmentationParameterWidget(ParameterWidget):
     """
     We want the User to be able to determine the resolution of frames when reading and the
     interpolation type for the Preview.
@@ -194,7 +195,7 @@ class BarcodeParameterWidget(ParameterWidget):
     """
 
     def __init__(self):
-        super(BarcodeParameterWidget, self).__init__()
+        super(ShotSegmentationParameterWidget, self).__init__()
         # Put UI Here
 
     def get_parameters(self):

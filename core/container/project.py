@@ -1,6 +1,7 @@
 # from core.node_editor.node_editor import *
 from shutil import copy2
 from threading import Lock
+from uuid import uuid4
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
@@ -101,6 +102,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         if folder is None and path is not None:
             folder = os.path.split(path)[0]
+        if folder is not None and path is None:
+            path = os.path.join(folder, name + VIAN_PROJECT_EXTENSION)
+
+        if folder is not None and not os.path.isdir(folder):
+            if not os.path.isdir(os.path.split(folder)[0]):
+                raise NotADirectoryError("The directory " + os.path.split(folder)[0] + " does not exist.")
+            else:
+                os.mkdir(folder)
 
         IClassifiable.__init__(self)
         QObject.__init__(self)
@@ -118,7 +127,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.hdf5_path = ""
 
         self.corpus_id = -1
-
+        self.uuid = str(uuid4())
         self.id_list = dict()
 
         self.meta_data = None
@@ -167,6 +176,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 self.movie_descriptor.set_movie_path(movie_path)
             else:
                 raise FileNotFoundError("Could not open movie at: " + movie_path)
+
+        if self.path is not None and self.folder is not None:
+            self.sanitize_paths()
+            self.create_file_structure()
+
 
     def get_type(self):
         return PROJECT
@@ -882,7 +896,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region IO
-    def store_project(self, path = None):
+    def store_project(self, path = None, return_dict = False):
         """
         Stores the project json to the given filepath.
         if no path is given, the default path is used.
@@ -932,10 +946,16 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for g in project.experiments:
             experiments.append(g.serialize())
 
+        if project.hdf5_manager is None:
+            hdf_indices = dict(curr_pos=dict(), uidmapping=dict())
+        else:
+            hdf_indices = project.hdf5_manager.get_indices()
+
         data = dict(
             path=project.path,
             name=project.name,
             corpus_id=project.corpus_id,
+            uuid = project.uuid,
             annotation_layers=a_layer,
             notes=project.notes,
             current_annotation_layer=None,
@@ -954,25 +974,29 @@ class VIANProject(QObject, IHasName, IClassifiable):
             vocabularies=vocabularies,
             experiments=experiments,
             meta_data = project.meta_data,
-            hdf_indices = project.hdf5_manager.get_indices(),
+            hdf_indices = hdf_indices,
             pipeline_scripts = project.pipeline_scripts,
             active_pipeline_script = project.active_pipeline_script,
             compute_pipeline_settings = project.compute_pipeline_settings
         )
-        if path is None:
-            path = project.path
-        path = path.replace(VIAN_PROJECT_EXTENSION, "")
 
-        numpy_path = path + "_scr"
-        project_path = path + ".eext"
+        if return_dict:
+            return data
+        else:
+            if path is None:
+                path = project.path
+            path = path.replace(VIAN_PROJECT_EXTENSION, "")
 
-        try:
-            with open(project_path, 'w') as f:
-                json.dump(data, f)
-        except Exception as e:
-            print("Exception during Storing: ", str(e))
+            numpy_path = path + "_scr"
+            project_path = path + ".eext"
 
-    def load_project(self, path, main_window = None):
+            try:
+                with open(project_path, 'w') as f:
+                    json.dump(data, f)
+            except Exception as e:
+                print("Exception during Storing: ", str(e))
+
+    def load_project(self, path=None, main_window = None, serialization = None):
         """
         Loads a project from a given file.
 
@@ -980,21 +1004,31 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param path:
         :return:
         """
-        if not VIAN_PROJECT_EXTENSION in path:
-            path += VIAN_PROJECT_EXTENSION
+        if serialization is None:
+            has_file = True
+            if not VIAN_PROJECT_EXTENSION in path:
+                path += VIAN_PROJECT_EXTENSION
 
-        if not os.path.isfile(path):
-            print("File not Found: ", path)
-            return
+            if not os.path.isfile(path):
+                print("File not Found: ", path)
+                return
 
-        print("Reading From", os.path.abspath(path))
-        with open(path) as f:
-            my_dict = json.load(f)
+            print("Reading From", os.path.abspath(path))
+            with open(path) as f:
+                my_dict = json.load(f)
+        else:
+            has_file = False
+            my_dict = serialization
 
         self.path = my_dict['path']
         self.path = path
         self.name = my_dict['name']
         self.main_segmentation_index = my_dict['main_segmentation_index']
+
+        if "uuid" in my_dict:
+            self.uuid = my_dict['uuid']
+        else:
+            self.uuid = str(uuid4())
 
         if 'corpus_id' in my_dict:
             self.corpus_id = my_dict['corpus_id']
@@ -1005,6 +1039,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if 'meta_data' in my_dict:
             self.meta_data = my_dict['meta_data']
 
+        if path is None and serialization is not None:
+            path = "no-path" + VIAN_PROJECT_EXTENSION
         self.folder = os.path.split(path)[0] + "/"
         self.results_dir = self.folder + "/results/"
         self.export_dir = self.folder + "/export/"
@@ -1055,16 +1091,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     print(e)
         # Check the FileStructure integrity anyway
         else:
-            self.create_file_structure()
+            if has_file:
+                self.create_file_structure()
 
-        self.hdf5_manager = HDF5Manager()
-        self.hdf5_manager.set_path(self.hdf5_path)
+        if has_file:
+            self.hdf5_manager = HDF5Manager()
+            self.hdf5_manager.set_path(self.hdf5_path)
 
-        try:
-            self.hdf5_manager.set_indices(my_dict['hdf_indices'])
-        except Exception as e:
-            print("Exception during hdf5_manager.set_indices(): ", e)
-            self.hdf5_manager.initialize_all()
+            try:
+                self.hdf5_manager.set_indices(my_dict['hdf_indices'])
+            except Exception as e:
+                print("Exception during hdf5_manager.set_indices(): ", e)
+                self.hdf5_manager.initialize_all()
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
@@ -1179,8 +1217,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.create_colormetry()
         self.sort_screenshots()
         self.undo_manager.clear()
-        self.sanitize_paths()
-        print(self.hdf5_manager)
+
+        if has_file:
+            self.sanitize_paths()
+
+        return self
 
     def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False, pipeline=True):
         """

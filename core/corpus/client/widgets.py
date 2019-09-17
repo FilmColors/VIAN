@@ -9,7 +9,7 @@ from PyQt5 import uic
 from core.data.log import log_warning, log_info, log_error, log_debug
 from core.data.computation import create_icon
 from core.corpus.client.corpus_client import CorpusClient
-from core.gui.Dialogs.new_project_dialog import FilmographyWidget2
+# from core.gui.Dialogs.new_project_dialog import FilmographyWidget2
 from functools import partial
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import *
@@ -19,6 +19,7 @@ import socket
 import threading
 import hashlib, uuid
 from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
+from core.gui.filmography_widget import FilmographyWidget2
 
 
 class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):

@@ -253,6 +253,9 @@ class HDF5Manager():
         return dict(curr_pos=self._index, uidmapping=self._uid_index)
 
     def on_close(self):
+        if self.h5_file is None:
+            return
+
         self.h5_file.close()
 
         self.col_edge_max = None
@@ -264,4 +267,5 @@ class HDF5Manager():
         self.h5_file = None
         self._index = dict()
         self._uid_index = dict()
+        print("Closed HDF")
 

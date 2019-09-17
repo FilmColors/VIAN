@@ -699,10 +699,11 @@ class MultiItemTextInput(QWidget):
         self.input.setFixedWidth(200)
         self.input.returnPressed.connect(self.on_add_item)
 
-
         self.items = []
         if autocompleter is not None:
             self.input.setCompleter(autocompleter)
+
+
 
     def setCompleter(self, completer):
         self.input.setCompleter(completer)
@@ -715,7 +716,6 @@ class MultiItemTextInput(QWidget):
         self.added_list.layout().addWidget(item)
         self.items.append(item)
         item.onRemove.connect(self.on_remove)
-
 
     def on_remove(self, item):
         if item in self.items:

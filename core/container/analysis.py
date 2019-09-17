@@ -75,7 +75,6 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamabl
         self.data = serialization['data']
         self.analysis_job_class = serialization['analysis_job_class']
 
-
     def delete(self):
         self.project.remove_analysis(self)
 
