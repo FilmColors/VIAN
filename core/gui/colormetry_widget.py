@@ -136,7 +136,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
 
         self.main_window.onTimeStep.connect(self.on_time_step)
         self.visibilityChanged.connect(self.on_visibility_changed)
-        # self.vis_tab.addTab(self.histogram, "Histogram")
 
     def on_worker_ready(self):
         self.worker_ready = True
