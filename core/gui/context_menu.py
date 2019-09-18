@@ -536,19 +536,18 @@ class CorpusProjectContextMenu(ContextMenu):
         # self.a_check_in = self.addAction("Check In")
         # self.a_check_out = self.addAction("Check Out")
         # self.a_commit = self.addAction("Commit")
-        self.a_remove = self.addAction("Remove from Corpus")
+        # self.a_remove = self.addAction("Remove from Corpus")
 
         self.a_open.triggered.connect(self.on_open)
         # self.a_check_in.triggered.connect(self.on_check_in)
         # self.a_check_out.triggered.connect(self.on_check_out)
         # self.a_commit.triggered.connect(self.on_commit)
-        self.a_remove.triggered.connect(self.on_remove)
+        # self.a_remove.triggered.connect(self.on_remove)
         self.popup(pos)
 
     def on_open(self):
         self.main_window.close_project()
         self.main_window.load_project(self.corpus_project.path)
-
 
     def on_check_in(self):
         self.corpus_client.checkin_project(self.dbproject)
@@ -560,7 +559,8 @@ class CorpusProjectContextMenu(ContextMenu):
         pass
 
     def on_remove(self):
-        self.corpus_client.remove_project(self.dbproject)
+        pass
+        # self.corpus_client.remove_project(self.dbproject)
 
 
 class ClassificationObjectContextMenu(ContextMenu):

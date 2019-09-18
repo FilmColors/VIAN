@@ -737,7 +737,6 @@ class MultiItemTextInput(QWidget):
         self.onChanged.emit()
 
     def set_items(self, lst):
-        print("names", lst)
         for name in lst:
             item = MultiItemTextInputItem(self, name)
             self.added_list.layout().addWidget(item)

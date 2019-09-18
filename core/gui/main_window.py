@@ -266,7 +266,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
         self.pipeline_toolbar = PipelineToolbar(self)
-        self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
+
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
@@ -274,6 +274,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
+        self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
@@ -908,6 +909,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.corpus_widget = CorpusDockWidget(self)
             self.onSave.connect(self.corpus_widget.on_save_triggered)
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.corpus_widget, Qt.Vertical)
+            # self.corpus_widget.hide()
         else:
             if not self.corpus_widget.visibleRegion().isEmpty():
                 self.corpus_widget.hide()
@@ -1486,6 +1488,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timeline.hide()
         self.pipeline_widget.hide()
         self.player_controls.hide()
+        self.corpus_widget.hide()
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
         self.annotation_options.hide()
@@ -1714,7 +1717,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def action_new_project(self):
         self.on_new_project()
 
-    def on_new_project(self, movie_path = ""):
+    def on_new_project(self, movie_path = "", add_to_current_corpus = False):
         # self.set_darwin_player_visibility(False)
         self.update()
 
@@ -1727,7 +1730,8 @@ class MainWindow(QtWidgets.QMainWindow):
         built_in = glob.glob("data/vocabularies/*.txt")
         vocabularies = built_in
 
-        dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies)
+        dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies,
+                                  add_to_current_corpus=add_to_current_corpus)
         dialog.show()
 
     def new_project(self, project, template_path = None, vocabularies = None, copy_movie = "None", finish_callback = None):

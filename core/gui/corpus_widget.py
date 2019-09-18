@@ -2,15 +2,15 @@ import os
 
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
     QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, \
-    QFileDialog, QMessageBox
+    QFileDialog, QMessageBox, QFrame
 from PyQt5.QtCore import Qt, pyqtSignal
-
+from PyQt5 import uic
 
 from core.gui.ewidgetbase import EDockWidget, EditableListWidget
 from core.gui.filmography_widget import FilmographyWidget2
 from core.container.corpus import Corpus
 from core.container.project import VIANProject
-
+from core.data.log import log_error
 
 class CorpusDockWidget(EDockWidget):
     onCorpusChanged = pyqtSignal(object)
@@ -37,17 +37,20 @@ class CorpusDockWidget(EDockWidget):
         self.a_new = self.file_menu.addAction("New Corpus")
         self.a_save = self.file_menu.addAction("Save Corpus")
         self.a_load = self.file_menu.addAction("Load Corpus")
-        # self.a_create_project = self.file_menu.addAction("Create Projects")
+        self.a_create_project = self.file_menu.addAction("Create Projects")
         self.a_import_project = self.file_menu.addAction("Import Projects")
 
         self.a_new.triggered.connect(self.on_new_corpus)
         self.a_save.triggered.connect(self.on_save_corpus)
+        self.a_create_project.triggered.connect(self.on_create_project)
         self.a_load.triggered.connect(self.on_load_corpus)
         self.general_widget.btn_EditTemplate.clicked.connect(self.on_edit_template)
         self.a_import_project.triggered.connect(self.on_import_projects)
 
         self.onCorpusChanged.connect(self.list.on_corpus_loaded)
         self.onCorpusChanged.connect(self.general_widget.on_corpus_loaded)
+
+        self.general_widget.btn_ImportTemplate.clicked.connect(self.import_template)
         self.filmography.onFilmographyChanged.connect(self.save_current_project)
         self.list.onSelectionChanged.connect(self.on_selection_changed)
         self.corpus = None
@@ -67,6 +70,18 @@ class CorpusDockWidget(EDockWidget):
             return
         else:
             self.corpus.save()
+
+    def on_create_project(self):
+        if self.corpus is None:
+            QMessageBox.warning(self, "No Corpus loaded", "No corpus has been loaded yet. Either load one or create "
+                                                          "a new one in the file menu")
+            return
+
+        file = QFileDialog.getOpenFileName(self)[0]
+        if not os.path.isfile(file):
+            return
+        self.main_window.on_new_project(file)
+        print(self.main_window.project)
 
     def on_load_corpus(self):
         if self.corpus is not None:
@@ -97,13 +112,22 @@ class CorpusDockWidget(EDockWidget):
         self.main_window.project = self.corpus.template
         self.main_window.dispatch_on_loaded()
 
+    def import_template(self):
+        file = QFileDialog.getOpenFileName(self, directory="data/templates", filter="*.viant")[0]
+        if not os.path.isfile(file):
+            return
+        self.corpus.import_template(file)
+
     def on_selection_changed(self, selection):
         try:
             if len(selection) > 0:
                 project = selection[0].meta
+                if project is None:
+                    return
                 self.filmography.set_filmography(project.movie_descriptor.meta_data)
                 self.onSelectionChanged.emit(project)
                 self.current_project = project
+                self.general_widget.on_project_changed(self.current_project)
             else:
                 self.current_project = None
         except Exception as e:
@@ -161,10 +185,24 @@ class CorpusList(EditableListWidget):
             self.projects.pop(project.uuid)
         pass
 
+
 class CorpusGeneralWidget(QWidget):
     def __init__(self, parent):
         super(CorpusGeneralWidget, self).__init__(parent)
         self.setLayout(QVBoxLayout())
+
+        self.layout().addWidget(QLabel("Corpus Information", self))
+        self.w_corpus = QFrame(self)
+        self.w_corpus.setWindowTitle("Corpus Information")
+        self.w_corpus.setLayout(QVBoxLayout())
+
+        self.layout().addWidget(self.w_corpus)
+        self.lt_actions = QHBoxLayout(self)
+        self.layout().addItem(self.lt_actions)
+
+        self.layout().addWidget(QLabel("Project Information", self))
+        self.w_movie = CorpusMovieWidget(self)
+        self.layout().addWidget(self.w_movie)
 
         self.w_name = QWidget(self)
         self.w_name.setLayout(QHBoxLayout())
@@ -172,10 +210,14 @@ class CorpusGeneralWidget(QWidget):
         self.textEdit_Name = QLineEdit(self.w_name)
         self.textEdit_Name.editingFinished.connect(self.on_name_changed)
         self.w_name.layout().addWidget(self.textEdit_Name)
-        self.layout().addWidget(self.w_name)
-        
+
+        self.w_corpus.layout().addWidget(self.w_name)
+
         self.btn_EditTemplate = QPushButton("Edit Template", self)
-        self.layout().addWidget(self.btn_EditTemplate)
+        self.lt_actions.addWidget(self.btn_EditTemplate)
+
+        self.btn_ImportTemplate = QPushButton("Import Template", self)
+        self.lt_actions.addWidget(self.btn_ImportTemplate)
 
         self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Preferred, QSizePolicy.Expanding))
         self.corpus = None
@@ -195,3 +237,48 @@ class CorpusGeneralWidget(QWidget):
                 self.corpus.name = self.textEdit_Name.text()
             self.corpus.save()
 
+    def on_project_changed(self, project):
+        self.w_movie.set_project(project)
+
+
+class CorpusMovieWidget(QWidget):
+    def __init__(self, parent):
+        super(CorpusMovieWidget, self).__init__(parent)
+        path = os.path.abspath("qt_ui/CorpusEditorGeneral.ui")
+        uic.loadUi(path, self)
+
+        self.setLayout(QVBoxLayout())
+        self.goto_dir = None
+        self.btn_OpenDirectory.clicked.connect(self.on_goto)
+
+    def set_project(self, project:VIANProject):
+        if project is not None:
+            self.lineEdit_Name.setText(project.name)
+            self.lbl_Location.setText(project.path)
+            self.goto_dir = project.folder
+            try:
+                self.spinBox_ItemID.setValue(int(project.movie_descriptor.movie_id.split("_")[0]))
+                self.spinBox_ManifestationID.setValue(int(project.movie_descriptor.movie_id.split("_")[1]))
+                self.spinBox_CopyID.setValue(int(project.movie_descriptor.movie_id.split("_")[2]))
+            except Exception as e:
+                log_error(e)
+        else:
+            self.lineEdit_Name.setText("")
+            self.lbl_Location.setText("")
+            self.goto_dir = None
+            self.spinBox_ItemID.setValue(0)
+            self.spinBox_ManifestationID.setValue(0)
+            self.spinBox_CopyID.setValue(0)
+
+    def on_goto(self):
+        import sys, subprocess
+        if self.goto_dir is not None:
+            if sys.platform == "win32":
+                subprocess.run("explorer " + self.goto_dir, shell=True)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", "-R", self.goto_dir])
+            else:
+                try:
+                    subprocess.run(["nautilus", self.goto_dir])
+                except:
+                    pass
