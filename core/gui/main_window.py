@@ -553,8 +553,8 @@ class MainWindow(QtWidgets.QMainWindow):
         log_debug("Test Function", self.settings.CONTRIBUTOR)
 
     def toggle_colormetry(self):
+        log_debug("toggle colormetry", self.project.movie_descriptor.fps / 2)
         if self.colormetry_running is False:
-            log_debug("toggle colormetry", self.project.movie_descriptor.fps / 2)
             job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self)
             args = job.prepare(self.project)
             self.actionColormetry.setText("Pause Colormetry")

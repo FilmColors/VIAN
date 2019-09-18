@@ -30,6 +30,10 @@ class ColormetryJob2(QObject):
             self.colormetry_analysis = project.colormetry_analysis
             self.resolution = self.colormetry_analysis.resolution
             start = self.colormetry_analysis.current_idx
+            if start == 0:
+                self.colormetry_analysis = project.create_colormetry(resolution=self.resolution)
+                self.colormetry_analysis.clear()
+
         self.duration = project.movie_descriptor.duration
         frame_duration = ms_to_frames(self.duration, project.movie_descriptor.fps)
         return [

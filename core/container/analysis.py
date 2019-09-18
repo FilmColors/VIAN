@@ -375,7 +375,7 @@ class ColormetryAnalysis(AnalysisContainer):
         try:
             frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
             if frame_idx == self.last_idx or frame_idx > self.current_idx:
-                return False
+                return None
             self.last_idx = frame_idx
             d = self.project.hdf5_manager.get_colorimetry_pal(frame_idx)
             hist = self.project.hdf5_manager.get_colorimetry_hist(frame_idx)
