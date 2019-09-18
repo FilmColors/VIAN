@@ -10,16 +10,14 @@ from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ELANProjectImporter
 from core.data.computation import images_to_movie
-from core.gui.filmography_widget import FilmographyWidget2
 
 class NewProjectDialog(EDialogWidget):
-    def __init__(self, parent, settings, movie_path = "", vocabularies = None, elan_segmentation = None, add_to_current_corpus=False):
+    def __init__(self, parent, settings, movie_path = "", elan_segmentation = None, add_to_current_corpus=False):
         super(NewProjectDialog, self).__init__(parent, parent, "_docs/build/html/step_by_step/project_management/create_project.html")
         path = os.path.abspath("qt_ui/DialogNewProject.ui")
         uic.loadUi(path, self)
         self.settings = settings
         self.templates = []
-        self.vocabularies = vocabularies
         self.project_name = "project_name"
         self.auto_naming = False
 
@@ -35,7 +33,6 @@ class NewProjectDialog(EDialogWidget):
             self.project_dir = path
 
         self.project = VIANProject(path =None, name="New Project")
-
         self.path_set_from_dialog = False
 
         for s in MovieSource:
@@ -44,8 +41,6 @@ class NewProjectDialog(EDialogWidget):
         self.find_templates()
 
         self.tabWidget.removeTab(1)
-        # self.filmography_widget = FilmographyWidget(self)
-        # self.tabWidget.addTab(self.filmography_widget, "Filmography")
         self.cB_AutomaticNaming.stateChanged.connect(self.on_automatic_naming_changed)
         self.lineEdit_ProjectName.textChanged.connect(self.on_proj_name_changed)
         self.lineEdit_ProjectPath.editingFinished.connect(self.on_proj_path_changed)
@@ -62,6 +57,8 @@ class NewProjectDialog(EDialogWidget):
         self.spinBox_Year.valueChanged.connect(self.on_desc_year_changed)
         self.comboBox_Source.currentIndexChanged.connect(self.on_desc_ource_changed)
         self.btn_BrowseMovie.clicked.connect(self.on_browse_movie_path)
+
+        self.comboBoxCorpus.addItems(self.settings.recent_corpora_2.keys())
 
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.btn_OK.clicked.connect(self.on_ok)
@@ -106,10 +103,6 @@ class NewProjectDialog(EDialogWidget):
             self.comboBox_Template.addItem(t.replace("\\" , "/").split("/").pop().replace(".viant", ""))
 
     def set_project_path(self):
-        #OLD System
-        # self.project.path = self.project_dir
-
-
         self.project.folder = self.project_dir
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
 
@@ -118,9 +111,10 @@ class NewProjectDialog(EDialogWidget):
                                 self.lineEdit_Name.text().replace(" ", "_") + "_" + \
                                 str(self.spinBox_Year.value()) + "_" + \
                                 self.comboBox_Source.currentText()
+            self.project.name = self.project_name
             self.lineEdit_ProjectName.setText(self.project_name)
-
             self.lineEdit_ProjectPath.setText(self.project.folder)
+
         else:
             self.project.name = self.project_name
             self.lineEdit_ProjectPath.setText(self.project.folder)
@@ -232,61 +226,12 @@ class NewProjectDialog(EDialogWidget):
 
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
 
-        # vocabularies = []
-        # for c in self.voc_cbs:
-        #     if c[0].isChecked:
-        #         vocabularies.append(c[1])
-
-        # self.main_window.new_project(self.project, template, vocabularies)
         if self.elan_segmentation is not None:
             ELANProjectImporter(self.main_window).apply_import(self.project, self.elan_segmentation)
-        self.main_window.new_project(self.project, template, copy_movie=copy_movie)
+
+        corpus = None
+        if self.comboBoxCorpus.currentText() != "None":
+            corpus = self.main_window.settings.recent_corpora_2[self.comboBoxCorpus.currentText()]
+        print(corpus)
+        self.main_window.new_project(self.project, template, copy_movie=copy_movie, corpus_path=corpus)
         self.close()
-
-
-# class FilmographyWidget(QWidget):
-#     def __init__(self, parent, project = None, persons = None, processes = None):
-#         super(FilmographyWidget, self).__init__(parent)
-#         path = os.path.abspath("qt_ui/FilmographyWidget.ui")
-#         uic.loadUi(path, self)
-#         if persons is not None:
-#             q = QCompleter([p['name'] for p in persons])
-#             self.lineEdit_Director.setCompleter(q)
-#             self.lineEdit_Cinematography.setCompleter(q)
-#             self.lineEdit_ColorConsultant.setCompleter(q)
-#             self.lineEdit_ProductionDesign.setCompleter(q)
-#             self.lineEdit_ArtDirector.setCompleter(q)
-#             self.lineEdit_CostumDesign.setCompleter(q)
-#         if processes is not None:
-#             self.comboBox_ColorProcess.addItems(sorted([p['name'] for p in processes]))
-#
-#
-#         # if project is not None:
-#
-#
-#     def get_filmography(self):
-#         filmography_meta = dict()
-#         if self.lineEdit_IMDB.text() != "":
-#             filmography_meta['imdb_id'] = self.lineEdit_IMDB.text().split(",")
-#         if self.lineEdit_Genre.text() != "":
-#             filmography_meta['genre'] = self.lineEdit_Genre.text().split(",")
-#         if self.comboBox_ColorProcess.currentText() != "":
-#             filmography_meta['color_process'] = self.comboBox_ColorProcess.text().split(",")
-#         if self.lineEdit_Director.text() != "":
-#             filmography_meta['director'] = self.lineEdit_Director.text().split(",")
-#         if self.lineEdit_Cinematography.text() != "":
-#             filmography_meta['cinematography'] = self.lineEdit_Cinematography.text().split(",")
-#         if self.lineEdit_ColorConsultant.text() != "":
-#             filmography_meta['color_consultant'] = self.lineEdit_ColorConsultant.text().split(",")
-#         if self.lineEdit_ProductionDesign.text() != "":
-#             filmography_meta['production_design'] = self.lineEdit_ProductionDesign.text().split(",")
-#         if self.lineEdit_ArtDirector.text() != "":
-#             filmography_meta['art_director'] = self.lineEdit_ArtDirector.text().split(",")
-#         if self.lineEdit_CostumDesign.text() != "":
-#             filmography_meta['costum_design'] = self.lineEdit_CostumDesign.text().split(",")
-#         if self.lineEdit_ProductionCompany.text() != "":
-#             filmography_meta['production_company'] = self.lineEdit_ProductionCompany.text().split(",")
-#         if self.lineEdit_ProductionCountry.text() != "":
-#             filmography_meta['country'] = self.lineEdit_ProductionCountry.text().split(",")
-#
-#         return filmography_meta

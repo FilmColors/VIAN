@@ -90,6 +90,10 @@
     <addaction name="actionBackup"/>
     <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
+    <addaction name="actionNew_Corpus"/>
+    <addaction name="actionLoad_Corpus"/>
+    <addaction name="actionClose_Corpus"/>
+    <addaction name="separator"/>
     <addaction name="menuImport"/>
     <addaction name="menuExport"/>
     <addaction name="separator"/>
@@ -225,23 +229,6 @@
     <addaction name="actionAuto_Segmentation"/>
     <addaction name="actionAuto_Screenshots"/>
    </widget>
-   <widget class="QMenu" name="menuCorpus">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string>Corpus</string>
-    </property>
-    <addaction name="actionCreateCorpus"/>
-    <addaction name="actionOpenLocal"/>
-    <addaction name="actionOpenRemote"/>
-    <addaction name="separator"/>
-    <addaction name="actionCommitProject"/>
-    <addaction name="actionCheckoutProject"/>
-    <addaction name="separator"/>
-    <addaction name="actionCorpus_Visualizer"/>
-    <addaction name="actionCorpus_VisualizerLegacy"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuCreate"/>
@@ -249,7 +236,6 @@
    <addaction name="menuTools"/>
    <addaction name="menuPlayer"/>
    <addaction name="menuAnalysis"/>
-   <addaction name="menuCorpus"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -882,6 +868,21 @@
   <action name="actionExportMovie_Segment">
    <property name="text">
     <string>Movie Segment</string>
+   </property>
+  </action>
+  <action name="actionNew_Corpus">
+   <property name="text">
+    <string>New Corpus</string>
+   </property>
+  </action>
+  <action name="actionLoad_Corpus">
+   <property name="text">
+    <string>Load Corpus</string>
+   </property>
+  </action>
+  <action name="actionClose_Corpus">
+   <property name="text">
+    <string>Close Corpus</string>
    </property>
   </action>
  </widget>

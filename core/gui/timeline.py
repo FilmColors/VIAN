@@ -185,6 +185,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_visualizations = dict()
         self.items = []
 
+        # This is only for keeping the datasets when the timeline is forced to redraw
+        self.visualization_datasets = []
+
         self.bar_height_min = 10
         self.group_height = 25
         self.controls_width = 200
@@ -299,6 +302,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             bars = tp(self.frame_Bars, self, control, dataset=dataset)
             item = [control, [bars], self.bar_height_min]
             self.item_visualizations[dataset.get_name().replace(" ", "-")] = item
+            if dataset not in self.visualization_datasets:
+                self.visualization_datasets.append(dataset)
             self.update_ui()
 
     @pyqtSlot(object)
@@ -420,6 +425,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_screenshots = []
         self.clear_visualizations()
 
+
     def update_location(self):
         # self.curr_movie_time = self.main_window.player.get_media_time() / 1000
         self.update()
@@ -482,6 +488,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             v[1][0].close()
             v[0].close()
         self.item_visualizations = dict()
+        self.visualization_datasets = []
 
     def update_ui(self):
         # self.time_scrubber.move(self.curr_movie_time, 0)
@@ -495,7 +502,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.time_scrubber.resize(self.scrubber_width, h)
 
         loc_y = self.time_bar_height
-
 
         self.items = self.item_segments + self.item_ann_layers + self.item_screenshots + list(self.item_visualizations.values())
 
@@ -598,9 +604,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 for s in bars.slices:
                     if s.item in selected:
                         s.is_selected = True
+                        s.update()
                         has_found = True
                     else:
                         s.is_selected = False
+                        s.update()
             entry[0].is_selected = has_found
 
 
@@ -612,10 +620,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.set_colormetry_progress(0.0)
         self.setDisabled(True)
 
-
     def recreate_timeline(self, args = None):
         vlocation = self.scrollArea.verticalScrollBar().value()
         project = self.main_window.project
+        datasets = self.visualization_datasets.copy()
+
         self.clear()
         self.duration = project.get_movie().duration
 
@@ -630,6 +639,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for grp in project.screenshot_groups:
             self.add_screenshots(grp)
 
+        for dataset in datasets:
+            self.add_visualization(dataset)
         self.on_selected(None, project.selected)
         self.update_ui()
         self.scrollArea.verticalScrollBar().setValue(vlocation)
@@ -650,10 +661,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 entry[0].is_selected = True
                 for b in entry[1]:
                     b.is_selected = True
+                    b.update()
             else:
                 entry[0].is_selected = False
                 for b in entry[1]:
                     b.is_selected = False
+                    b.update()
+
 
         if self.selected is not None and dispatch:
             self.project().set_selected(self, self.selected)
@@ -1311,6 +1325,14 @@ class TimebarSlice(QtWidgets.QWidget):
         self.query_highlighted = False
         self.sticky_highlighted = False
 
+        self.col_merge_highlighted = (255, 160, 47, 200)
+        self.col_query_highlighted = (63, 200, 229, 200)
+        self.col_sticky_highlighted = (195,38,123, 200)
+        self.col_cutting = (180,0,0, 200)
+        self.col_hovered = (232, 174, 12, 150)
+        self.col_selected = (self.color[0], self.color[1], self.color[2], 150)
+
+
         self.min_possible = 0
         self.max_possible = self.timeline.duration * self.timeline.scale
 
@@ -1334,25 +1356,25 @@ class TimebarSlice(QtWidgets.QWidget):
 
         else:
             if self.merge_highlighted:
-                col = (255, 160, 47, 200)
+                col = self.col_merge_highlighted
 
             elif self.query_highlighted:
-                col = (63, 200, 229, 200)
+                col = self.col_query_highlighted
 
             elif self.sticky_highlighted:
-                col = (195,38,123, 200)
+                col = self.col_sticky_highlighted
 
             elif self.is_hovered:
                 if self.timeline.is_cutting:
-                    col = (180,0,0, 200)
+                    col = self.col_cutting
                 else:
                     if self.is_selected:
-                        col = (self.color[0], self.color[1], self.color[2], 150)
+                        col = (self.col_hovered[0], self.col_hovered[1], self.col_hovered[2], 230)
                     else:
-                        col = (self.color[0], self.color[1], self.color[2], 80)
+                        col = (self.col_hovered[0], self.col_hovered[1], self.col_hovered[2], 150)
 
             elif self.is_selected:
-                col = (self.color[0], self.color[1], self.color[2], 150)
+                col = self.col_selected
 
             else:
                 col = (self.color[0], self.color[1], self.color[2], 50)
@@ -1647,6 +1669,8 @@ class TimebarSegmentationSlice(TimebarSlice):
     def __init__(self, parent:TimelineSegmentationBar, item:Segment, timeline):
         super(TimebarSegmentationSlice, self).__init__(parent, item, timeline, color = (54,146,182, 100))
         self.default_color = (54, 146, 182, 100)
+        self.col_selected = (54, 146, 182, 200)
+        self.col_hovered = (54, 146, 182, 240)
         item.onSegmentChanged.connect(self.update_text)
         item.onAnalysisAdded.connect(self.set_color)
 
@@ -1839,9 +1863,11 @@ class TimebarPicture(QtWidgets.QWidget):
 
     def paintEvent(self, QPaintEvent):
         if self.is_hovered:
-            col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 100)
+            col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 200)
+            w  = 7
         else:
             col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 50)
+            w = 3
 
         qp = QtGui.QPainter()
 
@@ -1850,7 +1876,7 @@ class TimebarPicture(QtWidgets.QWidget):
         qp.begin(self)
         qp.setRenderHint(QtGui.QPainter.Antialiasing)
         pen.setColor(col)
-        pen.setWidth(5)
+        pen.setWidth(w)
         qp.setPen(pen)
 
         qp.drawImage(self.img_rect, self.qimage)

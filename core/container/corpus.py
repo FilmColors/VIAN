@@ -10,14 +10,15 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from .project import VIANProject
 from .container_interfaces import IHasName
 from core.data.log import log_error, log_warning
-
-CORPUS_FILE_EXTENSION = ".vian_corpus"
+from core.data.enums import CORPUS
 
 
 class Corpus(QObject, IHasName):
     onProjectAdded = pyqtSignal(object)
     onProjectRemoved = pyqtSignal(object)
     onTemplateChanged = pyqtSignal(object)
+
+    CORPUS_FILE_EXTENSION = ".vian_corpus"
 
     def __init__(self, name="NewCorpus", directory="", file = None, template_movie_path = None):
         super(Corpus, self).__init__(None)
@@ -44,8 +45,7 @@ class Corpus(QObject, IHasName):
             except Exception as e:
                 log_error("Could not load project", e)
                 return
-
-        project.close()
+            project.close()
 
         self.projects_loaded[project.uuid] = project
         self.project_paths[project.uuid] = project.path
@@ -124,8 +124,8 @@ class Corpus(QObject, IHasName):
         elif self.file is not None:
             path = self.file
 
-        if CORPUS_FILE_EXTENSION not in path:
-            path += CORPUS_FILE_EXTENSION
+        if self.CORPUS_FILE_EXTENSION not in path:
+            path += self.CORPUS_FILE_EXTENSION
 
         with open(path, "w") as f:
             json.dump(self.serialize(), f)
@@ -136,7 +136,6 @@ class Corpus(QObject, IHasName):
             self.deserialize(json.load(f))
         return self
 
-
-
-
+    def get_type(self):
+        return CORPUS
 

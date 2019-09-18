@@ -1280,20 +1280,24 @@ class VIANProject(QObject, IHasName, IClassifiable):
         )
         return template
 
-    def apply_template(self, template_path):
+    def apply_template(self, template_path = None, template = None):
         """
         Loads a template from agiven path and applies it to the project.
 
         :param template_path: Path to the json
         :return: None
         """
-
-        try:
-            with open(template_path, "r") as f:
-                template = json.load(f)
-        except:
-            print("Importing Template Failed")
-            return
+        if template is None and template_path is None:
+            raise ValueError("Either template_path or template has to be given.")
+        if template_path is not None and template is None:
+            try:
+                with open(template_path, "r") as f:
+                    template = json.load(f)
+            except:
+                print("Importing Template Failed")
+                return
+        else:
+            template = template
 
         for s in template['segmentations']:
             new = Segmentation(s[0])

@@ -14,7 +14,9 @@ from collections import namedtuple
 
 from core.data.log import *
 from core.data.enums import ScreenshotNamingConventionOptions as naming
+from core.container.corpus import Corpus
 from PyQt5.QtGui import QFont, QColor
+
 
 from PyQt5.QtWidgets import QApplication
 
@@ -117,10 +119,14 @@ class UserSettings():
         self.recent_files_name = []
         self.recent_files_path = []
 
+        # @Deprecated
         self.recent_corpora = []
+        self.recent_corpora_2 = dict()
 
         self.USE_CORPUS = False
         self.USE_ELAN = False
+
+
 
         self.dock_widgets_data = []
 
@@ -202,6 +208,12 @@ class UserSettings():
                 log_info("Recreated Missing Directories")
                 break
 
+        t = dict()
+        for name, path in self.recent_corpora_2.items():
+            print(name, path, os.path.isfile(path))
+            if os.path.isfile(path):
+                t[name] = path
+        self.recent_corpora_2 = t
 
         if not integer:
             log_info("Settings regenerated")
@@ -254,7 +266,6 @@ class UserSettings():
     def add_recent_corpus(self, r):
         if not r in self.recent_corpora and os.path.isfile(r):
             self.recent_corpora.append(r)
-
 
     def get_last_corpus(self):
         if len(self.recent_corpora) > 0:
@@ -348,6 +359,11 @@ class UserSettings():
                     log_error(e)
                     pass
 
+    def add_recent_corpus2(self, corpus:Corpus):
+        p = corpus.file
+        if not corpus.CORPUS_FILE_EXTENSION in p:
+            p += corpus.CORPUS_FILE_EXTENSION
+        self.recent_corpora_2[corpus.name] = p
 
 class Contributor():
     """

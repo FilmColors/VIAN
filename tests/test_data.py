@@ -29,6 +29,8 @@ class TestImportMethods(unittest.TestCase):
             json.dump(self.exchange_data, f)
         with VIANProject("TestProject") as project:
             project.import_(ExperimentTemplateImporter(), "data/test-template.json")
+            with open("ERC-FilmColors-Template.viant", "w") as f:
+                json.dump(project.get_template(segm=True, voc=True, experiment=True, pipeline=True), f)
 
 if __name__ == '__main__':
     unittest.main()

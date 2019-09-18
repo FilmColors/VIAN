@@ -241,20 +241,26 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def update_layout_class_obj(self):
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
-            if len(self.sorted_containers) > self.current_idx:
-                if self.classification_mode == "Sequential":
+            if self.classification_mode == "Sequential":
+                if len(self.sorted_containers) > self.current_idx:
                     self.current_container = self.sorted_containers[self.current_idx]
                     self.main_window.project.set_selected(self, selected=[self.current_container])
-                self.lbl_CurrentContainer.setText(self.current_container.__class__.__name__ +" "+ self.current_container.get_name())
-                self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
-            else:
-                self.current_container = None
+                    self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
+                else:
+                    self.current_container = None
+
             if self.current_container is None:
                 return
-
+            print("Current Container", self.current_container)
+            self.lbl_CurrentContainer.setText(self.current_container.__class__.__name__
+                                              + " " + self.current_container.get_name())
             # Check  if we need to rebuild the layout or if the checkboxes stay the same,
             # if so apply the classification of the current container
-            if set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())]):
+            if set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in
+                                                       self.current_experiment.get_unique_keywords(
+                                                           self.current_container.get_parent_container(),
+                                                           return_all_if_none=True)]
+                                                      ):
                 for checkbox in self.all_checkboxes.values():
                     checkbox.stateChanged.disconnect()
                     checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))

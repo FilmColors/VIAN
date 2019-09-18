@@ -17,6 +17,7 @@ from core.visualization.basic_vis import *
 
 class ColorimetryWorker(QObject):
     onProcessingDone = pyqtSignal()
+
     def __init__(self, func):
         super(ColorimetryWorker, self).__init__()
         self.function = func
@@ -29,11 +30,9 @@ class ColorimetryWorker(QObject):
         except Exception as e:
             log_error(e)
 
-
-
-
 class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     draw = pyqtSignal(object)
+
     def __init__(self, main_window):
         super(ColorimetryLiveWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Colorimetry")

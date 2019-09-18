@@ -304,6 +304,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionBackup.triggered.connect(self.on_backup)
         self.actionCleanUpRecent.triggered.connect(self.cleanup_recent)
 
+        self.actionNew_Corpus.triggered.connect(self.corpus_widget.on_new_corpus)
+        self.actionLoad_Corpus.triggered.connect(self.corpus_widget.on_load_corpus)
+        self.actionClose_Corpus.triggered.connect(self.corpus_widget.on_close_corpus)
+
         ## IMPORT
         self.actionImportELANSegmentation.triggered.connect(self.import_segmentation)
         self.actionImportElanNewProject.triggered.connect(partial(self.import_elan_project, "", True))
@@ -410,12 +414,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSet_Letterbox.triggered.connect(self.on_set_letterbox)
 
         # Corpus
-        self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
-        self.actionOpenLocal.triggered.connect(self.open_local_corpus)
-        self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
-
-        self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
-        self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
+        # self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
+        # self.actionOpenLocal.triggered.connect(self.open_local_corpus)
+        # self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
+        # self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
+        # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -1726,18 +1729,13 @@ class MainWindow(QtWidgets.QMainWindow):
             if answer == QMessageBox.Yes:
                 self.on_save_project()
 
-        vocabularies = []
-        built_in = glob.glob("data/vocabularies/*.txt")
-        vocabularies = built_in
-
-        dialog = NewProjectDialog(self, self.settings, movie_path, vocabularies,
+        dialog = NewProjectDialog(self, self.settings, movie_path,
                                   add_to_current_corpus=add_to_current_corpus)
         dialog.show()
 
-    def new_project(self, project, template_path = None, vocabularies = None, copy_movie = "None", finish_callback = None):
+    def new_project(self, project, template_path = None, vocabularies = None, copy_movie = "None", finish_callback = None, corpus_path=None):
         if self.project is not None:
             self.close_project()
-
         self.project = project
 
         self.project.inhibit_dispatch = True
@@ -1746,9 +1744,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.settings.add_to_recent_files(self.project)
         self.update_recent_menu()
-
-        if template_path is not None:
-            self.project.apply_template(template_path)
 
         # Importing all Vocabularies
         if vocabularies is not None:
@@ -1767,9 +1762,21 @@ class MainWindow(QtWidgets.QMainWindow):
             shutil.move(self.project.movie_descriptor.movie_path, new_path)
             self.project.movie_descriptor.set_movie_path(new_path)
 
-        self.project.store_project()
+        if corpus_path is not None:
+            if self.corpus_widget.corpus is None or self.corpus_widget.corpus.file != corpus_path:
+                corpus = self.corpus_widget.load_corpus(corpus_path)
+            else:
+                corpus = self.corpus_widget.corpus
+            corpus.add_project(self.project)
+            self.project.apply_template(template=corpus.template.get_template())
 
+        elif template_path is not None:
+            self.project.apply_template(template_path)
+
+        self.project.store_project()
         self.project.inhibit_dispatch = False
+
+
 
         dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
         dialog.set_movie(self.project.movie_descriptor)

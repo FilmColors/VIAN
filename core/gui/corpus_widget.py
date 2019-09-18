@@ -62,6 +62,8 @@ class CorpusDockWidget(EDockWidget):
             self.corpus = Corpus("New Corpus", location, template_movie_path="data/template.mp4")
             self.corpus.save(os.path.join(self.corpus.directory, self.corpus.name))
             self.onCorpusChanged.emit(self.corpus)
+            self.show()
+            self.raise_()
 
     def on_save_corpus(self):
         if self.corpus is None:
@@ -70,6 +72,7 @@ class CorpusDockWidget(EDockWidget):
             return
         else:
             self.corpus.save()
+            self.main_window.settings.add_recent_corpus2(self.corpus)
 
     def on_create_project(self):
         if self.corpus is None:
@@ -81,7 +84,6 @@ class CorpusDockWidget(EDockWidget):
         if not os.path.isfile(file):
             return
         self.main_window.on_new_project(file)
-        print(self.main_window.project)
 
     def on_load_corpus(self):
         if self.corpus is not None:
@@ -89,9 +91,15 @@ class CorpusDockWidget(EDockWidget):
         file = QFileDialog.getOpenFileName(directory=self.main_window.settings.DIR_CORPORA)[0]
         if not os.path.isfile(file):
             return
+        self.load_corpus(file)
 
+    def load_corpus(self, file):
         self.corpus = Corpus("NewCorpus").load(file)
+        self.show()
+        self.raise_()
+        self.main_window.settings.add_recent_corpus2(self.corpus)
         self.onCorpusChanged.emit(self.corpus)
+        return self.corpus
 
     def on_import_projects(self):
         if self.corpus is None:
@@ -102,7 +110,9 @@ class CorpusDockWidget(EDockWidget):
         if not os.path.isfile(file):
             return
         self.corpus.add_project(file=file)
+
         self.corpus.save()
+        self.main_window.settings.add_recent_corpus2(self.corpus)
 
     def on_edit_template(self):
         if self.corpus is None:
@@ -141,6 +151,13 @@ class CorpusDockWidget(EDockWidget):
     def on_save_triggered(self):
         if self.corpus is not None:
             self.on_save_corpus()
+            self.main_window.settings.add_recent_corpus2(self.corpus)
+
+    def on_close_corpus(self):
+        if self.corpus is not None:
+            self.corpus.save(os.path.join(self.corpus.directory, self.corpus.name))
+            self.corpus = None
+            self.onCorpusChanged.emit(None)
 
 
 class CorpusList(EditableListWidget):
@@ -148,7 +165,6 @@ class CorpusList(EditableListWidget):
         super(CorpusList, self).__init__(parent)
         self.projects = dict()
         super(CorpusList, self).add_item("No Corpus Loaded", None)
-
 
     def on_corpus_loaded(self, corpus:Corpus):
         if corpus is None:
@@ -163,9 +179,8 @@ class CorpusList(EditableListWidget):
             for uuid, p in corpus.projects_loaded.items():
                 self.on_project_added(p)
             self.setEnabled(True)
-
-        corpus.onProjectAdded.connect(self.on_project_added)
-        corpus.onProjectRemoved.connect(self.on_project_removed)
+            corpus.onProjectAdded.connect(self.on_project_added)
+            corpus.onProjectRemoved.connect(self.on_project_removed)
 
     def on_project_added(self, project:VIANProject):
         if len(self.projects.keys()) == 0:
