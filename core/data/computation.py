@@ -488,7 +488,7 @@ def is_subdir(path, directory):
     return not relative.startswith(os.pardir + os.sep)
 
 
-def images_to_movie(imgs, out_file, time_scale = 180, fps = 30.0, size = (640,480), codec = 'DIVX'):
+def images_to_movie(imgs, out_file, time_scale = 180, fps = 30.0, size = (640,480), codec = 'MJPG'):
     """
     Creates a movie from a list of numpy images
     :param imgs: a list of numpy images
@@ -501,7 +501,7 @@ def images_to_movie(imgs, out_file, time_scale = 180, fps = 30.0, size = (640,48
     """
     if size is None:
         size = (imgs[0].shape[0], imgs[0].shape[1])
-    fourcc = cv2.VideoWriter_fourcc(*"MJPG")
+    fourcc = cv2.VideoWriter_fourcc(*codec)
     writer = cv2.VideoWriter(out_file, fourcc, fps, size)
     for img in imgs:
         for t in range(time_scale):

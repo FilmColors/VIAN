@@ -50,6 +50,7 @@ from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, Status
 from core.gui.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
 from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
+from core.gui.corpus_widget import CorpusDockWidget
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
@@ -89,6 +90,8 @@ class MainWindow(QtWidgets.QMainWindow):
     onProjectOpened = pyqtSignal(object)
     onMovieOpened = pyqtSignal(object)
     onProjectClosed = pyqtSignal()
+
+    onSave = pyqtSignal()
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -192,6 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.facial_identification_dock = None
         self.pipeline_widget = None
         self.script_editor = None
+        self.corpus_widget = None
 
         self.corpus_visualizer = VIANVisualizer2(self)
         self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
@@ -258,6 +262,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_quick_annotation_dock()
         self.create_colorimetry_live()
         self.create_experiment_editor()
+        self.create_corpus_widget()
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
         self.window_toolbar = WidgetsToolbar(self)
@@ -895,6 +900,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.colorimetry_live.raise_()
                 self.colorimetry_live.activateWindow()
 
+    def create_corpus_widget(self):
+        if self.corpus_widget is None:
+            self.corpus_widget = CorpusDockWidget(self)
+            self.onSave.connect(self.corpus_widget.on_save_triggered)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.corpus_widget, Qt.Vertical)
+        else:
+            if not self.corpus_widget.visibleRegion().isEmpty():
+                self.corpus_widget.hide()
+            else:
+                self.corpus_widget.show()
+                self.corpus_widget.raise_()
+                self.corpus_widget.activateWindow()
+
     def create_corpus_client_toolbar(self):
         if self.corpus_client_toolbar is None:
             self.corpus_client_toolbar = WebAppCorpusDock(self, self.corpus_client)
@@ -1031,6 +1049,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuRecently_Opened.addSeparator()
         try:
             for i, recent in enumerate(self.settings.recent_files_name):
+                if recent is None:
+                    continue
                 action = self.menuRecently_Opened.addAction(recent)
                 action.triggered.connect(partial(self.open_recent, i))
         except:
@@ -1312,6 +1332,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # self.tabifyDockWidget(self.colorimetry_live, self.script_editor)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
@@ -1811,6 +1832,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close_project()
 
     def on_save_project(self, open_dialog=False, sync = False):
+        self.onSave.emit()
+
         if open_dialog is True or self.project.path is "" or self.project.name is "":
 
             path = QFileDialog.getSaveFileName(filter="*" + VIAN_PROJECT_EXTENSION)

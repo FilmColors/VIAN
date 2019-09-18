@@ -60,6 +60,8 @@ class AudioHandler(QObject):
         with HDF5_FILE_LOCK:
             self._read(project.movie_descriptor.get_movie_path())
             self.audio_samples = self._sample_audio(self.callback)
+            if self.audio_samples is None:
+                return
             self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
 
             log_info("Size", self.audio_samples.nbytes / 10 ** 6)
@@ -92,12 +94,16 @@ class AudioHandler(QObject):
         :param callback: a function to call for signalling progress
         :return: an array of shape (length, 2) stereo signal, np.ndarray
         """
-        length = int(self._audioclip.duration / self.resolution)
-        arr = np.zeros(shape=(length, 2), dtype=np.float32)
-        for i in range(int(self._audioclip.duration / self.resolution)):
-            arr[i] = self._audioclip.get_frame(i / (1.0 / self.resolution))
-            if callback is not None and  i % 100 == 0:
-                callback("Audio Extraction:\t" + str(round(i / int(self._audioclip.duration / self.resolution)* 100, 2)) + "%")
+        try:
+            length = int(self._audioclip.duration / self.resolution)
+            arr = np.zeros(shape=(length, 2), dtype=np.float32)
+            for i in range(int(self._audioclip.duration / self.resolution)):
+                arr[i] = self._audioclip.get_frame(i / (1.0 / self.resolution))
+                if callback is not None and  i % 100 == 0:
+                    callback("Audio Extraction:\t" + str(round(i / int(self._audioclip.duration / self.resolution)* 100, 2)) + "%")
+        except Exception as e:
+            print(e)
+            return None
         return arr
 
 

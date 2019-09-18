@@ -6,19 +6,22 @@ from core.gui.ewidgetbase import MultiItemTextInput, QLabel
 class FilmographyWidget2(QWidget):
     def __init__(self, parent, project = None, persons = None, processes = None, genres = None, countries = None, companies=None):
         super(FilmographyWidget2, self).__init__(parent)
-        self.w = QWidget(self)
         self.setLayout(QVBoxLayout(self))
-        self.w.setLayout(QVBoxLayout(self.w))
 
-        self.area = QScrollArea()
-        self.area.setWidget(self.w)
+        self.area = QScrollArea(self)
         self.layout().addWidget(self.area)
 
+        self.w = QWidget(self)
+        self.area.setWidgetResizable(True)
+        self.area.setWidget(self.w)
+        self.w.setLayout(QVBoxLayout())
+        
         self.lineEdit_IMDB = QLineEdit(self.w)
         lt = QHBoxLayout(self.w)
+        self.w.layout().addItem(lt)
+
         lt.addWidget(QLabel("IMDB ID:", self.w))
         lt.addWidget(self.lineEdit_IMDB)
-        self.w.layout().addItem(lt)
 
         self.lineEdit_Genre = MultiItemTextInput(self.w, "Genre")
         self.lineEdit_Director = MultiItemTextInput(self.w, "Director")
@@ -33,17 +36,18 @@ class FilmographyWidget2(QWidget):
         self.lineEdit_ProductionCompany = MultiItemTextInput(self.w, "Production Company")
         self.lineEdit_ProductionCountry = MultiItemTextInput(self.w, "Production Country")
 
-        self.layout().addWidget(self.lineEdit_IMDB)
-        self.layout().addWidget(self.lineEdit_Genre)
-        self.layout().addWidget(self.lineEdit_Director)
-        self.layout().addWidget(self.lineEdit_Cinematography)
-        self.layout().addWidget(self.lineEdit_ColorConsultant)
-        self.layout().addWidget(self.lineEdit_ProductionDesign)
-        self.layout().addWidget(self.lineEdit_ArtDirector)
-        self.layout().addWidget(self.lineEdit_CostumDesign)
-        self.layout().addWidget(self.lineEdit_ColorProcess)
-        self.layout().addWidget(self.lineEdit_ProductionCompany)
-        self.layout().addWidget(self.lineEdit_ProductionCountry)
+        self.w.layout().addWidget(self.lineEdit_IMDB)
+        self.w.layout().addWidget(self.lineEdit_Genre)
+        self.w.layout().addWidget(self.lineEdit_Director)
+        self.w.layout().addWidget(self.lineEdit_Cinematography)
+        self.w.layout().addWidget(self.lineEdit_ColorConsultant)
+        self.w.layout().addWidget(self.lineEdit_ProductionDesign)
+        self.w.layout().addWidget(self.lineEdit_ArtDirector)
+        self.w.layout().addWidget(self.lineEdit_CostumDesign)
+        self.w.layout().addWidget(self.lineEdit_ColorProcess)
+        self.w.layout().addWidget(self.lineEdit_ProductionCompany)
+        self.w.layout().addWidget(self.lineEdit_ProductionCountry)
+        self.w.layout().addWidget(self.lineEdit_ProductionCountry)
 
         if persons is not None:
             q = QCompleter([p['name'] for p in persons])

@@ -127,7 +127,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         :param path:
         :return:
         """
-        if os.path.normpath(self.project.folder) in os.path.normpath(path):
+        if self.project.folder is not None and os.path.normpath(self.project.folder) in os.path.normpath(path):
             common = os.path.commonpath([self.project.path, path])
             self.movie_path = path.replace(common, "/")
             self.is_relative = True

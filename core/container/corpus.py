@@ -5,7 +5,7 @@ from typing import Dict
 from shutil import rmtree
 
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal
 
 from .project import VIANProject
 from .container_interfaces import IHasName
@@ -13,14 +13,19 @@ from core.data.log import log_error
 
 CORPUS_FILE_EXTENSION = ".vian_corpus"
 
+
 class Corpus(QObject, IHasName):
-    def __init__(self, name, directory):
+    onProjectAdded = pyqtSignal(object)
+    onProjectRemoved = pyqtSignal(object)
+    onTemplateChanged = pyqtSignal(object)
+
+    def __init__(self, name="NewCorpus", directory="", template_movie_path = None):
         super(Corpus, self).__init__(None)
         self.projects_loaded = dict()     # type: Dict[VIANProject.uuid:VIANProject]
         self.project_paths = dict()       # type: Dict[VIANProject.uuid:str]
         self.name = name
 
-        self.template = VIANProject("CorpusTemplate").__enter__()
+        self.template = VIANProject("CorpusTemplate", movie_path=template_movie_path).__enter__()
         self.directory = directory
 
     def add_project(self, project:VIANProject=None, file = None):
@@ -43,6 +48,7 @@ class Corpus(QObject, IHasName):
 
         self.projects_loaded[project.uuid] = project
         self.project_paths[project.uuid] = project.path
+        self.onProjectAdded.emit(project)
 
     def remove_project(self, project:VIANProject = None, file = None, delete_from_disk = False):
         """
@@ -71,6 +77,11 @@ class Corpus(QObject, IHasName):
                     rmtree(pdir)
             except Exception as e:
                 log_error("Could not remove project", e)
+        self.onProjectRemoved.emit(project)
+
+    def import_template(self, path):
+        self.template.apply_template(path)
+        self.onTemplateChanged.emit(self.template)
 
     def get_name(self):
         return self.name
@@ -92,9 +103,13 @@ class Corpus(QObject, IHasName):
         """ Loads a corpus from a serialization as given in serialize()"""
         self.name = serialization['name']
         self.template = VIANProject().load_project(serialization=serialization['template'])
-        self.name = serialization['name']
+        self.project_paths = serialization['projects']
         self.directory = serialization['directory']
 
+        for p in self.project_paths.values():
+            if os.path.isfile(p):
+                project = VIANProject().load_project(p)
+                self.projects_loaded[project.uuid] = project
         return self
 
     def save(self, path):

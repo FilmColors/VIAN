@@ -39,7 +39,7 @@ from PyQt5.QtGui import QPixmap, QIcon
 from core.data.settings import UserSettings
 from core.gui.drop_image_container import DropImageContainer
 from core.gui.ewidgetbase import MultiItemTextInput
-from core.corpus.new.corpus_widget import CorpusDockWidget
+from core.gui.corpus_widget import CorpusDockWidget, FilmographyWidget2
 DEBUG = True
 MAIN_WINDOW = None
 
@@ -47,7 +47,7 @@ MAIN_WINDOW = None
 class MW(QMainWindow):
     def __init__(self, widget):
         super(MW, self).__init__()
-        self.setCentralWidget(widget)
+        self.setCentralWidget(FilmographyWidget2(self))
         self.dock_widgets = []
         self.addDockWidget(Qt.LeftDockWidgetArea, CorpusDockWidget(self))
 
@@ -61,9 +61,6 @@ def set_attributes(app):
     app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     if sys.platform == "darwin":
         app.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
-
-
-
 
 settings = UserSettings()
 settings.load()

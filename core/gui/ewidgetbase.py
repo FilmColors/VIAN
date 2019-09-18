@@ -159,7 +159,6 @@ class EDockWidget(QDockWidget):
         self.main_window.resizeDocks([self], [h], Qt.Vertical)
 
     def setWidget(self, QWidget):
-        # NEWCODE
         if self.init:
             super(EDockWidget, self).setWidget(QWidget)
             self.init = False
@@ -563,6 +562,12 @@ class TextEditPopup(QMainWindow):
         if a0.key() == Qt.Key_Enter:
             self.close()
 
+class EditableListWidgetItem(QListWidgetItem):
+    def __init__(self, parent, name, meta):
+        super(EditableListWidgetItem, self).__init__(parent)
+        self.setText(name)
+        self.name = name
+        self.meta = meta
 
 class EditableListWidget(QWidget):
     onSelectionChanged = pyqtSignal(object)
@@ -585,16 +590,31 @@ class EditableListWidget(QWidget):
         self.layout().addItem(self.edit_layout)
 
         self.items = []
+        self.item_index = dict()
 
         self.list.itemSelectionChanged.connect(self.on_selected)
         self.btn_Add.clicked.connect(self.on_add)
         self.btn_Remove.clicked.connect(self.on_remove)
 
-    def add_item(self, name, meta):
+    def add_item(self, name, meta) -> EditableListWidgetItem:
+        n = name
+        c = 0
+        while n in self.item_index:
+            n = name + "_" + str(c).zfill(2)
+            c += 1
+        name = n
         itm = EditableListWidgetItem(self.list, name, meta)
         self.list.addItem(itm)
         self.items.append(itm)
+        self.item_index[name] = itm
         return itm
+
+    def remove_item(self, name):
+        if name in self.item_index:
+            itm = self.item_index[name]
+            self.items.remove(itm)
+            self.list.takeItem(self.list.indexFromItem(itm).row())
+            self.onItemDeleted.emit(itm.name, itm)
 
     def on_selected(self):
         selected = [s for s in self.list.selectedItems()]
@@ -612,14 +632,6 @@ class EditableListWidget(QWidget):
             self.list.takeItem(idx.row())
             self.onItemDeleted.emit(itm.name, itm)
             self.items.remove(itm)
-
-
-class EditableListWidgetItem(QListWidgetItem):
-    def __init__(self, parent, name, meta):
-        super(EditableListWidgetItem, self).__init__(parent)
-        self.setText(name)
-        self.name = name
-        self.meta = meta
 
 
 class VIANMoveableGraphicsItemSignals(QObject):
