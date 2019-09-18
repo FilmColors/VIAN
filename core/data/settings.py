@@ -219,7 +219,7 @@ class UserSettings():
 
         if path is None or name is None:
             return
-        
+
         if name not in self.recent_files_name:
             n_name = [name]
             n_name.extend(self.recent_files_name)

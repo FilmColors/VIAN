@@ -14,6 +14,7 @@ from core.container.project import VIANProject
 
 class CorpusDockWidget(EDockWidget):
     onCorpusChanged = pyqtSignal(object)
+    onSelectionChanged = pyqtSignal(object)
 
     def __init__(self, main_window):
         super(CorpusDockWidget, self).__init__(main_window, False)
@@ -36,7 +37,7 @@ class CorpusDockWidget(EDockWidget):
         self.a_new = self.file_menu.addAction("New Corpus")
         self.a_save = self.file_menu.addAction("Save Corpus")
         self.a_load = self.file_menu.addAction("Load Corpus")
-        self.a_create_project = self.file_menu.addAction("Create Projects")
+        # self.a_create_project = self.file_menu.addAction("Create Projects")
         self.a_import_project = self.file_menu.addAction("Import Projects")
 
         self.a_new.triggered.connect(self.on_new_corpus)
@@ -46,13 +47,17 @@ class CorpusDockWidget(EDockWidget):
         self.a_import_project.triggered.connect(self.on_import_projects)
 
         self.onCorpusChanged.connect(self.list.on_corpus_loaded)
+        self.onCorpusChanged.connect(self.general_widget.on_corpus_loaded)
+        self.filmography.onFilmographyChanged.connect(self.save_current_project)
         self.list.onSelectionChanged.connect(self.on_selection_changed)
         self.corpus = None
+        self.current_project = None
 
     def on_new_corpus(self):
         location = QFileDialog().getExistingDirectory(self, directory=self.main_window.settings.DIR_CORPORA)
         if os.path.isdir(location):
             self.corpus = Corpus("New Corpus", location, template_movie_path="data/template.mp4")
+            self.corpus.save(os.path.join(self.corpus.directory, self.corpus.name))
             self.onCorpusChanged.emit(self.corpus)
 
     def on_save_corpus(self):
@@ -61,7 +66,7 @@ class CorpusDockWidget(EDockWidget):
                                                           "a new one in the file menu")
             return
         else:
-            self.corpus.save(os.path.join(self.corpus.directory, self.corpus.name))
+            self.corpus.save()
 
     def on_load_corpus(self):
         if self.corpus is not None:
@@ -82,6 +87,7 @@ class CorpusDockWidget(EDockWidget):
         if not os.path.isfile(file):
             return
         self.corpus.add_project(file=file)
+        self.corpus.save()
 
     def on_edit_template(self):
         if self.corpus is None:
@@ -92,13 +98,26 @@ class CorpusDockWidget(EDockWidget):
         self.main_window.dispatch_on_loaded()
 
     def on_selection_changed(self, selection):
-        if len(selection) > 0:
-            project = selection[0].meta
-            print(project.name, project)
+        try:
+            if len(selection) > 0:
+                project = selection[0].meta
+                self.filmography.set_filmography(project.movie_descriptor.meta_data)
+                self.onSelectionChanged.emit(project)
+                self.current_project = project
+            else:
+                self.current_project = None
+        except Exception as e:
+            raise e
+
+    def save_current_project(self):
+        if self.current_project is not None:
+            self.current_project.movie_descriptor.meta_data = self.filmography.get_filmography()
+            self.current_project.store_project()
 
     def on_save_triggered(self):
         if self.corpus is not None:
             self.on_save_corpus()
+
 
 class CorpusList(EditableListWidget):
     def __init__(self, parent):
@@ -151,6 +170,7 @@ class CorpusGeneralWidget(QWidget):
         self.w_name.setLayout(QHBoxLayout())
         self.w_name.layout().addWidget(QLabel("Corpus Name"))
         self.textEdit_Name = QLineEdit(self.w_name)
+        self.textEdit_Name.editingFinished.connect(self.on_name_changed)
         self.w_name.layout().addWidget(self.textEdit_Name)
         self.layout().addWidget(self.w_name)
         
@@ -158,10 +178,20 @@ class CorpusGeneralWidget(QWidget):
         self.layout().addWidget(self.btn_EditTemplate)
 
         self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Preferred, QSizePolicy.Expanding))
-        # self.w_name = QWidget(self)
-        # self.w_name.setLayout(QHBoxLayout())
-        # self.w_name.layout().addWidget(QLabel("Corpus Name"))
-        # self.textEdit_Name = QTextEdit(self.w_name)
-        # self.w_name.layout().addWidget(self.textEdit_Name)
+        self.corpus = None
+        self.setEnabled(False)
 
+    def on_corpus_loaded(self, corpus):
+        self.corpus = corpus
+        if self.corpus is not None:
+            self.textEdit_Name.setText(self.corpus.name)
+            self.setEnabled(True)
+        else:
+            self.setEnabled(False)
+
+    def on_name_changed(self):
+        if self.corpus is not None:
+            if self.textEdit_Name.text() != "":
+                self.corpus.name = self.textEdit_Name.text()
+            self.corpus.save()
 

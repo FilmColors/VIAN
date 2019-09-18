@@ -527,27 +527,27 @@ class ExperimentContextMenu(ContextMenu):
 
 
 class CorpusProjectContextMenu(ContextMenu):
-    def __init__(self, parent, pos, project:VIANProject, dbproject:DBProject, corpus_client:CorpusClient):
+    def __init__(self, parent, pos, project:VIANProject, corpus_project:DBProject):
         super(CorpusProjectContextMenu, self).__init__(parent, pos)
         self.project = project
-        self.dbproject = dbproject
-        self.corpus_client = corpus_client
+        self.corpus_project = corpus_project
 
         self.a_open = self.addAction("Open Project")
-        self.a_check_in = self.addAction("Check In")
-        self.a_check_out = self.addAction("Check Out")
-        self.a_commit = self.addAction("Commit")
+        # self.a_check_in = self.addAction("Check In")
+        # self.a_check_out = self.addAction("Check Out")
+        # self.a_commit = self.addAction("Commit")
         self.a_remove = self.addAction("Remove from Corpus")
 
         self.a_open.triggered.connect(self.on_open)
-        self.a_check_in.triggered.connect(self.on_check_in)
-        self.a_check_out.triggered.connect(self.on_check_out)
-        self.a_commit.triggered.connect(self.on_commit)
+        # self.a_check_in.triggered.connect(self.on_check_in)
+        # self.a_check_out.triggered.connect(self.on_check_out)
+        # self.a_commit.triggered.connect(self.on_commit)
         self.a_remove.triggered.connect(self.on_remove)
         self.popup(pos)
 
     def on_open(self):
-        self.corpus_client.on_open_corpus_project(self.dbproject)
+        self.main_window.close_project()
+        self.main_window.load_project(self.corpus_project.path)
 
 
     def on_check_in(self):

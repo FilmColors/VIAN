@@ -265,15 +265,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_corpus_widget()
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
-        self.window_toolbar = WidgetsToolbar(self)
-        self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
-
         self.pipeline_toolbar = PipelineToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
         self.script_editor = self.pipeline_widget.editor
+
+        self.window_toolbar = WidgetsToolbar(self)
+        self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
+
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
         self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
 
@@ -494,6 +495,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_widget.pipeline.onPipelineFinalize.connect(self.vian_event_handler.run_on_finalize_event)
 
         self.pipeline_toolbar.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
+
+        self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
         self.update_recent_menu()
@@ -745,7 +748,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_outliner(self):
         if self.outliner is None:
-            self.outliner = Outliner(self, self.corpus_client)
+            self.outliner = Outliner(self)
             self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.outliner)
         else:
             if not self.outliner.visibleRegion().isEmpty():

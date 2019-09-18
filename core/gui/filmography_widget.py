@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import QCompleter, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
-
+from PyQt5.QtCore import pyqtSignal
 
 from core.gui.ewidgetbase import MultiItemTextInput, QLabel
 
 class FilmographyWidget2(QWidget):
+    onFilmographyChanged = pyqtSignal()
+
     def __init__(self, parent, project = None, persons = None, processes = None, genres = None, countries = None, companies=None):
         super(FilmographyWidget2, self).__init__(parent)
         self.setLayout(QVBoxLayout(self))
@@ -47,7 +49,17 @@ class FilmographyWidget2(QWidget):
         self.w.layout().addWidget(self.lineEdit_ColorProcess)
         self.w.layout().addWidget(self.lineEdit_ProductionCompany)
         self.w.layout().addWidget(self.lineEdit_ProductionCountry)
-        self.w.layout().addWidget(self.lineEdit_ProductionCountry)
+
+        self.lineEdit_Genre.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_Director.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_Cinematography.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_ColorConsultant.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_ProductionDesign.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_ArtDirector.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_CostumDesign.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_ColorProcess.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_ProductionCompany.onChanged.connect(self.onFilmographyChanged)
+        self.lineEdit_ProductionCountry.onChanged.connect(self.onFilmographyChanged)
 
         if persons is not None:
             q = QCompleter([p['name'] for p in persons])
@@ -79,7 +91,7 @@ class FilmographyWidget2(QWidget):
         filmography_meta = dict()
         filmography_meta['imdb_id'] = self.lineEdit_IMDB.text().split(",")
         filmography_meta['genre'] = self.lineEdit_Genre.get_items()
-        filmography_meta['color_process'] = self.comboBox_ColorProcess.get_items()
+        filmography_meta['color_process'] = self.lineEdit_ColorProcess.get_items()
         filmography_meta['director'] = self.lineEdit_Director.get_items()
         filmography_meta['cinematography'] = self.lineEdit_Cinematography.get_items()
         filmography_meta['color_consultant'] = self.lineEdit_ColorConsultant.get_items()
@@ -90,3 +102,30 @@ class FilmographyWidget2(QWidget):
         filmography_meta['country'] = self.lineEdit_ProductionCountry.get_items()
 
         return filmography_meta
+
+    def set_filmography(self, d):
+        self.clear()
+
+        if 'imdb_id' in d: self.lineEdit_IMDB.setText(", ".join(d['imdb_id']))
+        if 'genre' in d: self.lineEdit_Genre.set_items(d['genre'])
+        if 'color_process' in d: self.lineEdit_ColorProcess.set_items(d['color_process'])
+        if 'director' in d: self.lineEdit_Director.set_items(d['director'])
+        if 'cinematography' in d: self.lineEdit_Cinematography.set_items(d['cinematography'])
+        if 'color_consultant' in d: self.lineEdit_ColorConsultant.set_items(d['color_consultant'])
+        if 'production_design' in d: self.lineEdit_ProductionDesign.set_items(d['production_design'])
+        if 'art_director' in d: self.lineEdit_ArtDirector.set_items(d['art_director'])
+        if 'costum_design' in d: self.lineEdit_CostumDesign.set_items(d['costum_design'])
+        if 'production_company' in d: self.lineEdit_ProductionCompany.set_items(d['production_company'])
+        if 'country' in d: self.lineEdit_ProductionCountry.set_items(d['country'])
+
+    def clear(self):
+        self.lineEdit_Genre.clear()
+        self.lineEdit_Director .clear()
+        self.lineEdit_Cinematography.clear()
+        self.lineEdit_ColorConsultant.clear()
+        self.lineEdit_ProductionDesign.clear()
+        self.lineEdit_ArtDirector.clear()
+        self.lineEdit_CostumDesign.clear()
+        self.lineEdit_ColorProcess.clear()
+        self.lineEdit_ProductionCompany.clear()
+        self.lineEdit_ProductionCountry.clear()

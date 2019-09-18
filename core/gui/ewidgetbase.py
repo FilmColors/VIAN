@@ -695,6 +695,8 @@ class FileBrowseBar(QWidget):
 
 
 class MultiItemTextInput(QWidget):
+    onChanged = pyqtSignal()
+
     def __init__(self, parent, title, autocompleter = None):
         super(MultiItemTextInput, self).__init__(parent)
         self.setLayout(QHBoxLayout(self))
@@ -715,8 +717,6 @@ class MultiItemTextInput(QWidget):
         if autocompleter is not None:
             self.input.setCompleter(autocompleter)
 
-
-
     def setCompleter(self, completer):
         self.input.setCompleter(completer)
 
@@ -728,14 +728,30 @@ class MultiItemTextInput(QWidget):
         self.added_list.layout().addWidget(item)
         self.items.append(item)
         item.onRemove.connect(self.on_remove)
+        self.onChanged.emit()
 
     def on_remove(self, item):
         if item in self.items:
             self.items.remove(item)
             item.deleteLater()
+        self.onChanged.emit()
+
+    def set_items(self, lst):
+        print("names", lst)
+        for name in lst:
+            item = MultiItemTextInputItem(self, name)
+            self.added_list.layout().addWidget(item)
+            self.items.append(item)
+            item.onRemove.connect(self.on_remove)
 
     def get_items(self):
         return [n.name for n in self.items]
+
+    def clear(self):
+        self.input.setText("")
+        for itm in self.items:
+            itm.deleteLater()
+        self.items = []
 
 class MultiItemTextInputItem(QWidget):
     onRemove = pyqtSignal(object)
@@ -745,6 +761,7 @@ class MultiItemTextInputItem(QWidget):
         path = os.path.abspath("qt_ui/multiitemedititem.ui")
         uic.loadUi(path, self)
         self.lblName.setText(name)
+        self.name = name
         self.btn_remove.clicked.connect(partial(self.onRemove.emit, self))
 
 

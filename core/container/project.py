@@ -163,6 +163,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.colormetry_analysis = None
 
         self.hdf5_manager = None
+        self.hdf5_indices_loaded = dict(curr_pos=dict(), uidmapping=dict())
 
         self.inhibit_dispatch = False
         self.selected = []
@@ -180,7 +181,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if self.path is not None and self.folder is not None:
             self.sanitize_paths()
             self.create_file_structure()
-
 
     def get_type(self):
         return PROJECT
@@ -947,7 +947,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             experiments.append(g.serialize())
 
         if project.hdf5_manager is None:
-            hdf_indices = dict(curr_pos=dict(), uidmapping=dict())
+            hdf_indices = self.hdf5_indices_loaded
         else:
             hdf_indices = project.hdf5_manager.get_indices()
 
@@ -995,6 +995,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     json.dump(data, f)
             except Exception as e:
                 print("Exception during Storing: ", str(e))
+        log_info("Project Stored to", path)
 
     def load_project(self, path=None, main_window = None, serialization = None):
         """
@@ -1048,6 +1049,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.data_dir = self.folder + "/data/"
         self.hdf5_path = self.data_dir + "analyses.hdf5"
 
+
         move_project_to_directory_project = False
         version = [0,0,0]
         try:
@@ -1094,6 +1096,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if has_file:
                 self.create_file_structure()
 
+        try:
+            self.hdf5_indices_loaded = my_dict['hdf_indices']
+        except:
+            pass
         if has_file:
             self.hdf5_manager = HDF5Manager()
             self.hdf5_manager.set_path(self.hdf5_path)

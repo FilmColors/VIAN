@@ -46,8 +46,6 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
 
         self.progress_widget.onThresholdReached.connect(self.on_threshold_reached)
 
-
-
     @pyqtSlot()
     def on_analyses_changed(self):
         self.progress_widget.update_state()
@@ -56,8 +54,6 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
     def on_loaded(self, project):
         self.btn_Commit.setEnabled(False)
         self.progress_widget.btn_RunAll.setEnabled(False)
-
-
 
     def on_threshold_reached(self):
         self.btn_Commit.setEnabled(True)
@@ -346,6 +342,8 @@ class CorpusCommitDialog(EDialogWidget):
         self.pushButton_Cancel.clicked.connect(self.close)
 
     def on_commit(self):
+        for k, v in self.filmography.get_filmography().items():
+            self.main_window.project.movie_descriptor.meta_data[k] = v
         if self.main_window.project is not None:
             self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
         pass

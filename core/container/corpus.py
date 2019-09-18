@@ -9,7 +9,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 from .project import VIANProject
 from .container_interfaces import IHasName
-from core.data.log import log_error
+from core.data.log import log_error, log_warning
 
 CORPUS_FILE_EXTENSION = ".vian_corpus"
 
@@ -19,7 +19,7 @@ class Corpus(QObject, IHasName):
     onProjectRemoved = pyqtSignal(object)
     onTemplateChanged = pyqtSignal(object)
 
-    def __init__(self, name="NewCorpus", directory="", template_movie_path = None):
+    def __init__(self, name="NewCorpus", directory="", file = None, template_movie_path = None):
         super(Corpus, self).__init__(None)
         self.projects_loaded = dict()     # type: Dict[VIANProject.uuid:VIANProject]
         self.project_paths = dict()       # type: Dict[VIANProject.uuid:str]
@@ -27,6 +27,7 @@ class Corpus(QObject, IHasName):
 
         self.template = VIANProject("CorpusTemplate", movie_path=template_movie_path).__enter__()
         self.directory = directory
+        self.file = file
 
     def add_project(self, project:VIANProject=None, file = None):
         """
@@ -95,7 +96,8 @@ class Corpus(QObject, IHasName):
             name = self.name,
             template = self.template.store_project(return_dict=True),
             projects = self.project_paths,
-            directory = self.directory
+            directory = self.directory,
+            file = self.file
         )
         return ser
 
@@ -105,6 +107,7 @@ class Corpus(QObject, IHasName):
         self.template = VIANProject().load_project(serialization=serialization['template'])
         self.project_paths = serialization['projects']
         self.directory = serialization['directory']
+        self.file = serialization['file']
 
         for p in self.project_paths.values():
             if os.path.isfile(p):
@@ -112,10 +115,18 @@ class Corpus(QObject, IHasName):
                 self.projects_loaded[project.uuid] = project
         return self
 
-    def save(self, path):
+    def save(self, path=None):
         """ Serializes a Corpus into a json file """
+        if path is None and self.file is None:
+            log_warning("No path set for this corpus. First time, the path has to be given. The defaul name is used")
+            self.file = os.path.join(self.directory, self.name)
+            path = self.file
+        elif self.file is not None:
+            path = self.file
+
         if CORPUS_FILE_EXTENSION not in path:
             path += CORPUS_FILE_EXTENSION
+
         with open(path, "w") as f:
             json.dump(self.serialize(), f)
 

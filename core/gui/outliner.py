@@ -8,13 +8,15 @@ from PyQt5.QtGui import QIcon
 from core.data.computation import ms_to_string
 from core.data.interfaces import IProjectChangeNotify
 from core.container.project import VIANProject
+from core.container.corpus import Corpus
+
 from core.gui.context_menu import open_context_menu, CorpusProjectContextMenu
 from .ewidgetbase import EDockWidget
-from core.corpus.client.corpus_client import CorpusClient
-from core.corpus.legacy.sqlalchemy_entities import DBProject
+# from core.corpus.client.corpus_client import CorpusClient
+# from core.corpus.legacy.sqlalchemy_entities import DBProject
 
 class Outliner(EDockWidget, IProjectChangeNotify):
-    def __init__(self, main_window, corpus_client:CorpusClient):
+    def __init__(self, main_window):
         super(Outliner, self).__init__(main_window, width=500)
         path = os.path.abspath("qt_ui/Outliner.ui")
         uic.loadUi(path, self)
@@ -24,7 +26,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.performed_selection = False
         self.project_item = None
 
-        self.corpus_client = corpus_client
+        self.corpus = None #type: Corpus|None
 
         # self.corpus_client.onConnectionEstablished.connect(self.recreate_tree)
         # self.corpus_client.onDisconnect.connect(self.recreate_tree)
@@ -40,7 +42,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.tree.selection_dispatch = False
         # Storing last State of the None container items
         first_time = True
-        self.item_list = []
 
         # if self.project_item is not None:
         #     first_time = False
@@ -49,10 +50,21 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         #     for i in range(self.project_item.childCount()):
         #         exp_group_nodes.append(self.project_item.child(i).isExpanded())
         self.tree.clear()
+
+        self.analyses_roots = dict()
+        self.item_list = []
+        self.item_index = dict()
+
         self.project_item = None
         p = self.project()
+        if self.corpus is not None:
+            self.corpus_root = CorpusRootOutlinerItem(self.tree, 0, self.corpus)
+            self.corpus_root.setExpanded(True)
+            root = self.corpus_root
+        else:
+            root = self.tree
         if p is not None:
-            self.project_item = ProjectOutlinerItem(self.tree, 0, p)
+            self.project_item = ProjectOutlinerItem(root, 0, p)
 
             self.descriptor_item = MovieDescriptorOutlinerItem(self.project_item, 0, p.movie_descriptor)
             self.item_list.append(self.descriptor_item)
@@ -110,16 +122,19 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
             self.on_selected(None, self.project().get_selected())
 
-        # if self.corpus_client.connected:
-        #     to_add = []
-        #     if self.project() is not None:
-        #         for p in self.corpus_client.get_projects():
-        #             if p.name != self.project().get_name():
-        #                 to_add.append(p)
-        #
-        #     for p in sorted(to_add, key= lambda x:x.name):
-        #         itm = CorpusProjectOutlinerItem(self.tree, 0, p)
-        #         self.item_list.append(itm)
+        if self.corpus is not None:
+            to_add = []
+            print("Keys", self.corpus.projects_loaded.items())
+            for uuid, p in self.corpus.projects_loaded.items():
+                if self.project() is not None:
+                    if self.project().uuid != p.uuid:
+                        to_add.append(p)
+                else:
+                    to_add.append(p)
+            print("To Append", to_add)
+            for p in sorted(to_add, key= lambda x:x.name):
+                itm = CorpusProjectOutlinerItem(self.corpus_root, 0, p)
+                self.item_list.append(itm)
 
     def add_segmentation(self, s):
         segmentation_item = SegmentationOutlinerItem(self.segmentation_group, 0, s)
@@ -221,6 +236,25 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.project_item = None
         self.setDisabled(True)
 
+    def on_corpus_loaded(self, corpus:Corpus):
+        if corpus is None:
+            self.corpus = None
+            self.recreate_tree()
+            if self.project() is None:
+                self.setEnabled(False)
+        else:
+            self.corpus = corpus
+            self.corpus.onProjectAdded.connect(self.on_corpus_changed)
+            self.corpus.onProjectRemoved.connect(self.on_corpus_changed)
+            self.recreate_tree()
+            if self.project() is None:
+                self.show()
+                self.raise_()
+                self.setEnabled(True)
+
+    def on_corpus_changed(self, obj):
+        self.recreate_tree()
+
     @pyqtSlot(bool)
     def on_visibility_changed(self, visibility):
         if visibility:
@@ -317,7 +351,7 @@ class OutlinerTreeWidget(QTreeWidget):
         selected_objs = []
 
         for s in selected_items:
-            if s.get_container() is not None and not isinstance(s.get_container(), DBProject):
+            if s.get_container() is not None and not isinstance(s, CorpusProjectOutlinerItem):
                 selected_objs.append(s.get_container())
                 s.setSelected(True)
 
@@ -365,8 +399,10 @@ class OutlinerTreeWidget(QTreeWidget):
                                            self.project, scripts_root=True)
 
         elif isinstance(self.selectedItems()[0], CorpusProjectOutlinerItem):
-            context_menu = CorpusProjectContextMenu(self.outliner.main_window, self.mapToGlobal(QMouseEvent.pos()),
-                                                    self.project, self.selectedItems()[0].get_container(), self.outliner.corpus_client)
+            context_menu = CorpusProjectContextMenu(self.outliner.main_window,
+                                                    self.mapToGlobal(QMouseEvent.pos()),
+                                                    self.project,
+                                                    self.selectedItems()[0].get_container() )
         else:
             containers = []
             for item in self.selectedItems():
@@ -455,10 +491,31 @@ class AbstractOutlinerItem(QTreeWidgetItem):
             list.append(self)
 
 
+class CorpusRootOutlinerItem(AbstractOutlinerItem):
+    def __init__(self, parent, index, corpus:Corpus):
+        super(CorpusRootOutlinerItem, self).__init__(parent, index)
+        self.corpus = corpus
+        self.update_item()
+
+    def set_name(self, name):
+        self.corpus.name = name
+
+    def update_item(self):
+        super(CorpusRootOutlinerItem, self).update_item()
+        self.setText(0, self.corpus.name)
+        # if self.corpus_project.is_checked_out:
+        #     self.setForeground(0, QtGui.QColor(216, 51, 36, 150)) #0, 113, 122
+        # else:
+        self.setForeground(0, QtGui.QColor(255, 255, 255, 200))
+
+    def get_container(self):
+        return self.corpus
+
+
 class CorpusProjectOutlinerItem(AbstractOutlinerItem):
-    def __init__(self, parent, index, dbproject: DBProject):
+    def __init__(self, parent, index, corpus_project: VIANProject):
         super(CorpusProjectOutlinerItem, self).__init__(parent, index)
-        self.dbproject = dbproject
+        self.corpus_project = corpus_project
         self.update_item()
 
     def set_name(self, name):
@@ -466,14 +523,14 @@ class CorpusProjectOutlinerItem(AbstractOutlinerItem):
 
     def update_item(self):
         super(CorpusProjectOutlinerItem, self).update_item()
-        self.setText(0, self.dbproject.name)
-        if self.dbproject.is_checked_out:
-            self.setForeground(0, QtGui.QColor(216, 51, 36, 150)) #0, 113, 122
-        else:
-            self.setForeground(0, QtGui.QColor(255, 255, 255, 200))
+        self.setText(0, self.corpus_project.name)
+        # if self.corpus_project.is_checked_out:
+        #     self.setForeground(0, QtGui.QColor(216, 51, 36, 150)) #0, 113, 122
+        # else:
+        self.setForeground(0, QtGui.QColor(255, 255, 255, 200))
 
     def get_container(self):
-        return self.dbproject
+        return self.corpus_project
 
 
 class SegmentationOutlinerRootItem(AbstractOutlinerItem):

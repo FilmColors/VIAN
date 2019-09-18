@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import time
+from typing import TYPE_CHECKING
 
 from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
@@ -13,9 +14,10 @@ from collections import namedtuple
 from core.gui.perspectives import Perspective
 
 from core.gui.ewidgetbase import EToolBar
-
 from core.data.computation import create_icon
-# from core.gui.main_window import MainWindow
+
+if TYPE_CHECKING:
+    from core.gui.main_window import MainWindow
 
 class WidgetsToolbar(EToolBar):
     def __init__(self, main_window):
@@ -37,6 +39,7 @@ class WidgetsToolbar(EToolBar):
         self.addSeparator()
         self.a_setup = self.addAction(create_icon("qt_ui/icons/icon_settings_plot.png"), "Setup")
         self.a_vocabulary = self.addAction(create_icon("qt_ui/icons/icon_vocabulary.png"), "Vocabulary")
+        self.a_corpus = self.addAction(create_icon("qt_ui/icons/icon_corpus.png"), "Corpus")
         self.a_query = self.addAction(create_icon("qt_ui/icons/icon_query.png"), "Query")
 
         self.addSeparator()
@@ -62,8 +65,26 @@ class WidgetsToolbar(EToolBar):
         self.a_screenshot_manager.triggered.connect(self.main_window.create_screenshot_manager_dock_widget)
         self.a_colorimetry.triggered.connect(self.main_window.create_colorimetry_live)
         self.a_player.triggered.connect(self.main_window.create_widget_video_player)
+        self.a_corpus.triggered.connect(self.main_window.create_corpus_widget)
 
         self.a_cl_obj.triggered.connect(self.show_classification_selector)
+
+        self.hook_visibility(self.main_window.player_dock_widget, self.a_player)
+        self.hook_visibility(self.main_window.outliner, self.a_outliner)
+        self.hook_visibility(self.main_window.timeline, self.a_timeline)
+        self.hook_visibility(self.main_window.player_controls, self.a_player_controls)
+        self.hook_visibility(self.main_window.screenshots_manager_dock, self.a_screenshot_manager)
+        self.hook_visibility(self.main_window.colorimetry_live, self.a_colorimetry)
+        self.hook_visibility(self.main_window.analysis_results_widget_dock, self.a_analyses)
+        self.hook_visibility(self.main_window.vocabulary_matrix, self.a_classification)
+        self.hook_visibility(self.main_window.corpus_client_toolbar, self.a_upload)
+        self.hook_visibility(self.main_window.experiment_dock, self.a_setup)
+        self.hook_visibility(self.main_window.vocabulary_manager, self.a_vocabulary)
+        self.hook_visibility(self.main_window.corpus_widget, self.a_corpus)
+        self.hook_visibility(self.main_window.query_widget, self.a_query)
+
+        # self.main_window = main_window
+        self.main_window.vocabulary_manager.visibilityChanged.connect(partial(self.on_visibility_changed, self.main_window.vocabulary_manager, self.a_vocabulary))
         self.show()
 
     def show_classification_selector(self):
@@ -83,3 +104,12 @@ class WidgetsToolbar(EToolBar):
         if pos.y() > self.main_window.y() + self.main_window.height() / 2:
             pos -= QPoint(0, menu.height())
         menu.move(pos)
+
+    def hook_visibility(self, widget, action):
+        widget.visibilityChanged.connect(partial(self.on_visibility_changed, widget, action))
+
+    def on_visibility_changed(self, widget:QWidget, action:QAction):
+        if widget.isVisible():
+            self.widgetForAction(action).setStyleSheet("QWidget { background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:1 #212121, stop:0.4 #3f7eaf, stop:0.2 #3f7eaf, stop:0.1 #3f7eaf); }")
+        else:
+            self.widgetForAction(action).setStyleSheet("QWidget { background-color: #303030; }")
