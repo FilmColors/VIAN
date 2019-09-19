@@ -893,9 +893,57 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if path in self.pipeline_scripts:
             self.pipeline_scripts.remove(path)
 
-    # def get_missing_analyses(self, requirements):
-    #     if "segment_analyses" in data:
-    #         #Check Segments
+    def get_missing_analyses(self, requirements):
+        result = dict()
+        if "segment_analyses" in requirements:
+            segments = []
+            for s in self.segmentation:
+                segments.extend(s.segments)
+            result["segment_analyses"] = self._get_missing_analyses_for_container(
+                segments, requirements["segment_analyses"]
+            )
+        if "screenshot_analyses" in requirements:
+            screenshots = self.screenshots
+            result["screenshot_analyses"] = self._get_missing_analyses_for_container(
+                screenshots, requirements["screenshot_analyses"]
+            )
+
+        if "annotation_analyses" in requirements:
+            annotations = []
+            for l in self.annotation_layers:
+                annotations.extend(l.annotations)
+            result["annotation_analyses"] = self._get_missing_analyses_for_container(
+                annotations, requirements["annotation_analyses"]
+            )
+        return result
+
+    def _get_missing_analyses_for_container(self, containers, requirements):
+        missing_analyses = dict()
+        n_analyses = len(containers) * len(requirements)
+        n_analyses_done = 0
+
+        for c in containers:
+            for r in requirements:
+                found = False
+                for a in c.connected_analyses:
+                    if a.target_classification_object is None:
+                        continue
+                    if a.analysis_job_class == r[0] and a.target_classification_object.name == r[1]:
+                        found = True
+                        break
+                if found:
+                    n_analyses_done += 1
+                else:
+                    if r[2] not in missing_analyses:
+                        missing_analyses[r[2]] = dict()
+                    if r[0] not in missing_analyses[r[2]]:
+                        missing_analyses[r[2]][r[0]] = dict()
+                    if r[1] not in missing_analyses[r[2]][r[0]]:
+                        missing_analyses[r[2]][r[0]][r[1]] = []
+                    missing_analyses[r[2]][r[0]][r[1]].append(c)
+
+        return (missing_analyses, n_analyses, n_analyses_done)
+
     #endregion
 
     #region IO
@@ -1283,7 +1331,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         )
         return template
 
-    def apply_template(self, template_path = None, template = None):
+    def apply_template(self, template_path = None, template = None, script_export=None):
         """
         Loads a template from agiven path and applies it to the project.
 
@@ -1325,18 +1373,27 @@ class VIANProject(QObject, IHasName, IClassifiable):
             print([c.name for c in new.get_classification_objects_plain()])
 
         try:
-            if self.folder is None:
-                raise ValueError("Templates with pipeline scripts can only be loaded into projects with a folder structure.")
+            if self.folder is None and script_export is None:
+                raise ValueError("Templates with pipeline scripts can only be "
+                                 "loaded into projects with a folder structure or by passing a script_export attribute.")
+            if script_export is not None:
+                loc = script_export
+            else:
+                loc = self.folder
             for path, script, is_active in template['pipelines']:
-                p = os.path.join(self.folder, path)
+                p = os.path.join(loc, path)
                 with open(p, "w") as f:
                     f.write(script)
                 self.pipeline_scripts.append(p)
                 if is_active:
                     self.active_pipeline_script = p
 
-            self.compute_pipeline_settings = template["compute_pipeline_settings"]
+            if self.active_pipeline_script is None and len(self.pipeline_scripts) > 0:
+                self.active_pipeline_script = self.pipeline_scripts[0]
 
+            self.compute_pipeline_settings = template["compute_pipeline_settings"]
+            log_info("Pipeline Template:", "Pipelines", self.pipeline_scripts)
+            log_info("Pipeline Template:", "Active:", self.active_pipeline_script, "\tSettings:",template["compute_pipeline_settings"])
         except Exception as e:
             raise e
 

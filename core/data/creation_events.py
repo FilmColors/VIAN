@@ -18,6 +18,9 @@ ALL_REGISTERED_PIPELINES = dict()
 
 class VIANEventHandler(QObject):
     onCurrentPipelineChanged = pyqtSignal(object)
+    onLockPipelineGUIForLoading = pyqtSignal()
+    onReleasePipelineGUIAfterLoading = pyqtSignal()
+    onRunAnalysis = pyqtSignal(object)
     onException = pyqtSignal(str)
 
     def __init__(self, parent):
@@ -66,7 +69,9 @@ class VIANEventHandler(QObject):
     def set_current_pipeline(self, name):
         log_info("Pipeline", name)
         try:
+            self.onLockPipelineGUIForLoading.emit()
             self.current_pipeline = ALL_REGISTERED_PIPELINES[name][0]()
+            self.onReleasePipelineGUIAfterLoading.emit()
             self.onCurrentPipelineChanged.emit(self.current_pipeline)
         except Exception as e:
             self.onException.emit(traceback.format_exc())
@@ -109,10 +114,6 @@ class VIANEventHandler(QObject):
                 self.current_pipeline.on_project_finalized(self.project)
         except Exception as e:
             self.onException.emit(traceback.format_exc())
-
-    @pyqtSlot()
-    def run_all(self):
-        pass
 
     def _push(self, func, args):
         self.queue.append((func, args))

@@ -127,6 +127,7 @@ class CorpusDockWidget(EDockWidget):
         if not os.path.isfile(file):
             return
         self.corpus.import_template(file)
+        self.on_save_triggered()
 
     def on_selection_changed(self, selection):
         try:

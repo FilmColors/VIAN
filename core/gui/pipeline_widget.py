@@ -8,13 +8,14 @@ from core.data.interfaces import IProjectChangeNotify
 import os
 from core.gui.python_script_editor import PythonScriptEditor
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
-from core.data.log import log_error, log_info
+from core.data.log import log_error, log_info, log_warning
 from core.container.project import VIANProject
 from core.data.computation import import_module_from_path, create_icon
 
 
 class PipelineToolbar(EToolBar):
     onToComputeChanged = pyqtSignal(bool, bool, bool)
+    runAll = pyqtSignal()
 
     def __init__(self, main_window):
         super(PipelineToolbar, self).__init__(main_window, "Windows Toolbar")
@@ -30,11 +31,15 @@ class PipelineToolbar(EToolBar):
         self.a_auto_segment.setEnabled(False)
         self.a_auto_segment.triggered.connect(self.on_segment_checked_changed)
 
-        self.a_run_all = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Run Complete Pipeline")
+        self.a_run_all = self.addAction(create_icon("qt_ui/icons/icon_pipeline_run_all.png"), "Run Complete Pipeline")
         self.a_run_all.triggered.connect(self.run_all)
 
         self.a_pipeline_settings = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Pipeline Configuration")
         self.a_pipeline_settings.triggered.connect(self.main_window.create_pipeline_widget)
+
+        # self.lbl_status = QLabel("0 \n/ 0", self)
+        # self.lbl_status.setWordWrap(True)
+        # self.addWidget(self.lbl_status)
 
     def on_screenshot_checked_changed(self):
         if self.a_auto_screenshot.isChecked():
@@ -85,13 +90,13 @@ class PipelineToolbar(EToolBar):
             self.a_auto_segment.setEnabled(True)
 
     def run_all(self):
-        self.main_window.event_handler
+        self.runAll.emit()
 
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):
         super(PipelineDock, self).__init__(parent, False)
         self.setWindowTitle("Pipeline Manager")
-        self.pipeline = PipelineWidget(self, event_manager)
+        self.pipeline = PipelineWidget(self, event_manager, self.main_window)
         self.splitter = QSplitter(Qt.Horizontal)
         self.inner.setCentralWidget(self.splitter)
         self.inner.centralWidget().setLayout(QHBoxLayout())
@@ -116,12 +121,13 @@ class PipelineWidget(QWidget):
     onPipelineActivated = pyqtSignal(str)
     onPipelineFinalize = pyqtSignal()
     onToComputeChanged = pyqtSignal(bool, bool, bool)
+    onRunAnalysis = pyqtSignal(object)
 
-    def __init__(self, parent, event_manager: VIANEventHandler):
+    def __init__(self, parent, event_manager: VIANEventHandler, main_window):
         super(PipelineWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/PipelineWidget.ui")
         uic.loadUi(path, self)
-
+        self.main_window = main_window
         self.project = None #type: VIANProject
 
         self.btn_onSegment.setStyleSheet("QPushButton{background-color: rgb(100, 10, 10);}" + "QPushButton:checked{background-color: rgb(10, 100, 10);}")
@@ -196,6 +202,36 @@ class PipelineWidget(QWidget):
 
     def on_pipeline_finalize(self):
         self.onPipelineFinalize.emit()
+
+    @pyqtSlot()
+    def run_all(self):
+        if self.project is not None:
+            missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements)
+            missing = dict()
+            for k in missing_info.keys():
+                missing.update(missing_info[k][0])
+            print(missing)
+            experiment = self.project.get_experiment_by_name(self.main_window.vian_event_handler.current_pipeline.template)
+            if experiment is None:
+                return
+
+            for priority in sorted(missing.keys()):
+                for analysis_name in missing[priority].keys():
+                    analysis = self.main_window.eval_class(analysis_name)
+                    for clobj_name, containers in missing[priority][analysis_name].items():
+                        clobj = experiment.get_classification_object_by_name(clobj_name)
+
+                        if clobj is None:
+                            log_warning("Classification Object not found")
+                            continue
+                        d = dict(
+                            analysis=analysis(),
+                            targets=containers,
+                            parameters=None,
+                            classification_objs=clobj
+                        )
+                        log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
+                        self.onRunAnalysis.emit(d)
 
     @pyqtSlot(object)
     def on_loaded(self, project:VIANProject):

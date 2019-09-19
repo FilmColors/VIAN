@@ -81,7 +81,7 @@ class Corpus(QObject, IHasName):
         self.onProjectRemoved.emit(project)
 
     def import_template(self, path):
-        self.template.apply_template(path)
+        self.template.apply_template(path, script_export=self.directory)
         self.onTemplateChanged.emit(self.template)
 
     def get_name(self):

@@ -493,18 +493,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onProjectClosed.connect(self.vian_event_handler.on_close)
         self.vian_event_handler.onException.connect(self.script_editor.print_exception)
         self.vian_event_handler.onCurrentPipelineChanged.connect(self.pipeline_toolbar.on_current_pipeline_changed)
+        self.vian_event_handler.onLockPipelineGUIForLoading.connect(partial(self.pipeline_toolbar.setEnabled, False))
+        self.vian_event_handler.onReleasePipelineGUIAfterLoading.connect(partial(self.pipeline_toolbar.setEnabled, True))
+
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.pipeline_toolbar.set_to_compute)
         self.pipeline_widget.pipeline.onPipelineActivated.connect(self.vian_event_handler.set_current_pipeline)
         self.pipeline_widget.pipeline.onPipelineFinalize.connect(self.vian_event_handler.run_on_finalize_event)
+        self.pipeline_widget.pipeline.onRunAnalysis.connect(self.on_start_analysis)
 
         self.pipeline_toolbar.onToComputeChanged.connect(self.pipeline_widget.pipeline.set_to_compute)
+        self.pipeline_toolbar.runAll.connect(self.pipeline_widget.pipeline.run_all)
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
         self.update_recent_menu()
-
 
         self.player_controls.setState(False)
 
@@ -1768,15 +1772,16 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 corpus = self.corpus_widget.corpus
             corpus.add_project(self.project)
-            self.project.apply_template(template=corpus.template.get_template())
-
+            self.project.apply_template(template=corpus.template.get_template(segm=True,
+                                                                              voc=True,
+                                                                              experiment=True,
+                                                                              pipeline=True))
+            print("Script",self.project.active_pipeline_script)
         elif template_path is not None:
             self.project.apply_template(template_path)
 
         self.project.store_project()
         self.project.inhibit_dispatch = False
-
-
 
         dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
         dialog.set_movie(self.project.movie_descriptor)
