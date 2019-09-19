@@ -611,6 +611,7 @@ def handle_exception(func_name, e):
 def import_module_from_path(path):
     spec = importlib.util.spec_from_file_location("current_pipeline_module", path)
     foo = importlib.util.module_from_spec(spec)
+    sys.modules["current_pipeline_module"] = foo
     spec.loader.exec_module(foo)
 
 def generate_id(not_list = None):

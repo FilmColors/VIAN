@@ -267,7 +267,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pipeline_toolbar = PipelineToolbar(self)
 
-
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
         self.script_editor = self.pipeline_widget.editor
@@ -495,10 +494,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vian_event_handler.onException.connect(self.script_editor.print_exception)
         self.vian_event_handler.onCurrentPipelineChanged.connect(self.pipeline_toolbar.on_current_pipeline_changed)
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
+        self.pipeline_widget.pipeline.onToComputeChanged.connect(self.pipeline_toolbar.set_to_compute)
         self.pipeline_widget.pipeline.onPipelineActivated.connect(self.vian_event_handler.set_current_pipeline)
         self.pipeline_widget.pipeline.onPipelineFinalize.connect(self.vian_event_handler.run_on_finalize_event)
 
-        self.pipeline_toolbar.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
+        self.pipeline_toolbar.onToComputeChanged.connect(self.pipeline_widget.pipeline.set_to_compute)
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,

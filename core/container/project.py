@@ -713,6 +713,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # self.colormetry_analysis.clear()
         return colormetry
 
+
     #endregion
 
     # Getters for easier changes later in the project
@@ -892,7 +893,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if path in self.pipeline_scripts:
             self.pipeline_scripts.remove(path)
 
-
+    # def get_missing_analyses(self, requirements):
+    #     if "segment_analyses" in data:
+    #         #Check Segments
     #endregion
 
     #region IO
@@ -1322,8 +1325,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
             print([c.name for c in new.get_classification_objects_plain()])
 
         try:
+            if self.folder is None:
+                raise ValueError("Templates with pipeline scripts can only be loaded into projects with a folder structure.")
             for path, script, is_active in template['pipelines']:
-                p = os.path.join(self.path, path)
+                p = os.path.join(self.folder, path)
                 with open(p, "w") as f:
                     f.write(script)
                 self.pipeline_scripts.append(p)
@@ -1333,7 +1338,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.compute_pipeline_settings = template["compute_pipeline_settings"]
 
         except Exception as e:
-            print(e)
+            raise e
 
     def export(self, device, path):
         device.export(self, path)

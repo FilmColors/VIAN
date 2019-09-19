@@ -10,6 +10,7 @@ from core.container.project import VIANProject, Segment, Annotation, Screenshot
 from core.data.log import log_info, log_error, log_debug, log_warning
 import traceback
 import cv2
+import sys
 import inspect
 
 ALL_REGISTERED_PIPELINES = dict()
@@ -109,6 +110,10 @@ class VIANEventHandler(QObject):
         except Exception as e:
             self.onException.emit(traceback.format_exc())
 
+    @pyqtSlot()
+    def run_all(self):
+        pass
+
     def _push(self, func, args):
         self.queue.append((func, args))
         # log_info("is Queue Running: ", self.queue_running)
@@ -154,6 +159,7 @@ class VIANPipeline(QObject):
                         annotation_analyses=[]
                         )
     finished_threshold = 0.95
+
     def __init__(self):
         super(VIANPipeline, self).__init__()
     

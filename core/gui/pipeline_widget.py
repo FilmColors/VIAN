@@ -30,6 +30,9 @@ class PipelineToolbar(EToolBar):
         self.a_auto_segment.setEnabled(False)
         self.a_auto_segment.triggered.connect(self.on_segment_checked_changed)
 
+        self.a_run_all = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Run Complete Pipeline")
+        self.a_run_all.triggered.connect(self.run_all)
+
         self.a_pipeline_settings = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Pipeline Configuration")
         self.a_pipeline_settings.triggered.connect(self.main_window.create_pipeline_widget)
 
@@ -47,10 +50,23 @@ class PipelineToolbar(EToolBar):
             self.a_auto_segment.setIcon(create_icon("qt_ui/icons/icon_pipeline_segment_off.png"))
         self.on_update_to_compute()
 
+    def set_to_compute(self, comp_segments, comp_screenshots, comp_annotations):
+        if comp_segments:
+            self.a_auto_segment.setChecked(True)
+            self.a_auto_segment.setIcon(create_icon("qt_ui/icons/icon_pipeline_segment_on.png"))
+        else:
+            self.a_auto_segment.setIcon(create_icon("qt_ui/icons/icon_pipeline_segment_off.png"))
+
+        if comp_screenshots:
+            self.a_auto_screenshot.setChecked(True)
+            self.a_auto_screenshot.setIcon(create_icon("qt_ui/icons/icon_pipeline_screenshot_on.png"))
+        else:
+            self.a_auto_screenshot.setIcon(create_icon("qt_ui/icons/icon_pipeline_screenshot_off.png"))
+
     def on_update_to_compute(self):
-        comp_segments = self.a_auto_screenshot.isChecked()
-        comp_annotations = self.a_auto_segment.isChecked()
-        comp_screenshots = False
+        comp_screenshots = self.a_auto_screenshot.isChecked()
+        comp_segments = self.a_auto_segment.isChecked()
+        comp_annotations = False
 
         if self.main_window.project is not None:
             self.main_window.project.compute_pipeline_settings = dict(segments=comp_segments,
@@ -68,6 +84,8 @@ class PipelineToolbar(EToolBar):
             self.a_auto_screenshot.setEnabled(True)
             self.a_auto_segment.setEnabled(True)
 
+    def run_all(self):
+        self.main_window.event_handler
 
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):
@@ -139,6 +157,13 @@ class PipelineWidget(QWidget):
                 self.on_use_pipeline()
             self.all_items[pipeline] = itm
 
+    def set_to_compute(self, comp_segments, comp_screenshots, comp_annotations):
+        self.btn_onSegment.setChecked(comp_segments)
+        self.btn_onScreenshot.setChecked(comp_screenshots)
+        self.btn_onAnnotation.setChecked(comp_annotations)
+
+        self.on_update_to_compute()
+
     def on_update_to_compute(self):
         comp_segments = self.btn_onSegment.isChecked()
         comp_annotations = self.btn_onAnnotation.isChecked()
@@ -177,9 +202,11 @@ class PipelineWidget(QWidget):
         self.project = project
 
         for p in project.pipeline_scripts:
+            log_info("Pipeline in Project:", p)
             try:
                 import_module_from_path(p)
             except Exception as e:
+                raise e
                 log_error("Exception during loading of Script:", e)
         self.on_reload_scripts()
         module_name = get_name_of_script_by_path(project.active_pipeline_script)
