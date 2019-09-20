@@ -496,6 +496,7 @@ class ClassificationObjectList(QListWidget):
         super(ClassificationObjectList, self).__init__(parent)
         self.item_entries = []
         self.clear_list()
+        self.setSelectionMode(self.SingleSelection)
 
     def clear_list(self):
         self.clear()

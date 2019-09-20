@@ -420,6 +420,7 @@ class VocabularyTreeView(QTreeView):
         self.is_editing = False
         self.vocabulary_manager = vocabulary_manager
         self.selected_vocabularies = []
+        self.setSelectionMode(self.ExtendedSelection)
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() == Qt.RightButton:
