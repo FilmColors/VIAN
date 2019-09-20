@@ -1783,6 +1783,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.store_project()
         self.project.inhibit_dispatch = False
 
+        self.project.onProjectLoaded.connect(self.dispatch_on_loaded)
+        self.project.onProjectChanged.connect(self.dispatch_on_changed)
+        self.project.onSelectionChanged.connect(self.dispatch_on_selected)
+        self.onProjectOpened.emit(self.project)
+
         dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
         dialog.set_movie(self.project.movie_descriptor)
         dialog.show()
