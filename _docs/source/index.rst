@@ -10,6 +10,8 @@ Welcome to VIAN's documentation!
 .. toctree::
    :maxdepth: 4
 
+   Prerequisites
+   Shortcuts 
    UserGuide
    DevelopersGuide
    whatsnew
