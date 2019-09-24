@@ -27,9 +27,9 @@ Most bindings with the ALT-key relate to windows and widgets:
 
 further keybindings
 
-DEL     delete Element (Segment, Screenshot etc.)
-F10     Toggle StatusBar
-F11     Full Screen
+- DEL     delete Element (Segment, Screenshot etc.)
+- F10     Toggle StatusBar
+- F11     Full Screen
 
 
 .. toctree::
