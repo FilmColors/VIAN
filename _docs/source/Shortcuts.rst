@@ -2,7 +2,7 @@
 Shortcuts
 =========
 
-Important keybindings, listed according to the binding key
+Important keybindings, listed according to the binding key.
 
 Most bindings with the CTRL-key are the same as in other programs as well:
 
@@ -29,7 +29,7 @@ Most bindings with the ALT-key relate to windows and widgets:
 
 further keybindings:
 
-- DEL     delete Element (Segment, Screenshot etc.)
+- DEL     Delete Element (Segment, Screenshot etc.)
 - F10     Toggle StatusBar
 - F11     Full Screen
 
