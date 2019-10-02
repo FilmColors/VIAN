@@ -12,7 +12,6 @@ Welcome to VIAN's documentation!
 
    Prerequisites
    Shortcuts
-   OverviewInterface
    UserGuide
    DevelopersGuide
    whatsnew
