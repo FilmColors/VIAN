@@ -2,7 +2,7 @@
 Prerequisites
 =============
 
-Before you start a new Prject, consider the following points concerning video format, computational resources etc.:
+Before you start a new Project, consider the following points concerning video format, computational resources etc.:
 
 - Make sure that the video you are going to analyse was digitalized with encoding h264 (and not h265 or x265)
 - The best suited file format for working with in VIAN is mp4 
