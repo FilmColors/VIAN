@@ -11,3 +11,10 @@ After you created a new project and opened the video file, your VIAN interface w
 
    Overview of VIAN start window.
 
+Indicated Widgets:
+
+- 1: Video Player
+- 2: Screenshot Manager
+- 3: Control Panel
+- 4: Timeline
+- 5: Player Controls
