@@ -15,24 +15,21 @@ Creating a new VIAN Project as follows:
    1. **General**
 
       1. **Project Name** refers to the Name assigned in the Outliner.
-      2. **Project Path** use "Browse" to find a valid save path or insert one into the Text Box.
+      2. **Project Path** use "Browse" to find a valid save path or insert one into the Text Box. The default path points to the project-directory in the VIAN-directory.
    2. **Template**
 
-      1. If intended, select a  **Template** from the DropDown menu.
+      1. If intended, select a  **Template** from the DropDown menu. This Template will support you with its Vocabulary - often it is more convenient to adapt a existing Vocabulary to one's own needs than to build one from «scratch».
 
-   3. **Movie Descriptor**
+   3. **Media Descriptor**
 
-      1. Choose an appropriate **Movie Name**.
-      2. Select the **Movie Path**, where your target Movie is located.
-      3. If intended, assign a **Movie ID** to your Movie
-      4. Assign a **Creation Year** to the Movie
+      1. Choose an appropriate **Media Name**.
+      2. Select the **Media Path**, where your target Movie is located.
+      3. If intended, assign a **Media ID** to your Movie
+      4. Assign a **Year** to the Movie
       5. Select a **Source**
 
-   4. **Vocabulary**
 
-      1. Choose all vocabularies you want to add to the project, by checking/un-checking the specific Checkboxes.
-
-.. figure:: new_project.png
+.. figure:: new_project2.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
