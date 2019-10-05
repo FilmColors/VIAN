@@ -9,6 +9,7 @@ In this section, the Interface of VIAN and it's components are explained success
 .. toctree::
     :maxdepth: 2
 
+    OverviewInterface
     inspector
     outliner
     perspectives

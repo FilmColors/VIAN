@@ -18,5 +18,6 @@ Indicated Widgets:
 - 3: Control Panel
 - 4: Timeline
 - 5: Player Controls
+- 6: Current Position in Workflow (by default Segmentation step)
 
 Since this is what you will see when you create a new project, the Timeline and Screenshot Manager look (and are) pretty empty. If you want to know what a prototypical procedure in annotating and analyzing a film from this point on would look like, go to XXX. If you want to know mor about a specific widget seen above, go to YYY.
