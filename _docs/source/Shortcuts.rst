@@ -14,6 +14,8 @@ Most bindings with the CTRL-key are the same as in other programs as well:
 - C     Copy
 - V     Paste
 - D     Create new Segment (up to the cursor in the Timeline)
+- F     Take Screenshot
+- Scroll Zoom In/Out of Window the cursor is in (functions not for all windows, but e. g. the **Timeline**, **Screenshot Manager** etc.
 
 Most bindings with the ALT-key relate to windows and widgets:
 
@@ -30,6 +32,7 @@ Most bindings with the ALT-key relate to windows and widgets:
 further keybindings:
 
 - DEL     Delete Element (Segment, Screenshot etc.)
+- Space   Play/Pause Movie
 - F10     Toggle StatusBar
 - F11     Full Screen
 
