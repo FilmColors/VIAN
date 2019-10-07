@@ -1,6 +1,6 @@
 Perspectives
 ============
-VIAN uses **Perspectives** to give you the necessary tools for a specific step of your workflow.
+VIAN uses **Perspectives** to give you the necessary tools for a specific step of your workflow. You can think of it as predefined Window-Configurations: Suppose, for example, you wanted to get an overview over the screenshots you've taken sofar. Instead of manually deactivating Windows you don't need for that (e. g. the **Player Controls** etc.) and activating the ones which would be helpful (e. g. the **Inspector** etc.), you would simply hit **ALT+4** and go into the **Screenshot Perspecitve**, where there are the relevant Windows pre-defined.
 
 Current, there are seven Perspectives implemented in VIAN which can be selected with **ALT-1 (2, 3, 4, 5, 6, 7)**.
 each of these have a distinct purpose.

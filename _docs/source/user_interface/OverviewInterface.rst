@@ -16,7 +16,7 @@ After you've created a new project and opened the video file, your VIAN interfac
 
    OverviewInterface.rst
 
-As you would perform different tasks in your annotating workflow, you would need different widgets and windows to complete them. The VIAN Interface is therefore designed to be as flexible as needed: Different widgets and windows can be closed and opened, re-arranged or even «popped-out» (by dragging the element by its titel bar) of the normal Interface.
+As you would perform different tasks in your annotating workflow, you would need different widgets and windows to complete them. The VIAN Interface is therefore designed to be as flexible as needed: Different widgets and windows can be closed and opened, re-arranged or even «popped-out» (by dragging the element by its titel bar) of the normal Interface. Below is a short description of the default windows, which are seen in the picture above, and their functionality.
 
 .. Since this is what you will see when you create a new project, the Timeline and Screenshot Manager look (and are) pretty empty. If you want to know what a prototypical procedure in annotating and analyzing a film from this point on would look like, go to XXX. If you want to know more about a specific widget seen above, go to YYY.
 
