@@ -5,16 +5,13 @@ VIAN uses **Perspectives** to give you the necessary tools for a specific step o
 Current, there are seven Perspectives implemented in VIAN which can be selected with **ALT-1 (2, 3, 4, 5, 6, 7)**.
 each of these have a distinct purpose.
 
-* Player Perspective (ALT-1)
-* Normal Perspective (ALT-2)
-* Annotation Perspective (ALT-3)
-* Screenshot Perspective (ALT-4)
-* Classification Perspective (ALT-5)
-* Analysis Perspective (ALT-6)
-* Node Scripting Perspective (ALT-7)
+.. toctree::
+   :maxdepth: 4
 
-Player Perspective
-******************
+   perspectives.rst 
+   
+Player Perspective (ALT+1)
+**************************
 
 The Player Perspective removes all UI-Elements, allowing to have the full screen displaying the
 current movie.
@@ -26,8 +23,8 @@ current movie.
 
    The Inspector showing a Screenshot. Note the four distinct Sections.
 
-Normal Perspective
-******************
+Normal Perspective (ALT+2)
+**************************
 
 The Normal Perspective rearranges all the elements to the state when the program is started.
 *Timeline*, *Outliner*, *Inspector* and the Toolbars.
@@ -39,8 +36,8 @@ The Normal Perspective rearranges all the elements to the state when the program
 
    The Inspector showing a Screenshot. Note the four distinct Sections.
 
-Annotation Perspective
-***********************
+Annotation Perspective (ALT+3)
+******************************
 The Annotation Perspective displays all necessary widgets for *Segmenting* and *Annotating* a film, including the
 *Timeline*, *Outliner*, and the Toolbars.
 
@@ -51,8 +48,8 @@ The Annotation Perspective displays all necessary widgets for *Segmenting* and *
 
    The Inspector showing a Screenshot. Note the four distinct Sections.
 
-Screenshot Perspective
-**************************
+Screenshot Perspective (ALT-4)
+******************************
 The Screenshot Perspective shows all screenshots token so far in a big window on the left side, on the right sight are thi *Inspector* and *Outliner* modules.
 
 .. figure:: persp_screenshots.png
@@ -62,8 +59,8 @@ The Screenshot Perspective shows all screenshots token so far in a big window on
 
    The Inspector showing a Screenshot. Note the four distinct Sections.
 
-Classification Perspective
-***********************
+Classification Perspective (ALT-5)
+**********************************
 The Classification Perspective focuses on the classification widget including the *Timeline* on the right side, while on the left are the *video-Player* and the *Screenshot* widget.
 
 .. figure:: persp_screenshots.png
@@ -73,8 +70,8 @@ The Classification Perspective focuses on the classification widget including th
 
    The Inspector showing a Screenshot. Note the four distinct Sections.
 
-Analysis Perspective
-***********************
+Analysis Perspective (ALT-6)
+****************************
 The Analysis Perspective provides the widgets used for analysing the colors of a selected entity (e.g. sreenshot etc.), which is being displayed in the *Inspector* beneath the *Outliner* on the left.
 
 .. figure:: persp_screenshots.png
@@ -84,8 +81,8 @@ The Analysis Perspective provides the widgets used for analysing the colors of a
 
    The Inspector showing a Screenshot. Note the four distinct Sections.
 
-Node Scripting Perspective
-***********************
+Node Scripting Perspective (ALT-7)
+**********************************
 TO DO
 
 .. figure:: persp_node_editor.png
