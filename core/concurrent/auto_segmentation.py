@@ -37,7 +37,7 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
 
         job = AutoSegmentingJob(
             [project.movie_descriptor.get_movie_path(),
-             30,
+             colormetry.resolution,
              project.movie_descriptor.fps,
              colormetry.get_histogram(),
              colormetry.get_frame_pos(),
@@ -67,11 +67,11 @@ class DialogAutoSegmentation(EDialogWidget):
                                     "please wait until it is finished and try again.\n\n"
                                     "The progress is indicated by the green line on the Timeline.")
         self.lbl_not_ready.setStyleSheet("QLabel{foreground: red;}")
-        self.btn_start_colormetry = QPushButton("Start Colorimetry")
-        self.btn_start_colormetry.clicked.connect(self.main_window.toggle_colormetry)
+        #self.btn_start_colormetry = QPushButton("Start Colorimetry")
+        #self.btn_start_colormetry.clicked.connect(self.main_window.toggle_colormetry)
 
         self.widget_colorhist.layout().addWidget(self.lbl_not_ready)
-        self.widget_colorhist.layout().addWidget(self.btn_start_colormetry)
+        #self.widget_colorhist.layout().addWidget(self.btn_start_colormetry)
         self.btn_Run.clicked.connect(self.on_ok)
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_Cancel.clicked.connect(self.close)
@@ -83,10 +83,10 @@ class DialogAutoSegmentation(EDialogWidget):
             self.lbl_not_ready.show()
             if c is None:
                 self.lbl_not_ready.setText(self.not_run_text)
-                self.btn_start_colormetry.show()
+                #self.btn_start_colormetry.show()
             else:
                 self.lbl_not_ready.setText(self.not_finished_text)
-                self.btn_start_colormetry.hide()
+                #self.btn_start_colormetry.hide()
             self.btn_Run.setEnabled(False)
         else:
             self.lbl_not_ready.hide()
