@@ -1427,6 +1427,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :return: Vocabulary instance created.
         """
 
+        base = name
+        counter = 0
+        while name in [v.name for v in self.vocabularies]:
+            counter += 1
+            name = base + "_" + str(counter).zfill(2)
+
         voc = Vocabulary(name)
         self.add_vocabulary(voc)
         return voc
@@ -1655,7 +1661,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return None
     #endregion
 
-    # region Setters/Getters
+
     def cleanup(self):
         """
         Clean up the project, this includes the removal of all references annotation widgets.

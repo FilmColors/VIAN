@@ -364,6 +364,11 @@ class Vocabulary(IProjectContainer, IHasName):
         return self.name
 
     def set_name(self, name):
+        base = name
+        counter = 0
+        while name in [v.name for v in self.project.vocabularies]:
+            counter += 1
+            name = base + "_" + str(counter).zfill(2)
         self.name = name
         self.onVocabularyChanged.emit(self)
 

@@ -25,12 +25,15 @@ from core.data.enums import *
 class VocabularyManagerToolbar(QToolBar):
     def __init__(self, parent):
         super(VocabularyManagerToolbar, self).__init__(parent)
+        self.a_new_vocabulary = self.addAction((create_icon("qt_ui/icons/icon_create_vocabulary.png")),
+                                               "Create new Vocabulary")
         self.a_save = self.addAction(create_icon("qt_ui/icons/icon_save.png"), "Save")
         self.a_load = self.addAction(create_icon("qt_ui/icons/icon_load.png"), "Load")
+
         self.a_toproject = self.addAction(create_icon("qt_ui/icons/icon_toproject.png"), "Compare from Library to Project")
         self.a_fromproject = self.addAction(create_icon("qt_ui/icons/icon_fromproject.png"), "Compare from Project to Library")
-        self.a_switch_library = self.addAction(create_icon("qt_ui/icons/icon_switch_voc_project_library.png"),
-                                            "Switch between Project and Library Vocabularies")
+        # self.a_switch_library = self.addAction(create_icon("qt_ui/icons/icon_switch_voc_project_library.png"),
+        #                                     "Switch between Project and Library Vocabularies")
 
 
 class VocabularySaveDialog(QDialog):
@@ -133,45 +136,26 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
         self.toolbar = VocabularyManagerToolbar(self.inner)
         self.toolbar.a_save.triggered.connect(self.save_vocabularies)
         self.toolbar.a_load.triggered.connect(self.import_vocabularies)
-        self.toolbar.a_toproject.triggered.connect(self.vocabulary_view.compare_library_to_project)
-        self.toolbar.a_switch_library.triggered.connect(self.on_switch_current_library)
+        # self.toolbar.a_toproject.triggered.connect(self.vocabulary_view.compare_library_to_project)
+        self.toolbar.a_new_vocabulary.triggered.connect(self.on_new_vocabulary)
+        # self.toolbar.a_switch_library.triggered.connect(self.on_switch_current_library)
         self.inner.addToolBar(Qt.TopToolBarArea, self.toolbar)
         self.toolbar.a_toproject.triggered.connect(self.synchronize_from_library_to_project)
         self.toolbar.a_fromproject.triggered.connect(self.synchronize_from_project_to_library)
 
         self.show()
 
-    @pyqtSlot()
-    def on_switch_current_library(self):
-        """
-        Switching between the VocabularyManager showing the Projects vocabularies or the libraries vocabularies.
-        :return:
-        """
-        if self.mode == "library":
-            if self.main_window.project is None:
-                msg = QMessageBox.warning(self, "No Project Loaded", "You first have to load a Project to do this.")
-            else:
-                self.vocabulary_view.current_displayed_collection = self.main_window.project
-                self.mode = "project"
-                self.setWindowTitle("Vocabulary Manager: Project")
-                self.vocabulary_view.recreate_tree()
-                self.vocabulary_view.labelLibrary.hide()
-                self.vocabulary_view.labelProject.show()
-        else:
-            self.vocabulary_view.current_displayed_collection = self.vocabulary_view.vocabulary_collection
-            self.mode = "library"
-            self.setWindowTitle("Vocabulary Manager: Library")
-            self.vocabulary_view.recreate_tree()
-            self.vocabulary_view.labelLibrary.show()
-            self.vocabulary_view.labelProject.hide()
+    def on_new_vocabulary(self):
+        voc = self.vocabulary_view.vocabulary_collection.create_vocabulary("New Vocabulary")
+        self.vocabulary_view.treeViewLibrary.scroll_to_item(voc)
 
     @pyqtSlot()
     def save_vocabularies(self):
-        if len(self.vocabulary_view.treeView.selected_vocabularies) == 0:
+        if len(self.vocabulary_view.treeViewLibrary.selected_vocabularies) == 0:
             vocabularies = self.vocabulary_view.vocabulary_index
         else:
             vocabularies = dict()
-            for v in self.vocabulary_view.treeView.selected_vocabularies:
+            for v in self.vocabulary_view.treeViewLibrary.selected_vocabularies:
                 vocabularies[v.uuid] = self.vocabulary_view.vocabulary_index[v.uuid]
 
         dialog = VocabularySaveDialog(self, vocabularies)
@@ -183,7 +167,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             self.vocabulary_view.vocabulary_collection.import_vocabulary(f)
 
     def synchronize_from_library_to_project(self):
-        if len(self.vocabulary_view.treeView.selected_vocabularies) == 0:
+        if len(self.vocabulary_view.treeViewLibrary.selected_vocabularies) == 0:
             return
         if self.main_window.project is None:
             return
@@ -193,7 +177,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             vocabularies_project[v.uuid] = v
 
         to_compare = dict()
-        for v in self.vocabulary_view.treeView.selected_vocabularies:
+        for v in self.vocabulary_view.treeViewLibrary.selected_vocabularies:
             to_compare[v.uuid] = v
         to_apply = []
         to_check = []
@@ -216,12 +200,13 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             self.main_window.project.add_vocabulary(copy)
         for v in to_update:
             vocabularies_project[v.uuid].update_vocabulary(v)
+        self.vocabulary_view.recreate_tree()
 
     def synchronize_from_project_to_library(self):
         if self.main_window.project is None:
             return
 
-        if len(self.vocabulary_view.treeView.selected_vocabularies) == 0:
+        if len(self.vocabulary_view.treeViewProject.selected_vocabularies) == 0:
             return
 
         vocabularies_collection = dict()
@@ -229,7 +214,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             vocabularies_collection[v.uuid] = v
 
         to_compare = dict()
-        for v in self.vocabulary_view.treeView.selected_vocabularies:
+        for v in self.vocabulary_view.treeViewProject.selected_vocabularies:
             to_compare[v.uuid] = v
         to_apply = []
         to_check = []
@@ -252,6 +237,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             self.vocabulary_view.vocabulary_collection.add_vocabulary(copy)
         for v in to_update:
             vocabularies_project[v.uuid].update_vocabulary(v)
+        self.vocabulary_view.recreate_tree()
 
     def on_changed(self, project, item):
         self.vocabulary_view.on_changed(project, item)
@@ -269,22 +255,24 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         path = os.path.abspath("qt_ui/VocabularyManager.ui")
         uic.loadUi(path, self)
         self.main_window = main_window
-        self.project = main_window.project
+        self.project = None
         self.current_item = None
 
         self.vocabulary_collection = VIANProject(name="VocabularyCollection")
-        self.vocabulary_index = dict()
+        self.vocabulary_index = dict()  # A dict of vocabularies found on the file system
         self.fetch_vocabularies()
 
-        self.current_displayed_collection = self.vocabulary_collection
+        self.treeViewLibrary = VocabularyTreeView(self, self, self.vocabulary_collection, allow_create=True)
+        self.vocabulary_model_library = QStandardItemModel(self.treeViewLibrary)
+        self.innerLibrary.layout().addWidget(self.treeViewLibrary)
 
-        self.treeView = VocabularyTreeView(self, self)
-        self.inner.layout().addWidget(self.treeView)
+        self.treeViewProject = VocabularyTreeView(self, self, self.project, allow_create=False)
+        self.vocabulary_model_project = QStandardItemModel(self.treeViewProject)
+        self.innerProject.layout().addWidget(self.treeViewProject)
 
         self.image_drop = DropImageContainer(self)
         self.widgetImageContainer.setLayout(QVBoxLayout())
         self.widgetImageContainer.layout().addWidget(self.image_drop)
-        self.vocabulary_model = QStandardItemModel(self.treeView)
 
         self.btn_addItem.clicked.connect(self.add_word)
         self.lineEdit_Item.returnPressed.connect(self.add_word)
@@ -292,10 +280,9 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.lineEditName.textChanged.connect(self.on_name_changed)
         self.textEditDescription.textChanged.connect(self.on_description_changed)
 
+        self.vocabulary_collection.onVocabularyAdded.connect(partial(self.recreate_tree))
+        self.vocabulary_collection.onVocabularyRemoved.connect(partial(self.recreate_tree))
         self.recreate_tree()
-
-        self.labelLibrary.show()
-        self.labelProject.hide()
 
         self.show()
 
@@ -308,27 +295,11 @@ class VocabularyView(QWidget, IProjectChangeNotify):
             self.vocabulary_index[v.uuid] = dict(voc=v, path=p, edited=False)
         pass
 
-    @pyqtSlot()
-    def compare_library_to_project(self):
-        if self.main_window.project is None:
-            msg = QMessageBox.warning(self, "No Project Loaded", "You first have to open a Project to compare.")
-            return
-        vocabularies_in_project = dict()
-        for v in self.main_window.project.vocabularies:
-            vocabularies_in_project[v.uuid] = v
-
-        to_add = []
-        compared = []
-        for v in self.vocabulary_collection.vocabularies:
-            if v.uuid not in vocabularies_in_project:
-                to_add.append(v)
-            else:
-                compared.append(compare_vocabularies(v, vocabularies_in_project[v.uuid]))
-
-    def add_vocabulary(self, voc):
-        self.vocabulary_model.appendRow(self.get_vocabulary_item_model(voc))
-        self.treeView.setModel(self.vocabulary_model)
+    def add_vocabulary(self, model, view, voc):
+        model.appendRow(self.get_vocabulary_item_model(voc))
+        view.setModel(model)
         self.vocabulary_index[voc.uuid] = dict(voc=voc, path="", edited=False)
+
         # self.treeView = QTreeView()
 
     def get_vocabulary_item_model(self, voc):
@@ -363,29 +334,49 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
     def add_word(self):
         name = self.lineEdit_Item.text()
-        if name != "" and len(self.treeView.selectedIndexes()) > 0:
-            selected = self.vocabulary_model.itemFromIndex(self.treeView.selectedIndexes()[0])
+        if name != "" and len(self.treeViewLibrary.selectedIndexes()) > 0:
+            selected = self.vocabulary_model_library.itemFromIndex(self.treeViewLibrary.selectedIndexes()[0])
             selected_item = selected.voc_object
 
+            item = None
             if selected_item.get_type() == VOCABULARY_WORD:
                 word = selected_item.vocabulary.create_word(name, selected_item.name)
-                item = VocabularyItem(word.name, word)
+
+                if word is not None:
+                    item = VocabularyItem(word.name, word)
+                else:
+                    msg = QMessageBox.warning(self, "Duplicate Word",
+                                              "Adding two words with the same name is not allowed.")
             elif selected_item.get_type() == VOCABULARY:
                 word = selected_item.create_word(name)
-                item = VocabularyItem(word.name, word)
 
+                if word is not None:
+                    item = VocabularyItem(word.name, word)
+                else:
+                    msg = QMessageBox.warning(self, "Duplicate Word",
+                                              "Adding two words with the same name is not allowed.")
             else:
                 log_error("Failed to create word")
-            self.add_to_tree(selected, item)
+                item = None
+
+            if item is not None:
+                index = self.add_to_tree(selected, item)
+                self.treeViewLibrary.scrollTo(index)
         self.lineEdit_Item.setText("")
 
     def recreate_tree(self):
-        self.vocabulary_model.clear()
-        for v in self.current_displayed_collection.vocabularies:
-            self.add_vocabulary(v)
+        self.vocabulary_model_library.clear()
+        for v in self.vocabulary_collection.vocabularies:
+            self.add_vocabulary(self.vocabulary_model_library, self.treeViewLibrary, v)
+
+        self.vocabulary_model_project.clear()
+        if self.project is not None:
+            for v in self.project.vocabularies:
+                self.add_vocabulary(self.vocabulary_model_project, self.treeViewProject, v)
 
     def add_to_tree(self, selected, item):
         selected.appendRow(item)
+        return item.index()
 
     def on_name_changed(self):
         name = self.lineEditName.text()
@@ -399,6 +390,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
     def on_loaded(self, project):
         self.project = project
+        self.treeViewProject.collection = project
         self.recreate_tree()
 
     def on_closed(self):
@@ -415,18 +407,32 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
 
 class VocabularyTreeView(QTreeView):
-    def __init__(self, parent, vocabulary_manager: VocabularyView):
+    def __init__(self, parent, vocabulary_manager: VocabularyView, collection:VIANProject, allow_create=True):
         super(VocabularyTreeView, self).__init__(parent)
         self.is_editing = False
         self.vocabulary_manager = vocabulary_manager
         self.selected_vocabularies = []
         self.setSelectionMode(self.ExtendedSelection)
+        self.collection = collection
+        self.scrollToBottom()
+        self.allow_create = allow_create
+
+    def scroll_to_item(self, itm):
+        for r in range(self.model().rowCount()):
+            index = self.model().index(r, 0)
+            if self.model().data(index) == itm.get_name():
+                self.scrollTo(index)
+                return
+            for r in range(self.model().rowCount(index)):
+                if self.model().data(index) == itm.get_name():
+                    self.scrollTo(index)
+                    return
 
     def mousePressEvent(self, QMouseEvent):
+        super(VocabularyTreeView, self).mousePressEvent(QMouseEvent)
         if QMouseEvent.buttons() == Qt.RightButton:
-            self.open_context_menu(QMouseEvent)
-        else:
-            super(VocabularyTreeView, self).mousePressEvent(QMouseEvent)
+            if self.collection is not None:
+                self.open_context_menu(QMouseEvent)
 
     def selectionChanged(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection) -> None:
         try:
@@ -443,8 +449,8 @@ class VocabularyTreeView(QTreeView):
         #     return
 
         super(VocabularyTreeView, self).currentChanged(QModelIndex, QModelIndex_1)
-        if self.vocabulary_manager.vocabulary_model is not None:
-            current_item = self.vocabulary_manager.vocabulary_model.itemFromIndex(self.currentIndex())
+        if self.vocabulary_manager.vocabulary_model_library is not None:
+            current_item = self.vocabulary_manager.vocabulary_model_library.itemFromIndex(self.currentIndex())
             if current_item is not None:
                 obj = current_item.voc_object
                 if obj is not None:
@@ -461,12 +467,13 @@ class VocabularyTreeView(QTreeView):
             model_obj = None
 
         cm = VocabularyContextMenu(self.vocabulary_manager.main_window, pos, model_obj,
-                                   obj, self.vocabulary_manager.current_displayed_collection, self.model())
+                                   obj, self.collection, self.model(), self.vocabulary_manager, self, self.allow_create)
 
     def apply_name_changed(self):
         current_word = self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object
         new_name = self.model().itemFromIndex(self.selectedIndexes()[0]).text()
-        current_word.name = new_name
+        current_word.set_name(new_name)
+        self.model().itemFromIndex(self.selectedIndexes()[0]).setText(current_word.get_name())
 
     def edit(self, *args, **kwargs):
         self.is_editing = True
@@ -482,43 +489,50 @@ class VocabularyTreeView(QTreeView):
         self.apply_name_changed()
         super(VocabularyTreeView, self).editorDestroyed(*args, **kwargs)
 
-    def keyPressEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Shift:
-            self.setSelectionMode(self.MultiSelection)
-        else:
-            QKeyEvent.ignore()
-
-    def keyReleaseEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Shift:
-            self.setSelectionMode(self.SingleSelection)
-        else:
-            QKeyEvent.ignore()
+    # def keyPressEvent(self, QKeyEvent):
+    #     if QKeyEvent.key() == Qt.Key_Shift:
+    #         self.setSelectionMode(self.MultiSelection)
+    #     else:
+    #         QKeyEvent.ignore()
+    #
+    # def keyReleaseEvent(self, QKeyEvent):
+    #     if QKeyEvent.key() == Qt.Key_Shift:
+    #         self.setSelectionMode(self.SingleSelection)
+    #     else:
+    #         QKeyEvent.ignore()
 
 
 class VocabularyContextMenu(QMenu):
-    def __init__(self, parent, pos, model_item, item, voc_collection, item_model):
+    def __init__(self, parent, pos, model_item, item, voc_collection, item_model, manager, view, allow_create=True):
         super(VocabularyContextMenu, self).__init__(parent)
         self.model_item = model_item
         self.item = item
         self.main_window = parent
         self.voc_collection = voc_collection
         self.item_model = item_model
+        self.manager = manager
+        self.view = view
 
         if item is not None:
             self.a_remove = self.addAction("Remove " + str(item.__class__.__name__))
             self.a_remove.triggered.connect(self.on_remove)
-            self.a_add_word = self.addAction("Add Word")
-            # if self.item.get_type() == VOCABULARY and self.voc_collection is not None:
-            #     self.a_copy = self.addAction("Copy Vocabulary")
-            #     self.a_copy.triggered.connect(partial(self.voc_collection.copy_vocabulary, self.item))
 
-        self.a_new_voc = self.addAction("New Vocabulary")
-        self.a_new_voc.triggered.connect(self.on_new_voc)
+        if allow_create:
+            self.a_new_voc = self.addAction("New Vocabulary")
+            self.a_new_voc.triggered.connect(self.on_new_voc)
 
         self.popup(pos)
 
+    def on_create_word(self):
+        if isinstance(self.item, Vocabulary):
+            self.item.create_word("New Word")
+        elif isinstance(self.item, VocabularyWord):
+            self.item.vocabulary.create_word("New Word")
+        self.manager.recreate_tree()
+
     def on_new_voc(self):
-        self.voc_collection.create_vocabulary("New Vocabulary")
+        voc = self.voc_collection.create_vocabulary("New Vocabulary")
+        self.view.scroll_to_item(voc)
 
     def on_remove(self):
         if self.model_item.parent() is not None:

@@ -25,7 +25,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.dockWidgetContents.layout().addWidget(self.tree)
         self.performed_selection = False
         self.project_item = None
-
+        self.tree.setSelectionMode(self.tree.ExtendedSelection)
         self.corpus = None #type: Corpus|None
 
         # self.corpus_client.onConnectionEstablished.connect(self.recreate_tree)
@@ -292,17 +292,17 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.tree.select(to_select, False)
         self.tree.selection_dispatch = True
 
-    def keyPressEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Shift:
-            self.tree.setSelectionMode(self.tree.MultiSelection)
-        else:
-            QKeyEvent.ignore()
-
-    def keyReleaseEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Shift:
-            self.tree.setSelectionMode(self.tree.SingleSelection)
-        else:
-            QKeyEvent.ignore()
+    # def keyPressEvent(self, QKeyEvent):
+    #     if QKeyEvent.key() == Qt.Key_Shift:
+    #         self.tree.setSelectionMode(self.tree.MultiSelection)
+    #     else:
+    #         QKeyEvent.ignore()
+    #
+    # def keyReleaseEvent(self, QKeyEvent):
+    #     if QKeyEvent.key() == Qt.Key_Shift:
+    #         self.tree.setSelectionMode(self.tree.SingleSelection)
+    #     else:
+    #         QKeyEvent.ignore()
 
 
 class OutlinerTreeWidget(QTreeWidget):
@@ -361,14 +361,13 @@ class OutlinerTreeWidget(QTreeWidget):
             self.project.set_selected(self.outliner, selected_objs)
 
     def mousePressEvent(self, QMouseEvent):
+        super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
         if QMouseEvent.buttons() == Qt.RightButton:
             if len(self.selectedIndexes()) <= 1:
                 super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
 
             self.open_context_menu(QMouseEvent)
-            self.setSelectionMode(self.SingleSelection)
-        else:
-            super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
+            # self.setSelectionMode(self.SingleSelection)
 
     def itemExpanded(self, QTreeWidgetItem):
         container = QTreeWidgetItem.get_container()

@@ -441,10 +441,9 @@ class MediaObjectsList(QListWidget):
         self.attr_widget = attr_widget
 
     def mousePressEvent(self, e: QtGui.QMouseEvent):
+        super(MediaObjectsList, self).mousePressEvent(e)
         if e.button() == Qt.RightButton:
             self.attr_widget.context_menu(self.mapToGlobal(e.pos()))
-        else:
-            super(MediaObjectsList, self).mousePressEvent(e)
 
 
 class AttributesAnalysis(QWidget):
