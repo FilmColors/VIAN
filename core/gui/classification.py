@@ -207,14 +207,17 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.classification_mode = self.comboBox_ClassificationMode.currentText()
 
         if self.classification_mode == "Sequential":
-            self.update_widget()
             self.progressBar.show()
             self.btn_Previous.show()
             self.btn_Next.show()
+            self.update_widget()
         else:
             self.progressBar.hide()
             self.btn_Previous.hide()
             self.btn_Next.hide()
+            if len(self.project().selected) > 0:
+                self.current_container = self.project().selected[0]
+                self.update_widget()
 
     def on_stop_classification(self):
         self.stackedWidget.setCurrentIndex(0)
