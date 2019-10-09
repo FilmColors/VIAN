@@ -216,17 +216,22 @@ class IHasName():
 
 
 class IHasMediaObject():
+    onMediaAdded = pyqtSignal(object)
+    onMediaRemoved = pyqtSignal(object)
+
     def __init__(self):
         self.media_objects = []
 
     def add_media_object(self, media_object):
         if media_object not in self.media_objects:
             self.media_objects.append(media_object)
+            self.onMediaAdded.emit(media_object)
 
     def remove_media_object(self, media_object):
         if media_object in self.media_objects:
             media_object.delete()
             self.media_objects.remove(media_object)
+            self.onMediaRemoved.emit(media_object)
         self.project.dispatch_changed()
 
 

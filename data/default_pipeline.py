@@ -7,13 +7,13 @@ from core.analysis.analysis_import import *
 from core.analysis.analysis_utils import run_analysis
 
 @vian_pipeline
-class ERCFilmColorsVIANPipeline(VIANPipeline):
-    name = "ERCFilmColors Pipeline"
+class %PIPELINE_NAME%(VIANPipeline):
+    name = "%PIPELINE_NAME%"
     version = (1,0,0)
-    author = "Gaudenz Halter"
+    author = "%AUTHOR%"
 
     def __init__(self):
-        super(ERCFilmColorsVIANPipeline, self).__init__()
+        super(%PIPELINE_NAME%, self).__init__()
 
     def on_segment_created(self, project, segment, capture):
         print("Hello Segment")

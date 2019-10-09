@@ -7,7 +7,7 @@ import traceback
 from core.data.log import log_info, log_error, log_debug, log_warning
 from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter,QSizePolicy, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter,QSizePolicy, QDialog, QVBoxLayout, QLineEdit, QLabel, QPushButton
 from functools import partial
 
 
@@ -87,11 +87,14 @@ class PythonScriptEditor(QWidget):
         self.a_reload.triggered.connect(self.reload)
 
         self.editor.setFont(self.font)
-        self.editor.setTabStopWidth(QFontMetricsF(self.editor.font()).width(' ') * 4)
+        self.editor.setTabStopWidth(int(QFontMetricsF(self.editor.font()).width(' ')) * 4)
 
     def new(self):
-        self.load("data/default_pipeline.py")
-        self.current_file_path = ""
+        dialog = NewScriptDialog(self)
+        dialog.show()
+        # self.load("data/default_pipeline.py")
+        #
+        # self.current_file_path = ""
 
     def load(self, file_path):
         if file_path is None:
@@ -119,7 +122,7 @@ class PythonScriptEditor(QWidget):
 
         try:
             with open(p, "w") as f:
-                f.write(self.editor.toPlainText())
+                f.write(self.editor.toPlainText().replace("\t", "    "))
             self.current_file_path = p
         except IOError as e:
             log_error(e)
@@ -297,3 +300,36 @@ class PythonHighlighter (QSyntaxHighlighter):
             return True
         else:
             return False
+
+
+class NewScriptDialog(QDialog):
+    def __init__(self, parent, ):
+        super(NewScriptDialog, self).__init__(parent)
+        self.setLayout(QVBoxLayout())
+        self.lineEdit_Name = QLineEdit("MyAnalysis", self)
+        self.lineEdit_Author = QLineEdit("MyHackerPseudonym", self)
+        self.btn_OK = QPushButton("OK", self)
+        self.layout().addWidget(self.lineEdit_Name)
+        self.layout().addWidget(self.lineEdit_Author)
+        self.layout().addWidget(self.btn_OK)
+        self.btn_OK.clicked.connect(self.on_ok)
+
+    def on_ok(self):
+        with open("data/default_pipeline.py", "r") as f:
+            script = f.read()
+
+        script = script.replace("%PIPELINE_NAME%", self.lineEdit_Name.text().replace(" ", ""))
+        script = script.replace("%AUTHOR%", self.lineEdit_Author.text().replace(" ", ""))
+
+        try:
+            location = QFileDialog.getSaveFileName(self, filter="*.py")[0]
+            print(location)
+            with open(location, "w") as f:
+                f.write(script)
+            self.parent().load(location)
+            self.parent().reload()
+            self.close()
+        except Exception as e:
+            log_error("NewScriptDialog", e)
+            pass
+

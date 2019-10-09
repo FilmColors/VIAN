@@ -1311,17 +1311,8 @@ class TimebarSlice(QtWidgets.QWidget):
 
         if isinstance(item, IHasMediaObject):
             self.setAcceptDrops(True)
-            x = self.width() - 30
-            for obj in self.item.media_objects:
-                    itm = MediaObjectWidget(self, obj)
-                    itm.resize(25,25)
-                    itm.move(x, 5)
-                    if x > 50:
-                        itm.show()
-                    else:
-                        itm.hide()
-                    self.media_object_items.append(itm)
-                    x -= 30
+            self.item.onMediaAdded.connect(self.on_media_objects_changed)
+            self.item.onMediaRemoved.connect(self.on_media_objects_changed)
 
         self.merge_highlighted = False
         self.query_highlighted = False
@@ -1339,6 +1330,28 @@ class TimebarSlice(QtWidgets.QWidget):
 
         self.previous_slice = None
         self.next_slice = None
+        self.on_media_objects_changed()
+
+    @pyqtSlot(object)
+    def on_media_objects_changed(self, obj=None):
+        if not isinstance(self.item, IHasMediaObject):
+            return
+        x = self.width() - 30
+        for obj in self.media_object_items:
+            obj.deleteLater()
+        self.media_object_items = []
+
+        for obj in self.item.media_objects:
+            itm = MediaObjectWidget(self, obj)
+            itm.resize(25, 25)
+            itm.move(x, 5)
+            if x > 50:
+                itm.show()
+            else:
+                itm.hide()
+            self.media_object_items.append(itm)
+            x -= 30
+        self.update()
 
     def set_color(self):
         pass
@@ -1406,20 +1419,26 @@ class TimebarSlice(QtWidgets.QWidget):
         qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
 
         if self.has_classification:
-            pen.setColor(QtGui.QColor(0, 255, 0))
+            pen.setColor(QtGui.QColor(240,206,0))
             qp.setPen(pen)
             qp.drawEllipse(QRectF(self.width() - 10,5,5,5))
 
         pen.setColor(QtGui.QColor(255, 255, 255))
         x = self.width() - 60
         y = self.height() / 2 - (25 / 2)
+        can_show_all_media = True
         for m in self.media_object_items:
             m.move(x, int(y))
             if x > 50:
                 m.show()
             else:
                 m.hide()
+                can_show_all_media = False
             x -= 30
+        if not can_show_all_media:
+            pen.setColor(QtGui.QColor(178,41,41) )
+            qp.setPen(pen)
+            qp.drawEllipse(QRect(self.width() - 10, self.height() - 10, 5, 5))
 
         qp.end()
 
@@ -1531,6 +1550,7 @@ class TimebarSlice(QtWidgets.QWidget):
         self.item.project.create_media_object("New Object",
                                                     a0.mimeData().urls()[0].toLocalFile(),
                                                     self.item)
+        self.update()
 
     def enterEvent(self, QEvent):
         if not self.locked:
@@ -1739,9 +1759,7 @@ class MediaObjectWidget(QWidget):
         self.hovered = False
 
     def paintEvent(self, QPaintEvent):
-
         col = [5, 175, 242, 1]
-
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
 
@@ -1756,8 +1774,6 @@ class MediaObjectWidget(QWidget):
             qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), QColor(col[0], col[1], col[2], 200))
         else:
             qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), QColor(col[0], col[1], col[2], col[3]))
-
-        pen.setColor(QtGui.QColor(255, 255, 255))
 
         if self.media_object.dtype == MediaObjectType.PDF:
             qp.drawPixmap(QRect(0, 0, 25, 25), QPixmap("qt_ui/icons/icon_pdf.png"))
