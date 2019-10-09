@@ -1520,7 +1520,6 @@ class TimebarSlice(QtWidgets.QWidget):
         self.has_classification = len(keywords) > 0
         self.update()
 
-
     @pyqtSlot(int)
     def on_height_changed(self, int_height):
         self.resize(self.width(), int_height)
@@ -1848,6 +1847,8 @@ class TimebarPicture(QtWidgets.QWidget):
         self.item = screenshot
         self.item.onImageSet.connect(self.on_image_set)
         self.timeline = timeline
+        self.has_classification = len(self.item.tag_keywords)
+        self.item.onClassificationChanged.connect(self.on_classification_changed)
         self.is_hovered = False
         self.color = (123, 86, 32, 100)
         self.pic_height = height
@@ -1874,6 +1875,11 @@ class TimebarPicture(QtWidgets.QWidget):
         self.resize(width, self.pic_height)
         self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
 
+    @pyqtSlot(object)
+    def on_classification_changed(self, keywords):
+        self.has_classification = len(keywords) > 0
+        self.update()
+
     def paintEvent(self, QPaintEvent):
         if self.is_hovered:
             col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 200)
@@ -1894,6 +1900,10 @@ class TimebarPicture(QtWidgets.QWidget):
 
         qp.drawImage(self.img_rect, self.qimage)
         qp.drawRect(self.img_rect)
+        if self.has_classification:
+            pen.setColor(QtGui.QColor(0, 255, 0))
+            qp.setPen(pen)
+            qp.drawEllipse(QRectF(self.width() - 10, 5, 5, 5))
 
         qp.end()
 
