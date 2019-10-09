@@ -67,13 +67,13 @@ class VIANEventHandler(QObject):
 
     @pyqtSlot(str)
     def set_current_pipeline(self, name):
-        log_info("Pipeline", name)
         try:
             self.onLockPipelineGUIForLoading.emit()
             self.current_pipeline = ALL_REGISTERED_PIPELINES[name][0]()
             self.onReleasePipelineGUIAfterLoading.emit()
             self.onCurrentPipelineChanged.emit(self.current_pipeline)
         except Exception as e:
+            print("Exception in set_current_pipeline", e)
             self.onException.emit(traceback.format_exc())
 
     @pyqtSlot(object)
@@ -154,6 +154,7 @@ def get_name_of_script_by_path(spath):
 class VIANPipeline(QObject):
     name = "NoName"
     author = "NoAuthor"
+    experiment = None
     version = (0,0,0)
     requirements = dict(segment_analyses=[],
                         screenshot_analyses=[],

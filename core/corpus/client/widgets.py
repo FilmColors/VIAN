@@ -176,11 +176,11 @@ class CorpusProgressWidget(QWidget):
         if self.main_window.project is None:
             QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
             return
-        experiment = self.main_window.project.get_experiment_by_name(ERCFilmColorsVIANPipeline.template)
+        experiment = self.main_window.project.get_experiment_by_name(ERCFilmColorsVIANPipeline.experiment)
         if experiment is None:
             QMessageBox.information(self, "No Experiment created.",
                                     "You first have to create a experiment with the"
-                                    + ERCFilmColorsVIANPipeline.template + " template")
+                                    + ERCFilmColorsVIANPipeline.experiment + " template")
             return
 
         for priority in sorted(self.missing_analyses.keys()):

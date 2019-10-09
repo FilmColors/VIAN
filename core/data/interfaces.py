@@ -215,7 +215,7 @@ class IAnalysisJob(QObject):
         """
         return data_dict
 
-    def fit(self, targets, class_objs = None, callback=print) -> AnalysisContainer:
+    def fit(self, targets, class_objs = None, callback=None) -> AnalysisContainer:
         """
         Performs the analysis for given target containers and classification objects.
         If no classification object is given, a default one with the name "Global" is created.
@@ -228,6 +228,9 @@ class IAnalysisJob(QObject):
         else:
             project = targets.project
             targets = [targets]
+
+        if callback is None:
+            callback = self.dummy_callback
 
         if class_objs is None:
             clobj = project.get_classification_object_global("Global")
@@ -276,6 +279,7 @@ class IAnalysisJob(QObject):
 
     def dummy_callback(*args):
         pass
+
 
 class ParameterWidget(QWidget):
     """

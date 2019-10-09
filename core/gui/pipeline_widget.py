@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor, QPixmap, QIcon
 from core.data.interfaces import IProjectChangeNotify
 import os
+from functools import partial
 from core.gui.python_script_editor import PythonScriptEditor
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
 from core.data.log import log_error, log_info, log_warning
@@ -92,6 +93,7 @@ class PipelineToolbar(EToolBar):
     def run_all(self):
         self.runAll.emit()
 
+
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):
         super(PipelineDock, self).__init__(parent, False)
@@ -116,6 +118,9 @@ class PipelineDock(EDockWidget):
         if script_path is not None and os.path.isfile(script_path):
             self.editor.load(script_path)
 
+    def on_pipeline_loaded(self, pipeline):
+        if pipeline is not None:
+            self.pipeline.check_missing()
 
 class PipelineWidget(QWidget):
     onPipelineActivated = pyqtSignal(str)
@@ -140,6 +145,8 @@ class PipelineWidget(QWidget):
         self.btn_Finalize.clicked.connect(self.on_pipeline_finalize)
 
         self.btn_usePipeline.clicked.connect(self.on_use_pipeline)
+        self.pushButtonCheckMissing.clicked.connect(self.check_missing)
+        self.pushButtonRunAll.clicked.connect(self.run_all)
         self.current_item = None
         self.all_items = dict()
 
@@ -182,37 +189,74 @@ class PipelineWidget(QWidget):
 
         self.onToComputeChanged.emit(comp_segments, comp_screenshots, comp_annotations)
 
-    def on_use_pipeline(self):
-        if self.current_item is not None:
-            self.current_item.setForeground(QColor(69,69,69))
+    def on_use_pipeline(self, pipeline_name = None):
+        if pipeline_name is None or not isinstance(pipeline_name, str):
+            if self.current_item is not None:
+                self.current_item.setForeground(QColor(69,69,69))
 
-        if self.listWidget_Pipelines.currentItem() is None:
-            return
+            if self.listWidget_Pipelines.currentItem() is None:
+                return
+            pipeline_name = self.listWidget_Pipelines.currentItem().text()
 
-        pipeline_name = self.listWidget_Pipelines.currentItem().text()
+        else:
+            try:
+                itm = self.all_items[pipeline_name]
+                self.listWidget_Pipelines.setCurrentItem(itm)
+            except Exception as e:
+                raise e
+                pass
 
         self.current_item = self.listWidget_Pipelines.currentItem()
         if self.current_item is not None:
             self.current_item.setForeground(QColor(69, 200, 69))
 
-        self.onPipelineActivated.emit(pipeline_name)
         if self.project is not None and pipeline_name in ALL_REGISTERED_PIPELINES:
             self.project.add_pipeline_script(get_path_of_pipeline_script(pipeline_name))
             self.project.active_pipeline_script = get_path_of_pipeline_script(pipeline_name)
 
+        # self.check_missing()
+        self.onPipelineActivated.emit(pipeline_name)
+
+
     def on_pipeline_finalize(self):
         self.onPipelineFinalize.emit()
+
+    def check_missing(self):
+        if self.main_window.vian_event_handler.current_pipeline is None:
+            return
+        missing_info = self.project.get_missing_analyses(
+            self.main_window.vian_event_handler.current_pipeline.requirements)
+        for k in missing_info.keys():
+            print(k, missing_info[k][1], missing_info[k][2])
+        if missing_info['segment_analyses'][1] > 0:
+            self.progressBarSegments.setValue(missing_info['segment_analyses'][2] / missing_info['segment_analyses'][1] * 100)
+        else:
+            self.progressBarSegments.setValue(100)
+        if missing_info['screenshot_analyses'][1] > 0:
+            self.progressBarScreenshots.setValue(
+                missing_info['screenshot_analyses'][2] / missing_info['screenshot_analyses'][1] * 100)
+        else:
+            self.progressBarScreenshots.setValue(100)
+        if missing_info['annotation_analyses'][1] > 0:
+            self.progressBarAnnotations.setValue(
+                missing_info['annotation_analyses'][2] / missing_info['annotation_analyses'][1] * 100)
+        else:
+            self.progressBarAnnotations.setValue(100)
 
     @pyqtSlot()
     def run_all(self):
         if self.project is not None:
             missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements)
             missing = dict()
+            log_info("## Missing Analyses in Pipeline ##")
             for k in missing_info.keys():
                 missing.update(missing_info[k][0])
-            print(missing)
-            experiment = self.project.get_experiment_by_name(self.main_window.vian_event_handler.current_pipeline.template)
+                log_info("## -- ", k, missing_info[k][2], missing_info[k][1], missing_info[k][0])
+
+            experiment = self.project.get_experiment_by_name(self.main_window.vian_event_handler.current_pipeline.experiment)
+
             if experiment is None:
+                log_error("Experiment not found for RunAll")
                 return
 
             for priority in sorted(missing.keys()):
@@ -242,11 +286,9 @@ class PipelineWidget(QWidget):
             try:
                 import_module_from_path(p)
             except Exception as e:
-                raise e
                 log_error("Exception during loading of Script:", e)
         self.on_reload_scripts()
         module_name = get_name_of_script_by_path(project.active_pipeline_script)
-
         if module_name is not None and module_name in self.all_items:
             self.listWidget_Pipelines.setCurrentItem(self.all_items[module_name])
 
@@ -254,5 +296,9 @@ class PipelineWidget(QWidget):
         self.btn_onScreenshot.setChecked(project.compute_pipeline_settings['screenshots'])
         self.btn_onAnnotation.setChecked(project.compute_pipeline_settings['annotations'])
 
-        self.on_use_pipeline()
+        if module_name is not None:
+            self.on_use_pipeline(pipeline_name=module_name)
+
         self.on_update_to_compute()
+        project.onAnalysisRemoved.connect(partial(self.check_missing))
+        project.onAnalysisAdded.connect(partial(self.check_missing))

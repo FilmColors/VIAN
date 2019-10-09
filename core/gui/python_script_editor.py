@@ -7,7 +7,8 @@ import traceback
 from core.data.log import log_info, log_error, log_debug, log_warning
 from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, QCompleter,QSizePolicy, QDialog, QVBoxLayout, QLineEdit, QLabel, QPushButton
+from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, \
+    QCompleter,QSizePolicy, QDialog, QVBoxLayout, QLineEdit, QLabel, QPushButton, QComboBox
 from functools import partial
 
 
@@ -31,9 +32,9 @@ STYLES = {
     'operator': format(255,255,255),
     'brace': format(255,255,255),
     'defclass': format(255,255,255, 'bold'),
-    'string': format(165,194,97),
-    'string2': format(165,194,97),
-    'comment': format(98,151,85, 'italic'),
+    'string': format(106,135,89) ,
+    'string2': format(98,151,85),
+    'comment': format(120,120,120, 'italic'),
     'self': format(204,120,50, 'italic'),
     'numbers': format(104,151,187),
     'decorators': format(165,194,97, 'italic')
@@ -149,10 +150,11 @@ class PythonScriptEditor(QWidget):
         self.output.setPlainText(e)
         self.raise_()
 
-
+from PyQt5.QtGui import QTextOption
 class CodePlainTextEditor(QPlainTextEdit):
     def __init__(self, parent):
         super(CodePlainTextEditor, self).__init__(parent)
+        self.setWordWrapMode(QTextOption.NoWrap)
 
 
 class PythonHighlighter (QSyntaxHighlighter):
@@ -303,11 +305,15 @@ class PythonHighlighter (QSyntaxHighlighter):
 
 
 class NewScriptDialog(QDialog):
-    def __init__(self, parent, ):
+    def __init__(self, parent):
         super(NewScriptDialog, self).__init__(parent)
         self.setLayout(QVBoxLayout())
         self.lineEdit_Name = QLineEdit("MyAnalysis", self)
         self.lineEdit_Author = QLineEdit("MyHackerPseudonym", self)
+        # self.comboBox_Experiments = QComboBox(self)
+        # for e in project.experiments:
+        #     self.comboBox_Experiments.addItem(e.name)
+
         self.btn_OK = QPushButton("OK", self)
         self.layout().addWidget(self.lineEdit_Name)
         self.layout().addWidget(self.lineEdit_Author)
@@ -320,10 +326,10 @@ class NewScriptDialog(QDialog):
 
         script = script.replace("%PIPELINE_NAME%", self.lineEdit_Name.text().replace(" ", ""))
         script = script.replace("%AUTHOR%", self.lineEdit_Author.text().replace(" ", ""))
-
+        # script = script.replace("%EXPERIMENT_TITLE%", self.comboBox_Experiments.currentText())
         try:
             location = QFileDialog.getSaveFileName(self, filter="*.py")[0]
-            print(location)
+            # print(location)
             with open(location, "w") as f:
                 f.write(script)
             self.parent().load(location)

@@ -495,6 +495,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onProjectClosed.connect(self.vian_event_handler.on_close)
         self.vian_event_handler.onException.connect(self.script_editor.print_exception)
         self.vian_event_handler.onCurrentPipelineChanged.connect(self.pipeline_toolbar.on_current_pipeline_changed)
+        self.vian_event_handler.onCurrentPipelineChanged.connect(self.pipeline_widget.on_pipeline_loaded)
         self.vian_event_handler.onLockPipelineGUIForLoading.connect(partial(self.pipeline_toolbar.setEnabled, False))
         self.vian_event_handler.onReleasePipelineGUIAfterLoading.connect(partial(self.pipeline_toolbar.setEnabled, True))
 

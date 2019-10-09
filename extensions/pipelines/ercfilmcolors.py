@@ -10,7 +10,7 @@ from core.data.log import log_error, log_info, log_debug, log_warning
 @vian_pipeline
 class ERCFilmColorsVIANPipeline(VIANPipeline):
     name = "ERCFilmColors Pipeline"
-    template = "ERC Advanced Grant FilmColors"
+    experiment = "ERC Advanced Grant FilmColors"
     version = (0,1,0)
     author = "ERC Advanced Grant FilmColors, VMML"
 

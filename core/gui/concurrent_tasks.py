@@ -43,6 +43,7 @@ class ConcurrentTasksList(QWidget):
         self.task_entries = []
         self.dock = parent
         self.show()
+        self.tmax = 1
 
     @pyqtSlot(int, str, object, object)
     def add_task(self, task_id, name, task_object, job):
@@ -50,6 +51,8 @@ class ConcurrentTasksList(QWidget):
         self.task_entries.append(entry)
         self.widget_task_list.layout().addWidget(entry)
         entry.onProgress.connect(self.update_total)
+        if len(self.task_entries) > self.tmax:
+            self.tmax = len(self.task_entries) + 1
 
     @pyqtSlot(int)
     def remove_task(self, task_id):
@@ -63,7 +66,7 @@ class ConcurrentTasksList(QWidget):
 
     @pyqtSlot(int, float)
     def update_progress(self,task_id, value_float):
-        if len(self.task_entries) > 0:
+        if len(self.task_entries) == 1:
             complete_progress = 0
             for t in self.task_entries:
                 if t.task_id == task_id:
@@ -74,13 +77,20 @@ class ConcurrentTasksList(QWidget):
             self.progressBar_total.setValue(complete_progress)
             self.dock.onTotalProgressUpdate.emit(complete_progress)
             return complete_progress
+        elif len(self.task_entries) > 1:
+            complete_progress = int(float(len(self.task_entries)) / self.tmax)
+            self.progressBar_total.setValue(complete_progress)
+            self.dock.onTotalProgressUpdate.emit(complete_progress)
+            print(len(self.task_entries), self.tmax)
+            return complete_progress
         else:
             self.progressBar_total.setValue(0)
             self.dock.onTotalProgressUpdate.emit(0)
+            self.tmax = 1
             return 0.0
 
     def update_total(self):
-        if len(self.task_entries) > 0:
+        if len(self.task_entries) == 1:
             complete_progress = 0
             for t in self.task_entries:
                 complete_progress += t.progress_bar.value()
@@ -88,9 +98,15 @@ class ConcurrentTasksList(QWidget):
             self.progressBar_total.setValue(complete_progress)
             self.dock.onTotalProgressUpdate.emit(complete_progress)
             return complete_progress
+        elif len(self.task_entries) > 1:
+            complete_progress = int(float(len(self.task_entries)) / self.tmax)
+            self.progressBar_total.setValue(complete_progress)
+            self.dock.onTotalProgressUpdate.emit(complete_progress)
+            return complete_progress
         else:
             self.progressBar_total.setValue(0)
             self.dock.onTotalProgressUpdate.emit(0)
+            self.tmax = 1
             return 0.0
 
 

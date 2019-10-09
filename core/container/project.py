@@ -1261,6 +1261,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
 
         try:
+            print(my_dict['pipeline_scripts'], my_dict['pipeline_scripts'])
             self.pipeline_scripts = my_dict['pipeline_scripts']
             self.active_pipeline_script = my_dict['active_pipeline_script']
             self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
