@@ -37,13 +37,14 @@ class VocabularyManagerToolbar(QToolBar):
 
 
 class VocabularySaveDialog(QDialog):
-    def __init__(self, parent, vocabularies):
+    def __init__(self, parent, vocabularies, default_dir):
         super(VocabularySaveDialog, self).__init__(parent)
         self.setWindowTitle("Save Vocabularies")
         self.setLayout(QVBoxLayout())
-        lbl = QLabel("Select all vocabularies you want to save. The ones changed are highlighted in green")
-        lbl.setWordWrap(True)
-        self.layout().addWidget(lbl)
+        self.default_dir = default_dir
+        # lbl = QLabel("Select all vocabularies you want to save. The ones changed are highlighted in green")
+        # lbl.setWordWrap(True)
+        # self.layout().addWidget(lbl)
         self.modified_list = QListWidget()
         self.layout().addWidget(self.modified_list)
         self.vocabularies = vocabularies
@@ -56,6 +57,7 @@ class VocabularySaveDialog(QDialog):
                 itm.setForeground(QColor(0,255,0))
             else:
                 itm.setCheckState(Qt.Unchecked)
+                itm.setForeground(QColor(255, 255, 255))
             self.modified_list.addItem(itm)
             self.itms.append(dict(voc=v, list_item=itm))
         hlt = QHBoxLayout(self)
@@ -76,7 +78,10 @@ class VocabularySaveDialog(QDialog):
             if itm['list_item'].checkState() == Qt.Checked:
                 voc = itm['voc']['voc']
                 if folder is None:
-                    path = itm['voc']['path']
+                    if itm['voc']['path'] == "":
+                        path = os.path.join(self.default_dir, voc.name + ".json")
+                    else:
+                        path = itm['voc']['path']
                 else:
                     path = os.path.join(folder, voc.name + ".json")
                 voc.export_vocabulary(path)
@@ -84,6 +89,7 @@ class VocabularySaveDialog(QDialog):
                 log_info("Saving", itm['voc'])
             else:
                 log_info("Not Saving", itm['voc'])
+        self.close()
 
 
 class VocabularyCompareDialog(QDialog):
@@ -158,7 +164,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             for v in self.vocabulary_view.treeViewLibrary.selected_vocabularies:
                 vocabularies[v.uuid] = self.vocabulary_view.vocabulary_index[v.uuid]
 
-        dialog = VocabularySaveDialog(self, vocabularies)
+        dialog = VocabularySaveDialog(self, vocabularies, self.main_window.settings.DIR_VOCABULARIES)
         dialog.show()
 
     def import_vocabularies(self):
@@ -261,6 +267,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.current_item = None
 
         self.vocabulary_collection = VIANProject(name="VocabularyCollection")
+
         self.vocabulary_index = dict()  # A dict of vocabularies found on the file system
         self.fetch_vocabularies()
 
@@ -291,16 +298,22 @@ class VocabularyView(QWidget, IProjectChangeNotify):
     def fetch_vocabularies(self):
         for p in glob.glob("data/vocabularies/*.json"):
             v = self.vocabulary_collection.import_vocabulary(p)
+            v._path = p
             self.vocabulary_index[v.uuid] = dict(voc=v, path=p, edited=False)
         for p in glob.glob(self.main_window.settings.DIR_VOCABULARIES + "/*.json"):
             v = self.vocabulary_collection.import_vocabulary(p)
             self.vocabulary_index[v.uuid] = dict(voc=v, path=p, edited=False)
+            v._path = p
         pass
 
     def add_vocabulary(self, model, view, voc):
         model.appendRow(self.get_vocabulary_item_model(voc))
         view.setModel(model)
-        self.vocabulary_index[voc.uuid] = dict(voc=voc, path="", edited=False)
+        if voc.uuid in self.vocabulary_index:
+            edited =  self.vocabulary_index[voc.uuid]['edited']
+        else:
+            edited = False
+        self.vocabulary_index[voc.uuid] = dict(voc=voc, path=voc._path, edited=edited)
 
         # self.treeView = QTreeView()
 
@@ -567,7 +580,6 @@ class VocabularyTreeItemModel(QStandardItemModel):
         return d
 
     def dropMimeData(self, data: QtCore.QMimeData, action: QtCore.Qt.DropAction, row: int, column: int, parent: QtCore.QModelIndex) -> bool:
-        print(row, column)
         q = str(data.data("vocabularies"), encoding='utf-8')
         if q == self.type:
             return False

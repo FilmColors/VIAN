@@ -62,6 +62,9 @@ class Vocabulary(IProjectContainer, IHasName):
         self.image_urls = []
         self.category = "default"
 
+        self._path = ""
+
+
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
         if name in [w.name for w in self.words_plain]:
             log_warning("Duplicate Word", name)
