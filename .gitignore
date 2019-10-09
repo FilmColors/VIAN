@@ -15,9 +15,9 @@ user/models/*
 data/models/face_identification/shape_predictor_68_face_landmarks.dat
 data/models/
 idea/
-*.mp4
 *.vscode/
 .DS_Store
+*.mp4
 install/.DS_Store
 _docs/build/*
 dist/*
