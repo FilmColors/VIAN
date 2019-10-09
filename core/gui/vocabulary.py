@@ -7,7 +7,7 @@ from functools import partial
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent, QColor
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent, QColor, QDropEvent, QDragEnterEvent
 from PyQt5 import uic
 from core.data.computation import create_icon
 from core.data.log import log_error, log_info, log_warning, log_debug
@@ -170,6 +170,8 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
         if len(self.vocabulary_view.treeViewLibrary.selected_vocabularies) == 0:
             return
         if self.main_window.project is None:
+            msg = QMessageBox.warning(self, "No Project Loaded",
+                                      "You first need to load a project before attaching vocabularies.")
             return
 
         vocabularies_project = dict()
@@ -263,11 +265,11 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.fetch_vocabularies()
 
         self.treeViewLibrary = VocabularyTreeView(self, self, self.vocabulary_collection, allow_create=True)
-        self.vocabulary_model_library = QStandardItemModel(self.treeViewLibrary)
+        self.vocabulary_model_library = VocabularyTreeItemModel(self.treeViewLibrary, self.parent().synchronize_from_project_to_library, "library")
         self.innerLibrary.layout().addWidget(self.treeViewLibrary)
 
         self.treeViewProject = VocabularyTreeView(self, self, self.project, allow_create=False)
-        self.vocabulary_model_project = QStandardItemModel(self.treeViewProject)
+        self.vocabulary_model_project = VocabularyTreeItemModel(self.treeViewProject, self.parent().synchronize_from_library_to_project, "project")
         self.innerProject.layout().addWidget(self.treeViewProject)
 
         self.image_drop = DropImageContainer(self)
@@ -373,6 +375,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         if self.project is not None:
             for v in self.project.vocabularies:
                 self.add_vocabulary(self.vocabulary_model_project, self.treeViewProject, v)
+        self.treeViewProject.setModel(self.vocabulary_model_project)
 
     def add_to_tree(self, selected, item):
         selected.appendRow(item)
@@ -414,8 +417,13 @@ class VocabularyTreeView(QTreeView):
         self.selected_vocabularies = []
         self.setSelectionMode(self.ExtendedSelection)
         self.collection = collection
-        self.scrollToBottom()
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.setDragDropOverwriteMode(True)
+        self.setDropIndicatorShown(True)
+
         self.allow_create = allow_create
+        self.header().close()
 
     def scroll_to_item(self, itm):
         for r in range(self.model().rowCount()):
@@ -469,6 +477,11 @@ class VocabularyTreeView(QTreeView):
         cm = VocabularyContextMenu(self.vocabulary_manager.main_window, pos, model_obj,
                                    obj, self.collection, self.model(), self.vocabulary_manager, self, self.allow_create)
 
+
+    # def dropEvent(self, e: QDropEvent) -> None:
+    #     print(e.mimeData())
+    #     # print(e.)
+
     def apply_name_changed(self):
         current_word = self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object
         new_name = self.model().itemFromIndex(self.selectedIndexes()[0]).text()
@@ -489,11 +502,6 @@ class VocabularyTreeView(QTreeView):
         self.apply_name_changed()
         super(VocabularyTreeView, self).editorDestroyed(*args, **kwargs)
 
-    # def keyPressEvent(self, QKeyEvent):
-    #     if QKeyEvent.key() == Qt.Key_Shift:
-    #         self.setSelectionMode(self.MultiSelection)
-    #     else:
-    #         QKeyEvent.ignore()
     #
     # def keyReleaseEvent(self, QKeyEvent):
     #     if QKeyEvent.key() == Qt.Key_Shift:
@@ -512,7 +520,6 @@ class VocabularyContextMenu(QMenu):
         self.item_model = item_model
         self.manager = manager
         self.view = view
-
         if item is not None:
             self.a_remove = self.addAction("Remove " + str(item.__class__.__name__))
             self.a_remove.triggered.connect(self.on_remove)
@@ -542,10 +549,38 @@ class VocabularyContextMenu(QMenu):
         self.item.save_delete()
 
 
+class VocabularyTreeItemModel(QStandardItemModel):
+    def __init__(self, parent, migration_function, type):
+        super(VocabularyTreeItemModel, self).__init__(parent=parent)
+        self.migration_function = migration_function
+        self.type = type
+
+
+    def mimeTypes(self):
+        return ["vocabularies"]
+
+    def mimeData(self, indexes) -> QtCore.QMimeData:
+        # vocs = [str(self.itemFromIndex(idx).voc_object.unique_id) for idx in indexes]
+        # vocs = ";".join(vocs)
+        d  = QtCore.QMimeData()
+        d.setData("vocabularies", bytes(self.type, encoding="UTF-8"))
+        return d
+
+    def dropMimeData(self, data: QtCore.QMimeData, action: QtCore.Qt.DropAction, row: int, column: int, parent: QtCore.QModelIndex) -> bool:
+        print(row, column)
+        q = str(data.data("vocabularies"), encoding='utf-8')
+        if q == self.type:
+            return False
+
+        self.migration_function()
+        return False
+
+
 class VocabularyItem(QStandardItem):
     def __init__(self, text, object):
         super(VocabularyItem, self).__init__(text)
         self.voc_object = object
+        self.setDragEnabled(True)
 
 
 class VocabularyExportDialog(EDialogWidget):
