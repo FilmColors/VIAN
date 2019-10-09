@@ -1295,6 +1295,9 @@ class TimebarSlice(QtWidgets.QWidget):
         self.text = ""
         self.curr_pos = self.pos()
         self.curr_size = self.size()
+        self.item.onClassificationChanged.connect(self.on_classification_changed)
+
+        self.has_classification = len(self.item.tag_keywords) > 0
 
         self.update_text()
 
@@ -1330,7 +1333,6 @@ class TimebarSlice(QtWidgets.QWidget):
         self.col_cutting = (180,0,0, 200)
         self.col_hovered = (232, 174, 12, 150)
         self.col_selected = (self.color[0], self.color[1], self.color[2], 150)
-
 
         self.min_possible = 0
         self.max_possible = self.timeline.duration * self.timeline.scale
@@ -1378,8 +1380,6 @@ class TimebarSlice(QtWidgets.QWidget):
             else:
                 col = (self.color[0], self.color[1], self.color[2], 50)
 
-
-
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
 
@@ -1397,12 +1397,20 @@ class TimebarSlice(QtWidgets.QWidget):
         gradient.setSpread(QGradient.PadSpread)
 
         pen.setColor(QColor(col[0], col[1], col[2], 150))
+        qp.setPen(pen)
         qp.drawRect(QtCore.QRect(0, 0, self.width(), self.height()))
         qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), gradient)
 
         pen.setColor(QtGui.QColor(255, 255, 255))
+        qp.setPen(pen)
         qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
 
+        if self.has_classification:
+            pen.setColor(QtGui.QColor(0, 255, 0))
+            qp.setPen(pen)
+            qp.drawEllipse(QRectF(self.width() - 10,5,5,5))
+
+        pen.setColor(QtGui.QColor(255, 255, 255))
         x = self.width() - 60
         y = self.height() / 2 - (25 / 2)
         for m in self.media_object_items:
@@ -1506,6 +1514,12 @@ class TimebarSlice(QtWidgets.QWidget):
                         self.next_slice.item.set_start(int(round(((self.pos().x() + self.width()) * self.timeline.scale),0)))
                         self.next_slice.sticky_highlighted = False
                     return
+
+    @pyqtSlot(object)
+    def on_classification_changed(self, keywords):
+        self.has_classification = len(keywords) > 0
+        self.update()
+
 
     @pyqtSlot(int)
     def on_height_changed(self, int_height):
