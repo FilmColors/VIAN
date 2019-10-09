@@ -154,8 +154,6 @@
      <addaction name="actionNodeEditorPerspective"/>
      <addaction name="actionQuick_Annotation"/>
      <addaction name="separator"/>
-     <addaction name="actionSave_Perspective"/>
-     <addaction name="actionLoad_Perspective"/>
     </widget>
     <addaction name="menuToolboxes"/>
     <addaction name="actionPlayerControls"/>
@@ -168,14 +166,16 @@
     <addaction name="actionScreenshot_Manager"/>
     <addaction name="actionVocabularyManager"/>
     <addaction name="actionExperiment_Editor"/>
+    <addaction name="actionClassification"/>
+    <addaction name="actionWebApp_Upload"/>
     <addaction name="separator"/>
     <addaction name="menuPerspectives"/>
-    <addaction name="separator"/>
-    <addaction name="actionCorpus"/>
     <addaction name="separator"/>
     <addaction name="actionTaksMonitor"/>
     <addaction name="actionHistory"/>
     <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionCorpus"/>
     <addaction name="separator"/>
     <addaction name="actionFullscreen"/>
     <addaction name="actionToggleStatusBar"/>
@@ -883,6 +883,27 @@
   <action name="actionClose_Corpus">
    <property name="text">
     <string>Close Corpus</string>
+   </property>
+  </action>
+  <action name="actionClassification">
+   <property name="text">
+    <string>Classification</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
+   </property>
+  </action>
+  <action name="actionWebApp_Upload">
+   <property name="text">
+    <string>WebApp Upload</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+U</string>
+   </property>
+  </action>
+  <action name="actionVocabulary_Manager">
+   <property name="text">
+    <string>Vocabulary Manager</string>
    </property>
   </action>
  </widget>

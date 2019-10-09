@@ -425,7 +425,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_screenshots = []
         self.clear_visualizations()
 
-
     def update_location(self):
         # self.curr_movie_time = self.main_window.player.get_media_time() / 1000
         self.update()
@@ -485,8 +484,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def clear_visualizations(self):
         for v in self.item_visualizations.values():
-            v[1][0].close()
-            v[0].close()
+            v[1][0].deleteLater()
+            v[0].deleteLater()
         self.item_visualizations = dict()
         self.visualization_datasets = []
 
@@ -2306,6 +2305,7 @@ class TimelineVisualization(TimelineBar):
 
         qp.fillRect(rect, QtGui.QColor(12, 12, 12))
         return qimage, qp, data, t_start, t_end, ms
+
 
 from core.visualization.line_plot import LinePlot
 

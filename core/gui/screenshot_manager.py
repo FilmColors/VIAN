@@ -5,7 +5,7 @@ import time
 
 from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
+from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot, QRect
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
 from core.data.enums import *
@@ -490,6 +490,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if self.loading_icon is not None:
                 self.scene.removeItem(self.loading_icon)
                 self.scene.removeItem(self.loading_text)
+            self.update_manager()
+            self.center_images()
 
     def toggle_annotations(self):
         if len(self.selected) == 0:
@@ -587,6 +589,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.qimage_cache = new_qimage_cache
         self.clear_selection_frames()
         self.arrange_images()
+
+        if self.project.get_main_segmentation() is None \
+                or len(self.project.get_main_segmentation().segments) == 0:
+            self.center_images()
 
     def clear_manager(self):
         self.clear_scr_captions()
@@ -932,6 +938,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         elif event.key() == QtCore.Qt.Key_A and self.ctrl_is_pressed:
             self.select_image(self.images_plain)
 
+        elif event.key() == QtCore.Qt.Key_F:
+            self.center_images()
+
         elif event.key() == QtCore.Qt.Key_Shift:
             self.shift_is_pressed = True
         else:
@@ -981,6 +990,11 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         self.screenshot_obj.onImageSet.connect(self.set_pixmap)
         self.selection_rect = selection_rect
         self.qpixmap = qpixmap
+
+    def boundingRect(self) -> QtCore.QRectF:
+        if self.qpixmap is None:
+            return QRectF()
+        return QRectF(self.qpixmap.rect())
 
     # @pyqtSlot(object, object, object)
     def set_pixmap(self, scr, ndarray, pixmap):

@@ -40,6 +40,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         for itm in MATRIX_ORDERS:
             self.comboBox_Sorting.addItem(itm)
 
+
         self.current_idx = 0
         self.current_experiment = None
         self.current_container = None
@@ -135,10 +136,25 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.update_widget()
 
         project.onExperimentAdded.connect(self.enable_classification)
+        project.onExperimentAdded.connect(self.update_classification_list)
+        project.onExperimentRemoved.connect(self.update_classification_list)
 
     @pyqtSlot(object)
     def enable_classification(self, s):
         self.setEnabled(True)
+
+    @pyqtSlot(object)
+    def update_classification_list(self, experiment):
+        self.comboBox_Experiment.clear()
+        if self.project() is None:
+            return
+
+        for e in self.project().experiments:
+            self.comboBox_Experiment.addItem(e.get_name())
+        if len(self.project().experiments) > 0:
+            self.setEnabled(True)
+        else:
+            self.setEnabled(False)
 
     @pyqtSlot(bool)
     def on_visibility_changed(self, visibility):
@@ -207,11 +223,15 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         if len(self.sorted_containers) > self.current_idx + 1:
             self.current_idx += 1
             self.update_widget()
+            if self.current_container is not None:
+                self.frame_container(self.current_container)
 
     def on_previous(self):
         if 0 <= self.current_idx - 1:
             self.current_idx -= 1
             self.update_widget()
+            if self.current_container is not None:
+                self.frame_container(self.current_container)
 
     def on_order_changed(self):
         self.order_method = self.cb_ordering.currentIndex()
@@ -221,7 +241,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             return
 
         if container.get_type() == (SEGMENT or ANNOTATION):
-            self.main_window.player.set_media_time(container.get_start())
+            self.main_window.player.set_media_time(container.get_start() + ((container.get_end() - container.get_start()) / 2))
             self.main_window.timeline.timeline.frame_time_range(container.get_start(), container.get_end())
         elif container.get_type() == SCREENSHOT:
             segm = self.main_window.project.get_main_segmentation().get_segment_of_time(container.get_start())

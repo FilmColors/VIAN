@@ -140,6 +140,7 @@ class LoadScreenshotsJob(IConcurrentJob):
 
     If the annotated fails, it will be reset to None.
     """
+
     def run_concurrent(self, project, sign_progress):
         # [self.project.movie_descriptor.get_movie_path(), screenshot_position, screenshot_annotation_dicts]
         # for s in self.project.screenshots:
@@ -203,6 +204,7 @@ class LoadScreenshotsJob(IConcurrentJob):
         # # sign_progress(100)
 
         main_window.screenshots_manager.set_loading(False)
+
 
 
 class CreateScreenshotJob(IConcurrentJob):

@@ -207,7 +207,7 @@ class SemanticSegmentationParameterWidget(ParameterWidget):
         l3 = QHBoxLayout(self)
         l3.addWidget((QLabel("Dataset:".ljust(25), self)))
         self.cb_dataset = QComboBox(self)
-        self.cb_dataset.addItems(['Look into Persons', 'Ade20k'])
+        self.cb_dataset.addItems(['Look into Person (LIP)'])
         l3.addWidget(self.cb_dataset)
 
         self.layout().addItem(l2)
@@ -215,7 +215,7 @@ class SemanticSegmentationParameterWidget(ParameterWidget):
 
     def get_parameters(self):
         resolution = self.spin_frame.value()
-        if (self.cb_dataset.currentText() == "Look into Persons"):
+        if (self.cb_dataset.currentText() == "Look into Person (LIP)"):
             model = "LIP"
         elif (self.cb_dataset.currentText() == "ADE20K"):
             model = "ADE20K"

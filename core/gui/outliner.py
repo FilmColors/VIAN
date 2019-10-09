@@ -933,6 +933,7 @@ class ExperimentItem(AbstractOutlinerItem):
         self.classification_root = ClassificationObjectsRoot(self, 0)
         experiment.onClassificationObjectAdded.connect(self.add_classification_object)
         experiment.onClassificationObjectRemoved.connect(self.remove_classification_object)
+        experiment.onExperimentChanged.connect(self.update_item)
         for cl_obj in experiment.get_classification_objects_plain():
             self.add_classification_object(cl_obj)
 

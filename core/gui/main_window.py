@@ -348,6 +348,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionFullscreen.triggered.connect(self.toggle_fullscreen)
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
         self.actionScriptEditor.triggered.connect(self.pipeline_widget.show)
+        self.actionClassification.triggered.connect(self.create_vocabulary_matrix)
+        self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
 
         self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup))
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer))

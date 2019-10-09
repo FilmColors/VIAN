@@ -856,19 +856,26 @@ class Experiment(IProjectContainer, IHasName):
         """
         result = []
         for c in self.get_classification_objects_plain():
-            for tgt in c.target_container:
-                if tgt.get_type() == SEGMENTATION:
-                    for child in tgt.segments:
-                        if child not in result:
-                            result.append(child)
-                if tgt.get_type() == ANNOTATION_LAYER:
-                    for child in tgt.annotations:
-                        if child not in result:
-                            result.append(child)
-                if tgt.get_type() == SCREENSHOT_GROUP:
-                    for child in tgt.screenshots:
-                        if child not in result:
-                            result.append(child)
+            if len(c.target_container) > 0:
+                for tgt in c.target_container:
+                    if tgt.get_type() == SEGMENTATION:
+                        for child in tgt.segments:
+                            if child not in result:
+                                result.append(child)
+                    if tgt.get_type() == ANNOTATION_LAYER:
+                        for child in tgt.annotations:
+                            if child not in result:
+                                result.append(child)
+                    if tgt.get_type() == SCREENSHOT_GROUP:
+                        for child in tgt.screenshots:
+                            if child not in result:
+                                result.append(child)
+            else:
+                for s in self.project.segmentation:
+                    result.extend(s.segments)
+                for s in self.project.annotation_layers:
+                    result.extend(s.annotations)
+                result.extend(self.project.screenshots)
         return result
 
     def get_classification_objects_plain(self) -> List[ClassificationObject]:

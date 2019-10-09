@@ -15,6 +15,7 @@ SOURCE_COMPLETE = 2
 
 ImagePlotRawData = namedtuple("ImagePlotRawData", ["image", "x", "y", "z", "mime_data"])
 
+ANGLE_DELTA_STEP = 120
 
 class ImagePlot(QGraphicsView, IVIANVisualization):
     onImageClicked = pyqtSignal(object)
@@ -368,6 +369,8 @@ class VIANPixmapGraphicsItem(QGraphicsPixmapItem):
 
     def setPos(self, x, y):
         pos = QPointF(x, y)
+        if self.pixmap is not None:
+            pos = pos - QPoint(0, self.boundingRect().height() * self.scale())
         super(VIANPixmapGraphicsItem, self).setPos(pos)
         self.abs_pos = pos
 
@@ -552,11 +555,12 @@ class ImagePlotCircular(ImagePlot):
 
     def wheelEvent(self, event: QWheelEvent):
         t = 0
+        q = abs(event.angleDelta().y() / ANGLE_DELTA_STEP)
         if event.angleDelta().y() > 0.0:
-            t = (self.pos_scale + 0.1) * 100
+            t = (self.pos_scale + (0.1 * q)) * 100
 
         elif event.angleDelta().y() < 0.0:
-            t = (self.pos_scale - 0.1) * 100
+            t = (self.pos_scale - (0.1 * q)) * 100
 
         if 0 < t / 100 < 100:
             self.set_range_scale(t)
@@ -810,11 +814,12 @@ class ImagePlotPlane(ImagePlot):
 
     def wheelEvent(self, event: QWheelEvent):
         t = 0
+        q = abs(event.angleDelta().y() / ANGLE_DELTA_STEP)
         if event.angleDelta().y() > 0.0:
-            t = (self.curr_scale + 0.1) * 100
+            t = (self.curr_scale + (0.1 * q))  * 100
 
         elif event.angleDelta().y() < 0.0:
-            t = (self.curr_scale - 0.1) * 100
+            t = (self.curr_scale - (0.1 * q)) * 100
 
         if 0 < t / 100 < 100:
             self.set_scale(t)
@@ -970,6 +975,7 @@ class ImagePlotTime(ImagePlot):
         self.base_line = 1000
         self.x_max = 0
         self.y_max = 1.0
+        self.img_scale = 0.3
 
         self.lines = []
         self.itm_is_shown = dict()
@@ -1015,6 +1021,11 @@ class ImagePlotTime(ImagePlot):
                                          hover_text="Saturation:" + str(round(y, 2))+ "\t" + str(timestamp), mime_data=mime_data,
                                          alternative_channels=channels)
         self.scene().addItem(itm)
+        try:
+            y = itm.alternative_channels[self.channel.lower()]
+        except:
+            log_error("Channel " + self.channel + "does not exist in VIANPixmapGraphicsItem")
+            pass
         itm.setPos(np.nan_to_num(x * self.x_scale), np.nan_to_num((self.base_line * self.y_scale) - (y * self.y_scale) - itm.boundingRect().height()))
 
         self.raw_data.append(ImagePlotRawData(img, x, y, z, mime_data))
@@ -1198,14 +1209,14 @@ class ImagePlotTime(ImagePlot):
 
     def wheelEvent(self, event: QWheelEvent):
         t = 0
+        q = abs(event.angleDelta().y() / ANGLE_DELTA_STEP)
         if event.angleDelta().y() > 0.0:
-            t = self.y_max + 5
+            t = self.y_max + (5 * q)
 
         elif event.angleDelta().y() < 0.0:
-            t = self.y_max - 5
-
-        if 0 < t < 1000:
-            self.scale_pos(t)
+            t = self.y_max - (5 * q)
+        if 1 < t <= 255:
+            self.set_y_max(t)
 
 
 class ImagePlotTimeControls(QWidget):
@@ -1245,7 +1256,7 @@ class ImagePlotTimeControls(QWidget):
         self.cb_channel.addItems(plot.channels)
         hl3.addWidget(self.cb_channel)
 
-        self.slider_imagescale.setValue(100)
+        self.slider_imagescale.setValue(30)
         self.slider_y_max.setValue(255)
 
         self.layout().addItem(hl1)

@@ -28,6 +28,7 @@ class WidgetsToolbar(EToolBar):
         self.a_outliner = self.addAction(create_icon("qt_ui/icons/icon_outliner.png"), "Outliner")
         self.a_timeline = self.addAction(create_icon("qt_ui/icons/icon_timeline.png"), "Timeline")
         self.a_player_controls = self.addAction(create_icon("qt_ui/icons/icon_player_controls.png"), "Player Controls")
+        self.a_inspector = self.addAction(create_icon("qt_ui/icons/icon_inspector.png"), "Inspector")
 
         self.addSeparator()
         self.a_screenshot_manager = self.addAction(create_icon("qt_ui/icons/icon_screenshot_manager.png"), "Screenshot Manager")
@@ -52,6 +53,7 @@ class WidgetsToolbar(EToolBar):
         self.a_classification.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_C))
         self.a_query.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_Q))
         self.a_upload.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_U))
+        self.a_inspector.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_I))
 
         self.a_vocabulary.triggered.connect(self.main_window.create_vocabulary_manager)
         self.a_setup.triggered.connect(partial(self.main_window.switch_perspective, Perspective.ExperimentSetup))
@@ -66,6 +68,7 @@ class WidgetsToolbar(EToolBar):
         self.a_colorimetry.triggered.connect(self.main_window.create_colorimetry_live)
         self.a_player.triggered.connect(self.main_window.create_widget_video_player)
         self.a_corpus.triggered.connect(self.main_window.create_corpus_widget)
+        self.a_inspector.triggered.connect(self.main_window.create_inspector)
 
         self.a_cl_obj.triggered.connect(self.show_classification_selector)
 
@@ -82,6 +85,7 @@ class WidgetsToolbar(EToolBar):
         self.hook_visibility(self.main_window.vocabulary_manager, self.a_vocabulary)
         self.hook_visibility(self.main_window.corpus_widget, self.a_corpus)
         self.hook_visibility(self.main_window.query_widget, self.a_query)
+        self.hook_visibility(self.main_window.inspector, self.a_inspector)
 
         # self.main_window = main_window
         self.main_window.vocabulary_manager.visibilityChanged.connect(partial(self.on_visibility_changed, self.main_window.vocabulary_manager, self.a_vocabulary))

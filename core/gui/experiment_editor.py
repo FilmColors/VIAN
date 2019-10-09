@@ -54,6 +54,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         for ds in VIAN_SEGMENTATION_DATASETS:
             self.comboBox_Dataset.addItem(ds[0])
 
+
         # This contains all current option of the ComboBox Target Container
         self.target_container_options = []
         self.classification_object_index = dict()
@@ -74,25 +75,8 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.listWidget_Labels.itemChanged.connect(self.update_dataset_in_object)
         self.current_dataset_label_checkboxes = []
 
-        # Analysis
-        self.selected_analysis = None
-        self.comboBox_AnalysisClassificationObject.currentTextChanged.connect(self.on_analysis_classification_object_changed)
-        self.comboBox_AnalysisClass.currentTextChanged.connect(self.on_analysis_combobox_changed)
-        self.btn_AddAnalysis.clicked.connect(self.on_add_analysis)
-        self.btn_RemoveAnalysis.clicked.connect(self.on_remove_analysis)
-        self.btn_ApplyAnalysisChanges.clicked.connect(self.on_apply_analysis_changes)
-        # self.listWidget_Analyses.itemChanged.connect(self.update_analysis_list_in_experiment)
-        self.listWidget_Analyses.itemSelectionChanged.connect(self.on_selected_analysis_changed)
-        self.lineEdit_AnalysisName.textChanged.connect(self.on_analysis_name_changed)
-
         self.comboBoxExperiment.currentTextChanged.connect(self.on_experiment_combo_changed)
         self.pushButton_CreateExperiment.clicked.connect(self.main_window.on_create_experiment)
-
-        self.analysis_index = dict()
-        self.analyses_entries = []
-        for a in self.main_window.analysis_list:
-            self.comboBox_AnalysisClass.addItem(a.__name__)
-            self.analysis_index[a.__name__] = a
 
         # Disable all controls that need a selected Classification Object:
         self.on_class_selection_changed()
@@ -133,12 +117,13 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.lineEdit_ExperimentName.setText(self.current_experiment.name)
             self.update_classification_object_tree()
             self.update_vocabulary_view()
-            self.update_analysis_list()
             self.update_target_container_combobox()
 
     def experiment_name_changed(self):
         if self.inhibit_ui_signals:
             return
+        name = self.lineEdit_ExperimentName.text()
+        self.comboBoxExperiment.setItemText(self.comboBoxExperiment.currentIndex(), name)
         self.current_experiment.set_name(self.lineEdit_ExperimentName.text())
 
     #region Classification_objects
@@ -155,10 +140,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
     def update_classification_object_tree(self):
         self.treeWidget_Objects.clear()
-        self.comboBox_AnalysisClassificationObject.currentTextChanged.disconnect(
-            self.on_analysis_classification_object_changed)
-        self.comboBox_AnalysisClassificationObject.clear()
-        self.comboBox_AnalysisClassificationObject.addItem("None")
         self.classification_object_index = dict()
 
         for root in self.current_experiment.classification_objects:
@@ -167,7 +148,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
             item_index_list = []
             for i, obj in enumerate(plain):
-                self.comboBox_AnalysisClassificationObject.addItem(obj.name)
                 self.classification_object_index[obj.name] = obj
                 if i == 0:
                     itm = ClassificationObjectItem(self.treeWidget_Objects, obj)
@@ -184,8 +164,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
                 item_index_list.append([obj, itm])
         self.treeWidget_Objects.expandAll()
-        self.comboBox_AnalysisClassificationObject.currentTextChanged.connect(
-            self.on_analysis_classification_object_changed)
 
     def update_target_container_combobox(self):
         self.listTargets.clear()
@@ -303,76 +281,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                     if itm.target_item in self.selected_class_object.obj.target_container:
                         self.selected_class_object.obj.target_container.remove(itm.target_item)
 
-    #endregion
-
-    #region Analysis Tab
-    def on_add_analysis(self):
-        if self.current_experiment is not None:
-            self.current_experiment.add_analysis_to_pipeline("New Analysis_" +str(len(self.current_experiment.analyses)), self.main_window.analysis_list[0], None, None)
-            self.update_analysis_list()
-
-    def on_remove_analysis(self):
-        if self.current_experiment is not None and self.selected_analysis is not None:
-            self.current_experiment.remove_analysis_from_pipeline(self.selected_analysis)
-            self.update_analysis_list()
-
-    def on_apply_analysis_changes(self):
-        if self.selected_analysis is not None and self.curr_parameter_widget is not None:
-            self.selected_analysis['params'] = self.curr_parameter_widget.get_parameters()
-
-    def on_analysis_classification_object_changed(self):
-        if self.selected_analysis is not None:
-            if self.comboBox_AnalysisClassificationObject.currentText == "None":
-                self.selected_analysis['class_obj'] = "None"
-            else:
-                self.selected_analysis['class_obj'] = self.classification_object_index[self.comboBox_AnalysisClassificationObject.currentText()]
-
-    def on_analysis_name_changed(self):
-        if self.selected_analysis is not None:
-            self.selected_analysis['name'] = self.lineEdit_AnalysisName.text()
-            for s in self.analyses_entries:
-                s.update_text()
-
-    def on_selected_analysis_changed(self):
-        self.lineEdit_AnalysisName.textChanged.disconnect(self.on_analysis_name_changed)
-        if len(self.listWidget_Analyses.selectedItems()) > 0:
-            itm = self.listWidget_Analyses.selectedItems()[0]
-            self.selected_analysis = itm.analysis_entry
-            a_class = itm.analysis_class
-
-            # Add the new Parameter Widget
-            if self.curr_parameter_widget is not None:
-                self.curr_parameter_widget.deleteLater()
-            self.curr_parameter_widget = a_class().get_parameter_widget()
-            self.widgetParam.layout().addWidget(self.curr_parameter_widget)
-
-            self.comboBox_AnalysisClass.setCurrentText(str(self.selected_analysis['class_name'].__name__))
-            self.lineEdit_AnalysisName.setText(self.selected_analysis['name'])
-
-            if self.selected_analysis['class_obj'] is not None:
-                self.comboBox_AnalysisClassificationObject.setCurrentText(str(self.selected_analysis['class_obj'].name))
-        else:
-            self.selected_analysis = None
-
-        self.lineEdit_AnalysisName.textChanged.connect(self.on_analysis_name_changed)
-
-    def update_analysis_list(self):
-        self.listWidget_Analyses.clear()
-        self.analyses_entries = []
-        if self.current_experiment is not None:
-            for a in self.current_experiment.analyses:
-                itm = AnalysisItem(self.listWidget_Analyses, a['class_name'], a)
-                self.listWidget_Analyses.addItem(itm)
-                self.analyses_entries.append(itm)
-
-    def on_analysis_combobox_changed(self):
-        if self.selected_analysis is not None:
-            self.selected_analysis['class_name'] = self.analysis_index[self.comboBox_AnalysisClass.currentText()]
-
-            if self.curr_parameter_widget is not None:
-                self.curr_parameter_widget.deleteLater()
-            self.curr_parameter_widget = self.selected_analysis['class_name']().get_parameter_widget()
-            self.widgetParam.layout().addWidget(self.curr_parameter_widget)
     #endregion
 
     # region Semantic Segmentation

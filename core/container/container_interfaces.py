@@ -8,6 +8,7 @@ from core.data.log import log_error, log_warning
 
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)
+    onClassificationChanged = pyqtSignal(object)
 
     def __init__(self):
         self.tag_keywords = []
@@ -31,10 +32,12 @@ class IClassifiable():
     def add_word(self, keyword):
         if keyword not in self.tag_keywords:
             self.tag_keywords.append(keyword)
+            self.onClassificationChanged.emit(self.tag_keywords)
 
     def remove_word(self, keyword):
         if keyword in self.tag_keywords:
             self.tag_keywords.remove(keyword)
+            self.onClassificationChanged.emit(self.tag_keywords)
 
 
 class IProjectContainer(QObject):
