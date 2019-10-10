@@ -89,7 +89,10 @@ def store_project_concurrent(args, sign_progress):
     pipeline_scripts = []
     for q in project.pipeline_scripts:
         pipeline_scripts.append(q.serialize())
-
+    if project.active_pipeline_script is not None:
+        active_pipeline_script = project.active_pipeline_script.unique_id
+    else:
+        active_pipeline_script = None
     data = dict(
         path=project.path,
         name=project.name,
@@ -115,7 +118,7 @@ def store_project_concurrent(args, sign_progress):
         meta_data = project.meta_data,
         hdf_indices = hdf_indices,
         pipeline_scripts = pipeline_scripts,
-        active_pipeline_script = project.active_pipeline_script,
+        active_pipeline_script = active_pipeline_script,
         compute_pipeline_settings = project.compute_pipeline_settings
     )
 

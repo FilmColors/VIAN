@@ -281,6 +281,7 @@ class PipelineWidget(QWidget):
         if self.comboBoxExperiment.currentText() != "Select Experiment (Optional)":
            pipeline.experiment = self.all_experiments[self.comboBoxExperiment.currentText()]
         self.on_reload_scripts()
+        self.project.active_pipeline_script = pipeline
         self.onPipelineActivated.emit(pipeline)
 
     def on_pipeline_finalize(self):
@@ -402,6 +403,11 @@ class PipelineWidget(QWidget):
         project.onExperimentRemoved.connect(self.on_experiments_changed)
         self.on_experiments_changed()
         self.on_reload_scripts()
+        try:
+            if self.project.active_pipeline_script is not None:
+                self.on_use_pipeline(self.project.active_pipeline_script.name)
+        except Exception as e:
+            print(e)
         return
 
         # self.project = project

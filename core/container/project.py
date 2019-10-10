@@ -948,7 +948,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     if a.analysis_job_class == r[0] and a.target_classification_object.name == r[1]:
                         found = True
                         break
-                print(c, r, found)
                 if found:
                     n_analyses_done += 1
                 else:
@@ -1023,6 +1022,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for q in self.pipeline_scripts:
             pipeline_scripts.append(q.serialize())
 
+        if self.active_pipeline_script is not None:
+            active_pipeline_script = self.active_pipeline_script.unique_id
+        else:
+            active_pipeline_script = None
         data = dict(
             path=project.path,
             name=project.name,
@@ -1048,7 +1051,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             meta_data = project.meta_data,
             hdf_indices = hdf_indices,
             pipeline_scripts = pipeline_scripts,
-            active_pipeline_script = project.active_pipeline_script,
+            active_pipeline_script = active_pipeline_script,
             compute_pipeline_settings = project.compute_pipeline_settings
         )
 
@@ -1245,7 +1248,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         try:
             [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
-            self.active_pipeline_script = my_dict['active_pipeline_script']
+            self.active_pipeline_script = self.get_by_id(my_dict['active_pipeline_script'])
             self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
         except Exception as e:
             print("Exception in Load Pipelines", str(e))
@@ -1388,10 +1391,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
 
-        for e in template['experiments']:
-            new = Experiment().deserialize(e, self)
-            print([c.name for c in new.get_classification_objects_plain()])
-
         try:
             if self.folder is None and script_export is None:
                 raise ValueError("Templates with pipeline scripts can only be "
@@ -1408,16 +1407,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         f.write(pipeline.script)
                 except TypeError as e:
                     pass
-
-
-            # if self.active_pipeline_script is None and len(self.pipeline_scripts) > 0:
-            #     self.active_pipeline_script = self.pipeline_scripts[0]
-
-            # self.compute_pipeline_settings = template["compute_pipeline_settings"]
             log_info("Pipeline Template:", "Pipelines", self.pipeline_scripts)
-            # log_info("Pipeline Template:", "Active:", self.active_pipeline_script, "\tSettings:",template["compute_pipeline_settings"])
         except Exception as e:
             raise e
+
+        for e in template['experiments']:
+            new = Experiment().deserialize(e, self)
+            print([c.name for c in new.get_classification_objects_plain()])
+
 
     def export(self, device, path):
         device.export(self, path)
