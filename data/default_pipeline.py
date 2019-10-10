@@ -11,6 +11,7 @@ class %PIPELINE_NAME%(VIANPipeline):
     name = "%PIPELINE_NAME%"
     version = (1,0,0)
     author = "%AUTHOR%"
+    uuid = "%UUID%"
 
     def __init__(self):
         super(%PIPELINE_NAME%, self).__init__()

@@ -6,8 +6,10 @@ as within VIAN to be called once a selector is created.
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
-from core.container.project import VIANProject, Segment, Annotation, Screenshot
+from core.container.project import VIANProject, Segment, Annotation, Screenshot, Experiment
+from core.container.analysis import PipelineScript
 from core.data.log import log_info, log_error, log_debug, log_warning
+
 import traceback
 import cv2
 import sys
@@ -22,6 +24,8 @@ class VIANEventHandler(QObject):
     onReleasePipelineGUIAfterLoading = pyqtSignal()
     onRunAnalysis = pyqtSignal(object)
     onException = pyqtSignal(str)
+    analysisStarted = pyqtSignal()
+    analysisEnded = pyqtSignal()
 
     def __init__(self, parent):
         super(VIANEventHandler, self).__init__(parent)
@@ -65,11 +69,12 @@ class VIANEventHandler(QObject):
         self.comp_screenshots = comp_screenshots
         self.comp_annotations = comp_annotations
 
-    @pyqtSlot(str)
-    def set_current_pipeline(self, name):
+    @pyqtSlot(object)
+    def set_current_pipeline(self, pipeline:PipelineScript):
         try:
             self.onLockPipelineGUIForLoading.emit()
-            self.current_pipeline = ALL_REGISTERED_PIPELINES[name][0]()
+            self.current_pipeline = ALL_REGISTERED_PIPELINES[pipeline.name][0]()
+            self.current_pipeline.experiment = pipeline.experiment
             self.onReleasePipelineGUIAfterLoading.emit()
             self.onCurrentPipelineChanged.emit(self.current_pipeline)
         except Exception as e:
@@ -122,21 +127,26 @@ class VIANEventHandler(QObject):
             self._run()
 
     def _run(self):
+        self.analysisStarted.emit()
         # log_info("Queue:", self.queue_running, len(self.queue))
         if len(self.queue) > 0:
             self.queue_running = True
             (func, args) = self.queue.pop(0)
             try:
+                log_info(func, args)
                 func(*args)
             except Exception as e:
                 self.onException.emit(traceback.format_exc())
             self._run()
         else:
+            self.analysisEnded.emit()
             self.queue_running = False
+
 
 def vian_pipeline(cl):
     """Register a class as a plug-in"""
-    ALL_REGISTERED_PIPELINES[cl.name] = (cl, inspect.getfile(cl))
+    path = inspect.getfile(cl)
+    ALL_REGISTERED_PIPELINES[cl.name] = (cl, path)
     return cl
 
 def get_path_of_pipeline_script(name):

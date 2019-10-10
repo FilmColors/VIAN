@@ -12,6 +12,7 @@ from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, 
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from .container_interfaces import IProjectContainer, IHasName, IClassifiable
 from .hdf5_manager import get_analysis_by_name
+from .analysis import PipelineScript
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
@@ -64,7 +65,6 @@ class Vocabulary(IProjectContainer, IHasName):
 
         self._path = ""
 
-
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
         if name in [w.name for w in self.words_plain]:
             log_warning("Duplicate Word", name)
@@ -79,7 +79,7 @@ class Vocabulary(IProjectContainer, IHasName):
         
         :param word: the Word object to add
         :param parent_word: the parent Word, either as String or Word Object
-        :return: 
+        :return: None
         """
         if parent_word is None or isinstance(parent_word, Vocabulary):
             word.parent = self
@@ -170,7 +170,7 @@ class Vocabulary(IProjectContainer, IHasName):
                 organization_group = w.organization_group,
                 complexity_lvl = w.complexity_lvl,
                 complexity_group = w.complexity_group,
-                image_urls = w.image_urls
+                image_urls = w.image_urls,
             )
             words_data.append(data)
 
@@ -243,7 +243,10 @@ class Vocabulary(IProjectContainer, IHasName):
                 except:
                     # print("No UUID found in this vocabulary", self.name)
                     pass
-
+        try:
+            self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
+        except:
+            self.pipeline_script = None
         return self
 
     def export_vocabulary(self, path):
@@ -735,6 +738,7 @@ class Experiment(IProjectContainer, IHasName):
     onExperimentChanged = pyqtSignal(object)
     onClassificationObjectAdded = pyqtSignal(object)
     onClassificationObjectRemoved = pyqtSignal(object)
+    onPipelineScriptChanged = pyqtSignal(object)
 
     def __init__(self, name="New Experiment"):
         IProjectContainer.__init__(self)
@@ -745,6 +749,7 @@ class Experiment(IProjectContainer, IHasName):
         # This is a list of [IClassifiable, UniqueKeyword]
         self.classification_results = []
         self.correlation_matrix = None
+        self.pipeline_script = None
 
     def get_name(self):
         return self.name
@@ -947,6 +952,15 @@ class Experiment(IProjectContainer, IHasName):
     def remove_all_tags_with_container(self, container):
         self.classification_results[:] = [tup for tup in self.classification_results if not tup[0] is container]
 
+    def set_pipeline_script(self, pipeline_script:PipelineScript):
+        """
+        Sets the pipelinescript of the experiment. Only one may be assigned at the time.
+        :param pipeline_script: a PipelineScript Instance
+        :return: None
+        """
+        self.pipeline_script = pipeline_script
+        self.onPipelineScriptChanged.emit(self.pipeline_script)
+
     def serialize(self):
         analyses = []
         for a in self.analyses:
@@ -965,12 +979,17 @@ class Experiment(IProjectContainer, IHasName):
                     class_obj=None
                 ))
 
+        pipeline_script = None
+        if self.pipeline_script is not None:
+            pipeline_script = self.pipeline_script.unique_id
+
         data = dict(
             name=self.name,
             unique_id = self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
-            classification_results = [(c[0].unique_id, c[1].unique_id) for c in self.classification_results]
+            classification_results = [(c[0].unique_id, c[1].unique_id) for c in self.classification_results],
+            pipeline_script = pipeline_script
         )
         return data
 
@@ -1046,10 +1065,16 @@ class Experiment(IProjectContainer, IHasName):
                     self.tag_container(c, k)
                 else:
                     log_error("Loading Classification mapping failed: ", c, k)
-
         except Exception as e:
             log_error("Exeption during Experiment.deserialize:", e)
             pass
+
+        try:
+            self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
+            self.pipeline_script.experiment = self
+        except Exception as e:
+            print(e)
+            self.pipeline_script = None
 
         return self
 

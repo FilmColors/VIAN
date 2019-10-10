@@ -48,6 +48,8 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.target_items = []
         self.inhibit_ui_signals = False
 
+        self.pipeline_scripts = dict()
+
         self.curr_parameter_widget = None
         self.project_selector_dict = dict()
 
@@ -78,9 +80,13 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.comboBoxExperiment.currentTextChanged.connect(self.on_experiment_combo_changed)
         self.pushButton_CreateExperiment.clicked.connect(self.main_window.on_create_experiment)
 
+        self.pushButton_NewScript.clicked.connect(self.create_pipeline_script)
+        self.pushButtonImportScript.clicked.connect(self.load_pipeline_script)
+
+        self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
+
         # Disable all controls that need a selected Classification Object:
         self.on_class_selection_changed()
-
 
     def on_experiment_combo_changed(self):
         if self.comboBoxExperiment.currentText() in self.project_selector_dict:
@@ -118,6 +124,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.update_classification_object_tree()
             self.update_vocabulary_view()
             self.update_target_container_combobox()
+            self.update_pipeline_list()
 
     def experiment_name_changed(self):
         if self.inhibit_ui_signals:
@@ -352,6 +359,44 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
     # endregion
 
+    #region Pipeline
+    def create_pipeline_script(self):
+        self.main_window.pipeline_widget.raise_()
+        self.main_window.pipeline_widget.editor.new()
+
+    def load_pipeline_script(self):
+        self.main_window.pipeline_widget.raise_()
+        self.main_window.pipeline_widget.editor.load()
+
+    def update_pipeline_list(self):
+        self.comboBox_Pipeline.disconnect()
+        self.pipeline_scripts = dict()
+        self.comboBox_Pipeline.clear()
+        if self.main_window.project is None:
+            return
+        self.comboBox_Pipeline.addItem("Select Pipeline (optional)")
+
+        for p in self.main_window.project.pipeline_scripts:
+            self.comboBox_Pipeline.addItem(p.name)
+            self.pipeline_scripts[p.name] = p
+
+        if self.current_experiment is not None:
+            if self.current_experiment.pipeline_script is not None:
+                self.comboBox_Pipeline.setCurrentText(self.current_experiment.pipeline_script.name)
+        self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
+
+    def on_pipeline_script_changed(self):
+        if self.current_experiment is None:
+            return
+        name = self.comboBox_Pipeline.currentText()
+        if name == "Select Pipeline (optional)":
+            self.current_experiment.pipeline_script = None
+        else:
+            self.current_experiment.pipeline_script = self.pipeline_scripts[name]
+            self.pipeline_scripts[name].experiment = self.current_experiment
+
+    #endregion
+
     def set_enabled(self, state):
         for c in self.children():
             if isinstance(c, QWidget):
@@ -374,7 +419,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.inhibit_ui_signals = False
 
     def on_loaded(self, project):
-
         if len(project.experiments) > 0:
             self.current_experiment = project.experiments[0]
         else:
@@ -384,6 +428,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
     def on_closed(self):
         self.update_ui()
+
 
     def on_changed(self, project, item):
         if not self.isVisible():

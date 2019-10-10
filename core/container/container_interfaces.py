@@ -1,10 +1,13 @@
 """
 In this Module, all interfaces used by VIAN are defined.
 """
+import os
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import GENERIC
 from core.data.log import log_error, log_warning
+
+_VIAN_ROOT = os.path.dirname(os.path.abspath( __file__ + "../../../"))
 
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)

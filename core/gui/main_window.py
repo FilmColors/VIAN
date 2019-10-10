@@ -292,6 +292,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.concurrent_task_viewer.hide()
 
         self.worker_manager = WorkerManager(self)
+        self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
+        self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
 
         self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
         self.audio_handler.audioProcessed.connect(self.timeline.timeline.add_visualization)
@@ -498,12 +500,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vian_event_handler.onCurrentPipelineChanged.connect(self.pipeline_widget.on_pipeline_loaded)
         self.vian_event_handler.onLockPipelineGUIForLoading.connect(partial(self.pipeline_toolbar.setEnabled, False))
         self.vian_event_handler.onReleasePipelineGUIAfterLoading.connect(partial(self.pipeline_toolbar.setEnabled, True))
+        self.vian_event_handler.onLockPipelineGUIForLoading.connect(partial(self.pipeline_widget.set_is_loading, True))
+        self.vian_event_handler.onReleasePipelineGUIAfterLoading.connect(partial(self.pipeline_widget.set_is_loading, False))
 
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.pipeline_toolbar.set_to_compute)
         self.pipeline_widget.pipeline.onPipelineActivated.connect(self.vian_event_handler.set_current_pipeline)
         self.pipeline_widget.pipeline.onPipelineFinalize.connect(self.vian_event_handler.run_on_finalize_event)
         self.pipeline_widget.pipeline.onRunAnalysis.connect(self.on_start_analysis)
+        self.pipeline_widget.pipeline.onProgress.connect(self.pipeline_toolbar.progress_widget.on_progress)
 
         self.pipeline_toolbar.onToComputeChanged.connect(self.pipeline_widget.pipeline.set_to_compute)
         self.pipeline_toolbar.runAll.connect(self.pipeline_widget.pipeline.run_all)
@@ -1348,6 +1353,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.experiment_dock)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.query_widget)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
@@ -2322,7 +2329,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.stop()
         for o in self.i_project_notify_reciever:
             o.on_closed()
-
+        self.pipeline_widget.pipeline.on_closed()
         self.set_ui_enabled(False)
 
 

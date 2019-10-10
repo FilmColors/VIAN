@@ -2,6 +2,7 @@
 
 import sys
 import re
+from uuid import uuid4
 import importlib.util
 import traceback
 from core.data.log import log_info, log_error, log_debug, log_warning
@@ -10,6 +11,7 @@ from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFon
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, \
     QCompleter,QSizePolicy, QDialog, QVBoxLayout, QLineEdit, QLabel, QPushButton, QComboBox
 from functools import partial
+from core.container.analysis import PipelineScript
 
 
 def format(r, g, b, style=''):
@@ -44,15 +46,17 @@ STYLES = {
 class PythonScriptEditor(QWidget):
     onReload = pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, parent, main_window):
         super(PythonScriptEditor, self).__init__(parent)
-        self.main_window = parent
+        self.main_window = main_window
         self.inner = QMainWindow()
         self.setLayout(QVBoxLayout())
         self.setWindowTitle("Script Editor")
         self.editor = CodePlainTextEditor(self.inner)
         self.output = CodePlainTextEditor(self.inner)
         self.output.setReadOnly(True)
+
+        self.pipeline_script = None #type: PipelineScript
 
         self.central = QSplitter(Qt.Vertical, self.inner)
         self.central.setMaximumHeight(400)
@@ -71,10 +75,12 @@ class PythonScriptEditor(QWidget):
         self.a_new = self.m_file.addAction("New Script")
         self.a_load = self.m_file.addAction("Load")
         self.a_save = self.m_file.addAction("Save")
+        self.a_export = self.m_file.addAction("Save As / Export")
 
         self.a_new.triggered.connect(self.new)
         self.a_load.triggered.connect(partial(self.load, None))
         self.a_save.triggered.connect(partial(self.save, None, False))
+        self.a_export.triggered.connect(partial(self.save, None, True))
 
         if sys.platform == "darwin":
             self.font = QFont("Consolas")
@@ -91,58 +97,43 @@ class PythonScriptEditor(QWidget):
         self.editor.setTabStopWidth(int(QFontMetricsF(self.editor.font()).width(' ')) * 4)
 
     def new(self):
-        dialog = NewScriptDialog(self)
+        dialog = NewScriptDialog(self, self.main_window)
         dialog.show()
         # self.load("data/default_pipeline.py")
         #
         # self.current_file_path = ""
 
-    def load(self, file_path):
-        if file_path is None:
+    def load(self, pipeline:PipelineScript = None):
+        if pipeline is None:
             file_path = QFileDialog.getOpenFileName(self, filter="*.py")[0]
+            try:
+                with open(file_path, "r") as f:
+                    script = f.read()
 
-        if file_path == "":
-            return
-        try:
-            with open(file_path, "r") as f:
-                self.editor.setPlainText(f.read())
-            self.current_file_path = file_path
-        except IOError as e:
-            log_error(e)
+                dialog = NewScriptDialog(self, self.main_window, script)
+                dialog.show()
+            except Exception as e:
+                self.output.setPlainText(traceback.print_exc())
+                pass
+        else:
+            self.pipeline_script=pipeline
+            self.editor.setPlainText(pipeline.script)
+            self.reload()
 
     def save(self, file_path=None, save_as = False):
-        if file_path is not None:
-            p = file_path
-        elif save_as or self.current_file_path == "":
-            p = QFileDialog.getSaveFileName(self, filter="*.py")[0]
-        else:
-            p = self.current_file_path
-
-        if file_path == "":
+        if self.pipeline_script is None:
             return
-
-        try:
-            with open(p, "w") as f:
-                f.write(self.editor.toPlainText().replace("\t", "    "))
-            self.current_file_path = p
-        except IOError as e:
-            log_error(e)
+        if save_as:
+            file_path = QFileDialog.getSaveFileName(self, filter="*.py")[0]
+        self.pipeline_script.script = self.editor.toPlainText().replace("\t", "    ")
+        self.pipeline_script.save_script(file_path)
 
     def reload(self):
-        self.save()
-        if self.current_file_path != "":
-            try:
-                spec = importlib.util.spec_from_file_location("current_pipeline_module", self.current_file_path)
-                module = importlib.util.module_from_spec(spec)
-                sys.modules['current_pipeline_module'] = module
-                spec.loader.exec_module(module)
-                self.output.setPlainText("Successfully imported module")
-            except Exception as e:
-                self.output.setPlainText(traceback.format_exc())
-                pass
-
-        else:
-            log_info("No Module loaded")
+        self.pipeline_script.script = self.editor.toPlainText().replace("\t", "    ")
+        self.pipeline_script.save_script()
+        self.editor.setPlainText(self.pipeline_script.script)
+        message = self.pipeline_script.import_pipeline()
+        self.output.setPlainText(message)
         self.onReload.emit()
 
     @pyqtSlot(str)
@@ -305,34 +296,37 @@ class PythonHighlighter (QSyntaxHighlighter):
 
 
 class NewScriptDialog(QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent, main_window, script=None):
         super(NewScriptDialog, self).__init__(parent)
         self.setLayout(QVBoxLayout())
         self.lineEdit_Name = QLineEdit("MyAnalysis", self)
         self.lineEdit_Author = QLineEdit("MyHackerPseudonym", self)
-        # self.comboBox_Experiments = QComboBox(self)
-        # for e in project.experiments:
-        #     self.comboBox_Experiments.addItem(e.name)
 
         self.btn_OK = QPushButton("OK", self)
         self.layout().addWidget(self.lineEdit_Name)
         self.layout().addWidget(self.lineEdit_Author)
         self.layout().addWidget(self.btn_OK)
         self.btn_OK.clicked.connect(self.on_ok)
+        self.main_window = main_window
+        self.script = script
 
     def on_ok(self):
-        with open("data/default_pipeline.py", "r") as f:
-            script = f.read()
+        if self.script is None:
+            with open("data/default_pipeline.py", "r") as f:
+                script = f.read()
 
-        script = script.replace("%PIPELINE_NAME%", self.lineEdit_Name.text().replace(" ", ""))
-        script = script.replace("%AUTHOR%", self.lineEdit_Author.text().replace(" ", ""))
-        # script = script.replace("%EXPERIMENT_TITLE%", self.comboBox_Experiments.currentText())
+            script = script.replace("%PIPELINE_NAME%", self.lineEdit_Name.text().replace(" ", ""))
+            script = script.replace("%AUTHOR%", self.lineEdit_Author.text().replace(" ", ""))
+            script = script.replace("%UUID%", str(uuid4()))
+        else:
+            script = self.script
+
+        pipeline_script = self.main_window.project.create_pipeline_script(name=self.lineEdit_Name.text().replace(" ", ""),
+                                                        author=self.lineEdit_Author.text().replace(" ", ""),
+                                                        script=script)
         try:
-            location = QFileDialog.getSaveFileName(self, filter="*.py")[0]
-            # print(location)
-            with open(location, "w") as f:
-                f.write(script)
-            self.parent().load(location)
+            self.parent().pipeline_script = pipeline_script
+            self.parent().editor.setPlainText(pipeline_script.script)
             self.parent().reload()
             self.close()
         except Exception as e:
