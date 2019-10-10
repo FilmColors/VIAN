@@ -170,7 +170,7 @@ class ProgressWidget(QWidget):
         qp.drawArc(r3, self.root_angle * 16, int(((self.pz * 360) * 16)))
         pen.setColor(QColor(255, 255, 255, 150))
         qp.setPen(pen)
-        qp.drawText(QRectF(self.rect()),Qt.AlignCenter, str(np.round(np.mean(((self.px / 1.0 + self.py / 1.0 + self.pz / 1.0) * 100, 2)) / 3.0)) + "%")
+        qp.drawText(QRectF(self.rect()),Qt.AlignCenter, str(np.round((np.mean(self.px / 1.0 + self.py / 1.0 + self.pz / 1.0) / 3.0) * 100, 2)) + "%")
 
         # qp.drawArc(self.rect(), 0, 120 * 16)
         # qp.fillRect(self.rect(), QColor(200,100,0))

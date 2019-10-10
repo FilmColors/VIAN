@@ -495,7 +495,10 @@ class PipelineScript(IProjectContainer, IHasName):
     def set_project(self, project):
         super(PipelineScript, self).set_project(project)
         if self.path is None:
-            self.path = os.path.join(self.project.folder, self.name + ".py")
+            if self.project.folder is not None:
+                self.path = os.path.join(self.project.folder, self.name + ".py")
+            else:
+                self.path = self.name + ".py"
 
     def import_pipeline(self):
         try:

@@ -1353,6 +1353,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.experiment_dock)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.query_widget)
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 

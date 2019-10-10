@@ -1342,7 +1342,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 if os.path.isfile(p.path):
                     with open(p.path, "r") as f:
                         pipelines.append(p.serialize())
-
+            if self.active_pipeline_script is not None:
+                active_pipeline = self.active_pipeline_script.unique_id
+            else:
+                active_pipeline = None
         template = dict(
             segmentations = segmentations,
             vocabularies = vocabularies,
@@ -1350,7 +1353,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
             node_scripts=node_scripts,
             experiments = experiments,
             pipelines=pipelines,
-            compute_pipeline_settings = self.compute_pipeline_settings
+            compute_pipeline_settings = self.compute_pipeline_settings,
+            active_pipeline = active_pipeline
         )
         return template
 
@@ -1405,15 +1409,16 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     self.add_pipeline_script(pipeline)
                     with open(pipeline.path, "w") as f:
                         f.write(pipeline.script)
+                    self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
                 except TypeError as e:
                     pass
+
             log_info("Pipeline Template:", "Pipelines", self.pipeline_scripts)
         except Exception as e:
             raise e
 
         for e in template['experiments']:
             new = Experiment().deserialize(e, self)
-            print([c.name for c in new.get_classification_objects_plain()])
 
 
     def export(self, device, path):
