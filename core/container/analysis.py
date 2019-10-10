@@ -505,7 +505,7 @@ class PipelineScript(IProjectContainer, IHasName):
             sys.modules[self.name + "_pipeline_module"] = module
             r = spec.loader.exec_module(module)
             log_info("Imported OProject Pipeline:", self.name, module)
-            return "Successfully imported module", r
+            return "Successfully imported module"
         except Exception as e:
             return traceback.format_exc()
             pass

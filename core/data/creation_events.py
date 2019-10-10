@@ -24,6 +24,8 @@ class VIANEventHandler(QObject):
     onReleasePipelineGUIAfterLoading = pyqtSignal()
     onRunAnalysis = pyqtSignal(object)
     onException = pyqtSignal(str)
+    analysisStarted = pyqtSignal()
+    analysisEnded = pyqtSignal()
 
     def __init__(self, parent):
         super(VIANEventHandler, self).__init__(parent)
@@ -125,17 +127,21 @@ class VIANEventHandler(QObject):
             self._run()
 
     def _run(self):
+        self.analysisStarted.emit()
         # log_info("Queue:", self.queue_running, len(self.queue))
         if len(self.queue) > 0:
             self.queue_running = True
             (func, args) = self.queue.pop(0)
             try:
+                log_info(func, args)
                 func(*args)
             except Exception as e:
                 self.onException.emit(traceback.format_exc())
             self._run()
         else:
+            self.analysisEnded.emit()
             self.queue_running = False
+
 
 def vian_pipeline(cl):
     """Register a class as a plug-in"""

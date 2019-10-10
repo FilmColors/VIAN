@@ -873,14 +873,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Python Scripts
-    def create_pipeline_script(self, name:str, author="no_author") -> PipelineScript:
+    def create_pipeline_script(self, name:str, author="no_author", path = None, script = None) -> PipelineScript:
         """
         Creates a new PipelineScript given a name and a script content
         :param name: The name of the script
         :param script: The actual python script text
         :return: a PipelineScript class
         """
-        pipeline_script = PipelineScript(name, author)
+        pipeline_script = PipelineScript(name, author, path=path, script=script)
         return self.add_pipeline_script(pipeline_script)
 
     def add_pipeline_script(self, script:PipelineScript) -> PipelineScript:

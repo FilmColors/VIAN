@@ -7,8 +7,8 @@ from core.gui.ewidgetbase import EDockWidget, EToolBar
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QColor, QPixmap, QIcon, QMouseEvent
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QRect, QRectF, QEvent, QTimer
+from PyQt5.QtGui import QColor, QPixmap, QIcon, QMouseEvent, QPaintEvent, QPainter, QPen, QTextOption
 from core.data.interfaces import IProjectChangeNotify
 
 from functools import partial
@@ -18,7 +18,7 @@ from core.data.log import log_error, log_info, log_warning
 from core.container.project import VIANProject
 from core.container.analysis import PipelineScript
 from core.data.computation import import_module_from_path, create_icon
-
+import numpy as np
 
 class PipelineToolbar(EToolBar):
     onToComputeChanged = pyqtSignal(bool, bool, bool)
@@ -44,9 +44,11 @@ class PipelineToolbar(EToolBar):
         self.a_pipeline_settings = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Pipeline Configuration")
         self.a_pipeline_settings.triggered.connect(self.main_window.create_pipeline_widget)
 
-        # self.lbl_status = QLabel("0 \n/ 0", self)
-        # self.lbl_status.setWordWrap(True)
-        # self.addWidget(self.lbl_status)
+        self.progress_widget = ProgressWidget(self, self.widgetForAction(self.a_pipeline_settings))
+        self.addWidget(self.progress_widget)
+        self.main_window.vian_event_handler.analysisStarted.connect(self.progress_widget.on_start_analysis)
+        self.main_window.vian_event_handler.analysisEnded.connect(self.progress_widget.on_stop_analysis)
+
 
     def on_screenshot_checked_changed(self):
         if self.a_auto_screenshot.isChecked():
@@ -100,11 +102,89 @@ class PipelineToolbar(EToolBar):
         self.runAll.emit()
 
 
+class ProgressWidget(QWidget):
+    def __init__(self, parent, reference_widget):
+        super(ProgressWidget, self).__init__(parent)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.reference_widget = reference_widget
+        self.resize(self.reference_widget.size())
+        self.root_angle = 0
+        self.px = 0.0
+        self.py = 0.0
+        self.pz = 0.0
+        self.timer = QTimer()
+        self.timer.setInterval(30)
+        self.timer.timeout.connect(self.timestep)
+
+    @pyqtSlot()
+    def on_start_analysis(self):
+        if not self.timer.isActive():
+            self.timer.start()
+
+    @pyqtSlot()
+    def on_stop_analysis(self):
+        self.timer.stop()
+        self.root_angle = 0
+
+    @pyqtSlot(float, float, float)
+    def on_progress(self, segment, screenshots, annotations):
+        self.px = screenshots
+        self.py = segment
+        self.pz = annotations
+        self.update()
+
+    def timestep(self):
+        self.root_angle += 2
+        if self.root_angle >= 360:
+            self.root_angle = 0
+        self.update()
+
+    def paintEvent(self, a0: QPaintEvent) -> None:
+        self.resize(self.reference_widget.size())
+        qp = QPainter(self)
+
+        pen = QPen()
+        pen.setWidth(5)
+
+        qp.begin(self)
+        qp.setRenderHint(QPainter.Antialiasing)
+        qp.setRenderHint(QPainter.TextAntialiasing)
+
+        qp.setPen(pen)
+        r1 = self.rect()
+        r2 = self.rect()
+        r3 = self.rect()
+        r1.adjust(5, 5, -5, -5)
+        r2.adjust(10, 10, -10, -10)
+        r3.adjust(15, 15, -15, -15)
+
+        pen.setColor(QColor(54, 146, 182, 200))
+        qp.setPen(pen)
+
+        qp.drawArc(r1, self.root_angle * 16, int(((self.px * 360) * 16)))
+        pen.setColor(QColor(135, 85, 200))
+        qp.setPen(pen)
+        qp.drawArc(r2, self.root_angle * 16, int(((self.py * 360) * 16)))
+        pen.setColor(QColor(133, 42, 42, 200))
+        qp.setPen(pen)
+        qp.drawArc(r3, self.root_angle * 16, int(((self.pz * 360) * 16)))
+        pen.setColor(QColor(255, 255, 255, 150))
+        qp.setPen(pen)
+        qp.drawText(QRectF(self.rect()),Qt.AlignCenter, str(np.round(np.mean(((self.px / 1.0 + self.py / 1.0 + self.pz / 1.0) * 100, 2)) / 3.0)) + "%")
+
+        # qp.drawArc(self.rect(), 0, 120 * 16)
+        # qp.fillRect(self.rect(), QColor(200,100,0))
+        qp.end()
+    def enterEvent(self, a0: QEvent) -> None:
+        super(ProgressWidget, self).enterEvent(a0)
+        self.update()
+
+
 class PipelineDock(EDockWidget):
     def __init__(self, parent, event_manager):
         super(PipelineDock, self).__init__(parent, False)
         self.setWindowTitle("Pipeline Manager")
-        self.editor = PythonScriptEditor(self.inner.centralWidget())
+        self.editor = PythonScriptEditor(self.inner.centralWidget(), self.main_window)
         self.pipeline = PipelineWidget(self, event_manager, self.main_window, self.editor)
         self.splitter = QSplitter(Qt.Horizontal)
         self.inner.setCentralWidget(self.splitter)
@@ -116,16 +196,17 @@ class PipelineDock(EDockWidget):
         self.editor.onReload.connect(self.pipeline.on_reload_scripts)
 
         self.pipeline.onPipelineActivated.connect(self.on_active_pipeline_changed)
-
         self.splitter.setStretchFactor(0, 1)
         self.splitter.setStretchFactor(1, 3)
 
     def on_active_pipeline_changed(self, pipeline:PipelineScript):
         # script_path = get_path_of_pipeline_script(pipeline)
         # if script_path is not None and os.path.isfile(script_path):
-        self.editor.load(pipeline.path)
+        self.editor.load(pipeline)
 
     def on_pipeline_loaded(self, pipeline):
+        if self.main_window.project is None:
+            return
         if pipeline is not None:
             self.pipeline.check_missing()
 
@@ -139,6 +220,7 @@ class PipelineWidget(QWidget):
     onPipelineFinalize = pyqtSignal()
     onToComputeChanged = pyqtSignal(bool, bool, bool)
     onRunAnalysis = pyqtSignal(object)
+    onProgress = pyqtSignal(float, float, float)
 
     def __init__(self, parent, event_manager: VIANEventHandler, main_window, editor):
         super(PipelineWidget, self).__init__(parent)
@@ -189,6 +271,8 @@ class PipelineWidget(QWidget):
                     to_remove.append(script)
                     print(e)
                     continue
+                except KeyError as e:
+                    pass
 
         for p in to_remove:
             self.project.remove_pipeline_script(p)
@@ -305,7 +389,7 @@ class PipelineWidget(QWidget):
         try:
             t = self.pipeline_library[self.listWidget_Pipelines.selectedItems()[0].text()]
 
-            self.editor.load(t.path)
+            self.editor.load(t)
         except Exception as e:
             print(e)
 
@@ -313,8 +397,6 @@ class PipelineWidget(QWidget):
         if self.main_window.vian_event_handler.current_pipeline is None:
             return
         missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements)
-        for k in missing_info.keys():
-            print(k, missing_info[k][1], missing_info[k][2])
         if missing_info['segment_analyses'][1] > 0:
             self.progressBarSegments.setValue(missing_info['segment_analyses'][2] / missing_info['segment_analyses'][1] * 100)
         else:
@@ -329,6 +411,11 @@ class PipelineWidget(QWidget):
                 missing_info['annotation_analyses'][2] / missing_info['annotation_analyses'][1] * 100)
         else:
             self.progressBarAnnotations.setValue(100)
+
+        self.onProgress.emit(missing_info['segment_analyses'][2] / np.clip(missing_info['segment_analyses'][1], 1, None) if missing_info['segment_analyses'][1] > 0 else 1.0,
+                             missing_info['screenshot_analyses'][2] / np.clip(missing_info['screenshot_analyses'][1], 1, None) if missing_info['screenshot_analyses'][1] > 0 else 1.0,
+                             missing_info['annotation_analyses'][2] / np.clip(missing_info['annotation_analyses'][1], 1, None) if missing_info['annotation_analyses'][1] > 0 else 1.0
+                             )
 
     def on_pipeline_selected(self):
         if len(self.listWidget_Pipelines.selectedItems()) == 0:
@@ -401,6 +488,11 @@ class PipelineWidget(QWidget):
         self.project = project
         project.onExperimentAdded.connect(self.on_experiments_changed)
         project.onExperimentRemoved.connect(self.on_experiments_changed)
+        project.onAnalysisAdded.connect(partial(self.check_missing))
+        project.onAnalysisRemoved.connect(partial(self.check_missing))
+        project.onSegmentAdded.connect(partial(self.check_missing))
+        project.onScreenshotAdded.connect(partial(self.check_missing))
+        project.onAnnotationAdded.connect(partial(self.check_missing))
         self.on_experiments_changed()
         self.on_reload_scripts()
         try:

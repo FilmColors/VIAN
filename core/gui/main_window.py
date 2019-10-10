@@ -292,6 +292,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.concurrent_task_viewer.hide()
 
         self.worker_manager = WorkerManager(self)
+        self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
+        self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
 
         self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
         self.audio_handler.audioProcessed.connect(self.timeline.timeline.add_visualization)
@@ -506,6 +508,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_widget.pipeline.onPipelineActivated.connect(self.vian_event_handler.set_current_pipeline)
         self.pipeline_widget.pipeline.onPipelineFinalize.connect(self.vian_event_handler.run_on_finalize_event)
         self.pipeline_widget.pipeline.onRunAnalysis.connect(self.on_start_analysis)
+        self.pipeline_widget.pipeline.onProgress.connect(self.pipeline_toolbar.progress_widget.on_progress)
 
         self.pipeline_toolbar.onToComputeChanged.connect(self.pipeline_widget.pipeline.set_to_compute)
         self.pipeline_toolbar.runAll.connect(self.pipeline_widget.pipeline.run_all)

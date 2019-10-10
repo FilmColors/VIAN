@@ -3,6 +3,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from random import randint
 import traceback, sys
 import cv2
+from core.data.log import log_info, log_error
 from core.data.computation import numpy_to_pixmap, generate_id
 from core.data.interfaces import IProjectChangeNotify
 
@@ -16,6 +17,8 @@ class WorkerSignals(QObject):
     sign_task_manager_progress = pyqtSignal(int, float)
     sign_create_progress_bar = pyqtSignal(int, str, object, object)
     sign_remove_progress_bar = pyqtSignal(int)
+    analysisStarted = pyqtSignal()
+    analysisEnded = pyqtSignal()
 
 
 class Worker(QRunnable):
@@ -192,6 +195,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
 
 class AnalysisWorker(QObject):
+
     def __init__(self, worker_manager):
         super(AnalysisWorker, self).__init__()
 
@@ -212,6 +216,7 @@ class AnalysisWorker(QObject):
 
     @pyqtSlot()
     def run_worker(self):
+        self.signals.analysisStarted.emit()
         n_jobs = len(self.scheduled_task.keys())
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
             self.current_task_id = task_id
@@ -224,6 +229,7 @@ class AnalysisWorker(QObject):
         # Clean up
         self.scheduled_task = dict()
         self.finished_tasks = dict()
+        self.signals.analysisEnded.emit()
 
     def _run_task(self, task_id, analysis, args, on_progress):
         print("Running Analysis", analysis.__class__)
@@ -232,6 +238,7 @@ class AnalysisWorker(QObject):
         except Exception as e:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
+            log_error(traceback.print_exc())
             self.signals.sign_error.emit((exctype, value, traceback.format_exc()))
             return None
 
