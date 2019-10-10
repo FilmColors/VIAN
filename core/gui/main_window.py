@@ -498,6 +498,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vian_event_handler.onCurrentPipelineChanged.connect(self.pipeline_widget.on_pipeline_loaded)
         self.vian_event_handler.onLockPipelineGUIForLoading.connect(partial(self.pipeline_toolbar.setEnabled, False))
         self.vian_event_handler.onReleasePipelineGUIAfterLoading.connect(partial(self.pipeline_toolbar.setEnabled, True))
+        self.vian_event_handler.onLockPipelineGUIForLoading.connect(partial(self.pipeline_widget.set_is_loading, True))
+        self.vian_event_handler.onReleasePipelineGUIAfterLoading.connect(partial(self.pipeline_widget.set_is_loading, False))
 
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.vian_event_handler.to_compute_changed)
         self.pipeline_widget.pipeline.onToComputeChanged.connect(self.pipeline_toolbar.set_to_compute)
@@ -2322,7 +2324,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.stop()
         for o in self.i_project_notify_reciever:
             o.on_closed()
-
+        self.pipeline_widget.pipeline.on_closed()
         self.set_ui_enabled(False)
 
 

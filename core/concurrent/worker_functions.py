@@ -86,10 +86,14 @@ def store_project_concurrent(args, sign_progress):
     else:
         hdf_indices = project.hdf5_manager.get_indices()
 
+    pipeline_scripts = []
+    for q in project.pipeline_scripts:
+        pipeline_scripts.append(q.serialize())
+
     data = dict(
         path=project.path,
         name=project.name,
-        corpus_id = project.corpus_id,
+        corpus_id=project.corpus_id,
         uuid = project.uuid,
         annotation_layers=a_layer,
         notes=project.notes,
@@ -105,12 +109,12 @@ def store_project_concurrent(args, sign_progress):
         movie_descriptor=project.movie_descriptor.serialize(),
         version=version.__version__,
         screenshot_groups=screenshot_groups,
-        scripts = scripts,
+        scripts=scripts,
         vocabularies=vocabularies,
-        experiments = experiments,
+        experiments=experiments,
         meta_data = project.meta_data,
         hdf_indices = hdf_indices,
-        pipeline_scripts = project.pipeline_scripts,
+        pipeline_scripts = pipeline_scripts,
         active_pipeline_script = project.active_pipeline_script,
         compute_pipeline_settings = project.compute_pipeline_settings
     )

@@ -10,9 +10,9 @@ from core.data.log import log_error, log_info, log_debug, log_warning
 @vian_pipeline
 class ERCFilmColorsVIANPipeline(VIANPipeline):
     name = "ERCFilmColors Pipeline"
-    experiment = "ERC Advanced Grant FilmColors"
     version = (0,1,0)
     author = "ERC Advanced Grant FilmColors, VMML"
+    uuid = "fa71ec23-39ef-4af8-b59f-b419f8551f07"
 
     requirements = dict(segment_analyses = [
                             (ColorFeatureAnalysis.__name__, "Global", 0),
@@ -74,9 +74,9 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
         :return: None
         """
         cl_objs = [
-            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Global"),
-            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Foreground"),
-            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Background")
+            self.experiment.get_classification_object_by_name("Global"),
+            self.experiment.get_classification_object_by_name("Foreground"),
+            self.experiment.get_classification_object_by_name("Background")
                          ]
 
         semseg = SemanticSegmentationAnalysis(model=self.model, model_name="LIP", graph=self.graph, session=self.session)
@@ -111,15 +111,14 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
         :param project: The VIANProject instance
         :return: None
         """
-        cl_obj_global = [project.get_experiment("ERC Advanced Grant FilmColors")
-                             .get_classification_object_by_name("Global")]
+        cl_obj_global = [self.experiment.get_classification_object_by_name("Global")]
         for segment in project.segments:
             run_analysis(project, ColorFeatureAnalysis(), [segment], dict(resolution=30), cl_obj_global)
 
         cl_objs = [
-            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Global"),
-            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Foreground"),
-            project.get_experiment("ERC Advanced Grant FilmColors").get_classification_object_by_name("Background")
+            self.experiment.get_classification_object_by_name("Global"),
+            self.experiment.get_classification_object_by_name("Foreground"),
+            self.experiment.get_classification_object_by_name("Background")
                          ]
         for screenshot in project.screenshots:
             run_analysis(project, SemanticSegmentationAnalysis(), [screenshot], dict(model = "LIP"), [cl_objs[0]])

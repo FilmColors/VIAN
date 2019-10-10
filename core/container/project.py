@@ -150,7 +150,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         self.active_pipeline_script = None
         self.compute_pipeline_settings = dict(segments=False, screenshots=False, annotations=False)
-        self.pipeline_scripts = []
+        self.pipeline_scripts = []              # type: List[PipelineScript]
 
         self.add_screenshot_group("All Shots", initial=True)
         self.active_screenshot_group = self.screenshot_groups[0]
@@ -873,27 +873,44 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Python Scripts
-    def add_pipeline_script(self, path):
+    def create_pipeline_script(self, name:str, author="no_author") -> PipelineScript:
+        """
+        Creates a new PipelineScript given a name and a script content
+        :param name: The name of the script
+        :param script: The actual python script text
+        :return: a PipelineScript class
+        """
+        pipeline_script = PipelineScript(name, author)
+        return self.add_pipeline_script(pipeline_script)
+
+    def add_pipeline_script(self, script:PipelineScript) -> PipelineScript:
         """
         Adds a script at a given path to the project.
 
         :param path: Path to the pipeline python script.
         :return: None
         """
-        if path not in self.pipeline_scripts:
-            self.pipeline_scripts.append(path)
+        for s in self.pipeline_scripts:
+            if s.name == script.name and s.script == script.script:
+                return s
 
-    def remove_pipeline_script(self, path):
+        self.pipeline_scripts.append(script)
+        script.set_project(self)
+        return script
+
+    def remove_pipeline_script(self, script:PipelineScript):
         """
         Removes a given script path from the project.
 
         :param path: The path to remove.
         :return: None
         """
-        if path in self.pipeline_scripts:
-            self.pipeline_scripts.remove(path)
+
+        if script in self.pipeline_scripts:
+            self.pipeline_scripts.remove(script)
 
     def get_missing_analyses(self, requirements):
+        # requirements = script.pipeline_type.requirements
         result = dict()
         if "segment_analyses" in requirements:
             segments = []
@@ -967,7 +984,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         screenshot_groups = []
         scripts = []
         experiments = []
-
+        pipeline_scripts = []
         vocabularies = []
 
         for v in project.vocabularies:
@@ -1002,6 +1019,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             hdf_indices = project.hdf5_manager.get_indices()
 
+        for q in self.pipeline_scripts:
+            pipeline_scripts.append(q.serialize())
+
         data = dict(
             path=project.path,
             name=project.name,
@@ -1026,7 +1046,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             experiments=experiments,
             meta_data = project.meta_data,
             hdf_indices = hdf_indices,
-            pipeline_scripts = project.pipeline_scripts,
+            pipeline_scripts = pipeline_scripts,
             active_pipeline_script = project.active_pipeline_script,
             compute_pipeline_settings = project.compute_pipeline_settings
         )
@@ -1222,6 +1242,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
             # self.main_window.print_message("Loading Node Scripts failed", "Red")
             # self.main_window.print_message(e, "Red")
 
+        try:
+            [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
+            self.active_pipeline_script = my_dict['active_pipeline_script']
+            self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
+        except Exception as e:
+            print("Exception in Load Pipelines", str(e))
 
         try:
             for e in my_dict['experiments']:
@@ -1259,14 +1285,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         node.operation.result = res
 
         # self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
-
-        try:
-            print(my_dict['pipeline_scripts'], my_dict['pipeline_scripts'])
-            self.pipeline_scripts = my_dict['pipeline_scripts']
-            self.active_pipeline_script = my_dict['active_pipeline_script']
-            self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
-        except Exception as e:
-            print("Exception in Load Pipelines", str(e))
 
         if self.colormetry_analysis is not None:
             if not self.hdf5_manager.has_colorimetry():
@@ -1317,9 +1335,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 experiments.append(e.to_template())
         if pipeline:
             for p in self.pipeline_scripts:
-                if os.path.isfile(p):
-                    with open(p, "r") as f:
-                        pipelines.append((os.path.split(p)[1], f.read(), p is self.active_pipeline_script))
+                if os.path.isfile(p.path):
+                    with open(p.path, "r") as f:
+                        pipelines.append(p.serialize())
 
         template = dict(
             segmentations = segmentations,
@@ -1381,20 +1399,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 loc = script_export
             else:
                 loc = self.folder
-            for path, script, is_active in template['pipelines']:
-                p = os.path.join(loc, path)
-                with open(p, "w") as f:
-                    f.write(script)
-                self.pipeline_scripts.append(p)
-                if is_active:
-                    self.active_pipeline_script = p
+            for q in template['pipelines']:
+                pipeline = PipelineScript().deserialize(q, loc)
+                self.add_pipeline_script(pipeline)
+                with open(pipeline.path, "w") as f:
+                    f.write(pipeline.script)
 
-            if self.active_pipeline_script is None and len(self.pipeline_scripts) > 0:
-                self.active_pipeline_script = self.pipeline_scripts[0]
+            # if self.active_pipeline_script is None and len(self.pipeline_scripts) > 0:
+            #     self.active_pipeline_script = self.pipeline_scripts[0]
 
-            self.compute_pipeline_settings = template["compute_pipeline_settings"]
+            # self.compute_pipeline_settings = template["compute_pipeline_settings"]
             log_info("Pipeline Template:", "Pipelines", self.pipeline_scripts)
-            log_info("Pipeline Template:", "Active:", self.active_pipeline_script, "\tSettings:",template["compute_pipeline_settings"])
+            # log_info("Pipeline Template:", "Active:", self.active_pipeline_script, "\tSettings:",template["compute_pipeline_settings"])
         except Exception as e:
             raise e
 
@@ -1661,7 +1677,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 return e
         return None
     #endregion
-
 
     def cleanup(self):
         """

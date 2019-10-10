@@ -2,6 +2,7 @@
 
 import sys
 import re
+from uuid import uuid4
 import importlib.util
 import traceback
 from core.data.log import log_info, log_error, log_debug, log_warning
@@ -71,10 +72,12 @@ class PythonScriptEditor(QWidget):
         self.a_new = self.m_file.addAction("New Script")
         self.a_load = self.m_file.addAction("Load")
         self.a_save = self.m_file.addAction("Save")
+        self.a_export = self.m_file.addAction("Save As / Export")
 
         self.a_new.triggered.connect(self.new)
         self.a_load.triggered.connect(partial(self.load, None))
         self.a_save.triggered.connect(partial(self.save, None, False))
+        self.a_export.triggered.connect(partial(self.save, None, True))
 
         if sys.platform == "darwin":
             self.font = QFont("Consolas")
@@ -97,7 +100,7 @@ class PythonScriptEditor(QWidget):
         #
         # self.current_file_path = ""
 
-    def load(self, file_path):
+    def load(self, file_path=None):
         if file_path is None:
             file_path = QFileDialog.getOpenFileName(self, filter="*.py")[0]
 
@@ -122,6 +125,7 @@ class PythonScriptEditor(QWidget):
             return
 
         try:
+            p = p.replace(".py", "") + ".py"
             with open(p, "w") as f:
                 f.write(self.editor.toPlainText().replace("\t", "    "))
             self.current_file_path = p
@@ -310,9 +314,6 @@ class NewScriptDialog(QDialog):
         self.setLayout(QVBoxLayout())
         self.lineEdit_Name = QLineEdit("MyAnalysis", self)
         self.lineEdit_Author = QLineEdit("MyHackerPseudonym", self)
-        # self.comboBox_Experiments = QComboBox(self)
-        # for e in project.experiments:
-        #     self.comboBox_Experiments.addItem(e.name)
 
         self.btn_OK = QPushButton("OK", self)
         self.layout().addWidget(self.lineEdit_Name)
@@ -326,6 +327,7 @@ class NewScriptDialog(QDialog):
 
         script = script.replace("%PIPELINE_NAME%", self.lineEdit_Name.text().replace(" ", ""))
         script = script.replace("%AUTHOR%", self.lineEdit_Author.text().replace(" ", ""))
+        script = script.replace("%UUID%", str(uuid4()))
         # script = script.replace("%EXPERIMENT_TITLE%", self.comboBox_Experiments.currentText())
         try:
             location = QFileDialog.getSaveFileName(self, filter="*.py")[0]

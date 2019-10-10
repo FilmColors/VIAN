@@ -5,13 +5,14 @@
 import cv2
 import numpy as np
 import bisect
+from uuid import uuid4
 from typing import List
+import traceback
 
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
-from .container_interfaces import IProjectContainer, IHasName, ISelectable
+from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT
 from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
-
 
 class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamableContainer):
     """
@@ -119,7 +120,7 @@ class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
 
             # self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
         except Exception as e:
-            print("Exception in NodeScriptAnalysis.serialize(): ", str(e))
+            log_error("Exception in NodeScriptAnalysis.serialize(): ", str(e))
 
         data = dict(
             name=self.name,
@@ -412,7 +413,7 @@ class ColormetryAnalysis(AnalysisContainer):
         return self.has_finished
 
     def clear(self):
-        print("Clearing Colorimetry, Resolution:", self.resolution)
+        log_info("Clearing Colorimetry, Resolution:", self.resolution)
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
         # print(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) , self.resolution)
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
@@ -452,10 +453,97 @@ class ColormetryAnalysis(AnalysisContainer):
             self.end_idx = serialization['end_idx']
 
         except Exception as e:
-            print("Exception in Loading Analysis", str(e))
+            log_error("Exception in Loading Analysis", str(e))
         self.current_idx = project.hdf5_manager.get_colorimetry_length() - 1
         self.time_ms = project.hdf5_manager.get_colorimetry_times()[:self.current_idx + 1].tolist()
         self.check_finished()
         return self
+
+
+with open(os.path.join(_VIAN_ROOT, "data/default_pipeline.py"), "r") as f:
+    _PIPELINE_TEMPLATE = f.read()
+
+
+class PipelineScript(IProjectContainer, IHasName):
+    _pipeline_script_template = _PIPELINE_TEMPLATE
+
+    def __init__(self, name = "NewScript", author = "no-author", path=None, script=None):
+        super(PipelineScript, self).__init__()
+        self.name = name
+        self.author = author
+        self.uuid = None
+        self.experiment = None
+        if script is None:
+            self.script = self._init_script()
+        else:
+            self.script = script
+
+        self.path = None
+        if path is not None:
+            self.path = path.replace(".py", "") + ".py"
+
+        self.computation_setting = dict(segments=False, screenshots=False, annotations=False)
+        self.pipeline_type = None
+
+    def _init_script(self):
+        """ Replaces all placesholders in the pipeline template with the actual values """
+        script = self._pipeline_script_template.replace("%PIPELINE_NAME%", self.name.replace(" ", ""))
+        script = script.replace("%AUTHOR%", self.author.replace(" ", ""))
+        script = script.replace("%UUID%", str(uuid4))
+        return script
+
+    def set_project(self, project):
+        super(PipelineScript, self).set_project(project)
+        if self.path is None:
+            self.path = os.path.join(self.project.folder, self.name + ".py")
+
+    def import_pipeline(self):
+        try:
+            self.save_script(self.path)
+            spec = importlib.util.spec_from_file_location(self.name + "_pipeline_module", self.path)
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[self.name + "_pipeline_module"] = module
+            r = spec.loader.exec_module(module)
+            log_info("Imported OProject Pipeline:", self.name, module)
+            return "Successfully imported module", r
+        except Exception as e:
+            return traceback.format_exc()
+            pass
+
+    def save_script(self, path=None):
+        """ Saves the python script at a given location, if none is given it is stored at PipelineScript.path"""
+        try:
+            if path is None:
+                path = self.path.replace(".py", "") + ".py"
+            with open(path, "w") as f:
+                f.write(self.script.replace("\t", "    "))
+        except OSError as e:
+            log_error(traceback.format_exc())
+        return path
+
+    def serialize(self):
+        """ Returns a dict of json serializable values """
+        return dict(
+            name=self.name,
+            unique_id = self.unique_id,
+            script = self.script,
+            computation_settings = self.computation_setting
+        )
+
+    def deserialize(self, serialization, folder):
+        """ Applies a dict of json serializable values to this instance """
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.script = serialization['script']
+        self.path = os.path.join(folder, self.name.replace(".py", "") + ".py")
+        self.computation_setting = serialization['computation_settings']
+        return self
+
+    def __eq__(self, other):
+        print(self.name, other.name)
+        return self.name == other.name and self.script == other.script
+
+
+
 
 

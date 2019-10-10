@@ -92,6 +92,7 @@ class UserSettings():
         self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
         self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
         self.DIR_VOCABULARIES = self.DIR_ROOT + "/vocabularies/"
+        self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
 
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
@@ -187,8 +188,10 @@ class UserSettings():
         self.DIR_TEMPLATES = self.DIR_ROOT + "/templates/"
         self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
         self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
+        self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
 
-        for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS, self.DIR_CORPORA, self.DIR_PROJECTS]:
+        for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS,
+                  self.DIR_CORPORA, self.DIR_PROJECTS, self.DIR_SCRIPTS]:
             if not os.path.isdir(d):
                 os.mkdir(d)
                 log_info(d + "\t Directory created.")
@@ -201,11 +204,12 @@ class UserSettings():
         """
 
         integer = True
-        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_PLUGINS, self.DIR_CORPORA]:
+        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_ROOT, self.DIR_TEMPLATES,
+                    self.DIR_PLUGINS, self.DIR_CORPORA, self.DIR_SCRIPTS]:
             if not os.path.isdir(dir):
                 self.generate_dir_paths()
                 integer = False
-                log_info("Recreated Missing Directories")
+                log_info("Recreated Missing Directories:", dir)
                 break
 
         t = dict()

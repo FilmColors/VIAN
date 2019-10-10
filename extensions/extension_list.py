@@ -19,7 +19,8 @@ class ExtensionList:
         self.main_window = main_window
         self.load_plugins()
         self.load_analysis()
-        self.load_pipelines()
+        # self.load_pipelines("extensions/pipelines/")
+        # self.load_pipelines(main_window.settings.DIR_SCRIPTS)
 
         log_info("\n")
         log_info("#### --- Extensions --- #####")
@@ -35,7 +36,6 @@ class ExtensionList:
 
     def load_plugins(self):
         file_list = []
-        # print (os.path.abspath(os.path.curdir))
         for root, dirs, files in os.walk("extensions/plugins/", topdown=False):
             for name in files:
                 if ".py" in name and not "__init__.py" in name and not "__pycache__" in root:
@@ -56,18 +56,10 @@ class ExtensionList:
                         if obj is not GAPlugin and obj is not ExtensionList:
                             self.plugins.append(obj(self.main_window))
             except Exception as e:
-                # print(e)
                 continue
-
-        # for f in glob.glob("extensions" + "/*/*"):
-        #     if ".py" in f and (not "__init__" in f) and not ("extension_list" in f) and (not ".pyc" in f):
-        #         p = f.replace(os.path.abspath(os.path.curdir), "")
-        #         p = p.replace("\\", "/")
-        #         files.append(p.replace("/", ".").replace(".py", ""))
 
     def load_analysis(self):
         file_list = []
-        # print (os.path.abspath(os.path.curdir))
         for root, dirs, files in os.walk("extensions/analysis/", topdown=False):
             for name in files:
                 if ".py" in name and not "__init__.py" in name and not "__pycache__" in name:
@@ -93,10 +85,10 @@ class ExtensionList:
                 # print(e)
                 continue
 
-    def load_pipelines(self):
+    def load_pipelines(self, ddir="extensions/pipelines/"):
         file_list = []
         # print (os.path.abspath(os.path.curdir))
-        for root, dirs, files in os.walk("extensions/pipelines/", topdown=False):
+        for root, dirs, files in os.walk(ddir, topdown=False):
             for name in files:
                 if "py" in name:
                     path = os.path.join(root, name)
