@@ -948,6 +948,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     if a.analysis_job_class == r[0] and a.target_classification_object.name == r[1]:
                         found = True
                         break
+                print(c, r, found)
                 if found:
                     n_analyses_done += 1
                 else:
@@ -1400,10 +1401,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
             else:
                 loc = self.folder
             for q in template['pipelines']:
-                pipeline = PipelineScript().deserialize(q, loc)
-                self.add_pipeline_script(pipeline)
-                with open(pipeline.path, "w") as f:
-                    f.write(pipeline.script)
+                try:
+                    pipeline = PipelineScript().deserialize(q, loc)
+                    self.add_pipeline_script(pipeline)
+                    with open(pipeline.path, "w") as f:
+                        f.write(pipeline.script)
+                except TypeError as e:
+                    pass
+
 
             # if self.active_pipeline_script is None and len(self.pipeline_scripts) > 0:
             #     self.active_pipeline_script = self.pipeline_scripts[0]

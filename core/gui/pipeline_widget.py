@@ -357,41 +357,42 @@ class PipelineWidget(QWidget):
                 self.comboBoxExperiment.currentText() != "Select Experiment (Optional)":
             self.pipeline_library[self.listWidget_Pipelines.selectedItems()[0].text()].experiment \
                 = self.all_experiments[self.comboBoxExperiment.currentText()]
+            self.all_experiments[self.comboBoxExperiment.currentText()].pipeline_script \
+                = self.pipeline_library[self.listWidget_Pipelines.selectedItems()[0].text()]
 
     @pyqtSlot()
     def run_all(self):
-        return
-        # if self.project is not None:
-        #     missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements)
-        #     missing = dict()
-        #     log_info("## Missing Analyses in Pipeline ##")
-        #     for k in missing_info.keys():
-        #         missing.update(missing_info[k][0])
-        #         log_info("## -- ", k, missing_info[k][2], missing_info[k][1], missing_info[k][0])
-        #
-        #     experiment = self.project.get_experiment_by_name(self.main_window.vian_event_handler.current_pipeline.experiment)
-        #
-        #     if experiment is None:
-        #         log_error("Experiment not found for RunAll")
-        #         return
-        #
-        #     for priority in sorted(missing.keys()):
-        #         for analysis_name in missing[priority].keys():
-        #             analysis = self.main_window.eval_class(analysis_name)
-        #             for clobj_name, containers in missing[priority][analysis_name].items():
-        #                 clobj = experiment.get_classification_object_by_name(clobj_name)
-        #
-        #                 if clobj is None:
-        #                     log_warning("Classification Object not found")
-        #                     continue
-        #                 d = dict(
-        #                     analysis=analysis(),
-        #                     targets=containers,
-        #                     parameters=None,
-        #                     classification_objs=clobj
-        #                 )
-        #                 log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
-        #                 self.onRunAnalysis.emit(d)
+        if self.project is not None:
+            missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements)
+            missing = dict()
+            log_info("## Missing Analyses in Pipeline ##")
+            for k in missing_info.keys():
+                missing.update(missing_info[k][0])
+                log_info("## -- ", k, missing_info[k][2], missing_info[k][1], missing_info[k][0])
+
+            experiment = self.main_window.vian_event_handler.current_pipeline.experiment
+
+            if experiment is None:
+                log_error("Experiment not found for RunAll")
+                return
+
+            for priority in sorted(missing.keys()):
+                for analysis_name in missing[priority].keys():
+                    analysis = self.main_window.eval_class(analysis_name)
+                    for clobj_name, containers in missing[priority][analysis_name].items():
+                        clobj = experiment.get_classification_object_by_name(clobj_name)
+
+                        if clobj is None:
+                            log_warning("Classification Object not found")
+                            continue
+                        d = dict(
+                            analysis=analysis(),
+                            targets=containers,
+                            parameters=None,
+                            classification_objs=clobj
+                        )
+                        log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
+                        self.onRunAnalysis.emit(d)
 
     @pyqtSlot(object)
     def on_loaded(self, project:VIANProject):
