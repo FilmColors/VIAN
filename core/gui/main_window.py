@@ -353,6 +353,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClassification.triggered.connect(self.create_vocabulary_matrix)
         self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
 
+        # self.menuBar().actionAnnotationPersp.hide()
+
         self.actionExperimentSetupPersp.triggered.connect(partial(self.switch_perspective, Perspective.ExperimentSetup))
         self.actionPlayerPersp.triggered.connect(partial(self.switch_perspective, Perspective.VideoPlayer))
         self.actionAnnotationPersp.triggered.connect(partial(self.switch_perspective, Perspective.Annotation))

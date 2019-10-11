@@ -75,10 +75,11 @@ class VIANEventHandler(QObject):
             self.onLockPipelineGUIForLoading.emit()
             self.current_pipeline = ALL_REGISTERED_PIPELINES[pipeline.name][0]()
             self.current_pipeline.experiment = pipeline.experiment
+            if self.project is not None:
+                self.current_pipeline.on_setup(self.project)
             self.onReleasePipelineGUIAfterLoading.emit()
             self.onCurrentPipelineChanged.emit(self.current_pipeline)
         except Exception as e:
-            print("Exception in set_current_pipeline", e)
             self.onException.emit(traceback.format_exc())
 
     @pyqtSlot(object)
@@ -174,7 +175,10 @@ class VIANPipeline(QObject):
 
     def __init__(self):
         super(VIANPipeline, self).__init__()
-    
+
+    def on_setup(self, project:VIANProject):
+        pass
+
     def on_segment_created(self, project:VIANProject, segment:Segment, capture):
         pass
 

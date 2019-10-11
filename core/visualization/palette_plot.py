@@ -21,6 +21,8 @@ import numpy as np
 import time
 
 class PaletteWidget(QWidget):
+    onReloadData = pyqtSignal()
+
     def __init__(self, parent):
         super(PaletteWidget, self).__init__(parent)
         self.palette_tree = None
@@ -281,7 +283,9 @@ class PaletteLABWidget(QWidget):
 
         self.layout().addWidget(self.view)
         # self.layout().addItem(self.hbox_ctrl)
-        self.layout().addWidget(ExpandableWidget(self, "Controls", self.w_ctrls2, popup=False))
+        exp = ExpandableWidget(self, "Controls", self.w_ctrls2, popup=True)
+        self.layout().addWidget(exp)
+        exp.onClicked.connect(self.draw_palette)
 
         self.cb_show_grid.setChecked(True)
         self.slider.setValue(12)
@@ -312,6 +316,7 @@ class PaletteLABWidget(QWidget):
         self.view.jitter = self.slider_jitter.value()
         self.view.dot_size = self.slider_size.value()
         self.view.scale = self.slider_scale.value()
+        self.view.depth = self.slider.value()
         if self.cb_mode.currentText() == "Layer":
             self.lbl_mode_hint.setText("Layer Index:")
         else:
@@ -357,6 +362,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
     def draw_palette(self, target = None):
         if self.palette_layer is None:
             return
+
         self.image = QImage(self.size(), QImage.Format_RGBA8888)
         qp = QPainter()
         pen = QPen()

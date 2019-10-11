@@ -147,7 +147,6 @@
      <addaction name="actionExperimentSetupPersp"/>
      <addaction name="actionPlayerPersp"/>
      <addaction name="actionSegmentationPersp"/>
-     <addaction name="actionAnnotationPersp"/>
      <addaction name="actionScreenshotsPersp"/>
      <addaction name="actionVocabularyPersp"/>
      <addaction name="actionResultsPersp"/>

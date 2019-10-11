@@ -19,7 +19,7 @@ class ExtensionList:
         self.main_window = main_window
         self.load_plugins()
         self.load_analysis()
-        # self.load_pipelines("extensions/pipelines/")
+        self.load_pipelines("extensions/pipelines/")
         # self.load_pipelines(main_window.settings.DIR_SCRIPTS)
 
         log_info("\n")

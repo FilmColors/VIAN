@@ -28,6 +28,9 @@ class PipelineToolbar(EToolBar):
         super(PipelineToolbar, self).__init__(main_window, "Windows Toolbar")
         self.setWindowTitle("Windows Toolbar")
 
+        self.progress_widget = ProgressWidget(self, None)
+        self.addWidget(self.progress_widget)
+
         self.a_auto_screenshot = self.addAction(create_icon("qt_ui/icons/icon_pipeline_screenshot_off.png"), "Auto Pipeline Screenshots")
         self.a_auto_screenshot.setCheckable(True)
         self.a_auto_screenshot.setEnabled(False)
@@ -44,8 +47,7 @@ class PipelineToolbar(EToolBar):
         self.a_pipeline_settings = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Pipeline Configuration")
         self.a_pipeline_settings.triggered.connect(self.main_window.create_pipeline_widget)
 
-        self.progress_widget = ProgressWidget(self, self.widgetForAction(self.a_pipeline_settings))
-        self.addWidget(self.progress_widget)
+        self.progress_widget.reference_widget = self.widgetForAction(self.a_pipeline_settings)
         self.main_window.vian_event_handler.analysisStarted.connect(self.progress_widget.on_start_analysis)
         self.main_window.vian_event_handler.analysisEnded.connect(self.progress_widget.on_stop_analysis)
 
@@ -106,8 +108,10 @@ class ProgressWidget(QWidget):
     def __init__(self, parent, reference_widget):
         super(ProgressWidget, self).__init__(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         self.reference_widget = reference_widget
-        self.resize(self.reference_widget.size())
+        if self.reference_widget is not None:
+            self.resize(self.reference_widget.size())
         self.root_angle = 0
         self.px = 0.0
         self.py = 0.0
@@ -140,7 +144,8 @@ class ProgressWidget(QWidget):
         self.update()
 
     def paintEvent(self, a0: QPaintEvent) -> None:
-        self.resize(self.reference_widget.size())
+        if self.reference_widget is not None:
+            self.resize(self.reference_widget.size())
         qp = QPainter(self)
 
         pen = QPen()

@@ -346,4 +346,4 @@ class CorpusCommitDialog(EDialogWidget):
             self.main_window.project.movie_descriptor.meta_data[k] = v
         if self.main_window.project is not None:
             self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
-        pass
+        self.close()

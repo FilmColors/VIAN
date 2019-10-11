@@ -93,7 +93,7 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.spatial_complexity_param = ExpandableWidget(self, "Controls", self.spatial_complexity_vis.get_param_widget())
         lt_spatial.layout().addWidget(self.spatial_complexity_param)
 
-        self.hilbert_param = ExpandableWidget(self, "Controls", self.hilbert_vis.get_param_widget())
+        self.hilbert_param = ExpandableWidget(self, "Controls", self.hilbert_vis.get_param_widget(), popup=True)
         lt_hilbert = QWidget()
         lt_hilbert.setLayout(QVBoxLayout())
         lt_hilbert.layout().addWidget(self.hilbert_vis)
