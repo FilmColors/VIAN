@@ -65,7 +65,8 @@ class ExpandableWidget(QWidget):
             self.onClicked.emit()
             return
         if self.popup:
-            ExpandablePopup(self, self)
+            pop = ExpandablePopup(self, self)
+            pop.move(self.mapToGlobal(QPoint(10,10)))
         if state is None:
             self.inner.setVisible(not self.inner.isVisible())
         else:

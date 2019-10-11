@@ -288,7 +288,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                         except:
                             pass
 
-
         self.tree.select(to_select, False)
         self.tree.selection_dispatch = True
 
