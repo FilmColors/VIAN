@@ -23,6 +23,8 @@ class AudioHandler(QObject):
     After the processing is done, audioProcessed is emitted and self.audio_samples and self.audio_volume
     are set.
     """
+    audioExtractingStarted = pyqtSignal()
+    audioExtractingEnded = pyqtSignal()
     audioProcessed = pyqtSignal(object)
     audioExtracted = pyqtSignal(str)
 
@@ -56,9 +58,14 @@ class AudioHandler(QObject):
         log_info("AudioHandlerPath:", project.movie_descriptor.get_movie_path())
 
         self.project = project
+        if self.project is None:
+            self.audioExtractingEnded.emit()
 
+    @pyqtSlot()
+    def extract(self):
+        self.audioExtractingStarted.emit()
         with HDF5_FILE_LOCK:
-            self._read(project.movie_descriptor.get_movie_path())
+            self._read(self.project.movie_descriptor.get_movie_path())
             self.audio_samples = self._sample_audio(self.callback)
             if self.audio_samples is None:
                 return
@@ -66,17 +73,18 @@ class AudioHandler(QObject):
 
             log_info("Size", self.audio_samples.nbytes / 10 ** 6)
             log_info("Size", self.audio_volume.nbytes / 10 ** 6)
-            project_audio_path = os.path.join(project.data_dir, "audio.mp3")
+            project_audio_path = os.path.join(self.project.data_dir, "audio.mp3")
             self.audioProcessed.emit(
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
                                 vis_type=TimelineDataset.VIS_TYPE_AREA))
             try:
                 if not os.path.isfile(project_audio_path) and self.export_audio:
-                    self._audioclip.write_audiofile(os.path.join(project.data_dir, "audio.mp3"))
+                    self._audioclip.write_audiofile(os.path.join(self.project.data_dir, "audio.mp3"))
             except Exception as e:
                 log_error(e)
             self._videoclip.close()
             self._audioclip.close()
+        self.audioExtractingEnded.emit()
 
     @pyqtSlot(str)
     def _read(self, path:str):

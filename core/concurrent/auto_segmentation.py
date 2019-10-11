@@ -7,13 +7,13 @@ from core.data.interfaces import IConcurrentJob
 from core.data.enums import *
 from core.container.project import VIANProject
 
-from core.data.computation import frame2ms
+from core.data.computation import frame2ms, floatify_img
 
 AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1
 
 
-def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100):
+def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100, resolution=30):
     duration = project.movie_descriptor.duration
     if mode == AUTO_SEGM_EVEN:
         if n_segment < 0:
@@ -35,15 +35,22 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
     elif mode == AUTO_SEGM_CHIST:
         ready, colormetry = project.get_colormetry()
 
+        if ready:
+            histograms = colormetry.get_histogram()
+            frame_pos = colormetry.get_frame_pos()
+        else:
+            histograms = None
+            frame_pos  = None
+
         job = AutoSegmentingJob(
             [project.movie_descriptor.get_movie_path(),
              colormetry.resolution,
              project.movie_descriptor.fps,
-             colormetry.get_histogram(),
-             colormetry.get_frame_pos(),
+             histograms,
+             frame_pos,
              nth_frame,
              [n_cluster_lb, n_cluster_hb]
-             ])
+             , resolution] )
         main_window.run_job_concurrent(job)
 
 
@@ -70,7 +77,9 @@ class DialogAutoSegmentation(EDialogWidget):
         #self.btn_start_colormetry = QPushButton("Start Colorimetry")
         #self.btn_start_colormetry.clicked.connect(self.main_window.toggle_colormetry)
 
-        self.widget_colorhist.layout().addWidget(self.lbl_not_ready)
+        # self.widget_colorhist.layout().addWidget(self.lbl_not_ready)
+        # self.sl
+        # self.widget_colorhist.layout().addWidget(self.slider_resolution)
         #self.widget_colorhist.layout().addWidget(self.btn_start_colormetry)
         self.btn_Run.clicked.connect(self.on_ok)
         self.btn_Help.clicked.connect(self.on_help)
@@ -78,19 +87,20 @@ class DialogAutoSegmentation(EDialogWidget):
 
     def on_mode_changed(self, idx):
         self.stackedWidget.setCurrentIndex(idx)
-        ret, c =  self.project.get_colormetry()
-        if ret is False and idx == 1:
-            self.lbl_not_ready.show()
-            if c is None:
-                self.lbl_not_ready.setText(self.not_run_text)
-                #self.btn_start_colormetry.show()
-            else:
-                self.lbl_not_ready.setText(self.not_finished_text)
-                #self.btn_start_colormetry.hide()
-            self.btn_Run.setEnabled(False)
-        else:
-            self.lbl_not_ready.hide()
-            self.btn_Run.setEnabled(True)
+        return
+        # ret, c =  self.project.get_colormetry()
+        # if ret is False and idx == 1:
+        #     self.lbl_not_ready.show()
+        #     if c is None:
+        #         self.lbl_not_ready.setText(self.not_run_text)
+        #         #self.btn_start_colormetry.show()
+        #     else:
+        #         self.lbl_not_ready.setText(self.not_finished_text)
+        #         #self.btn_start_colormetry.hide()
+        #     self.btn_Run.setEnabled(False)
+        # else:
+        #     self.lbl_not_ready.hide()
+        #     self.btn_Run.setEnabled(True)
 
     def on_ok(self):
         if self.comboBox_Distribution.currentIndex() == 0:
@@ -104,7 +114,7 @@ class DialogAutoSegmentation(EDialogWidget):
                           segment_width,
                           self.spinBox_nthFrame.value(),
                           self.spinBox_lowBound.value(),
-                          np.clip(self.spinBox_highBound.value(), self.spinBox_lowBound.value(), None))
+                          np.clip(self.spinBox_highBound.value(), self.spinBox_lowBound.value(), None), resolution=self.spinBoxResolution.value())
         self.close()
 
 
@@ -118,7 +128,7 @@ class AutoSegmentingJob(IConcurrentJob):
         indices = args[4]
         frame_resolution = args[5]
         n_cluster_range = args[6]
-
+        alt_resolution = args[7]
         cluster_sizes = range(n_cluster_range[0], n_cluster_range[1], 1)
         histograms = []
         frames = []
@@ -129,13 +139,16 @@ class AutoSegmentingJob(IConcurrentJob):
         resize_f = 192.0 / cap.get(cv2.CAP_PROP_FRAME_WIDTH)
 
         data_idx = 0
-        read_img  = -1 # We only want to read every second image
+        read_img = -1 # We only want to read every second image
+        if indices is None:
+            indices = []
+            resolution = alt_resolution
         for i in range(int(length)):
             if self.aborted:
                 return None
             if i % resolution == 0:
                 read_img += 1
-                if data_idx >= len(in_hists):
+                if in_hists is not None and data_idx >= len(in_hists):
                     break
                 if read_img % frame_resolution == 0:
                     cap.set(cv2.CAP_PROP_POS_FRAMES, i)
@@ -144,7 +157,22 @@ class AutoSegmentingJob(IConcurrentJob):
                     read_img = 0
 
                 sign_progress(i / length)
-                histograms.append(np.resize(in_hists[data_idx], new_shape=16 ** 3))
+                if in_hists is not None:
+                    histograms.append(np.resize(in_hists[data_idx], new_shape=16 ** 3))
+                else:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+                    ret, frame = cap.read()
+                    if frame is None:
+                        break
+
+                    frame = cv2.cvtColor(floatify_img(frame), cv2.COLOR_BGR2LAB)
+                    data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
+                    hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+                                        [16, 16, 16],
+                                        [0, 100, -128, 128,
+                                         -128, 128])
+                    indices.append(i)
+                    histograms.append(np.resize(hist, new_shape=16 ** 3))
                 data_idx += 1
 
 

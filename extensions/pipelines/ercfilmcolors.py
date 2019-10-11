@@ -53,6 +53,9 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
             self.session = None
         log_info(self.model, self.model_name)
 
+    def on_setup(self, project:VIANProject):
+        if project.get_experiment_by_name("ERC Advanced Grant FilmColors") is None:
+            project.apply_template(template_path="data/ERC-FilmColors-Template")
 
     def on_segment_created(self, project:VIANProject, segment:Segment, capture:cv2.VideoCapture):
         """
@@ -90,8 +93,6 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
 
         ColorFeatureAnalysis().fit(screenshot, cl_objs)
         ColorPaletteAnalysis().fit(screenshot, cl_objs)
-
-
 
     def on_svg_annotation_created(self, project, annotation, sub_img):
         """

@@ -393,6 +393,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
         # self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
         self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
+        self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
         # Keras is optional, if available create Actions
         if KERAS_AVAILABLE:
@@ -424,6 +425,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
         # self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
         # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
+        self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
+        self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -606,6 +609,18 @@ class MainWindow(QtWidgets.QMainWindow):
                          vis_type=TimelineDataset.VIS_TYPE_LINE))
         except Exception as e:
             log_error("Exception in MainWindow.on_colormetry_finished(): ", str(e))
+
+    def set_audio_extracting(self, state):
+        if state:
+            self.actionColormetry.setText("Start Colorimetry (blocked)")
+            self.actionClearColormetry.setText("Clear Colorimetry (blocked)")
+            self.actionColormetry.setEnabled(False)
+            self.actionClearColormetry.setEnabled(False)
+        else:
+            self.actionColormetry.setText("Start Colorimetry")
+            self.actionClearColormetry.setText("Clear Colorimetry")
+            self.actionColormetry.setEnabled(True)
+            self.actionClearColormetry.setEnabled(True)
 
     def clear_colormetry(self):
         if self.project is not None:
