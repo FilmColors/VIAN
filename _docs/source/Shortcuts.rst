@@ -2,7 +2,7 @@
 Shortcuts
 =========
 
-Important keybindings, listed according to the binding key. The **CTRL** corresponds on Mac-keyboards to the **CMD**.
+Important keybindings, listed according to the binding key.
 
 Most bindings with the CTRL-key are the same as in other programs as well:
 

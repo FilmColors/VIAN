@@ -7,11 +7,23 @@
 ===================
 Interface in Detail
 ===================
-In this section, you get a detailed overview over the different tool windows listed beneath. 
+In this section, you get a detailed overview over the different tool windows listed beneath. The order is the same as in the **Control Panel** top-down.
 
 .. toctree::
    :maxdepth: 4
 
-   inspector
+   player
    outliner
    timeline
+   inspector
+   screenshot_manager
+   colorimetry
+   analyses
+   classification
+   upload
+   setup
+   vocabulary
+   corpus
+   query
+
+

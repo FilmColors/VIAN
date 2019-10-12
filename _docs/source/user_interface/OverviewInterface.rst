@@ -2,7 +2,7 @@
 Overview Interface
 ==================
 
-After you've created a new project and opened the video file, your VIAN interface will look like the following picture (you can always return to this **Perspective** by pressing **ALT-2**:
+After you've created a new project and opened the video file, your VIAN interface will look like the following picture:
 
 .. figure:: VIAN_Interface_2.png
    :scale: 70 %
