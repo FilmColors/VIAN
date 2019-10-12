@@ -7,13 +7,13 @@ In this section, the Interface of VIAN and it's components are explained success
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
 
     OverviewInterface
-    inspector
-    outliner
-    perspectives
-    timeline
+    interface_detail/interface_detail
+..    outliner
+..    perspectives
+..    timeline
 
 .. figure:: user_interface.png
    :scale: 100 %
