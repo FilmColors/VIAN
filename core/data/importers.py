@@ -595,7 +595,7 @@ class ExperimentTemplateImporter(ImportDevice):
             voc.category = entry['vocabulary_category']
             for w in entry['words']:
                 word = voc.create_word(name = w['name'])
-                word.complexity_group = w['complexity_group']
+                word.complexity_group = w['complexity_group']['name']
                 word.complexity_lvl = w['complexity']
                 word.organization_group = w['arrangement_group']
                 words_index[w['id']] = word

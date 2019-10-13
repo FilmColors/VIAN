@@ -1339,9 +1339,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 experiments.append(e.to_template())
         if pipeline:
             for p in self.pipeline_scripts:
-                if os.path.isfile(p.path):
-                    with open(p.path, "r") as f:
-                        pipelines.append(p.serialize())
+                pipelines.append(p.serialize())
             if self.active_pipeline_script is not None:
                 active_pipeline = self.active_pipeline_script.unique_id
             else:
@@ -1404,9 +1402,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
             else:
                 loc = self.folder
             for q in template['pipelines']:
+                print(q)
                 try:
                     pipeline = PipelineScript().deserialize(q, loc)
                     self.add_pipeline_script(pipeline)
+                    print("AA", self.pipeline_scripts)
                     with open(pipeline.path, "w") as f:
                         f.write(pipeline.script)
                     self.active_pipeline_script = self.get_by_id(template['active_pipeline'])

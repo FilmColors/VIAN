@@ -210,6 +210,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             vocabularies_project[v.uuid].update_vocabulary(v)
         self.vocabulary_view.recreate_tree()
 
+
     def synchronize_from_project_to_library(self):
         if self.main_window.project is None:
             return
@@ -271,6 +272,17 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.vocabulary_index = dict()  # A dict of vocabularies found on the file system
         self.fetch_vocabularies()
 
+        self.complexities = {
+            "0 (Unclassified)": 1,
+            "1 (Beginner)": 1,
+            "2" : 2,
+            "3 (Intermediate)" : 3,
+            "4" : 4,
+            "5 (Expert)" : 5
+        }
+        for k, v in self.complexities.items():
+            self.comboBoxComplexity.addItem(k)
+
         self.treeViewLibrary = VocabularyTreeView(self, self, self.vocabulary_collection, allow_create=True)
         self.vocabulary_model_library = VocabularyTreeItemModel(self.treeViewLibrary, self.parent().synchronize_from_project_to_library, "library")
         self.innerLibrary.layout().addWidget(self.treeViewLibrary)
@@ -288,6 +300,8 @@ class VocabularyView(QWidget, IProjectChangeNotify):
 
         self.lineEditName.textChanged.connect(self.on_name_changed)
         self.textEditDescription.textChanged.connect(self.on_description_changed)
+        self.lineEditComplexityGroup.textChanged.connect(self.on_complexity_group_changed)
+        self.comboBoxComplexity.currentTextChanged.connect(self.on_complexity_level_changed)
 
         self.vocabulary_collection.onVocabularyAdded.connect(partial(self.recreate_tree))
         self.vocabulary_collection.onVocabularyRemoved.connect(partial(self.recreate_tree))
@@ -341,9 +355,28 @@ class VocabularyView(QWidget, IProjectChangeNotify):
             return
         self.lineEditName.setText(current.name)
         self.textEditDescription.setPlainText(current.comment)
+
         if isinstance(current, VocabularyWord):
-            pass
+            self.lineEditCategory.setEnabled(False)
+            self.comboBoxComplexity.setEnabled(True)
+            print("Complexity Group", current.complexity_group)
+            self.lineEditComplexityGroup.setText(current.complexity_group)
+            for k, v in self.complexities.items():
+                if v == current.complexity_lvl:
+                    self.comboBoxComplexity.setCurrentText(k)
+                    break
+
         elif isinstance(current, Vocabulary):
+            self.lineEditCategory.setText(current.category)
+            self.lineEditCategory.setEnabled(True)
+            complexity_groups = []
+            for w in current.words: #type: VocabularyWord
+                if w.complexity_group not in complexity_groups:
+                    complexity_groups.append(w.complexity_group)
+            if len(complexity_groups) > 1:
+                self.lineEditComplexityGroup.setText("Multiple")
+            else:
+                self.lineEditComplexityGroup.setText(complexity_groups[0])
             pass
         self.current_item = current
 
@@ -380,6 +413,15 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.lineEdit_Item.setText("")
 
     def recreate_tree(self):
+        # AutoCompleter for Complexity Groups
+
+        complexity_groups = []
+        for v in self.vocabulary_collection.vocabularies:
+            complexity_groups.extend(v.get_complexity_groups())
+        complexity_groups = list(set(complexity_groups))
+        completer = QCompleter(complexity_groups)
+        self.lineEditComplexityGroup.setCompleter(completer)
+
         self.vocabulary_model_library.clear()
         for v in self.vocabulary_collection.vocabularies:
             self.add_vocabulary(self.vocabulary_model_library, self.treeViewLibrary, v)
@@ -398,6 +440,24 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         name = self.lineEditName.text()
         if self.current_item is not None:
             self.current_item.name = name
+
+    def on_complexity_group_changed(self):
+        if self.current_item is None:
+            return
+        if isinstance(self.current_item, Vocabulary):
+            for w in self.current_item.words:
+                w.complexity_group = self.lineEditComplexityGroup.text()
+        elif isinstance(self.current_item, VocabularyWord):
+            self.current_item.complexity_group = self.lineEditComplexityGroup.text()
+
+    def on_complexity_level_changed(self):
+        if self.current_item is None:
+            return
+        if isinstance(self.current_item, Vocabulary):
+            for w in self.current_item.words:
+                w.complexity_lvl = self.complexities[self.comboBoxComplexity.currentText()]
+        elif isinstance(self.current_item, VocabularyWord):
+            self.current_item.complexity_lvl = self.complexities[self.comboBoxComplexity.currentText()]
 
     def on_description_changed(self):
         description = self.textEditDescription.toPlainText()

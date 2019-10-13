@@ -154,6 +154,9 @@ class Vocabulary(IProjectContainer, IHasName):
             w.get_children_plain(result)
         return result
 
+    def get_complexity_groups(self):
+        return [w.complexity_group for w in self.words]
+
     def serialize(self):
         words = []
         for w in self.words:
@@ -854,6 +857,18 @@ class Experiment(IProjectContainer, IHasName):
             result.extend(clobj.get_vocabularies())
         return result
 
+    def get_complexity_groups(self):
+        """
+        Returns a list of all complexity groups used in the vocabularies attached to this Experiment
+        :return:
+        """
+        complexity_groups = []
+        for k in self.get_unique_keywords():
+            t = k.word_obj.complexity_group
+            if t not in complexity_groups:
+                complexity_groups.append(t)
+        return complexity_groups
+
     def create_class_object(self, name, parent=None):
         t = self.get_classification_object_by_name(name)
         if t is not None:
@@ -1045,12 +1060,17 @@ class Experiment(IProjectContainer, IHasName):
                     class_obj=None
                 ))
 
+        pipeline_script = None
+        if self.pipeline_script is not None:
+            pipeline_script = self.pipeline_script.unique_id
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
-            classification_results=[]
+            classification_results=[],
+            pipeline_script = pipeline_script
         )
         return data
 
