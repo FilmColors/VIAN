@@ -8,32 +8,32 @@ from core.analysis.analysis_utils import run_analysis
 from core.data.log import log_error, log_info, log_debug, log_warning
 
 @vian_pipeline
-class ERCFilmColorsVIANPipeline(VIANPipeline):
-    name = "ERCFilmColors Pipeline"
+class FigureGroundScreenshotPipeline(VIANPipeline):
+    name = "Figure-Ground Screenshots Pipeline"
     version = (0,1,0)
     author = "ERC Advanced Grant FilmColors, VMML"
-    uuid = "fa71ec23-39ef-4af8-b59f-b419f8551f07"
+    uuid = "b974c859-e7e7-4804-bce4-bd7631420c36"
 
-    requirements = dict(segment_analyses = [
-                            (ColorFeatureAnalysis.__name__, "Global", 0),
-                            (ColorPaletteAnalysis.__name__, "Global", 0),
-                            (ColorHistogramAnalysis.__name__, "Global", 0)
-                        ],
+    requirements = dict(segment_analyses = [],
                         screenshot_analyses = [
                             (SemanticSegmentationAnalysis.__name__, "Global", 0),
-                            (ColorFeatureAnalysis.__name__, "Foreground", 1),
-                            (ColorFeatureAnalysis.__name__, "Background", 1),
+                            (ColorPaletteAnalysis.__name__, "Global", 1),
                             (ColorFeatureAnalysis.__name__, "Global", 1),
-                            (ColorPaletteAnalysis.__name__, "Foreground", 1),
-                            (ColorPaletteAnalysis.__name__, "Background", 1),
-                            (ColorPaletteAnalysis.__name__, "Global", 1)
+                            (ColorPaletteAnalysis.__name__, "Figure", 1),
+                            (ColorFeatureAnalysis.__name__, "Figure", 1),
+                            (ColorPaletteAnalysis.__name__, "Ground", 1),
+                            (ColorFeatureAnalysis.__name__, "Ground", 1)
                         ],
                         annotation_analyses=[]
                         )
     finished_threshold = 0.95
 
     def __init__(self):
-        super(ERCFilmColorsVIANPipeline, self).__init__()
+        super(FigureGroundScreenshotPipeline, self).__init__()
+        self.cl_obj_fig = None
+        self.cl_obj_glob = None
+        self.cl_obj_gnd = None
+
         try:
             self.graph = tf.Graph()
             config = tf.ConfigProto()
@@ -53,9 +53,28 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
             self.session = None
         log_info(self.model, self.model_name)
 
-    def on_setup(self, project:VIANProject):
-        if project.get_experiment_by_name("ERC Advanced Grant FilmColors") is None:
-            project.apply_template(template_path="data/ERC-FilmColors-Template")
+    def on_setup(self, project: VIANProject):
+        """
+        This event is yielded when the pipeline is activate using the "Use Pipeline" button.
+        Here we can setup the environment to fit our purpose.
+
+        :param project: the VIANProject instance.
+        :return: None
+        """
+        pass
+        exp = project.get_experiment_by_name("FigureGround-Experiment")
+        if exp is None:
+            exp = project.create_experiment(name="FigureGround-Experiment")
+
+        self.experiment = exp
+
+        self.cl_obj_glob = exp.create_class_object("Global")
+        self.cl_obj_fig = exp.create_class_object("Figure")
+        self.cl_obj_gnd = exp.create_class_object("Ground")
+
+        self.cl_obj_glob.semantic_segmentation_labels = (DATASET_NAME_LIP, list(range(0,20)))
+        self.cl_obj_fig.semantic_segmentation_labels = (DATASET_NAME_LIP, list(range(1, 20)))
+        self.cl_obj_gnd.semantic_segmentation_labels = (DATASET_NAME_LIP, [LIPLabels.Background])
 
     def on_segment_created(self, project:VIANProject, segment:Segment, capture:cv2.VideoCapture):
         """
@@ -77,19 +96,13 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
         :return: None
         """
         cl_objs = [
-            self.experiment.get_classification_object_by_name("Global"),
-            self.experiment.get_classification_object_by_name("Foreground"),
-            self.experiment.get_classification_object_by_name("Background")
-                         ]
+            self.cl_obj_glob,
+            self.cl_obj_fig,
+            self.cl_obj_gnd
+        ]
 
         semseg = SemanticSegmentationAnalysis(model=self.model, model_name="LIP", graph=self.graph, session=self.session)
         semseg.fit(screenshot, cl_objs[0])
-
-        # run_analysis(project, SemanticSegmentationAnalysis(model=self.model, model_name="LIP",
-        #                                                    graph=self.graph, session=self.session ),
-        #              [screenshot], dict(model_name="LIP"), [cl_objs[0]])
-        # run_analysis(project, ColorFeatureAnalysis(), [screenshot], dict(resolution=30), cl_objs)
-        # run_analysis(project, ColorPaletteAnalysis(), [screenshot], dict(resolution=30), cl_objs)
 
         ColorFeatureAnalysis().fit(screenshot, cl_objs)
         ColorPaletteAnalysis().fit(screenshot, cl_objs)
@@ -112,17 +125,4 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
         :param project: The VIANProject instance
         :return: None
         """
-        cl_obj_global = [self.experiment.get_classification_object_by_name("Global")]
-        for segment in project.segments:
-            run_analysis(project, ColorFeatureAnalysis(), [segment], dict(resolution=30), cl_obj_global)
-
-        cl_objs = [
-            self.experiment.get_classification_object_by_name("Global"),
-            self.experiment.get_classification_object_by_name("Foreground"),
-            self.experiment.get_classification_object_by_name("Background")
-                         ]
-        for screenshot in project.screenshots:
-            run_analysis(project, SemanticSegmentationAnalysis(), [screenshot], dict(model = "LIP"), [cl_objs[0]])
-            run_analysis(project, ColorFeatureAnalysis(), [screenshot], dict(resolution=30), cl_objs)
-            run_analysis(project, ColorPaletteAnalysis(), [screenshot], dict(resolution=30), cl_objs)
         pass

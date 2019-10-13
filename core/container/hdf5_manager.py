@@ -19,6 +19,7 @@ def get_analysis_by_name(name):
         print("No Such Visualization")
         raise ImportError("Analysis " +name+" not existent in the current environment.")
 
+
 DEFAULT_SIZE = (50,)
 DS_MOVIE = "movie"
 DS_COL_HIST = "col_histograms"
@@ -104,7 +105,7 @@ class HDF5Manager():
     def load(self, unique_id):
         if self.h5_file is None:
             raise IOError("HDF5 File not opened yet")
-        pos = self._uid_index[unique_id]
+        pos = self._uid_index[str(unique_id)]
         return self.h5_file[pos[0]][pos[1]]
 
     def get_location(self, unique_id):
@@ -118,7 +119,7 @@ class HDF5Manager():
             self._index[k] = v
 
         for k, v in dict(d['uidmapping']).items():
-            self._uid_index[int(k)] = v
+            self._uid_index[str(k)] = v
     #endregion
 
     #region Colorimetry

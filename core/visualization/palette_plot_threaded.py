@@ -42,7 +42,7 @@ class PaletteWidget(QWidget):
         self.cb_sorting.addItems(['Cluster', 'Frequency', "Hilbert"])
 
 
-        self.layout().addWidget(ExpandableWidget(self,"Controls",self.all_ctrls, popup=False))
+        self.layout().addWidget(ExpandableWidget(self,"Controls",self.all_ctrls, popup=True))
 
         self.hbox_slider = QVBoxLayout(self.all_ctrls)
         self.hbox_ctrl = QVBoxLayout(self.all_ctrls)
@@ -407,7 +407,7 @@ class PaletteLABWidget(QWidget):
 
         self.layout().addWidget(self.view)
         # self.layout().addItem(self.hbox_ctrl)
-        self.layout().addWidget(ExpandableWidget(self, "Controls", self.w_ctrls2, popup=False))
+        self.layout().addWidget(ExpandableWidget(self, "Controls", self.w_ctrls2, popup=True))
 
         self.cb_show_grid.setChecked(True)
         self.slider.setValue(12)

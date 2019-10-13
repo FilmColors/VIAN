@@ -28,6 +28,9 @@ class PipelineToolbar(EToolBar):
         super(PipelineToolbar, self).__init__(main_window, "Windows Toolbar")
         self.setWindowTitle("Windows Toolbar")
 
+        self.progress_widget = ProgressWidget(self, None)
+        self.addWidget(self.progress_widget)
+
         self.a_auto_screenshot = self.addAction(create_icon("qt_ui/icons/icon_pipeline_screenshot_off.png"), "Auto Pipeline Screenshots")
         self.a_auto_screenshot.setCheckable(True)
         self.a_auto_screenshot.setEnabled(False)
@@ -44,11 +47,9 @@ class PipelineToolbar(EToolBar):
         self.a_pipeline_settings = self.addAction(create_icon("qt_ui/icons/icon_pipeline_settings.png"), "Pipeline Configuration")
         self.a_pipeline_settings.triggered.connect(self.main_window.create_pipeline_widget)
 
-        self.progress_widget = ProgressWidget(self, self.widgetForAction(self.a_pipeline_settings))
-        self.addWidget(self.progress_widget)
+        self.progress_widget.reference_widget = self.widgetForAction(self.a_pipeline_settings)
         self.main_window.vian_event_handler.analysisStarted.connect(self.progress_widget.on_start_analysis)
         self.main_window.vian_event_handler.analysisEnded.connect(self.progress_widget.on_stop_analysis)
-
 
     def on_screenshot_checked_changed(self):
         if self.a_auto_screenshot.isChecked():
@@ -106,8 +107,10 @@ class ProgressWidget(QWidget):
     def __init__(self, parent, reference_widget):
         super(ProgressWidget, self).__init__(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         self.reference_widget = reference_widget
-        self.resize(self.reference_widget.size())
+        if self.reference_widget is not None:
+            self.resize(self.reference_widget.size())
         self.root_angle = 0
         self.px = 0.0
         self.py = 0.0
@@ -140,7 +143,8 @@ class ProgressWidget(QWidget):
         self.update()
 
     def paintEvent(self, a0: QPaintEvent) -> None:
-        self.resize(self.reference_widget.size())
+        if self.reference_widget is not None:
+            self.resize(self.reference_widget.size())
         qp = QPainter(self)
 
         pen = QPen()
@@ -160,17 +164,28 @@ class ProgressWidget(QWidget):
 
         pen.setColor(QColor(54, 146, 182, 200))
         qp.setPen(pen)
-
-        qp.drawArc(r1, self.root_angle * 16, int(((self.px * 360) * 16)))
-        pen.setColor(QColor(135, 85, 200))
-        qp.setPen(pen)
-        qp.drawArc(r2, self.root_angle * 16, int(((self.py * 360) * 16)))
-        pen.setColor(QColor(133, 42, 42, 200))
-        qp.setPen(pen)
-        qp.drawArc(r3, self.root_angle * 16, int(((self.pz * 360) * 16)))
-        pen.setColor(QColor(255, 255, 255, 150))
-        qp.setPen(pen)
-        qp.drawText(QRectF(self.rect()),Qt.AlignCenter, str(np.round((np.mean(self.px / 1.0 + self.py / 1.0 + self.pz / 1.0) / 3.0) * 100, 2)) + "%")
+        if self.px == 0 and self.py == 0 and self.pz == 0:
+            qp.drawArc(r1, self.root_angle * 16, int(((1.0 * 360) * 16)))
+            pen.setColor(QColor(135, 85, 200))
+            qp.setPen(pen)
+            qp.drawArc(r2, self.root_angle * 16, int(((1.0 * 360) * 16)))
+            pen.setColor(QColor(133, 42, 42, 200))
+            qp.setPen(pen)
+            qp.drawArc(r3, self.root_angle * 16, int(((1.0 * 360) * 16)))
+            pen.setColor(QColor(255, 255, 255, 150))
+            qp.setPen(pen)
+            qp.drawText(QRectF(self.rect()), Qt.AlignCenter, "Pipe\nline")
+        else:
+            qp.drawArc(r1, self.root_angle * 16, int(((self.px * 360) * 16)))
+            pen.setColor(QColor(135, 85, 200))
+            qp.setPen(pen)
+            qp.drawArc(r2, self.root_angle * 16, int(((self.py * 360) * 16)))
+            pen.setColor(QColor(133, 42, 42, 200))
+            qp.setPen(pen)
+            qp.drawArc(r3, self.root_angle * 16, int(((self.pz * 360) * 16)))
+            pen.setColor(QColor(255, 255, 255, 150))
+            qp.setPen(pen)
+            qp.drawText(QRectF(self.rect()),Qt.AlignCenter, str(np.round((np.mean(self.px / 1.0 + self.py / 1.0 + self.pz / 1.0) / 3.0) * 100, 2)) + "%")
 
         # qp.drawArc(self.rect(), 0, 120 * 16)
         # qp.fillRect(self.rect(), QColor(200,100,0))
@@ -453,9 +468,11 @@ class PipelineWidget(QWidget):
         if self.project is not None:
             missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements)
             missing = dict()
+
             log_info("## Missing Analyses in Pipeline ##")
             for k in missing_info.keys():
-                missing.update(missing_info[k][0])
+                # print(k, missing_info[k], missing.items())
+                missing[k] = missing_info[k][0]
                 log_info("## -- ", k, missing_info[k][2], missing_info[k][1], missing_info[k][0])
 
             experiment = self.main_window.vian_event_handler.current_pipeline.experiment
@@ -463,24 +480,24 @@ class PipelineWidget(QWidget):
             if experiment is None:
                 log_error("Experiment not found for RunAll")
                 return
+            for cl in missing.keys():
+                for priority in sorted(missing[cl].keys()):
+                    for analysis_name in missing[cl][priority].keys():
+                        analysis = self.main_window.eval_class(analysis_name)
+                        for clobj_name, containers in missing[cl][priority][analysis_name].items():
+                            clobj = experiment.get_classification_object_by_name(clobj_name)
 
-            for priority in sorted(missing.keys()):
-                for analysis_name in missing[priority].keys():
-                    analysis = self.main_window.eval_class(analysis_name)
-                    for clobj_name, containers in missing[priority][analysis_name].items():
-                        clobj = experiment.get_classification_object_by_name(clobj_name)
-
-                        if clobj is None:
-                            log_warning("Classification Object not found")
-                            continue
-                        d = dict(
-                            analysis=analysis(),
-                            targets=containers,
-                            parameters=None,
-                            classification_objs=clobj
-                        )
-                        log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
-                        self.onRunAnalysis.emit(d)
+                            if clobj is None:
+                                log_warning("Classification Object not found")
+                                continue
+                            d = dict(
+                                analysis=analysis(),
+                                targets=containers,
+                                parameters=None,
+                                classification_objs=clobj
+                            )
+                            log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
+                            self.onRunAnalysis.emit(d)
 
     @pyqtSlot(object)
     def on_loaded(self, project:VIANProject):

@@ -147,7 +147,6 @@
      <addaction name="actionExperimentSetupPersp"/>
      <addaction name="actionPlayerPersp"/>
      <addaction name="actionSegmentationPersp"/>
-     <addaction name="actionAnnotationPersp"/>
      <addaction name="actionScreenshotsPersp"/>
      <addaction name="actionVocabularyPersp"/>
      <addaction name="actionResultsPersp"/>
@@ -200,6 +199,8 @@
     <addaction name="separator"/>
     <addaction name="actionColormetry"/>
     <addaction name="actionClearColormetry"/>
+    <addaction name="separator"/>
+    <addaction name="actionStart_AudioExtraction"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
@@ -904,6 +905,11 @@
   <action name="actionVocabulary_Manager">
    <property name="text">
     <string>Vocabulary Manager</string>
+   </property>
+  </action>
+  <action name="actionStart_AudioExtraction">
+   <property name="text">
+    <string>Start AudioExtraction</string>
    </property>
   </action>
  </widget>

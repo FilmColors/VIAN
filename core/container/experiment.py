@@ -154,6 +154,9 @@ class Vocabulary(IProjectContainer, IHasName):
             w.get_children_plain(result)
         return result
 
+    def get_complexity_groups(self):
+        return [w.complexity_group for w in self.words]
+
     def serialize(self):
         words = []
         for w in self.words:
@@ -171,6 +174,7 @@ class Vocabulary(IProjectContainer, IHasName):
                 complexity_lvl = w.complexity_lvl,
                 complexity_group = w.complexity_group,
                 image_urls = w.image_urls,
+                comment=w.comment
             )
             words_data.append(data)
 
@@ -180,7 +184,8 @@ class Vocabulary(IProjectContainer, IHasName):
             category = self.category,
             unique_id = self.unique_id,
             words = words_data,
-            image_urls = self.image_urls
+            image_urls = self.image_urls,
+            comment = self.comment
         )
 
         return voc_data
@@ -193,6 +198,12 @@ class Vocabulary(IProjectContainer, IHasName):
 
         try:
             self.uuid = serialization['uuid']
+        except:
+            log_warning("No UUID found in this vocabulary", self.name)
+            pass
+
+        try:
+            self.comment = serialization['comment']
         except:
             log_warning("No UUID found in this vocabulary", self.name)
             pass
@@ -221,6 +232,10 @@ class Vocabulary(IProjectContainer, IHasName):
                 except:
                     log_warning("No UUID found in this vocabulary", self.name)
                     pass
+                try:
+                    word.comment = w['comment']
+                except:
+                    pass
             else:
                 # Fields introduced in 0.8.0
                 try:
@@ -242,6 +257,10 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.uuid = w['uuid']
                 except:
                     # print("No UUID found in this vocabulary", self.name)
+                    pass
+                try:
+                    word.comment = w['comment']
+                except:
                     pass
         try:
             self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
@@ -270,7 +289,11 @@ class Vocabulary(IProjectContainer, IHasName):
         self.unique_id = new_id
         self.uuid = serialization['uuid']
         id_replacing_table.append([old_id, new_id])
-
+        try:
+            self.comment = serialization['comment']
+        except:
+            log_warning("No UUID found in this vocabulary", self.name)
+            pass
         # Replace all IDs with new one:
         for w in serialization['words']:
             old = w['unique_id']
@@ -317,6 +340,11 @@ class Vocabulary(IProjectContainer, IHasName):
                 except:
                     print("No UUID found in this vocabulary", self.name)
                     pass
+                try:
+                    word.comment = w['comment']
+                except:
+                    log_warning("No UUID found in this vocabulary", self.name)
+                    pass
             else:
 
                 word = self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
@@ -335,6 +363,11 @@ class Vocabulary(IProjectContainer, IHasName):
                     # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
                     word.uuid = w['uuid']
+                except:
+                    log_warning("No UUID found in this vocabulary", self.name)
+                    pass
+                try:
+                    word.comment = w['comment']
                 except:
                     log_warning("No UUID found in this vocabulary", self.name)
                     pass
@@ -824,7 +857,23 @@ class Experiment(IProjectContainer, IHasName):
             result.extend(clobj.get_vocabularies())
         return result
 
+    def get_complexity_groups(self):
+        """
+        Returns a list of all complexity groups used in the vocabularies attached to this Experiment
+        :return:
+        """
+        complexity_groups = []
+        for k in self.get_unique_keywords():
+            t = k.word_obj.complexity_group
+            if t not in complexity_groups:
+                complexity_groups.append(t)
+        return complexity_groups
+
     def create_class_object(self, name, parent=None):
+        t = self.get_classification_object_by_name(name)
+        if t is not None:
+            return t
+
         if parent is None:
             parent = self
         obj = ClassificationObject(name, self, parent)
@@ -1011,12 +1060,17 @@ class Experiment(IProjectContainer, IHasName):
                     class_obj=None
                 ))
 
+        pipeline_script = None
+        if self.pipeline_script is not None:
+            pipeline_script = self.pipeline_script.unique_id
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
-            classification_results=[]
+            classification_results=[],
+            pipeline_script = pipeline_script
         )
         return data
 

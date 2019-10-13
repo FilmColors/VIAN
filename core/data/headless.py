@@ -421,7 +421,7 @@ def to_corpus(project):
                                 # cv2.imwrite(mask_path, mask, [cv2.IMWRITE_PNG_COMPRESSION, PNG_COMPRESSION_RATE])
 
                                 if scr.unique_id not in mask_index:
-                                    mask_index[int(scr.unique_id)] = []
+                                    mask_index[str(scr.unique_id)] = []
 
                                 mask_index[scr.unique_id].append((dict(
                                     scene_id=scr.scene_id,

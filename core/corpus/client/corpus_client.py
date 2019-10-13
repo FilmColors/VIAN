@@ -328,7 +328,7 @@ class WebAppCorpusInterface(QObject):
                                             scr.shot_id_segm) + ".png"
 
                                         if scr.unique_id not in mask_index:
-                                            mask_index[int(scr.unique_id)] = []
+                                            mask_index[str(scr.unique_id)] = []
 
                                         mask_index[scr.unique_id].append((dict(
                                             scene_id=scr.scene_id,

@@ -5,12 +5,16 @@ import time
 import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QGridLayout, \
+    QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout, QLabel, QAction, QDialog, QSlider, \
+    QComboBox
+
 
 from core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
 from core.data.log import log_error, log_info, log_debug, log_warning
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import EDockWidget
+from core.container.experiment import Experiment
 
 MATRIX_ORDER_PER_SEGMENT = 0
 MATRIX_ORDER_PER_TYPE = 1
@@ -39,7 +43,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         for itm in MATRIX_ORDERS:
             self.comboBox_Sorting.addItem(itm)
-
 
         self.current_idx = 0
         self.current_experiment = None
@@ -76,7 +79,13 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
+        self.a_complexity = QAction("Change Complexity")
+        self.inner.menuBar().addAction(self.a_complexity)
+
+        self.a_complexity.triggered.connect(self.on_change_complexity)
+
         self.visibilityChanged.connect(self.on_visibility_changed)
+        self.complexity_settings = None
 
         if self.behaviour == "query":
             self.btn_StartClassification.hide()
@@ -161,6 +170,16 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         if visibility:
             if self.main_window.project is not None:
                 self.on_selected(None, self.main_window.project.selected)
+
+    def on_change_complexity(self):
+        if self.current_experiment is not None:
+            dialog = ComplexityDialog(self, self, self.current_experiment, self.complexity_settings)
+            dialog.show()
+        pass
+
+    def apply_complexities(self, d):
+        self.complexity_settings = d
+        self.update_widget(force = True)
 
     def on_selected(self, sender, selected):
         if not self.isVisible():
@@ -252,16 +271,16 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.main_window.timeline.timeline.frame_time_range(segm.get_start(), segm.get_end())
             self.main_window.screenshots_manager.frame_screenshot(container)
 
-    def update_widget(self):
+    def update_widget(self, force=False):
         if self.current_experiment is None:
             return
         if self.tab_sorting_mode == "categories":
-            self.update_layout_categories()
+            self.update_layout_categories(force)
 
         elif self.tab_sorting_mode == "class-obj":
-            self.update_layout_class_obj()
+            self.update_layout_class_obj(force)
 
-    def update_layout_class_obj(self):
+    def update_layout_class_obj(self, force=False):
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
             if self.classification_mode == "Sequential":
@@ -279,7 +298,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                                               + " " + self.current_container.get_name())
             # Check  if we need to rebuild the layout or if the checkboxes stay the same,
             # if so apply the classification of the current container
-            if set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in
+            if not force and set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in
                                                        self.current_experiment.get_unique_keywords(
                                                            self.current_container.get_parent_container(),
                                                            return_all_if_none=True)]
@@ -321,6 +340,13 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
 
                 for k in keywords:
+                    if self.complexity_settings is not None:
+                        try:
+                            if self.complexity_settings[k.word_obj.complexity_group] < k.word_obj.complexity_lvl:
+                                continue
+                        except Exception as e:
+                            print(e)
+
                     idx = tab_widgets_class_objs_index.index(k.class_obj.unique_id)
                     if  k.voc_obj.category not in self.tab_categories[idx]:
                         tab = QScrollArea()
@@ -364,7 +390,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         if self.classification_mode == "Sequential":
             self.frame_container(self.current_container)
 
-    def update_layout_categories(self):
+    def update_layout_categories(self, force=False):
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
             if len(self.sorted_containers) > self.current_idx:
@@ -380,7 +406,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
             # Check if we need to rebuild the layout or if the checkboxes stay the same,
             # if so apply the classification of the current container
-            if set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in
+            if not force and set(self.all_checkboxes.keys()) == set(itm.unique_id for itm in
                                                       self.current_experiment.get_unique_keywords(
                                                               self.current_container.get_parent_container())):
                 for checkbox in self.all_checkboxes.values():
@@ -405,6 +431,14 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
             keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.organization_group, x.word_obj.name))
             for k in keywords:
+                if self.complexity_settings is not None:
+                    try:
+                        print(self.complexity_settings[k.word_obj.complexity_group], k.word_obj.complexity_lvl)
+                        if self.complexity_settings[k.word_obj.complexity_group] < k.word_obj.complexity_lvl:
+                            continue
+                    except Exception as e:
+                        print(e)
+
                 if k.voc_obj.category not in self.tab_categories:
                     tab = QScrollArea()
                     tab.setWidget(QWidget())
@@ -564,3 +598,62 @@ class WordCheckBox(QCheckBox):
         super(WordCheckBox, self).__init__(parent)
         self.word = word
         self.setText(word.get_name().replace("_", " "))
+
+
+class ComplexityDialog(QDialog):
+    onComplete = pyqtSignal(object)
+
+    def __init__(self, parent, classification_widget, experiment:Experiment, complexity_settings = None):
+        super(ComplexityDialog, self).__init__(parent)
+        self.experiment = experiment
+        self.classification_widget = classification_widget
+        self.setLayout(QGridLayout())
+
+        self.complexities = {
+            "0 (Unclassified)": 1,
+            "1 (Beginner)": 1,
+            "2": 2,
+            "3 (Intermediate)": 3,
+            "4": 4,
+            "5 (Expert)": 5
+        }
+
+        self.cboxes = dict()
+        self.cb_global = QComboBox(self)
+        for k, v in self.complexities.items():
+            self.cb_global.addItem(k)
+        self.cb_global.currentTextChanged.connect(self.on_global)
+        self.layout().addWidget(QLabel("Global", self), 0, 0)
+        self.layout().addWidget(self.cb_global, 0, 1)
+
+        row = 1
+        for t in experiment.get_complexity_groups():
+            self.layout().addWidget(QLabel(t, self), row, 0)
+            cbox = QComboBox(self)
+            for k, v in self.complexities.items():
+                cbox.addItem(k)
+
+            if complexity_settings is not None and t in complexity_settings:
+                cbox.setCurrentIndex(complexity_settings[t] - 1)
+            self.cboxes[t] = cbox
+            self.layout().addWidget(cbox, row, 1)
+            row += 1
+
+        self.btn_complete = QPushButton("Apply", self)
+        self.btn_complete.clicked.connect(self.on_complete)
+        self.layout().addWidget(self.btn_complete)
+
+    def on_global(self):
+        t = self.cb_global.currentText()
+        for k, cb in self.cboxes.items():
+            cb.setCurrentText(t)
+
+    def on_complete(self):
+        result = dict()
+        for key, cbox in self.cboxes.items():
+            result[key] = self.complexities[cbox.currentText()]
+        self.classification_widget.apply_complexities(result)
+        self.close()
+
+
+

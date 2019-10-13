@@ -191,7 +191,7 @@ class UserSettings():
         self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
 
         for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS,
-                  self.DIR_CORPORA, self.DIR_PROJECTS, self.DIR_SCRIPTS]:
+                  self.DIR_CORPORA, self.DIR_PROJECTS, self.DIR_SCRIPTS, self.DIR_VOCABULARIES]:
             if not os.path.isdir(d):
                 os.mkdir(d)
                 log_info(d + "\t Directory created.")
@@ -205,7 +205,7 @@ class UserSettings():
 
         integer = True
         for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_ROOT, self.DIR_TEMPLATES,
-                    self.DIR_PLUGINS, self.DIR_CORPORA, self.DIR_SCRIPTS]:
+                    self.DIR_PLUGINS, self.DIR_CORPORA, self.DIR_SCRIPTS, self.DIR_VOCABULARIES]:
             if not os.path.isdir(dir):
                 self.generate_dir_paths()
                 integer = False

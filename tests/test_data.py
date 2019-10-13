@@ -30,17 +30,28 @@ class TestImportMethods(unittest.TestCase):
         with open("test-template.json", "w") as f:
             json.dump(self.exchange_data, f)
         with VIANProject("TestProject") as project:
+            with open("../extensions/pipelines/ercfilmcolors.py", "r") as f:
+                script = f.read()
             project.import_(ExperimentTemplateImporter(), "data/test-template.json")
-            project.add_pipeline_script("../extensions/pipelines/ercfilmcolors.py")
-            project.active_pipeline_script = "../extensions/pipelines/ercfilmcolors.py"
+            pipeline = project.create_pipeline_script(name="ERCFilmColors Pipeline",author="ERCFilmColors", script=script)
+
+            project.experiments[0].pipeline_script = pipeline
+            pipeline.experiment = project.experiments[0]
+
+            # project.add_pipeline_script("../extensions/pipelines/ercfilmcolors.py")
+            project.active_pipeline_script = pipeline
             project.compute_pipeline_settings = dict(segments=False,
                                                           screenshots=True,
                                                           annotations=False)
             with open("ERC-FilmColors-Template.viant", "w") as f:
                 json.dump(project.get_template(segm=True, voc=True, experiment=True, pipeline=True), f)
+            print("Exported")
         with VIANProject("TestProject", folder="data") as project:
             project.apply_template("ERC-FilmColors-Template.viant")
+            print(project.pipeline_scripts)
             self.assertTrue(project.active_pipeline_script is not None)
+            for v in project.vocabularies:
+                v.export_vocabulary("../data/vocabularies/" + v.name + ".json")
 
 if __name__ == '__main__':
     unittest.main()

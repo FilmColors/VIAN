@@ -264,17 +264,18 @@ class StageSelector(QWidget):
         self.main_window = main_window
         self.setStyleSheet("QPushButton{background: transparent;} QWidget:focus{border: 0px solid #383838;}")
 
+        self.btn_Annotation.hide()
         self.buttons = [
             (self.btn_Setup, Perspective.ExperimentSetup),
             (self.btn_Segmentation, Perspective.Segmentation),
-            (self.btn_Annotation, Perspective.Annotation),
+            # (self.btn_Annotation, Perspective.Annotation),
             (self.btn_Classification, Perspective.Classification),
             (self.btn_Query, Perspective.Query),
             (self.btn_WebApp, Perspective.WebApp)
         ]
 
         self.btn_Segmentation.clicked.connect(partial(self.set_stage, Perspective.Segmentation))
-        self.btn_Annotation.clicked.connect(partial(self.set_stage, Perspective.Annotation))
+        # self.btn_Annotation.clicked.connect(partial(self.set_stage, Perspective.Annotation))
         self.btn_Setup.clicked.connect(partial(self.set_stage, Perspective.ExperimentSetup))
         self.btn_Classification.clicked.connect(partial(self.set_stage, Perspective.Classification))
         self.btn_Query.clicked.connect(partial(self.set_stage, Perspective.Query))

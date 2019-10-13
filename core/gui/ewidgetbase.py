@@ -33,6 +33,7 @@ def line_separator(Orientation):
 import typing
 
 class ExpandableWidget(QWidget):
+    onClicked = pyqtSignal()
     def __init__(self, parent, expand_title = "Expand", inner = None, expanded = False, popup = False):
         super(ExpandableWidget, self).__init__(parent)
         self.popup = popup
@@ -61,13 +62,16 @@ class ExpandableWidget(QWidget):
     def toggle_expanded(self):
         state = None
         if self.inner is None:
+            self.onClicked.emit()
             return
         if self.popup:
-            ExpandablePopup(self, self)
+            pop = ExpandablePopup(self, self)
+            pop.move(self.mapToGlobal(QPoint(10,10)))
         if state is None:
             self.inner.setVisible(not self.inner.isVisible())
         else:
             self.inner.setVisible(state)
+        self.onClicked.emit()
 
 
 class ExpandablePopup(QMainWindow):

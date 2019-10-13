@@ -89,8 +89,11 @@ class ColormetryJob2(QObject):
             frame_lab = cv2.cvtColor(frame.astype(np.uint8), cv2.COLOR_BGR2Lab)
             palette_input_width = 300
             if model is None:
-                rx = palette_input_width / frame.shape[0]
-                frame_lab_input = cv2.resize(frame_lab, None, None, rx, rx, cv2.INTER_CUBIC)
+                if palette_input_width < frame.shape[0]:
+                    rx = palette_input_width / frame.shape[0]
+                    frame_lab_input = cv2.resize(frame_lab, None, None, rx, rx, cv2.INTER_CUBIC)
+                else:
+                    frame_lab_input = frame
                 model = PaletteExtractorModel(frame_lab_input, n_pixels=400, num_levels=8)
             t_read = time.time() - t
             t = time.time()
