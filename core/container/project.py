@@ -1751,7 +1751,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         is_unique = False
         item_id = 0
         while is_unique is False:
-            item_id = randint(1000000000, 9999999999)
+            # item_id = randint(1000000000, 9999999999)
+            item_id = str(uuid4())
             if self.get_by_id(item_id) is None:
                 is_unique = True
 
