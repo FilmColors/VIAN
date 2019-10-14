@@ -710,12 +710,19 @@ class MultiItemTextInput(QWidget):
         self.input = QLineEdit(self)
         self.added_list = QWidget(self)
         self.added_list.setLayout(QHBoxLayout(self.added_list))
+        self.btn_add = QPushButton("+", self)
+        self.btn_add.setMaximumWidth(20)
+
         self.layout().addWidget(self.input)
+        self.layout().addWidget(self.btn_add)
+        self.layout().addWidget(QLabel("Added:", self))
+
         self.layout().addWidget(self.added_list)
         self.added_list.setContentsMargins(0,0,0,0)
         self.added_list.layout().setContentsMargins(0,0,0,0)
         self.input.setFixedWidth(200)
         self.input.returnPressed.connect(self.on_add_item)
+        self.btn_add.clicked.connect(self.on_add_item)
 
         self.items = []
         if autocompleter is not None:

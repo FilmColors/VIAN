@@ -15,12 +15,30 @@ from core.data.log import log_error, log_info, log_debug, log_warning
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import EDockWidget
 from core.container.experiment import Experiment
+from core.container.project import Segment, Annotation, Screenshot
 
 MATRIX_ORDER_PER_SEGMENT = 0
 MATRIX_ORDER_PER_TYPE = 1
 MATRIX_ORDER_RANDOM = 2
 MATRIX_ORDERS = ["By Time", "By Type", "Random"]
 
+CLASS_OBJ_SORTING_ERC = {
+    "Global" : 0,
+    "Foreground" : 1,
+    "Female Protagonist" : 2,
+    "Male Protagonist" : 3,
+    "Female Support" : 4,
+    "Male Support": 5,
+    "Background": 6,
+    "Objects":7,
+    "Environment":8,
+    "Lighting": 9,
+    "Intertitle":10,
+}
+CATEGORY_SORTING_ERC = {
+    "Location / Time": 0, "Key Words": 1, "Color": 2, "Color Contrasts": 3, "Composition": 4,
+    "Depth of Field": 5, "Lighting": 6, "Textures": 7, "Materials": 8, "Faktura": 9, "Movement": 10
+}
 class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window, behaviour = "classification"):
         super(ClassificationWindow, self).__init__(main_window, limit_size=False)
@@ -66,6 +84,11 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.checkbox_groups = []
         self.checkbox_names =[]
         self.all_checkboxes = dict() # All Checkboxes by their corresponding UniqueKeyword.unique_id
+        self.tab_widgets_class_objs = dict()
+        self.tab_widget_tree = dict()
+
+        self.cl_obj_arrangement = dict()
+        self.category_arrangement = dict()
 
         m_layout = self.inner.menuBar().addMenu("Layout")
         self.a_cat = m_layout.addAction("Category")
@@ -203,7 +226,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.a_cat.setChecked(True)
             self.a_class.setChecked(False)
             self.tab_sorting_mode = "categories"
-        self.update_widget()
+        self.update_widget(force=True)
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
@@ -280,8 +303,13 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 else:
                     self.current_container = None
 
-            if self.current_container is None:
+            if self.current_container is None :
                 return
+            if not (isinstance(self.current_container, Segment)
+                    or isinstance(self.current_container, Annotation)
+                    or isinstance(self.current_container, Screenshot)):
+                return
+
             print("Current Container", self.current_container)
             self.lbl_CurrentContainer.setText(self.current_container.__class__.__name__
                                               + " " + self.current_container.get_name())
@@ -298,24 +326,53 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
                 return
 
+        # last_sorting_arrangement = dict()
+        # for k, v in self.tab_widgets_class_objs.items():
+        #     last_sorting_arrangement[k] = v.index()
+        #
+        # last_cl_obj_arrangement = dict()
+        # for class_name, v in self.tab_widget_tree.items():
+        #     last_cl_obj_arrangement[class_name] = dict()
+        #     for category_name, w in self.tab_widget_tree[class_name]:
+        #         if class_name in self.tab_widgets_class_objs and category_name in self.tab_widget_tree[class_name]:
+        #             last_cl_obj_arrangement[class_name][category_name] = \
+        #                 self.tab_widgets_class_objs[class_name].indexOf(self.tab_widget_tree[class_name][category_name])
+
         self.tab_widget.clear()
+        self.tab_widget.setMovable(True)
         self.tabs = []
         self.all_checkboxes = dict()
         self.tab_categories = []
         self.checkbox_groups = []
         self.checkbox_names = []
 
+        self.tab_widget_tree = dict()
+
         tab_widgets_class_objs_index = []
         tab_widgets_class_objs = dict()
 
+
         # Create outer tabs for Classification Objects
-        for c in self.current_experiment.get_classification_objects_plain():
+        ctabs = self.current_experiment.get_classification_objects_plain()
+        try:
+            ctabs = sorted(ctabs, key=lambda x: CLASS_OBJ_SORTING_ERC[x.name])
+        except Exception as e:
+            ctabs = sorted(ctabs, key=lambda x: x.name)
+        for c in ctabs:
             tab = QTabWidget(self.tab_widget)
-            self.tab_widget.addTab(tab, c.get_name())
+            tab.setMovable(True)
+            try:
+                self.tab_widget.insertTab(CLASS_OBJ_SORTING_ERC[c.name], tab, c.name)
+            except Exception as e:
+                self.tab_widget.addTab(tab, c.get_name())
+
             tab_widgets_class_objs[str(c.unique_id)] = tab
             tab_widgets_class_objs_index.append(c.unique_id)
+            self.tab_widget_tree[c.name] = dict()
+
             self.tab_categories.append([])
             self.tabs.append([])
+        self.tab_widgets_class_objs = tab_widgets_class_objs
 
         # Draw Fields
         if self.current_container is not None or self.behaviour == "query":
@@ -326,8 +383,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container(),
                                                                            return_all_if_none=True)
 
-                keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
-
+                # keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
+                try:
+                    keywords = sorted(keywords, key=lambda x: (CATEGORY_SORTING_ERC[x.voc_obj.category], not "Significance" in x.voc_obj.name, x.word_obj.name))
+                except Exception as e:
+                    print(e)
+                    keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
                 for k in keywords:
                     if self.complexity_settings is not None:
                         try:
@@ -345,7 +406,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
                         self.tabs[idx].append(tab)
                         self.tab_categories[idx].append(k.voc_obj.category)
-                        tab_widgets_class_objs[str(k.class_obj.unique_id)].addTab(tab, k.voc_obj.category)
+                        self.tab_widget_tree[k.class_obj.name][k.voc_obj.category] = tab
+                        try:
+                            tab_widgets_class_objs[str(k.class_obj.unique_id)].insertTab(CATEGORY_SORTING_ERC[k.voc_obj.category], tab, k.voc_obj.category)
+                        except Exception as e:
+                            tab_widgets_class_objs[str(k.class_obj.unique_id)].addTab(tab, k.voc_obj.category)
+
                     else:
                         tab = self.tabs[idx][self.tab_categories[idx].index(k.voc_obj.category)]
 
@@ -505,11 +571,25 @@ class CheckBoxGroupWidget(QWidget):
         self.items = []
         self.expanded = True
         self.n_columns = n_columns
+
         self.btn_Class.setText(name.ljust(50))
+        self.btn_Class.setStyleSheet("Text-align:left")
         self.btn_Class.clicked.connect(self.toggle_expand)
+        self.lineEditSearchBar.textChanged.connect(self.on_search)
 
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
         self.toggle_expand()
+
+    def on_search(self):
+        if self.lineEditSearchBar.text() == "":
+            for k in self.items:
+                k.show()
+        else:
+            for k in self.items:
+                if self.lineEditSearchBar.text().lower() in k.word.get_name().lower():
+                    k.show()
+                else:
+                    k.hide()
 
     def finalize(self):
         is_visualizer = False
@@ -572,11 +652,13 @@ class CheckBoxGroupWidget(QWidget):
         self.expanded = not self.expanded
 
     def hide_all(self):
+        self.lineEditSearchBar.hide()
         self.widgetContent.hide()
         # for itm in self.items:
         #     itm.hide()
 
     def show_all(self):
+        self.lineEditSearchBar.show()
         self.widgetContent.show()
         # for itm in self.items:
         #     itm.show()

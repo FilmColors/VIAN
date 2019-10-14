@@ -334,9 +334,19 @@ class CorpusCommitDialog(EDialogWidget):
             self.companies = []
             log_error(e)
 
+
         self.filmography = FilmographyWidget2(self, main_window.project, persons=self.persons,
                                               processes=self.processes, genres=self.genres,
                                               countries = self.countries, companies=self.companies)
+
+        self.lineEditMovieName = QLineEdit(self)
+        if main_window.project is not None:
+            self.lineEditMovieName.setText(self.main_window.project.movie_descriptor.movie_name)
+        self.lt = QHBoxLayout()
+        self.lt.addWidget(QLabel("Full Movie Name", self))
+        self.lt.addWidget(self.lineEditMovieName)
+
+        self.horizontalLayoutUpper.addItem(self.lt)
         self.horizontalLayoutUpper.addWidget(self.filmography)
         self.pushButton_Commit.clicked.connect(self.on_commit)
         self.pushButton_Cancel.clicked.connect(self.close)
@@ -344,6 +354,7 @@ class CorpusCommitDialog(EDialogWidget):
     def on_commit(self):
         for k, v in self.filmography.get_filmography().items():
             self.main_window.project.movie_descriptor.meta_data[k] = v
+        self.main_window.project.movie_descriptor.movie_name = self.lineEditMovieName.text()
         if self.main_window.project is not None:
             self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
         self.close()

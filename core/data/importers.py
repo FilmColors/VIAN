@@ -582,19 +582,34 @@ class ExperimentTemplateImporter(ImportDevice):
     def import_(self, project:VIANProject, path):
         with open(path, "r") as f:
             data = json.load(f)
-        experiment = project.create_experiment(data['experiment']['name'])
+        experiment = Experiment(data['experiment']['name'])
+        experiment.unique_id = data['experiment']['uuid']
+        project.add_experiment(experiment)
+        # experiment = project.create_experiment(data['experiment']['name'])
         cl_objs_index = dict()
         for entry in data['classification_objects']:
-            clobj = experiment.create_class_object(entry['name'])
+            clobj = ClassificationObject(entry['name'], experiment=experiment, parent=experiment)
+            clobj.unique_id = entry['uuid']
+            clobj.set_project(project)
+            experiment.add_classification_object(clobj)
             clobj.semantic_segmentation_labels = (entry['semantic_segmentation_dataset'], [lbl for lbl in entry['semantic_segmentation_label_ids']])
             cl_objs_index[entry['id']] = clobj
 
         words_index = dict()
         for entry in data['vocabularies']:
-            voc = project.create_vocabulary(name=entry['name'])
+            # voc = project.create_vocabulary(name=entry['name'])
+            voc = Vocabulary(name=entry['name'])
+            voc.unique_id = entry['uuid']
+            voc.uuid = entry['uuid']
             voc.category = entry['vocabulary_category']
+            project.add_vocabulary(voc)
             for w in entry['words']:
-                word = voc.create_word(name = w['name'])
+                # word = voc.create_word(name = w['name'])
+                word = VocabularyWord(name = w['name'], vocabulary=voc)
+                word.unique_id = w['uuid']
+                word.uuid = w['uuid']
+                voc.add_word(word)
+
                 word.complexity_group = w['complexity_group']['name']
                 word.complexity_lvl = w['complexity']
                 word.organization_group = w['arrangement_group']

@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutUpper"/>
+    <layout class="QVBoxLayout" name="horizontalLayoutUpper"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

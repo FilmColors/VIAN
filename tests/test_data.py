@@ -10,6 +10,7 @@ from core.container.project import VIANProject
 
 from core.data.creation_events import get_path_of_pipeline_script
 
+
 class TestImportMethods(unittest.TestCase):
     def setUp(self) -> None:
         os.mkdir("data")
@@ -51,7 +52,11 @@ class TestImportMethods(unittest.TestCase):
             print(project.pipeline_scripts)
             self.assertTrue(project.active_pipeline_script is not None)
             for v in project.vocabularies:
+                r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/query/vocabulary_hash/" + v.unique_id)
+                print(r.json())
+
                 v.export_vocabulary("../data/vocabularies/" + v.name + ".json")
+
 
 if __name__ == '__main__':
     unittest.main()

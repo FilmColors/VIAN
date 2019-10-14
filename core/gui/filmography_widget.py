@@ -19,11 +19,12 @@ class FilmographyWidget2(QWidget):
         self.w.setLayout(QVBoxLayout())
         
         self.lineEdit_IMDB = QLineEdit(self.w)
-        lt = QHBoxLayout(self.w)
-        self.w.layout().addItem(lt)
+        self.lt = QHBoxLayout(self.w)
 
-        lt.addWidget(QLabel("IMDB ID:", self.w))
-        lt.addWidget(self.lineEdit_IMDB)
+        self.lt.addWidget(QLabel("IMDB ID:", self.w))
+        self.lt.addWidget(self.lineEdit_IMDB)
+
+        self.w.layout().addItem(self.lt)
 
         self.lineEdit_Genre = MultiItemTextInput(self.w, "Genre")
         self.lineEdit_Director = MultiItemTextInput(self.w, "Director")

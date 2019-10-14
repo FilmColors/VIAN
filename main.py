@@ -45,7 +45,7 @@ from PyQt5.QtGui import QPixmap, QIcon
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow, version
 
-DEBUG = False
+DEBUG = True
 MAIN_WINDOW = None
 
 class SuperFilter(QObject):
