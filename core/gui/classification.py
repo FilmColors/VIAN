@@ -113,17 +113,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.btn_ResetQuery.clicked.connect(self.on_reset_query)
 
     def on_changed(self, project, item):
-        pass
-        # if self.behaviour == "classification":
-        #     self.comboBox_Experiment.clear()
-        #     if len(project.experiments) > 0:
-        #         self.setEnabled(True)
-        #         for e in project.experiments:
-        #             self.comboBox_Experiment.addItem(e.get_name())
-        #     else:
-        #         self.setEnabled(False)
-        # else:
-        #     self.update_widget()
         return
 
     def on_loaded(self, project):
