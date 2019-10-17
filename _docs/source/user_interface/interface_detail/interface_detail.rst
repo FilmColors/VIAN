@@ -12,18 +12,19 @@ In this section, you get a detailed overview over the different tool windows lis
 .. toctree::
    :maxdepth: 4
 
-   player
-   outliner
-   timeline
-   inspector
-   screenshot_manager
-   colorimetry
-   analyses
-   classification
-   upload
-   setup
-   vocabulary
-   corpus
-   query
+   player/player.rst
+   outliner/outliner.rst
+   timeline/timeline.rst
+   player_controls/player_controls.rst
+   inspector/inspector.rst
+   screenshot_manager/screenshot_manager.rst
+   colorimetry/colorimetry.rst
+   analyses/analyses.rst
+   classification/classification.rst
+   upload/upload.rst
+   setup/setup.rst
+   vocabulary/vocabulary.rst
+   corpus/corpus.rst
+   query/query.rst
 
 

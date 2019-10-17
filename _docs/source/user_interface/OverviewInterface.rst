@@ -4,8 +4,8 @@ Overview Interface
 
 After you've created a new project and opened the video file, your VIAN interface will look like the following picture:
 
-.. figure:: VIAN_Interface_2.png
-   :scale: 70 %
+.. figure:: overview_interface.png
+   :scale: 65%
    :align: center
    :alt: map to buried treasure
 
@@ -15,6 +15,8 @@ After you've created a new project and opened the video file, your VIAN interfac
    :maxdepth: 4
 
    OverviewInterface.rst
+
+.. note:: If you dragged some Windows, closed others or are somhow lost in the current interface, you can always come back to this default interface by hitting **ALT-2**.
 
 As you would perform different tasks in your annotating workflow, you would need different widgets and windows to complete them. The VIAN Interface is therefore designed to be as flexible as needed: Different widgets and windows can be closed and opened, re-arranged or even «popped-out» (by dragging the element by its titel bar) of the normal Interface. Below is a short description of the default windows, which are seen in the picture above, and their functionality.
 
