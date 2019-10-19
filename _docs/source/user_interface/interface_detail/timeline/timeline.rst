@@ -6,7 +6,7 @@ Use the Timeline to create and modify **Segments** and **Segmentaion-** and **Sc
 
 
 .. figure:: timeline.png
-   :scale: 65%
+   :scale: 60%
    :align: center
    :alt: map to buried treasure
 

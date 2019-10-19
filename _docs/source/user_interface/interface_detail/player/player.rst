@@ -1,7 +1,7 @@
 Video Player
 ============
 
-The Player window is a staright-forward tool: It shows the current frame, which is indicated by the red line in the **Player Controls**. 
+The Player window is a straight-forward tool: It shows the current frame, which is indicated by the red line in the **Player Controls**. 
 
 
 .. figure:: player.png
