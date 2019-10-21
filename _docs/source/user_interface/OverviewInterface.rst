@@ -9,7 +9,7 @@ After you've created a new project and opened the video file, your VIAN interfac
    :align: center
    :alt: map to buried treasure
 
-   Overview of VIAN start window.
+   Overview of the VIAN default interface.
 
 .. toctree::
    :maxdepth: 4
@@ -22,8 +22,8 @@ As you would perform different tasks in your annotating workflow, you would need
 
 .. Since this is what you will see when you create a new project, the Timeline and Screenshot Manager look (and are) pretty empty. If you want to know what a prototypical procedure in annotating and analyzing a film from this point on would look like, go to XXX. If you want to know more about a specific widget seen above, go to YYY.
 
-1. Video Player
-***************
+1. :ref:`video_player`
+******************************************************
 
 The Video Player shows you the current frame where you are in the **Timeline**. It is also a **Perspective**.
 

@@ -12,7 +12,7 @@ In this section, you get a detailed overview over the different tool windows lis
 .. toctree::
    :maxdepth: 4
 
-   player/player.rst
+   video_player/video_player.rst
    outliner/outliner.rst
    timeline/timeline.rst
    player_controls/player_controls.rst
