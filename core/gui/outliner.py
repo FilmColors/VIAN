@@ -275,8 +275,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
         top.get_children(items)
 
-        if self.tree.selectionMode() == self.tree.SingleSelection:
-            self.tree.clearSelection()
+        self.tree.clearSelection()
 
         for i in items:
             if i.has_item:
