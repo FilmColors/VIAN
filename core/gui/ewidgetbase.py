@@ -123,8 +123,15 @@ class EDockWidget(QDockWidget):
 
         #NEWCODE
         self.inner = QMainWindow(None)
-        self.init = True
 
+        if limit_size:
+            # if width is None:
+            #     width = 400
+            # self.inner.setMaximumWidth(width)
+            self.inner.size
+            self.inner.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+
+        self.init = True
         self.setWidget(self.inner)
 
         if QScreen.physicalDotsPerInch(QApplication.screens()[0]) > 300:
@@ -133,27 +140,16 @@ class EDockWidget(QDockWidget):
             self.max_width = 400
 
         self.main_window.dock_widgets.append(self)
-
-        # Currently VLC breaks the DockWidgets under OSX, we disable it therefore
-        # if self.main_window.is_darwin:
-        #     self.setFeatures(QDockWidget.NoDockWidgetFeatures|QDockWidget.DockWidgetClosable)
-
-    def resizeEvent(self, *args, **kwargs):
-        # Keeping the size of the Dockwidgets
-
+    
+    def minimumSizeHint(self):
         if self.limit_size:
-            if self.maximumWidth() != self.max_width:
-                self.areas = self.main_window.dockWidgetArea(self)
-                if self.areas == Qt.LeftDockWidgetArea or self.areas == Qt.RightDockWidgetArea:
-                    self.setMaximumWidth(self.max_width)
-
-        super(EDockWidget, self).resizeEvent( *args, **kwargs)
-
-            # if self.project():
-            #     self.main_window.update_player_size()
-            #     self.main_window.update_overlay()
-
+            return QSize(200,200)
+        else:
+            return super(EDockWidget, self).minimumSizeHint()
+    
     def resize_dock(self, w=-1, h=-1):
+        return
+
         if w == -1:
             w = self.widget().width()
         if h == -1:
@@ -170,9 +166,9 @@ class EDockWidget(QDockWidget):
         else:
             self.inner.setCentralWidget(QWidget)
 
-    def dockLocationChanged(self, Qt_DockWidgetArea):
-        super(EDockWidget, self).dockLocationChanged(Qt_DockWidgetArea)
-        self.areas = Qt_DockWidgetArea
+    # def dockLocationChanged(self, Qt_DockWidgetArea):
+    #     super(EDockWidget, self).dockLocationChanged(Qt_DockWidgetArea)
+    #     self.areas = Qt_DockWidgetArea
 
     def close(self):
         self.hide()

@@ -243,7 +243,7 @@ class AnalysisWorker(QObject):
         self.signals.analysisEnded.emit()
 
     def _run_task(self, task_id, analysis, args, on_progress):
-        print("Running Analysis", analysis.__class__)
+        log_info("Running Analysis", analysis.__class__)
         try:
             return analysis.process(args, on_progress)
         except Exception as e:
@@ -254,5 +254,4 @@ class AnalysisWorker(QObject):
             return None
 
     def _on_progress(self, float_value):
-        print("Signal Progress, ", float_value)
         self.signals.sign_task_manager_progress.emit(self.current_task_id, float_value)

@@ -914,26 +914,31 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if script in self.pipeline_scripts:
             self.pipeline_scripts.remove(script)
 
-    def get_missing_analyses(self, requirements):
+    def get_missing_analyses(self, requirements, segments = None, screenshots=None, annotations = None):
         # requirements = script.pipeline_type.requirements
         result = dict()
-        if "segment_analyses" in requirements:
+        if segments is None:
             segments = []
             for s in self.segmentation:
                 segments.extend(s.segments)
+        if screenshots is None:
+            screenshots = self.screenshots
+
+        if annotations is None:
+            annotations = []
+            for l in self.annotation_layers:
+                annotations.extend(l.annotations)
+
+        if "segment_analyses" in requirements:
             result["segment_analyses"] = self._get_missing_analyses_for_container(
                 segments, requirements["segment_analyses"]
             )
         if "screenshot_analyses" in requirements:
-            screenshots = self.screenshots
             result["screenshot_analyses"] = self._get_missing_analyses_for_container(
                 screenshots, requirements["screenshot_analyses"]
             )
 
         if "annotation_analyses" in requirements:
-            annotations = []
-            for l in self.annotation_layers:
-                annotations.extend(l.annotations)
             result["annotation_analyses"] = self._get_missing_analyses_for_container(
                 annotations, requirements["annotation_analyses"]
             )
