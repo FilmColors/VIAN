@@ -142,8 +142,9 @@ class IProjectContainer(QObject):
         return self.notes
 
     def set_notes(self, notes):
+        self.project.undo_manager.to_undo((self.set_notes, [notes]),
+                                          (self.set_notes, [self.notes]))
         self.notes = notes
-        # self.dispatch_on_changed(item=self)
 
     def copy_event(self, target):
         """

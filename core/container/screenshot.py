@@ -73,12 +73,12 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.shot_id_segm = segm_id
         self.onScreenshotChanged.emit(self)
 
-    def set_notes(self, notes):
-        self.project.undo_manager.to_undo((self.set_notes, [notes]),
-                                          (self.set_notes, [self.notes]))
-        self.notes = notes
-        self.onScreenshotChanged.emit(self)
-        self.dispatch_on_changed(item=self)
+    # def set_notes(self, notes):
+    #     self.project.undo_manager.to_undo((self.set_notes, [notes]),
+    #                                       (self.set_notes, [self.notes]))
+    #     self.notes = notes
+    #     # self.onScreenshotChanged.emit(self)
+    #     self.dispatch_on_changed(item=self)
 
     def set_annotation_visibility(self, visibility):
         self.annotation_is_visible = visibility
