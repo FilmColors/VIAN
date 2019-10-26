@@ -20,6 +20,7 @@ from core.container.analysis import PipelineScript
 from core.data.computation import import_module_from_path, create_icon
 import numpy as np
 
+
 class PipelineToolbar(EToolBar):
     onToComputeChanged = pyqtSignal(bool, bool, bool)
     runAll = pyqtSignal()
