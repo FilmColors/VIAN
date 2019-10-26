@@ -216,6 +216,8 @@ class AnalysisWorker(QObject):
         self.finished_tasks = dict()
         self.current_task_id = 0
 
+        self.done = []
+
     @pyqtSlot(object, object)
     def push_task(self, analysis, args):
         task_id = generate_id(self.scheduled_task.keys())
@@ -225,15 +227,16 @@ class AnalysisWorker(QObject):
     @pyqtSlot()
     def run_worker(self):
         self.signals.analysisStarted.emit()
-        n_jobs = len(self.scheduled_task.keys())
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
             self.current_task_id = task_id
             result = self._run_task(*args)
             if result is not None:
                 self.finished_tasks[task_id] = result
-            self.signals.sign_remove_progress_bar.emit(task_id)
         self.signals.sign_result.emit(self.finished_tasks)
 
+        for i, (task_id, args) in enumerate(self.scheduled_task.items()):
+            self.signals.sign_remove_progress_bar.emit(task_id)
+        
         # Clean up
         self.scheduled_task = dict()
         self.finished_tasks = dict()
@@ -251,4 +254,5 @@ class AnalysisWorker(QObject):
             return None
 
     def _on_progress(self, float_value):
+        print("Signal Progress, ", float_value)
         self.signals.sign_task_manager_progress.emit(self.current_task_id, float_value)
