@@ -11,7 +11,7 @@ In this section, the Interface of VIAN and it's components are explained success
 
     OverviewInterface
     interface_detail/interface_detail
-    perspectives
+    perspectives/perspectives
 ..    inspector
 ..    outliner
 ..    perspectives
