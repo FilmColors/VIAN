@@ -2,6 +2,7 @@ import os
 import glob
 from random import randint
 import sys
+import subprocess
 import tempfile as tmp
 from shutil import copytree, move
 import shutil
@@ -147,6 +148,8 @@ class VianUpdaterJob(IConcurrentJob):
                         except Exception as e:
                             log_error("Could not Copy File:", str(src_file), str(e))
                             continue
+            self.run_python_update(self.app_root)
+
             try:
                 shutil.rmtree(self.app_root + "/update/", ignore_errors=True)
             except Exception as e:
@@ -155,6 +158,17 @@ class VianUpdaterJob(IConcurrentJob):
         except Exception as e:
             log_error(e)
             return [False]
+
+    def run_python_update(self, app_root):
+        if sys.platform == "win32":
+            script_path = os.path.join(app_root, "python-update-win.bat")
+            cmd = script_path
+        else:
+            script_path = os.path.join(app_root, "python-update-osx.sh")
+            cmd = "sh " + script_path
+
+        if os.path.isfile(script_path):
+            subprocess.call(cmd, shell=True)
 
     def modify_project(self, project, result, sign_progress = None, main_window = None):
         QMessageBox.information(main_window, "Update Finished", "Update Finished\n\n VIAN will quit now.\nPlease restart the Application after it has closed.")

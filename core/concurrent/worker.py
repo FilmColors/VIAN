@@ -125,6 +125,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.main_window = main_window
         self.project = None
         self.queue = []
+        self.queue_identify = []
         self.running = None
 
         self.worker = AnalysisWorker(self)
@@ -140,14 +141,21 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.worker.signals.sign_task_manager_progress.connect(self.main_window.concurrent_task_viewer.update_progress)
 
     def push(self, project, analysis, targets, parameters, fps, class_objs):
+        identify = (targets, class_objs, analysis.__class__)
+        if identify in self.queue_identify:
+            log_info("Job is already in Queue:", identify)
+            return
+
         self.queue.append((analysis, (project, targets, fps, class_objs)))
+        self.queue_identify.append(identify)
         if self.running is None:
             self._start()
 
     def _start(self):
         if len(self.queue) > 0:
-            print("Queue", len(self.queue), [q[0].__class__ for q in self.queue])
+            print("Queue:", len(self.queue), [q[0].__class__ for q in self.queue])
             analysis, params = self.queue.pop(0)
+            self.queue_identify.pop(0)
             self.running = analysis
             args = analysis.prepare(*params)
             if analysis.multiple_result:

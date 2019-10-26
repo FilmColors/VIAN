@@ -1,4 +1,4 @@
 {
-  "webapp_root": "http://127.0.0.1:5000/api/",
-  "localhost": "http://ercwebapp.westeurope.cloudapp.azure.com/api/"
+  "localhost": "http://127.0.0.1:5000/api/",
+  "webapp_root": "http://ercwebapp.westeurope.cloudapp.azure.com/api/"
 }

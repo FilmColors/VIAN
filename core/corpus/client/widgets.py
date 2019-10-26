@@ -242,8 +242,9 @@ class CorpusClientWidget(QWidget):
     def on_connect(self):
         if self.corpus_client.is_connected:
             QMessageBox.information(self, "Already Connected", "You are already connected to the WebApp.")
+            self.on_connected()
             return
-        self.on_connected(None)
+
         ret = False
         if self.main_window.settings.CONTRIBUTOR.token is not None:
             ret = self.corpus_client.connect_webapp(self.main_window.settings.CONTRIBUTOR)['success']
@@ -251,18 +252,20 @@ class CorpusClientWidget(QWidget):
         if self.main_window.settings.CONTRIBUTOR.token is None or ret is False:
             dialog = WebAppLoginDialog(self.main_window, self.corpus_client)
             dialog.show()
+        else:
+            self.on_disconnected()
 
     def on_options(self):
         menu = CorpusOptionMenu(self, self.corpus_client)
         menu.popup(QCursor.pos())
 
     @pyqtSlot(object)
-    def on_connected(self, corpus):
+    def on_connected(self):
         self.btn_Commit.setEnabled(True)
         self.btn_Connect.setIcon(create_icon("qt_ui/icons/icon_webapp.png"))
 
     @pyqtSlot(object)
-    def on_disconnected(self, corpus):
+    def on_disconnected(self):
         self.btn_Commit.setEnabled(False)
         self.btn_Connect.setIcon(create_icon("qt_ui/icons/icon_webapp_off.png"))
 

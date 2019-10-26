@@ -9,6 +9,7 @@ import cv2
 from functools import partial
 from PyQt5 import uic
 import os
+
 import sys
 # if sys.platform == "darwin":
 #     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
@@ -566,12 +567,14 @@ class TextEditPopup(QMainWindow):
         if a0.key() == Qt.Key_Enter:
             self.close()
 
+
 class EditableListWidgetItem(QListWidgetItem):
     def __init__(self, parent, name, meta):
         super(EditableListWidgetItem, self).__init__(parent)
         self.setText(name)
         self.name = name
         self.meta = meta
+
 
 class EditableListWidget(QWidget):
     onSelectionChanged = pyqtSignal(object)
@@ -763,6 +766,7 @@ class MultiItemTextInput(QWidget):
             itm.deleteLater()
         self.items = []
 
+
 class MultiItemTextInputItem(QWidget):
     onRemove = pyqtSignal(object)
 
@@ -892,23 +896,23 @@ class CreateScreenshotGroupPopup(QMainWindow):
 #             dialog = EVisualizationDialog(self, self.figure)
 
 #
-# class EMatplotLibVis(EAnalyseVisualization):
-#     def __init__(self, parent, analyze):
-#         super(EMatplotLibVis, self).__init__(parent, analyze)
-#
-#         # a figure instance to plot on
-#         # self.figure = MatplotlibFigure(self, self.analyze)
-#
-#         # this is the Canvas Widget that displays the `figure`
-#         # it takes the `figure` instance as a parameter to __init__
-#
-#         # this is the Navigation widget
-#         # it takes the Canvas widget and a parent
-#
-#         self.layout().addWidget(self.figure)
-#
-#     def plot(self):
-#         self.figure.plot()
+class EMatplotLibVis(QWidget):
+    def __init__(self, parent, analyze):
+        super(EMatplotLibVis, self).__init__(parent, analyze)
+
+        # a figure instance to plot on
+        # self.figure = MatplotlibFigure(self, self.analyze)
+
+        # this is the Canvas Widget that displays the `figure`
+        # it takes the `figure` instance as a parameter to __init__
+
+        # this is the Navigation widget
+        # it takes the Canvas widget and a parent
+
+        self.layout().addWidget(self.figure)
+
+    def plot(self):
+        self.figure.plot()
 #
 # class GraphicsViewDockWidget(EDockWidget):
 #     def __init__(self, main_window, pixmap = None):

@@ -73,8 +73,8 @@ class DialogAutoScreenshot(EDialogWidget):
 
     def on_ok(self):
         segmentation = None
-        if self.comboBox_Distribution.currentText() == "N - Per Segment":
-            segmentation = self.segmentations[self.comboBox_Target.currentIndex()]
+        # if self.comboBox_Distribution.currentText() == "N - Per Segment":
+        segmentation = self.segmentations[self.comboBox_Target.currentIndex()]
         job = AutoScreenshotJob(None, self.comboBox_Method.currentText(),
                           self.comboBox_Distribution.currentText(),
                             self.spinBox_N.value(), segmentation, self.project.hdf5_manager)

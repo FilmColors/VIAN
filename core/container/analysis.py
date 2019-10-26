@@ -14,6 +14,7 @@ from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIA
 from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
 
+
 class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamableContainer):
     """
     This is the BaseClass of all AnalysisContainers in the VIAN Project.
@@ -283,6 +284,14 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
             self.a_class = get_analysis_by_name(self.analysis_job_class)
         self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
+
+    def delete(self):
+        super(IAnalysisJobAnalysis, self).delete()
+        self.cleanup()
+
+    def cleanup(self):
+        if self.target_container is not None:
+            self.target_container.remove_analysis(self)
 
 
 class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):

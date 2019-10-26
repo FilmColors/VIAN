@@ -613,6 +613,7 @@ class ExperimentTemplateImporter(ImportDevice):
                 word.complexity_group = w['complexity_group']['name']
                 word.complexity_lvl = w['complexity']
                 word.organization_group = w['arrangement_group']
+                print("Group", word.organization_group)
                 words_index[w['id']] = word
 
         vocs_to_add = []

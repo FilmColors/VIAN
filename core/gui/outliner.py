@@ -15,6 +15,7 @@ from .ewidgetbase import EDockWidget
 # from core.corpus.client.corpus_client import CorpusClient
 # from core.corpus.legacy.sqlalchemy_entities import DBProject
 
+
 class Outliner(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(Outliner, self).__init__(main_window, width=500)
@@ -463,9 +464,8 @@ class AbstractOutlinerItem(QTreeWidgetItem):
     # @pyqtSlot(object)
     def remove_analysis(self, analysis):
         if analysis.unique_id in self.analyses:
-            self.removeChild(self.annotations[analysis.get_id()])
+            self.removeChild(self.analyses[analysis.get_id()])
             self.analyses.pop(analysis.get_id())
-
 
     def get_container(self):
         return None

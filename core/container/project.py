@@ -663,9 +663,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
         """
         if analysis in self.analysis:
             self.analysis.remove(analysis)
+
+            if isinstance(analysis, IAnalysisJobAnalysis):
+                analysis.cleanup()
+
             self.remove_from_id_list(analysis)
             self.undo_manager.to_undo((self.remove_analysis, [analysis]), (self.add_analysis, [analysis]))
             self.dispatch_changed()
+
             self.onAnalysisRemoved.emit(analysis)
 
     def get_job_analyses(self) -> List[IAnalysisJobAnalysis]:

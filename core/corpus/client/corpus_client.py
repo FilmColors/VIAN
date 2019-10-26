@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePo
 from core.data.settings import UserSettings, Contributor, CONFIG
 from core.container.project import VIANProject
 from core.container.analysis import SemanticSegmentationAnalysisContainer
+from core.container.experiment import Experiment, VocabularyWord, Vocabulary
 from core.analysis.analysis_import import SemanticSegmentationAnalysis
 
 
@@ -96,8 +97,6 @@ class CorpusClient(QObject):
             print(e)
             return False
 
-
-
     @pyqtSlot(object)
     def on_connect_finished(self, result):
         if result is not None:
@@ -116,7 +115,6 @@ class CorpusClient(QObject):
             self.onCommitStarted.emit(project, contributor)
         else:
             self.onCommitFailed.emit()
-
 
     @pyqtSlot(object)
     def on_commit_finished(self):
@@ -403,6 +401,16 @@ class WebAppCorpusInterface(QObject):
     @pyqtSlot()
     def get_companies(self):
         return requests.get(self.ep_query_companies).json()
+
+    def push_vocabulary(self, vocabulary:Vocabulary):
+        """ Pushes a Vocabulary to the WebApp """
+        pass
+
+    def pull_vocabulary(self, vocabulary:Vocabulary):
+        """ Tries to Pull a Vocabulary from the WebApp """
+        pass
+
+
 
 
 class LocalCorpusInterface():
