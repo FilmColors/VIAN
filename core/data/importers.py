@@ -579,6 +579,8 @@ class SegmentationImporter(CSVImporter):
 
 
 class ExperimentTemplateImporter(ImportDevice):
+    hidden_vocs = ["Hues"]
+
     def import_(self, project:VIANProject, path):
         with open(path, "r") as f:
             data = json.load(f)
@@ -602,6 +604,8 @@ class ExperimentTemplateImporter(ImportDevice):
             voc.unique_id = entry['uuid']
             voc.uuid = entry['uuid']
             voc.category = entry['vocabulary_category']
+            if voc.name in self.hidden_vocs:
+                voc.is_visible = False
             project.add_vocabulary(voc)
             for w in entry['words']:
                 # word = voc.create_word(name = w['name'])
@@ -634,6 +638,8 @@ class ExperimentTemplateImporter(ImportDevice):
 
 
 class ExperimentTemplateUpdater(ImportDevice):
+    hidden_vocs = ["Hues"]
+
     def import_(self, project:VIANProject, path):
         with open(path, "r") as f:
             data = json.load(f)
@@ -670,6 +676,9 @@ class ExperimentTemplateUpdater(ImportDevice):
 
             # Updating Values
             voc.category = entry['vocabulary_category']
+
+            if voc.name in self.hidden_vocs:
+                voc.is_visible = False
 
             for w in entry['words']:
                 # word = voc.create_word(name = w['name'])

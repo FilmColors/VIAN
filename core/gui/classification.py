@@ -16,7 +16,7 @@ from core.data.log import log_error, log_info, log_debug, log_warning
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import EDockWidget
 from core.container.experiment import Experiment
-from core.container.project import Segment, Annotation, Screenshot
+from core.container.project import Segment, Annotation, Screenshot, ClassificationObject, UniqueKeyword
 
 MATRIX_ORDER_PER_SEGMENT = 0
 MATRIX_ORDER_PER_TYPE = 1
@@ -101,6 +101,11 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_class = m_layout.addAction("Class-Obj / Category")
         self.a_class.setCheckable(True)
         self.a_class.setChecked(True)
+
+        self.a_hidden = m_layout.addAction("Show Hidden Vocabularies")
+        self.a_hidden.setCheckable(True)
+        self.a_hidden.setChecked(False)
+        self.a_hidden.triggered.connect(partial(self.update_widget, True))
 
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
@@ -354,14 +359,19 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         tab_widgets_class_objs_index = []
         tab_widgets_class_objs = dict()
 
-
         # Create outer tabs for Classification Objects
         ctabs = self.current_experiment.get_classification_objects_plain()
         try:
             ctabs = sorted(ctabs, key=lambda x: CLASS_OBJ_SORTING_ERC[x.name])
         except Exception as e:
             ctabs = sorted(ctabs, key=lambda x: x.name)
-        for c in ctabs:
+        for c in ctabs: #type:ClassificationObject
+            visible_keywords = 0
+            for kwd in c.unique_keywords: #type:UniqueKeyword
+                if kwd.voc_obj.is_visible or self.a_hidden.isChecked():
+                    visible_keywords += 1
+            if visible_keywords == 0:
+                continue
             tab = QTabWidget(self.tab_widget)
             tab.setMovable(True)
             try:
@@ -386,13 +396,15 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container(),
                                                                            return_all_if_none=True)
 
-                # keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
                 try:
                     keywords = sorted(keywords, key=lambda x: (CATEGORY_SORTING_ERC[x.voc_obj.category], not "Significance" in x.voc_obj.name, x.word_obj.name))
                 except Exception as e:
                     print(e)
                     keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
                 for k in keywords:
+                    if not k.voc_obj.is_visible and not self.a_hidden.isChecked():
+                        continue
+
                     if self.complexity_settings is not None:
                         try:
                             if self.complexity_settings[k.word_obj.complexity_group] < k.word_obj.complexity_lvl:
@@ -489,6 +501,9 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
             keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.organization_group, x.word_obj.name))
             for k in keywords:
+                if not k.voc_obj.is_visible and not self.a_hidden.isChecked():
+                    continue
+
                 if self.complexity_settings is not None:
                     try:
                         if self.complexity_settings[k.word_obj.complexity_group] < k.word_obj.complexity_lvl:

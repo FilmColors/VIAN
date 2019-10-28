@@ -63,6 +63,8 @@ class Vocabulary(IProjectContainer, IHasName):
         self.image_urls = []
         self.category = "default"
 
+        self.is_visible = True
+
         self._path = ""
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
@@ -185,7 +187,8 @@ class Vocabulary(IProjectContainer, IHasName):
             unique_id = self.unique_id,
             words = words_data,
             image_urls = self.image_urls,
-            comment = self.comment
+            comment = self.comment,
+            visible = self.is_visible
         )
 
         return voc_data
@@ -262,10 +265,17 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.comment = w['comment']
                 except:
                     pass
+
         try:
             self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
         except:
             self.pipeline_script = None
+
+        try:
+            self.is_visible = serialization['visible']
+        except Exception as e:
+            print(e)
+            self.is_visible = True
         return self
 
     def export_vocabulary(self, path):
@@ -1150,7 +1160,7 @@ class Experiment(IProjectContainer, IHasName):
             self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
             self.pipeline_script.experiment = self
         except Exception as e:
-            log_error("Exception in Experiment.deserialize()", e)
+            log_error("Exception in Experiment.deserialize()", e, project.name)
             self.pipeline_script = None
 
         return self

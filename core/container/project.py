@@ -308,9 +308,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
             segm = new.create_segment2(start = s.get_start(), stop = s.get_end(),
                                        dispatch=False,
                                        mode=SegmentCreationMode.INTERVAL)
+            if segm is None:
+                continue
             segm.annotation_body = s.annotation_body
 
-        print("Dispatching")
         self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
         self.dispatch_changed(item = new)
         return segmentation
@@ -1438,7 +1439,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         self.add_pipeline_script(new)
                         with open(pipeline.path, "w") as f:
                             f.write(pipeline.script)
-                        self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
+                    self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
                 except TypeError as e:
                     pass
 
@@ -1451,6 +1452,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
             # the id introspection of a project (get_by_id())
             if merge:
                 with VIANProject("Temp") as temp_propj:
+                    for q in template['pipelines']:
+                        try:
+                            pipeline = PipelineScript().deserialize(q, loc)
+                            temp_propj.add_pipeline_script(pipeline)
+                        except Exception as e:
+                            raise e
                     for v in template['vocabularies']:
                         voc = Vocabulary("voc").deserialize(v, temp_propj)
                         temp_propj.add_vocabulary(voc)

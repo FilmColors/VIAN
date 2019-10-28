@@ -1860,6 +1860,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.colormetry_running:
                 self.toggle_colormetry()
             self.project.cleanup()
+            if self.corpus_widget is not None:
+                self.corpus_widget.set_in_template_mode(False)
 
         self.player_controls.setState(False)
         self.project = None
