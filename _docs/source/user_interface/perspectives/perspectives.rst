@@ -77,16 +77,6 @@ The Analysis Perspective provides the widgets used for analysing the colors of a
 
    The Analysis Perspective.
 
-Node Scripting Perspective (ALT-7)
-**********************************
-TO DO
-
-.. figure:: node_perspective.png
-   :scale: 65 %
-   :align: center
-   :alt: map to buried treasure
-
-   The Node Scripting Perspective.
 
 * :ref:`genindex`
 * :ref:`modindex`

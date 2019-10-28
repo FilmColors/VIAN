@@ -21,8 +21,6 @@ Under the **Visualization Button** (indicated with **1** in the image above) the
 - Luminance Variance:
 
 
-
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
