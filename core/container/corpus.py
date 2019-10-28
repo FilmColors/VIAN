@@ -134,6 +134,7 @@ class Corpus(QObject, IHasName):
         """ Deserializes a Corpus from a json file """
         with open(path, "r") as f:
             self.deserialize(json.load(f))
+        self.file = path
         return self
 
     def get_type(self):

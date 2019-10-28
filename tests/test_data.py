@@ -7,7 +7,7 @@ import requests
 
 from core.data.importers import ExperimentTemplateImporter
 from core.container.project import VIANProject
-
+from core.container.experiment import merge_experiment, merge_experiment_inspect
 from core.data.creation_events import get_path_of_pipeline_script
 
 
@@ -55,6 +55,58 @@ class TestImportMethods(unittest.TestCase):
                 print(r.json())
 
                 # v.export_vocabulary("../data/vocabularies/" + v.name + ".json")
+
+    def test_2_merge_experiments(self):
+        r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/experiments/1")
+        self.exchange_data = r.json()
+
+        with open("data/test-template.json", "w") as f:
+            json.dump(self.exchange_data, f)
+
+        with VIANProject("TestProject") as project1:
+            project1.import_(ExperimentTemplateImporter(), "data/test-template.json")
+            with VIANProject("TestProject") as project2:
+                project2.import_(ExperimentTemplateImporter(), "data/test-template.json")
+                cl_obj_global = project2.experiments[0].get_classification_object_by_name("Global")
+                project2.experiments[0].remove_classification_object(cl_obj_global)
+                # for v in merge_experiment_inspect(project2.experiments[0], project1.experiments[0]):
+                #     print(v)
+
+                cl_new = project2.experiments[0].create_class_object("AnotherCL")
+                v_new = project2.create_vocabulary("AnotherV")
+                v_new.create_word("w1")
+                v_new.create_word("w2")
+                cl_new.add_vocabulary(v_new)
+
+                # for v in merge_experiment_inspect(project2.experiments[0], project1.experiments[0]):
+                #     print(v)
+
+                merge_experiment(project2.experiments[0], project1.experiments[0])
+                print(len(project1.experiments[0].get_unique_keywords()),
+                      len(project2.experiments[0].get_unique_keywords()))
+                self.assertFalse(len(project1.experiments[0].get_unique_keywords()) ==
+                                len(project2.experiments[0].get_unique_keywords()))
+
+                t1 = [(q.word_obj.unique_id, q.voc_obj.unique_id, q.class_obj.unique_id) for q in project1.experiments[0].get_unique_keywords()]
+                t2 = [(q.word_obj.unique_id, q.voc_obj.unique_id, q.class_obj.unique_id) for q in
+                      project2.experiments[0].get_unique_keywords()]
+
+                self.assertFalse(set(t1) == set(t2))
+
+                merge_experiment(project2.experiments[0], project1.experiments[0], drop=True)
+                print(len(project1.experiments[0].get_unique_keywords()),
+                      len(project2.experiments[0].get_unique_keywords()))
+
+                self.assertTrue(len(project1.experiments[0].get_unique_keywords()) ==
+                                 len(project2.experiments[0].get_unique_keywords()))
+
+                t1 = [(q.word_obj.unique_id, q.voc_obj.unique_id, q.class_obj.unique_id) for q in
+                      project1.experiments[0].get_unique_keywords()]
+                t2 = [(q.word_obj.unique_id, q.voc_obj.unique_id, q.class_obj.unique_id) for q in
+                      project2.experiments[0].get_unique_keywords()]
+
+                self.assertTrue(set(t1) == set(t2))
+
 
 
 if __name__ == '__main__':

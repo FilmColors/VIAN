@@ -12,7 +12,7 @@ from core.data.importers import ELANProjectImporter
 from core.data.computation import images_to_movie
 
 class NewProjectDialog(EDialogWidget):
-    def __init__(self, parent, settings, movie_path = "", elan_segmentation = None, add_to_current_corpus=False):
+    def __init__(self, parent, settings, movie_path = "", elan_segmentation = None, add_to_current_corpus = False):
         super(NewProjectDialog, self).__init__(parent, parent, "_docs/build/html/step_by_step/project_management/create_project.html")
         path = os.path.abspath("qt_ui/DialogNewProject.ui")
         uic.loadUi(path, self)
@@ -59,6 +59,14 @@ class NewProjectDialog(EDialogWidget):
         self.btn_BrowseMovie.clicked.connect(self.on_browse_movie_path)
 
         self.comboBoxCorpus.addItems(self.settings.recent_corpora_2.keys())
+        self.comboBoxCorpus.currentTextChanged.connect(self.on_corpus_changed)
+
+        if add_to_current_corpus:
+            if self.main_window.corpus_widget.corpus is not None:
+                try:
+                    self.comboBoxCorpus.setCurrentText(self.main_window.corpus_widget.corpus.name)
+                except Exception as e:
+                    print(e)
 
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.btn_OK.clicked.connect(self.on_ok)
@@ -74,6 +82,12 @@ class NewProjectDialog(EDialogWidget):
         self.image_paths = []
 
         self.show()
+
+    def on_corpus_changed(self):
+        if self.comboBoxCorpus.currentText() != "None":
+            self.comboBox_Template.setEnabled(False)
+        else:
+            self.comboBox_Template.setEnabled(True)
 
     def on_from_images_changed(self):
         if self.checkBox_FromImages.isChecked():
@@ -135,7 +149,7 @@ class NewProjectDialog(EDialogWidget):
             self.project_dir = path
 
     def on_browse_project_path(self):
-        path = QFileDialog.getExistingDirectory(directory=self.project_dir)
+        path = QFileDialog.getExistingDirectory(caption="Select Root Directory of the Project", directory=self.project_dir)
         self.project_dir = path
         self.lineEdit_ProjectPath.setText(self.project.folder)
 
@@ -195,7 +209,7 @@ class NewProjectDialog(EDialogWidget):
                 raise Exception("Directory already exists.")
         except Exception as e:
             QMessageBox.warning(self, str(e),"The Root directory of your project could not be created because the " + str(e) +", please set it manually.")
-            self.project_dir = QFileDialog.getExistingDirectory()
+            self.project_dir = QFileDialog.getExistingDirectory(caption="Select Root Directory of the Project")
             try:
                 os.mkdir(self.project_dir + "/" + self.project_name)
             except:

@@ -1167,7 +1167,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 try:
                     old_path = self.path
 
-                    folder = QFileDialog.getExistingDirectory()
+                    folder = QFileDialog.getExistingDirectory(caption="Select Directory to migrate the Project into")
                     self.folder = folder + "/" + self.name
                     self.path = self.folder + "/" + self.name
                     os.mkdir(self.folder)
@@ -1366,7 +1366,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         )
         return template
 
-    def apply_template(self, template_path = None, template = None, script_export=None):
+    def apply_template(self, template_path = None, template = None, script_export=None, merge=True, merge_drop = False):
         """
         Loads a template from agiven path and applies it to the project.
 
@@ -1386,18 +1386,28 @@ class VIANProject(QObject, IHasName, IClassifiable):
             template = template
 
         for s in template['segmentations']:
-            new = Segmentation(s[0])
-            new.unique_id = s[1]
-            self.add_segmentation(new)
+            new = None
+            if merge:
+                new = self.get_by_id(s[1])
+
+            if new is None:
+                new = Segmentation(s[0])
+                new.unique_id = s[1]
+                self.add_segmentation(new)
 
         for v in template['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
         for l in template['layers']:
-            new = AnnotationLayer(l[0])
-            new.unique_id = l[1]
-            self.add_annotation_layer(new)
+            new = None
+            if merge:
+                new = self.get_by_id(l[1])
+
+            if new is None:
+                new = AnnotationLayer(l[0])
+                new.unique_id = l[1]
+                self.add_annotation_layer(new)
 
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
@@ -1412,14 +1422,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
             else:
                 loc = self.folder
             for q in template['pipelines']:
-                print(q)
                 try:
                     pipeline = PipelineScript().deserialize(q, loc)
-                    self.add_pipeline_script(pipeline)
-                    print("AA", self.pipeline_scripts)
-                    with open(pipeline.path, "w") as f:
-                        f.write(pipeline.script)
-                    self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
+                    new = None
+                    if merge:
+                        new = self.get_by_id(pipeline.unique_id)
+                    if new is None:
+                        new = pipeline
+                        self.add_pipeline_script(new)
+                        with open(pipeline.path, "w") as f:
+                            f.write(pipeline.script)
+                        self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
                 except TypeError as e:
                     pass
 
@@ -1430,6 +1443,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for e in template['experiments']:
             new = Experiment().deserialize(e, self)
 
+    def merge_template(self):
+        changes = []
 
     def export(self, device, path):
         device.export(self, path)

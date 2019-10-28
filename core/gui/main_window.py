@@ -1312,7 +1312,7 @@ class MainWindow(QtWidgets.QMainWindow):
         answer = QMessageBox.question(self, "Backup", "Do you want to store the Backup into the default Directory?",
                                       buttons=QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
         if answer == QMessageBox.No:
-            path = QFileDialog.getExistingDirectory(self, directory = self.settings.DIR_ROOT)[0] + "/"
+            path = QFileDialog.getExistingDirectory(self, caption="Select Directory to store Backup", directory = self.settings.DIR_ROOT)[0] + "/"
         elif answer == QMessageBox.Yes:
             path = self.settings.DIR_BACKUPS
         else:
@@ -1832,7 +1832,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
         dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
 
-
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
@@ -1899,7 +1898,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if open_dialog is True or self.project.path is "" or self.project.name is "":
 
-            path = QFileDialog.getSaveFileName(filter="*" + VIAN_PROJECT_EXTENSION)
+            path = QFileDialog.getSaveFileName(caption="Select Project File to save", filter="*" + VIAN_PROJECT_EXTENSION)
 
             path = path[0].replace(VIAN_PROJECT_EXTENSION, "")
             path = path.replace("\\", "/")
@@ -2099,7 +2098,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     to_export.append((s.get_start(), s.get_end()))
 
             if len(to_export) > 0:
-                directory = QFileDialog.getExistingDirectory(directory=self.project.export_dir)
+                directory = QFileDialog.getExistingDirectory(caption="Select Directory to export Segments into", directory=self.project.export_dir)
                 if os.path.isdir(directory):
                     self.audio_handler.export_segments(to_export, directory=directory, callback=print)
                 else:

@@ -613,7 +613,6 @@ class ExperimentTemplateImporter(ImportDevice):
                 word.complexity_group = w['complexity_group']['name']
                 word.complexity_lvl = w['complexity']
                 word.organization_group = w['arrangement_group']
-                print("Group", word.organization_group)
                 words_index[w['id']] = word
 
         vocs_to_add = []
@@ -646,7 +645,7 @@ class ExperimentTemplateUpdater(ImportDevice):
         for entry in data['classification_objects']:
             clobj = project.get_by_id(entry['uuid'])
             if clobj is None:
-                log_info("ExperimentTemplateUpdater: Creating Classificat5ion Object:", (entry['name']))
+                log_info("ExperimentTemplateUpdater: Creating Classification Object:", (entry['name']))
                 clobj = ClassificationObject(entry['name'], experiment=experiment, parent=experiment)
                 clobj.unique_id = entry['uuid']
                 clobj.set_project(project)
@@ -699,6 +698,7 @@ class ExperimentTemplateUpdater(ImportDevice):
             word = words_index[entry['word']]
             if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
                 if (word.vocabulary, clobj) not in vocs_to_add:
+                    vocs_to_add.append((word.vocabulary, clobj))
                     unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
                     unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
                 else:

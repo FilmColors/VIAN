@@ -59,7 +59,7 @@ class DialogScreenshotExporter(EDialogWidget):
         self.checkBox_Visibility.setEnabled(self.override_visibility)
 
     def on_browse(self):
-        self.folder_path = QFileDialog.getExistingDirectory()
+        self.folder_path = QFileDialog.getExistingDirectory(caption="Select Directory to export Screenshots into")
         self.lineEdit_Folder.setText(self.folder_path)
 
     def on_edit_path_finished(self):
