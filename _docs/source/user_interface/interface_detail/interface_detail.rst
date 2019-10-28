@@ -9,6 +9,14 @@ Interface in Detail
 ===================
 In this section, you get a detailed overview over the different tool windows listed beneath. The order is the same as in the **Control Panel** top-down.
 
+.. figure:: control_panel.png
+   :scale: 65 %
+   :align: left
+   :alt: map to buried treasure
+
+   The Control Panel with the Icons for the corresponding Tools.
+
+
 .. toctree::
    :maxdepth: 4
 
