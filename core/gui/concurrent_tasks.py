@@ -40,74 +40,42 @@ class ConcurrentTasksList(QWidget):
         super(ConcurrentTasksList, self).__init__(parent)
         path = os.path.abspath("qt_ui/ConcurrentTasksList.ui")
         uic.loadUi(path, self)
-        self.task_entries = []
+        self.task_entries = dict()
         self.dock = parent
-        self.show()
-        self.tmax = 1
 
     @pyqtSlot(int, str, object, object)
     def add_task(self, task_id, name, task_object, job):
-        entry = ConcurrentTaskEntry(self,task_id, name, task_object, job)
-        self.task_entries.append(entry)
+        entry = ConcurrentTaskEntry(self, task_id, name, task_object, job)
+        self.task_entries[task_id] = entry
         self.widget_task_list.layout().addWidget(entry)
         entry.onProgress.connect(self.update_total)
-        if len(self.task_entries) > self.tmax:
-            self.tmax = len(self.task_entries) + 1
 
     @pyqtSlot(int)
     def remove_task(self, task_id):
-        for t in self.task_entries:
-            if t.task_id == task_id:
-                t.close()
-                t.deleteLater()
-                self.task_entries.remove(t)
-                break
-        self.update_progress(-1,-1)
+        if task_id in self.task_entries:
+            w = self.task_entries[task_id]
+            w.deleteLater()
+            self.task_entries.pop(task_id)
+        self.update_total()
 
     @pyqtSlot(int, float)
     def update_progress(self,task_id, value_float):
-        if len(self.task_entries) == 1:
-            complete_progress = 0
-            for t in self.task_entries:
-                if t.task_id == task_id:
-                    t.update_progress(value_float)
-                complete_progress += t.progress_bar.value()
-            complete_progress = int(float(complete_progress) / len(self.task_entries))
-
-            self.progressBar_total.setValue(complete_progress)
-            self.dock.onTotalProgressUpdate.emit(complete_progress)
-            return complete_progress
-        elif len(self.task_entries) > 1:
-            complete_progress = int(float(len(self.task_entries)) / self.tmax)
-            self.progressBar_total.setValue(complete_progress)
-            self.dock.onTotalProgressUpdate.emit(complete_progress)
-            print(len(self.task_entries), self.tmax)
-            return complete_progress
-        else:
-            self.progressBar_total.setValue(0)
-            self.dock.onTotalProgressUpdate.emit(0)
-            self.tmax = 1
-            return 0.0
+        if task_id in self.task_entries:
+            w = self.task_entries[task_id]
+            w.update_progress(value_float)
+        return self.update_total()
 
     def update_total(self):
-        if len(self.task_entries) == 1:
-            complete_progress = 0
-            for t in self.task_entries:
-                complete_progress += t.progress_bar.value()
-            complete_progress = int(float(complete_progress) / len(self.task_entries))
-            self.progressBar_total.setValue(complete_progress)
-            self.dock.onTotalProgressUpdate.emit(complete_progress)
-            return complete_progress
-        elif len(self.task_entries) > 1:
-            complete_progress = int(float(len(self.task_entries)) / self.tmax)
-            self.progressBar_total.setValue(complete_progress)
-            self.dock.onTotalProgressUpdate.emit(complete_progress)
-            return complete_progress
+        total = 0.0
+        if len(self.task_entries.keys()) > 0:
+            for k , w in self.task_entries.items():
+                total += w.progress
+            total /= len(self.task_entries.keys())
         else:
-            self.progressBar_total.setValue(0)
-            self.dock.onTotalProgressUpdate.emit(0)
-            self.tmax = 1
-            return 0.0
+            total = 0.0
+        self.progressBar_total.setValue(total)
+        self.dock.onTotalProgressUpdate.emit(total)
+        return total
 
 
 class ConcurrentTaskEntry(QWidget):

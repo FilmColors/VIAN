@@ -11,6 +11,7 @@ from core.concurrent.worker import MinimalThreadWorker, WorkerManager
 from core import version
 from core.version import *
 from core.concurrent.worker_functions import *
+from core.concurrent.update_erc_template import ERCUpdateJob
 from core.corpus.client.widgets import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
@@ -263,7 +264,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_colorimetry_live()
         self.create_experiment_editor()
         self.create_corpus_widget()
-        self.settings.apply_dock_widgets_settings(self.dock_widgets)
+
 
         self.pipeline_toolbar = PipelineToolbar(self)
 
@@ -335,6 +336,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionPaste.triggered.connect(self.on_paste)
         self.actionDelete.triggered.connect(self.on_delete)
         self.actionDelete.setShortcuts([QKeySequence(Qt.Key_Delete), QKeySequence(Qt.Key_Backspace)])
+        self.actionRun_Pipeline_for_Selection.triggered.connect(self.pipeline_widget.pipeline.run_selection)
+        self.actionRun_Complete_Pipeline.triggered.connect(self.pipeline_widget.pipeline.run_all)
+        self.actionDelete_all_Analyses.triggered.connect(self.on_remove_all_analyses)
 
         # Tab Windows
         self.actionScreenshot_Manager.triggered.connect(self.create_screenshot_manager_dock_widget)
@@ -427,6 +431,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
         self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
+
+        self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -1137,6 +1143,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # TODO What is this for??
         self.player_controls.on_play()
 
+    def on_remove_all_analyses(self):
+        if self.project is not None:
+            to_remove = [a for a in self.project.analysis]
+            print(to_remove)
+            for a in to_remove:
+                self.project.remove_analysis(a)
+
     def on_exit(self):
         self.set_overlay_visibility(False)
         if self.project is not None and self.project.undo_manager.has_modifications():
@@ -1344,10 +1357,6 @@ class MainWindow(QtWidgets.QMainWindow):
         central = QWidget(self)
         central.setFixedWidth(0)
 
-        # if self.is_darwin:
-        #     self.screenshot_toolbar.show()
-        #     self.annotation_toolbar.show()
-
         if perspective == Perspective.VideoPlayer:
             self.player_dock_widget.show()
 
@@ -1360,18 +1369,21 @@ class MainWindow(QtWidgets.QMainWindow):
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
             self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.tabifyDockWidget(self.inspector, self.history_view)
+            self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
+
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
             self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
-            # self.tabifyDockWidget(self.colorimetry_live, self.script_editor)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.experiment_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.query_widget)
+
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
@@ -2206,6 +2218,10 @@ class MainWindow(QtWidgets.QMainWindow):
         screenshot_annotation_dicts = []
 
         self.has_open_project = True
+
+        job = ERCUpdateJob()
+        worker = MinimalThreadWorker(job.run_concurrent, self.project, True)
+        self.thread_pool.start(worker, QThread.HighPriority)
 
         # Check if the file exists locally
         success = True

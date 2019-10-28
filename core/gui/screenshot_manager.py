@@ -313,9 +313,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def add_screenshot(self, scr:Screenshot):
         scr.onImageSet.connect(self.update_screenshot)
         scr.onAnalysisAdded.connect(self.on_analysis_added)
+        scr.onAnalysisRemoved.connect(self.on_analysis_removed)
         self.update_screenshot(scr)
 
     def on_analysis_added(self, a):
+        self.update_screenshot(a.target_container)
+
+    def on_analysis_removed(self, a):
         self.update_screenshot(a.target_container)
 
     @pyqtSlot(object, object, object)
@@ -335,6 +339,9 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
             except Exception as e:
                 a = None
         if a is None:
+            self.lc_view.remove_image_by_uid(scr.unique_id)
+            self.ab_view.remove_image_by_uid(scr.unique_id)
+            self.color_dt.remove_image_by_uid(scr.unique_id)
             return
         x = scr.movie_timestamp
         sat = a['saturation_l']

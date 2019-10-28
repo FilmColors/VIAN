@@ -73,6 +73,11 @@ class IProjectContainer(QObject):
             self.connected_analyses.remove(analysis)
             self.onAnalysisRemoved.emit(analysis)
 
+    def delete_analyses(self):
+        to_remove = [a for a in self.connected_analyses]
+        for a in to_remove:
+            self.project.remove_analysis(a)
+
     def get_connected_analysis(self, class_type=None, as_clobj_dict=False):
         """
         Returns a List of AnalysesResults that are of class_type, and attached to this container
@@ -142,8 +147,9 @@ class IProjectContainer(QObject):
         return self.notes
 
     def set_notes(self, notes):
+        self.project.undo_manager.to_undo((self.set_notes, [notes]),
+                                          (self.set_notes, [self.notes]))
         self.notes = notes
-        # self.dispatch_on_changed(item=self)
 
     def copy_event(self, target):
         """

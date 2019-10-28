@@ -273,7 +273,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.fetch_vocabularies()
 
         self.complexities = {
-            "0 (Unclassified)": 1,
+            "0 (Undefined)": 1,
             "1 (Beginner)": 1,
             "2" : 2,
             "3 (Intermediate)" : 3,

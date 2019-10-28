@@ -364,6 +364,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.start = start
         self.segmentation.update_segment_ids()
         self.project.sort_screenshots()
+
+        # Since the region has changed, we delete the analysis
+        self.delete_analyses()
+
         self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
@@ -372,6 +376,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             end = self.start + self.MIN_SIZE
 
         self.project.undo_manager.to_undo((self.set_end, [end]), (self.set_end, [self.end]))
+
+        # Since the region has changed, we delete the analysis
+        self.delete_analyses()
+
         self.end = end
         self.segmentation.update_segment_ids()
         self.project.sort_screenshots()
@@ -388,6 +396,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.project.undo_manager.to_undo((self.move, [start, end]), (self.move, [self.start, self.end]))
         self.start = start
         self.end = end
+
+        # Since the region has changed, we delete the analysis
+        self.delete_analyses()
+
         self.segmentation.update_segment_ids()
         self.project.sort_screenshots()
         self.onSegmentChanged.emit(self)
@@ -487,3 +499,4 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def get_parent_container(self):
         return self.segmentation
+

@@ -88,7 +88,6 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             self.scene().removeItem(item)
             self.item_idx.pop(uid)
             self.images.remove(item)
-            print("Found")
 
     def sort_images(self):
         self.luminances = sorted(self.luminances, key=lambda x: x[0])

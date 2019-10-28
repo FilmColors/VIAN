@@ -595,7 +595,18 @@ class ClassificationObject(IProjectContainer, IHasName):
 
             return keywords
         else:
+            #Check if really there are new words in the vocabulary which are not yet added to the keywords.
             keywords = []
+            all_words = [w.word_obj for w in self.unique_keywords]
+            for w in voc.words_plain:
+                if w not in all_words:
+                    if keyword_override is not None:
+                        keyword = keyword_override[w.unique_id]
+                    else:
+                        keyword = UniqueKeyword(self.experiment, voc, w, self)
+                    keyword.set_project(self.project)
+                    self.unique_keywords.append(keyword)
+
             for r in self.unique_keywords:
                 if r.voc_obj == voc:
                     keywords.append(r)

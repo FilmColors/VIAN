@@ -15,10 +15,11 @@ from functools import partial
 from core.gui.python_script_editor import PythonScriptEditor
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
 from core.data.log import log_error, log_info, log_warning
-from core.container.project import VIANProject
+from core.container.project import VIANProject, Screenshot, Annotation, Segment
 from core.container.analysis import PipelineScript
 from core.data.computation import import_module_from_path, create_icon
 import numpy as np
+
 
 class PipelineToolbar(EToolBar):
     onToComputeChanged = pyqtSignal(bool, bool, bool)
@@ -498,6 +499,52 @@ class PipelineWidget(QWidget):
                             )
                             log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
                             self.onRunAnalysis.emit(d)
+
+    def run_selection(self):
+        if self.project is not None:
+            if self.main_window.vian_event_handler.current_pipeline is None:
+                return
+
+            container = self.project.selected
+
+            scrs = [s for s in container if isinstance(s, Screenshot)]
+            segments = [s for s in container if isinstance(s, Segment)]
+            annotations = [s for s in container if isinstance(s, Annotation)]
+
+            missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements,
+                                                             screenshots=scrs, annotations=annotations, segments=segments)
+            missing = dict()
+
+            log_info("## Missing Analyses in Pipeline ##")
+            for k in missing_info.keys():
+                # print(k, missing_info[k], missing.items())
+                missing[k] = missing_info[k][0]
+                log_info("## -- ", k, missing_info[k][2], missing_info[k][1], missing_info[k][0])
+
+            experiment = self.main_window.vian_event_handler.current_pipeline.experiment
+
+            if experiment is None:
+                log_error("Experiment not found for RunAll")
+                return
+            for cl in missing.keys():
+                for priority in sorted(missing[cl].keys()):
+                    for analysis_name in missing[cl][priority].keys():
+                        analysis = self.main_window.eval_class(analysis_name)
+                        for clobj_name, containers in missing[cl][priority][analysis_name].items():
+                            clobj = experiment.get_classification_object_by_name(clobj_name)
+
+                            if clobj is None:
+                                log_warning("Classification Object not found")
+                                continue
+                            d = dict(
+                                analysis=analysis(),
+                                targets=containers,
+                                parameters=None,
+                                classification_objs=clobj
+                            )
+                            log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
+                            self.onRunAnalysis.emit(d)
+
 
     @pyqtSlot(object)
     def on_loaded(self, project:VIANProject):

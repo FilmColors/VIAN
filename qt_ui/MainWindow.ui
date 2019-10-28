@@ -188,6 +188,11 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
+    <addaction name="separator"/>
+    <addaction name="actionRun_Pipeline_for_Selection"/>
+    <addaction name="actionRun_Complete_Pipeline"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete_all_Analyses"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -910,6 +915,27 @@
   <action name="actionStart_AudioExtraction">
    <property name="text">
     <string>Start AudioExtraction</string>
+   </property>
+  </action>
+  <action name="actionRun_Pipeline_for_Selection">
+   <property name="text">
+    <string>Run Pipeline for Selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionRun_Complete_Pipeline">
+   <property name="text">
+    <string>Run Complete Pipeline</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+P</string>
+   </property>
+  </action>
+  <action name="actionDelete_all_Analyses">
+   <property name="text">
+    <string>Delete all Analyses</string>
    </property>
   </action>
  </widget>

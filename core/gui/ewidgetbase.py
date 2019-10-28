@@ -9,6 +9,7 @@ import cv2
 from functools import partial
 from PyQt5 import uic
 import os
+
 import sys
 # if sys.platform == "darwin":
 #     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
@@ -122,8 +123,15 @@ class EDockWidget(QDockWidget):
 
         #NEWCODE
         self.inner = QMainWindow(None)
-        self.init = True
 
+        if limit_size:
+            # if width is None:
+            #     width = 400
+            # self.inner.setMaximumWidth(width)
+            self.inner.size
+            self.inner.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+
+        self.init = True
         self.setWidget(self.inner)
 
         if QScreen.physicalDotsPerInch(QApplication.screens()[0]) > 300:
@@ -132,27 +140,16 @@ class EDockWidget(QDockWidget):
             self.max_width = 400
 
         self.main_window.dock_widgets.append(self)
-
-        # Currently VLC breaks the DockWidgets under OSX, we disable it therefore
-        # if self.main_window.is_darwin:
-        #     self.setFeatures(QDockWidget.NoDockWidgetFeatures|QDockWidget.DockWidgetClosable)
-
-    def resizeEvent(self, *args, **kwargs):
-        # Keeping the size of the Dockwidgets
-
+    
+    def minimumSizeHint(self):
         if self.limit_size:
-            if self.maximumWidth() != self.max_width:
-                self.areas = self.main_window.dockWidgetArea(self)
-                if self.areas == Qt.LeftDockWidgetArea or self.areas == Qt.RightDockWidgetArea:
-                    self.setMaximumWidth(self.max_width)
-
-        super(EDockWidget, self).resizeEvent( *args, **kwargs)
-
-            # if self.project():
-            #     self.main_window.update_player_size()
-            #     self.main_window.update_overlay()
-
+            return QSize(200,200)
+        else:
+            return super(EDockWidget, self).minimumSizeHint()
+    
     def resize_dock(self, w=-1, h=-1):
+        return
+
         if w == -1:
             w = self.widget().width()
         if h == -1:
@@ -169,9 +166,9 @@ class EDockWidget(QDockWidget):
         else:
             self.inner.setCentralWidget(QWidget)
 
-    def dockLocationChanged(self, Qt_DockWidgetArea):
-        super(EDockWidget, self).dockLocationChanged(Qt_DockWidgetArea)
-        self.areas = Qt_DockWidgetArea
+    # def dockLocationChanged(self, Qt_DockWidgetArea):
+    #     super(EDockWidget, self).dockLocationChanged(Qt_DockWidgetArea)
+    #     self.areas = Qt_DockWidgetArea
 
     def close(self):
         self.hide()
@@ -566,12 +563,14 @@ class TextEditPopup(QMainWindow):
         if a0.key() == Qt.Key_Enter:
             self.close()
 
+
 class EditableListWidgetItem(QListWidgetItem):
     def __init__(self, parent, name, meta):
         super(EditableListWidgetItem, self).__init__(parent)
         self.setText(name)
         self.name = name
         self.meta = meta
+
 
 class EditableListWidget(QWidget):
     onSelectionChanged = pyqtSignal(object)
@@ -763,6 +762,7 @@ class MultiItemTextInput(QWidget):
             itm.deleteLater()
         self.items = []
 
+
 class MultiItemTextInputItem(QWidget):
     onRemove = pyqtSignal(object)
 
@@ -892,23 +892,23 @@ class CreateScreenshotGroupPopup(QMainWindow):
 #             dialog = EVisualizationDialog(self, self.figure)
 
 #
-# class EMatplotLibVis(EAnalyseVisualization):
-#     def __init__(self, parent, analyze):
-#         super(EMatplotLibVis, self).__init__(parent, analyze)
-#
-#         # a figure instance to plot on
-#         # self.figure = MatplotlibFigure(self, self.analyze)
-#
-#         # this is the Canvas Widget that displays the `figure`
-#         # it takes the `figure` instance as a parameter to __init__
-#
-#         # this is the Navigation widget
-#         # it takes the Canvas widget and a parent
-#
-#         self.layout().addWidget(self.figure)
-#
-#     def plot(self):
-#         self.figure.plot()
+class EMatplotLibVis(QWidget):
+    def __init__(self, parent, analyze):
+        super(EMatplotLibVis, self).__init__(parent, analyze)
+
+        # a figure instance to plot on
+        # self.figure = MatplotlibFigure(self, self.analyze)
+
+        # this is the Canvas Widget that displays the `figure`
+        # it takes the `figure` instance as a parameter to __init__
+
+        # this is the Navigation widget
+        # it takes the Canvas widget and a parent
+
+        self.layout().addWidget(self.figure)
+
+    def plot(self):
+        self.figure.plot()
 #
 # class GraphicsViewDockWidget(EDockWidget):
 #     def __init__(self, main_window, pixmap = None):

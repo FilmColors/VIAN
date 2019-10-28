@@ -4,8 +4,10 @@ from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePo
 from core.data.settings import UserSettings, Contributor, CONFIG
 from core.container.project import VIANProject
 from core.container.analysis import SemanticSegmentationAnalysisContainer
+from core.container.experiment import Experiment, VocabularyWord, Vocabulary
 from core.analysis.analysis_import import SemanticSegmentationAnalysis
-
+from core.data.log import log_info
+from core.data.importers import ExperimentTemplateUpdater
 
 import os
 import json
@@ -33,8 +35,26 @@ def get_vian_version():
     version_id = q['id']
     return version, version_id
 
+
 def download_vian_update(version_id):
     return requests.get(EP_ROOT + "vian/download_vian/" + str(version_id), stream=True)
+
+
+def check_erc_template(project:VIANProject):
+    uuid = CONFIG['erc_template_uuid']
+    exp = project.get_by_id(uuid)
+    if exp is None:
+        log_info("No ERC Template detected")
+        return
+    log_info("ERC Template detected, updating")
+    r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/experiments/1")
+    exchange_data = r.json()
+    temporary = "data/temp.json"
+    with open(temporary, "w") as f:
+        json.dump(exchange_data, f)
+    project.import_(ExperimentTemplateUpdater(), temporary)
+    log_info("ERC Template detected, Done")
+
 
 
 class CorpusClient(QObject):
@@ -96,8 +116,6 @@ class CorpusClient(QObject):
             print(e)
             return False
 
-
-
     @pyqtSlot(object)
     def on_connect_finished(self, result):
         if result is not None:
@@ -116,7 +134,6 @@ class CorpusClient(QObject):
             self.onCommitStarted.emit(project, contributor)
         else:
             self.onCommitFailed.emit()
-
 
     @pyqtSlot(object)
     def on_commit_finished(self):
@@ -403,6 +420,16 @@ class WebAppCorpusInterface(QObject):
     @pyqtSlot()
     def get_companies(self):
         return requests.get(self.ep_query_companies).json()
+
+    def push_vocabulary(self, vocabulary:Vocabulary):
+        """ Pushes a Vocabulary to the WebApp """
+        pass
+
+    def pull_vocabulary(self, vocabulary:Vocabulary):
+        """ Tries to Pull a Vocabulary from the WebApp """
+        pass
+
+
 
 
 class LocalCorpusInterface():

@@ -1,3 +1,4 @@
+import traceback
 import logging
 import os
 
@@ -70,6 +71,7 @@ def log_error(*args):
     for a in args:
         msg += str(a) + " "
     log.error(msg)
+    log.error(traceback.format_exc())
 
 def log_debug(*args):
     msg = ""

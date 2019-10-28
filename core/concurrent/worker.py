@@ -125,6 +125,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.main_window = main_window
         self.project = None
         self.queue = []
+        self.queue_identify = []
         self.running = None
 
         self.worker = AnalysisWorker(self)
@@ -140,14 +141,21 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.worker.signals.sign_task_manager_progress.connect(self.main_window.concurrent_task_viewer.update_progress)
 
     def push(self, project, analysis, targets, parameters, fps, class_objs):
+        identify = (targets, class_objs, analysis.__class__)
+        if identify in self.queue_identify:
+            log_info("Job is already in Queue:", identify)
+            return
+
         self.queue.append((analysis, (project, targets, fps, class_objs)))
+        self.queue_identify.append(identify)
         if self.running is None:
             self._start()
 
     def _start(self):
         if len(self.queue) > 0:
-            print("Queue", len(self.queue), [q[0].__class__ for q in self.queue])
+            print("Queue:", len(self.queue), [q[0].__class__ for q in self.queue])
             analysis, params = self.queue.pop(0)
+            self.queue_identify.pop(0)
             self.running = analysis
             args = analysis.prepare(*params)
             if analysis.multiple_result:
@@ -208,6 +216,8 @@ class AnalysisWorker(QObject):
         self.finished_tasks = dict()
         self.current_task_id = 0
 
+        self.done = []
+
     @pyqtSlot(object, object)
     def push_task(self, analysis, args):
         task_id = generate_id(self.scheduled_task.keys())
@@ -217,22 +227,23 @@ class AnalysisWorker(QObject):
     @pyqtSlot()
     def run_worker(self):
         self.signals.analysisStarted.emit()
-        n_jobs = len(self.scheduled_task.keys())
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
             self.current_task_id = task_id
             result = self._run_task(*args)
             if result is not None:
                 self.finished_tasks[task_id] = result
-            self.signals.sign_remove_progress_bar.emit(task_id)
         self.signals.sign_result.emit(self.finished_tasks)
 
+        for i, (task_id, args) in enumerate(self.scheduled_task.items()):
+            self.signals.sign_remove_progress_bar.emit(task_id)
+        
         # Clean up
         self.scheduled_task = dict()
         self.finished_tasks = dict()
         self.signals.analysisEnded.emit()
 
     def _run_task(self, task_id, analysis, args, on_progress):
-        print("Running Analysis", analysis.__class__)
+        log_info("Running Analysis", analysis.__class__)
         try:
             return analysis.process(args, on_progress)
         except Exception as e:

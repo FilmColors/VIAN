@@ -9,7 +9,7 @@ from PyQt5 import QtCore
 
 class Inspector(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
-        super(Inspector, self).__init__(main_window)
+        super(Inspector, self).__init__(main_window, limit_size=True, width=450)
         path = os.path.abspath("qt_ui/Inspector.ui")
         uic.loadUi(path, self)
 
@@ -18,14 +18,16 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.lineEdit_Name.editingFinished.connect(self.set_name)
         self.textEdit_Notes.textChanged.connect(self.set_notes)
 
-        # self.lineEdit_Vocabulary.returnPressed.connect(self.add_voc_word)
         self.completer = QCompleter()
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.btn_VocMatrix.clicked.connect(self.main_window.create_vocabulary_matrix)
 
         self.visibilityChanged.connect(self.on_visibility_changed)
-        # self.lineEdit_Vocabulary.keyPressEvent.connect(self.vocabulary_key_press)
         self.lineEdit_Vocabulary.setCompleter(self.completer)
+
+        # self.widget().setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+        # self.widget().setMaximumWidth(self.max_width)
+        # self.widget().setMinimumWidth(self.max_width // 2)
 
         self.item = None
         self.allow_change = False
@@ -464,9 +466,9 @@ class AttributesAnalysis(QWidget):
         self.layout().addWidget(QLabel("Target: " + clobj_name))
 
         # index = self.descriptor.procedure_id
-        self.vis_button = QPushButton("Show Visualization", self)
-        self.layout().addWidget(self.vis_button)
-        self.vis_button.clicked.connect(self.on_show_vis)
+        # self.vis_button = QPushButton("Show Visualization", self)
+        # self.layout().addWidget(self.vis_button)
+        # self.vis_button.clicked.connect(self.on_show_vis)
         self.vis = descriptor.get_preview()
 
         # Vis could be none because of a failed Visualization creation

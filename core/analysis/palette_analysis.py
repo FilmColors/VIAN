@@ -20,7 +20,7 @@ from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class ColorPaletteAnalysis(IAnalysisJob):
-    def __init__(self, resolution = 30):
+    def __init__(self, resolution = 30, input_width = 300, n_super_pixel = 200):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorPalettes",
                                                    dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6), #(Distance, Layer, L, A, B, N)
@@ -29,6 +29,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
                                                    version="1.0.0",
                                                    multiple_result=True)
         self.resolution = resolution
+        self.seeds_input_width = input_width
+        self.n_super_pixel = n_super_pixel
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
         """
@@ -81,6 +83,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         cap.set(cv2.CAP_PROP_POS_FRAMES, start)
         c = start
 
+        model = None
         while c < stop + self.resolution:
             if c % self.resolution != 0:
                 c += 1
@@ -92,14 +95,23 @@ class ColorPaletteAnalysis(IAnalysisJob):
 
             if frame is None:
                 break
-
             # Get sub frame if there are any margins
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
+            if model is None:
+                if self.seeds_input_width < frame.shape[0]:
+                    rx = self.seeds_input_width / frame.shape[0]
+                    frame = cv2.resize(frame, None, None, rx, rx, cv2.INTER_CUBIC)
+                model = PaletteExtractorModel(frame, n_pixels=self.n_super_pixel, num_levels=8)
+
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
             try:
-                pal = color_palette(frame, mask=bin_mask, mask_index=255)
+                pal = color_palette(frame, mask=bin_mask,
+                                    mask_index=255,
+                                    n_pixels=self.n_super_pixel,
+                                    seeds_input_width = self.seeds_input_width,
+                                    seeds_model=model)
             except Exception as e:
                 log_error(e)
                 pal = None

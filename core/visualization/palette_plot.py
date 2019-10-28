@@ -44,7 +44,6 @@ class PaletteWidget(QWidget):
         self.cb_sorting = QComboBox(self.all_ctrls)
         self.cb_sorting.addItems(['Cluster', 'Frequency', "Hilbert"])
 
-
         self.layout().addWidget(ExpandableWidget(self,"Controls",self.all_ctrls, popup=False))
 
         self.hbox_slider = QVBoxLayout(self.all_ctrls)

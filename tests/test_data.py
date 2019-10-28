@@ -49,13 +49,12 @@ class TestImportMethods(unittest.TestCase):
             print("Exported")
         with VIANProject("TestProject", folder="data") as project:
             project.apply_template("ERC-FilmColors-Template.viant")
-            print(project.pipeline_scripts)
             self.assertTrue(project.active_pipeline_script is not None)
             for v in project.vocabularies:
                 r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/query/vocabulary_hash/" + v.unique_id)
                 print(r.json())
 
-                v.export_vocabulary("../data/vocabularies/" + v.name + ".json")
+                # v.export_vocabulary("../data/vocabularies/" + v.name + ".json")
 
 
 if __name__ == '__main__':
