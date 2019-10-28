@@ -107,6 +107,53 @@ class TestImportMethods(unittest.TestCase):
 
                 self.assertTrue(set(t1) == set(t2))
 
+    def test_3_merge_template(self):
+        r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/experiments/1")
+        self.exchange_data = r.json()
+
+        with open("data/test-template.json", "w") as f:
+            json.dump(self.exchange_data, f)
+
+        with VIANProject("TestProject") as project1:
+            project1.import_(ExperimentTemplateImporter(), "data/test-template.json")
+
+
+            with open("../extensions/pipelines/ercfilmcolors.py", "r") as f:
+                script = f.read()
+            pipeline = project1.create_pipeline_script(name="ERCFilmColors Pipeline", author="ERCFilmColors",
+                                                       script=script)
+
+            project1.experiments[0].pipeline_script = pipeline
+            pipeline.experiment = project1.experiments[0]
+
+            project1.active_pipeline_script = pipeline
+            project1.compute_pipeline_settings = dict(segments=False,
+                                                      screenshots=True,
+                                                      annotations=False)
+            tmpl = project1.get_template(True, True, True, True, True, True)
+
+            with VIANProject("TestProject") as project2:
+                project2.apply_template(template=tmpl,  script_export="data/")
+                print(len(project1.experiments[0].get_unique_keywords()),
+                      len(project2.experiments[0].get_unique_keywords()))
+
+                cl_obj_global = project2.experiments[0].get_classification_object_by_name("Global")
+                project2.experiments[0].remove_classification_object(cl_obj_global)
+
+                cl_new = project1.experiments[0].create_class_object("AnotherCL")
+                v_new = project1.create_vocabulary("AnotherV")
+                v_new.create_word("w1")
+                v_new.create_word("w2")
+                cl_new.add_vocabulary(v_new)
+
+                tmpl = project1.get_template(True, True, True, True, True, True)
+                res = project2.apply_template(template=tmpl, merge=True, script_export="data/")
+
+                print(res)
+                for r in res:
+                    print(r)
+                print(len(project1.experiments[0].get_unique_keywords()),
+                      len(project2.experiments[0].get_unique_keywords()))
 
 
 if __name__ == '__main__':

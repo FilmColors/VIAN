@@ -1266,6 +1266,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         try:
             for e in my_dict['experiments']:
                 new = Experiment().deserialize(e, self)
+                self.add_experiment(new)
 
         except Exception as e:
             # raise e
@@ -1347,13 +1348,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if experiment:
             for e in self.experiments:
                 experiments.append(e.to_template())
+
+        active_pipeline = None
         if pipeline:
             for p in self.pipeline_scripts:
                 pipelines.append(p.serialize())
             if self.active_pipeline_script is not None:
                 active_pipeline = self.active_pipeline_script.unique_id
-            else:
-                active_pipeline = None
+
         template = dict(
             segmentations = segmentations,
             vocabularies = vocabularies,
@@ -1373,6 +1375,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param template_path: Path to the json
         :return: None
         """
+        merge_results = []
+
         if template is None and template_path is None:
             raise ValueError("Either template_path or template has to be given.")
         if template_path is not None and template is None:
@@ -1391,6 +1395,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 new = self.get_by_id(s[1])
 
             if new is None:
+                merge_results.append(("Created Segmentation", s))
                 new = Segmentation(s[0])
                 new.unique_id = s[1]
                 self.add_segmentation(new)
@@ -1405,6 +1410,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 new = self.get_by_id(l[1])
 
             if new is None:
+                merge_results.append(("Created Annotation Layer", l))
                 new = AnnotationLayer(l[0])
                 new.unique_id = l[1]
                 self.add_annotation_layer(new)
@@ -1441,10 +1447,28 @@ class VIANProject(QObject, IHasName, IClassifiable):
             raise e
 
         for e in template['experiments']:
-            new = Experiment().deserialize(e, self)
+            # If we want to merge the experiments, we need to create a temporary project, since Experiment relies on
+            # the id introspection of a project (get_by_id())
+            if merge:
+                with VIANProject("Temp") as temp_propj:
+                    for v in template['vocabularies']:
+                        voc = Vocabulary("voc").deserialize(v, temp_propj)
+                        temp_propj.add_vocabulary(voc)
 
-    def merge_template(self):
-        changes = []
+                    new = Experiment().deserialize(e, temp_propj)
+                    temp_propj.add_experiment(new)
+
+                    exp = self.get_by_id(new.unique_id)
+                    if exp is not None and isinstance(exp, Experiment):
+                        t = merge_experiment(exp, new, drop=merge_drop)
+                        merge_results.extend(t)
+                    else:
+                        new = Experiment().deserialize(e, self)
+                        self.add_experiment(new)
+            else:
+                new = Experiment().deserialize(e, self)
+                self.add_experiment(new)
+        return merge_results
 
     def export(self, device, path):
         device.export(self, path)

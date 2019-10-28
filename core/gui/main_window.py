@@ -1894,6 +1894,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close_project()
 
     def on_save_project(self, open_dialog=False, sync = False):
+        if self.corpus_widget.in_template_mode:
+            return
+
         self.onSave.emit()
 
         if open_dialog is True or self.project.path is "" or self.project.name is "":
@@ -1948,6 +1951,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.stop()
         if self.settings.AUTOSAVE:
             ms =  self.settings.AUTOSAVE_TIME * 60 * 1000
+            log_info("Autosave Changed:", ms, "ms")
             self.autosave_timer.setInterval(ms)
             if do_start:
                 self.autosave_timer.start()

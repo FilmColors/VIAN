@@ -41,6 +41,7 @@ def download_vian_update(version_id):
 
 
 def check_erc_template(project:VIANProject):
+    return
     uuid = CONFIG['erc_template_uuid']
     exp = project.get_by_id(uuid)
     if exp is None:

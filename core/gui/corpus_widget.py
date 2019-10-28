@@ -1,5 +1,5 @@
 import os
-
+from typing import Optional
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
     QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, \
     QFileDialog, QMessageBox, QFrame, QStackedWidget, QGridLayout
@@ -48,6 +48,8 @@ class CorpusDockWidget(EDockWidget):
         self.a_load.triggered.connect(self.on_load_corpus)
         self.general_widget.btn_EditTemplate.clicked.connect(self.on_edit_template)
         self.general_widget.btn_CloseTemplate.clicked.connect(self.on_close_template)
+        self.general_widget.btn_SaveTemplate.clicked.connect(self.on_save_template)
+
         self.a_import_project.triggered.connect(self.on_import_projects)
 
         self.onCorpusChanged.connect(self.list.on_corpus_loaded)
@@ -56,8 +58,8 @@ class CorpusDockWidget(EDockWidget):
         self.general_widget.btn_ImportTemplate.clicked.connect(self.import_template)
         self.filmography.onFilmographyChanged.connect(self.save_current_project)
         self.list.onSelectionChanged.connect(self.on_selection_changed)
-        self.corpus = None
-        self.current_project = None
+        self.corpus = None  # type: Optional[Corpus]
+        self.current_project = None # type: Optional[VIANProject]
 
     def on_new_corpus(self):
         location = QFileDialog().getExistingDirectory(self, directory=self.main_window.settings.DIR_CORPORA)
@@ -135,9 +137,11 @@ class CorpusDockWidget(EDockWidget):
         self.set_in_template_mode(False)
         self.last_project = None
 
-    # def on_save_template(self):
-    #     if self.in_template_mode:
-    #
+    def on_save_template(self):
+        if self.corpus is not None:
+            self.corpus.reload()
+            self.corpus.apply_template_to_all()
+        self.on_close_template()
 
     def import_template(self):
         file = QFileDialog.getOpenFileName(self, directory="data/templates", filter="*.viant")[0]
@@ -165,11 +169,13 @@ class CorpusDockWidget(EDockWidget):
         if self.current_project is not None:
             self.current_project.movie_descriptor.meta_data = self.filmography.get_filmography()
             self.current_project.store_project()
+            self.corpus.reload(self.current_project)
 
     def on_save_triggered(self):
         if self.corpus is not None:
             self.on_save_corpus()
             self.main_window.settings.add_recent_corpus2(self.corpus)
+            self.corpus.reload()
 
     def on_close_corpus(self):
         if self.corpus is not None:
