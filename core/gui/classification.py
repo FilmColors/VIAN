@@ -558,6 +558,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.update_widget()
         self.current_experiment.query(self.current_query_keywords, self.cb_PromoteToScreenshots.isChecked())
 
+    def get_settings(self):
+        return self.complexity_settings
+
+    def apply_settings(self, settings):
+        self.complexity_settings = settings
+
     @pyqtSlot(object)
     def on_experiment_changed(self, exp):
         self.update_widget()
@@ -776,7 +782,7 @@ class ComplexityDialog(QDialog):
         self.setLayout(QGridLayout())
 
         self.complexities = {
-            "0 (Unclassified)": 1,
+            "0 (Undefined)": 5,
             "1 (Beginner)": 1,
             "2": 2,
             "3 (Intermediate)": 3,
@@ -800,7 +806,7 @@ class ComplexityDialog(QDialog):
                 cbox.addItem(k)
 
             if complexity_settings is not None and t in complexity_settings:
-                cbox.setCurrentIndex(complexity_settings[t] - 1)
+                cbox.setCurrentIndex(complexity_settings[t])
             self.cboxes[t] = cbox
             self.layout().addWidget(cbox, row, 1)
             row += 1
@@ -819,6 +825,7 @@ class ComplexityDialog(QDialog):
         for key, cbox in self.cboxes.items():
             result[key] = self.complexities[cbox.currentText()]
         self.classification_widget.apply_complexities(result)
+        self.classification_widget.main_window.query_widget.apply_complexities(result)
         self.close()
 
 

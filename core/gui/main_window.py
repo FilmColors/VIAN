@@ -11,6 +11,7 @@ from core.concurrent.worker import MinimalThreadWorker, WorkerManager
 from core import version
 from core.version import *
 from core.concurrent.worker_functions import *
+from core.concurrent.update_erc_template import ERCUpdateJob
 from core.corpus.client.widgets import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
@@ -263,7 +264,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_colorimetry_live()
         self.create_experiment_editor()
         self.create_corpus_widget()
-        self.settings.apply_dock_widgets_settings(self.dock_widgets)
+
 
         self.pipeline_toolbar = PipelineToolbar(self)
 
@@ -430,6 +431,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
         self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
+
+        self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
         qApp.focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
@@ -2215,6 +2218,10 @@ class MainWindow(QtWidgets.QMainWindow):
         screenshot_annotation_dicts = []
 
         self.has_open_project = True
+
+        job = ERCUpdateJob()
+        worker = MinimalThreadWorker(job.run_concurrent, self.project, True)
+        self.thread_pool.start(worker, QThread.HighPriority)
 
         # Check if the file exists locally
         success = True

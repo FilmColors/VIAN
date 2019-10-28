@@ -86,20 +86,22 @@ def my_exception_hook(exctype, value, traceback):
         global MAIN_WINDOW
         # print("CRASH")
         # sys._excepthook(exctype, value, traceback)
-        QMessageBox.warning(MAIN_WINDOW, "Error occured", "Oups, there has gone something wrong.\n"
+        answer = QMessageBox.question(MAIN_WINDOW, "Error occured", "Oups, there has gone something wrong.\n"
                                                           "Maybe you can just work on, maybe not.\n"
                                                           "Best you make a backup of your project now. \n" 
-                                                          "Also, don't forget to send us the log files in /Your/VIAN/Directory/log-files/")
+                                                          "Also, don't forget to send us the log files in /Your/VIAN/Directory/log-files/\n "
+                                                                    "Do you want to open the folder now?")
 
-        if sys.platform == "win32":
-            subprocess.run("explorer log-files", shell=True)
-        elif sys.platform == "darwin":
-            subprocess.run(["open", "-R", "log-files"])
-        else:
-            try:
-                subprocess.run(["nautilus", "log-files"])
-            except:
-                pass
+        if answer == QMessageBox.Yes:
+            if sys.platform == "win32":
+                subprocess.run("explorer log-files", shell=True)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", "-R", "log-files"])
+            else:
+                try:
+                    subprocess.run(["nautilus", "log-files"])
+                except:
+                    pass
 
 
 

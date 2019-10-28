@@ -6,7 +6,8 @@ from core.container.project import VIANProject
 from core.container.analysis import SemanticSegmentationAnalysisContainer
 from core.container.experiment import Experiment, VocabularyWord, Vocabulary
 from core.analysis.analysis_import import SemanticSegmentationAnalysis
-
+from core.data.log import log_info
+from core.data.importers import ExperimentTemplateUpdater
 
 import os
 import json
@@ -34,8 +35,26 @@ def get_vian_version():
     version_id = q['id']
     return version, version_id
 
+
 def download_vian_update(version_id):
     return requests.get(EP_ROOT + "vian/download_vian/" + str(version_id), stream=True)
+
+
+def check_erc_template(project:VIANProject):
+    uuid = CONFIG['erc_template_uuid']
+    exp = project.get_by_id(uuid)
+    if exp is None:
+        log_info("No ERC Template detected")
+        return
+    log_info("ERC Template detected, updating")
+    r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/experiments/1")
+    exchange_data = r.json()
+    temporary = "data/temp.json"
+    with open(temporary, "w") as f:
+        json.dump(exchange_data, f)
+    project.import_(ExperimentTemplateUpdater(), temporary)
+    log_info("ERC Template detected, Done")
+
 
 
 class CorpusClient(QObject):

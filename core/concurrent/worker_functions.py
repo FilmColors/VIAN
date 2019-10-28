@@ -213,7 +213,6 @@ class LoadScreenshotsJob(IConcurrentJob):
         main_window.screenshots_manager.set_loading(False)
 
 
-
 class CreateScreenshotJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         frame_pos = args[0]

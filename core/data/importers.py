@@ -632,3 +632,77 @@ class ExperimentTemplateImporter(ImportDevice):
 
         for vocabulary, clobj in vocs_to_add:
             clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])
+
+
+class ExperimentTemplateUpdater(ImportDevice):
+    def import_(self, project:VIANProject, path):
+        with open(path, "r") as f:
+            data = json.load(f)
+        experiment = project.get_by_id(data['experiment']['uuid'])
+        if experiment is None:
+            raise ValueError("Experiment not found with uuid:" + data['experiment']['uuid'])
+
+        cl_objs_index = dict()
+        for entry in data['classification_objects']:
+            clobj = project.get_by_id(entry['uuid'])
+            if clobj is None:
+                log_info("ExperimentTemplateUpdater: Creating Classificat5ion Object:", (entry['name']))
+                clobj = ClassificationObject(entry['name'], experiment=experiment, parent=experiment)
+                clobj.unique_id = entry['uuid']
+                clobj.set_project(project)
+                experiment.add_classification_object(clobj)
+                clobj.semantic_segmentation_labels = (entry['semantic_segmentation_dataset'], [lbl for lbl in entry['semantic_segmentation_label_ids']])
+            else:
+                log_info("ExperimentTemplateUpdater: Found Classification Object:", (entry['name']))
+            cl_objs_index[entry['id']] = clobj
+
+        words_index = dict()
+        for entry in data['vocabularies']:
+
+            voc = project.get_by_id(entry['uuid'])
+            if voc is None:
+                log_info("ExperimentTemplateUpdater: Creating Vocabulary Object:", (entry['name']))
+                voc = Vocabulary(name=entry['name'])
+                voc.unique_id = entry['uuid']
+                voc.uuid = entry['uuid']
+                project.add_vocabulary(voc)
+            else:
+                log_info("ExperimentTemplateUpdater: Found Vocabulary Object:", (entry['name']))
+
+            # Updating Values
+            voc.category = entry['vocabulary_category']
+
+            for w in entry['words']:
+                # word = voc.create_word(name = w['name'])
+                word = project.get_by_id(w['uuid'])
+                if word is None:
+                    log_info("ExperimentTemplateUpdater: Creating Word Object:", (w['name']))
+                    word = VocabularyWord(name = w['name'], vocabulary=voc)
+                    word.unique_id = w['uuid']
+                    word.uuid = w['uuid']
+                    voc.add_word(word)
+                else:
+                    log_info("ExperimentTemplateUpdater: Found Word Object:", (w['name']))
+
+                # Updating Values
+                word.complexity_group = w['complexity_group']['name']
+                word.complexity_lvl = w['complexity']
+                word.organization_group = w['arrangement_group']
+                words_index[w['id']] = word
+
+        vocs_to_add = []
+        unique_keywords = dict()
+        for entry in data['unique_keywords']:
+            clobj = cl_objs_index[entry['classification_object']]
+            if clobj.unique_id not in unique_keywords:
+                unique_keywords[clobj.unique_id] = dict()
+            word = words_index[entry['word']]
+            if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
+                if (word.vocabulary, clobj) not in vocs_to_add:
+                    unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
+                    unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
+                else:
+                    unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
+
+        for vocabulary, clobj in vocs_to_add:
+            clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])

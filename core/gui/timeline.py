@@ -892,7 +892,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     #region Selector
     def start_selector(self, pos):
-        print("Start Selector")
         if self.selector is not None or self.is_selecting is True:
             return
 
@@ -914,7 +913,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.check_auto_scroll(np.clip(pos.x(), 0, self.duration / self.scale))
 
     def end_selector(self):
-        print("END Selector", self.is_selecting, self.selector)
         if self.is_selecting and self.selector_context is None:
             self.is_selecting = False
             # pos = self.selector.pos().x() + self.selector.width() + self.pos().x()
