@@ -217,6 +217,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 self.current_container = None
 
     def on_closed(self):
+        self.clear_view()
         self.current_experiment = None
         self.stackedWidget.setCurrentIndex(0)
         self.setEnabled(False)
@@ -299,6 +300,17 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         elif self.tab_sorting_mode == "class-obj":
             self.update_layout_class_obj(force)
+
+    def clear_view(self):
+        self.tab_widget.clear()
+        self.tab_widget.setMovable(True)
+        self.tabs = []
+        self.all_checkboxes = dict()
+        self.tab_categories = []
+        self.checkbox_groups = []
+        self.checkbox_names = []
+        self.tab_widget_tree = dict()
+
 
     def update_layout_class_obj(self, force=False):
         # if we are classifying, Select current Container
@@ -463,6 +475,13 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def update_layout_categories(self, force=False):
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
+            if self.current_container is None :
+                return
+            if not (isinstance(self.current_container, Segment)
+                    or isinstance(self.current_container, Annotation)
+                    or isinstance(self.current_container, Screenshot)):
+                return
+
             if len(self.sorted_containers) > self.current_idx:
                 if self.classification_mode == "Sequential":
                     self.current_container = self.sorted_containers[self.current_idx]
@@ -497,7 +516,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             if self.behaviour == "query":
                 keywords = self.current_experiment.get_unique_keywords()
             else:
-                keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+                keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container(), return_all_if_none=True)
 
             keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.organization_group, x.word_obj.name))
             for k in keywords:
@@ -522,7 +541,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     self.tab_widget.addTab(tab, k.voc_obj.category)
                 else:
                     tab = self.tabs[self.tab_categories.index(k.voc_obj.category)]
-
                 if k.voc_obj.name + ":" + k.class_obj.name not in self.checkbox_names:
                     self.checkbox_names.append(k.voc_obj.name + ":" + k.class_obj.name)
                     group = CheckBoxGroupWidget(tab, k.class_obj.name + ":" + k.voc_obj.name)

@@ -423,12 +423,13 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.current_experiment = project.experiments[0]
         else:
             self.current_experiment = None
+        project.onExperimentAdded.connect(partial(self.update_ui))
+        project.onExperimentRemoved.connect(partial(self.update_ui))
 
         self.update_ui()
 
     def on_closed(self):
         self.update_ui()
-
 
     def on_changed(self, project, item):
         if not self.isVisible():
