@@ -308,10 +308,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
             segm = new.create_segment2(start = s.get_start(), stop = s.get_end(),
                                        dispatch=False,
                                        mode=SegmentCreationMode.INTERVAL)
-            if segm is None:
-                continue
             segm.annotation_body = s.annotation_body
 
+        print("Dispatching")
         self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
         self.dispatch_changed(item = new)
         return segmentation
@@ -1091,7 +1090,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param path:
         :return:
         """
-        if path is not None:
+        if serialization is None:
             has_file = True
             if not VIAN_PROJECT_EXTENSION in path:
                 path += VIAN_PROJECT_EXTENSION
@@ -1168,7 +1167,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 try:
                     old_path = self.path
 
-                    folder = QFileDialog.getExistingDirectory(caption="Select Directory to migrate the Project into")
+                    folder = QFileDialog.getExistingDirectory()
                     self.folder = folder + "/" + self.name
                     self.path = self.folder + "/" + self.name
                     os.mkdir(self.folder)
@@ -1184,19 +1183,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         try:
             self.hdf5_indices_loaded = my_dict['hdf_indices']
-        except Exception as e:
-            print(e)
+        except:
             pass
         if has_file:
             self.hdf5_manager = HDF5Manager()
             self.hdf5_manager.set_path(self.hdf5_path)
+
             try:
                 self.hdf5_manager.set_indices(my_dict['hdf_indices'])
             except Exception as e:
                 print("Exception during hdf5_manager.set_indices(): ", e)
                 self.hdf5_manager.initialize_all()
-        else:
-            print("No HDF5 File")
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
@@ -1269,11 +1266,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         try:
             for e in my_dict['experiments']:
                 new = Experiment().deserialize(e, self)
-                self.add_experiment(new)
 
         except Exception as e:
             # raise e
-            print("Exception in Load Experiment", e)
+            print(e)
 
         for d in my_dict['analyzes']:
             if d is not None:
@@ -1351,14 +1347,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if experiment:
             for e in self.experiments:
                 experiments.append(e.to_template())
-
-        active_pipeline = None
         if pipeline:
             for p in self.pipeline_scripts:
                 pipelines.append(p.serialize())
             if self.active_pipeline_script is not None:
                 active_pipeline = self.active_pipeline_script.unique_id
-
+            else:
+                active_pipeline = None
         template = dict(
             segmentations = segmentations,
             vocabularies = vocabularies,
@@ -1371,15 +1366,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         )
         return template
 
-    def apply_template(self, template_path = None, template = None, script_export=None, merge=True, merge_drop = False):
+    def apply_template(self, template_path = None, template = None, script_export=None):
         """
         Loads a template from agiven path and applies it to the project.
 
         :param template_path: Path to the json
         :return: None
         """
-        merge_results = []
-
         if template is None and template_path is None:
             raise ValueError("Either template_path or template has to be given.")
         if template_path is not None and template is None:
@@ -1393,30 +1386,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
             template = template
 
         for s in template['segmentations']:
-            new = None
-            if merge:
-                new = self.get_by_id(s[1])
-
-            if new is None:
-                merge_results.append(("Created Segmentation", s))
-                new = Segmentation(s[0])
-                new.unique_id = s[1]
-                self.add_segmentation(new)
+            new = Segmentation(s[0])
+            new.unique_id = s[1]
+            self.add_segmentation(new)
 
         for v in template['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
         for l in template['layers']:
-            new = None
-            if merge:
-                new = self.get_by_id(l[1])
-
-            if new is None:
-                merge_results.append(("Created Annotation Layer", l))
-                new = AnnotationLayer(l[0])
-                new.unique_id = l[1]
-                self.add_annotation_layer(new)
+            new = AnnotationLayer(l[0])
+            new.unique_id = l[1]
+            self.add_annotation_layer(new)
 
         for n in template['node_scripts']:
             new = NodeScript().deserialize(n, self)
@@ -1431,16 +1412,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
             else:
                 loc = self.folder
             for q in template['pipelines']:
+                print(q)
                 try:
                     pipeline = PipelineScript().deserialize(q, loc)
-                    new = None
-                    if merge:
-                        new = self.get_by_id(pipeline.unique_id)
-                    if new is None:
-                        new = pipeline
-                        self.add_pipeline_script(new)
-                        with open(pipeline.path, "w") as f:
-                            f.write(pipeline.script)
+                    self.add_pipeline_script(pipeline)
+                    print("AA", self.pipeline_scripts)
+                    with open(pipeline.path, "w") as f:
+                        f.write(pipeline.script)
                     self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
                 except TypeError as e:
                     pass
@@ -1450,34 +1428,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
             raise e
 
         for e in template['experiments']:
-            # If we want to merge the experiments, we need to create a temporary project, since Experiment relies on
-            # the id introspection of a project (get_by_id())
-            if merge:
-                with VIANProject("Temp") as temp_propj:
-                    for q in template['pipelines']:
-                        try:
-                            pipeline = PipelineScript().deserialize(q, loc)
-                            temp_propj.add_pipeline_script(pipeline)
-                        except Exception as e:
-                            raise e
-                    for v in template['vocabularies']:
-                        voc = Vocabulary("voc").deserialize(v, temp_propj)
-                        temp_propj.add_vocabulary(voc)
+            new = Experiment().deserialize(e, self)
 
-                    new = Experiment().deserialize(e, temp_propj)
-                    temp_propj.add_experiment(new)
-
-                    exp = self.get_by_id(new.unique_id)
-                    if exp is not None and isinstance(exp, Experiment):
-                        t = merge_experiment(exp, new, drop=merge_drop)
-                        merge_results.extend(t)
-                    else:
-                        new = Experiment().deserialize(e, self)
-                        self.add_experiment(new)
-            else:
-                new = Experiment().deserialize(e, self)
-                self.add_experiment(new)
-        return merge_results
 
     def export(self, device, path):
         device.export(self, path)

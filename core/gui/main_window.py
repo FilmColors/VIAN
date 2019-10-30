@@ -293,8 +293,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.concurrent_task_viewer.hide()
 
         self.worker_manager = WorkerManager(self)
-        # self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
-        # self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
+        self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
+        self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
 
         self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
         self.audio_handler.audioProcessed.connect(self.timeline.timeline.add_visualization)
@@ -318,7 +318,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
         self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
-        self.actionImportWebApp.triggered.connect(self.import_webapp)
 
         ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
@@ -1313,7 +1312,7 @@ class MainWindow(QtWidgets.QMainWindow):
         answer = QMessageBox.question(self, "Backup", "Do you want to store the Backup into the default Directory?",
                                       buttons=QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
         if answer == QMessageBox.No:
-            path = QFileDialog.getExistingDirectory(self, caption="Select Directory to store Backup", directory = self.settings.DIR_ROOT)[0] + "/"
+            path = QFileDialog.getExistingDirectory(self, directory = self.settings.DIR_ROOT)[0] + "/"
         elif answer == QMessageBox.Yes:
             path = self.settings.DIR_BACKUPS
         else:
@@ -1833,6 +1832,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
         dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
 
+
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
@@ -1850,21 +1850,17 @@ class MainWindow(QtWidgets.QMainWindow):
             QMessageBox.warning(self, "Failed to Load", "File is corrupt and could not be loaded")
 
     def close_project(self):
-        self.worker_manager.on_closed()
-
         if self.project is not None:
             if self.project.undo_manager.has_modifications():
                 answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
                 if answer == QMessageBox.Yes:
-                    self.on_save_project(sync=True)
+                    self.on_save_project()
 
             self.player.stop()
             self.abortAllConcurrentThreads.emit()
             if self.colormetry_running:
                 self.toggle_colormetry()
             self.project.cleanup()
-            if self.corpus_widget is not None:
-                self.corpus_widget.set_in_template_mode(False)
 
         self.player_controls.setState(False)
         self.project = None
@@ -1899,14 +1895,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close_project()
 
     def on_save_project(self, open_dialog=False, sync = False):
-        if self.corpus_widget.in_template_mode:
-            return
-
         self.onSave.emit()
 
         if open_dialog is True or self.project.path is "" or self.project.name is "":
 
-            path = QFileDialog.getSaveFileName(caption="Select Project File to save", filter="*" + VIAN_PROJECT_EXTENSION)
+            path = QFileDialog.getSaveFileName(filter="*" + VIAN_PROJECT_EXTENSION)
 
             path = path[0].replace(VIAN_PROJECT_EXTENSION, "")
             path = path.replace("\\", "/")
@@ -1956,7 +1949,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.stop()
         if self.settings.AUTOSAVE:
             ms =  self.settings.AUTOSAVE_TIME * 60 * 1000
-            log_info("Autosave Changed:", ms, "ms")
             self.autosave_timer.setInterval(ms)
             if do_start:
                 self.autosave_timer.start()
@@ -2067,16 +2059,6 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = SegmentationImporterDialog(self, self.project, self)
         dialog.show()
 
-    def import_webapp(self):
-        if self.project is None:
-            QMessageBox.information(self, "Instruction", "Please create a new empty project first")
-            return
-        project_file = QFileDialog.getOpenFileName(self, caption="Select WebApp File", filter="*.json *.webapp_json")[0]
-        self.project.import_(WebAppProjectImporter(self.project.movie_descriptor.movie_path), project_file)
-        self.dispatch_on_loaded()
-
-
-
     def export_segmentation(self):
         dialog = ExportSegmentationDialog(self)
         dialog.show()
@@ -2117,7 +2099,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     to_export.append((s.get_start(), s.get_end()))
 
             if len(to_export) > 0:
-                directory = QFileDialog.getExistingDirectory(caption="Select Directory to export Segments into", directory=self.project.export_dir)
+                directory = QFileDialog.getExistingDirectory(directory=self.project.export_dir)
                 if os.path.isdir(directory):
                     self.audio_handler.export_segments(to_export, directory=directory, callback=print)
                 else:

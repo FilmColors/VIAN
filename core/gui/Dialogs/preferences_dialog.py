@@ -86,7 +86,6 @@ class DialogPreferences(EDialogWidget):
     def set_autosave_time(self):
         value = self.spinBox_AutosaveTime.value()
         self.settings.AUTOSAVE_TIME = value
-        self.main_window.update_autosave_timer(do_start=True)
 
     def set_grid_size(self):
         self.settings.GRID_SIZE = self.spinBox_GridSize.value()

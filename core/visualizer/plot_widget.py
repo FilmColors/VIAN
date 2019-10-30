@@ -34,7 +34,7 @@ def feature_changed(scr, plot):
             plot.update_item(scr.dbscreenshot.id, (scr.year_x, ty))
 
     except Exception as e:
-        print("Exception in Feature Changed", e)
+        print(e)
         pass
 
 

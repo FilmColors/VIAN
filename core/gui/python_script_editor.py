@@ -124,7 +124,7 @@ class PythonScriptEditor(QWidget):
         if self.pipeline_script is None:
             return
         if save_as:
-            file_path = QFileDialog.getSaveFileName(self, caption="Select Path", filter="*.py")[0]
+            file_path = QFileDialog.getSaveFileName(self, filter="*.py")[0]
         self.pipeline_script.script = self.editor.toPlainText().replace("\t", "    ")
         self.pipeline_script.save_script(file_path)
 

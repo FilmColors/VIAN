@@ -108,7 +108,7 @@ class TimestepUpdateWorkerSingle(QObject):
                         self.signals.onColormetryUpdate.emit(data, self.position_ms)
 
         except Exception as e:
-            print("Exception in Timestep Update", e)
+            print(e)
             self.signals.onError.emit([e])
 
     def get_opencv_frame(self, time_frame):

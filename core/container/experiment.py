@@ -58,12 +58,10 @@ class Vocabulary(IProjectContainer, IHasName):
         self.comment = ""
         self.info_url = ""
         self.words = []
-        self.words_plain = [] #type:List[VocabularyWord]
+        self.words_plain = []
         self.was_expanded = False
         self.image_urls = []
         self.category = "default"
-
-        self.is_visible = True
 
         self._path = ""
 
@@ -187,8 +185,7 @@ class Vocabulary(IProjectContainer, IHasName):
             unique_id = self.unique_id,
             words = words_data,
             image_urls = self.image_urls,
-            comment = self.comment,
-            visible = self.is_visible
+            comment = self.comment
         )
 
         return voc_data
@@ -265,17 +262,10 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.comment = w['comment']
                 except:
                     pass
-
         try:
             self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
         except:
             self.pipeline_script = None
-
-        try:
-            self.is_visible = serialization['visible']
-        except Exception as e:
-            print(e)
-            self.is_visible = True
         return self
 
     def export_vocabulary(self, path):
@@ -624,9 +614,6 @@ class ClassificationObject(IProjectContainer, IHasName):
             return keywords
 
     def remove_vocabulary(self, voc):
-        if voc not in self.classification_vocabularies:
-            return
-
         self.classification_vocabularies.remove(voc)
         to_delete = [x for x in self.unique_keywords if x.voc_obj == voc]
         self.unique_keywords = [x for x in self.unique_keywords if not x.voc_obj == voc]
@@ -699,13 +686,7 @@ class ClassificationObject(IProjectContainer, IHasName):
     def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
-
-        t = dict()
-        for clobj in self.experiment.get_classification_objects_plain():
-            t[clobj.unique_id] = clobj
-        t[self.experiment.unique_id] = self.experiment
-
-        p = t[serialization['parent']]
+        p = project.get_by_id(serialization['parent'])
 
         if isinstance(p, ClassificationObject):
             p.add_child(self)
@@ -717,7 +698,6 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.classification_vocabularies = [project.get_by_id(uid) for uid in serialization['classification_vocabularies']]
         self.unique_keywords = [UniqueKeyword(self.experiment).deserialize(ser, project) for ser in serialization['unique_keywords']]
         ts = [project.get_by_id(uid) for uid in serialization['target_container']]
-
         for t in ts:
             if t is not None:
                 self.target_container.append(t)
@@ -726,7 +706,7 @@ class ClassificationObject(IProjectContainer, IHasName):
         try:
             self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
         except Exception as e:
-            log_error("Exception in deserialize", e)
+            log_error(e)
 
         return self
 
@@ -835,6 +815,7 @@ class Experiment(IProjectContainer, IHasName):
         """
         result = []
         containers = self.project.get_all_containers()
+        # self.project.onScreenshotsHighlighted.emit([])
 
         for c in containers:
             if isinstance(c, IClassifiable):
@@ -881,7 +862,7 @@ class Experiment(IProjectContainer, IHasName):
             matrix /= np.amax(matrix)
             return keywords, matrix
 
-    def get_vocabularies(self) -> List[Vocabulary]:
+    def get_vocabularies(self):
         result = []
         for clobj in self.classification_objects:
             result.extend(clobj.get_vocabularies())
@@ -940,7 +921,6 @@ class Experiment(IProjectContainer, IHasName):
         if obj in self.classification_objects:
             self.classification_objects.remove(obj)
             self.onClassificationObjectRemoved.emit(self)
-            self.project.remove_from_id_list(obj)
 
     def get_containers_to_classify(self):
         """
@@ -1027,7 +1007,7 @@ class Experiment(IProjectContainer, IHasName):
                 keyword.tagged_containers.remove(container)
                 container.remove_word(keyword)
         except Exception as e:
-            log_error("Exception in remove_tag", e)
+            log_error(e)
 
     def remove_all_tags_with_container(self, container):
         self.classification_results[:] = [tup for tup in self.classification_results if not tup[0] is container]
@@ -1108,6 +1088,7 @@ class Experiment(IProjectContainer, IHasName):
     def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
+        project.add_experiment(self)
 
         for ser in serialization['classification_objects']:
             obj = ClassificationObject("", self).deserialize(ser, project)
@@ -1118,11 +1099,13 @@ class Experiment(IProjectContainer, IHasName):
                 self.analyses = []
             else:
                 self.analyses = []
+
                 try:
                     for a in analyses:
                         if a['class_obj'] != None:
                             self.analyses.append(dict(
                                 name=a['name'],
+                                # class_name = project.main_window.eval_class(a['class_name']),
                                 class_name = get_analysis_by_name(a['class_name']),
                                 params = a['params'],
                                 class_obj = project.get_by_id(a['class_obj'])
@@ -1130,6 +1113,7 @@ class Experiment(IProjectContainer, IHasName):
                         else:
                             self.analyses.append(dict(
                                 name=a['name'],
+                                # class_name = project.main_window.eval_class(a['class_name']),
                                 class_name=get_analysis_by_name(a['class_name']),
                                 params=a['params'],
                                 class_obj=None
@@ -1139,16 +1123,9 @@ class Experiment(IProjectContainer, IHasName):
                     self.analyses = []
 
         try:
-            keywords = dict()
-            for k in self.get_unique_keywords():
-                keywords[k.unique_id] = k
-
             for ser in serialization['classification_results']:
                 c = project.get_by_id(ser[0])
-                try:
-                    k = keywords[ser[1]]
-                except:
-                    k = None
+                k = project.get_by_id(ser[1])
                 if c is not None and k is not None:
                     self.tag_container(c, k)
                 else:
@@ -1161,160 +1138,13 @@ class Experiment(IProjectContainer, IHasName):
             self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
             self.pipeline_script.experiment = self
         except Exception as e:
-            log_error("Exception in Experiment.deserialize()", e, project.name)
+            print(e)
             self.pipeline_script = None
 
         return self
 
     def delete(self):
         self.project.remove_experiment(self)
-
-
-def merge_experiment(self:Experiment, other: Experiment, drop=False):
-    """
-    Merges another experiment into this experiment
-    :param self:
-    :param other:
-    :param drop:
-    :return:
-    """
-    changes = []
-    # Creating all missing Classification Objects
-    cl_objs_index = dict()
-    for entry in other.get_classification_objects_plain():
-        clobj = self.project.get_by_id(entry.unique_id)
-        if clobj is None:
-            clobj = ClassificationObject(entry.name, experiment=self, parent=self)
-            clobj.unique_id = entry.unique_id
-            clobj.set_project(self.project)
-            self.add_classification_object(clobj)
-            clobj.semantic_segmentation_labels = entry.semantic_segmentation_labels
-            changes.append(("Added Classification Object", clobj))
-        cl_objs_index[entry.unique_id] = clobj
-    words_index = dict()
-    # Creating all missing Vocabularies
-    for entry in other.get_vocabularies():
-        voc = self.project.get_by_id(entry.unique_id)
-        if voc is None:
-            voc = Vocabulary(name=entry.name)
-            voc.unique_id = entry.unique_id
-            voc.uuid = entry.unique_id
-            self.project.add_vocabulary(voc)
-            changes.append(("Added Vocabulary Object", voc))
-
-        # Updating Values
-        voc.category = entry.category
-
-        for w in entry.words_plain:
-            # word = voc.create_word(name = w['name'])
-            word = self.project.get_by_id(w.unique_id)
-            if word is None:
-                word = VocabularyWord(name=w.name, vocabulary=voc)
-                word.unique_id = w.unique_id
-                word.uuid = w.unique_id
-                voc.add_word(word)
-                changes.append(("Added Vocabulary Word", voc))
-
-            # Updating Values
-            word.complexity_group = w.complexity_group
-            word.complexity_lvl = w.complexity_lvl
-            word.organization_group = w.organization_group
-            words_index[w.unique_id] = word
-
-    vocs_to_add = []
-    unique_keywords = dict()
-    # Creating all missing Unique Keywords
-    for entry in other.get_unique_keywords():
-
-        # Check if the keyword already exists in this experiment:
-        keyword = self.project.get_by_id(entry.unique_id) #type:UniqueKeyword
-        clobj = cl_objs_index[entry.class_obj.unique_id]
-
-        if clobj.unique_id not in unique_keywords:
-            unique_keywords[clobj.unique_id] = dict()
-
-        word = words_index[entry.word_obj.unique_id]
-
-        if keyword is None:
-            if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-                keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
-                keyword.unique_id = entry.unique_id
-        else:
-            clobj.remove_vocabulary(keyword.voc_obj)
-
-        if (word.vocabulary, clobj) not in vocs_to_add:
-            vocs_to_add.append((word.vocabulary, clobj))
-            unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
-        unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = keyword
-
-    # Creating adding the vocabularies to the classification object, inject the UniqueKeywords
-    for vocabulary, clobj in vocs_to_add:
-        clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])
-
-    if drop:
-        diff = set([t.unique_id for t in self.get_classification_objects_plain()])\
-            .difference([t.unique_id for t in other.get_classification_objects_plain()])
-
-        for d in diff:
-            self.remove_classification_object(self.project.get_by_id(d))
-
-        for c_self in self.get_classification_objects_plain():
-            c_other = other.project.get_by_id(c_self.unique_id)
-            diff = set([t.unique_id for t in c_self.get_vocabularies()])\
-                .difference([t.unique_id for t in c_other.get_vocabularies()])
-            for d in diff:
-                c_self.remove_vocabulary(self.project.get_by_id(d))
-
-        for v_self in self.get_vocabularies():
-            v_other = other.project.get_by_id(v_self.unique_id)
-            diff = set([t.unique_id for t in v_self.words_plain]) \
-                .difference([t.unique_id for t in v_other.words_plain])
-            for d in diff:
-                v_self.remove_word(self.project.get_by_id(d))
-    return changes
-
-
-def merge_experiment_inspect(self:Experiment, other: Experiment):
-    changes = []
-    cl_objs_index = dict()
-    for entry in other.get_classification_objects_plain():
-        clobj = self.project.get_by_id(entry.unique_id)
-        if clobj is None:
-            changes.append(("Added Classification Object", entry.name))
-        cl_objs_index[entry.unique_id] = entry
-
-    words_index = dict()
-    for entry in other.get_vocabularies():
-        voc = self.project.get_by_id(entry.unique_id)
-        if voc is None:
-            changes.append(("Added Vocabulary Object", entry))
-
-        for w in entry.words_plain:
-            word = self.project.get_by_id(w.unique_id)
-            if word is None:
-                changes.append(("Added Vocabulary Word", w))
-            words_index[w.unique_id] = w
-
-    # Creating all missing Unique Keywords
-    t1 = [(q.word_obj.unique_id, q.voc_obj.unique_id, q.class_obj.unique_id) for q in other.get_unique_keywords()]
-    t2 = [(q.word_obj.unique_id, q.voc_obj.unique_id, q.class_obj.unique_id) for q in self.get_unique_keywords()]
-
-    #To Add
-    diff = set(t1).difference(set(t2))
-
-    def format_keyword(t, r):
-        return t.project.get_by_id(r[0]).name, \
-               t.project.get_by_id(r[1]).name, \
-               t.project.get_by_id(r[2]).name
-
-    for d in diff:
-        changes.append(("Added UniqueKeyword", format_keyword(other, d)))
-        # To Add
-    diff = set(t2).difference(set(t1))
-    for d in diff:
-        changes.append(("Removed UniqueKeyword", format_keyword(self, d)))
-
-    return changes
 
 
 VOC_COMPARE_ATTRS = [

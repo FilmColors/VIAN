@@ -54,7 +54,6 @@
      <addaction name="separator"/>
      <addaction name="actionImportVocabulary"/>
      <addaction name="actionImportVIANExperiment"/>
-     <addaction name="actionImportWebApp"/>
      <addaction name="separator"/>
      <addaction name="actionImportELANSegmentation"/>
      <addaction name="actionImportCSVVocabulary"/>
@@ -937,11 +936,6 @@
   <action name="actionDelete_all_Analyses">
    <property name="text">
     <string>Delete all Analyses</string>
-   </property>
-  </action>
-  <action name="actionImportWebApp">
-   <property name="text">
-    <string>VIAN WebApp</string>
    </property>
   </action>
  </widget>

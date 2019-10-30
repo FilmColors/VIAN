@@ -165,7 +165,7 @@ class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
 
                     self.data.append(node_data)
         except Exception as e:
-            log_error("Exception in analysis deserialiation", e)
+            print(e)
 
         return self
 
@@ -251,11 +251,10 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
 
         # VERSION > 0.6.8
         try:
-            # clobj = project.get_by_id(serialization['classification_obj'])
-            # if clobj is not None:
-            self.target_classification_object = project.get_by_id(serialization['classification_obj'])
+            if serialization['classification_obj'] > 0:
+                self.target_classification_object = project.get_by_id(serialization['classification_obj'])
         except Exception as e:
-            log_error("Exception in IAnalysisContainerAnalysis.deserialize()", e)
+            print(e)
             pass
 
         # self.data = []
