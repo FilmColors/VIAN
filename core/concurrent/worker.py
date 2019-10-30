@@ -128,10 +128,8 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.queue_identify = []
         self.running = None
 
-        self.worker = None
-        self.execution_thread = None
-
-        self.reset()
+        self.worker = AnalysisWorker(self)
+        self.execution_thread = QThread()
         self.worker.moveToThread(self.execution_thread)
         self.execution_thread.start()
 
