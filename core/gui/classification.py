@@ -16,7 +16,7 @@ from core.data.log import log_error, log_info, log_debug, log_warning
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import EDockWidget
 from core.container.experiment import Experiment
-from core.container.project import Segment, Annotation, Screenshot
+from core.container.project import Segment, Annotation, Screenshot, ClassificationObject, UniqueKeyword
 
 MATRIX_ORDER_PER_SEGMENT = 0
 MATRIX_ORDER_PER_TYPE = 1
@@ -101,6 +101,11 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_class = m_layout.addAction("Class-Obj / Category")
         self.a_class.setCheckable(True)
         self.a_class.setChecked(True)
+
+        self.a_hidden = m_layout.addAction("Show Hidden Vocabularies")
+        self.a_hidden.setCheckable(True)
+        self.a_hidden.setChecked(False)
+        self.a_hidden.triggered.connect(partial(self.update_widget, True))
 
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
@@ -212,6 +217,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 self.current_container = None
 
     def on_closed(self):
+        self.clear_view()
         self.current_experiment = None
         self.stackedWidget.setCurrentIndex(0)
         self.setEnabled(False)
@@ -295,6 +301,16 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         elif self.tab_sorting_mode == "class-obj":
             self.update_layout_class_obj(force)
 
+    def clear_view(self):
+        self.tab_widget.clear()
+        self.tab_widget.setMovable(True)
+        self.tabs = []
+        self.all_checkboxes = dict()
+        self.tab_categories = []
+        self.checkbox_groups = []
+        self.checkbox_names = []
+        self.tab_widget_tree = dict()
+
     def update_layout_class_obj(self, force=False):
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
@@ -318,16 +334,22 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                                               + " " + self.current_container.get_name())
             # Check  if we need to rebuild the layout or if the checkboxes stay the same,
             # if so apply the classification of the current container
-            if not force and set(self.all_checkboxes.keys()) == set([itm.unique_id for itm in
-                                                       self.current_experiment.get_unique_keywords(
-                                                           self.current_container.get_parent_container(),
-                                                           return_all_if_none=True)]
-                                                      ):
-                for checkbox in self.all_checkboxes.values():
-                    checkbox.stateChanged.disconnect()
-                    checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
-                    checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
-                return
+            if not force:
+                s1 = set(self.all_checkboxes.keys())
+                s2 = []
+                for k in self.current_experiment.get_unique_keywords(self.current_container.get_parent_container(),
+                                                           return_all_if_none=True):
+                    if not k.voc_obj.is_visible and not self.a_hidden.isChecked():
+                        continue
+                    s2.append(k.unique_id)
+
+                s2 = set(s2)
+                if s1 == s2:
+                    for checkbox in self.all_checkboxes.values():
+                        checkbox.stateChanged.disconnect()
+                        checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
+                        checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
+                    return
 
         # last_sorting_arrangement = dict()
         # for k, v in self.tab_widgets_class_objs.items():
@@ -354,14 +376,19 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         tab_widgets_class_objs_index = []
         tab_widgets_class_objs = dict()
 
-
         # Create outer tabs for Classification Objects
         ctabs = self.current_experiment.get_classification_objects_plain()
         try:
             ctabs = sorted(ctabs, key=lambda x: CLASS_OBJ_SORTING_ERC[x.name])
         except Exception as e:
             ctabs = sorted(ctabs, key=lambda x: x.name)
-        for c in ctabs:
+        for c in ctabs: #type:ClassificationObject
+            visible_keywords = 0
+            for kwd in c.unique_keywords: #type:UniqueKeyword
+                if kwd.voc_obj.is_visible or self.a_hidden.isChecked():
+                    visible_keywords += 1
+            if visible_keywords == 0:
+                continue
             tab = QTabWidget(self.tab_widget)
             tab.setMovable(True)
             try:
@@ -386,19 +413,21 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container(),
                                                                            return_all_if_none=True)
 
-                # keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
                 try:
                     keywords = sorted(keywords, key=lambda x: (CATEGORY_SORTING_ERC[x.voc_obj.category], not "Significance" in x.voc_obj.name, x.word_obj.name))
                 except Exception as e:
-                    print(e)
+                    print("Exception in Classification Redraw", e)
                     keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
                 for k in keywords:
+                    if not k.voc_obj.is_visible and not self.a_hidden.isChecked():
+                        continue
+
                     if self.complexity_settings is not None:
                         try:
                             if self.complexity_settings[k.word_obj.complexity_group] < k.word_obj.complexity_lvl:
                                 continue
                         except Exception as e:
-                            print(e)
+                            print("Exception in Classification Complexity Redrwa", e)
 
                     idx = tab_widgets_class_objs_index.index(k.class_obj.unique_id)
                     if  k.voc_obj.category not in self.tab_categories[idx]:
@@ -428,6 +457,8 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
                     checkbox = WordCheckBox(group, k)
                     if self.behaviour == "classification":
+                        if self.current_experiment.has_tag(self.current_container, checkbox.word):
+                            print("Has Tag")
                         checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
                         checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
                     else:
@@ -451,6 +482,13 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def update_layout_categories(self, force=False):
         # if we are classifying, Select current Container
         if self.behaviour == "classification":
+            if self.current_container is None :
+                return
+            if not (isinstance(self.current_container, Segment)
+                    or isinstance(self.current_container, Annotation)
+                    or isinstance(self.current_container, Screenshot)):
+                return
+
             if len(self.sorted_containers) > self.current_idx:
                 if self.classification_mode == "Sequential":
                     self.current_container = self.sorted_containers[self.current_idx]
@@ -485,16 +523,19 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             if self.behaviour == "query":
                 keywords = self.current_experiment.get_unique_keywords()
             else:
-                keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container())
+                keywords = self.current_experiment.get_unique_keywords(self.current_container.get_parent_container(), return_all_if_none=True)
 
             keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.organization_group, x.word_obj.name))
             for k in keywords:
+                if not k.voc_obj.is_visible and not self.a_hidden.isChecked():
+                    continue
+
                 if self.complexity_settings is not None:
                     try:
                         if self.complexity_settings[k.word_obj.complexity_group] < k.word_obj.complexity_lvl:
                             continue
                     except Exception as e:
-                        print(e)
+                        print("Exception in Classification Complexity Redraw", e)
 
                 if k.voc_obj.category not in self.tab_categories:
                     tab = QScrollArea()
@@ -507,7 +548,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     self.tab_widget.addTab(tab, k.voc_obj.category)
                 else:
                     tab = self.tabs[self.tab_categories.index(k.voc_obj.category)]
-
                 if k.voc_obj.name + ":" + k.class_obj.name not in self.checkbox_names:
                     self.checkbox_names.append(k.voc_obj.name + ":" + k.class_obj.name)
                     group = CheckBoxGroupWidget(tab, k.class_obj.name + ":" + k.voc_obj.name)

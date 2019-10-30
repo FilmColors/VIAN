@@ -84,6 +84,24 @@ class Corpus(QObject, IHasName):
         self.template.apply_template(path, script_export=self.directory)
         self.onTemplateChanged.emit(self.template)
 
+    def apply_template_to_all(self):
+        self.reload()
+        t = self.template.get_template(True, True, True, True, True, True)
+        for uuid, p in self.projects_loaded.items():
+            p.apply_template(template=t, merge=True)
+            if p.path is not None:
+                p.store_project()
+
+    def reload(self, project=None):
+        if project is None:
+            for p in self.project_paths.values():
+                if os.path.isfile(p):
+                    project = VIANProject().load_project(p)
+                    self.projects_loaded[project.uuid] = project
+        else:
+            project = VIANProject().load_project(project.path)
+            self.projects_loaded[project.uuid] = project
+
     def get_name(self):
         return self.name
 
@@ -109,10 +127,7 @@ class Corpus(QObject, IHasName):
         self.directory = serialization['directory']
         self.file = serialization['file']
 
-        for p in self.project_paths.values():
-            if os.path.isfile(p):
-                project = VIANProject().load_project(p)
-                self.projects_loaded[project.uuid] = project
+        self.reload()
         return self
 
     def save(self, path=None):
@@ -134,6 +149,7 @@ class Corpus(QObject, IHasName):
         """ Deserializes a Corpus from a json file """
         with open(path, "r") as f:
             self.deserialize(json.load(f))
+        self.file = path
         return self
 
     def get_type(self):

@@ -33,7 +33,7 @@ class ExportSegmentationDialog(EDialogWidget):
         self.label_Format.setEnabled(state)
 
     def on_browse(self):
-        path = QFileDialog.getSaveFileName(directory=self.main_window.project.path, filter="*.csv *.txt")[0]
+        path = QFileDialog.getSaveFileName(caption="Select Path", directory=self.main_window.project.path, filter="*.csv *.txt")[0]
         self.lineEdit_Path.setText(path)
 
     def on_export(self):

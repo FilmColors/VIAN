@@ -119,7 +119,7 @@ class HDF5Manager():
             self._index[k] = v
 
         for k, v in dict(d['uidmapping']).items():
-            self._uid_index[str(k)] = v
+            self._uid_index[k] = v
     #endregion
 
     #region Colorimetry
@@ -251,6 +251,9 @@ class HDF5Manager():
             self.h5_file = h5py.File(self.path, "r+")
 
     def get_indices(self):
+        print("Indices")
+        for k in self._uid_index.keys():
+            print(k, self._uid_index[str(k)])
         return dict(curr_pos=self._index, uidmapping=self._uid_index)
 
     def on_close(self):
@@ -268,5 +271,5 @@ class HDF5Manager():
         self.h5_file = None
         self._index = dict()
         self._uid_index = dict()
-        print("Closed HDF")
+        log_info("Closed HDF")
 
