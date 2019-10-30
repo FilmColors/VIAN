@@ -129,6 +129,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.running = None
 
 
+
         self.worker = AnalysisWorker(self)
         self.execution_thread = QThread()
         self.worker.moveToThread(self.execution_thread)
