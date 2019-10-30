@@ -41,6 +41,7 @@ def download_vian_update(version_id):
 
 
 def check_erc_template(project:VIANProject):
+    return
     uuid = CONFIG['erc_template_uuid']
     exp = project.get_by_id(uuid)
     if exp is None:
@@ -113,7 +114,7 @@ class CorpusClient(QObject):
                 self.is_connected = True
             return ret
         except Exception as e:
-            print(e)
+            print("Exception in connect webapp", e)
             return False
 
     @pyqtSlot(object)

@@ -71,7 +71,7 @@ class VocabularySaveDialog(QDialog):
 
     def on_save(self, save_as = False):
         if save_as:
-            folder = QFileDialog.getExistingDirectory()
+            folder = QFileDialog.getExistingDirectory(caption="Select Directory to Vocabularies into")
         else:
             folder = None
         for itm in self.itms:
@@ -678,7 +678,7 @@ class VocabularyExportDialog(EDialogWidget):
         self.btn_Browse.clicked.connect(self.on_browse)
 
     def on_browse(self):
-        path = QFileDialog.getExistingDirectory(directory=self.project.export_dir)
+        path = QFileDialog.getExistingDirectory(caption="Select Directory to export Vocabulary into", directory=self.project.export_dir)
         self.lineEdit_Path.setText(path)
 
     def export(self):

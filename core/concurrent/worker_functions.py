@@ -81,6 +81,7 @@ def store_project_concurrent(args, sign_progress):
         except Exception as e:
             print("Exception in Analysis.serialize()", e)
 
+    print("HDG5 MANAGER", project.hdf5_manager)
     if project.hdf5_manager is None:
         hdf_indices = dict(curr_pos=dict(), uidmapping=dict())
     else:
