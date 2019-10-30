@@ -622,16 +622,25 @@ class ExperimentTemplateImporter(ImportDevice):
         vocs_to_add = []
         unique_keywords = dict()
         for entry in data['unique_keywords']:
+            # Check if the keyword already exists in this experiment:
+            keyword = project.get_by_id(entry['uuid'])  # type:UniqueKeyword
             clobj = cl_objs_index[entry['classification_object']]
+
             if clobj.unique_id not in unique_keywords:
                 unique_keywords[clobj.unique_id] = dict()
+
             word = words_index[entry['word']]
+            if keyword is None:
+                if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
+                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
+                    keyword.unique_id = entry['uuid']
+            else:
+                clobj.remove_vocabulary(keyword.voc_obj)
+
             if (word.vocabulary, clobj) not in vocs_to_add:
                 vocs_to_add.append((word.vocabulary, clobj))
                 unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
-                unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
-            else:
-                unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
+            unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = keyword
 
         for vocabulary, clobj in vocs_to_add:
             clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])
@@ -701,17 +710,74 @@ class ExperimentTemplateUpdater(ImportDevice):
         vocs_to_add = []
         unique_keywords = dict()
         for entry in data['unique_keywords']:
+            # Check if the keyword already exists in this experiment:
+            keyword = project.get_by_id(entry['uuid'])  # type:UniqueKeyword
             clobj = cl_objs_index[entry['classification_object']]
+
             if clobj.unique_id not in unique_keywords:
                 unique_keywords[clobj.unique_id] = dict()
+
             word = words_index[entry['word']]
-            if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-                if (word.vocabulary, clobj) not in vocs_to_add:
-                    vocs_to_add.append((word.vocabulary, clobj))
-                    unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
-                    unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
-                else:
-                    unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(experiment, word.vocabulary, word, clobj)
+            if keyword is None:
+                if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
+                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
+                    keyword.unique_id = entry['uuid']
+            else:
+                clobj.remove_vocabulary(keyword.voc_obj)
+
+            if (word.vocabulary, clobj) not in vocs_to_add:
+                vocs_to_add.append((word.vocabulary, clobj))
+                unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
+            unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = keyword
 
         for vocabulary, clobj in vocs_to_add:
             clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])
+
+
+
+class WebAppProjectImporter(ImportDevice):
+    def __init__(self, movie_path):
+        super(WebAppProjectImporter, self).__init__()
+        self.movie_path = movie_path
+        self.fps = cv2.VideoCapture(self.movie_path).get(cv2.CAP_PROP_FPS)
+
+    def import_(self, project:VIANProject, path):
+        with open(path, "r") as f:
+            data = json.load(f)
+        project.name = data['project_name']
+
+        with open("temp.json", "w") as f:
+            json.dump(data['experiment'], f)
+
+        project.import_(ExperimentTemplateImporter(), path="temp.json")
+        os.remove("temp.json")
+
+        self.fps = project.movie_descriptor.fps
+        segmentation = dict()
+        for s in data['segments']:
+
+            if s['segmentation_id'] not in segmentation:
+                t = project.create_segmentation(data['segmentation'][str(s['segmentation_id'])])
+                segmentation[s['segmentation_id']] = t
+            segmentation[s['segmentation_id']].create_segment2(start=s['start_ms'],
+                    stop=s['end_ms'],
+                    body=s['body'],
+                    unique_id=s['uuid'])
+
+        for i, s in enumerate(data['screenshots']):
+            scr = Screenshot(title="Screenshot" + str(i), timestamp=s['time_ms'],
+                             frame_pos=ms_to_frames(s['time_ms'], self.fps),
+                             image=np.zeros(shape=(30,50,3), dtype=np.uint8))
+            scr.unique_id = str(uuid4())
+            project.add_screenshot(scr)
+
+        for entry in data['classification']:
+            entity = project.get_by_id(entry['entity'])
+            ukw = project.get_by_id(entry['ukw'])
+            project.experiments[0].tag_container(entity, ukw)
+
+        for s in project.segmentation[0].segments:
+            print(s.tag_keywords)
+
+
+

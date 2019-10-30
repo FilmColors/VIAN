@@ -624,6 +624,9 @@ class ClassificationObject(IProjectContainer, IHasName):
             return keywords
 
     def remove_vocabulary(self, voc):
+        if voc not in self.classification_vocabularies:
+            return
+
         self.classification_vocabularies.remove(voc)
         to_delete = [x for x in self.unique_keywords if x.voc_obj == voc]
         self.unique_keywords = [x for x in self.unique_keywords if not x.voc_obj == voc]
@@ -832,7 +835,6 @@ class Experiment(IProjectContainer, IHasName):
         """
         result = []
         containers = self.project.get_all_containers()
-        # self.project.onScreenshotsHighlighted.emit([])
 
         for c in containers:
             if isinstance(c, IClassifiable):
@@ -1116,7 +1118,6 @@ class Experiment(IProjectContainer, IHasName):
                 self.analyses = []
             else:
                 self.analyses = []
-
                 try:
                     for a in analyses:
                         if a['class_obj'] != None:
@@ -1224,21 +1225,27 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
     unique_keywords = dict()
     # Creating all missing Unique Keywords
     for entry in other.get_unique_keywords():
+
+        # Check if the keyword already exists in this experiment:
+        keyword = self.project.get_by_id(entry.unique_id) #type:UniqueKeyword
         clobj = cl_objs_index[entry.class_obj.unique_id]
+
         if clobj.unique_id not in unique_keywords:
             unique_keywords[clobj.unique_id] = dict()
+
         word = words_index[entry.word_obj.unique_id]
-        if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-            if (word.vocabulary, clobj) not in vocs_to_add:
-                vocs_to_add.append((word.vocabulary, clobj))
-                unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
-                unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(self,
-                                                                                                            word.vocabulary,
-                                                                                                            word, clobj)
-            else:
-                unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = UniqueKeyword(self,
-                                                                                                            word.vocabulary,
-                                                                                                            word, clobj)
+
+        if keyword is None:
+            if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
+                keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
+                keyword.unique_id = entry.unique_id
+        else:
+            clobj.remove_vocabulary(keyword.voc_obj)
+
+        if (word.vocabulary, clobj) not in vocs_to_add:
+            vocs_to_add.append((word.vocabulary, clobj))
+            unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
+        unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = keyword
 
     # Creating adding the vocabularies to the classification object, inject the UniqueKeywords
     for vocabulary, clobj in vocs_to_add:

@@ -5,7 +5,7 @@ import shutil
 import json
 import requests
 
-from core.data.importers import ExperimentTemplateImporter
+from core.data.importers import ExperimentTemplateImporter, WebAppProjectImporter
 from core.container.project import VIANProject
 from core.container.experiment import merge_experiment, merge_experiment_inspect
 from core.data.creation_events import get_path_of_pipeline_script
@@ -149,12 +149,31 @@ class TestImportMethods(unittest.TestCase):
                 tmpl = project1.get_template(True, True, True, True, True, True)
                 res = project2.apply_template(template=tmpl, merge=True, script_export="data/")
 
-                print(res)
-                for r in res:
-                    print(r)
+                self.assertTrue(len(project1.experiments[0].get_unique_keywords()) ==
+                                len(project2.experiments[0].get_unique_keywords()))
                 print(len(project1.experiments[0].get_unique_keywords()),
                       len(project2.experiments[0].get_unique_keywords()))
 
+                project1.experiments[0].remove_classification_object(cl_new)
+                tmpl = project1.get_template(True, True, True, True, True, True)
+                res = project2.apply_template(template=tmpl, merge=True, merge_drop=True, script_export="data/")
+
+                print(len(project1.experiments[0].get_unique_keywords()),
+                                len(project2.experiments[0].get_unique_keywords()))
+                self.assertTrue(len(project1.experiments[0].get_unique_keywords()) ==
+                                len(project2.experiments[0].get_unique_keywords()))
+
+    def test_4_project_import(self):
+        r = requests.get("http://127.0.0.1:5000/download/148")
+        self.exchange_data = r.json()
+
+        with open("test-template.json", "w") as f:
+            json.dump(self.exchange_data, f)
+
+        with VIANProject("TestProject") as project1:
+            project1.import_(WebAppProjectImporter(
+                movie_path="F:/fiwi_datenbank/MOV/14_1_1_MOV.mov"),
+                "test-template.json")
 
 if __name__ == '__main__':
     unittest.main()

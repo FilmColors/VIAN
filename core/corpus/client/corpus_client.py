@@ -114,7 +114,7 @@ class CorpusClient(QObject):
                 self.is_connected = True
             return ret
         except Exception as e:
-            print(e)
+            print("Exception in connect webapp", e)
             return False
 
     @pyqtSlot(object)

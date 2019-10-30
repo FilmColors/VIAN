@@ -293,8 +293,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.concurrent_task_viewer.hide()
 
         self.worker_manager = WorkerManager(self)
-        self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
-        self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
+        # self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
+        # self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
 
         self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
         self.audio_handler.audioProcessed.connect(self.timeline.timeline.add_visualization)
@@ -318,6 +318,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportCSVVocabulary.triggered.connect(self.import_csv_vocabulary)
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
         self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
+        self.actionImportWebApp.triggered.connect(self.import_webapp)
 
         ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
@@ -1849,11 +1850,13 @@ class MainWindow(QtWidgets.QMainWindow):
             QMessageBox.warning(self, "Failed to Load", "File is corrupt and could not be loaded")
 
     def close_project(self):
+        self.worker_manager.on_closed()
+
         if self.project is not None:
             if self.project.undo_manager.has_modifications():
                 answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
                 if answer == QMessageBox.Yes:
-                    self.on_save_project()
+                    self.on_save_project(sync=True)
 
             self.player.stop()
             self.abortAllConcurrentThreads.emit()
@@ -2063,6 +2066,16 @@ class MainWindow(QtWidgets.QMainWindow):
     def import_segmentation(self, path=None):
         dialog = SegmentationImporterDialog(self, self.project, self)
         dialog.show()
+
+    def import_webapp(self):
+        if self.project is None:
+            QMessageBox.information(self, "Instruction", "Please create a new empty project first")
+            return
+        project_file = QFileDialog.getOpenFileName(self, caption="Select WebApp File", filter="*.json *.webapp_json")[0]
+        self.project.import_(WebAppProjectImporter(self.project.movie_descriptor.movie_path), project_file)
+        self.dispatch_on_loaded()
+
+
 
     def export_segmentation(self):
         dialog = ExportSegmentationDialog(self)

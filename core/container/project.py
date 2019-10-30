@@ -1091,7 +1091,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param path:
         :return:
         """
-        if serialization is None:
+        if path is not None:
             has_file = True
             if not VIAN_PROJECT_EXTENSION in path:
                 path += VIAN_PROJECT_EXTENSION
@@ -1184,17 +1184,19 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         try:
             self.hdf5_indices_loaded = my_dict['hdf_indices']
-        except:
+        except Exception as e:
+            print(e)
             pass
         if has_file:
             self.hdf5_manager = HDF5Manager()
             self.hdf5_manager.set_path(self.hdf5_path)
-
             try:
                 self.hdf5_manager.set_indices(my_dict['hdf_indices'])
             except Exception as e:
                 print("Exception during hdf5_manager.set_indices(): ", e)
                 self.hdf5_manager.initialize_all()
+        else:
+            print("No HDF5 File")
 
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
@@ -1271,7 +1273,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         except Exception as e:
             # raise e
-            print(e)
+            print("Exception in Load Experiment", e)
 
         for d in my_dict['analyzes']:
             if d is not None:
