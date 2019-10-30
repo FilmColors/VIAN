@@ -45,9 +45,8 @@ from PyQt5.QtGui import QPixmap, QIcon
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow, version
 
-DEBUG = False
+DEBUG = True
 MAIN_WINDOW = None
-
 
 class SuperFilter(QObject):
     def __init__(self, parent):
@@ -103,6 +102,8 @@ def my_exception_hook(exctype, value, traceback):
                     subprocess.run(["nautilus", "log-files"])
                 except:
                     pass
+
+
 
 
 def handler(msg_type, msg_log_context, msg_string):
