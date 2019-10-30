@@ -48,7 +48,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     def create_segment2(self, start, stop, mode:SegmentCreationMode = SegmentCreationMode.BACKWARD,
                         body = "",
                         dispatch  = True,
-                        inhibit_overlap = True, minimal_length = 5):
+                        inhibit_overlap = True, minimal_length = 5, unique_id = -1):
 
         # If the Segment is smaller than the minimal_length, don't do anything
         if mode == SegmentCreationMode.BACKWARD:
@@ -104,7 +104,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
         ID = len(self.segments) + 1
         new_seg = Segment(ID=ID, start=start, end=stop, name=str(ID),
-                          segmentation=self, annotation_body=body)
+                          segmentation=self, annotation_body=body, unique_id=unique_id)
         new_seg.set_project(self.project)
 
         self.add_segment(new_seg, dispatch)
@@ -112,6 +112,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
 
     def add_segment(self, segment, dispatch = True):
         # Finding the Segments location
+        if self.project is not None:
+            segment.set_project(self.project)
 
         if len(self.segments) == 0:
             self.segments.append(segment)
@@ -334,12 +336,14 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     """
     onSegmentChanged = pyqtSignal(object)
 
-    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None, annotation_body = "", name = "New Segment"):
+    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None,
+                 annotation_body = "", name = "New Segment", unique_id = -1):
         IProjectContainer.__init__(self)
         ILockable.__init__(self)
         IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
 
+        self.unique_id = unique_id
         self.MIN_SIZE = 10
         self.ID = ID
         self.start = start

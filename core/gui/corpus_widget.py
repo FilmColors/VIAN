@@ -1,8 +1,8 @@
 import os
-
+from typing import Optional
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
     QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, \
-    QFileDialog, QMessageBox, QFrame
+    QFileDialog, QMessageBox, QFrame, QStackedWidget, QGridLayout
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5 import uic
 
@@ -20,6 +20,8 @@ class CorpusDockWidget(EDockWidget):
         super(CorpusDockWidget, self).__init__(main_window, False)
         self.setWindowTitle("Corpus")
         self.w = QSplitter(Qt.Horizontal, self)
+        self.in_template_mode = False
+        self.last_project = None
 
         self.list = CorpusList(self.w)
         self.info_widget = QTabWidget(self.w)
@@ -45,6 +47,9 @@ class CorpusDockWidget(EDockWidget):
         self.a_create_project.triggered.connect(self.on_create_project)
         self.a_load.triggered.connect(self.on_load_corpus)
         self.general_widget.btn_EditTemplate.clicked.connect(self.on_edit_template)
+        self.general_widget.btn_CloseTemplate.clicked.connect(self.on_close_template)
+        self.general_widget.btn_SaveTemplate.clicked.connect(self.on_save_template)
+
         self.a_import_project.triggered.connect(self.on_import_projects)
 
         self.onCorpusChanged.connect(self.list.on_corpus_loaded)
@@ -53,8 +58,8 @@ class CorpusDockWidget(EDockWidget):
         self.general_widget.btn_ImportTemplate.clicked.connect(self.import_template)
         self.filmography.onFilmographyChanged.connect(self.save_current_project)
         self.list.onSelectionChanged.connect(self.on_selection_changed)
-        self.corpus = None
-        self.current_project = None
+        self.corpus = None  # type: Optional[Corpus]
+        self.current_project = None # type: Optional[VIANProject]
 
     def on_new_corpus(self):
         location = QFileDialog().getExistingDirectory(self, directory=self.main_window.settings.DIR_CORPORA)
@@ -80,10 +85,10 @@ class CorpusDockWidget(EDockWidget):
                                                           "a new one in the file menu")
             return
 
-        file = QFileDialog.getOpenFileName(self)[0]
+        file = QFileDialog.getOpenFileName(self, caption="Select a Movie File")[0]
         if not os.path.isfile(file):
             return
-        self.main_window.on_new_project(file)
+        self.main_window.on_new_project(file, add_to_current_corpus=True)
 
     def on_load_corpus(self):
         if self.corpus is not None:
@@ -119,8 +124,24 @@ class CorpusDockWidget(EDockWidget):
             return
         if self.main_window.project is not None:
             self.main_window.on_save_project()
+            self.last_project = self.main_window.project.path
         self.main_window.project = self.corpus.template
         self.main_window.dispatch_on_loaded()
+        self.set_in_template_mode(True)
+
+    def on_close_template(self):
+        if self.main_window.project is self.corpus.template:
+            self.corpus.save()
+        if self.last_project is not None:
+            self.main_window.load_project(self.last_project)
+        self.set_in_template_mode(False)
+        self.last_project = None
+
+    def on_save_template(self):
+        if self.corpus is not None:
+            self.corpus.reload()
+            self.corpus.apply_template_to_all()
+        self.on_close_template()
 
     def import_template(self):
         file = QFileDialog.getOpenFileName(self, directory="data/templates", filter="*.viant")[0]
@@ -148,17 +169,26 @@ class CorpusDockWidget(EDockWidget):
         if self.current_project is not None:
             self.current_project.movie_descriptor.meta_data = self.filmography.get_filmography()
             self.current_project.store_project()
+            self.corpus.reload(self.current_project)
 
     def on_save_triggered(self):
         if self.corpus is not None:
             self.on_save_corpus()
             self.main_window.settings.add_recent_corpus2(self.corpus)
+            self.corpus.reload()
 
     def on_close_corpus(self):
         if self.corpus is not None:
             self.corpus.save(os.path.join(self.corpus.directory, self.corpus.name))
             self.corpus = None
             self.onCorpusChanged.emit(None)
+
+    def set_in_template_mode(self, state):
+        if state:
+            self.general_widget.templateStack.setCurrentIndex(1)
+        else:
+            self.general_widget.templateStack.setCurrentIndex(0)
+        self.in_template_mode = state
 
 
 class CorpusList(EditableListWidget):
@@ -214,6 +244,7 @@ class CorpusGeneralWidget(QWidget):
 
         self.layout().addWidget(self.w_corpus)
         self.lt_actions = QHBoxLayout(self)
+        self.layout().addWidget(QLabel("Template", self))
         self.layout().addItem(self.lt_actions)
 
         self.layout().addWidget(QLabel("Project Information", self))
@@ -229,11 +260,28 @@ class CorpusGeneralWidget(QWidget):
 
         self.w_corpus.layout().addWidget(self.w_name)
 
+        self.templateStack = QStackedWidget(self)
+        self.templateStack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.lt_actions.addWidget(self.templateStack)
+        self.template_widget_manage = QWidget(self.templateStack)
+        self.template_widget_edit = QWidget(self.templateStack)
+        self.templateStack.addWidget(self.template_widget_manage)
+        self.templateStack.addWidget(self.template_widget_edit)
+
+        self.template_widget_manage.setLayout(QGridLayout())
+        self.template_widget_edit.setLayout(QGridLayout())
+
         self.btn_EditTemplate = QPushButton("Edit Template", self)
-        self.lt_actions.addWidget(self.btn_EditTemplate)
+        self.template_widget_manage.layout().addWidget(self.btn_EditTemplate, 0, 0)
 
         self.btn_ImportTemplate = QPushButton("Import Template", self)
-        self.lt_actions.addWidget(self.btn_ImportTemplate)
+        self.template_widget_manage.layout().addWidget(self.btn_ImportTemplate, 0, 1)
+
+        self.btn_SaveTemplate = QPushButton("Save Template", self)
+        self.template_widget_edit.layout().addWidget(self.btn_SaveTemplate, 0, 0)
+
+        self.btn_CloseTemplate = QPushButton("Close Template", self)
+        self.template_widget_edit.layout().addWidget(self.btn_CloseTemplate, 0, 1)
 
         self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Preferred, QSizePolicy.Expanding))
         self.corpus = None

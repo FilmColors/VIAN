@@ -191,6 +191,10 @@ class StatusProgressBar(QtWidgets.QWidget):
     def set_progress(self, float):
         if self.isVisible() is False:
             self.show()
+
+        if float == 0.0:
+            self.hide()
+
         self.progress_bar.setValue(float * 100)
 
     def on_finished(self):
