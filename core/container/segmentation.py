@@ -18,8 +18,8 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     onSegmentDeleted = pyqtSignal(object)
     onSegmentationChanged = pyqtSignal(object)
 
-    def __init__(self, name = None, segments = None):
-        IProjectContainer.__init__(self)
+    def __init__(self, name = None, segments = None, unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         self.name = name
         if segments is None:
@@ -338,12 +338,11 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None,
                  annotation_body = "", name = "New Segment", unique_id = -1):
-        IProjectContainer.__init__(self)
+        IProjectContainer.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
 
-        self.unique_id = unique_id
         self.MIN_SIZE = 10
         self.ID = ID
         self.start = start

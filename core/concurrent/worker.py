@@ -213,6 +213,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
     def reset(self):
         self.worker.abort()
 
+
 class AnalysisWorker(QObject):
 
     def __init__(self, worker_manager):

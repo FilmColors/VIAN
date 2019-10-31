@@ -31,8 +31,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def __init__(self, title = "", image = None,
                  img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
-                 shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None):
-        IProjectContainer.__init__(self)
+                 shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None, unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         IClassifiable.__init__(self)
         self.title = title
         self.img_movie = None
@@ -255,8 +255,8 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     onScreenshotRemoved = pyqtSignal(object)
     onScreenshotGroupChanged = pyqtSignal(object)
 
-    def __init__(self, project, name = "New Screenshot Group"):
-        IProjectContainer.__init__(self)
+    def __init__(self, project, name = "New Screenshot Group", unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.set_project(project)
         self.name = name
         self.screenshots = []

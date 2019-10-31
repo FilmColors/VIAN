@@ -36,8 +36,8 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 
     """
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
-                 name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static"):
-        IProjectContainer.__init__(self)
+                 name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static", unique_id = -1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
@@ -362,8 +362,8 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
     onAnnotationRemoved = pyqtSignal(object)
     onAnnotationLayerChanged = pyqtSignal(object)
 
-    def __init__(self, name = None, t_start = 0, t_end = 0):
-        IProjectContainer.__init__(self)
+    def __init__(self, name = None, t_start = 0, t_end = 0, unique_id = -1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
 
         self.name = name
@@ -411,9 +411,9 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 
     def create_annotation(self, type = AnnotationType.Rectangle, position = (150,150), size=(100,100),
                           color = (255,255,255), line_width = 5, name = "New Annotation", font_size = 10,
-                          resource_path = ""):
+                          resource_path = "", unique_id=-1):
         annotation = Annotation(type, size = size, color=color, line_w=line_width, name=name,
-                                orig_position=position, font_size=font_size, resource_path=resource_path)
+                                orig_position=position, font_size=font_size, resource_path=resource_path, unique_id=unique_id)
 
         self.add_annotation(annotation)
         annotation.set_project(self.project)

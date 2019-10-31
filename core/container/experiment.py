@@ -51,8 +51,8 @@ class Vocabulary(IProjectContainer, IHasName):
     onVocabularyWordAdded = pyqtSignal(object)
     onVocabularyWordRemoved = pyqtSignal(object)
 
-    def __init__(self, name):
-        IProjectContainer.__init__(self)
+    def __init__(self, name, unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.uuid = str(uuid4())
         self.name = name
         self.comment = ""
@@ -71,8 +71,7 @@ class Vocabulary(IProjectContainer, IHasName):
         if name in [w.name for w in self.words_plain]:
             log_warning("Duplicate Word", name)
             return
-        word = VocabularyWord(name, vocabulary=self)
-        word.unique_id = unique_id
+        word = VocabularyWord(name, vocabulary=self, unique_id=unique_id)
         self.add_word(word, parent_word, dispatch)
         return word
 
@@ -458,8 +457,8 @@ class VocabularyWord(IProjectContainer, IHasName):
     """
     onVocabularyWordChanged = pyqtSignal(object)
 
-    def __init__(self, name, vocabulary, parent = None, is_checkable = False):
-        IProjectContainer.__init__(self)
+    def __init__(self, name, vocabulary, parent = None, is_checkable = False, unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
         self.uuid = str(uuid4())
         self.comment = ""
@@ -567,8 +566,8 @@ class ClassificationObject(IProjectContainer, IHasName):
     onUniqueKeywordsChanged = pyqtSignal(object)
     onSemanticLabelsChanged = pyqtSignal(object)
 
-    def __init__(self, name, experiment, parent = None):
-        IProjectContainer.__init__(self)
+    def __init__(self, name, experiment, parent = None, unique_id = -1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
         self.experiment = experiment
         self.parent = parent
@@ -742,8 +741,8 @@ class UniqueKeyword(IProjectContainer):
     :var class_obj: The ClassObj this keyword origins
     :var external_id: An External Key for the ERC-FilmColors Project
     """
-    def __init__(self, experiment,  voc_obj:Vocabulary = None, word_obj:VocabularyWord = None, class_obj:ClassificationObject = None):
-        IProjectContainer.__init__(self)
+    def __init__(self, experiment,  voc_obj:Vocabulary = None, word_obj:VocabularyWord = None, class_obj:ClassificationObject = None, unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.experiment = experiment
         self.voc_obj = voc_obj
         self.word_obj = word_obj
@@ -804,8 +803,8 @@ class Experiment(IProjectContainer, IHasName):
     onClassificationObjectRemoved = pyqtSignal(object)
     onPipelineScriptChanged = pyqtSignal(object)
 
-    def __init__(self, name="New Experiment"):
-        IProjectContainer.__init__(self)
+    def __init__(self, name="New Experiment", unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
         self.classification_objects = []
         self.analyses = []
@@ -899,14 +898,14 @@ class Experiment(IProjectContainer, IHasName):
                 complexity_groups.append(t)
         return complexity_groups
 
-    def create_class_object(self, name, parent=None):
+    def create_class_object(self, name, parent=None, unique_id=-1):
         t = self.get_classification_object_by_name(name)
         if t is not None:
             return t
 
         if parent is None:
             parent = self
-        obj = ClassificationObject(name, self, parent)
+        obj = ClassificationObject(name, self, parent, unique_id=unique_id)
         if parent is self:
             obj.set_project(self.project)
             self.classification_objects.append(obj)

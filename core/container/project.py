@@ -265,7 +265,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return cl_obj
 
     #region Segmentation
-    def create_segmentation(self, name = None, dispatch = True) -> Segmentation:
+    def create_segmentation(self, name = None, dispatch = True, unique_id=-1) -> Segmentation:
         """
         Creates a new Segmentation with a given name.
 
@@ -273,7 +273,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param dispatch: If the creation should be signaled through the GUI
         :return: a new Segmentation instance.
         """
-        s = Segmentation(name)
+        s = Segmentation(name, unique_id=unique_id)
         self.add_segmentation(s, dispatch)
         return s
 
@@ -429,7 +429,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     # endregion
 
     # region Screenshots
-    def create_screenshot(self, name, frame_pos = None, time_ms = None) -> Screenshot:
+    def create_screenshot(self, name, frame_pos = None, time_ms = None, unique_id=-1) -> Screenshot:
         """
         Creates a Screenshot within the project.
         Either frame_pos or time_ms has to be given,
@@ -456,12 +456,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if ret:
             # shot = Screenshot(title="New Screenshot", image=frame, img_blend=frame_annotated, timestamp=time, frame_pos=frame_pos, annotation_item_ids=annotation_ids)
 
-            new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos)
+            new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos, unique_id=unique_id)
             self.add_screenshot(new)
             return new
         return None
 
     def create_screenshot_headless(self, name, frame_pos = None, time_ms = None, fps = 29.0):
+        #TODO do we still need this?
 
         if frame_pos is None and time_ms is None:
             print("Either frame or ms has to be given")
@@ -777,7 +778,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         return self.movie_descriptor
 
     #region Annotations
-    def create_annotation_layer(self, name, t_start = 0, t_stop = 0) -> AnnotationLayer:
+    def create_annotation_layer(self, name, t_start = 0, t_stop = 0, unique_id=-1) -> AnnotationLayer:
         """
         Creates a new AnnotationLayer instance and returns it.
 
@@ -786,7 +787,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param t_stop: time of the end in milliseconds
         :return: AnnotationLayer instance
         """
-        layer = AnnotationLayer(name, t_start, t_stop)
+        layer = AnnotationLayer(name, t_start, t_stop, unique_id=unique_id)
         self.add_annotation_layer(layer)
         return layer
 
@@ -879,14 +880,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Python Scripts
-    def create_pipeline_script(self, name:str, author="no_author", path = None, script = None) -> PipelineScript:
+    def create_pipeline_script(self, name:str, author="no_author", path = None, script = None, unique_id=-1) -> PipelineScript:
         """
         Creates a new PipelineScript given a name and a script content
         :param name: The name of the script
         :param script: The actual python script text
         :return: a PipelineScript class
         """
-        pipeline_script = PipelineScript(name, author, path=path, script=script)
+        pipeline_script = PipelineScript(name, author, path=path, script=script, unique_id=unique_id)
         return self.add_pipeline_script(pipeline_script)
 
     def add_pipeline_script(self, script:PipelineScript) -> PipelineScript:
@@ -1501,7 +1502,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Vocabularies
-    def create_vocabulary(self, name="New Vocabulary") -> Vocabulary:
+    def create_vocabulary(self, name="New Vocabulary", unique_id=-1) -> Vocabulary:
         """
         Creates a new Vocabulary instance and adds it to the project.
 
@@ -1515,7 +1516,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             counter += 1
             name = base + "_" + str(counter).zfill(2)
 
-        voc = Vocabulary(name)
+        voc = Vocabulary(name, unique_id=unique_id)
         self.add_vocabulary(voc)
         return voc
 
@@ -1625,7 +1626,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region MediaObjects
-    def create_media_object(self, name ,data, container: IHasMediaObject):
+    def create_media_object(self, name, data, container: IHasMediaObject, unique_id=-1):
         """
         Creates a media object and adds it to the project.
 
@@ -1656,7 +1657,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 counter += 1
 
             copy2(data, new_path)
-            new = FileMediaObject(fname, new_path, container, o_type)
+            new = FileMediaObject(fname, new_path, container, o_type, unique_id=unique_id)
 
         self.add_media_object(new, container)
 
@@ -1669,12 +1670,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     #region Experiments
 
-    def create_experiment(self, name="New Experiment") -> Experiment:
+    def create_experiment(self, name="New Experiment", unique_id=-1) -> Experiment:
         """
         Creates a new Experiment instance to the project.
         :return: Experiment instance created
         """
-        new = Experiment(name=name)
+        new = Experiment(name=name, unique_id=unique_id)
         self.add_experiment(new)
         return new
         pass

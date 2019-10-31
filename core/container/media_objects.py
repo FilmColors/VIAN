@@ -2,14 +2,15 @@ from core.data.enums import MEDIA_OBJECT, MediaObjectType
 from .container_interfaces import IProjectContainer, IHasName, IHasMediaObject
 from core.data.computation import *
 
+
 class AbstractMediaObject(IProjectContainer, IHasName):
     """
     :var name: The Name of this Object
     :var container: The Container it belongs to
     :var dtype: The Type of data stored in this MediaObject
     """
-    def __init__(self, name, container:IHasMediaObject, dtype):
-        IProjectContainer.__init__(self)
+    def __init__(self, name, container:IHasMediaObject, dtype, unique_id=-1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
         self.container = container
         self.dtype = dtype
@@ -51,8 +52,8 @@ class FileMediaObject(AbstractMediaObject):
         :var dtype: The Type of data stored in this MediaObject
         :var file_path: The File Path to this object's source
         """
-    def __init__(self, name, file_path, container, dtype):
-        super(FileMediaObject, self).__init__(name, container, dtype)
+    def __init__(self, name, file_path, container, dtype, unique_id=-1):
+        super(FileMediaObject, self).__init__(name, container, dtype, unique_id=unique_id)
         self.file_path = file_path
 
     def serialize(self):
@@ -90,8 +91,8 @@ class DataMediaObject(AbstractMediaObject):
         :var dtype: The Type of data stored in this MediaObject
         :var data: The Data Dict of this object
         """
-    def __init__(self, name, data, container, dtype):
-        super(DataMediaObject, self).__init__(name, container, dtype)
+    def __init__(self, name, data, container, dtype, unique_id=-1):
+        super(DataMediaObject, self).__init__(name, container, dtype, unique_id=unique_id)
         self.data = data
 
     def serialize(self):

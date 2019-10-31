@@ -24,12 +24,12 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamabl
         :self.notes : Additional Notes added in the Inspector
         :self.data : The Generic Data Dict defined by the respective Analysis
     """
-    def __init__(self, name = "", data = None):
+    def __init__(self, name = "", data = None, unique_id = -1):
         """
         :param name:
         :param data:
         """
-        IProjectContainer.__init__(self)
+        IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
         self.notes = ""
         self.data = data
@@ -477,8 +477,8 @@ with open(os.path.join(_VIAN_ROOT, "data/default_pipeline.py"), "r") as f:
 class PipelineScript(IProjectContainer, IHasName):
     _pipeline_script_template = _PIPELINE_TEMPLATE
 
-    def __init__(self, name = "NewScript", author = "no-author", path=None, script=None):
-        super(PipelineScript, self).__init__()
+    def __init__(self, name = "NewScript", author = "no-author", path=None, script=None, unique_id = -1):
+        super(PipelineScript, self).__init__(unique_id=unique_id)
         self.name = name
         self.author = author
         self.uuid = None

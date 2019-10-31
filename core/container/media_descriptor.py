@@ -27,8 +27,8 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 
     """
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id="0_0_0", year=1800, source="",
-                 duration=100, fps = 30):
-        IProjectContainer.__init__(self)
+                 duration=100, fps = 30, unique_id = -1):
+        IProjectContainer.__init__(self, unique_id=unique_id)
         IClassifiable.__init__(self)
         self.set_project(project)
         self.movie_name = movie_name
