@@ -130,6 +130,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
         self.worker = AnalysisWorker(self)
         self.execution_thread = QThread()
+        self.execution_thread.exit()
         self.worker.moveToThread(self.execution_thread)
         self.execution_thread.start()
 
@@ -141,6 +142,8 @@ class WorkerManager(QObject, IProjectChangeNotify):
         self.worker.signals.sign_task_manager_progress.connect(self.main_window.concurrent_task_viewer.update_progress)
         self.worker.signals.analysisStarted.connect(self.main_window.pipeline_toolbar.progress_widget.on_start_analysis)
         self.worker.signals.analysisEnded.connect(self.main_window.pipeline_toolbar.progress_widget.on_stop_analysis)
+
+        self.reset()
 
     def push(self, project, analysis, targets, parameters, fps, class_objs):
         identify = (targets, class_objs, analysis.__class__)
@@ -208,23 +211,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
     @pyqtSlot()
     def reset(self):
-        pass
-        # if self.execution_thread is not None:
-        #     self.execution_thread.terminate()
-        # self.worker = AnalysisWorker(self)
-        # self.execution_thread = QThread()
-        # self.worker.moveToThread(self.execution_thread)
-        # self.execution_thread.start()
-        #
-        # self.onPushTask.connect(self.worker.push_task)
-        # self.onStartWorker.connect(self.worker.run_worker)
-        #
-        # self.worker.signals.sign_create_progress_bar.connect(self.main_window.concurrent_task_viewer.add_task)
-        # self.worker.signals.sign_remove_progress_bar.connect(self.main_window.concurrent_task_viewer.remove_task)
-        # self.worker.signals.sign_task_manager_progress.connect(self.main_window.concurrent_task_viewer.update_progress)
-        # self.worker.signals.analysisStarted.connect(self.main_window.pipeline_toolbar.progress_widget.on_start_analysis)
-        # self.worker.signals.analysisEnded.connect(self.main_window.pipeline_toolbar.progress_widget.on_stop_analysis)
-
+        self.worker.abort()
 
 class AnalysisWorker(QObject):
 
@@ -241,6 +228,7 @@ class AnalysisWorker(QObject):
         self.current_task_id = 0
 
         self.done = []
+        self.aborted = False
 
     @pyqtSlot(object, object)
     def push_task(self, analysis, args):
@@ -252,9 +240,11 @@ class AnalysisWorker(QObject):
     def run_worker(self):
         self.signals.analysisStarted.emit()
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
+            if self.aborted:
+                break
             self.current_task_id = task_id
             result = self._run_task(*args)
-            if result is not None:
+            if result is not None and not self.aborted:
                 self.finished_tasks[task_id] = result
         self.signals.sign_result.emit(self.finished_tasks)
 
@@ -265,6 +255,7 @@ class AnalysisWorker(QObject):
         self.scheduled_task = dict()
         self.finished_tasks = dict()
         self.signals.analysisEnded.emit()
+        self.aborted = False
 
     def _run_task(self, task_id, analysis, args, on_progress):
         log_info("Running Analysis", analysis.__class__)
@@ -280,4 +271,10 @@ class AnalysisWorker(QObject):
     def _on_progress(self, float_value):
         self.signals.sign_task_manager_progress.emit(self.current_task_id, float_value)
 
+    def abort(self):
+        self.scheduled_task = dict()
+        self.finished_tasks = dict()
+        self.signals.analysisEnded.emit()
+
+        self.aborted = True
 
