@@ -1,7 +1,12 @@
-.. _classifiaction::
+.. _classification::
 
 Classification
 ==============
+
+The Classification Window is the tool for annotating the Objects with the corresponfing Vocabulary you intend to. In order to be able to perform this task, you need to have two steps already have done:
+
+- The segmentation_ of your movie and
+- The Setting up of an experiment_
 
 .. figure:: classification_start.png
    :scale: 80 %
@@ -10,6 +15,11 @@ Classification
 
    The Mask before starting a Classification.
 
+Indicated Information:
+
+- **1**: **Experiment**: Choose the experiment (i.e. the Vocabulary and Objects) you want to use to classify your movie. If you have not set up an Experiment yet you can define one HERE, or you can select the *ERC Advanced Grant FilmColors* which already has Objects and a corresponding Experiment pre-defined.
+- **2**: **Mode**: Select the Mode in which you want to carry out your Classification; which means, either you select the Segments manually (you click on them in the **Timeline**), or you classify them sequentally (as seen in the image below).
+- **3**: **Sorting Method**: TO DO
 
 .. figure:: classification_in_prog.png
    :scale: 50 %
