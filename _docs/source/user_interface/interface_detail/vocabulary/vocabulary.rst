@@ -29,5 +29,5 @@ Indicated Information:
 - **9**: In both windows, *Library* and *Project*, the Category *Movement* is selected. Since the movie that is gonna be annoted has rather slow camera movement, the terms *fast* and *hectic* were removed since they are not gonna be used.
 
 * :ref:`genindex`
-* :ref:`midindex`
+* :ref:`modindex`
 * :ref:`search`

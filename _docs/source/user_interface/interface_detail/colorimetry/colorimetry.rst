@@ -1,8 +1,9 @@
-.. _colrimetry:
+.. _colorimetry:
 
 Colorimetry
 ===========
 
+If you ran the **Colorimetry** (which means that the color features for each frame are being computed), you can inspect the color features of the current frame you are at in the **timeline**.
 
 .. figure:: colorimetry.png
    :scale: 60%
@@ -10,6 +11,29 @@ Colorimetry
    :alt: map to buried treasure
    
    The two visualizations of the Colorimetry along the corresponding frame.
+
+
+.. image:: colorimetry_palette_1.png
+   :scale: 50%
+   :align: left
+   :alt: map to buried treasure
+   
+
+.. image:: colorimetry_palette.png
+   :scale: 50%
+   :align: right
+   :alt: map to buried treasure
+   
+Indicated Information:
+
+- **1**: **Mode**:
+ - *Full Tree*:
+ - *Layer*:
+- **2**: **Sorting**:
+ - *Cluster*:
+ - *Frequency*:
+ - *Hilbert*:
+- **3**: **Layer Depth**:
 
 * :ref:`genindex`
 * :ref:`modindex`

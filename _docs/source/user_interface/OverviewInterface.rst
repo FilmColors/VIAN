@@ -5,7 +5,7 @@ Overview Interface
 If you open a project in VIAN, your interface will look something like the following picture (the picture shows a project already in process, so there are Screenshots, layers in the Timeline etc. If you create a new project, you inerface will look much emptier, but the windows are the same):
 
 .. figure:: overview_interface.png
-   :scale: 65%
+   :scale: 50%
    :align: center
    :alt: map to buried treasure
 
