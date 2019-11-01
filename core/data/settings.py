@@ -31,8 +31,15 @@ palette_beach = Palette(palette_name="Ocean", palette_colors=[[3,63,99],[40,102,
 palette_earth = Palette(palette_name="Earth", palette_colors=[[252,170,103],[176,65,62],[255,255,199],[84,134,135],[71,51,53]])
 palette_gray = Palette(palette_name="Gray", palette_colors=[[0,0,0],[50,50,50],[100,100,100],[150,150,150],[200,200,200],[255,255,255]])
 
-with open("data/config.json", "r") as f:
-    CONFIG = json.load(f)
+try:
+    with open("data/config.json", "r") as f:
+        CONFIG = json.load(f)
+except:
+    try:
+        with open("../data/config.json", "r") as f:
+            CONFIG = json.load(f)
+    except Exception as e:
+        raise e
 
 class UserSettings():
     """
@@ -334,6 +341,7 @@ class UserSettings():
             log_error("No Settings found", e)
 
         self.integritiy_check()
+        return self
 
     def clean_up_recent(self):
         # Check if recent files exist:

@@ -973,6 +973,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         return (missing_analyses, n_analyses, n_analyses_done)
 
+    def get_pipeline_script_by_uuid(self, uuid):
+        for p in self.pipeline_scripts:
+            if p.uuid == uuid:
+                return p
+        return None
     #endregion
 
     #region IO
@@ -1875,7 +1880,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if self.inhibit_dispatch is False:
             self.onSelectionChanged.emit(sender, self.selected)
     #endregion
-
 
 
 

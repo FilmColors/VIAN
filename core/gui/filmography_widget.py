@@ -86,7 +86,8 @@ class FilmographyWidget2(QWidget):
             q = QCompleter([p['name'] for p in countries])
             self.lineEdit_ProductionCountry.setCompleter(q)
 
-        # if project is not None:
+        if project is not None:
+            self.set_filmography(project.movie_descriptor.meta_data)
 
     def get_filmography(self):
         filmography_meta = dict()

@@ -85,7 +85,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             if inhibit_overlap:
                 last = None
                 next = None
-
                 for i, s in enumerate(self.segments):
                     if s.start < start:
                         last = s
@@ -100,6 +99,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                     stop = next.start
 
         if stop - start < minimal_length:
+            log_error("Segment to small. SegmentSize:", stop - start, "MinimalSize:" ,minimal_length)
             return
 
         ID = len(self.segments) + 1

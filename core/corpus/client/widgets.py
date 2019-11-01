@@ -176,11 +176,15 @@ class CorpusProgressWidget(QWidget):
         if self.main_window.project is None:
             QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
             return
-        experiment = self.main_window.project.get_experiment_by_name(ERCFilmColorsVIANPipeline.experiment)
+        if self.main_window.project.active_pipeline_script.uuid != ERCFilmColorsVIANPipeline.uuid:
+            self.main_window.project.active_pipeline_script = self.main_window.project\
+                .get_pipeline_script_by_uuid(ERCFilmColorsVIANPipeline.uuid)
+
+        experiment = self.main_window.project.get_experiment_by_name("ERC Advanced Grant FilmColors")
         if experiment is None:
             QMessageBox.information(self, "No Experiment created.",
                                     "You first have to create a experiment with the"
-                                    + ERCFilmColorsVIANPipeline.experiment + " template")
+                                    + ERCFilmColorsVIANPipeline.experiment.name + " template")
             return
 
         for priority in sorted(self.missing_analyses.keys()):
@@ -337,7 +341,6 @@ class CorpusCommitDialog(EDialogWidget):
             self.companies = []
             log_error(e)
 
-
         self.filmography = FilmographyWidget2(self, main_window.project, persons=self.persons,
                                               processes=self.processes, genres=self.genres,
                                               countries = self.countries, companies=self.companies)
@@ -353,6 +356,10 @@ class CorpusCommitDialog(EDialogWidget):
         self.horizontalLayoutUpper.addWidget(self.filmography)
         self.pushButton_Commit.clicked.connect(self.on_commit)
         self.pushButton_Cancel.clicked.connect(self.close)
+
+    def on_check(self):
+
+        pass
 
     def on_commit(self):
         for k, v in self.filmography.get_filmography().items():

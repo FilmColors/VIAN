@@ -2069,10 +2069,31 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def import_webapp(self):
         if self.project is None:
-            QMessageBox.information(self, "Instruction", "Please create a new empty project first")
-            return
+            self.close_project()
+
         project_file = QFileDialog.getOpenFileName(self, caption="Select WebApp File", filter="*.json *.webapp_json")[0]
-        self.project.import_(WebAppProjectImporter(self.project.movie_descriptor.movie_path), project_file)
+
+        if not os.path.isfile(project_file):
+            return
+
+        if self.project is None:
+            self.close_project()
+
+        directory = QFileDialog.getExistingDirectory(self,
+                                                     caption="Select directory where the project folder is placed",
+                                                    directory=self.settings.DIR_PROJECTS)
+
+        if not os.path.isdir(directory):
+            QMessageBox.warning(self, "No valid Directory", "No valid directory has been selected")
+            return
+
+        movie_path = QFileDialog.getOpenFileName(self, caption="Select Movie File",
+                                                 directory=self.settings.DIR_PROJECTS)[0]
+
+        self.project = VIANProject(movie_path=movie_path)
+        self.project.import_(WebAppProjectImporter(self.project.movie_descriptor.movie_path,
+                                                   directory=directory),
+                             project_file)
         self.dispatch_on_loaded()
 
 

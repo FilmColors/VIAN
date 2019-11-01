@@ -23,7 +23,7 @@ class TestImportMethods(unittest.TestCase):
         experiments = r.json()
         self.assertIsInstance(experiments, list)
 
-        r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/experiments/" + str(experiments[0]['id']))
+        r = requests.get("http://127.0.0.1:5000/api/experiments/1")
         self.exchange_data = r.json()
 
         with open("data/test-template.json", "w") as f:

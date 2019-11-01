@@ -457,8 +457,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
                     checkbox = WordCheckBox(group, k)
                     if self.behaviour == "classification":
-                        if self.current_experiment.has_tag(self.current_container, checkbox.word):
-                            print("Has Tag")
                         checkbox.setChecked(self.current_experiment.has_tag(self.current_container, checkbox.word))
                         checkbox.stateChanged.connect(partial(self.current_experiment.toggle_tag, self.current_container, checkbox.word))
                     else:

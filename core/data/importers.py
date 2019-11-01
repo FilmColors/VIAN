@@ -632,8 +632,7 @@ class ExperimentTemplateImporter(ImportDevice):
             word = words_index[entry['word']]
             if keyword is None:
                 if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
-                    keyword.unique_id = entry['uuid']
+                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj, unique_id=entry['uuid'])
             else:
                 clobj.remove_vocabulary(keyword.voc_obj)
 
@@ -711,7 +710,7 @@ class ExperimentTemplateUpdater(ImportDevice):
         unique_keywords = dict()
         for entry in data['unique_keywords']:
             # Check if the keyword already exists in this experiment:
-            keyword = project.get_by_id(entry['uuid'])  # type:UniqueKeyword
+            keyword = project.get_by_id(entry['uuid'])
             clobj = cl_objs_index[entry['classification_object']]
 
             if clobj.unique_id not in unique_keywords:
@@ -720,8 +719,7 @@ class ExperimentTemplateUpdater(ImportDevice):
             word = words_index[entry['word']]
             if keyword is None:
                 if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
-                    keyword.unique_id = entry['uuid']
+                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj, unique_id=entry['uuid'])
             else:
                 clobj.remove_vocabulary(keyword.voc_obj)
 
@@ -736,48 +734,98 @@ class ExperimentTemplateUpdater(ImportDevice):
 
 
 class WebAppProjectImporter(ImportDevice):
-    def __init__(self, movie_path):
+    def __init__(self, movie_path, directory = None):
         super(WebAppProjectImporter, self).__init__()
         self.movie_path = movie_path
-        self.fps = cv2.VideoCapture(self.movie_path).get(cv2.CAP_PROP_FPS)
+        # cap = cv2.VideoCapture(self.movie_path)
+        # cap.read()
+        self.directory = directory
+        self.fps = None
 
     def import_(self, project:VIANProject, path):
         with open(path, "r") as f:
             data = json.load(f)
         project.name = data['project_name']
+        project.uuid = data['uuid']
+        project.movie_descriptor.year = data['year']
+        project.movie_descriptor.meta_data['ERC_FilmColorsFilmography'] = data['filmography']
+        project.movie_descriptor.movie_id = "".join([str(data['corpus_id']),
+                                                     str(data['manifestation_id']),
+                                                     str(data['copy_id'])])
+        if self.directory is not None:
+            folder_name = "_".join([project.movie_descriptor.movie_id, data['project_name'], str(data['year'])])
+            file_name = folder_name + VIAN_PROJECT_EXTENSION
+
+            project.folder = os.path.join(self.directory, folder_name)
+            project.path = os.path.join(self.directory, folder_name, file_name)
+
+            os.mkdir(project.folder)
+            project.store_project(path=os.path.join(self.directory, folder_name, file_name))
+
+            project.create_file_structure()
+            project.connect_hdf5()
 
         with open("temp.json", "w") as f:
             json.dump(data['experiment'], f)
 
         project.import_(ExperimentTemplateImporter(), path="temp.json")
         os.remove("temp.json")
-
         self.fps = project.movie_descriptor.fps
-        segmentation = dict()
-        for s in data['segments']:
 
-            if s['segmentation_id'] not in segmentation:
-                t = project.create_segmentation(data['segmentation'][str(s['segmentation_id'])])
-                segmentation[s['segmentation_id']] = t
-            segmentation[s['segmentation_id']].create_segment2(start=s['start_ms'],
-                    stop=s['end_ms'],
-                    body=s['body'],
-                    unique_id=s['uuid'])
+        segmentation = dict()
+        all_segments = dict()
+        for segmentation_id, v in data['segmentation'].items():
+            segmentation_id = int(segmentation_id)
+            t = project.create_segmentation(data['segmentation'][str(segmentation_id)])
+            segmentation[segmentation_id] = t
+            all_segments[segmentation_id] = []
+
+        print(all_segments)
+        print(segmentation)
+        for s in sorted(data['segments'], key=lambda x: x['start_ms']):
+            k = int(s['segmentation_id'])
+            while (s['start_ms'], s['end_ms']) in all_segments[k]:
+                k += 1
+                if k not in all_segments:
+                    t = project.create_segmentation(name="Alternative" + str(k))
+                    segmentation[k] = t
+                    all_segments[k] = []
+            segmentation_id = k
+
+            # if segmentation_id not in segmentation:
+            #     t = project.create_segmentation(data['segmentation'][str(segmentation_id)])
+            #     segmentation[segmentation_id] = t
+            #     all_segments[segmentation_id] = []
+
+            segmentation[segmentation_id].create_segment2(
+                start=s['start_ms'],
+                stop=s['end_ms'],
+                body=s['body'],
+                unique_id=s['uuid'], inhibit_overlap=False, mode = SegmentCreationMode.INTERVAL)
+            all_segments[segmentation_id].append((s['start_ms'], s['end_ms']))
+
+        to_remove = []
+        for s in project.segmentation:
+            if len(s.segments) == 0:
+                to_remove.append(s)
+        for s in to_remove:
+            project.remove_segmentation(s)
 
         for i, s in enumerate(data['screenshots']):
             scr = Screenshot(title="Screenshot" + str(i), timestamp=s['time_ms'],
                              frame_pos=ms_to_frames(s['time_ms'], self.fps),
-                             image=np.zeros(shape=(30,50,3), dtype=np.uint8))
-            scr.unique_id = str(uuid4())
+                             image=np.zeros(shape=(30,50,3), dtype=np.uint8),
+                             unique_id=s['uuid'])
             project.add_screenshot(scr)
 
         for entry in data['classification']:
             entity = project.get_by_id(entry['entity'])
             ukw = project.get_by_id(entry['ukw'])
+            if entity is None or ukw is None:
+                print(entry['entity'], entry['ukw'])
+                continue
             project.experiments[0].tag_container(entity, ukw)
 
-        for s in project.segmentation[0].segments:
-            print(s.tag_keywords)
 
 
 

@@ -1,4 +1,5 @@
 import cv2
+import sys
 import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
@@ -248,6 +249,13 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def get_parent_container(self):
         return self.screenshot_group
 
+    def load_screenshots(self, cap:cv2.VideoCapture = None):
+        if cap is None:
+            cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos)
+        ret, frame = cap.read()
+        self.set_img_movie(frame)
+
 
 class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     onScreenshotGroupDeleted = pyqtSignal(object)
@@ -323,4 +331,3 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     def delete(self):
         self.project.remove_screenshot_group(self)
         self.onScreenshotGroupDeleted.emit(self)
-
