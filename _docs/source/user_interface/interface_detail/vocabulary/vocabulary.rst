@@ -26,7 +26,7 @@ Indicated Information:
 - **6**: The Library Vocabulary.
 - **7**: The Project Vocabulary.
 - **8**: The Information Window which displays Information of the selected Category.
-- **9**: In both windows, *Library* and *Project*, the Category *Movement* is selected. Since the movie that is gonna be annoted has rather slow camera movement, the terms *fast* and *hectic* were removed since they are not gonna be used.
+- **9**: In both windows, *Library* and *Project*, the Category *Movement* is selected. Since the movie that is gonna be annoted has rather slow camera movement, the terms *fast* and *hectic* were removed from the Project Vocabularyfrom the Project Vocabulary since they are not gonna be used.
 
 * :ref:`genindex`
 * :ref:`modindex`

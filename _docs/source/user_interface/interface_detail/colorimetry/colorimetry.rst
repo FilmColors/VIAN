@@ -12,6 +12,10 @@ If you ran the **Colorimetry** (which means that the color features for each fra
    
    The two visualizations of the Colorimetry along the corresponding frame.
 
+Indicated Information:
+
+- **1**: The **Palette**-Visualization of the current Frame.
+- **2**: The **Space Palette**-Visualization of the current Frame.
 
 .. image:: colorimetry_palette_1.png
    :scale: 50%
