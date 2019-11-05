@@ -110,7 +110,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
-        self.a_complexity = QAction("Change Complexity")
+        self.a_complexity = QAction("Change Complexity", self.inner.menuBar())
         self.inner.menuBar().addAction(self.a_complexity)
 
         self.a_complexity.triggered.connect(self.on_change_complexity)
