@@ -24,8 +24,7 @@ class MovieMosaicAnalysis(IAnalysisJob):
                                                   help_path = "",
                                                   author="Gaudenz Halter",
                                                   version = "0.0.1",
-                                                  multiple_result=True,
-                                                  data_serialization=DataSerialization.MASKS)
+                                                  multiple_result=True)
 
     def prepare(self, project, targets, fps, class_objs = None):
         super(MovieMosaicAnalysis, self).prepare(project, targets, fps, class_objs)

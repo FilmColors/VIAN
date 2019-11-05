@@ -30,8 +30,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                                                            dataset_dtype=np.uint8,
                                                            author="Gaudenz Halter",
                                                            version="1.0.0",
-                                                           multiple_result=False,
-                                                           data_serialization=DataSerialization.MASKS)
+                                                           multiple_result=False)
         self.model_name = model_name
         self.model = model
         self.resolution = resolution

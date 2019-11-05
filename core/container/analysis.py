@@ -183,7 +183,6 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
             self.parameters = parameters
         else:
             self.parameters = []
-
         self.target_classification_object = target_classification_object
         # Evaluated self.analysis-job_class
         self.a_class = None
@@ -275,13 +274,11 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
 
     def get_adata(self):
         if self.a_class is None:
-            # self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
             self.a_class = get_analysis_by_name(self.analysis_job_class)
         return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
 
     def set_adata(self, d):
         if self.a_class is None:
-            # self.a_class = self.project.main_window.eval_class(self.analysis_job_class)
             self.a_class = get_analysis_by_name(self.analysis_job_class)
         self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
         self.data = None
@@ -293,6 +290,24 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def cleanup(self):
         if self.target_container is not None:
             self.target_container.remove_analysis(self)
+
+
+class FileAnalysis(IAnalysisJobAnalysis):
+    def __init__(self, name="NewFileAnalysis", results=None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
+        super(FileAnalysis, self).__init__(name, results, analysis_job_class, parameters, container, target_classification_object)
+        self.file_path = None
+
+    def set_adata(self, d):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        self.file_path = os.path.join(self.project.data_dir, str(self.unique_id))
+        self.a_class().to_file(d, self.file_path)
+
+    def get_adata(self):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        self.file_path = os.path.join(self.project.data_dir, str(self.unique_id))
+        return self.a_class().from_file(self.file_path)
 
 
 class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):

@@ -33,9 +33,8 @@ class DataSerialization(Enum):
     This Enum defines how an object is stored in the sqlite file of the Project. 
     see :module:~'core.data.project_streaming.SQLiteStreamer'
     """
-    JSON = 0
-    MASKS = 1
-    IMAGE = 2
+    HDF5 = 0
+    FILE = 1
 
 
 def get_type_as_string(type):

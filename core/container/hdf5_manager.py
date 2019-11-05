@@ -4,6 +4,7 @@ import os
 import gc
 import numpy as np
 
+from core.data.enums import DataSerialization
 from core.data.log import log_info
 ALL_REGISTERED_ANALYSES = dict()
 
@@ -75,6 +76,8 @@ class HDF5Manager():
         if analyses is None or len(analyses) == 0:
             analyses = ALL_REGISTERED_ANALYSES.values()
         for a in analyses:
+            if a().data_serialization == DataSerialization.FILE:
+                continue
             c = a()
             self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype)
 

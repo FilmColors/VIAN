@@ -4,6 +4,7 @@ from core.analysis.barcode_analysis import *
 from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
 from core.analysis.histogram_analysis import ColorHistogramAnalysis
+from core.analysis.z_projection import ZProjectionAnalysis
 from core.container.hdf5_manager import vian_analysis
 
 # import dlib
@@ -32,8 +33,7 @@ except:
                                                                dataset_dtype = np.uint8,
                                                                author="Gaudenz Halter",
                                                                version="1.0.0",
-                                                               multiple_result=False,
-                                                               data_serialization=DataSerialization.MASKS)
+                                                               multiple_result=False)
 
         def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs=None):
             """

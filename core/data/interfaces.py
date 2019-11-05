@@ -59,12 +59,12 @@ class IAnalysisJob(QObject):
     
     """
     def __init__(self, name, source_types,
-                 dataset_name, dataset_shape, dataset_dtype,
+                 dataset_name=None, dataset_shape=None, dataset_dtype=None,
                  help_path = "",
                  author="No Author",
                  version = "0.0.1",
                  multiple_result = False,
-                 data_serialization = DataSerialization.JSON):
+                 data_serialization = DataSerialization.HDF5):
         """
         
         :param name: The name of the Analysis, used in the UI.
@@ -76,6 +76,10 @@ class IAnalysisJob(QObject):
         seperately or once for all input containers
         """
         super(IAnalysisJob, self).__init__()
+        if (dataset_name is None or dataset_dtype is None or dataset_shape is None) and \
+                data_serialization == DataSerialization.HDF5:
+            raise ValueError("For HDF5 stored analyses a dataset has to be given")
+
         self.name = name
         self.source_types = source_types
         self.dataset_name = dataset_name
@@ -273,6 +277,12 @@ class IAnalysisJob(QObject):
 
     def to_hdf5(self, data):
         return data
+
+    def to_file(self, data, file_path):
+        return file_path
+
+    def from_file(self, file_path):
+        return None
 
     def abort(self):
         pass

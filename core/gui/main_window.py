@@ -395,6 +395,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
         self.actionColor_Histogram.triggered.connect(partial(self.analysis_triggered, ColorHistogramAnalysis()))
         self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
+        self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
         # self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
         # self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
         self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))

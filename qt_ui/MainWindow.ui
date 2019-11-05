@@ -202,6 +202,7 @@
     <addaction name="actionColorFeatures"/>
     <addaction name="actionColor_Histogram"/>
     <addaction name="actionColor_Palette"/>
+    <addaction name="actionZProjection"/>
     <addaction name="separator"/>
     <addaction name="actionColormetry"/>
     <addaction name="actionClearColormetry"/>
@@ -942,6 +943,11 @@
   <action name="actionImportWebApp">
    <property name="text">
     <string>VIAN WebApp</string>
+   </property>
+  </action>
+  <action name="actionZProjection">
+   <property name="text">
+    <string>Z-Projection</string>
    </property>
   </action>
  </widget>
