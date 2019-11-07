@@ -158,11 +158,12 @@ class ZProjectionAnalysis(IAnalysisJob):
         return data_dict
 
     def to_file(self, data, file_path):
-        file_path = file_path + ".png"
+        file_path = file_path + ".jpg"
         cv2.imwrite(file_path, data)
+        return file_path
 
     def from_file(self, file_path):
-        file_path = file_path + ".png"
+        file_path = file_path + ".jpg"
         img = cv2.imread(file_path)
         return img
 

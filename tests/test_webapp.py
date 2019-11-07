@@ -27,6 +27,20 @@ class TestCreate(unittest.TestCase):
             t = interface.check_project_exists(project)
             self.assertFalse(t)
 
+    def test_export(self):
+        with VIANProject().load_project(path=PROJECT) as project:
+            settings = UserSettings(path=SETTINGS_PATH).load()
+            cap = cv2.VideoCapture(project.movie_descriptor.movie_path)
+            ret, frame = cap.read()
+            cv2.imshow("", frame)
+            for s in project.screenshots:
+                print(s, s.frame_pos)
+                s.load_screenshots(cap)
+                cv2.imshow("", s.get_img_movie())
+                cv2.waitKey(10)
+            interface = WebAppCorpusInterface()
+            interface._export_project(project)
+
     def test_upload(self):
         with VIANProject().load_project(path=PROJECT) as project:
             settings = UserSettings(path=SETTINGS_PATH).load()

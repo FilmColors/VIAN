@@ -3,7 +3,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
 from core.data.settings import UserSettings, Contributor, CONFIG
 from core.container.project import VIANProject
-from core.container.analysis import SemanticSegmentationAnalysisContainer
+from core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
 from core.container.experiment import Experiment, VocabularyWord, Vocabulary
 from core.analysis.analysis_import import SemanticSegmentationAnalysis
 from core.data.log import log_info
@@ -55,7 +55,6 @@ def check_erc_template(project:VIANProject):
         json.dump(exchange_data, f)
     project.import_(ExperimentTemplateUpdater(), temporary)
     log_info("ERC Template detected, Done")
-
 
 
 class CorpusClient(QObject):
@@ -134,7 +133,7 @@ class CorpusClient(QObject):
         if self.mode() is not None:
             self.onCommitStarted.emit(project, contributor)
         else:
-            self.onCommitFailed.emit()
+            self.onCommitFailed.emit(None)
 
     @pyqtSlot(object)
     def on_commit_finished(self):
@@ -220,9 +219,7 @@ class WebAppCorpusInterface(QObject):
             ret = dict(success = False)
             print("Exception in RemoteCorpusClient.connect_user(): ", str(e))
             self.signals.onConnectionFailed.emit(ret)
-
         return ret
-        pass
 
     @pyqtSlot()
     def logout(self):
@@ -231,16 +228,7 @@ class WebAppCorpusInterface(QObject):
     def verify_project(self):
         return True
 
-    @pyqtSlot(object, object)
-    def commit_project(self, project:VIANProject, contributor:Contributor):
-        """
-           Here we actually commit the project, 
-           this includes to prepare the project, baking screenshots and masks into image files 
-           and upload them to the Server
-           :param user: 
-           :param project: 
-           :return: 
-           """
+    def _export_project(self, project):
         try:
             # region -- PREPARE --
             if not self.verify_project():
@@ -266,8 +254,8 @@ class WebAppCorpusInterface(QObject):
                     os.mkdir(export_project_dir)
             except Exception as e:
                 raise e
-                QMessageBox.information("Commit Error", "Could not modify \\corpus_export\\ directory."
-                                                        "\nPlease make sure the Folder is not open in the Explorer/Finder.")
+                # QMessageBox.information("Commit Error", "Could not modify \\corpus_export\\ directory."
+                                                        #"\nPlease make sure the Folder is not open in the Explorer/Finder.")
                 return False, None
 
             # -- Create a HDF5 File for the Export -- #
@@ -284,6 +272,7 @@ class WebAppCorpusInterface(QObject):
             # Maps the unique ID of the screenshot to it's mask path -> dict(key:unique_id, val:dict(scene_id, segm_shot_id, group, path))
             mask_index = dict()
             shots_index = dict()
+            file_analyses_index = dict()
 
             for i, scr in enumerate(project.screenshots):
                 sys.stdout.write(
@@ -339,8 +328,6 @@ class WebAppCorpusInterface(QObject):
                                 data = a.get_adata()
                                 dataset = a.dataset
                                 mask_idx = project.hdf5_manager._uid_index[a.unique_id]
-                                # data = dict(db[table].find_one(key=a.unique_id))['json']
-                                # data = project.main_window.eval_class(a.analysis_job_class)().from_json(data)
 
                                 if dataset in masks_to_export_names:
                                     mask_path = mask_dir + dataset + "_" + str(scr.scene_id) + "_" + str(
@@ -359,6 +346,15 @@ class WebAppCorpusInterface(QObject):
                                         scr_region=a.entry_shape)
                                     ))
 
+            for i, a in enumerate(project.analysis):
+                if isinstance(a, FileAnalysis):
+                    file_path = a.save(os.path.join(export_project_dir, str(a.unique_id)))
+                    file_analyses_index[a.unique_id] = dict(
+                        target = a.target_container,
+                        analysis = a.analysis_job_class,
+                        file_path =file_path
+                    )
+
             with open(export_project_dir + "image_linker.json", "w") as f:
                 json.dump(dict(masks=mask_index, shots=shots_index), f)
 
@@ -370,9 +366,21 @@ class WebAppCorpusInterface(QObject):
             shutil.make_archive(archive_file, 'zip', export_project_dir)
 
         except Exception as e:
+            raise e
             print("Exception in RemoteCorpusClient.commit_project(): ", str(e))
+        return archive_file
 
-        # endregion
+    @pyqtSlot(object, object)
+    def commit_project(self, project:VIANProject, contributor:Contributor):
+        """
+           Here we actually commit the project, 
+           this includes to prepare the project, baking screenshots and masks into image files 
+           and upload them to the Server
+           :param user: 
+           :param project: 
+           :return: 
+           """
+        archive_file = self._export_project(project)
 
         if contributor is None:
             self.signals.onCommitFinished.emit(project)
@@ -441,8 +449,6 @@ class WebAppCorpusInterface(QObject):
     def pull_vocabulary(self, vocabulary:Vocabulary):
         """ Tries to Pull a Vocabulary from the WebApp """
         pass
-
-
 
 
 class LocalCorpusInterface():

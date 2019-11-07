@@ -295,19 +295,29 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
 class FileAnalysis(IAnalysisJobAnalysis):
     def __init__(self, name="NewFileAnalysis", results=None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
         super(FileAnalysis, self).__init__(name, results, analysis_job_class, parameters, container, target_classification_object)
-        self.file_path = None
+        self._file_path = None
 
     def set_adata(self, d):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        self.file_path = os.path.join(self.project.data_dir, str(self.unique_id))
-        self.a_class().to_file(d, self.file_path)
+        self._file_path = os.path.join(self.project.data_dir, str(self.unique_id))
+        self.a_class().to_file(d, self._file_path)
 
     def get_adata(self):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        self.file_path = os.path.join(self.project.data_dir, str(self.unique_id))
-        return self.a_class().from_file(self.file_path)
+        self._file_path = os.path.join(self.project.data_dir, str(self.unique_id))
+        return self.a_class().from_file(self._file_path)
+
+    def get_file_path(self):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        return self.a_class().get_file_path(self._file_path)
+
+    def save(self, file_path):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        return self.a_class().to_file(self.get_adata(), file_path)
 
 
 class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):

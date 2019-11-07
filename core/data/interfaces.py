@@ -284,6 +284,9 @@ class IAnalysisJob(QObject):
     def from_file(self, file_path):
         return None
 
+    def get_file_path(self, file_path):
+        return file_path
+
     def abort(self):
         pass
 

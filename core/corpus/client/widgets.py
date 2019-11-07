@@ -274,6 +274,8 @@ class CorpusClientWidget(QWidget):
         self.btn_Connect.setIcon(create_icon("qt_ui/icons/icon_webapp_off.png"))
 
     def on_commit(self):
+        if self.corpus_client is None:
+            QMessageBox.information(self, "Not Connected", "Please login to the WebApp first.")
         dialog = CorpusCommitDialog(self.main_window, self.corpus_client)
         dialog.show()
         # if self.main_window.project is not None:

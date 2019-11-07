@@ -1141,7 +1141,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.data_dir = self.folder + "/data/"
         self.hdf5_path = self.data_dir + "analyses.hdf5"
 
-
         move_project_to_directory_project = False
         version = [0,0,0]
         try:

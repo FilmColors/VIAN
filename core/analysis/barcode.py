@@ -143,12 +143,15 @@ class BarcodeAnalysis(IAnalysisJob):
     def to_file(self, data, file_path):
         file_path = file_path + ".png"
         cv2.imwrite(file_path, data)
+        return file_path
 
     def from_file(self, file_path):
         file_path = file_path + ".png"
         img = cv2.imread(file_path)
         return img
 
+    def get_file_path(self, file_path):
+        return file_path + ".png"
 
 class BarcodeAnalysisParameterWidget(ParameterWidget):
     """
