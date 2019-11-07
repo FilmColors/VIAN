@@ -23,7 +23,7 @@ Indicated Information:
 
 After you've specified the required Settings, you will be prompted with a screen that looks like the following for carrying out the Classification:
 
-.. figure:: classification_in_prog.png
+.. figure:: classification_in_prog_2.png
    :scale: 50 %
    :align: center
    :alt: map to buried treasure
@@ -32,10 +32,12 @@ After you've specified the required Settings, you will be prompted with a screen
 
 Indicated Information:
 
-- **1**: The Indicator at which Segment you are at the moment, and the Buttons for going to the previous and the next Element, respectively (The *Next* and *Previous* Buttons are available only if you've chosen *Sequential Mode*).
-- **2**: In this area you will find the Vocabulary that you set up in the **Experiment** Section: In the upper bar the defined Objects and their corresponding Concepts are selectable (as Tabs). In the area below are the actual Words from the Vocabulary with which the Objects are classified.
-- **3**: The Progress Bar indicating how far you are in the process of classifying your movie.
-- **4**: As you traverse your Segments, the current Segment is highlighted in blue and the Cursor jumps automatically to the center of the Segment, so that a representative Frame is being displayed in the **player controls**.
+- **1**: The Button on the left *Previous* for going one Segment back, the button on the right *Next* for proceeding to the next Segment, the Indicator in the middle, on which Segment one is at the moment.
+- **2**: The Area with the Objects and the Vocabulary to classify them. In this case, the *Global* Object is going to be classified with regard to its *Location* concept from the *Location/Time* Vocabulary.
+- **3**: The *Location* concept is being searched for the term *summer*.
+- **4**: The Progress Bar, indicating to what percentage the Classifiaction is done.
+- **5**: The Segment one is at at the moment, the Cursor jumps automatically to its center, so a representative Frame of the Segment is displayed in the :ref:`video_player`.
+- **6**: The yellow dots indicate that a segment has been classified.
 
 
 * :ref:`genindex`
