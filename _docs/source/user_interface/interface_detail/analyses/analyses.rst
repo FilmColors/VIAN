@@ -1,4 +1,4 @@
-.. _analyses::
+.. _analyses:
 
 Analyses
 ===========
