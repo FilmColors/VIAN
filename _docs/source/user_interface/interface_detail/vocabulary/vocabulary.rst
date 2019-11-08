@@ -1,4 +1,4 @@
-.. _vocabulary::
+.. _vocabulary:
 
 Vocabulary
 ==========
