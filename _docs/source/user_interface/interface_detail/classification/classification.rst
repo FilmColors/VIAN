@@ -3,7 +3,7 @@
 Classification
 ==============
 
-The Classification Window is the tool for annotating the Objects with the corresponfing Vocabulary you intend to. In order to be able to perform this task, you need to have two steps already have done:
+The Classification Window is the tool for annotating the Objects with the corresponfing Vocabulary you intend to. In order to be able to perform this task, two steps must already have been performed:
 
 - The :ref:`segmentation` of your movie and
 - The Setting up of an :ref:`experiment`
