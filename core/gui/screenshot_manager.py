@@ -420,7 +420,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.only_show_current_segment = False
 
         self.font = QFont("Consolas")
-        self.font_size = 68
+        self.font_size = 40
         self.font_size_segments = 120
         self.font.setPointSize(self.font_size)
         self.color = QColor(225,225,225)
@@ -483,7 +483,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             lbl.setAttribute(Qt.WA_NoSystemBackground)
             movie.start()
 
-            font = QFont("Consolas", 36)
+            font = QFont("Bahnschrift", 36)
             self.loading_icon = self.scene.addWidget(lbl)
             self.loading_text = self.scene.addText("Loading Screenshots... please wait.", font)
             self.loading_text.setDefaultTextColor(QColor(255,255,255))
@@ -744,8 +744,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if len(self.selected) > 0:
             for i in self.selected:
                 pen = QtGui.QPen()
-                pen.setColor(QtGui.QColor(255, 160, 74))
-                pen.setWidth(25)
+                pen.setColor(QtGui.QColor(255, 160, 74, 150))
+                pen.setWidth(10)
                 item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(i.selection_rect))
                 item.setPen(pen)
                 # rect = QtCore.QRectF(i.selection_rect)
@@ -976,9 +976,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def mouseDoubleClickEvent(self, *args, **kwargs):
         if len(self.selected) > 0:
-            popup = ImagePreviewPopup(self, self.selected[0].pixmap())
+            popup = ImagePreviewPopup(self, numpy_to_pixmap(self.selected[0].screenshot_obj.get_img_movie_orig_size()))
             self.main_window.player.set_media_time(self.selected[0].screenshot_obj.movie_timestamp)
-            # self.frame_image(self.selected[0])
         else:
             self.center_images()
 

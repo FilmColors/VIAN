@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QObject, QThread, pyqtSlot, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
-from core.data.settings import UserSettings, Contributor, CONFIG
+from core.data.settings import UserSettings, Contributor, CONFIG, IS_DEV
 from core.container.project import VIANProject
 from core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
 from core.container.experiment import Experiment, VocabularyWord, Vocabulary
@@ -22,7 +22,12 @@ import requests
 PAL_WIDTH = 720
 # EP_ROOT = "http://ercwebapp.westeurope.cloudapp.azure.com/api/"
 # EP_ROOT = "http://127.0.0.1:5000/api/"
-EP_ROOT = CONFIG['webapp_root']
+
+if IS_DEV:
+    EP_ROOT = CONFIG['localhost']
+else:
+    EP_ROOT = CONFIG['webapp_root']
+
 # EP_VIAN_VERSION = self.ep_root + "/vian/version"
 # self.ep_get_vian_update = self.ep_root + "/vian/download_vian/"
 

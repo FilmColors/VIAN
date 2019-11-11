@@ -1876,7 +1876,7 @@ class TimebarPicture(QtWidgets.QWidget):
         self.is_hovered = False
         self.color = (123, 86, 32, 100)
         self.pic_height = height
-        qimage, qpixmap = screenshot.get_preview(scale=0.1)
+        qimage, qpixmap = screenshot.get_preview()
         self.pixmap = qpixmap
         self.qimage = qimage
         self.size = (screenshot.get_img_movie(ignore_cl_obj = True).shape[0],
@@ -1888,7 +1888,7 @@ class TimebarPicture(QtWidgets.QWidget):
 
     @pyqtSlot(object, object, object)
     def on_image_set(self, screenshot, ndarray, pixmap):
-        qimage, qpixmap = screenshot.get_preview(scale=0.1)
+        qimage, qpixmap = screenshot.get_preview()
         self.pixmap = qpixmap
         self.qimage = qimage
         self.update()
@@ -1942,7 +1942,7 @@ class TimebarPicture(QtWidgets.QWidget):
         self.raise_()
 
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
-        preview = ImagePreviewPopup(self.timeline.main_window, numpy_to_pixmap(self.item.get_img_movie(ignore_cl_obj = True)))
+        preview = ImagePreviewPopup(self.timeline.main_window, numpy_to_pixmap(self.item.get_img_movie_orig_size()))
         preview.show()
         self.timeline.set_current_time(self.item.movie_timestamp)
 

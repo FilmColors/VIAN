@@ -226,7 +226,7 @@ class AttributesScreenshot(QWidget):
         self.lbl_global_id.setText(str(self.descriptor.shot_id_global))
         self.lbl_segm_id.setText(str(self.descriptor.shot_id_segm))
 
-        self.lbl_Preview.setPixmap(numpy_to_qt_image(self.descriptor.get_img_movie(), target_width=400)[1])
+        self.lbl_Preview.setPixmap(numpy_to_qt_image(self.descriptor.get_img_movie_orig_size(), target_width=400)[1])
         self.show()
 
 

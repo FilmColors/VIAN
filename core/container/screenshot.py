@@ -74,13 +74,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.shot_id_segm = segm_id
         self.onScreenshotChanged.emit(self)
 
-    # def set_notes(self, notes):
-    #     self.project.undo_manager.to_undo((self.set_notes, [notes]),
-    #                                       (self.set_notes, [self.notes]))
-    #     self.notes = notes
-    #     # self.onScreenshotChanged.emit(self)
-    #     self.dispatch_on_changed(item=self)
-
     def set_annotation_visibility(self, visibility):
         self.annotation_is_visible = visibility
 
@@ -109,11 +102,18 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         :param scale: 
         :return: 
         """
-        if (self.preview_cache is None or self.preview_cache[0] != scale) and self.img_movie.shape[0] > 100:
-            self.preview_cache = (scale, numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC)))
-            return self.preview_cache[1]
-        else:
-            return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
+        if self.preview_cache is None and self.img_movie.shape[0] > 100:
+            self.preview_cache = numpy_to_qt_image(self.img_movie)
+        if self.preview_cache is None:
+            return numpy_to_qt_image(self.img_movie)
+        return self.preview_cache
+        # retur nnumpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
+        # if (self.preview_cache is None or self.preview_cache[0] != scale) and self.img_movie.shape[0] > 100:
+        #     self.preview_cache = (scale, numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC)))
+        #
+        #     return self.preview_cache[1]
+        # else:
+        #     return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
     def set_classification_object(self, clobj, recompute = False, hdf5_cache=None):
         if not recompute and clobj.unique_id in self.masked_cache:
@@ -157,10 +157,21 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             return
         if self.project is not None and self.project.headless_mode:
             return
+        fx = CACHE_WIDTH / img.shape[1]
+        img = cv2.resize(img, None, None, fx, fx, cv2.INTER_CUBIC)
+        self.img_movie = img
+
         if img.shape[2] == 3:
             self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img))
         elif img.shape[2] == 4:
             self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
+
+    def get_img_movie_orig_size(self):
+        cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos)
+        ret, frame = cap.read()
+        cap.release()
+        return frame
 
     def get_semantic_segmentations(self, dataset=None):
         """

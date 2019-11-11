@@ -40,6 +40,7 @@ except:
             CONFIG = json.load(f)
     except Exception as e:
         raise e
+IS_DEV = os.path.isfile("is_dev.txt")
 
 class UserSettings():
     """
@@ -72,6 +73,7 @@ class UserSettings():
 
         self.SCREENSHOTS_EXPORT_NAMING = self.SCREENSHOTS_EXPORT_NAMING_DEFAULT
         self.SCREENSHOTS_STATIC_SAVE = False
+        self.CACHED_IMAGE_WIDTH = 250
 
         # Timeline Grid
         self.USE_GRID = True
@@ -133,8 +135,6 @@ class UserSettings():
 
         self.USE_CORPUS = False
         self.USE_ELAN = False
-
-
 
         self.dock_widgets_data = []
 

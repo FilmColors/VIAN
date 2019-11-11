@@ -1,5 +1,5 @@
 {
-  "webapp_root": "http://127.0.0.1:5000/api/",
-  "localhost": "http://ercwebapp.westeurope.cloudapp.azure.com/api/",
+  "localhost": "http://127.0.0.1:5000/api/",
+  "webapp_root": "http://ercwebapp.westeurope.cloudapp.azure.com/api/",
   "erc_template_uuid" : "a77a472f-2d4f-458d-acd6-be9fca69cd7f"
 }

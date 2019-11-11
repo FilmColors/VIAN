@@ -105,9 +105,6 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
         for k, v in features.items():
             self.feature_plot.create_feature(FeatureTuple(k, v[0].voc_obj.get_name(), v[0].class_obj.get_name(), v[1]), True)
 
-        # for scr in self.main_window.project.screenshots:
-        #     self.feature_plot.add_screenshot(scr.img_movie, scr.movie_timestamp)
-
         try:
             keywords, matrix = exp.get_correlation_matrix()
             features = []
