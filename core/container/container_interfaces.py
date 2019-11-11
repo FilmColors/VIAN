@@ -47,6 +47,8 @@ class IProjectContainer(QObject):
     onAnalysisAdded = pyqtSignal(object)
     onAnalysisRemoved = pyqtSignal(object)
 
+    onSelectedChanged = pyqtSignal(bool)
+
     def __init__(self, unique_id = -1):
         QObject.__init__(self)
         self.project = None
@@ -161,6 +163,19 @@ class IProjectContainer(QObject):
 
     def get_type(self):
         return -1
+
+    def select(self, multi_select=False):
+        if self.project is not None:
+            if multi_select:
+                self.project.add_selected(self)
+            else:
+                self.project.set_selected(None, self)
+            self.onSelectedChanged.emit(True)
+
+    def deselect(self):
+        if self.project is not None:
+            self.project.remove_selected(self)
+            self.onSelectedChanged.emit(False)
 
 
 class ITimeRange():

@@ -732,6 +732,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param selected: A list of IProjectContainer
         :return:
         """
+        for t in self.selected:
+            if not isinstance(t, VIANProject):
+                t.onSelectedChanged.emit(False)
         if selected is None:
             selected = []
 
@@ -747,11 +750,23 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 l = s
             if s.get_type() == NODE_SCRIPT:
                 self.set_current_script(s)
+            if not isinstance(s, VIANProject):
+                s.onSelectedChanged.emit(True)
 
         if l is not None:
             self.current_annotation_layer = l
 
         self.dispatch_selected(sender)
+
+    def add_selected(self, sel):
+        if sel not in self.selected:
+            self.selected.append(sel)
+            self.dispatch_selected(None)
+
+    def remove_selected(self, sel):
+        if sel in self.selected:
+            self.selected.remove(sel)
+            self.dispatch_selected(None)
 
     def get_selected(self, types = None) -> List[IProjectContainer]:
         """
