@@ -102,10 +102,17 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_class.setCheckable(True)
         self.a_class.setChecked(True)
 
+        m_layout.addSeparator()
+
         self.a_hidden = m_layout.addAction("Show Hidden Vocabularies")
         self.a_hidden.setCheckable(True)
         self.a_hidden.setChecked(False)
         self.a_hidden.triggered.connect(partial(self.update_widget, True))
+
+        self.a_only_active = m_layout.addAction("Show used keywords only")
+        self.a_only_active.setCheckable(True)
+        self.a_only_active.setChecked(False)
+        self.a_only_active.triggered.connect(partial(self.update_widget, True))
 
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
@@ -389,6 +396,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     visible_keywords += 1
             if visible_keywords == 0:
                 continue
+
             tab = QTabWidget(self.tab_widget)
             tab.setMovable(True)
             try:
@@ -420,6 +428,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.name))
                 for k in keywords:
                     if not k.voc_obj.is_visible and not self.a_hidden.isChecked():
+                        continue
+
+                    if self.a_only_active.isChecked() and \
+                            not self.current_experiment.has_tag(self.current_container, k):
                         continue
 
                     if self.complexity_settings is not None:
@@ -526,6 +538,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             keywords = sorted(keywords, key=lambda x: (x.class_obj.name, x.voc_obj.name, x.word_obj.organization_group, x.word_obj.name))
             for k in keywords:
                 if not k.voc_obj.is_visible and not self.a_hidden.isChecked():
+                    continue
+
+                if self.a_only_active.isChecked() and \
+                        not self.current_experiment.has_tag(self.current_container, k):
                     continue
 
                 if self.complexity_settings is not None:
