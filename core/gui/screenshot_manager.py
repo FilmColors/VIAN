@@ -740,17 +740,18 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.project.set_selected(self, sel)
 
     def draw_selection_frames(self):
-        self.clear_selection_frames()
-        if len(self.selected) > 0:
-            for i in self.selected:
-                pen = QtGui.QPen()
-                pen.setColor(QtGui.QColor(255, 160, 74, 150))
-                pen.setWidth(10)
-                item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(i.selection_rect))
-                item.setPen(pen)
-                # rect = QtCore.QRectF(i.selection_rect)
-                self.selection_frames.append(item)
-                self.scene.addItem(item)
+        return
+        # self.clear_selection_frames()
+        # if len(self.selected) > 0:
+        #     for i in self.selected:
+        #         pen = QtGui.QPen()
+        #         pen.setColor(QtGui.QColor(255, 160, 74, 150))
+        #         pen.setWidth(10)
+        #         item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(i.selection_rect))
+        #         item.setPen(pen)
+        #         # rect = QtCore.QRectF(i.selection_rect)
+        #         self.selection_frames.append(item)
+        #         self.scene.addItem(item)
 
     def center_images(self):
         self.fitInView(self.sceneRect(), QtCore.Qt.KeepAspectRatio)
@@ -865,16 +866,17 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.setEnabled(False)
 
     def on_selected(self, sender, selected):
-        if selected is None:
-            selected = []
-        if not sender is self:
-            sel = []
-            for i in self.images_plain:
-                    for s in selected:
-                        if isinstance(s, Screenshot):
-                            if i.screenshot_obj is s:
-                                sel.append(i)
-            self.select_image(sel, dispatch=False)
+        return
+        # if selected is None:
+        #     selected = []
+        # if not sender is self:
+        #     sel = []
+        #     for i in self.images_plain:
+        #             for s in selected:
+        #                 if isinstance(s, Screenshot):
+        #                     if i.screenshot_obj is s:
+        #                         sel.append(i)
+        #     self.select_image(sel, dispatch=False)
 
     def rubber_band_selection(self, QRect, Union, QPointF=None, QPoint=None):
         self.rubberband_rect = self.mapToScene(QRect).boundingRect()
@@ -963,21 +965,24 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             event.ignore()
 
     def mouseReleaseEvent(self, QMouseEvent):
-        selected = []
         if self.rubberband_rect.width() > 20 and self.rubberband_rect.height() > 20:
+            modifiers = QtWidgets.QApplication.keyboardModifiers()
+            if not modifiers == QtCore.Qt.ShiftModifier:
+                self.project.set_selected(None)
+
             for i in self.images_plain:
                 i_rect = QtCore.QRectF(i.pos().x(), i.pos().y(),i.boundingRect().width(), i.boundingRect().height())
                 if self.rubberband_rect.intersects(QtCore.QRectF(i_rect)):
-                    selected.append(i)
-            self.select_image(selected)
+                    i.screenshot_obj.select(multi_select=True)
 
             self.rubberband_rect = QtCore.QRectF(0.0, 0.0, 0.0, 0.0)
             super(ScreenshotsManagerWidget, self).mouseReleaseEvent(QMouseEvent)
 
     def mouseDoubleClickEvent(self, *args, **kwargs):
-        if len(self.selected) > 0:
-            popup = ImagePreviewPopup(self, numpy_to_pixmap(self.selected[0].screenshot_obj.get_img_movie_orig_size()))
-            self.main_window.player.set_media_time(self.selected[0].screenshot_obj.movie_timestamp)
+        sel = self.project.selected
+        if len(sel) > 0:
+            popup = ImagePreviewPopup(self, numpy_to_pixmap(sel[0].get_img_movie_orig_size()))
+            self.main_window.player.set_media_time(sel[0].movie_timestamp)
         else:
             self.center_images()
 
@@ -993,9 +998,13 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         super(ScreenshotManagerPixmapItems, self).__init__(qpixmap)
         self.manager = manager
         self.screenshot_obj = obj
-        self.screenshot_obj.onImageSet.connect(self.set_pixmap)
         self.selection_rect = selection_rect
+        self.is_selected = False
+
         self.qpixmap = qpixmap
+
+        self.screenshot_obj.onImageSet.connect(self.set_pixmap)
+        self.screenshot_obj.onSelectedChanged.connect(self.on_selected_changed)
 
     def boundingRect(self) -> QtCore.QRectF:
         if self.qpixmap is None:
@@ -1007,17 +1016,22 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         self.setPixmap(pixmap)
         self.qpixmap = pixmap
 
-    def mousePressEvent(self, *args, **kwargs):
-        self.setSelected(True)
-        if self.manager.shift_is_pressed:
-            selected = self.manager.selected
-            if self in selected:
-                selected.remove(self)
-            else:
-                selected.append(self)
-        else:
-            selected = [self]
+    # @pyqtSlot(bool)
+    def on_selected_changed(self, state):
+        self.is_selected = state
+        self.update()
 
-        self.manager.select_image(selected)
-        # self.manager.main_window.screenshots_editor.set_current_screenshot(self.screenshot_obj)
+    def paint(self, painter: QtGui.QPainter, option: 'QStyleOptionGraphicsItem', widget: QWidget) -> None:
+        super(ScreenshotManagerPixmapItems, self).paint(painter, option, widget)
+        if self.is_selected:
+            pen = QtGui.QPen()
+            pen.setColor(QtGui.QColor(255, 160, 74, 150))
+            pen.setWidth(10)
+            painter.setPen(pen)
+            painter.drawRect(self.qpixmap.rect())
+
+    def mousePressEvent(self, *args, **kwargs):
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+        self.screenshot_obj.select(modifiers == QtCore.Qt.ShiftModifier)
+
 

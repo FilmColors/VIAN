@@ -592,6 +592,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scrollArea.verticalScrollBar().setValue(vlocation)
 
     def on_selected(self, sender, selected):
+        return
+
         if sender is self:
             return
         if selected is None:
@@ -654,7 +656,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         if search is None:
             return
 
-        for i,entry in enumerate(self.items):
+        for i, entry in enumerate(self.items):
             if search == entry[0] or search == entry[0].item:
                 self.selected = entry[0].item
                 entry[0].is_selected = True
@@ -667,9 +669,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                     b.is_selected = False
                     b.update()
 
+        # if self.selected is not None and dispatch:
+        #     self.project().set_selected(self, self.selected)
 
-        if self.selected is not None and dispatch:
-            self.project().set_selected(self, self.selected)
         self.update()
 
     @pyqtSlot(int)
@@ -1008,10 +1010,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 class TimelineControl(QtWidgets.QWidget):
     onHeightChanged = pyqtSignal(int)
 
-    def __init__(self, parent,timeline, item = None, name = "No Name"):
+    def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineControl, self).__init__(parent)
         self.timeline =  timeline
         self.item = item
+
         self.h_exp = 300
         self.h_col = 100
         self.name = name
@@ -1019,6 +1022,7 @@ class TimelineControl(QtWidgets.QWidget):
         self.groups = []
         self.setMouseTracking(True)
         self.is_selected = False
+        self.bar = None
 
         self.size_grip_hovered = False
         self.is_resizing = False
@@ -1029,6 +1033,17 @@ class TimelineControl(QtWidgets.QWidget):
             self.resize(self.width(), 45)
         else:
             self.resize(self.width(), self.item.strip_height)
+
+        self.item.onSelectedChanged.connect(self.on_selected_changed)
+
+    @pyqtSlot(bool)
+    def on_selected_changed(self, state):
+        self.is_selected = state
+        self.timeline.selected = self.item
+        if self.bar is not None:
+            self.bar.is_selected = state
+            self.bar.update()
+        self.update()
 
     def set_name(self):
         if self.item is not None:
@@ -1077,7 +1092,8 @@ class TimelineControl(QtWidgets.QWidget):
                 self.is_resizing = True
                 self.resize_offset = self.height() - QMouseEvent.pos().y()
             else:
-                self.timeline.select(self)
+                self.item.select()
+                # self.timeline.select(self)
 
         if QMouseEvent.button() == Qt.RightButton:
             context = open_context_menu(self.timeline.main_window,self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
@@ -1178,6 +1194,7 @@ class TimelineBar(QtWidgets.QFrame):
         self.orig_height = height
         self.setMouseTracking(True)
         self.control = control
+        self.control.bar = self
         self.control.onHeightChanged.connect(self.on_height_changed)
         self.is_selected = False
 
@@ -1295,6 +1312,9 @@ class TimebarSlice(QtWidgets.QWidget):
         self.locked = False
         self.timeline = timeline
         self.item = item
+
+        self.item.onSelectedChanged.connect(self.on_selected_changed)
+
         self.show()
         self.mode = "center"
         self.setMouseTracking(True)
@@ -1339,6 +1359,12 @@ class TimebarSlice(QtWidgets.QWidget):
         self.previous_slice = None
         self.next_slice = None
         self.on_media_objects_changed()
+
+
+    @pyqtSlot(bool)
+    def on_selected_changed(self, state):
+        self.is_selected = state
+        self.update()
 
     @pyqtSlot(object)
     def on_media_objects_changed(self, obj=None):
@@ -1493,7 +1519,11 @@ class TimebarSlice(QtWidgets.QWidget):
                             self.max_possible = self.timeline.duration * self.timeline.scale
 
                     self.is_selected = True
-                    self.timeline.project().set_selected(None, self.item)
+
+                    modifiers = QtWidgets.QApplication.keyboardModifiers()
+                    self.item.select(multi_select=modifiers == QtCore.Qt.ShiftModifier)
+
+                    # self.timeline.project().set_selected(None, self.item)
                     self.offset = self.mapToParent(QMouseEvent.pos())
                     self.curr_size = self.size()
                     self.curr_pos = self.pos()
@@ -1873,7 +1903,11 @@ class TimebarPicture(QtWidgets.QWidget):
         self.timeline = timeline
         self.has_classification = len(self.item.tag_keywords)
         self.item.onClassificationChanged.connect(self.on_classification_changed)
+
         self.is_hovered = False
+        self.is_selected = False
+
+        self.item.onSelectedChanged.connect(self.on_selected_changed)
         self.color = (123, 86, 32, 100)
         self.pic_height = height
         qimage, qpixmap = screenshot.get_preview()
@@ -1885,6 +1919,11 @@ class TimebarPicture(QtWidgets.QWidget):
         self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
         self.resize(width, self.pic_height)
         self.show()
+
+    @pyqtSlot(bool)
+    def on_selected_changed(self, state):
+        self.is_selected = state
+        self.update()
 
     @pyqtSlot(object, object, object)
     def on_image_set(self, screenshot, ndarray, pixmap):
@@ -1905,7 +1944,7 @@ class TimebarPicture(QtWidgets.QWidget):
         self.update()
 
     def paintEvent(self, QPaintEvent):
-        if self.is_hovered:
+        if self.is_hovered or self.is_selected:
             col = QtGui.QColor(self.color[0], self.color[1], self.color[2], 200)
             w  = 7
         else:
@@ -1913,7 +1952,6 @@ class TimebarPicture(QtWidgets.QWidget):
             w = 3
 
         qp = QtGui.QPainter()
-
         pen = QtGui.QPen()
 
         qp.begin(self)
@@ -1933,7 +1971,9 @@ class TimebarPicture(QtWidgets.QWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.buttons() & Qt.LeftButton:
-            self.timeline.project().set_selected(self, self.item)
+            modifiers = QtWidgets.QApplication.keyboardModifiers()
+            self.item.select(multi_select=modifiers == QtCore.Qt.ShiftModifier)
+
         if QMouseEvent.buttons() & Qt.RightButton:
             open_context_menu(self.timeline.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
 

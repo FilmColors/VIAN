@@ -266,27 +266,37 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         if sender is self or selected is None:
             return
         self.tree.selection_dispatch = False
-        items = []
+
         to_select = []
+
         top = self.tree.topLevelItem(0)
 
         if top is None:
             return
-
+        items = []
         top.get_children(items)
 
         self.tree.clearSelection()
 
-        for i in items:
-            if i.has_item:
-                for s in selected:
-                    if i.get_container() is s:
-                        to_select.append(i)
-                        i.parent().setExpanded(True)
-                        try:
-                            i.parent().parent().setExpanded(True)
-                        except:
-                            pass
+        index = dict()
+        for t in items:
+            if t.get_container() is not None:
+                try:
+                    if t.get_container().unique_id not in index:
+                        index[t.get_container().unique_id] = t
+                except:
+                    pass
+
+        uuids_selected = [t.get_id() for t in selected]
+        for k in uuids_selected:
+            if k in index:
+                v = index[k]
+                to_select.append(v)
+                v.parent().setExpanded(True)
+                try:
+                    v.parent().parent().setExpanded(True)
+                except:
+                    pass
 
         self.tree.select(to_select, False)
         self.tree.selection_dispatch = True
@@ -484,6 +494,7 @@ class AbstractOutlinerItem(QTreeWidgetItem):
         if self.childCount() > 0:
             for i in range(self.childCount()):
                 self.child(i).get_children(list)
+            list.append(self)
         else:
             list.append(self)
 
