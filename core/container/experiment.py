@@ -4,7 +4,7 @@ from uuid import uuid4
 import numpy as np
 
 
-from typing import List
+from typing import List, Tuple
 
 from core.data.log import log_warning, log_debug, log_info, log_error
 from core.container.analysis import AnalysisContainer
@@ -117,7 +117,7 @@ class Vocabulary(IProjectContainer, IHasName):
         # Remove all unique keywords attached to this VocabularyWord
         word.cleanup_referenced_keywords()
 
-        # Remove all children if nesseary
+        # Remove all children if necessary
         for w in children:
             self.words_plain.remove(w)
 
@@ -627,11 +627,13 @@ class ClassificationObject(IProjectContainer, IHasName):
             return
 
         self.classification_vocabularies.remove(voc)
+
         to_delete = [x for x in self.unique_keywords if x.voc_obj == voc]
         self.unique_keywords = [x for x in self.unique_keywords if not x.voc_obj == voc]
 
         for d in to_delete:
             self.project.remove_from_id_list(d)
+
         self.onUniqueKeywordsChanged.emit(self)
 
     def get_vocabularies(self):
@@ -713,15 +715,26 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.parent = p
             self.set_project(project)
 
-        self.classification_vocabularies = [project.get_by_id(uid) for uid in serialization['classification_vocabularies']]
-        self.unique_keywords = [UniqueKeyword(self.experiment).deserialize(ser, project) for ser in serialization['unique_keywords']]
+        self.classification_vocabularies = []
+        for uid in serialization['classification_vocabularies']:
+            voc = project.get_by_id(uid)
+            if voc is not None:
+                self.classification_vocabularies.append(voc)
+            else:
+                log_warning("Could not Resolve Vocabulary:", uid)
+
+        self.unique_keywords = []
+        for ser in serialization['unique_keywords']:
+            try:
+                self.unique_keywords.append(UniqueKeyword(self.experiment).deserialize(ser, project))
+            except Exception as e:
+                print(e, ser['word_obj'])
+
         ts = [project.get_by_id(uid) for uid in serialization['target_container']]
 
         for t in ts:
             if t is not None:
                 self.target_container.append(t)
-
-        # VERSION > 0.6.8
         try:
             self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
         except Exception as e:
@@ -781,6 +794,9 @@ class UniqueKeyword(IProjectContainer):
         except:
             pass
 
+        if self.voc_obj is None or self.word_obj is None or self.class_obj is None:
+            raise ValueError("UniqueKeyword could not be resolved.")
+
         self.set_project(project)
         self.word_obj._add_referenced_unique_keyword(self)
         return self
@@ -806,11 +822,11 @@ class Experiment(IProjectContainer, IHasName):
     def __init__(self, name="New Experiment", unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
-        self.classification_objects = []
+        self.classification_objects = []    #type:List[ClassificationObject]
         self.analyses = []
 
         # This is a list of [IClassifiable, UniqueKeyword]
-        self.classification_results = []
+        self.classification_results = [] #type: List[Tuple[IClassifiable, UniqueKeyword]]
         self.correlation_matrix = None
         self.pipeline_script = None
 

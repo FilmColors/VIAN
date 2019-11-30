@@ -12,7 +12,6 @@ Visualization and MultimediaLab
 
 """
 
-
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import platform
@@ -117,6 +116,7 @@ def set_style_sheet(app, path):
 
 def set_attributes(app):
     app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+    app.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
     # if sys.platform == "darwin":
     #     app.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
 
@@ -130,7 +130,6 @@ if __name__ == '__main__':
 
     settings = UserSettings()
     settings.load()
-
 
     app = QApplication(sys.argv)
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)

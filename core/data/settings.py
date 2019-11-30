@@ -196,6 +196,7 @@ class UserSettings():
         self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
         self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
         self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
+        self.DIR_VOCABULARIES = self.DIR_ROOT + "/vocabularies/"
 
         for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS,
                   self.DIR_CORPORA, self.DIR_PROJECTS, self.DIR_SCRIPTS, self.DIR_VOCABULARIES]:

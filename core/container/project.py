@@ -1406,8 +1406,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
             try:
                 with open(template_path, "r") as f:
                     template = json.load(f)
-            except:
-                print("Importing Template Failed")
+            except Exception as e:
+                print("Importing Template Failed", e)
+                raise e
                 return
         else:
             template = template
@@ -1595,6 +1596,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :return:
         """
         if voc in self.vocabularies:
+            # We first need to remove the vocabulary from all classification objects
+            # (it might be used for classification)
+
+            clobjs = []
+            [clobjs.extend(e.classification_objects) for e in self.experiments]
+            for c in clobjs:
+                c.remove_vocabulary(voc)
+
+            # Remove it from the project
             self.vocabularies.remove(voc)
             self.remove_from_id_list(voc)
             self.onVocabularyRemoved.emit(voc)

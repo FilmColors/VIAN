@@ -472,7 +472,6 @@ class PipelineWidget(QWidget):
 
             log_info("## Missing Analyses in Pipeline ##")
             for k in missing_info.keys():
-                # print(k, missing_info[k], missing.items())
                 missing[k] = missing_info[k][0]
                 log_info("## -- ", k, missing_info[k][2], missing_info[k][1], missing_info[k][0])
 

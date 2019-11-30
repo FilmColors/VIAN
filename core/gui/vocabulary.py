@@ -210,7 +210,6 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             vocabularies_project[v.uuid].update_vocabulary(v)
         self.vocabulary_view.recreate_tree()
 
-
     def synchronize_from_project_to_library(self):
         if self.main_window.project is None:
             return
@@ -375,9 +374,8 @@ class VocabularyView(QWidget, IProjectChangeNotify):
                     complexity_groups.append(w.complexity_group)
             if len(complexity_groups) > 1:
                 self.lineEditComplexityGroup.setText("Multiple")
-            else:
+            elif len(complexity_groups) == 0:
                 self.lineEditComplexityGroup.setText(complexity_groups[0])
-            pass
         self.current_item = current
 
     def add_word(self):
@@ -423,12 +421,12 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.lineEditComplexityGroup.setCompleter(completer)
 
         self.vocabulary_model_library.clear()
-        for v in self.vocabulary_collection.vocabularies:
+        for v in sorted(self.vocabulary_collection.vocabularies, key=lambda x:x.name):
             self.add_vocabulary(self.vocabulary_model_library, self.treeViewLibrary, v)
 
         self.vocabulary_model_project.clear()
         if self.project is not None:
-            for v in self.project.vocabularies:
+            for v in sorted(self.project.vocabularies, key=lambda x:x.name):
                 self.add_vocabulary(self.vocabulary_model_project, self.treeViewProject, v)
         self.treeViewProject.setModel(self.vocabulary_model_project)
 

@@ -1,2 +1,5 @@
 import tensorflow as tf
-tf.logging.set_verbosity(tf.logging.FATAL)
+import logging
+logging.getLogger("tensorflow").setLevel(logging.ERROR)
+
+# tf.logging.set_verbosity(tf.logging.FATAL)

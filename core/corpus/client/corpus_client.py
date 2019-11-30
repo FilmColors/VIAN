@@ -140,6 +140,9 @@ class CorpusClient(QObject):
         else:
             self.onCommitFailed.emit(None)
 
+    def check_project_exists(self, project:VIANProject):
+        return self.corpus_interface.check_project_exists(project)
+
     @pyqtSlot(object)
     def on_commit_finished(self):
         pass
@@ -416,7 +419,6 @@ class WebAppCorpusInterface(QObject):
         except Exception as e:
             print(e)
             return False
-
 
     @pyqtSlot(object)
     def download_project(self, desc):

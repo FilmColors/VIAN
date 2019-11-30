@@ -23,6 +23,8 @@ from core.gui.filmography_widget import FilmographyWidget2
 
 
 class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
+    runAllAnalyses = pyqtSignal()
+
     def __init__(self, main_window, corpus_client:CorpusClient):
         super(WebAppCorpusDock, self).__init__(main_window, False)
         self.setWindowTitle("WebApp")
@@ -35,7 +37,7 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
         self.central.layout().addWidget(self.corpus_widget)
         self.stack = QStackedWidget(self)
         self.central.layout().addWidget(self.stack)
-        self.progress_widget = CorpusProgressWidget(self, main_window)
+        self.progress_widget = CorpusProgressWidget(self, self, main_window)
         self.filmography_widget = FilmographyWidget2(self)
         self.stack.addWidget(self.progress_widget)
         self.stack.addWidget( self.filmography_widget)
@@ -53,7 +55,7 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
 
     def on_loaded(self, project):
         self.btn_Commit.setEnabled(False)
-        self.progress_widget.btn_RunAll.setEnabled(False)
+        # self.progress_widget.btn_RunAll.setEnabled(False)
 
     def on_threshold_reached(self):
         self.btn_Commit.setEnabled(True)
@@ -61,10 +63,13 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
 
 class CorpusProgressWidget(QWidget):
     onThresholdReached = pyqtSignal()
+    onRunAll = pyqtSignal()
 
-    def __init__(self, parent, main_window):
+    def __init__(self, parent, corpus_widget, main_window):
         super(CorpusProgressWidget, self).__init__(parent)
         self.main_window = main_window
+        self.corpus_widget = corpus_widget
+
         self.setLayout(QVBoxLayout())
         self.btn_checkFiles = QPushButton("1. Check Project")
         self.btn_checkFiles.clicked.connect(self.update_state)
@@ -75,15 +80,23 @@ class CorpusProgressWidget(QWidget):
         self.spacer = QWidget()
         self.spacer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
 
-        self.btn_RunAll = QPushButton("2. Run all Missing Analyses")
-        self.btn_RunAll.clicked.connect(self.run_all)
+        # self.btn_RunAll = QPushButton("2. Run all Missing Analyses")
+        # self.btn_RunAll.clicked.connect(self.run_all)
         self.layout().addWidget(self.spacer)
-        self.layout().addWidget(self.btn_RunAll)
+        # self.layout().addWidget(self.btn_RunAll)
+
+        self.lbl_Instructions = QLabel("The webapp requires a specific set of analyses performed before upload. "
+                                       "Currently these requirements are not met. To perform these analyses do the following:\n "
+                                       "1. Go to the pipeline manager\n"
+                                       "2. Select the ERCFilmColors Pipeline\n"
+                                       "3. In the Dropdown, select the ERC Advanced Grant FilmColors Experiment\n"
+                                       "4. Press 'Run All Missing Analyses'")
+        self.lbl_Instructions.setWordWrap(True)
 
         self.requirements = ERCFilmColorsVIANPipeline.requirements
+        self.layout().addWidget(self.lbl_Instructions)
         self.items = dict()
         self.missing_analyses = dict()
-
 
     @pyqtSlot()
     def update_state(self):
@@ -93,117 +106,39 @@ class CorpusProgressWidget(QWidget):
             return
         self.missing_analyses = dict()
 
-        progress_segmentation = 0.0
-        progress_screenshots = 0.0
-
+        res = dict()
         if self.main_window.project is not None:
-            if "segment_analyses" in data and self.main_window.project.get_main_segmentation() is not None:
-                n_analyses = len(self.main_window.project.get_main_segmentation().segments) * len(data["segment_analyses"])
-                n_analyses_done = 0
-                analyses_to_do = data["segment_analyses"]
-                for s in self.main_window.project.get_main_segmentation().segments:
-                    for q in analyses_to_do:
-                        found = False
-                        for a in s.connected_analyses:
-                            if a.target_classification_object is None:
-                                continue
-                            if a.analysis_job_class == q[0] and a.target_classification_object.name == q[1]:
-                                found = True
-                                break
-                        if found:
-                            n_analyses_done += 1
-                        else:
-                            if q[2] not in self.missing_analyses:
-                                self.missing_analyses[q[2]] = dict()
-                            if q[0] not in self.missing_analyses[q[2]]:
-                                self.missing_analyses[q[2]][q[0]] = dict()
-                            if q[1] not in self.missing_analyses[q[2]][q[0]]:
-                                self.missing_analyses[q[2]][q[0]][q[1]] = []
-                            self.missing_analyses[q[2]][q[0]][q[1]] .append(s)
+            missing = self.main_window.project.get_missing_analyses(self.requirements)
 
-                if "SegmentAnalyses" not in self.items:
-                    bar = ProgressItem("SegmentAnalyses")
+            u = [
+                ("ScreenshotAnalyses", "screenshot_analyses", "progress_screenshots"),
+                ("SegmentAnalyses", "segment_analyses", "progress_segmentation")
+            ]
+
+            # Apply the result to the three progress bars
+            for (bar_name, item_name, var) in u:
+                n_analyses = missing[item_name][1]
+                n_analyses_done = missing[item_name][2]
+                # t = missing[item_name]
+                if bar_name not in self.items:
+                    bar = ProgressItem(bar_name)
                     self.list_widget.layout().addWidget(bar)
-                    self.items["SegmentAnalyses"] = bar
+                    self.items[bar_name] = bar
                 else:
-                    bar = self.items["SegmentAnalyses"]
+                    bar = self.items[bar_name]
+
                 bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
-                progress_segmentation = n_analyses_done /  np.clip(n_analyses, 1, None)
-
-            if "screenshot_analyses" in data:
-                n_analyses = len(self.main_window.project.screenshots) * len(data["screenshot_analyses"])
-                n_analyses_done = 0
-                analyses_to_do = data["screenshot_analyses"]
-                for s in self.main_window.project.screenshots:
-                    for q in analyses_to_do:
-                        found = False
-                        for a in s.connected_analyses:
-                            if a.target_classification_object is None:
-                                continue
-                            if a.analysis_job_class == q[0] and a.target_classification_object.name == q[1]:
-                                found = True
-                                break
-                        if found:
-                            n_analyses_done += 1
-                        else:
-                            if q[2] not in self.missing_analyses:
-                                self.missing_analyses[q[2]] = dict()
-                            if q[0] not in self.missing_analyses[q[2]]:
-                                self.missing_analyses[q[2]][q[0]] = dict()
-                            if q[1] not in self.missing_analyses[q[2]][q[0]]:
-                                self.missing_analyses[q[2]][q[0]][q[1]] = []
-                            self.missing_analyses[q[2]][q[0]][q[1]].append(s)
-
-                if "ScreenshotAnalyses" not in self.items:
-                    bar = ProgressItem("ScreenshotAnalyses")
-                    self.list_widget.layout().addWidget(bar)
-                    self.items["ScreenshotAnalyses"] = bar
-                else:
-                    bar = self.items["ScreenshotAnalyses"]
+                res[var] = n_analyses_done / np.clip(n_analyses, 1, None)
                 bar.progress_bar.setValue(n_analyses_done / np.clip(n_analyses, 1, None) * 100)
-                progress_screenshots = n_analyses_done / np.clip(n_analyses, 1, None)
 
-            if progress_screenshots >= ERCFilmColorsVIANPipeline.finished_threshold and \
-                progress_segmentation >= ERCFilmColorsVIANPipeline.finished_threshold:
+            if res["progress_screenshots"] >= ERCFilmColorsVIANPipeline.finished_threshold and \
+                res["progress_segmentation"] >= ERCFilmColorsVIANPipeline.finished_threshold:
                 self.onThresholdReached.emit()
-                self.btn_RunAll.setEnabled(False)
+                self.lbl_Instructions.setVisible(False)
             else:
-                self.btn_RunAll.setEnabled(True)
+                self.lbl_Instructions.setVisible(True)
         else:
             QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
-
-    def run_all(self):
-        if self.main_window.project is None:
-            QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
-            return
-        if self.main_window.project.active_pipeline_script.uuid != ERCFilmColorsVIANPipeline.uuid:
-            self.main_window.project.active_pipeline_script = self.main_window.project\
-                .get_pipeline_script_by_uuid(ERCFilmColorsVIANPipeline.uuid)
-
-        experiment = self.main_window.project.get_experiment_by_name("ERC Advanced Grant FilmColors")
-        if experiment is None:
-            QMessageBox.information(self, "No Experiment created.",
-                                    "You first have to create a experiment with the"
-                                    + ERCFilmColorsVIANPipeline.experiment.name + " template")
-            return
-
-        for priority in sorted(self.missing_analyses.keys()):
-            for analysis_name in self.missing_analyses[priority].keys():
-                analysis = self.main_window.eval_class(analysis_name)
-                for clobj_name, containers in self.missing_analyses[priority][analysis_name].items():
-                    clobj = experiment.get_classification_object_by_name(clobj_name)
-
-                    if clobj is None:
-                        log_warning("Classification Object not found")
-                        continue
-                    d = dict(
-                        analysis= analysis(),
-                        targets = containers,
-                        parameters = None,
-                        classification_objs = clobj
-                    )
-                    log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
-                    self.main_window.on_start_analysis(d)
 
 
 class ProgressItem(QWidget):
@@ -367,6 +302,14 @@ class CorpusCommitDialog(EDialogWidget):
         for k, v in self.filmography.get_filmography().items():
             self.main_window.project.movie_descriptor.meta_data[k] = v
         self.main_window.project.movie_descriptor.movie_name = self.lineEditMovieName.text()
+
         if self.main_window.project is not None:
+            exists = self.corpus_client.check_project_exists(self.main_window.project)
+            # if exists:
+            #     QMessageBox.warning(self,"Project Already Uploaded",
+            #                 "This project has already been uploaded to the WebApp. "
+            #                 "Updating project is not yet supported.")
+            #     return
+
             self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
         self.close()

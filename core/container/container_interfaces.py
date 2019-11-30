@@ -7,7 +7,8 @@ from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import GENERIC
 from core.data.log import log_error, log_warning
 
-_VIAN_ROOT = os.path.dirname(os.path.abspath( __file__ + "../../../"))
+_VIAN_ROOT = os.path.abspath(os.path.split( __file__)[0] + "/../..")
+print(_VIAN_ROOT,  os.path.split( __file__)[0] + "/../..")
 
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)

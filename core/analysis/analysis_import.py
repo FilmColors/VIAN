@@ -16,8 +16,8 @@ try:
     from core.analysis.import_tensortflow import tf
     # tf.test.is_gpu_available()
     # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    tf.logging.set_verbosity(tf.logging.FATAL)
-    log_info("Verbosity", tf.logging.get_verbosity())
+    # tf.logging.set_verbosity(tf.logging.FATAL)
+    # log_info("Verbosity", tf.logging.get_verbosity())
 
 except:
     from core.data.enums import DataSerialization
