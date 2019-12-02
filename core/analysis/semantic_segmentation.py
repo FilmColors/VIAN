@@ -8,7 +8,7 @@ June 2018
 from typing import List
 import pickle
 
-from core.data.computation import ms_to_frames, numpy_to_pixmap
+from core.data.computation import ms_to_frames, numpy_to_pixmap, get_colormap
 from core.container.project import *
 from core.container.analysis import SemanticSegmentationAnalysisContainer
 from core.gui.ewidgetbase import EGraphicsView
@@ -20,6 +20,11 @@ from core.analysis.deep_learning.models import *
 from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
 from core.data.enums import DataSerialization
 from core.container.hdf5_manager import vian_analysis
+
+from matplotlib import cm
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+
+
 
 @vian_analysis
 class SemanticSegmentationAnalysis(IAnalysisJob):
@@ -136,15 +141,47 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
         widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata(), cv2.COLOR_GRAY2BGR)))
+
+        n = 20
+        colormap = get_colormap(n)
+        data = analysis.get_adata()
+        img = np.zeros(shape=data.shape + (3,), dtype=np.float32)
+
+        for i in range(n):
+            img[data==i] = colormap[i][:3]
+
+        img = (img * 255).astype(np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+
+        if isinstance(analysis.target_container, Screenshot):
+            scr = analysis.target_container.get_img_movie_orig_size()
+            scr = cv2.resize(scr, img.shape[:2][::-1], interpolation=cv2.INTER_CUBIC).astype(np.float32)
+            img = ((scr * 0.7) + (img * 0.3)).astype(np.uint8)
+
+        widget.set_image(numpy_to_pixmap(img))
         return widget
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
         """
         This function should show the complete Visualization
         """
-        widget = EGraphicsView(None, auto_frame=True)
-        widget.set_image(numpy_to_pixmap(cv2.cvtColor(analysis.get_adata(), cv2.COLOR_GRAY2BGR)))
+        widget = EGraphicsView(None, auto_frame=True, has_context_menu=True)
+
+        n = 20
+        colormap = get_colormap(n)
+        data = analysis.get_adata()
+        img = np.zeros(shape=data.shape + (3,), dtype=np.float32)
+        for i in range(n):
+            img[data == i] = colormap[i][:3]
+        img = (img * 255).astype(np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+
+        if isinstance(analysis.target_container, Screenshot):
+            scr = analysis.target_container.get_img_movie_orig_size()
+            scr = cv2.resize(scr, img.shape[:2][::-1], interpolation=cv2.INTER_CUBIC).astype(np.float32)
+            img = ((scr * 0.7) + (img * 0.3)).astype(np.uint8)
+        widget.set_image(numpy_to_pixmap(img))
+
         return [VisualizationTab(widget=widget, name="Semantic Segmentation Mask", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):

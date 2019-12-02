@@ -689,4 +689,5 @@ class VocabularyExportDialog(EDialogWidget):
                     itm[1].export_vocabulary(dir + "/" +itm[1].name + ".json")
             self.close()
 
+
 #endregion

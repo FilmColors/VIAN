@@ -240,7 +240,6 @@ class EGraphicsView(QGraphicsView):
     def set_image(self, pixmap, clear = True):
         if clear:
             self.gscene.clear()
-
         self.pixmap = self.gscene.addPixmap(pixmap)
 
     def resizeEvent(self, event: QResizeEvent):

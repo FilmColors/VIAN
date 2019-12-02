@@ -614,6 +614,7 @@ def import_module_from_path(path):
     sys.modules["current_pipeline_module"] = foo
     spec.loader.exec_module(foo)
 
+
 def generate_id(not_list = None):
     if not_list is None:
         not_list = []
@@ -623,3 +624,13 @@ def generate_id(not_list = None):
         new_id = random.randint(0, 9999999)
 
     return new_id
+
+
+def get_colormap(n=12, map="gist_ncar"):
+    from matplotlib import cm
+
+    viridis = cm.get_cmap(map, n)
+    res = []
+    for i in range(n):
+        res.append(viridis(i / n))
+    return res

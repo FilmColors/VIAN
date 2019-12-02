@@ -55,7 +55,7 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
 
     def on_setup(self, project:VIANProject):
         if project.get_experiment_by_name("ERC Advanced Grant FilmColors") is None:
-            project.apply_template(template_path="data/ERC-FilmColors-Template")
+            project.apply_template(template_path="data/templates/ERC-FilmColors-Template.viant")
 
     def on_segment_created(self, project:VIANProject, segment:Segment, capture:cv2.VideoCapture):
         """
