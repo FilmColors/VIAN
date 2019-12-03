@@ -17,14 +17,13 @@ Indicated Information:
 - **1**: The **Palette**-Visualization of the current Frame.
 - **2**: The **Space Palette**-Visualization of the current Frame.
 
-.. image:: colorimetry_palette_1.png
-   :scale: 50%
+.. image:: colorimetry_palette_7.png
+   :scale: 55%
    :align: left
    :alt: map to buried treasure
    
-
-.. image:: colorimetry_palette.png
-   :scale: 50%
+.. image:: colorimetry_palette_1_7.png
+   :scale: 55%
    :align: right
    :alt: map to buried treasure
    
@@ -37,7 +36,7 @@ Indicated Information:
  - *Cluster*:
  - *Frequency*:
  - *Hilbert*:
-- **3**: **Layer Depth**:
+- **3**: **Layer Depth**: Defines how "fine-grained" the resolution of the Colorimetry should be. A layer size between 7 and 10 has showed to be most informative.
 
 * :ref:`genindex`
 * :ref:`modindex`
