@@ -15,7 +15,7 @@ If you install VIAN manually (without the installer from the homepage),
 the following Software Tools need to be present:
 
 - python3
-- VLC(?)
+- VLC 64-bit Version
 
 Movie Files
 ***********
