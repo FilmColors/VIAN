@@ -11,7 +11,8 @@ Make sure you have at least the following generations of OS, or newer:
 - **MacOS**: SnowLion
 - **Ubuntu**: 16.04
 
-The following Software Tools need to be present:
+If you install VIAN manually (without the installer from the homepage),
+the following Software Tools need to be present:
 
 - python3
 - VLC(?)
@@ -19,12 +20,16 @@ The following Software Tools need to be present:
 Starting New Project
 ********************
 
-
 Before you start a new Project, consider the following points concerning video format, computational resources etc.:
 
-- Make sure that the video you are going to analyse was digitalized with encoding h264 (and not h265 or x265)
-- The best suited file format for working with in VIAN is .mp4 
-- Since VIAN computes the colorimetry of each frame of the movie when you start a new project, this process may take some while (depending on yout hardware up to XXX min)
+- VIAN handles a wide variety of film codecs and container (file) formats. However consider following important notes regarding the movie file.
+    - We test VIAN with h264 and h265 encoded .mp4 movies.
+    - h264 ensures performance of VIAN, however the compression has an impact on the movie quality
+    - h265 ensures a good quality, may however effect the performance of VIAN depending on your computer
+    - (detail) Make sure that the compression method does not include skipped frames
+    - (detail) Movie and audio channel have to have the same length
+
+- Since VIAN computes the colorimetry of each frame of the movie when you start a new project, this process may take some while.
 
 .. toctree::
     :maxdepth: 4
