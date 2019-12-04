@@ -148,7 +148,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         img = np.zeros(shape=data.shape + (3,), dtype=np.float32)
 
         for i in range(n):
-            img[data==i] = colormap[i][:3]
+            img[data == i] = colormap[i][:3]
 
         img = (img * 255).astype(np.uint8)
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)

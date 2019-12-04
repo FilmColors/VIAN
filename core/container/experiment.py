@@ -1174,7 +1174,8 @@ class Experiment(IProjectContainer, IHasName):
 
         try:
             self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
-            self.pipeline_script.experiment = self
+            if self.pipeline_script is not None:
+                self.pipeline_script.experiment = self
         except Exception as e:
             log_error("Exception in Experiment.deserialize()", e, project.name)
             self.pipeline_script = None

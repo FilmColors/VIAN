@@ -536,7 +536,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             else:
                 ctrl.onHeightChanged.emit(ctrl.height() / n_bars)
 
-
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
         self.frame_outer.setFixedSize(self.frame_Bars.size().width(), self.frame_Bars.height())
@@ -1034,7 +1033,10 @@ class TimelineControl(QtWidgets.QWidget):
         else:
             self.resize(self.width(), self.item.strip_height)
 
-        self.item.onSelectedChanged.connect(self.on_selected_changed)
+        if not isinstance(self.item, TimelineDataset):
+            self.item.onSelectedChanged.connect(self.on_selected_changed)
+
+
 
     @pyqtSlot(bool)
     def on_selected_changed(self, state):
@@ -1092,7 +1094,8 @@ class TimelineControl(QtWidgets.QWidget):
                 self.is_resizing = True
                 self.resize_offset = self.height() - QMouseEvent.pos().y()
             else:
-                self.item.select()
+                if not isinstance(self.item, TimelineDataset):
+                    self.item.select()
                 # self.timeline.select(self)
 
         if QMouseEvent.button() == Qt.RightButton:
