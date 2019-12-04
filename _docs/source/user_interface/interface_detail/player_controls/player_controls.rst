@@ -14,8 +14,8 @@ The Player Controls Window is a straight-forward tool for contorling the **Audio
 
 Indicated Information:
 
-- **1**: The number of the Frame that you are actually at in the **Timeline**.
-- **2**: The exact Time where you are (hh:mm:ss) at in the **Timeline**.
+- **1**: The number of the Frame that you are actually at in the :ref:`timeline`.
+- **2**: The exact Time where you are (hh:mm:ss) at in the :ref:`timeline`.
 - **3**: Controls for *jumping to the beginning of the movie*, *fast backward*, *play/pause*, *fast forward* and *jumping to the end of the movie*.
 
 
