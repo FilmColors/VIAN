@@ -750,7 +750,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 l = s
             if s.get_type() == NODE_SCRIPT:
                 self.set_current_script(s)
-            if not isinstance(s, VIANProject):
+            if hasattr(s, "onSelectedChanged"):
                 s.onSelectedChanged.emit(True)
 
         if l is not None:

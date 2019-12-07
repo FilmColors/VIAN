@@ -12,6 +12,7 @@ from core.container.corpus import Corpus
 from core.container.project import VIANProject
 from core.data.log import log_error
 
+
 class CorpusDockWidget(EDockWidget):
     onCorpusChanged = pyqtSignal(object)
     onSelectionChanged = pyqtSignal(object)
@@ -248,7 +249,6 @@ class CorpusList(EditableListWidget):
     def remove_from_corpus(self, name, item):
         if item.meta is not None:
             self.corpus_widget.corpus.remove_project(item.meta)
-
 
 
 class CorpusGeneralWidget(QWidget):
