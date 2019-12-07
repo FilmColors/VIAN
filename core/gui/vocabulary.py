@@ -204,7 +204,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
 
     def finish_synchronize_from_library_to_project(self, to_add, to_update, vocabularies_project):
         for v in to_add:
-            copy = self.vocabulary_view.vocabulary_collection.copy_vocabulary(v)
+            copy = self.vocabulary_view.vocabulary_collection.copy_vocabulary(v, add_to_global=False)
             self.main_window.project.add_vocabulary(copy)
         for v in to_update:
             vocabularies_project[v.uuid].update_vocabulary(v)
@@ -241,7 +241,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
 
     def finish_synchronize_from_project_to_library(self, to_add, to_update, vocabularies_project):
         for v in to_add:
-            copy = self.main_window.project.vocabulary_collection.copy_vocabulary(v)
+            copy = self.main_window.project.vocabulary_collection.copy_vocabulary(v, add_to_global=False)
             self.vocabulary_view.vocabulary_collection.add_vocabulary(copy)
         for v in to_update:
             vocabularies_project[v.uuid].update_vocabulary(v)
@@ -312,12 +312,13 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         for p in glob.glob("data/vocabularies/*.json"):
             v = self.vocabulary_collection.import_vocabulary(p)
             v._path = p
+            v.is_builtin = True
             self.vocabulary_index[v.uuid] = dict(voc=v, path=p, edited=False)
+
         for p in glob.glob(self.main_window.settings.DIR_VOCABULARIES + "/*.json"):
             v = self.vocabulary_collection.import_vocabulary(p)
             self.vocabulary_index[v.uuid] = dict(voc=v, path=p, edited=False)
             v._path = p
-        pass
 
     def add_vocabulary(self, model, view, voc):
         model.appendRow(self.get_vocabulary_item_model(voc))
@@ -355,7 +356,9 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.lineEditName.setText(current.name)
         self.textEditDescription.setPlainText(current.comment)
 
+        voc = None
         if isinstance(current, VocabularyWord):
+            voc = current.vocabulary
             self.lineEditCategory.setEnabled(False)
             self.comboBoxComplexity.setEnabled(True)
             print("Complexity Group", current.complexity_group)
@@ -366,6 +369,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
                     break
 
         elif isinstance(current, Vocabulary):
+            voc = current
             self.lineEditCategory.setText(current.category)
             self.lineEditCategory.setEnabled(True)
             complexity_groups = []
@@ -374,9 +378,22 @@ class VocabularyView(QWidget, IProjectChangeNotify):
                     complexity_groups.append(w.complexity_group)
             if len(complexity_groups) > 1:
                 self.lineEditComplexityGroup.setText("Multiple")
-            elif len(complexity_groups) == 0:
+            elif len(complexity_groups) == 1:
                 self.lineEditComplexityGroup.setText(complexity_groups[0])
         self.current_item = current
+
+        if voc is not None and voc.is_builtin:
+            self.lineEditName.setEnabled(False)
+            self.textEditDescription.setEnabled(False)
+            self.lineEditCategory.setEnabled(False)
+            self.comboBoxComplexity.setEnabled(False)
+            self.lineEditComplexityGroup.setEnabled(False)
+        else:
+            self.lineEditName.setEnabled(True)
+            self.textEditDescription.setEnabled(True)
+            self.lineEditCategory.setEnabled(True)
+            self.comboBoxComplexity.setEnabled(True)
+            self.lineEditComplexityGroup.setEnabled(True)
 
     def add_word(self):
         name = self.lineEdit_Item.text()
@@ -548,13 +565,14 @@ class VocabularyTreeView(QTreeView):
         cm = VocabularyContextMenu(self.vocabulary_manager.main_window, pos, model_obj,
                                    obj, self.collection, self.model(), self.vocabulary_manager, self, self.allow_create)
 
-
-    # def dropEvent(self, e: QDropEvent) -> None:
-    #     print(e.mimeData())
-    #     # print(e.)
-
     def apply_name_changed(self):
         current_word = self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object
+        if isinstance(current_word, Vocabulary):
+            if current_word.is_builtin:
+                QMessageBox.warning(self, "Vocabulary is built-in", "You can not edit a built in vocabulary.")
+                name = "(FilmColors) " + self.model().itemFromIndex(self.selectedIndexes()[0]).voc_object.name
+                self.model().itemFromIndex(self.selectedIndexes()[0]).setText(name)
+                return
         new_name = self.model().itemFromIndex(self.selectedIndexes()[0]).text()
         current_word.set_name(new_name)
         self.model().itemFromIndex(self.selectedIndexes()[0]).setText(current_word.get_name())
@@ -594,6 +612,9 @@ class VocabularyContextMenu(QMenu):
         if item is not None:
             self.a_remove = self.addAction("Remove " + str(item.__class__.__name__))
             self.a_remove.triggered.connect(self.on_remove)
+            if isinstance(item, Vocabulary):
+                self.a_copy = self.addAction("Copy Vocabulary")
+                self.a_copy.triggered.connect(self.on_copy)
 
         if allow_create:
             self.a_new_voc = self.addAction("New Vocabulary")
@@ -606,6 +627,10 @@ class VocabularyContextMenu(QMenu):
             self.item.create_word("New Word")
         elif isinstance(self.item, VocabularyWord):
             self.item.vocabulary.create_word("New Word")
+        self.manager.recreate_tree()
+
+    def on_copy(self):
+        v = self.item.project.copy_vocabulary(self.item, replace_uuid=True)
         self.manager.recreate_tree()
 
     def on_new_voc(self):
@@ -648,6 +673,9 @@ class VocabularyTreeItemModel(QStandardItemModel):
 
 class VocabularyItem(QStandardItem):
     def __init__(self, text, object):
+        if isinstance(object, Vocabulary):
+            if object.is_builtin:
+                text = "(FilmColors) " + text
         super(VocabularyItem, self).__init__(text)
         self.voc_object = object
         self.setDragEnabled(True)

@@ -64,6 +64,7 @@ class Vocabulary(IProjectContainer, IHasName):
         self.category = "default"
 
         self.is_visible = True
+        self.is_builtin = False
 
         self._path = ""
 

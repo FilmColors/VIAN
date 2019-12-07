@@ -3,7 +3,7 @@ from typing import Optional
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
     QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, \
     QFileDialog, QMessageBox, QFrame, QStackedWidget, QGridLayout
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5 import uic
 
 from core.gui.ewidgetbase import EDockWidget, EditableListWidget
@@ -23,7 +23,7 @@ class CorpusDockWidget(EDockWidget):
         self.in_template_mode = False
         self.last_project = None
 
-        self.list = CorpusList(self.w)
+        self.list = CorpusList(self.w, self)
         self.info_widget = QTabWidget(self.w)
         self.general_widget = CorpusGeneralWidget(self.w)
         self.general_widget.setLayout(QVBoxLayout())
@@ -57,7 +57,9 @@ class CorpusDockWidget(EDockWidget):
 
         self.general_widget.btn_ImportTemplate.clicked.connect(self.import_template)
         self.filmography.onFilmographyChanged.connect(self.save_current_project)
+
         self.list.onSelectionChanged.connect(self.on_selection_changed)
+
         self.corpus = None  # type: Optional[Corpus]
         self.current_project = None # type: Optional[VIANProject]
 
@@ -89,6 +91,16 @@ class CorpusDockWidget(EDockWidget):
         if not os.path.isfile(file):
             return
         self.main_window.on_new_project(file, add_to_current_corpus=True)
+
+    def on_remove_project(self, name, item):
+        if self.corpus is None:
+            QMessageBox.warning(self, "No Corpus loaded", "No corpus has been loaded yet. Either load one or create "
+                                                          "a new one in the file menu")
+            return
+        project = item.meta
+        if project is None:
+            return
+        self.corpus.remove_project(project)
 
     def on_load_corpus(self):
         if self.corpus is not None:
@@ -192,10 +204,12 @@ class CorpusDockWidget(EDockWidget):
 
 
 class CorpusList(EditableListWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, corpus_widget):
         super(CorpusList, self).__init__(parent)
+        self.corpus_widget = corpus_widget
         self.projects = dict()
         super(CorpusList, self).add_item("No Corpus Loaded", None)
+        self.onItemDeleted.connect(self.remove_from_corpus)
 
     def on_corpus_loaded(self, corpus:Corpus):
         if corpus is None:
@@ -206,7 +220,8 @@ class CorpusList(EditableListWidget):
                 self.remove_item("No Corpus Loaded")
             except:
                 pass
-            self.add_item("No Projects Added yet.", None)
+            if len(corpus.projects_loaded) == 0:
+                self.add_item("No Projects Added yet.", None)
             for uuid, p in corpus.projects_loaded.items():
                 self.on_project_added(p)
             self.setEnabled(True)
@@ -222,14 +237,18 @@ class CorpusList(EditableListWidget):
         if project.uuid not in self.projects:
             itm = self.add_item(project.name, project)
             self.projects[project.uuid] = itm
-        pass
 
     def on_project_removed(self, project):
         if project.uuid in self.projects:
             itm = self.projects[project.uuid]
-            self.remove_item(itm.name)
             self.projects.pop(project.uuid)
-        pass
+            if project.name in self.item_index:
+                self.remove_item(itm.name)
+
+    def remove_from_corpus(self, name, item):
+        if item.meta is not None:
+            self.corpus_widget.corpus.remove_project(item.meta)
+
 
 
 class CorpusGeneralWidget(QWidget):

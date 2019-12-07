@@ -1554,27 +1554,27 @@ class VIANProject(QObject, IHasName, IClassifiable):
         name = voc.name
         duplicate = None
 
-        while(not_ok):
-            has_duplicate = False
-            for v in self.vocabularies:
-                if v.name == name:
-                    name = voc.name + "_" + str(counter).zfill(2)
-                    has_duplicate = True
-                    counter += 1
-                    duplicate = v
-                    break
-            if not has_duplicate:
-                not_ok = False
-                break
-            else:
-                # If the Vocabulares are duplicates, we might want to replace the IDS in the Caller,
-                # Therefore we create a replacement table
-                x = [w.name for w in voc.words_plain]
-                y = [w.name for w in duplicate.words_plain]
-
-                if set(x) == set(y):
-                    print("Vocabulary is duplicate")
-                    return duplicate
+        # while(not_ok):
+        #     has_duplicate = False
+        #     for v in self.vocabularies:
+        #     #     if v.name == name:
+        #     #         name = voc.name + "_" + str(counter).zfill(2)
+        #     #         has_duplicate = True
+        #     #         counter += 1
+        #     #         duplicate = v
+        #     #         break
+        #     # if not has_duplicate:
+        #     #     not_ok = False
+        #     #     break
+        #     # else:
+        #         # If the Vocabulares are duplicates, we might want to replace the IDS in the Caller,
+        #         # Therefore we create a replacement table
+        #         x = [w.name for w in voc.words_plain]
+        #         y = [w.name for w in duplicate.words_plain]
+        #
+        #         if set(x) == set(y):
+        #             print("Vocabulary is duplicate")
+        #             return duplicate
 
         voc.name = name
         voc.set_project(self)
@@ -1610,7 +1610,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.onVocabularyRemoved.emit(voc)
         self.dispatch_changed()
 
-    def copy_vocabulary(self, voc, add_to_global = True):
+    def copy_vocabulary(self, voc, add_to_global = True, replace_uuid = False):
         """
         Copies an existing Vocabulary
 
@@ -1620,6 +1620,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
         """
         self.inhibit_dispatch = True
         new = self.import_vocabulary(None, add_to_global, serialization=voc.serialize())
+
+        if replace_uuid:
+            new.uuid = str(uuid4())
+            for w in new.words_plain:
+                w.uuid = str(uuid4())
         self.inhibit_dispatch = False
         return new
 

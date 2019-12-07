@@ -67,9 +67,9 @@ class Corpus(QObject, IHasName):
             self.project_paths.pop(project.uuid)
         if project.uuid in self.projects_loaded:
             self.projects_loaded.pop(project.uuid)
-
         project.close()
 
+        print(self.projects_loaded, self.project_paths)
         if delete_from_disk:
             project.close()
             pdir = project.folder
@@ -78,6 +78,7 @@ class Corpus(QObject, IHasName):
                     rmtree(pdir)
             except Exception as e:
                 log_error("Could not remove project", e)
+
         self.onProjectRemoved.emit(project)
 
     def import_template(self, path):
