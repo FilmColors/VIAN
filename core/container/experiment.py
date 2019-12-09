@@ -274,7 +274,6 @@ class Vocabulary(IProjectContainer, IHasName):
         try:
             self.is_visible = serialization['visible']
         except Exception as e:
-            print(e)
             self.is_visible = True
         return self
 
@@ -592,9 +591,10 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.classification_vocabularies.append(voc)
             keywords = []
             for i, w in enumerate(voc.words_plain):
-                if keyword_override is not None:
+                keyword = None
+                if keyword_override is not None and w.unique_id in keyword_override:
                     keyword = keyword_override[w.unique_id]
-                else:
+                if keyword is None:
                     keyword = UniqueKeyword(self.experiment, voc, w, self)
                 if external_ids is not None:
                     keyword.external_id = external_ids[i]
@@ -602,18 +602,20 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.unique_keywords.append(keyword)
                 keywords.append(keyword)
             self.onUniqueKeywordsChanged.emit(self)
-
             return keywords
         else:
             #Check if really there are new words in the vocabulary which are not yet added to the keywords.
             keywords = []
             all_words = [w.word_obj for w in self.unique_keywords]
-            for w in voc.words_plain:
+            for i, w in enumerate(voc.words_plain):
                 if w not in all_words:
-                    if keyword_override is not None:
+                    keyword = None
+                    if keyword_override is not None and w.unique_id in keyword_override:
                         keyword = keyword_override[w.unique_id]
-                    else:
+                    if keyword is None:
                         keyword = UniqueKeyword(self.experiment, voc, w, self)
+                    if external_ids is not None:
+                        keyword.external_id = external_ids[i]
                     keyword.set_project(self.project)
                     self.unique_keywords.append(keyword)
 
@@ -722,6 +724,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             if voc is not None:
                 self.classification_vocabularies.append(voc)
             else:
+                raise Exception("Could not Resolve Vocabulary", uid)
                 log_warning("Could not Resolve Vocabulary:", uid)
 
         self.unique_keywords = []
@@ -1196,6 +1199,7 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
     :return:
     """
     changes = []
+
     # Creating all missing Classification Objects
     cl_objs_index = dict()
     for entry in other.get_classification_objects_plain():
@@ -1209,9 +1213,17 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
             changes.append(("Added Classification Object", clobj))
         cl_objs_index[entry.unique_id] = clobj
     words_index = dict()
+
     # Creating all missing Vocabularies
     for entry in other.get_vocabularies():
         voc = self.project.get_by_id(entry.unique_id)
+
+        if voc is None:
+            voc = self.project.get_by_id(entry.uuid)
+            if voc is not None:
+                print("Found by uuid")
+                entry.unique_id = voc.uuid
+
         if voc is None:
             voc = Vocabulary(name=entry.name)
             voc.unique_id = entry.unique_id
@@ -1219,11 +1231,9 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
             self.project.add_vocabulary(voc)
             changes.append(("Added Vocabulary Object", voc))
 
-        # Updating Values
         voc.category = entry.category
 
         for w in entry.words_plain:
-            # word = voc.create_word(name = w['name'])
             word = self.project.get_by_id(w.unique_id)
             if word is None:
                 word = VocabularyWord(name=w.name, vocabulary=voc)
@@ -1236,36 +1246,53 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
             word.complexity_group = w.complexity_group
             word.complexity_lvl = w.complexity_lvl
             word.organization_group = w.organization_group
-            words_index[w.unique_id] = word
+            words_index[word.unique_id] = word
+
+            # if entry.name == "Narratology":
+            #     print("Word", word.name, word.unique_id, voc.unique_id)
 
     vocs_to_add = []
     unique_keywords = dict()
+
     # Creating all missing Unique Keywords
     for entry in other.get_unique_keywords():
-
-        # Check if the keyword already exists in this experiment:
-        keyword = self.project.get_by_id(entry.unique_id) #type:UniqueKeyword
         clobj = cl_objs_index[entry.class_obj.unique_id]
+        word = words_index[entry.word_obj.unique_id]
 
+        # We build a lookup hashtable
         if clobj.unique_id not in unique_keywords:
             unique_keywords[clobj.unique_id] = dict()
 
-        word = words_index[entry.word_obj.unique_id]
+        # Check if the keyword already exists in this experiment by id:
+        keyword = self.project.get_by_id(entry.unique_id) #type:UniqueKeyword
 
+        # Check if the keyword exists by hierarchy (VocabularyWord - Classification Object)
         if keyword is None:
-            if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-                keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
-                keyword.unique_id = entry.unique_id
-        else:
-            clobj.remove_vocabulary(keyword.voc_obj)
+            ts = [(kwd, kwd.word_obj) for kwd in clobj.unique_keywords]
+            for k, w in ts:
+                if w == word:
+                    keyword = k
+                    break
+
+        # if the keyword doesn't exist, create it
+        if keyword is None:
+            keyword = UniqueKeyword(self, word.vocabulary, word, clobj)
+
+        keyword.unique_id = entry.unique_id
 
         if (word.vocabulary, clobj) not in vocs_to_add:
             vocs_to_add.append((word.vocabulary, clobj))
             unique_keywords[clobj.unique_id][word.vocabulary.unique_id] = dict()
+
         unique_keywords[clobj.unique_id][word.vocabulary.unique_id][word.unique_id] = keyword
+
+        if word.vocabulary.name == "Narratology":
+            print(clobj.unique_id, word.vocabulary.unique_id, unique_keywords[clobj.unique_id][word.vocabulary.unique_id])
+
 
     # Creating adding the vocabularies to the classification object, inject the UniqueKeywords
     for vocabulary, clobj in vocs_to_add:
+        print(clobj.unique_id, vocabulary.unique_id)
         clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])
 
     if drop:

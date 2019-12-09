@@ -1,3 +1,9 @@
+"""
+A VIAN Corpus is merely a class which represents a collection of VIAN Projects,
+all sharing a common template.
+
+
+"""
 import os
 import json
 
@@ -7,9 +13,9 @@ from shutil import rmtree
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from .project import VIANProject
+from .project import VIANProject, merge_experiment
 from .container_interfaces import IHasName
-from core.data.log import log_error, log_warning
+from core.data.log import log_error, log_warning, log_info
 from core.data.enums import CORPUS
 
 
@@ -19,6 +25,14 @@ class Corpus(QObject, IHasName):
     onTemplateChanged = pyqtSignal(object)
 
     CORPUS_FILE_EXTENSION = ".vian_corpus"
+
+    # Merge Behaviour enums, define how to import projects into the corpus
+    # If merge is set, two experiments with the same uuid or name get merged, else old gets removed
+    # if keep is set, values (Vocabularies, ClassificationObjects and Keywords)
+    # which are only present in the old experiment will be preserved
+    MERGE_BEHAVIOUR_MERGE_KEEP = "merge-keep"
+    MERGE_BEHAVIOUR_MERGE_DELETE = "merge-delete"
+    MERGE_BEHAVIOUR_DELETE_DELETE = "delete-delete"
 
     def __init__(self, name="NewCorpus", directory="", file = None, template_movie_path = None):
         super(Corpus, self).__init__(None)
@@ -30,7 +44,7 @@ class Corpus(QObject, IHasName):
         self.directory = directory
         self.file = file
 
-    def add_project(self, project:VIANProject=None, file = None):
+    def add_project(self, project:VIANProject=None, file = None, merge_behaviour = MERGE_BEHAVIOUR_MERGE_KEEP):
         """
         Adds a project to the corpus, can either be given by VIANProject object or file
         :param project:
@@ -40,16 +54,41 @@ class Corpus(QObject, IHasName):
         if project is None and file is None:
             raise ValueError("Either project or file has to be given.")
         if project is None:
+            results = None
             try:
                 project = VIANProject().load_project(file)
+                t_exp_names = [e.name for e in self.template.experiments]
+                t_exp_unique_ids = [e.unique_id for e in self.template.experiments]
+
+                print(merge_behaviour)
+                template_dict = self.template.get_template(segm = True, voc = True,
+                                                      ann = True, scripts = False,
+                                                      experiment = True, pipeline=True)
+                print(template_dict)
+                if merge_behaviour == self.MERGE_BEHAVIOUR_DELETE_DELETE:
+                    to_remove = [e for e in project.experiments if e.name in t_exp_names or e.unique_id in t_exp_unique_ids]
+                    for t in to_remove:
+                        project.remove_experiment(t)
+                    results = project.apply_template(template = template_dict)
+
+                elif merge_behaviour == self.MERGE_BEHAVIOUR_MERGE_DELETE:
+                    results = project.apply_template(template=template_dict, merge=True, merge_drop=True)
+
+                elif merge_behaviour == self.MERGE_BEHAVIOUR_MERGE_KEEP:
+                    results = project.apply_template(template=template_dict, merge=True, merge_drop=False)
+
             except Exception as e:
                 log_error("Could not load project", e)
                 return
+            project.store_project()
             project.close()
 
-        self.projects_loaded[project.uuid] = project
-        self.project_paths[project.uuid] = project.path
-        self.onProjectAdded.emit(project)
+            for l in results:
+                log_info(l)
+
+            self.projects_loaded[project.uuid] = project
+            self.project_paths[project.uuid] = project.path
+            self.onProjectAdded.emit(project)
 
     def remove_project(self, project:VIANProject = None, file = None, delete_from_disk = False):
         """

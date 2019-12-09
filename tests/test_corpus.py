@@ -59,6 +59,25 @@ class TestCreate(unittest.TestCase):
         corpus.remove_project(file=proj3.path, delete_from_disk=True)
         self.assertTrue(not os.path.isdir(proj3.folder))
 
+    def test_merge(self):
+        corpus = Corpus("TestCorpus", directory="data/")
+
+        proj1 = VIANProject("P1", folder="data/projects/p1", movie_path=p1)
+        proj1.store_project()
+        proj2 = VIANProject("P2", folder="data/projects/p2", movie_path=p2)
+        proj2.store_project()
+        proj3 = VIANProject("P3", folder="data/projects/p3", movie_path=p3)
+        proj3.store_project()
+        proj4 = VIANProject("P4", folder="data/projects/p4", movie_path=p4)
+        proj4.store_project()
+
+        corpus.add_project(proj1)
+        corpus.add_project(proj2)
+        corpus.add_project(file=proj3.path)
+        corpus.add_project(file=proj4.path)
+
+
+
 
 
 if __name__ == '__main__':

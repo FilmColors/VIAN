@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
     QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, \
-    QFileDialog, QMessageBox, QFrame, QStackedWidget, QGridLayout
+    QFileDialog, QMessageBox, QFrame, QStackedWidget, QGridLayout, QDialog, QComboBox
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5 import uic
 
@@ -124,13 +124,18 @@ class CorpusDockWidget(EDockWidget):
             QMessageBox.warning(self, "No Corpus loaded", "No corpus has been loaded yet. Either load one or create "
                                                           "a new one in the file menu")
             return
-        file = QFileDialog.getOpenFileName(directory=self.main_window.settings.DIR_CORPORA)[0]
-        if not os.path.isfile(file):
+        files = QFileDialog.getOpenFileNames(directory=self.main_window.settings.DIR_CORPORA)[0]
+        if len(files) == 0:
             return
-        self.corpus.add_project(file=file)
+        print(files)
+        dialog = ImportProjectCorpusDialog(self, files, self.on_import_projects_finalize)
+        dialog.show()
 
-        self.corpus.save()
-        self.main_window.settings.add_recent_corpus2(self.corpus)
+    def on_import_projects_finalize(self, files, settings):
+        for file in files:
+            self.corpus.add_project(file=file, merge_behaviour=settings)
+            self.corpus.save()
+            self.main_window.settings.add_recent_corpus2(self.corpus)
 
     def on_edit_template(self):
         if self.corpus is None:
@@ -365,3 +370,34 @@ class CorpusMovieWidget(QWidget):
                     subprocess.run(["nautilus", self.goto_dir])
                 except:
                     pass
+
+
+class ImportProjectCorpusDialog(QDialog):
+    def __init__(self, parent, files, callback):
+        super(ImportProjectCorpusDialog, self).__init__(parent)
+        self.files = files
+        self.callback = callback
+
+        lt = QGridLayout(self)
+        self.setLayout(lt)
+        lt.addWidget(QLabel("Merge Behaviour"),0,0)
+        self.settings = {
+            "Merge Experiments, Keep information only present in old":Corpus.MERGE_BEHAVIOUR_MERGE_KEEP,
+            "Merge Experiments, Delete information only present in old":Corpus.MERGE_BEHAVIOUR_MERGE_DELETE,
+            "Delete Experiments, Delete Classification": Corpus.MERGE_BEHAVIOUR_DELETE_DELETE,
+        }
+        self.cb_merge_behaviour = QComboBox(self)
+        for k in self.settings.keys():
+            self.cb_merge_behaviour.addItem(k)
+
+        lt.addWidget(self.cb_merge_behaviour, 0, 1)
+        self.btn_ok = QPushButton("Apply", self)
+        self.btn_ok.clicked.connect(self.on_ok)
+        lt.addWidget(self.btn_ok, 1,0, 1,2)
+        self.show()
+
+    def on_ok(self):
+        settings = self.settings[self.cb_merge_behaviour.currentText()]
+        self.callback(self.files, settings)
+        self.close()
+

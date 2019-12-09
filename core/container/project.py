@@ -1337,7 +1337,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         return self
 
-    def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False, pipeline=True):
+    def get_template(self, segm = True, voc = True, ann = True, scripts = False, experiment = True, pipeline=True):
         """
         Returns a template dictionary from this projects.
 
@@ -1396,10 +1396,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
         Loads a template from agiven path and applies it to the project.
 
         :param template_path: Path to the json
-        :return: None
+        :param template: a template dict as returned from VIANProject.get_template()
+        :param export_scripts: If the PipelineScripts should be exported into a py file
+        :param merge: if the new template should be merge into an already existing one
+        :param merge_drop: if data which is not present in the new template during merge should be dropped
+        :return: merge results, a list of printable string describing the merge changes,
+        returns an empty list if merge has been false
         """
         merge_results = []
-
+        log_info("Applying Template")
         if template is None and template_path is None:
             raise ValueError("Either template_path or template has to be given.")
         if template_path is not None and template is None:
@@ -1462,6 +1467,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         self.add_pipeline_script(new)
                         with open(pipeline.path, "w") as f:
                             f.write(pipeline.script)
+                        merge_results.append(("Added PipelineScript", new.name))
                     self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
                 except TypeError as e:
                     pass
@@ -1479,8 +1485,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         try:
                             pipeline = PipelineScript().deserialize(q, loc)
                             temp_propj.add_pipeline_script(pipeline)
-                        except Exception as e:
-                            raise e
+                        except Exception as exception:
+                            raise exception
                     for v in template['vocabularies']:
                         voc = Vocabulary("voc").deserialize(v, temp_propj)
                         temp_propj.add_vocabulary(voc)
@@ -1490,11 +1496,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
                     exp = self.get_by_id(new.unique_id)
                     if exp is not None and isinstance(exp, Experiment):
+                        merge_results.append(("Merged Experiment", exp.name))
                         t = merge_experiment(exp, new, drop=merge_drop)
                         merge_results.extend(t)
                     else:
                         new = Experiment().deserialize(e, self)
                         self.add_experiment(new)
+                        merge_results.append(("Added Experiment", new.name))
             else:
                 new = Experiment().deserialize(e, self)
                 self.add_experiment(new)

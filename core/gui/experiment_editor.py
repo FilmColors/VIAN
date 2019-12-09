@@ -84,7 +84,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.pushButtonImportScript.clicked.connect(self.load_pipeline_script)
 
         self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
-
+        self.lineEditSearchVoc.textChanged.connect(self.search_vocabulary)
         # Disable all controls that need a selected Classification Object:
         self.on_class_selection_changed()
 
@@ -138,7 +138,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.listView_Vocabularies.clear()
         self.voc_items = []
         if self.selected_class_object is not None:
-            for voc in self.main_window.project.vocabularies:
+            for voc in sorted(self.main_window.project.vocabularies, key=lambda x:x.name):
                 itm = VocabularyListItem(self.listView_Vocabularies, voc)
                 self.listView_Vocabularies.addItem(itm)
                 if voc in self.selected_class_object.obj.get_vocabularies():
@@ -287,6 +287,15 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 else:
                     if itm.target_item in self.selected_class_object.obj.target_container:
                         self.selected_class_object.obj.target_container.remove(itm.target_item)
+
+    def search_vocabulary(self, name):
+        if name == "":
+            for v in self.voc_items:
+                v.setHidden(False)
+        else:
+            for v in self.voc_items:
+                v.setHidden(name not in v.voc.name)
+
 
     #endregion
 

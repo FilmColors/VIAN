@@ -561,10 +561,6 @@ class CorpusProjectContextMenu(ContextMenu):
 
     def on_remove(self):
         self.corpus.remove_project(self.corpus_project)
-        # if self.main_window.corpus is not None:
-        #
-        pass
-        # self.corpus_client.remove_project(self.dbproject)
 
 
 class ClassificationObjectContextMenu(ContextMenu):
