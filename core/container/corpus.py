@@ -60,11 +60,10 @@ class Corpus(QObject, IHasName):
                 t_exp_names = [e.name for e in self.template.experiments]
                 t_exp_unique_ids = [e.unique_id for e in self.template.experiments]
 
-                print(merge_behaviour)
                 template_dict = self.template.get_template(segm = True, voc = True,
                                                       ann = True, scripts = False,
                                                       experiment = True, pipeline=True)
-                print(template_dict)
+
                 if merge_behaviour == self.MERGE_BEHAVIOUR_DELETE_DELETE:
                     to_remove = [e for e in project.experiments if e.name in t_exp_names or e.unique_id in t_exp_unique_ids]
                     for t in to_remove:

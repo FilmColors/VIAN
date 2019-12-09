@@ -217,7 +217,7 @@ class EDialogWidget(QDialog):
 
     def on_help(self):
         if self.help_path is not None:
-            webbrowser.open("file://" + os.path.abspath(self.help_path))
+            webbrowser.open(self.help_path)
 
 
 class EGraphicsView(QGraphicsView):

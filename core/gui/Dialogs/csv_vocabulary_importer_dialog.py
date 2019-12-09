@@ -10,7 +10,7 @@ from core.gui.ewidgetbase import EDialogWidget
 
 class CSVVocabularyImportDialog(EDialogWidget):
     def __init__(self, parent, project):
-        super(CSVVocabularyImportDialog, self).__init__(parent, parent, "_docs/build/html/step_by_step/project_management/create_project.html")
+        super(CSVVocabularyImportDialog, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/project_management/create_project.html")
         path = os.path.abspath("qt_ui/DialogCSVVocabularyImporter.ui")
         uic.loadUi(path, self)
         self.project = project

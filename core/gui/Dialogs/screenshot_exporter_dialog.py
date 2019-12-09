@@ -9,7 +9,7 @@ from core.gui.ewidgetbase import EDialogWidget
 
 class DialogScreenshotExporter(EDialogWidget):
     def __init__(self, parent, manager):
-        super(DialogScreenshotExporter, self).__init__(parent, parent, "_docs/build/html/step_by_step/screenshots/export_screenshots.html")
+        super(DialogScreenshotExporter, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/screenshots/export_screenshots.html")
         path = os.path.abspath("qt_ui/DialogScreenshotExport.ui")
         uic.loadUi(path, self)
         self.manager = manager

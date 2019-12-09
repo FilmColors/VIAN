@@ -188,7 +188,7 @@ class IMDBFinder(QMainWindow):
             print(e)
 
     def on_help(self):
-        open_web_browser(os.path.abspath("_docs/build/html/plugins/imdb_finder/imdb_finder.html"))
+        open_web_browser("https://www.vian.app/static/manual/plugins/imdb_finder/imdb_finder.html")
 
 
 class IMDBBEntry(QWidget):

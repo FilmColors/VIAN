@@ -52,7 +52,7 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
 
 class DialogAutoScreenshot(EDialogWidget):
     def __init__(self, parent, project):
-        super(DialogAutoScreenshot, self).__init__(parent, parent, "_docs/build/html/step_by_step/segmentation/auto_segmentation.html")
+        super(DialogAutoScreenshot, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/segmentation/auto_segmentation.html")
         path = os.path.abspath("qt_ui/DialogAutoScreenshot.ui")
         uic.loadUi(path, self)
 

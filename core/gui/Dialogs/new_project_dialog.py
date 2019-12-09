@@ -13,7 +13,7 @@ from core.data.computation import images_to_movie
 
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path = "", elan_segmentation = None, add_to_current_corpus = False):
-        super(NewProjectDialog, self).__init__(parent, parent, "_docs/build/html/step_by_step/project_management/create_project.html")
+        super(NewProjectDialog, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/project_management/create_project.html")
         path = os.path.abspath("qt_ui/DialogNewProject.ui")
         uic.loadUi(path, self)
         self.settings = settings

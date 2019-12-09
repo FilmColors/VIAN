@@ -14,7 +14,7 @@ from core.container.project import VIANProject
 
 class DialogScreenshotImport(EDialogWidget):
     def __init__(self, parent, paths = None):
-        super(DialogScreenshotImport, self).__init__(parent, parent, "_docs/build/html/step_by_step/screenshots/export_screenshots.html")
+        super(DialogScreenshotImport, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/screenshots/export_screenshots.html")
         path = os.path.abspath("qt_ui/DialogImportScreenshots.ui")
         uic.loadUi(path, self)
         self.files = []
