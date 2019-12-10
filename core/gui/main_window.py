@@ -659,7 +659,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #region WidgetCreation
 
     def show_welcome(self):
-        open_web_browser(os.path.abspath("_docs/build/html/whats_new/latest.html"))
+        open_web_browser("https://www.vian.app/static/manual/whats_new/latest.html")
         self.settings.SHOW_WELCOME = False
         self.settings.store(self.dock_widgets)
 
@@ -1705,7 +1705,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.update()
 
     def open_documentation(self):
-        webbrowser.open("file://" + os.path.abspath("_docs/build/html/index.html"))
+        webbrowser.open("https://www.vian.app/static/manual/index.html")
 
     def on_about(self):
         about = ""

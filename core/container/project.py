@@ -750,7 +750,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 l = s
             if s.get_type() == NODE_SCRIPT:
                 self.set_current_script(s)
-            if not isinstance(s, VIANProject):
+            if hasattr(s, "onSelectedChanged"):
                 s.onSelectedChanged.emit(True)
 
         if l is not None:
@@ -1337,7 +1337,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         return self
 
-    def get_template(self, segm = False, voc = False, ann = False, scripts = False, experiment = False, pipeline=True):
+    def get_template(self, segm = True, voc = True, ann = True, scripts = False, experiment = True, pipeline=True):
         """
         Returns a template dictionary from this projects.
 
@@ -1396,10 +1396,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
         Loads a template from agiven path and applies it to the project.
 
         :param template_path: Path to the json
-        :return: None
+        :param template: a template dict as returned from VIANProject.get_template()
+        :param export_scripts: If the PipelineScripts should be exported into a py file
+        :param merge: if the new template should be merge into an already existing one
+        :param merge_drop: if data which is not present in the new template during merge should be dropped
+        :return: merge results, a list of printable string describing the merge changes,
+        returns an empty list if merge has been false
         """
         merge_results = []
-
+        log_info("Applying Template")
         if template is None and template_path is None:
             raise ValueError("Either template_path or template has to be given.")
         if template_path is not None and template is None:
@@ -1462,6 +1467,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         self.add_pipeline_script(new)
                         with open(pipeline.path, "w") as f:
                             f.write(pipeline.script)
+                        merge_results.append(("Added PipelineScript", new.name))
                     self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
                 except TypeError as e:
                     pass
@@ -1479,8 +1485,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         try:
                             pipeline = PipelineScript().deserialize(q, loc)
                             temp_propj.add_pipeline_script(pipeline)
-                        except Exception as e:
-                            raise e
+                        except Exception as exception:
+                            raise exception
                     for v in template['vocabularies']:
                         voc = Vocabulary("voc").deserialize(v, temp_propj)
                         temp_propj.add_vocabulary(voc)
@@ -1490,11 +1496,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
                     exp = self.get_by_id(new.unique_id)
                     if exp is not None and isinstance(exp, Experiment):
+                        merge_results.append(("Merged Experiment", exp.name))
                         t = merge_experiment(exp, new, drop=merge_drop)
                         merge_results.extend(t)
                     else:
                         new = Experiment().deserialize(e, self)
                         self.add_experiment(new)
+                        merge_results.append(("Added Experiment", new.name))
             else:
                 new = Experiment().deserialize(e, self)
                 self.add_experiment(new)
@@ -1554,27 +1562,27 @@ class VIANProject(QObject, IHasName, IClassifiable):
         name = voc.name
         duplicate = None
 
-        while(not_ok):
-            has_duplicate = False
-            for v in self.vocabularies:
-                if v.name == name:
-                    name = voc.name + "_" + str(counter).zfill(2)
-                    has_duplicate = True
-                    counter += 1
-                    duplicate = v
-                    break
-            if not has_duplicate:
-                not_ok = False
-                break
-            else:
-                # If the Vocabulares are duplicates, we might want to replace the IDS in the Caller,
-                # Therefore we create a replacement table
-                x = [w.name for w in voc.words_plain]
-                y = [w.name for w in duplicate.words_plain]
-
-                if set(x) == set(y):
-                    print("Vocabulary is duplicate")
-                    return duplicate
+        # while(not_ok):
+        #     has_duplicate = False
+        #     for v in self.vocabularies:
+        #     #     if v.name == name:
+        #     #         name = voc.name + "_" + str(counter).zfill(2)
+        #     #         has_duplicate = True
+        #     #         counter += 1
+        #     #         duplicate = v
+        #     #         break
+        #     # if not has_duplicate:
+        #     #     not_ok = False
+        #     #     break
+        #     # else:
+        #         # If the Vocabulares are duplicates, we might want to replace the IDS in the Caller,
+        #         # Therefore we create a replacement table
+        #         x = [w.name for w in voc.words_plain]
+        #         y = [w.name for w in duplicate.words_plain]
+        #
+        #         if set(x) == set(y):
+        #             print("Vocabulary is duplicate")
+        #             return duplicate
 
         voc.name = name
         voc.set_project(self)
@@ -1610,7 +1618,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.onVocabularyRemoved.emit(voc)
         self.dispatch_changed()
 
-    def copy_vocabulary(self, voc, add_to_global = True):
+    def copy_vocabulary(self, voc, add_to_global = True, replace_uuid = False):
         """
         Copies an existing Vocabulary
 
@@ -1620,6 +1628,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
         """
         self.inhibit_dispatch = True
         new = self.import_vocabulary(None, add_to_global, serialization=voc.serialize())
+
+        if replace_uuid:
+            new.uuid = str(uuid4())
+            for w in new.words_plain:
+                w.uuid = str(uuid4())
         self.inhibit_dispatch = False
         return new
 

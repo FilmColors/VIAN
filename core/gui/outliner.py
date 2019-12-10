@@ -125,14 +125,12 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
         if self.corpus is not None:
             to_add = []
-            print("Keys", self.corpus.projects_loaded.items())
             for uuid, p in self.corpus.projects_loaded.items():
                 if self.project() is not None:
                     if self.project().uuid != p.uuid:
                         to_add.append(p)
                 else:
                     to_add.append(p)
-            print("To Append", to_add)
             for p in sorted(to_add, key= lambda x:x.name):
                 itm = CorpusProjectOutlinerItem(self.corpus_root, 0, p)
                 self.item_list.append(itm)
@@ -410,7 +408,8 @@ class OutlinerTreeWidget(QTreeWidget):
             context_menu = CorpusProjectContextMenu(self.outliner.main_window,
                                                     self.mapToGlobal(QMouseEvent.pos()),
                                                     self.project,
-                                                    self.selectedItems()[0].get_container() )
+                                                    self.selectedItems()[0].get_container(),
+                                                    self.outliner.corpus)
         else:
             containers = []
             for item in self.selectedItems():

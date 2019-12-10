@@ -217,7 +217,7 @@ class EDialogWidget(QDialog):
 
     def on_help(self):
         if self.help_path is not None:
-            webbrowser.open("file://" + os.path.abspath(self.help_path))
+            webbrowser.open(self.help_path)
 
 
 class EGraphicsView(QGraphicsView):
@@ -598,6 +598,18 @@ class EditableListWidget(QWidget):
         self.btn_Add.clicked.connect(self.on_add)
         self.btn_Remove.clicked.connect(self.on_remove)
 
+    def mousePressEvent(self, a0: QMouseEvent) -> None:
+        if a0.button() == Qt.RightButton:
+
+            def remove_all(itms):
+                for r in itms:
+                    self.remove_item(r)
+
+            menu = QMenu(self)
+            a_export = menu.addAction("Remove")
+            a_export.triggered.connect(partial(remove_all,  [s.name for s in self.list.selectedItems()]))
+            menu.popup(self.mapToGlobal(a0.pos()))
+
     def add_item(self, name, meta) -> EditableListWidgetItem:
         n = name
         c = 0
@@ -614,7 +626,8 @@ class EditableListWidget(QWidget):
     def remove_item(self, name):
         if name in self.item_index:
             itm = self.item_index[name]
-            self.items.remove(itm)
+            if itm in self.items:
+                self.items.remove(itm)
             self.list.takeItem(self.list.indexFromItem(itm).row())
             self.onItemDeleted.emit(itm.name, itm)
 
@@ -632,8 +645,8 @@ class EditableListWidget(QWidget):
     def on_remove(self):
         for idx, itm in zip(self.list.selectedIndexes(), self.list.selectedItems()):
             self.list.takeItem(idx.row())
-            self.onItemDeleted.emit(itm.name, itm)
             self.items.remove(itm)
+            self.onItemDeleted.emit(itm.name, itm)
 
 
 class VIANMoveableGraphicsItemSignals(QObject):
