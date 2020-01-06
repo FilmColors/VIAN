@@ -450,6 +450,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.selected = []
         self.selection_frames = []
 
+        # The scrollbar location before clearing the scene
+        self.current_y = 0
+
         self.write_lock = Lock()
 
         self.selected = []
@@ -599,9 +602,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         if self.project.get_main_segmentation() is None \
                 or len(self.project.get_main_segmentation().segments) == 0:
+
             self.center_images()
+        else:
+            print("Current Location", self.current_y, self.verticalScrollBar().value())
+            self.verticalScrollBar().setValue(self.current_y)
+
 
     def clear_manager(self):
+        self.current_y = self.verticalScrollBar().value()
         self.clear_scr_captions()
 
         for img in self.images_plain:
@@ -619,6 +628,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if self.loading_text is not None:
             self.scene.removeItem(self.loading_text)
         self.images_segmentation = []
+
 
     def arrange_images(self):
         self.clear_captions()
