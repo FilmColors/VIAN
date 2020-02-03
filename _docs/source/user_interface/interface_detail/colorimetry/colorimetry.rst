@@ -18,12 +18,12 @@ Indicated Information:
 - **2**: The **Space Palette**-Visualization of the current Frame.
 
 .. image:: colorimetry_palette_7.png
-   :scale: 55%
+   :width: 47%
    :align: left
    :alt: map to buried treasure
    
 .. image:: colorimetry_palette_1_7.png
-   :scale: 55%
+   :width: 47%
    :align: right
    :alt: map to buried treasure
    
