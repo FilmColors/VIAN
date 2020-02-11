@@ -87,6 +87,7 @@ class AnnotationType(Enum):
 
 class ScreenshotNamingConventionOptions(Enum):
     empty = (None, 0)
+
     # Screenshot Attributes
     Screenshot_Title = ("Screenshot", "title")
     Scene_ID = ("Screenshot", "scene_id")

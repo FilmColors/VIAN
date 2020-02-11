@@ -331,9 +331,15 @@ def build_file_name(naming, screenshot, movie_descriptor):
             object_attr = value[1]
 
             if object_type == "Screenshot":
-                if object_attr == "screenshot_group":
-                    file_name = file_name[:-1]
-                file_name += str(getattr(screenshot, object_attr))
+
+                # This removed the underline for the ERC Screenshot Groups, but is unpredictable for other users.
+                # if object_attr == "screenshot_group":
+                #     file_name = file_name[:-1]
+
+                attr = getattr(screenshot, object_attr)
+                if isinstance(attr, ScreenshotGroup):
+                    attr = attr.get_name()
+                file_name += str(attr)
 
             if object_type == "Movie":
                 file_name += str(getattr(movie_descriptor, object_attr))
