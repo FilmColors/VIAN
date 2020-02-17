@@ -32,6 +32,7 @@ To create a new Segmentation, do the following
    * :ref:`new_project`
    * :ref:`import_elan_projects`
    * :ref:`changing_movie_paths`
+   * :ref:`create_new_segmentation`
 
 
 * :ref:`genindex`
