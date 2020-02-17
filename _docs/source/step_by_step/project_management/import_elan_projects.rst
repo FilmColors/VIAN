@@ -11,7 +11,7 @@ To import an existing ELAN Project, do the following:
 3. After the Import has finished, right click to the MovieDescriptor Item in the *Outliner*.
 4. Click on *Set Movie Path* and choose the target Movie in the File Dialog.
 
-.. figure:: elan_project.png
+.. figure:: set_movie_path.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
