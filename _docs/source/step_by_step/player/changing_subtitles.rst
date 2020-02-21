@@ -22,6 +22,7 @@ Change the Subtitles as follows:
 .. seealso::
 
    * :ref:`player`
+   * :ref:`video_player`
 
 
 * :ref:`genindex`

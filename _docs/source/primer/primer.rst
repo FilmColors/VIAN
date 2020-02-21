@@ -28,6 +28,21 @@ You can specifiy the location of your projects, the default hereby is: */Documen
 Segmentation
 ============
 
+A typical pre-step in annotating films is to divide the film into coherent sub-units, or segments (what «coherent» means, depends on your research question: coherent regarding narratology, color, length etc.). 
+Typically, you would further take a few representative screenshots for each segment, that can be analysed regarding their color properties (see **Color Analysis** further down on this page for more information).
+
+.. seealso::
+
+   Video-Tutorials:
+
+   * :ref:`create_new_segmentation`
+   * :ref:`rename_segmentation`
+   * :ref:`create_auto-segmentation`
+
+   Other Wiki-Pages:
+
+   * :ref:`segmentation`
+
 Experiments
 ===========
 
