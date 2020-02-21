@@ -46,6 +46,12 @@ Typically, you would further take a few representative screenshots for each segm
 Experiments
 ===========
 
+.. seealso::
+
+   Other Wiki-Pages:
+
+   * :ref:`experiments`
+
 Classification
 ==============
 
@@ -55,6 +61,16 @@ Classification
    :alt: map to buried treasure
 
    The Player Persepctive.
+
+.. seealso::
+
+   Video-Tutorials:
+
+   * :ref:`run_classification`
+
+   Other Wiki-Pages:
+
+   * :ref:`classification`
 
 Color Analysis
 ==============
