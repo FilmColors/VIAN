@@ -494,6 +494,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.check_finished()
         return self
 
+
 with open(os.path.join(_VIAN_ROOT, "data/default_pipeline.py"), "r") as f:
     _PIPELINE_TEMPLATE = f.read()
 

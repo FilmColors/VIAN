@@ -569,14 +569,6 @@ class MainWindow(QtWidgets.QMainWindow):
             except:
                 pass
 
-    def print_time(self, segment):
-        log_info(segment)
-
-    def test_function(self):
-        from core.data.io.web_annotation import WebAnnotationDevice
-        WebAnnotationDevice().export("test.json", self.project, self.settings.CONTRIBUTOR, self.version)
-        log_debug("Test Function", self.settings.CONTRIBUTOR)
-
     def toggle_colormetry(self):
         log_debug("toggle colormetry", self.project.movie_descriptor.fps / 2)
         if self.colormetry_running is False:
@@ -725,8 +717,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.player_dock_widget.activateWindow()
         if self.drawing_overlay is not None:
             self.check_overlay_visibility()
-
-#OLD CODE
 
     def create_annotation_toolbar(self):
         if self.annotation_toolbar is None:
@@ -989,10 +979,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_overlay.synchronize_transforms()
         self.update()
 
-    # def closeEvent(self, *args, **kwargs):
-    #     exit = self.on_exit()
-    #     if not exit:
-    #         self.event().ignoreEvent()
     def closeEvent(self, a0: QtGui.QCloseEvent):
         exit = self.on_exit()
         if not exit:
@@ -1008,7 +994,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.timeline.is_scaling = True
         elif event.key() == Qt.Key_Shift:
             pass
-            # self.timeline.timeline.is_multi_selecting = True
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_Control:
@@ -1016,7 +1001,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.timeline.is_scaling = False
         elif event.key() == Qt.Key_Shift:
             pass
-            # self.timeline.timeline.is_multi_selecting = False
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -2159,33 +2143,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #endregion
 
-    #region Corpus
-    def on_create_corpus(self):
-        pass
-
-    @pyqtSlot(object)
-    def on_corpus_created(self,  corpus):
-        pass
-
-    def open_local_corpus(self):
-        try:
-            path = QFileDialog.getOpenFileName(self, directory=self.settings.DIR_CORPORA, filter="*.vian_corpus")[0]
-            self.corpus_client.on_connect_local(path)
-            self.corpus_client_toolbar.show()
-        except Exception as e:
-            log_error(e)
-
-    def open_remote_corpus(self):
-        pass
-
-    def connect_to_corpus(self, corpus):
-        pass
-
-    def disconnect_to_corpus(self, corpus):
-        pass
-
-    #endregion
-
     def set_ui_enabled(self, state):
         self.actionSave.setDisabled(not state)
         self.actionSaveAs.setDisabled(not state)
@@ -2345,7 +2302,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for o in self.i_project_notify_reciever:
                 o.on_changed(self.project, item)
 
-    pyqtSlot(object, object)
+    @pyqtSlot(object, object)
     def dispatch_on_selected(self, sender, selected):
         if self.project is None:
             return
@@ -2358,6 +2315,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # ttime = time.time()
             o.on_selected(sender, selected)
             # print(sender, o.__class__.__name__, time.time() - ttime)
+
 
     @pyqtSlot(int)
     def dispatch_on_timestep_update(self, time):

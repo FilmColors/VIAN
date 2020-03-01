@@ -99,7 +99,6 @@ class AutoScreenshotJob(IConcurrentJob):
         movie_path = args[0]
         project = args[1]
         frame_pos = auto_screenshot(project, self.method, self.distribution, self.n, self.segmentation, self.hdf5_manager)
-        # frame_pos = args[1]
 
         cap = cv2.VideoCapture(movie_path)
         fps = cap.get(cv2.CAP_PROP_FPS)

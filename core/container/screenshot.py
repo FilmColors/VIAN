@@ -107,13 +107,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         if self.preview_cache is None:
             return numpy_to_qt_image(self.img_movie)
         return self.preview_cache
-        # retur nnumpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
-        # if (self.preview_cache is None or self.preview_cache[0] != scale) and self.img_movie.shape[0] > 100:
-        #     self.preview_cache = (scale, numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC)))
-        #
-        #     return self.preview_cache[1]
-        # else:
-        #     return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
     def set_classification_object(self, clobj, recompute = False, hdf5_cache=None):
         if not recompute and clobj.unique_id in self.masked_cache:

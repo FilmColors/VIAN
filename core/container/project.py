@@ -847,7 +847,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.onAnnotationLayerRemoved.emit(layer)
         self.dispatch_changed()
 
-
     def remove_annotation(self, annotation):
         """
         Removes an annotation from any annotation layer it belongs to.
