@@ -47,7 +47,6 @@ class AnnotationToolbar(EToolBar):
         self.action_ellipse.triggered.connect(self.on_ellipse)
         self.action_text.triggered.connect(self.on_text)
         self.action_image.triggered.connect(self.on_image)
-        self.action_test.triggered.connect(self.main_window.test_function)
         self.action_freehand.triggered.connect(self.on_freehand)
 
         self.current_color = (0,0,0)
@@ -75,9 +74,6 @@ class AnnotationToolbar(EToolBar):
 
     def on_freehand(self):
         freehand = self.drawing_widget.create_freehand(self.current_color, self.current_line_thickness)
-
-    def on_arrow(self):
-        self.main_window.test_function()
 
     @pyqtSlot(str, int, int, tuple)
     def on_options_changed(self, font_family, font_size, line, color):
