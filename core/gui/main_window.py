@@ -20,7 +20,7 @@ from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
-from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
+
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
@@ -44,8 +44,8 @@ from core.gui.inspector import Inspector
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
-from core.gui.player_vlc import Player_VLC, PlayerDockWidget  # , Player_Qt
-from core.gui.quick_annotation import QuickAnnotationDock
+from core.gui.player_vlc import Player_VLC, PlayerDockWidget
+
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline import TimelineContainer
@@ -55,11 +55,12 @@ from core.gui.corpus_widget import CorpusDockWidget
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-from core.visualizer.visualizer import VIANVisualizer2
+
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses
-from core.gui.toolbar_widgets import WidgetsToolbar
+from core.gui.toolbar import WidgetsToolbar
 from core.data.log import log_warning, log_debug, log_info, log_error
+
 try:
     import keras.backend as K
     from core.analysis.semantic_segmentation import *
@@ -71,10 +72,10 @@ except Exception as e:
     log_info(e)
     KERAS_AVAILABLE = False
 
-
 VERSION = "0.8.0"
 
 PROFILE = False
+
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
@@ -198,18 +199,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.script_editor = None
         self.corpus_widget = None
 
-        self.corpus_visualizer = VIANVisualizer2(self)
-        self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
-
-        self.corpus_visualizer_dock = EDockWidget(self, False)
-        self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
-        self.corpus_visualizer_dock.setWindowTitle("Corpus Visualizer Query")
-        self.corpus_visualizer_result_dock = EDockWidget(self, False)
-        self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
-        self.corpus_visualizer_result_dock.setWindowTitle("Corpus Visualizer Results")
+        # self.corpus_visualizer = VIANVisualizer2(self)
+        # self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
+        #
+        # self.corpus_visualizer_dock = EDockWidget(self, False)
+        # self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
+        # self.corpus_visualizer_dock.setWindowTitle("Corpus Visualizer Query")
+        # self.corpus_visualizer_result_dock = EDockWidget(self, False)
+        # self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
+        # self.corpus_visualizer_result_dock.setWindowTitle("Corpus Visualizer Results")
 
         self.progress_popup = None
-        self.quick_annotation_dock = None
+
         self.colorimetry_live = None
         self.query_widget = None
 
@@ -260,7 +261,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_matrix()
         self.create_query_widget()
         self.create_analysis_results_widget()
-        self.create_quick_annotation_dock()
+
         self.create_colorimetry_live()
         self.create_experiment_editor()
         self.create_corpus_widget()
@@ -922,16 +923,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.analysis_results_widget_dock.raise_()
                 self.analysis_results_widget_dock.activateWindow()
 
-    def create_quick_annotation_dock(self):
-        if self.quick_annotation_dock is None:
-            self.quick_annotation_dock = QuickAnnotationDock(self)
-            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.quick_annotation_dock, Qt.Vertical)
-        else:
-            if not self.quick_annotation_dock.visibleRegion().isEmpty():
-                self.quick_annotation_dock.hide()
-            else:
-                self.quick_annotation_dock.show()
-
     def create_colorimetry_live(self):
         if self.colorimetry_live is None:
             self.colorimetry_live = ColorimetryLiveWidget(self)
@@ -1465,12 +1456,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.experiment_dock, self.vocabulary_manager)
             # self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
-        elif perspective == Perspective.QuickAnnotation:
-            self.player_dock_widget.show()
-            self.quick_annotation_dock.show()
-
-            self.addDockWidget(Qt.LeftDockWidgetArea,self.player_dock_widget)
-            self.addDockWidget(Qt.BottomDockWidgetArea, self.quick_annotation_dock)
 
         elif perspective == Perspective.Query:
             self.timeline.show()
@@ -1490,11 +1475,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshot_toolbar.show()
             self.screenshots_manager_dock.raise_()
 
-        elif perspective == Perspective.CorpusVisualizer:
-            self.corpus_visualizer_result_dock.show()
-            self.corpus_visualizer_dock.show()
-            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
+        # elif perspective == Perspective.CorpusVisualizer:
+        #     self.corpus_visualizer_result_dock.show()
+        #     self.corpus_visualizer_dock.show()
+        #     self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
+        #     self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
 
         elif perspective == Perspective.WebApp:
             self.timeline.show()
@@ -1540,14 +1525,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
         self.annotation_options.hide()
-        self.corpus_visualizer_dock.hide()
-        self.corpus_visualizer_result_dock.hide()
+        # self.corpus_visualizer_dock.hide()
+        # self.corpus_visualizer_result_dock.hide()
 
         if self.facial_identification_dock is not None:
             self.facial_identification_dock.hide()
 
         self.experiment_dock.hide()
-        self.quick_annotation_dock.hide()
+
         self.colorimetry_live.hide()
 
     def set_default_dock_sizes(self, perspective):
@@ -1738,18 +1723,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_reload_movie(self):
         if self.project is not None:
             self.player.on_loaded(self.project)
-
-    def on_start_visualizer(self):
-        self.switch_perspective(Perspective.CorpusVisualizer)
-        # try:
-        #     visualizer = VIANVisualizer2(self)
-        #     visualizer.show()
-        #     self.open_dialogs.append(visualizer)
-        # except Exception as e:
-        #     print(e)
-
-    def on_start_visualizer_legacy(self):
-        pass
 
     def on_export_screenshots(self):
         dialog = DialogScreenshotExporter(self, self.screenshots_manager)
@@ -2065,8 +2038,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def import_segmentation(self, path=None):
-        dialog = SegmentationImporterDialog(self, self.project, self)
-        dialog.show()
+        pass
 
     def import_webapp(self):
         if self.project is None:
@@ -2323,9 +2295,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.timeline.timeline.set_colormetry_progress(0.0)
         else:
             self.on_colormetry_finished(None)
-
-        if self.current_perspective == Perspective.CorpusVisualizer.name:
-            self.switch_perspective(Perspective.Segmentation)
 
         log_info("\n#### --- Loaded Project --- ####")
         log_info("Folder:".rjust(15), self.project.folder)

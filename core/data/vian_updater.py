@@ -3,7 +3,7 @@ import glob
 from random import randint
 import sys
 import subprocess
-import tempfile as tmp
+
 from shutil import copytree, move
 import shutil
 from core.data.interfaces import IConcurrentJob
@@ -14,8 +14,7 @@ from core.corpus.client.corpus_client import get_vian_version, download_vian_upd
 import requests, zipfile, io
 import os
 
-import urllib.request, urllib.error, urllib.parse
-
+#TODO MS - 0.9.0
 class VianUpdater(IConcurrentJob):
     def __init__(self, main_window, current_version):
         v = current_version.split(".")

@@ -13,7 +13,6 @@ from core.corpus.client.corpus_client import CorpusClient
 from functools import partial
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import *
-from core.gui.tools import StringList
 import json
 import socket
 import threading

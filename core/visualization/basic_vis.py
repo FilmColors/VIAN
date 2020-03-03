@@ -7,7 +7,7 @@ import numpy as np
 from core.data.computation import get_heatmap_value, ms_to_string, overlap_rect
 from core.gui.ewidgetbase import EGraphicsView
 from core.analysis.colorimetry.hilbert import create_hilbert_transform
-from core.gui.tools import ExportImageDialog
+from core.gui.image_export_dialog import ExportImageDialog
 
 class IVIANVisualization():
     def __init__(self, naming_fields = None):

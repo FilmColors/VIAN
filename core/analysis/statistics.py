@@ -1,6 +1,5 @@
 import numpy as np
-from sklearn.cluster.hierarchical import AgglomerativeClustering
-
+from sklearn.cluster import AgglomerativeClustering
 
 def classification_clustering(X, n_clusters = 1):
     X = tfidf(X)

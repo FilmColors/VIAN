@@ -1,4 +1,4 @@
-from sklearn.cluster.hierarchical import AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 
 from core.gui.ewidgetbase import *

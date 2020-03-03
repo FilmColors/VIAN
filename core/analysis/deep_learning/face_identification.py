@@ -11,7 +11,7 @@ import keras.backend as K
 from core.analysis.import_tensortflow import tf
 import keras.backend.tensorflow_backend as KTF
 
-from sklearn.cluster.hierarchical import AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering
 
 from core.analysis.deep_learning.keras_callback import VIANKerasCallback
 from core.data.computation import overlap_rect, contains_rect

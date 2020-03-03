@@ -19,6 +19,7 @@ from core.data.computation import create_icon
 if TYPE_CHECKING:
     from core.gui.main_window import MainWindow
 
+
 class WidgetsToolbar(EToolBar):
     def __init__(self, main_window):
         super(WidgetsToolbar, self).__init__(main_window, "Windows Toolbar")
