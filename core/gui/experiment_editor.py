@@ -12,8 +12,6 @@ from core.container.project import SEGMENT, SCREENSHOT, ClassificationObject, \
 from core.analysis.deep_learning.labels import VIAN_SEGMENTATION_DATASETS
 
 
-
-
 TGT_ENTRIES = [ 'All',
                 "All Segments",
                 "All Annotations" ,
@@ -25,12 +23,19 @@ TGT_ENTRIES = [ 'All',
                 "All Annotations of <Create Annotation Layer",
                 "All Screenshots of <Create Screenshots Group>"]
 
+
 class ExperimentEditorDock(EDockWidget):
     def __init__(self, main_window):
         super(ExperimentEditorDock, self).__init__(main_window, limit_size=False)
         self.experiment_editor = ExperimentEditor(main_window)
         self.setWidget(self.experiment_editor)
         self.setWindowTitle("Experiment Overview")
+        self.a_help = self.inner.menuBar().addAction("Help")
+        self.a_help.triggered.connect(self.on_help)
+
+    def on_help(self):
+        import webbrowser
+        webbrowser.open("http://ercwebapp.westeurope.cloudapp.azure.com/static/manual/step_by_step/step_by_step.html")
 
 
 class ExperimentEditor(QWidget, IProjectChangeNotify):
@@ -56,6 +61,14 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         for ds in VIAN_SEGMENTATION_DATASETS:
             self.comboBox_Dataset.addItem(ds[0])
 
+        self.splitter = QSplitter(self)
+
+        self.splitter.addWidget(self.widget1)
+        self.splitter.addWidget(self.widget2)
+        self.splitter.addWidget(self.widget3)
+        self.splitter.addWidget(self.widget4)
+
+        self.tab_3.layout().addWidget(self.splitter)
 
         # This contains all current option of the ComboBox Target Container
         self.target_container_options = []

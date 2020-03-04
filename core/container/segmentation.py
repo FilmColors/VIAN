@@ -5,6 +5,7 @@ from core.container.container_interfaces import IProjectContainer, IHasName, ISe
 from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
 
+
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     """
     :var name: The Name of the Segmentation
@@ -22,24 +23,28 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         IProjectContainer.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         self.name = name
+
         if segments is None:
             segments = []
+
         self.segments = segments
-        self.timeline_visibility = True
+
         self.notes = ""
         self.is_main_segmentation = False
+
+        # Timeline
+        self.timeline_visibility = True
         self.strip_height = -1
 
         for s in self.segments:
             s.segmentation = self
 
-    def get_segmentation_Id_list(self):
-        if self.segments is not None and len(self.segments) > 0:
-            return (str(s.ID) for s in self.segments)
-        else:
-            return None
-
     def get_segment_of_time(self, time_ms):
+        """
+        Returns a Segment containing the given time ms, if none exists returns None
+        :param time_ms:
+        :return:
+        """
         for s in self.segments:
             if s.get_start() <= time_ms < s.get_end():
                 return s
@@ -147,6 +152,13 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.onSegmentDeleted.emit(segment)
 
     def cut_segment(self, segm, time):
+        """
+        Cuts one segment at given time into two different segments
+
+        :param segm: The Segment to cut
+        :param time: the time to cut the segment (absolute)
+        :return: None
+        """
         if segm in self.segments:
             old_end = segm.get_end()
             segm.end = time
@@ -156,6 +168,12 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             self.dispatch_on_changed(item=self)
 
     def merge_segments(self, a, b):
+        """
+        Merges two segments into one
+        :param a: The first segment
+        :param b: the second segment
+        :return:
+        """
         if abs(a.ID - b.ID) <= 1:
             if a.ID < b.ID:
                 start = a.get_start()
@@ -188,12 +206,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.segments = sorted(self.segments, key=lambda x: x.start)
         for i, s in enumerate(self.segments):
             s.ID = i + 1
-
-    def get_segment(self, time):
-        for s in self.segments:
-            if s.start < time < s.end:
-                return s
-        return None
 
     def remove_unreal_segments(self, length = 1):
         for s in self.segments:

@@ -199,7 +199,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.dispatch_on_changed(item=self)
 
     def update_scene_id(self, segmentation):
-        segment = segmentation.get_segment(self.movie_timestamp)
+        segment = segmentation.get_segment_of_time(self.movie_timestamp)
         if segment is not None:
             self.scene_id = segment.ID
         return segment

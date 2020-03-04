@@ -382,8 +382,6 @@ def compare_images(imageA, imageB):
 
 
 def find_time_of_screenshot(movie, shot, start, end):
-
-
     # import the necessary packages
     # construct the argument parse and parse the arguments
 
@@ -526,12 +524,6 @@ def labels_to_binary_mask(multi_mask, labels, as_bool = False):
         return result.astype(np.bool)
     return result
 
-# def labels_to_binary_mask2(multi_mask, labels):
-#     result = np.zeros_like(multi_mask, dtype=np.bool)
-#     idx = np.intersect1d(multi_mask, labels, return_indices=True)[1]
-#     idx = np.unravel_index(idx, multi_mask.shape)
-#     result[idx] = True
-#     return result
 
 def apply_mask(img, mask, indices, mask_size = 100):
     if len(mask.shape) > 2:
