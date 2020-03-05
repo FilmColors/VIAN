@@ -622,6 +622,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def on_experiment_changed(self, exp):
         self.update_widget()
 
+    def on_multi_experiment_changed(self, state):
+        """ If multi experiment is activated, a selector is shown, else the primary experiment is shown per default """
+        self.widgetExperimentSelector.setVisible(state)
+
 
 class CheckBoxGroupWidget(QWidget):
     def __init__(self, parent, name, n_columns = 3):

@@ -93,6 +93,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onMovieOpened = pyqtSignal(object)
     onProjectClosed = pyqtSignal()
 
+    onMultiExperimentChanged = pyqtSignal(bool)
     onSave = pyqtSignal()
 
     def __init__(self, loading_screen:QSplashScreen):
@@ -434,6 +435,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
         self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
+
+        self.onMultiExperimentChanged.connect(self.outliner.on_multi_experiment_changed)
+        self.onMultiExperimentChanged.connect(self.experiment_dock.experiment_editor.on_multi_experiment_changed)
+        self.onMultiExperimentChanged.connect(self.vocabulary_matrix.on_multi_experiment_changed)
+        self.onMultiExperimentChanged.emit(self.settings.MULTI_EXPERIMENTS)
 
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
@@ -1747,6 +1753,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if answer == QMessageBox.Yes:
                 self.on_save_project()
 
+
         dialog = NewProjectDialog(self, self.settings, movie_path,
                                   add_to_current_corpus=add_to_current_corpus)
         dialog.show()
@@ -1801,6 +1808,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onProjectChanged.connect(self.dispatch_on_changed)
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
         self.onProjectOpened.emit(self.project)
+
+        if len(self.project.experiments) == 0:
+            self.project.create_experiment("Default")
 
         dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
         dialog.set_movie(self.project.movie_descriptor)
@@ -1865,6 +1875,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onProjectChanged.connect(self.dispatch_on_changed)
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
 
+        if len(self.project.experiments) == 0:
+            self.project.create_experiment("Default")
+        
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False
         try:
@@ -2214,6 +2227,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         w = InfoPopup(self, text, loc)
         w.show()
+
+    @pyqtSlot(bool)
+    def on_multi_experiment_changed(self, state):
+        """ If multi experiment is activated, a selector is shown, else the primary experiment is shown per default """
+        self.actionCreateExperiment.setVisible(state)
+        self.onMultiExperimentChanged.emit(state)
+        # self.recreate_tree()
 
     #region IProjectChangedNotify
 

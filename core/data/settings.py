@@ -103,6 +103,8 @@ class UserSettings():
         self.DIR_VOCABULARIES = self.DIR_ROOT + "/vocabularies/"
         self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
 
+        self.MULTI_EXPERIMENTS = False
+
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
         if not os.path.isdir(self.DIR_ROOT):

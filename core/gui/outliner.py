@@ -37,6 +37,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.item_index = dict()
         self.visibilityChanged.connect(self.on_visibility_changed)
 
+        self._show_experiment = True
         self.show()
 
     def recreate_tree(self):
@@ -97,9 +98,10 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                     node_item = NodeScriptsNodeItem(script_item, j, n)
                     self.item_list.append(node_item)
 
-            self.experiment_group = ExperimentRootItem(self.project_item, 5)
-            for i, exp in enumerate(self.main_window.project.experiments):
-                self.add_experiment(exp)
+            if self._show_experiment:
+                self.experiment_group = ExperimentRootItem(self.project_item, 5)
+                for i, exp in enumerate(self.main_window.project.experiments):
+                    self.add_experiment(exp)
 
             # if not first_time:
             #     self.project_item.setExpanded(exp_p_item)
@@ -179,15 +181,18 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             self.item_index.pop(grp.get_id())
 
     def add_experiment(self, s):
-        experiment_item = ExperimentItem(self.experiment_group, 0, s)
-        self.item_list.append(experiment_item)
-        self.item_index[s.get_id()] = experiment_item
+        if self._show_experiment:
+            experiment_item = ExperimentItem(self.experiment_group, 0, s)
+            self.item_list.append(experiment_item)
+            self.item_index[s.get_id()] = experiment_item
+
 
     def remove_experiment(self, s):
-        if s.get_id() in self.item_index:
-            self.experiment_group.removeChild(self.item_index[s.get_id()])
-            self.item_list.remove(self.item_index[s.get_id()])
-            self.item_index.pop(s.get_id())
+        if self._show_experiment:
+            if s.get_id() in self.item_index:
+                self.experiment_group.removeChild(self.item_index[s.get_id()])
+                self.item_list.remove(self.item_index[s.get_id()])
+                self.item_index.pop(s.get_id())
 
     def add_analysis(self, s):
         if s.analysis_job_class not in self.analyses_roots:
@@ -298,6 +303,12 @@ class Outliner(EDockWidget, IProjectChangeNotify):
 
         self.tree.select(to_select, False)
         self.tree.selection_dispatch = True
+
+    @pyqtSlot(bool)
+    def on_multi_experiment_changed(self, state):
+        """ If multi experiment is activated, a selector is shown, else the primary experiment is shown per default """
+        self._show_experiment = state
+        self.recreate_tree()
 
     # def keyPressEvent(self, QKeyEvent):
     #     if QKeyEvent.key() == Qt.Key_Shift:

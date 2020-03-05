@@ -465,6 +465,9 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         if isinstance(item, IProjectContainer) and item.get_type() == EXPERIMENT or item.get_type() == CLASSIFICATION_OBJECT:
             self.update_ui()
 
+    def on_multi_experiment_changed(self, state):
+        """ If multi experiment is activated, a selector is shown, else the primary experiment is shown per default """
+        self.widgetSelector.setVisible(state)
 
 class ClassificationObjectItem(QTreeWidgetItem):
     def __init__(self, parent, obj):
