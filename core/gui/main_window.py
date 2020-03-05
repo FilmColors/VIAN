@@ -1877,7 +1877,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if len(self.project.experiments) == 0:
             self.project.create_experiment("Default")
-        
+
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False
         try:

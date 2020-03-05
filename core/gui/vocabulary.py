@@ -251,11 +251,11 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             dialog = VocabularyCompareDialog(self, to_check, to_apply, vocabularies_collection, self.finish_synchronize_from_project_to_library)
             dialog.show()
         else:
-            self.finish_synchronize_from_library_to_project(to_apply, [], vocabularies_collection)
+            self.finish_synchronize_from_project_to_library(to_apply, [], vocabularies_collection)
 
     def finish_synchronize_from_project_to_library(self, to_add, to_update, vocabularies_project):
         for v in to_add:
-            copy = self.main_window.project.vocabulary_collection.copy_vocabulary(v, add_to_global=False)
+            copy = self.main_window.project.copy_vocabulary(v, add_to_global=False)
             self.vocabulary_view.vocabulary_collection.add_vocabulary(copy)
         for v in to_update:
             vocabularies_project[v.uuid].update_vocabulary(v)
