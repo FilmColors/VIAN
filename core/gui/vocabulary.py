@@ -242,6 +242,10 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
         to_check = []
         for k, v in to_compare.items():
             if k in vocabularies_collection:
+                if vocabularies_collection[k].is_builtin:
+                    QMessageBox.warning(self, "Builtin Vocabularies can not be updated",
+                             "There already exists a built-in Vocabulary "+ vocabularies_collection[k].name +" in the Library, which may not be edited. ")
+                    continue
                 changes = compare_vocabularies(v, vocabularies_collection[k])
                 if len(changes) > 0:
                     to_check.append(dict(voc=v, changes=changes))
