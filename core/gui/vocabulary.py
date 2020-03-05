@@ -641,13 +641,14 @@ class VocabularyContextMenu(QMenu):
         if len(items) > 0:
             self.a_remove = self.addAction("Remove Selected")
             self.a_remove.triggered.connect(self.on_remove)
-        if len(items) == 1 and isinstance(items[0], Vocabulary):
+        if len(items) == 1 and isinstance(items[0], Vocabulary) and allow_create:
             self.a_copy = self.addAction("Copy Vocabulary")
             self.a_copy.triggered.connect(self.on_copy)
 
         if allow_create:
             self.a_new_voc = self.addAction("New Vocabulary")
             self.a_new_voc.triggered.connect(self.on_new_voc)
+
 
         self.popup(pos)
 
