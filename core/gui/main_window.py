@@ -1809,9 +1809,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
         self.onProjectOpened.emit(self.project)
 
+        #  Creating a Default Experiment and Classification Object in case the multi-experiment mode is turned off
         if len(self.project.experiments) == 0:
             exp = self.project.create_experiment("Default")
-            exp.create_class_object("Global")
+        if len(self.project.experiments[0].classification_objects) == 0:
+            self.project.experiments[0].create_class_object("Global")
 
         dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
         dialog.set_movie(self.project.movie_descriptor)
@@ -1876,9 +1878,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onProjectChanged.connect(self.dispatch_on_changed)
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
 
+        # Creating a Default Experiment and Classification Object in case the multi-experiment mode is turned off
         if len(self.project.experiments) == 0:
             exp = self.project.create_experiment("Default")
-            exp.create_class_object("Global")
+        if len(self.project.experiments[0].classification_objects) == 0:
+            self.project.experiments[0].create_class_object("Global")
 
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False
