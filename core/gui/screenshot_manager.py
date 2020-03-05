@@ -605,7 +605,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             self.center_images()
         else:
-            print("Current Location", self.current_y, self.verticalScrollBar().value())
+            # print("Current Location", self.current_y, self.verticalScrollBar().value())
             self.verticalScrollBar().setValue(self.current_y)
 
 
@@ -628,7 +628,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if self.loading_text is not None:
             self.scene.removeItem(self.loading_text)
         self.images_segmentation = []
-
 
     def arrange_images(self):
         self.clear_captions()

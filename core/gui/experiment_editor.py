@@ -98,6 +98,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
 
         self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
         self.lineEditSearchVoc.textChanged.connect(self.search_vocabulary)
+
         # Disable all controls that need a selected Classification Object:
         self.on_class_selection_changed()
 
@@ -457,9 +458,6 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         if not self.isVisible():
             return
 
-        # if item is None and not self.isVisible():
-        #     return
-        # else:
         if item is None:
             self.update_ui()
             return

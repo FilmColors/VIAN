@@ -40,6 +40,8 @@ from core.data.settings import UserSettings
 from core.gui.drop_image_container import DropImageContainer
 from core.gui.ewidgetbase import MultiItemTextInput
 from core.gui.corpus_widget import CorpusDockWidget, FilmographyWidget2
+
+from core.node_editor.node_editor import NodeEditor, NodeEditorDock
 DEBUG = True
 MAIN_WINDOW = None
 
@@ -49,7 +51,7 @@ class MW(QMainWindow):
         super(MW, self).__init__()
         self.setCentralWidget(FilmographyWidget2(self))
         self.dock_widgets = []
-        self.addDockWidget(Qt.LeftDockWidgetArea, CorpusDockWidget(self))
+        self.addDockWidget(Qt.LeftDockWidgetArea, NodeEditorDock(self))
 
 def set_style_sheet(app, path):
     style_sheet = open(os.path.abspath(path), 'r')

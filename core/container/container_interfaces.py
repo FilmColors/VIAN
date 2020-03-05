@@ -10,6 +10,7 @@ from core.data.log import log_error, log_warning
 _VIAN_ROOT = os.path.abspath(os.path.split( __file__)[0] + "/../..")
 print(_VIAN_ROOT,  os.path.split( __file__)[0] + "/../..")
 
+
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)
     onClassificationChanged = pyqtSignal(object)
