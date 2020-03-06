@@ -623,13 +623,6 @@ class VocabularyTreeView(QTreeView):
         self.apply_name_changed()
         super(VocabularyTreeView, self).editorDestroyed(*args, **kwargs)
 
-    #
-    # def keyReleaseEvent(self, QKeyEvent):
-    #     if QKeyEvent.key() == Qt.Key_Shift:
-    #         self.setSelectionMode(self.SingleSelection)
-    #     else:
-    #         QKeyEvent.ignore()
-
 
 class VocabularyContextMenu(QMenu):
     def __init__(self, parent, pos, items, voc_collection, item_model, manager, view, selected_indices, allow_create=True):
@@ -652,8 +645,6 @@ class VocabularyContextMenu(QMenu):
         if allow_create:
             self.a_new_voc = self.addAction("New Vocabulary")
             self.a_new_voc.triggered.connect(self.on_new_voc)
-
-
         self.popup(pos)
 
     def on_create_word(self):

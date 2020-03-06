@@ -293,7 +293,6 @@ class CSVExporter(ExportDevice):
                     writer.writerow(row)
         if self.export_scr:
             segm_outfile = path + "_scr.csv"
-
             headers = ["UID", "Time Start"]
             if self.export_keywords:
                 keyword_mapping = get_keyword_columns(project)
