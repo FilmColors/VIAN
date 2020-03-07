@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1083</width>
-    <height>919</height>
+    <height>1520</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,6 +69,7 @@
      <addaction name="actionExportExperiment"/>
      <addaction name="actionExportVocabulary"/>
      <addaction name="separator"/>
+     <addaction name="actionExportCSV"/>
      <addaction name="actionScreenshotsExport"/>
      <addaction name="action_ExportSegmentation"/>
      <addaction name="separator"/>
@@ -948,6 +949,11 @@
   <action name="actionZProjection">
    <property name="text">
     <string>Z-Projection</string>
+   </property>
+  </action>
+  <action name="actionExportCSV">
+   <property name="text">
+    <string>CSV</string>
    </property>
   </action>
  </widget>

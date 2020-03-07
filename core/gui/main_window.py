@@ -331,6 +331,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExit.triggered.connect(self.on_exit)
         self.actionScreenshotsExport.triggered.connect(self.on_export_screenshots)
         self.actionExportMovie_Segment.triggered.connect(self.on_export_movie_segments)
+        self.actionExportCSV.triggered.connect(self.on_export_csv)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -2121,6 +2122,10 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.print_message("Zipping Project Failed", "Red")
             self.print_message(str(e), "Red")
+
+    def on_export_csv(self):
+        file = QFileDialog.getSaveFileName()[0]
+        self.project.export(CSVExporter(), file)
 
     def on_export_movie_segments(self):
         if self.project is not None:
