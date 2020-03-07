@@ -1708,11 +1708,11 @@ class MainWindow(QtWidgets.QMainWindow):
         QMessageBox.about(self, "About", about)
 
     def increase_playrate(self):
-        self.player.set_rate(self.player.get_rate() + 0.1)
+        self.player.set_rate(np.clip(self.player.get_rate() + 0.1, 0.1, 10))
         self.player_controls.update_rate()
 
     def decrease_playrate(self):
-        self.player.set_rate(self.player.get_rate() - 0.1)
+        self.player.set_rate(np.clip(self.player.get_rate() - 0.1, 0.1, 10))
         self.player_controls.update_rate()
 
     def on_create_experiment(self):
@@ -2001,7 +2001,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def signal_timestep_update(self):
         if self.time_counter < self.clock_synchronize_step:
-            self.time += self.time_update_interval
+            self.time += self.time_update_interval * self.player.get_rate()
             self.time_counter += 1
         else:
             self.time = self.player.get_media_time()

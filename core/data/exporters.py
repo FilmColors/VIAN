@@ -24,6 +24,7 @@ DEFAULT_NAMING_SCREENSHOTS = [
     ScreenshotNamingConventionOptions.Movie_Source.name,
         ]
 
+
 def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
 
@@ -325,6 +326,7 @@ class CSVExporter(ExportDevice):
                 f.append(r)
                 c += 1
         f.save(path)
+
 
 def build_file_name(naming, screenshot, movie_descriptor):
     """
