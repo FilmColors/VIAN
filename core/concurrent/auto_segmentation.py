@@ -112,9 +112,8 @@ class DialogAutoSegmentation(EDialogWidget):
         auto_segmentation(self.project, self.comboBox_Mode.currentIndex(), self.main_window,
                           n_segments,
                           segment_width,
-                          self.spinBox_nthFrame.value(),
-                          self.spinBox_lowBound.value(),
-                          np.clip(self.spinBox_highBound.value(), self.spinBox_lowBound.value(), None), resolution=self.spinBoxResolution.value())
+                          n_cluster_lb=self.spinBox_lowBound.value(),
+                          n_cluster_hb=np.clip(self.spinBox_highBound.value(), self.spinBox_lowBound.value(), None))
         self.close()
 
 
@@ -135,8 +134,18 @@ class AutoSegmentingJob(IConcurrentJob):
 
         cap = cv2.VideoCapture(movie_path)
         length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-
+        step = length / (10 * n_cluster_range[1])
         resize_f = 192.0 / cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+        counter = 0
+        tot = len(list(range(0, int(length), int(step))))
+        for i in range(0, int(length), int(step)):
+            sign_progress(counter / tot)
+            counter += 1
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+            ret, frame = cap.read()
+            frames.append(dict(pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
+                     pos=i))
 
         data_idx = 0
         read_img = -1 # We only want to read every second image
@@ -150,11 +159,6 @@ class AutoSegmentingJob(IConcurrentJob):
                 read_img += 1
                 if in_hists is not None and data_idx >= len(in_hists):
                     break
-                if read_img % frame_resolution == 0:
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
-                    ret, frame = cap.read()
-                    frames.append(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC))
-                    read_img = 0
 
                 sign_progress(i / length)
                 if in_hists is not None:
@@ -193,7 +197,42 @@ class AutoSegmentingJob(IConcurrentJob):
                 model.fit(histograms)
                 clusterings.append(model.labels_)
 
-        return [clusterings, frames, indices, fps, frame_resolution, n_cluster_range]
+
+        frames_total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+        pcounter, p_max = 0, len(indices) * 30
+        for j, idx in enumerate(indices):
+            hists = []
+            frame_window = 15
+            fmin = int(np.clip(idx - frame_window, 0, frames_total))
+            fmax = int(np.clip(idx + frame_window, 0, frames_total))
+            hists = np.zeros(shape=(fmax - fmin, 16, 16, 16))
+            for x, f_idx  in enumerate(range(fmin, fmax)):
+                sign_progress(pcounter / p_max)
+                pcounter += 1
+
+                cap.set(cv2.CAP_PROP_POS_FRAMES, f_idx)
+                ret, frame = cap.read()
+
+                frame = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+                frame = cv2.resize(frame, (300,300), interpolation=cv2.INTER_CUBIC)
+
+                data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
+                hists[x] = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+                                [16, 16, 16],
+                                [0, 100, -128, 128, -128, 128])
+
+            highest_mse = 0.0
+            highest_idx = 0
+            for hidx, i in enumerate(range(fmin, fmax - 1)):
+                h1, h2 = hists[hidx], hists[hidx + 1]
+                mse = ((h1 - h2)**2).mean()
+                if mse > highest_mse:
+                    highest_mse = mse
+                    highest_idx = i
+            indices[j] = highest_idx
+        cap.release()
+        return dict(clusterings=clusterings, frames=frames, indices=indices, fps=fps, frame_resolution=frame_resolution, cluster_range=n_cluster_range)
 
     def modify_project(self, project, result, sign_progress=None, main_window = None):
         if result is not None:
@@ -201,7 +240,7 @@ class AutoSegmentingJob(IConcurrentJob):
             widget.show()
 
     def get_widget(self, parent, result):
-        return ApplySegmentationWindow(parent, result[0], result[1], result[2], result[3], result[4], result[5])
+        return ApplySegmentationWindow(parent, **result)
 
 
 class ApplySegmentationWindow(QMainWindow):
@@ -252,45 +291,70 @@ class ApplySegmentationWindow(QMainWindow):
         self.on_slider_changed()
 
     def on_slider_changed(self):
-        index = int(self.slider.value()) - 1 - self.cluster_range[0]
-
         self.lbl_n_cluster.setText(str(self.slider.value()))
+
+        index = int(self.slider.value()) - 1 - self.cluster_range[0]
+        clustering = self.clusterings[index]
+
+        segments = []
+        curr_lbl = -1
+        indices = []
+        print(clustering)
+        for idx, lbl in enumerate(self.clusterings[index]):
+            if curr_lbl != lbl:
+                if len(indices) > 0:
+                    start_index = self.indices[indices[0]]
+                    if len(indices) > 1:
+                        end_index = self.indices[indices[len(indices) - 1]]
+                    else:
+                        end_index = self.indices[indices[np.clip(start_index + 1, 0, len(indices) - 1)]]
+
+                    segments.append(dict(start=start_index,
+                                         end = end_index,
+                                         indices=indices))
+                    indices = []
+                    curr_lbl = lbl
+            indices.append(idx)
+        for s in segments:
+            print(s)
+
+        for idx, s in enumerate(segments):
+            if idx == 0:
+                s['start'] = 0
+            if idx != len(segments) - 1:
+                s['end'] = segments[idx + 1]['start']
+            s['images'] = []
+            for img in self.frames:
+                if s['start'] <= img['pos'] < s['end']:
+                    s['images'].append(img)
+
         images = []
         segm_imgs = []
         curr_lbl = -1
-        for i, c in enumerate(self.clusterings[index]):
-            if i % self.frame_resolution == 0:
-                i = int(i / self.frame_resolution)
-                if c == curr_lbl:
-                    segm_imgs.append(numpy_to_pixmap(self.frames[i]))
-                else:
-                    images.append(segm_imgs)
-                    segm_imgs = []
-                    segm_imgs.append(numpy_to_pixmap(self.frames[i]))
-                    curr_lbl = c
+        # for i, c in enumerate(self.clusterings[index]):
+        #     if i % self.frame_resolution == 0:
+        #         i = int(i / self.frame_resolution)
+        #         if c == curr_lbl:
+        #             segm_imgs.append(self.frames[i]['pixmap'])
+        #         else:
+        #             images.append(segm_imgs)
+        #             segm_imgs = []
+        #             segm_imgs.append(self.frames[i]['pixmap'])
+        #             curr_lbl = c
 
         self.view.scene().clear()
-        x = 0
-        img_h = 200
-        img_w = 200
-        max_height = 0
-        m_base = 0
-        n_groups = int(len(images) / 2)
-        for i, group in enumerate(images):
-            y = 0 + m_base
-            x += img_w
-            for img in group:
-                itm = self.view.scene().addPixmap(img)
-                itm.setPos(x, y)
-                y += 180
-                if y > max_height:
-                    max_height = y
-            if i == n_groups:
-                self.view.scene().addLine(0, max_height + 50, self.view.scene().itemsBoundingRect().width(), max_height + 50)
-                m_base = max_height + 100
-                x = img_w
+        x, y, = 0, 0
+        img_h, img_w = 200, 200
 
-        # rect = QRectF(self.view.scene().itemsBoundingRect().x(), self.view.scene().itemsBoundingRect().y(), 100, self.view.scene().itemsBoundingRect().height())
+        for i, segm in enumerate(segments):
+            for img in segm['images']:
+                itm = self.view.scene().addPixmap(img['pixmap'])
+                itm.setPos(x, y)
+                x += img_w
+            x = 0
+            y += img_h
+
+        rect = QRectF(self.view.scene().itemsBoundingRect().x(), self.view.scene().itemsBoundingRect().y(), 100, self.view.scene().itemsBoundingRect().height())
         self.view.fitInView(self.view.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
 
     def apply_segmentation(self):
