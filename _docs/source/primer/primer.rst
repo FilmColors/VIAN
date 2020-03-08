@@ -4,7 +4,7 @@
 Primer
 ======
 
-In this section, the typical workflow of VIAN and concepts behind it shall be explained.
+In this section, the typical workflow of VIAN and concepts behind it shall be explained. Links to more detailed descriptions of modules etc. are provided.
 
 Creating a Project
 ==================
