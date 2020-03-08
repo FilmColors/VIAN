@@ -2132,7 +2132,8 @@ class MainWindow(QtWidgets.QMainWindow):
             to_export = []
             for s in self.project.selected:
                 if isinstance(s, Segment):
-                    to_export.append((s.get_start(), s.get_end()))
+                    name = build_segment_nomenclature(s)
+                    to_export.append((s.get_start(), s.get_end(), name))
 
             if len(to_export) > 0:
                 directory = QFileDialog.getExistingDirectory(caption="Select Directory to export Segments into", directory=self.project.export_dir)

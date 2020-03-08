@@ -25,6 +25,7 @@ DEFAULT_NAMING_SCREENSHOTS = [
         ]
 
 
+
 def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
 
@@ -369,3 +370,6 @@ def build_file_name(naming, screenshot, movie_descriptor):
     file_name = file_name.replace("All Shots_", "_")
 
     return file_name
+
+def build_segment_nomenclature(s:Segment):
+    return str(s.project.movie_descriptor.movie_id) + "_"+ s.segmentation.name +"_" + str(s.ID)

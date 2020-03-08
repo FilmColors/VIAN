@@ -37,7 +37,7 @@ from PyQt5.QtGui import QPixmap, QIcon
 
 
 from core.data.settings import UserSettings
-from core.gui.drop_image_container import DropImageContainer
+from core.gui.utils.nomenclature import NomenclatureWidget
 from core.gui.ewidgetbase import MultiItemTextInput
 from core.gui.corpus_widget import CorpusDockWidget, FilmographyWidget2
 
@@ -49,9 +49,9 @@ MAIN_WINDOW = None
 class MW(QMainWindow):
     def __init__(self, widget):
         super(MW, self).__init__()
-        self.setCentralWidget(FilmographyWidget2(self))
-        self.dock_widgets = []
-        self.addDockWidget(Qt.LeftDockWidgetArea, NodeEditorDock(self))
+        self.setCentralWidget(NomenclatureWidget(self))
+        # self.dock_widgets = []
+        # self.addDockWidget(Qt.LeftDockWidgetArea, NodeEditorDock(self))
 
 def set_style_sheet(app, path):
     style_sheet = open(os.path.abspath(path), 'r')
