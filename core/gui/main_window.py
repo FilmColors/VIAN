@@ -21,6 +21,8 @@ from core.data.audio_handler import AudioHandler
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 
+from flask_server.server import FlaskServer
+
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
@@ -95,6 +97,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     onMultiExperimentChanged = pyqtSignal(bool)
     onSave = pyqtSignal()
+
+    onStartFlaskServer = pyqtSignal()
+    onStopFlaskServer = pyqtSignal()
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -238,6 +243,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.audio_handler_thread = QThread()
         self.audio_handler.moveToThread(self.audio_handler_thread)
         self.audio_handler_thread.start()
+
+        self.flask_server = FlaskServer(None)
+        self.flask_server_thread = QThread()
+        self.flask_server.moveToThread(self.flask_server_thread)
+        self.flask_server_thread.start()
+        self.onStartFlaskServer.connect(self.flask_server.run_server)
+        self.onStartFlaskServer.emit()
 
         self.create_widget_elan_status()
         self.create_widget_video_player()
