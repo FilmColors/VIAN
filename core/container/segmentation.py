@@ -266,6 +266,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         else:
             self.locked = False
 
+        self.update_segment_ids()
         return self
 
     def get_type(self):

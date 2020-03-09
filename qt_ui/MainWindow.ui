@@ -195,6 +195,7 @@
     <addaction name="actionRun_Complete_Pipeline"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_all_Analyses"/>
+    <addaction name="actionFind"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -954,6 +955,14 @@
   <action name="actionExportCSV">
    <property name="text">
     <string>CSV</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="text">
+    <string>Find</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
    </property>
   </action>
  </widget>

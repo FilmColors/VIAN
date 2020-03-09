@@ -7,6 +7,7 @@ from core.gui.ewidgetbase import EDockWidget
 
 app = Flask(__name__)
 
+
 class FlaskServer(QObject):
     def __init__(self, parent):
         super(FlaskServer, self).__init__(parent)

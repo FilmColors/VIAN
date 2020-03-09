@@ -39,6 +39,7 @@ from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, \
     ALWAYS_VLC
 from core.analysis.analysis_import import *
+from core.gui.search_window import SearchWindow
 from core.gui.experiment_editor import ExperimentEditorDock
 # from core.gui.face_identificator import FaceIdentificatorDock
 from core.gui.history import HistoryView
@@ -284,8 +285,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_experiment_editor()
         self.create_corpus_widget()
 
-
         self.pipeline_toolbar = PipelineToolbar(self)
+
+        self.search_window = SearchWindow(self)
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
@@ -360,6 +362,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionRun_Pipeline_for_Selection.triggered.connect(self.pipeline_widget.pipeline.run_selection)
         self.actionRun_Complete_Pipeline.triggered.connect(self.pipeline_widget.pipeline.run_all)
         self.actionDelete_all_Analyses.triggered.connect(self.on_remove_all_analyses)
+        self.actionFind.triggered.connect(self.on_search)
 
         # Tab Windows
         self.actionScreenshot_Manager.triggered.connect(self.create_screenshot_manager_dock_widget)
@@ -1183,11 +1186,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.store(self.dock_widgets)
 
         self.frame_update_thread.quit()
+        self.flask_server_thread.quit()
+        self.audio_handler_thread.quit()
+        self.vian_event_handler_thread.quit()
+
         self.abortAllConcurrentThreads.emit()
 
         if PROFILE:
             self.profiler.disable()
             self.profiler.dump_stats("Profile.prof")
+
 
         QCoreApplication.quit()
         return True
@@ -1347,6 +1355,11 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.print_message("Backup Failed", "Red")
             self.print_message(str(e), "Red")
+
+    def on_search(self):
+        self.search_window.show()
+        self.search_window.resize(QSize(int(self.width() * 0.8), int(self.height() * 0.8)))
+        self.search_window.move(QPoint(int(self.width() * 0.1), int(self.height() * 0.1)))
 
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)
@@ -1638,11 +1651,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # else:
         #     worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
         #     self.start_worker(worker, analysis.get_name())
-
-    # @pyqtSlot(object, object, object, object)
-    # def on_analysis_prepare(self, analysis, targets, parameters, class_objs):
-    #     fps = self.player.get_fps()
-    #     args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
 
     def analysis_result(self, result):
         pass
@@ -2007,7 +2015,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_overlay()
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
 
-
     def create_analysis_list(self):
         self.analysis_list = []
         for name, obj in inspect.getmembers(sys.modules[__name__]):
@@ -2319,6 +2326,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
 
+        self.search_window.on_loaded(self.project)
         ready, colorimetry = self.project.get_colormetry()
         run_colormetry = False
         if not ready:
@@ -2420,6 +2428,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.stop()
         for o in self.i_project_notify_reciever:
             o.on_closed()
+
+        self.search_window.on_close()
         self.pipeline_widget.pipeline.on_closed()
         self.set_ui_enabled(False)
 

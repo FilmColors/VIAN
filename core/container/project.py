@@ -221,6 +221,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     result.append(itm)
         return result
 
+    def get_annotations(self):
+        res = []
+        for s in self.segmentation:
+            res.extend(s.segments)
+        for a in self.annotation_layers:
+            res.extend(a.annotations)
+        res.extend(self.screenshots)
+        return res
+
     def print_all(self, type = None):
         for c in self.get_all_containers():
             if type is not None and type == c.get_type():
@@ -592,27 +601,24 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.dispatch_changed()
             self.onScreenshotGroupRemoved.emit(grp)
 
-    # def get_screenshots_of_segment(self, main_segm_id, segmentation = None):
-    #     """
-    #     Returns all screenshots which are within a segment.
-    #
-    #     :param main_segm_id: The id of the segment do retrieve the screenshots from.
-    #
-    #     :param segmentation:
-    #     :return:
-    #     """
-    #     if segmentation is None:
-    #         segmentation = self.get_main_segmentation()
-    #     result = []
-    #     if segmentation is not None:
-    #         start = segmentation.segments[main_segm_id].get_start()
-    #         end = segmentation.segments[main_segm_id].get_end()
-    #
-    #         for s in self.screenshots:
-    #             if start <= s.movie_timestamp < end:
-    #                 result.append(s)
-    #
-    #     return result
+    def get_screenshots_of_segment(self, segment: Segment) -> List[Screenshot]:
+        """
+        Returns all screenshots which are within a segment.
+
+        :param main_segm_id: The id of the segment do retrieve the screenshots from.
+
+        :param segmentation:
+        :return:
+        """
+        result = []
+        start = segment.get_start()
+        end = segment.get_end()
+
+        for s in self.screenshots:
+            if start <= s.movie_timestamp < end:
+                result.append(s)
+
+        return result
 
     def set_current_screenshot_group(self, grp) -> ScreenshotGroup:
         """

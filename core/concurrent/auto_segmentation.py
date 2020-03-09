@@ -13,6 +13,23 @@ AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1
 
 
+def cluster_histograms_adjacently(x, n_clusters = 2):
+    connectivity = np.zeros(shape=(x.shape[0], x.shape[0]), dtype=np.uint8)
+    for i in range(1, x.shape[0] - 1, 1):
+        connectivity[i][i - 1] = 1
+        connectivity[i][i] = 1
+        connectivity[i][i + 1] = 1
+
+
+    model = AgglomerativeClustering(linkage="ward",
+                                    connectivity=connectivity,
+                                    n_clusters=n_clusters, compute_full_tree=True)
+    model.fit(x)
+    return model.labels_
+
+
+
+
 def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100, resolution=30):
     duration = project.movie_descriptor.duration
     if mode == AUTO_SEGM_EVEN:
@@ -50,7 +67,7 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
              frame_pos,
              nth_frame,
              [n_cluster_lb, n_cluster_hb]
-             , resolution] )
+             ,resolution] )
         main_window.run_job_concurrent(job)
 
 
@@ -134,6 +151,7 @@ class AutoSegmentingJob(IConcurrentJob):
 
         cap = cv2.VideoCapture(movie_path)
         length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        fps = cap.get(cv2.CAP_PROP_FPS)
         step = length / (10 * n_cluster_range[1])
         resize_f = 192.0 / cap.get(cv2.CAP_PROP_FRAME_WIDTH)
 
@@ -179,7 +197,6 @@ class AutoSegmentingJob(IConcurrentJob):
                     histograms.append(np.resize(hist, new_shape=16 ** 3))
                 data_idx += 1
 
-
         connectivity = np.zeros(shape=(len(histograms), len(histograms)), dtype=np.uint8)
         for i in range(1, len(histograms) - 1, 1):
             connectivity[i][i - 1] = 1
@@ -197,40 +214,49 @@ class AutoSegmentingJob(IConcurrentJob):
                 model.fit(histograms)
                 clusterings.append(model.labels_)
 
-
         frames_total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        pcounter, p_max = 0, len(np.unique(clusterings[0])) * 30
 
-        pcounter, p_max = 0, len(indices) * 30
-        for j, idx in enumerate(indices):
-            hists = []
-            frame_window = 15
-            fmin = int(np.clip(idx - frame_window, 0, frames_total))
-            fmax = int(np.clip(idx + frame_window, 0, frames_total))
-            hists = np.zeros(shape=(fmax - fmin, 16, 16, 16))
-            for x, f_idx  in enumerate(range(fmin, fmax)):
-                sign_progress(pcounter / p_max)
-                pcounter += 1
-
-                cap.set(cv2.CAP_PROP_POS_FRAMES, f_idx)
-                ret, frame = cap.read()
-
-                frame = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
-                frame = cv2.resize(frame, (300,300), interpolation=cv2.INTER_CUBIC)
-
-                data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
-                hists[x] = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
-                                [16, 16, 16],
-                                [0, 100, -128, 128, -128, 128])
-
-            highest_mse = 0.0
-            highest_idx = 0
-            for hidx, i in enumerate(range(fmin, fmax - 1)):
-                h1, h2 = hists[hidx], hists[hidx + 1]
-                mse = ((h1 - h2)**2).mean()
-                if mse > highest_mse:
-                    highest_mse = mse
-                    highest_idx = i
-            indices[j] = highest_idx
+        # print(indices)
+        # print(clusterings[0])
+        # last_index = -1
+        # for j, idx in enumerate(indices):
+        #
+        #     if clusterings[0][j] == last_index:
+        #         continue
+        #
+        #     last_index = clusterings[0][j]
+        #
+        #     frame_window = 15
+        #
+        #     fmin = int(np.clip(idx - frame_window, 0, frames_total))
+        #     fmax = int(np.clip(idx + frame_window, 0, frames_total))
+        #     t_indices = list(range(fmin, fmax))
+        #     hists = np.zeros(shape=(fmax - fmin, 16**3))
+        #     for x, f_idx  in enumerate(range(fmin, fmax)):
+        #         sign_progress(pcounter / p_max)
+        #         pcounter += 1
+        #
+        #         cap.set(cv2.CAP_PROP_POS_FRAMES, f_idx)
+        #         ret, frame = cap.read()
+        #
+        #         frame = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+        #         frame = cv2.resize(frame, (300,300), interpolation=cv2.INTER_CUBIC)
+        #
+        #         data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
+        #         hists[x] = np.reshape(cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+        #                         [16, 16, 16],
+        #                         [0, 100, -128, 128, -128, 128]), newshape=(16**3))
+        #
+        #     labels = cluster_histograms_adjacently(hists)
+        #
+        #     highest_idx = idx
+        #     for i, val in enumerate(labels):
+        #         if i != labels[0]:
+        #             highest_idx = t_indices[i]
+        #             break
+        #     indices[j] = highest_idx
+        #     print("Approximating of Indices", j, len(indices), labels, i, highest_idx)
         cap.release()
         return dict(clusterings=clusterings, frames=frames, indices=indices, fps=fps, frame_resolution=frame_resolution, cluster_range=n_cluster_range)
 
@@ -267,6 +293,8 @@ class ApplySegmentationWindow(QMainWindow):
         self.hbox = QHBoxLayout(self.w)
         self.w_slider.setLayout(self.hbox)
 
+        self.segments = []
+
         self.hbox.addWidget(QLabel("n-Clusters:"))
         self.hbox.addWidget(self.slider)
         self.lbl_n_cluster = QLabel("1")
@@ -292,14 +320,11 @@ class ApplySegmentationWindow(QMainWindow):
 
     def on_slider_changed(self):
         self.lbl_n_cluster.setText(str(self.slider.value()))
-
         index = int(self.slider.value()) - 1 - self.cluster_range[0]
-        clustering = self.clusterings[index]
 
         segments = []
         curr_lbl = -1
         indices = []
-        print(clustering)
         for idx, lbl in enumerate(self.clusterings[index]):
             if curr_lbl != lbl:
                 if len(indices) > 0:
@@ -315,8 +340,6 @@ class ApplySegmentationWindow(QMainWindow):
                     indices = []
                     curr_lbl = lbl
             indices.append(idx)
-        for s in segments:
-            print(s)
 
         for idx, s in enumerate(segments):
             if idx == 0:
@@ -327,20 +350,6 @@ class ApplySegmentationWindow(QMainWindow):
             for img in self.frames:
                 if s['start'] <= img['pos'] < s['end']:
                     s['images'].append(img)
-
-        images = []
-        segm_imgs = []
-        curr_lbl = -1
-        # for i, c in enumerate(self.clusterings[index]):
-        #     if i % self.frame_resolution == 0:
-        #         i = int(i / self.frame_resolution)
-        #         if c == curr_lbl:
-        #             segm_imgs.append(self.frames[i]['pixmap'])
-        #         else:
-        #             images.append(segm_imgs)
-        #             segm_imgs = []
-        #             segm_imgs.append(self.frames[i]['pixmap'])
-        #             curr_lbl = c
 
         self.view.scene().clear()
         x, y, = 0, 0
@@ -354,37 +363,17 @@ class ApplySegmentationWindow(QMainWindow):
             x = 0
             y += img_h
 
+        self.segments = segments
         rect = QRectF(self.view.scene().itemsBoundingRect().x(), self.view.scene().itemsBoundingRect().y(), 100, self.view.scene().itemsBoundingRect().height())
         self.view.fitInView(self.view.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
 
     def apply_segmentation(self):
-        index = int(self.slider.value()) - 1 - self.cluster_range[0]
-        segments = []
-        curr_lbl = -1
-        curr_segment = [0, 0]
-        last_idx = -1
-        for i, c in enumerate(self.clusterings[index]):
-            if i == 0:
-                last_idx = 0
-                curr_lbl = c
-
-            elif c == curr_lbl:
-                last_idx = i
-
-            else:
-                curr_segment[1] = self.indices[last_idx]
-                segments.append(curr_segment)
-                curr_segment = [self.indices[last_idx], 0]
-                curr_lbl = c
-                last_idx = i
-
-        curr_segment[1] = self.indices[last_idx]
-        segments.append(curr_segment)
-
         segmentation = self.project.create_segmentation("Auto Segmentation", dispatch=False)
-        for s in segments:
-            segmentation.create_segment2(frame2ms(s[0], self.fps),
-                                         frame2ms(s[1], self.fps),
+        for i, s in enumerate(self.segments):
+            if i < len(s) - 1:
+                s['end'] = self.segments[i + 1]['start'] - 1
+            segmentation.create_segment2(frame2ms(s['start'], self.fps),
+                                         frame2ms(s['end'], self.fps),
                                          mode=SegmentCreationMode.INTERVAL,
                                          inhibit_overlap=False,
                                          dispatch=False)
