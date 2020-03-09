@@ -21,7 +21,7 @@ from core.data.audio_handler import AudioHandler
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 
-from flask_server.server import FlaskServer
+from flask_server.server import FlaskServer, FlaskWebWidget
 
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -250,6 +250,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flask_server_thread.start()
         self.onStartFlaskServer.connect(self.flask_server.run_server)
         self.onStartFlaskServer.emit()
+
+        self.web_view = FlaskWebWidget(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
+        self.web_view.view.setUrl(QUrl("http://127.0.0.1:5000/"))
+        self.web_view.hide()
 
         self.create_widget_elan_status()
         self.create_widget_video_player()
