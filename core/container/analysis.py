@@ -15,7 +15,7 @@ from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
 
 
-class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamableContainer):
+class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
     """
     This is the BaseClass of all AnalysisContainers in the VIAN Project.
 

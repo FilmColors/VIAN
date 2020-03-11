@@ -254,7 +254,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
-        self.web_view.view.setUrl(QUrl("http://127.0.0.1:5000/"))
+        self.web_view.set_url("http://127.0.0.1:5000/screenshot_vis")
         self.web_view.hide()
 
         self.create_widget_elan_status()
@@ -485,7 +485,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.colorimetry_live,
                                     self.query_widget,
                                     self.worker_manager,
-                                          self.corpus_client_toolbar
+                                    self.corpus_client_toolbar,
+                                    self.flask_server
                                           ]
 
         self.menus_list = [

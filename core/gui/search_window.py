@@ -104,7 +104,7 @@ class ResultWidget(QWidget):
 
         self.list.setLayout(QVBoxLayout())
         self.layout().addWidget(self.area)
-        
+
         self.span = QWidget(self.list)
         self.list.layout().addWidget(self.span)
         self.span.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -128,6 +128,7 @@ class ResultWidget(QWidget):
 
 class Entry(QFrame):
     onDoubleClicked = pyqtSignal(object)
+
     def __init__(self, parent, container):
         super(Entry, self).__init__(parent)
         self.container = container
