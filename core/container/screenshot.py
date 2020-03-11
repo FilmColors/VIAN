@@ -13,18 +13,23 @@ CACHE_WIDTH = 250
 
 class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable):
     """
-    :var title: The Name of this Screenshot
+    :var title: The name of this Screenshot
+    :var frame_pos: The Position of this Frame in Frames
+    :var movie_timestamp: The Time in MS
+    :var creation_timestamp: The Time of Creation in time.now() format
+    :var screenshot_group: The ScreenshotGroup this is associated to
+
+    :var scene_id: The Index of this Screenshot within the Main Segmentation of the Project
+    :var shot_id_global: The Index of this screenshot over all Screenshots
+    :var shot_id_segm: The Index of this shot within the segment
+
+    :var notes: Additional Notes set in the Inspector
+
+    Application Variables:
+
     :var img_movie: Image Data of the complete frame
     :var img_blend: Image Data of the Annotated Frame if Any
     :var annotation_item_ids: The Annotations that have been there while rendering the img_blend
-    :var frame_pos: THe Position of this Frame in Frames
-    :var scene_id: The Id of this Screenshot within the Main Segmentation of the Project
-    :var shot_id_global: The Id of this screenshot over all Screenshots
-    :var shot_id_segm: The Id of this shot within the segment
-    :var movie_timestamp: The Time in MS
-    :var creation_timestamp: The Time of Creation in time.now() format
-    :var screenshot_group: The Screenshot Groupd this is asociated to
-    :var notes: Additional Notes set in the Inspector
     :var curr_size: The size of the loaded Image relative to it's original Size
     """
     onScreenshotChanged = pyqtSignal(object)
@@ -269,6 +274,12 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
 
 class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
+    """
+    :var name: The name of the ScreenshotGroup
+    :var screenshots: A list of Screenshots
+    :var notes: Additional Notes set in the Inspector
+
+    """
     onScreenshotGroupDeleted = pyqtSignal(object)
     onScreenshotAdded = pyqtSignal(object)
     onScreenshotRemoved = pyqtSignal(object)

@@ -10,8 +10,11 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     """
     :var name: The Name of the Segmentation
     :var segments: A List of Segments
-    :var timeline_visibility: if it is visible in the timeline or not
     :var notes: Additional Notes that can be added to describe it in the Inspector
+
+    Application Variables
+
+    :var timeline_visibility: if it is visible in the timeline or not
     :var is_main_segmentation: If this is the main Segmentation
 
     """
@@ -332,18 +335,20 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             for s in self.segments:
                 target.create_segment2(s.get_start(), s.get_end(), body=s.annotation_body)
 
+
 class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject):
     """
-    :var MIN_SIZE: The Shortest size in MS
-    :var ID: The Segments ID in the Segmentation {0, ..., n}
+    :var name: the Name of the Segment
     :var start: Time start in MS
     :var end: Time end in MS
-    :var name: the Name of the Segment
+    :var segmentation: it's parent Segmentation, which it is grouped in
+    :var ID: The Segments Index within the Segmentation {0, ..., n}
+    :var annotation_body: The Annotation body as string
+
+    Application Variables:
 
     :var duration: The Duration of the Segment in MS
-    :var annotation_body: The Annotation Content Text
     :var timeline_visibility: If it is visible in the Timeline
-    :var segmentation: it's parent Timeline
     :var notes: Additional Notes that can be set in the Inspector
 
     """

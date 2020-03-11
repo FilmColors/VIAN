@@ -3,8 +3,6 @@ from enum import Enum
 DATASET_NAME_LIP = "LIP_Dataset"
 DATASET_NAME_ADE20K = "ADE20K"
 
-
-
 class LIPLabels(Enum):
     Background      = 0
     Hat             = 1

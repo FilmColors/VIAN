@@ -32,44 +32,36 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     A VIANProject is a FileSystem and a json File that is located inside this folder.
 
-    :var undo_manager = UndoRedoManager()
-    :var main_window: A Reference to the Main Window
-    :var inhibit_dispatch: if Dispatch should be inhibited
-
     :var path: The Path to the Projects .eext file (absolute)
     :var name: The Name of the Project
     :var folder: The Root Directory of the Project where the eext file lies inside
+
+    :var movie_descriptor: The Movie Descriptor of this Project
+    :var annotation_layers: A List of Annotation Layers
+    :var screenshots: A List of all Screenshots, without grouping
+    :var segmentation: A List of all Segmentations
+    :var analysis: A List of IAnalysisResult
+    :var screenshot_groups: All Screenshot Groups
+    :var vocabularies: All Vocabularies (deprecated these are now global)
+    :var experiments: A List of all Experiments
+    :var colormetry_analysis: The ColorimetryAnalysis Reference
+
+
+    Application Variables:
+    :var active_screenshot_group = self.screenshot_groups[0]
+    :var active_screenshot_group.is_current = True
+    :var main_segmentation_index: The index of the main Segmentation Layer in self.segmentations, by which Screenshots are sorted
+    :var current_annotation_layer: The Currently Selected Annotation Layer
+    :var id_list: A list of [Unique-ID, IProjectContainer] tuples
+    :var corpus_id: this is the VIANCorpus id of this project (default: -1)
+    :var undo_manager = UndoRedoManager()
+    :var main_window: A Reference to the Main Window
+    :var inhibit_dispatch: if Dispatch should be inhibited
+    :var selected: A List of Currently Selected IProjectContainers
     :var data_dir: the path to the data dir
     :var results_dir: the path to the result dir
     :var shots_dir: the path to the shot dir
     :var export_dir: the path to the export dir
-
-    :var corpus_id: this is the VIANCorpus id of this project (default: -1)
-
-    :var id_list: A list of [Unique-ID, IProjectContainer] tuples
-
-    :var annotation_layers: A List of Annotation Layers
-    :var current_annotation_layer: The Currently Selected Annotation Layer
-    :var screenshots: A List of all Screenshots
-    :var segmentation: A List of all Segmentations
-    :var main_segmentation_index: The index of the main Segmentation Layer in self.segmentations
-    :var movie_descriptor: The Movie Descriptor of this Project
-    :var analysis: A List of IAnalysisResult
-    :var screenshot_groups: All Screenshot Groups
-    :var vocabularies: All Vocabularies (deprecated these are now global)
-
-    :var experiments: A List of all Experiments
-
-    :var current_script: The Currently Selected NodeScript
-    :var node_scripts: A List of All Node Scripts
-
-    :var add_screenshot_group("All Shots", initial=True)
-    :var active_screenshot_group = self.screenshot_groups[0]
-    :var active_screenshot_group.is_current = True
-
-    :var colormetry_analysis: The ColorimetryAnalysis Reference
-
-    :var selected: A List of Currently Selected IProjectContainers
     """
 
     onScreenshotGroupAdded = pyqtSignal(object)

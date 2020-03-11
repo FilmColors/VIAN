@@ -81,10 +81,130 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         self.project.remove_analysis(self)
 
 
-class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
+class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     """
+    An analysis result which has been performed on some annotation:
+
+    :var target_container: A IProjectContainer which has been analysed
+    :var analysis_job_class: The classname of the analysis which has been performed
+    :var target_classification_object: The classification object which has been targeted, if the ClassificationObject has a semantic segmentation defined it has been used during analysis
+
 
     """
+    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
+        super(IAnalysisJobAnalysis, self).__init__(name, results)
+        self.target_container = container #type: IProjectContainer
+        if analysis_job_class is not None:
+            self.analysis_job_class = analysis_job_class.__name__
+        else:
+            self.analysis_job_class = None
+
+        if parameters is not None:
+            self.parameters = parameters
+        else:
+            self.parameters = []
+        self.target_classification_object = target_classification_object
+        # Evaluated self.analysis-job_class
+        self.a_class = None
+
+    def get_preview(self):
+        try:
+            return get_analysis_by_name(self.analysis_job_class)().get_preview(self)
+        except Exception as e:
+            print("Preview:", e)
+
+    def get_visualization(self, main_window):
+        try:
+            return get_analysis_by_name(self.analysis_job_class)().get_visualization(self,
+                 self.project.results_dir,
+                 self.project.data_dir,
+                 self.project,
+                 main_window
+            )
+        except Exception as e:
+            print("Exception in get_visualization()", e)
+
+    def get_type(self):
+        return ANALYSIS_JOB_ANALYSIS
+
+    def set_target_container(self, container):
+        self.target_container = container
+        self.target_container.add_analysis(self)
+
+    def set_target_classification_obj(self, class_obj):
+        self.target_classification_object = class_obj
+
+    def serialize(self):
+        if self.target_classification_object is not None:
+            class_obj_id = self.target_classification_object.unique_id
+        else:
+            class_obj_id = -1
+
+        data = dict(
+            name=self.name,
+            unique_id=self.unique_id,
+            analysis_container_class=self.__class__.__name__,
+            analysis_job_class=self.analysis_job_class,
+            parameters=self.parameters,
+
+            notes=self.notes,
+            container = self.target_container.unique_id,
+            classification_obj = class_obj_id
+        )
+
+        return data
+
+    def deserialize(self, serialization, project):
+        self.name = serialization['name']
+        self.unique_id = serialization['unique_id']
+        self.analysis_job_class = serialization['analysis_job_class']
+        self.notes = serialization['notes']
+
+        # VERSION > 0.6.8
+        try:
+            # clobj = project.get_by_id(serialization['classification_obj'])
+            # if clobj is not None:
+            self.target_classification_object = project.get_by_id(serialization['classification_obj'])
+        except Exception as e:
+            log_error("Exception in IAnalysisContainerAnalysis.deserialize()", e)
+            pass
+
+        # self.data = []
+        # t = streamer.project.main_window.eval_class(self.analysis_job_class)
+        # self.data = t().deserialize(streamer.sync_load(self.unique_id))
+        self.parameters = serialization['parameters']
+
+        self.set_target_container(project.get_by_id(serialization['container']))
+
+        return self
+
+    def unload_container(self, data = None, sync = False):
+        if data is not None:
+            self.data = data
+        if self.data is None:
+            return
+
+    def get_adata(self):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
+
+    def set_adata(self, d):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+        self.data = None
+
+    def delete(self):
+        super(IAnalysisJobAnalysis, self).delete()
+        self.cleanup()
+
+    def cleanup(self):
+        if self.target_container is not None:
+            self.target_container.remove_analysis(self)
+
+
+class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
         super(NodeScriptAnalysis, self).__init__(name, results)
         self.script_id = script_id
@@ -168,128 +288,6 @@ class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
             log_error("Exception in analysis deserialiation", e)
 
         return self
-
-
-class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
-    def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
-        super(IAnalysisJobAnalysis, self).__init__(name, results)
-        self.target_container = container
-        if analysis_job_class is not None:
-            self.analysis_job_class = analysis_job_class.__name__
-        else:
-            self.analysis_job_class = None
-
-        if parameters is not None:
-            self.parameters = parameters
-        else:
-            self.parameters = []
-        self.target_classification_object = target_classification_object
-        # Evaluated self.analysis-job_class
-        self.a_class = None
-
-    def get_preview(self):
-        try:
-            #return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
-            return get_analysis_by_name(self.analysis_job_class)().get_preview(self)
-        except Exception as e:
-            print("Preview:", e)
-
-    def get_visualization(self, main_window):
-        try:
-            # return self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
-            #                                                                                  self.project.results_dir,
-            #                                                                                  self.project.data_dir,
-            #                                                                                  self.project,
-            #                                                                                  self.project.main_window)
-            return get_analysis_by_name(self.analysis_job_class)().get_visualization(self,
-                 self.project.results_dir,
-                 self.project.data_dir,
-                 self.project,
-                 main_window
-            )
-        except Exception as e:
-            print("Exception in get_visualization()", e)
-            # QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
-            #                     " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
-
-    def get_type(self):
-        return ANALYSIS_JOB_ANALYSIS
-
-    def set_target_container(self, container):
-        self.target_container = container
-        self.target_container.add_analysis(self)
-
-    def set_target_classification_obj(self, class_obj):
-        self.target_classification_object = class_obj
-
-    def serialize(self):
-        if self.target_classification_object is not None:
-            class_obj_id = self.target_classification_object.unique_id
-        else:
-            class_obj_id = -1
-
-        data = dict(
-            name=self.name,
-            unique_id=self.unique_id,
-            analysis_container_class=self.__class__.__name__,
-            analysis_job_class=self.analysis_job_class,
-            parameters=self.parameters,
-
-            notes=self.notes,
-            container = self.target_container.unique_id,
-            classification_obj = class_obj_id
-        )
-
-        return data
-
-    def deserialize(self, serialization, project):
-        self.name = serialization['name']
-        self.unique_id = serialization['unique_id']
-        self.analysis_job_class = serialization['analysis_job_class']
-        self.notes = serialization['notes']
-
-        # VERSION > 0.6.8
-        try:
-            # clobj = project.get_by_id(serialization['classification_obj'])
-            # if clobj is not None:
-            self.target_classification_object = project.get_by_id(serialization['classification_obj'])
-        except Exception as e:
-            log_error("Exception in IAnalysisContainerAnalysis.deserialize()", e)
-            pass
-
-        # self.data = []
-        # t = streamer.project.main_window.eval_class(self.analysis_job_class)
-        # self.data = t().deserialize(streamer.sync_load(self.unique_id))
-        self.parameters = serialization['parameters']
-
-        self.set_target_container(project.get_by_id(serialization['container']))
-
-        return self
-
-    def unload_container(self, data = None, sync = False):
-        if data is not None:
-            self.data = data
-        if self.data is None:
-            return
-
-    def get_adata(self):
-        if self.a_class is None:
-            self.a_class = get_analysis_by_name(self.analysis_job_class)
-        return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
-
-    def set_adata(self, d):
-        if self.a_class is None:
-            self.a_class = get_analysis_by_name(self.analysis_job_class)
-        self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
-        self.data = None
-
-    def delete(self):
-        super(IAnalysisJobAnalysis, self).delete()
-        self.cleanup()
-
-    def cleanup(self):
-        if self.target_container is not None:
-            self.target_container.remove_analysis(self)
 
 
 class FileAnalysis(IAnalysisJobAnalysis):
@@ -493,6 +491,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.time_ms = project.hdf5_manager.get_colorimetry_times()[:self.current_idx + 1].tolist()
         self.check_finished()
         return self
+
 
 with open(os.path.join(_VIAN_ROOT, "data/default_pipeline.py"), "r") as f:
     _PIPELINE_TEMPLATE = f.read()

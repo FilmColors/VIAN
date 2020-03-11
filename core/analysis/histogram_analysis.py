@@ -16,6 +16,13 @@ from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class ColorHistogramAnalysis(IAnalysisJob):
+    """
+    A CIELab Color Histogram encoded as np.float32.
+    The corresponding dataset structure in the HDF5 File is an array of 3 dimensional histograms with 16 bins each.
+
+    HDF5-Shape: (n-frames, 16, 16, 16)
+    HDF5-Meaning: (analysis, Bins-Luminance, Bins-A, Bins-B)
+    """
     def __init__(self, resolution=30):
         super(ColorHistogramAnalysis, self).__init__("Color Histogram", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorHistograms",
