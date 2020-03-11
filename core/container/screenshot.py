@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
-from core.container.container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable
+from core.container.container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, deprecation_serialization
 from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from core.container.analysis import SemanticSegmentationAnalysisContainer
 from PyQt5.QtCore import pyqtSignal
@@ -32,6 +32,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     :var annotation_item_ids: The Annotations that have been there while rendering the img_blend
     :var curr_size: The size of the loaded Image relative to it's original Size
     """
+
+    # TODO Refactor title > name
+    # TODO Refactor movie-timestamp > start_ms
+
     onScreenshotChanged = pyqtSignal(object)
     onImageSet = pyqtSignal(object, object, object) # Screenshot, ndarray, QPixmap
 
@@ -61,23 +65,22 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         self.masked_cache = dict()
 
-
     def set_title(self, title):
         self.title = title
         self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
-    def set_scene_id(self, scene_id):
-        self.scene_id = scene_id
-        self.onScreenshotChanged.emit(self)
+    # def set_scene_id(self, scene_id):
+    #     self.scene_id = scene_id
+    #     self.onScreenshotChanged.emit(self)
 
-    def set_shot_id_global(self, global_id):
-        self.shot_id_global = global_id
-        self.onScreenshotChanged.emit(self)
-
-    def set_shot_id_segm(self, segm_id):
-        self.shot_id_segm = segm_id
-        self.onScreenshotChanged.emit(self)
+    # def set_shot_id_global(self, global_id):
+    #     self.shot_id_global = global_id
+    #     self.onScreenshotChanged.emit(self)
+    #
+    # def set_shot_id_segm(self, segm_id):
+    #     self.shot_id_segm = segm_id
+    #     self.onScreenshotChanged.emit(self)
 
     def set_annotation_visibility(self, visibility):
         self.annotation_is_visible = visibility
@@ -112,13 +115,6 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         if self.preview_cache is None:
             return numpy_to_qt_image(self.img_movie)
         return self.preview_cache
-        # retur nnumpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
-        # if (self.preview_cache is None or self.preview_cache[0] != scale) and self.img_movie.shape[0] > 100:
-        #     self.preview_cache = (scale, numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC)))
-        #
-        #     return self.preview_cache[1]
-        # else:
-        #     return numpy_to_qt_image(cv2.resize(self.img_movie, None, None, scale, scale, cv2.INTER_CUBIC))
 
     def set_classification_object(self, clobj, recompute = False, hdf5_cache=None):
         if not recompute and clobj.unique_id in self.masked_cache:
@@ -211,18 +207,22 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def serialize(self):
         result = dict(
-            title = self.title,
+            name = self.title,
             unique_id=self.unique_id,
             annotation_item_ids = self.annotation_item_ids,
             frame_pos = self.frame_pos,
-            scene_id = self.scene_id,
-            shot_id_global = self.shot_id_global,
-            shot_id_segm = self.shot_id_segm,
-            movie_timestamp = self.movie_timestamp,
+
+            start_ms = self.movie_timestamp,
+            end_ms = self.movie_timestamp,
+
             creation_timestamp = self.creation_timestamp,
             notes = self.notes,
-        )
 
+            vian_webapp_scene_id = self.scene_id,
+            vian_webapp_shot_id_global = self.shot_id_global,
+            vian_webapp_shot_id_segm = self.shot_id_segm,
+
+        )
 
         # images = [self.img_movie.astype(np.uint8)]
         images = None
@@ -230,19 +230,18 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def deserialize(self, serialization, project):
         self.project = project
-        self.title = serialization['title']
+
+        self.title = deprecation_serialization(serialization, ['name', 'title'])
+
         self.unique_id = serialization['unique_id']
-        self.scene_id = serialization['scene_id']
-        self.movie_timestamp = serialization['movie_timestamp']
+        self.movie_timestamp = deprecation_serialization(serialization, ['start_ms', 'movie_timestamp'])
+
         self.creation_timestamp = serialization['creation_timestamp']
         self.annotation_item_ids = serialization['annotation_item_ids']
 
         self.notes = serialization['notes']
-        self.shot_id_segm = serialization['shot_id_segm']
-        self.shot_id_global = serialization['shot_id_global']
         self.frame_pos = serialization['frame_pos']
 
-        #
         self.img_movie = np.zeros(shape=(30,50,3), dtype=np.uint8)
         self.img_blend = None
 

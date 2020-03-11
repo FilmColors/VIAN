@@ -10,6 +10,17 @@ from core.data.log import log_error, log_warning
 _VIAN_ROOT = os.path.abspath(os.path.split( __file__)[0] + "/../..")
 print(_VIAN_ROOT,  os.path.split( __file__)[0] + "/../..")
 
+class AnnotationBody(QObject):
+    MIMETYPE_TEXT_PLAIN = "text/plain"
+    MIMETYPE_TEXT_RICH = "text/rich"
+
+    def __init__(self, content, mime_type = None):
+        super(AnnotationBody, self).__init__()
+        self.content = content
+
+        if mime_type is None:
+            mime_type = self.MIMETYPE_TEXT_PLAIN
+        self.mime_type = mime_type
 
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)
@@ -63,6 +74,9 @@ class IProjectContainer(QObject):
 
     def get_id(self):
         return self.unique_id
+
+    def get_annotation_body(self):
+        return AnnotationBody("", "text/plain")
 
     def set_expanded(self, expanded):
         self.outliner_expanded = expanded
@@ -277,6 +291,8 @@ class AutomatedTextSource():
         return ""
 
 
-
-
-
+def deprecation_serialization(d, keys):
+    for k in keys:
+        if k in d:
+            return d[k]
+    return None

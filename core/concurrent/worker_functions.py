@@ -38,10 +38,8 @@ def store_project_concurrent(args, sign_progress):
 
     a_layer = []
     screenshots = []
-    screenshots_img = []
-    screenshots_ann = []
     segmentations = []
-    analyzes = []
+    analyses = []
     screenshot_groups = []
     scripts = []
     experiments = []
@@ -59,8 +57,6 @@ def store_project_concurrent(args, sign_progress):
     for b in project.screenshots:
         src, img = b.serialize()
         screenshots.append(src)
-        # screenshots_img.append(img[0])
-        # screenshots_ann.append(img[1])
 
     sign_progress(0.4)
     for c in project.segmentation:
@@ -77,7 +73,7 @@ def store_project_concurrent(args, sign_progress):
 
     for d in project.analysis:
         try:
-            analyzes.append(d.serialize())
+            analyses.append(d.serialize())
         except Exception as e:
             print("Exception in Analysis.serialize()", e)
 
@@ -109,7 +105,7 @@ def store_project_concurrent(args, sign_progress):
         main_segmentation_index=project.main_segmentation_index,
         screenshots=screenshots,
         segmentation=segmentations,
-        analyzes=analyzes,
+        analyses=analyses,
         movie_descriptor=project.movie_descriptor.serialize(),
         version=version.__version__,
         screenshot_groups=screenshot_groups,

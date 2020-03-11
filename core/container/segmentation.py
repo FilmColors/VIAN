@@ -1,7 +1,7 @@
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
 from core.container.container_interfaces import IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, \
-    AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject
+    AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
 from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
 
@@ -453,9 +453,9 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         r = dict(
              scene_id = self.ID,
              unique_id = self.unique_id,
-             start = self.start,
-             end = self.end,
-             duration = self.duration,
+             start_ms = self.start,
+             end_ms = self.end,
+
              name = self.name,
              annotation_body = self.annotation_body,
              notes = self.notes,
@@ -468,10 +468,11 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.project = project
         self.ID = serialization["scene_id"]
         self.unique_id = serialization['unique_id']
-        self.start = serialization["start"]
-        self.end = serialization["end"]
-        self.duration = serialization["duration"]
 
+        self.start = deprecation_serialization(serialization, ["start_ms", "start"])
+        self.end = deprecation_serialization(serialization, ["end_ms", "end"])
+
+        self.duration = self.end - self.start
         self.notes = serialization['notes']
 
         # Backwards Compatibility

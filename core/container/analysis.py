@@ -10,7 +10,7 @@ from typing import List
 import traceback
 
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
-from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT
+from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT, deprecation_serialization
 from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
 
@@ -65,7 +65,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
             unique_id=self.unique_id,
             notes=self.notes,
             data = self.data,
-            analysis_job_class = self.analysis_job_class
+            vian_serialization_type = self.analysis_job_class
         )
 
         return data
@@ -139,11 +139,19 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         else:
             class_obj_id = -1
 
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+
+        hdf5_location = self.project.hdf5_manager.location_of(self.unique_id)
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
-            analysis_container_class=self.__class__.__name__,
-            analysis_job_class=self.analysis_job_class,
+
+            hdf5_location = hdf5_location,
+
+            vian_serialization_type=self.__class__.__name__,
+            vian_analysis_type=self.analysis_job_class,
             parameters=self.parameters,
 
             notes=self.notes,
@@ -156,7 +164,7 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
-        self.analysis_job_class = serialization['analysis_job_class']
+        self.analysis_job_class = deprecation_serialization(serialization, ['vian_analysis_type','analysis_job_class'])
         self.notes = serialization['notes']
 
         try:
@@ -249,7 +257,7 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
         d = super(SemanticSegmentationAnalysisContainer, self).serialize()
         d['dataset'] = self.dataset
         d['entry_shape'] = self.entry_shape
-        d['analysis_container_class'] = SemanticSegmentationAnalysisContainer.__name__
+        d['vian_serialization_type'] = SemanticSegmentationAnalysisContainer.__name__
         return d
 
     def deserialize(self, serialization, project):
@@ -273,6 +281,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.analysis_job_class = "Colormetry"
 
         print("Colormetry Analysis Constructor", resolution)
+
         self.resolution = resolution
         self.has_finished = False
 
@@ -346,7 +355,6 @@ class ColormetryAnalysis(AnalysisContainer):
         return [time_palette_data, self.time_ms]
 
     def check_finished(self):
-        # print("IDX", self.current_idx, self.end_idx, self.current_idx == self.end_idx)
         if int(self.current_idx) >= int(self.end_idx - 1):
             self.has_finished = True
         return self.has_finished
@@ -354,7 +362,7 @@ class ColormetryAnalysis(AnalysisContainer):
     def clear(self):
         log_info("Clearing Colorimetry, Resolution:", self.resolution)
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
-        # print(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) , self.resolution)
+
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
         self.end_idx = n_frames
         self.curr_location = 0
@@ -368,14 +376,13 @@ class ColormetryAnalysis(AnalysisContainer):
         serialization = dict(
             name=self.name,
             unique_id=self.unique_id,
-            analysis_container_class=self.__class__.__name__,
+            vian_serialization_type=self.__class__.__name__,
             resolution = self.resolution,
             curr_idx = self.current_idx,
             time_ms = self.time_ms,
             end_idx = self.end_idx,
             notes=self.notes,
             has_finished = self.has_finished
-
         )
         return serialization
 

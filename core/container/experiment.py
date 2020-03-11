@@ -10,9 +10,11 @@ from core.data.log import log_warning, log_debug, log_info, log_error
 from core.container.analysis import AnalysisContainer
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
-from .container_interfaces import IProjectContainer, IHasName, IClassifiable
+from .container_interfaces import IProjectContainer, IHasName, IClassifiable, deprecation_serialization
 from .hdf5_manager import get_analysis_by_name
 from .analysis import PipelineScript
+
+from core.analysis.deep_learning.labels import LIPLabels
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
@@ -562,6 +564,8 @@ class ClassificationObject(IProjectContainer, IHasName):
     :var semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple ("<Name of Dataset>", [Indices of assigned Mask layers])
 
     """
+    #TODO Semantic Segmentation Refactor
+
     onClassificationObjectChanged = pyqtSignal(object)
     onUniqueKeywordsChanged = pyqtSignal(object)
     onSemanticLabelsChanged = pyqtSignal(object)
@@ -687,6 +691,12 @@ class ClassificationObject(IProjectContainer, IHasName):
         return CLASSIFICATION_OBJECT
 
     def serialize(self):
+        if self.semantic_segmentation_labels[0] != "":
+            semseg_serialization = dict(model=self.semantic_segmentation_labels[0],
+                                        labels=[dict(name=LIPLabels(t).name, label=t) for t in self.semantic_segmentation_labels[1]])
+        else:
+            semseg_serialization = None
+
         serialization = dict(
             name=self.name,
             unique_id = self.unique_id,
@@ -695,7 +705,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             unique_keywords =  [k.serialize() for k in self.unique_keywords],
             target_container = [k.unique_id for k in self.target_container],
             children = [c.unique_id for c in self.children],
-            semantic_segmentation_labels = self.semantic_segmentation_labels
+            semantic_segmentation_labels = semseg_serialization
         )
 
         return serialization
@@ -740,7 +750,14 @@ class ClassificationObject(IProjectContainer, IHasName):
             if t is not None:
                 self.target_container.append(t)
         try:
-            self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
+            try:
+                self.semantic_segmentation_labels = (serialization['semantic_segmentation_labels']['model'],
+                                                     [t['label'] for t in serialization['semantic_segmentation_labels']['labels']])
+            except Exception as e:
+                print(e)
+                self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
+
+            print(self.semantic_segmentation_labels)
         except Exception as e:
             log_error("Exception in deserialize", e)
 
@@ -779,22 +796,24 @@ class UniqueKeyword(IProjectContainer):
     def serialize(self):
         data = dict(
             unique_id = self.unique_id,
-            voc_obj = self.voc_obj.unique_id,
+            # voc_obj = self.voc_obj.unique_id,
             word_obj = self.word_obj.unique_id,
             class_obj = self.class_obj.unique_id,
-            external_id = self.external_id
+            vian_webapp_external_id = self.external_id
         )
 
         return data
 
     def deserialize(self, serialization, project):
         self.unique_id = serialization['unique_id']
-        self.voc_obj = project.get_by_id(serialization['voc_obj'])
         self.word_obj = project.get_by_id(serialization['word_obj'])
+        self.voc_obj = self.word_obj.vocabulary
+
+        # self.voc_obj = project.get_by_id(serialization['voc_obj'])
         self.class_obj = project.get_by_id(serialization['class_obj'])
 
         try:
-            self.external_id = serialization['external_id']
+            self.external_id = deprecation_serialization(serialization,['vian_webapp_external_id', 'external_id'])
         except:
             pass
 
@@ -1087,7 +1106,7 @@ class Experiment(IProjectContainer, IHasName):
             unique_id = self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
-            classification_results = [(c[0].unique_id, c[1].unique_id) for c in self.classification_results],
+            classification_results = [dict(target=c[0].unique_id, keyword=c[1].unique_id) for c in self.classification_results],
             pipeline_script = pipeline_script
         )
         return data
@@ -1163,9 +1182,16 @@ class Experiment(IProjectContainer, IHasName):
                 keywords[k.unique_id] = k
 
             for ser in serialization['classification_results']:
-                c = project.get_by_id(ser[0])
                 try:
-                    k = keywords[ser[1]]
+                    target_uuid = ser['target']
+                    keyword_uuid = ser['keyword']
+                except:
+                    target_uuid = ser[0]
+                    keyword_uuid = ser[1]
+
+                c = project.get_by_id(target_uuid)
+                try:
+                    k = keywords[keyword_uuid]
                 except:
                     k = None
                 if c is not None and k is not None:

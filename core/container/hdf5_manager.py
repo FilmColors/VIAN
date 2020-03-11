@@ -109,6 +109,15 @@ class HDF5Manager():
             self._index[dataset_name] += 1
             self.h5_file.flush()
 
+    def location_of(self, uuid):
+        try:
+            (dataset, pos) = self._uid_index[uuid]
+            return dict(hdf5_dataset=dataset, hdf5_index = pos)
+        except Exception as e:
+            log_info(e)
+            return None
+
+
     def load(self, unique_id):
         if self.h5_file is None:
             raise IOError("HDF5 File not opened yet")

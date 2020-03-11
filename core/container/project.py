@@ -1010,7 +1010,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         screenshots_img = []
         screenshots_ann = []
         segmentations = []
-        analyzes = []
+        analyses = []
         screenshot_groups = []
         scripts = []
         experiments = []
@@ -1033,7 +1033,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             segmentations.append(c.serialize())
 
         for d in project.analysis:
-            analyzes.append(d.serialize())
+            analyses.append(d.serialize())
 
         for e in project.screenshot_groups:
             screenshot_groups.append(e.serialize())
@@ -1071,7 +1071,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             main_segmentation_index=project.main_segmentation_index,
             screenshots=screenshots,
             segmentation=segmentations,
-            analyzes=analyzes,
+            analyses=analyses,
             movie_descriptor=project.movie_descriptor.serialize(),
             version=version.__version__,
             screenshot_groups=screenshot_groups,
@@ -1290,13 +1290,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 self.add_experiment(new)
 
         except Exception as e:
-            # raise e
             print("Exception in Load Experiment", e)
 
-        for d in my_dict['analyzes']:
+        # Renaming the old analyzes to analyses due to a typo
+        analyses_fix = "analyses"
+        if analyses_fix not in my_dict:
+            analyses_fix = "analyzes"
+        for d in my_dict[analyses_fix]:
             if d is not None:
                 try:
-                    new = eval(d['analysis_container_class'])().deserialize(d, self)
+                    t = deprecation_serialization(d, ['vian_serialization_type', 'analysis_container_class'])
+                    new = eval(t)().deserialize(d, self)
                     if isinstance(new, ColormetryAnalysis):
                         try:
                             # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
@@ -1311,17 +1315,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         self.add_analysis(new)
                 except Exception as e:
                     print("Exception in Load Analyses", str(e))
-
-        # Finalizing the Project, Hooking up the ID Connections
-        # Connecting the NodeScriptAnalysis Objects to their Final Nodes
-        # for a in self.analysis:
-        #     if isinstance(a, NodeScriptAnalysis):
-        #         for i, res in enumerate(a.data):
-        #             node = self.get_by_id(a.final_node_ids[i])
-        #             if node is not None:
-        #                 node.operation.result = res
-
-        # self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
 
         if self.colormetry_analysis is not None:
             if not self.hdf5_manager.has_colorimetry():
