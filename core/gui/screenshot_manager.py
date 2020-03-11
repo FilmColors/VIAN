@@ -895,13 +895,17 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         # If there are selected Screenshots, only export those,
         # Else export all
-        if len(self.selected) == 0:
-            for item in self.images_plain:
-                screenshots.append(item.screenshot_obj)
+        selection = []
+        for s in self.project.selected:
+            if isinstance(s, Screenshot):
+                selection.append(s)
+
+        if len(selection) == 0:
+            for item in self.project.screenshots:
+                screenshots.append(item)
             self.main_window.print_message("No Screenshots selected, exporting all Screenshots", "red")
         else:
-            for item in self.selected:
-                screenshots.append(item.screenshot_obj)
+            screenshots = selection
 
         try:
             if not os.path.isdir(path):
