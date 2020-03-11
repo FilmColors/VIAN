@@ -207,6 +207,14 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         )
         return data
 
+    def get_hdf5_description(self):
+        return dict(
+            title = "Semantic Segmentation",
+            description = "A list of semantic segmentation masks ",
+            color_space = "BGR",
+            dimensions = "An array of bitmasks"
+        )
+
     def to_hdf5(self, data):
         entry = np.zeros(self.dataset_shape, self.dataset_dtype)
 

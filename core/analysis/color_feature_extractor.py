@@ -238,6 +238,24 @@ class ColorFeatureAnalysis(IAnalysisJob):
              )
         return d
 
+    def get_hdf5_description(self):
+        return dict(
+            title = "Average Color Values",
+            description = "Contains a list of average color values. ",
+            color_space = "CIELab, BGR",
+            dimensions = "1st: index of the feature vector \\ "
+                         " [0]: Average Value: Luminance (CIELab) {0.0, ..., 100.0 }\\"
+                         " [1] Average Value: A-Channel (CIELab) {-128.0, ..., 128.0}\\"
+                         " [2] Average Value: B-Channel (CIELab) {-128.0, ..., 128.0}\\"
+                         " [3] Average Value: B-Channel (BGR) {0, ..., 255}\\"
+                         " [4] Average Value: G-Channel (BGR) {0, ..., 255}\\"
+                         " [5] Average Value: R-Channel (BGR) {0, ..., 255}\\"
+                         " [6] Average Value: Luebbe Saturation (BGR) {0, ..., 1.0}, "
+                         "(Deprecated, this will be removed at some point)\\"
+                         " [7] Average Value: Experimental Saturation (BGR) {0, ..., 1.0}, "
+                         "(Deprecated, this will be removed at some point)\\"
+        )
+
     def to_hdf5(self, data):
         d = np.zeros(shape=8)
         d[0:3] = np.array(data["color_lab"])

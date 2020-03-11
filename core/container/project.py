@@ -631,10 +631,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Analysis
-    def create_node_analysis(self, name, result, script_id, final_node_ids):
-        analysis = NodeScriptAnalysis(name, result, script_id, final_node_ids)
-        self.add_analysis(analysis)
-        return analysis
+    # def create_node_analysis(self, name, result, script_id, final_node_ids):
+    #     analysis = NodeScriptAnalysis(name, result, script_id, final_node_ids)
+    #     self.add_analysis(analysis)
+    #     return analysis
 
     def add_analysis(self, analysis:AnalysisContainer, dispatch = False) -> AnalysisContainer:
         """
@@ -1311,14 +1311,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         self.add_analysis(new)
                 except Exception as e:
                     print("Exception in Load Analyses", str(e))
+
         # Finalizing the Project, Hooking up the ID Connections
         # Connecting the NodeScriptAnalysis Objects to their Final Nodes
-        for a in self.analysis:
-            if isinstance(a, NodeScriptAnalysis):
-                for i, res in enumerate(a.data):
-                    node = self.get_by_id(a.final_node_ids[i])
-                    if node is not None:
-                        node.operation.result = res
+        # for a in self.analysis:
+        #     if isinstance(a, NodeScriptAnalysis):
+        #         for i, res in enumerate(a.data):
+        #             node = self.get_by_id(a.final_node_ids[i])
+        #             if node is not None:
+        #                 node.operation.result = res
 
         # self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
 

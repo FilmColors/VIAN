@@ -159,6 +159,16 @@ class ColorHistogramAnalysis(IAnalysisJob):
     def deserialize(self, data_dict):
         return data_dict
 
+    def get_hdf5_description(self):
+        return dict(
+            title = "CIE-Lab Color Histograms",
+            description = "Contains a list of color histograms in CIELab colorspace. ",
+            dimensions = "1st: index of the histogram\\ "
+                         "2nd: Bins Luminance {0.0, ..., 100.0} \\"
+                         "3rd: Bins A-Channel {-128.0, ..., 128.0}\\"
+                         "4th: Bins B-Channel {-128.0, ..., 128.0}\\"
+        )
+
     def to_hdf5(self, data):
         return data
 

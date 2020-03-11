@@ -104,7 +104,6 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         else:
             self.parameters = []
         self.target_classification_object = target_classification_object
-        # Evaluated self.analysis-job_class
         self.a_class = None
 
     def get_preview(self):
@@ -160,18 +159,11 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         self.analysis_job_class = serialization['analysis_job_class']
         self.notes = serialization['notes']
 
-        # VERSION > 0.6.8
         try:
-            # clobj = project.get_by_id(serialization['classification_obj'])
-            # if clobj is not None:
             self.target_classification_object = project.get_by_id(serialization['classification_obj'])
         except Exception as e:
             log_error("Exception in IAnalysisContainerAnalysis.deserialize()", e)
             pass
-
-        # self.data = []
-        # t = streamer.project.main_window.eval_class(self.analysis_job_class)
-        # self.data = t().deserialize(streamer.sync_load(self.unique_id))
         self.parameters = serialization['parameters']
 
         self.set_target_container(project.get_by_id(serialization['container']))
@@ -202,92 +194,6 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def cleanup(self):
         if self.target_container is not None:
             self.target_container.remove_analysis(self)
-
-
-class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
-    def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
-        super(NodeScriptAnalysis, self).__init__(name, results)
-        self.script_id = script_id
-        self.final_node_ids = final_nodes_ids
-        self.analysis_job_class = "NodeScript"
-
-    def get_type(self):
-        return ANALYSIS_NODE_SCRIPT
-
-    def serialize(self):
-        data_json = []
-
-        try:
-            #Loop over each final node of the Script
-            for i, n in enumerate(self.data):
-                node_id = self.final_node_ids[i]
-                node_result = []
-                result_dtypes = []
-
-                # Loop over each result in the final node
-                for d in n:
-                    if isinstance(d, np.ndarray):
-                        node_result.append(d.tolist())
-                        result_dtypes.append(str(d.dtype))
-                    elif isinstance(d, list):
-                        node_result.append(d)
-                        result_dtypes.append("list")
-                    else:
-                        node_result.append(np.array(d).tolist())
-                        result_dtypes.append(str(np.array(d).dtype))
-                data_json.append([node_id, node_result, result_dtypes])
-
-            # We want to store the analysis container if it is not already stored
-
-            # self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
-        except Exception as e:
-            log_error("Exception in NodeScriptAnalysis.serialize(): ", str(e))
-
-        data = dict(
-            name=self.name,
-            analysis_container_class = self.__class__.__name__,
-            unique_id=self.unique_id,
-            script_id=self.script_id,
-            # data_json=data_json,
-            notes=self.notes
-        )
-
-        return data
-
-    def deserialize(self, serialization, streamer):
-        self.name = serialization['name']
-        self.unique_id = serialization['unique_id']
-        self.notes = serialization['notes']
-        self.script_id = serialization['script_id']
-
-        self.final_node_ids = []
-        self.data = []
-        try:
-            # data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
-            data_json = None
-            #TODO Numpy Storing obsolete for Scripts
-            # Loop over each final node of the Script
-            for r in data_json:
-
-                node_id = r[0]
-                node_results = r[1]
-                result_dtypes = r[2]
-
-                node_data = []
-                self.final_node_ids.append(node_id)
-
-                # Loop over each Result of the Final Node
-                for j, res in enumerate(node_results):
-                    if result_dtypes[j] == "list":
-                        node_data.append(res)
-                    else:
-                        node_data.append(np.array(res, dtype=result_dtypes[j]))
-
-                    self.data.append(node_data)
-        except Exception as e:
-            log_error("Exception in analysis deserialiation", e)
-
-        return self
 
 
 class FileAnalysis(IAnalysisJobAnalysis):
@@ -580,6 +486,90 @@ class PipelineScript(IProjectContainer, IHasName):
         return self.name == other.name and self.script == other.script
 
 
+# class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
+#     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
+#         super(NodeScriptAnalysis, self).__init__(name, results)
+#         self.script_id = script_id
+#         self.final_node_ids = final_nodes_ids
+#         self.analysis_job_class = "NodeScript"
+#
+#     def get_type(self):
+#         return ANALYSIS_NODE_SCRIPT
+#
+#     def serialize(self):
+#         data_json = []
+#
+#         try:
+#             #Loop over each final node of the Script
+#             for i, n in enumerate(self.data):
+#                 node_id = self.final_node_ids[i]
+#                 node_result = []
+#                 result_dtypes = []
+#
+#                 # Loop over each result in the final node
+#                 for d in n:
+#                     if isinstance(d, np.ndarray):
+#                         node_result.append(d.tolist())
+#                         result_dtypes.append(str(d.dtype))
+#                     elif isinstance(d, list):
+#                         node_result.append(d)
+#                         result_dtypes.append("list")
+#                     else:
+#                         node_result.append(np.array(d).tolist())
+#                         result_dtypes.append(str(np.array(d).dtype))
+#                 data_json.append([node_id, node_result, result_dtypes])
+#
+#             # We want to store the analysis container if it is not already stored
+#
+#             # self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
+#         except Exception as e:
+#             log_error("Exception in NodeScriptAnalysis.serialize(): ", str(e))
+#
+#         data = dict(
+#             name=self.name,
+#             analysis_container_class = self.__class__.__name__,
+#             unique_id=self.unique_id,
+#             script_id=self.script_id,
+#             # data_json=data_json,
+#             notes=self.notes
+#         )
+#
+#         return data
+#
+#     def deserialize(self, serialization, streamer):
+#         self.name = serialization['name']
+#         self.unique_id = serialization['unique_id']
+#         self.notes = serialization['notes']
+#         self.script_id = serialization['script_id']
+#
+#         self.final_node_ids = []
+#         self.data = []
+#         try:
+#             # data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
+#             data_json = None
+#             #TODO Numpy Storing obsolete for Scripts
+#             # Loop over each final node of the Script
+#             for r in data_json:
+#
+#                 node_id = r[0]
+#                 node_results = r[1]
+#                 result_dtypes = r[2]
+#
+#                 node_data = []
+#                 self.final_node_ids.append(node_id)
+#
+#                 # Loop over each Result of the Final Node
+#                 for j, res in enumerate(node_results):
+#                     if result_dtypes[j] == "list":
+#                         node_data.append(res)
+#                     else:
+#                         node_data.append(np.array(res, dtype=result_dtypes[j]))
+#
+#                     self.data.append(node_data)
+#         except Exception as e:
+#             log_error("Exception in analysis deserialiation", e)
+#
+#         return self
 
 
 

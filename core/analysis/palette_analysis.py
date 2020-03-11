@@ -202,6 +202,21 @@ class ColorPaletteAnalysis(IAnalysisJob):
         ]
         return dict(dist = data_dict['dist'], tree=layers)
 
+    def get_hdf5_description(self):
+        return dict(
+            title = "Average Color Values",
+            description = "A bottom-up color palette clustering. ",
+            color_space = "BGR, computed in CIELab",
+            dimensions = "1st: index of the feature vector \\ "
+                         "2nd: Palette Clusters\\"
+                         " [0]: Merge Distance\\"
+                         " [1]: Merge Depth"
+                         " [3] Cluster Color: B-Channel (BGR) {0, ..., 255}\\"
+                         " [4] Cluster Color: G-Channel (BGR) {0, ..., 255}\\"
+                         " [5] Cluster Color: R-Channel (BGR) {0, ..., 255}\\"
+                         " [6] Number of Colors"
+        )
+
     def to_hdf5(self, data):
         d = np.zeros(shape=(COLOR_PALETTES_MAX_LENGTH, 6))
         count = COLOR_PALETTES_MAX_LENGTH

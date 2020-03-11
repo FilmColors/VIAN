@@ -219,6 +219,14 @@ class IAnalysisJob(QObject):
         """
         return data_dict
 
+    def get_hdf5_description(self):
+        """
+        Returns an HDF5.Attributes dictionary describing the content of the HDF5 file.
+
+        :return: dict
+        """
+        return dict()
+
     def fit(self, targets, class_objs = None, callback=None) -> AnalysisContainer:
         """
         Performs the analysis for given target containers and classification objects.

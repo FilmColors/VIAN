@@ -79,13 +79,17 @@ class HDF5Manager():
             if a().data_serialization == DataSerialization.FILE:
                 continue
             c = a()
-            self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype)
+            self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype, c.get_hdf5_description())
 
-    def initialize_dataset(self, name, shape, dtype):
+    def initialize_dataset(self, name, shape, dtype, attrs):
         if name not in self.h5_file:
             log_info("Init:", name, shape, dtype)
             self.h5_file.create_dataset(name=name, shape=shape, dtype=dtype, maxshape=(None, ) + shape[1:], chunks=True)
             self._index[name] = 0
+            for k, v in attrs.items():
+                self.h5_file[name].attrs[k] = v
+            print("HDF5 Attributes:")
+            print(self.h5_file[name].attrs)
 
     def dump(self, d, dataset_name, unique_id):
         with HDF5_WRITE_LOCK:
