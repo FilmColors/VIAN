@@ -15,6 +15,11 @@ class AnnotationBody(QObject):
             mime_type = self.MIMETYPE_TEXT_PLAIN
         self.mime_type = mime_type
 
+    def from_string(self, s):
+        self.content = s
+        self.mime_type = self.MIMETYPE_TEXT_PLAIN
+        return self
+
     def serialize(self):
         return dict(
             unique_id=self.unique_id,

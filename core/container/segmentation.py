@@ -488,11 +488,18 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
         if 'annotation_body' in serialization:
             try:
-                self.annotation_body = AnnotationBody().deserialize(serialization['annotation_body'][0]).content
-            except:
+                if isinstance(serialization['annotation_body'], str):
+                    serialization['annotation_body'] = serialization['annotation_body']
+                elif isinstance(serialization['annotation_body'], dict):
+                    self.annotation_body = AnnotationBody().deserialize(serialization['annotation_body']).content
+                else:
+                    self.annotation_body = AnnotationBody().deserialize(serialization['annotation_body'][0]).content
+            except Exception as e:
+                raise e
                 self.annotation_body = serialization['annotation_body']
         else:
             self.annotation_body = ""
+
 
         try:
             for w in serialization["media_objects"]:
@@ -507,6 +514,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             log_error(e)
 
         return self
+
 
     def get_type(self):
         return SEGMENT

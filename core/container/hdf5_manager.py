@@ -128,7 +128,7 @@ class HDF5Manager():
     def get_location(self, unique_id):
         if self.h5_file is None:
             raise IOError("HDF5 File not opened yet")
-        pos = self._uid_index[unique_id]
+        pos = self._uid_index[str(unique_id)]
         return pos
 
     def set_indices(self, d):
