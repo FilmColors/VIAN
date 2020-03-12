@@ -10,11 +10,14 @@ from flask import Flask, render_template, send_file, url_for
 from core.gui.ewidgetbase import EDockWidget
 from core.container.project import VIANProject, Screenshot, Segment
 from core.analysis.analysis_import import ColorFeatureAnalysis
-from core.data.computation import lab_to_lch, lab_to_sat
+from core.data.computation import lab_to_lch, lab_to_sat, ms2datetime
 
 app = Flask(__name__)
 app.root_path = os.path.split(__file__)[0]
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 class ScreenshotData:
@@ -28,6 +31,7 @@ class ScreenshotData:
         self.hue = []
         self.time = []
         self.uuids = []
+
 
 class ServerData:
     def __init__(self):
@@ -72,7 +76,7 @@ class ServerData:
                 a.append(d[1])
                 b.append(d[2])
                 uuids.append(s.unique_id)
-                time.append(s.get_start())
+                time.append(ms2datetime(s.get_start()))
                 lch = lab_to_lch(arr)
                 luminance.append(float(arr[0]))
                 chroma.append(float(lch[1]))
@@ -87,6 +91,7 @@ class ServerData:
         data.luminance = luminance
         data.saturation = saturation
         data.hue = hue
+        data.time = time
 
         data.uuids = uuids
 
@@ -96,9 +101,12 @@ class ServerData:
 
 
     def screenshot_url(self, s:Screenshot = None, uuid = None):
+        if self.project is None:
+            return
         if uuid is None:
             return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), s.unique_id + ".jpg")
         return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), uuid + ".jpg")
+
 
     def export_screenshots(self):
         ps = []
@@ -113,6 +121,11 @@ class ServerData:
                     cv2.imwrite(p, s.img_movie)
                 ps.append(p)
         return ps
+
+    def clear(self):
+        self.project = None #type: VIANProject
+        self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
+
 
 
 _server_data = ServerData()
@@ -134,7 +147,7 @@ class FlaskServer(QObject):
 
     def on_closed(self):
         global _server_data
-        _server_data.project = None
+        _server_data.clear()
 
     def on_changed(self, project, item):
         pass
@@ -154,10 +167,16 @@ class FlaskWebWidget(EDockWidget):
         self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
         self.setWidget(self.view)
 
+
     def set_url(self, url):
         QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
         QWebEngineProfile.defaultProfile().clearHttpCache()
         self.view.setUrl(QUrl(url))
+        self.view.reload()
+
+    def reload(self):
+        print("Reload")
+        self.view.reload()
 
 
 @app.route("/")
@@ -190,9 +209,7 @@ def screenshot_data():
     if _server_data.project is None:
         return dict(changes=False, data = ScreenshotData().__dict__)
     else:
-        print("polling")
         if _server_data._screenshot_cache['has_changed']:
-            print("Changed")
             _server_data._screenshot_cache['data'].urls = [url_for("screenshot", uuid=u) for u in _server_data._screenshot_cache['data'].uuids]
             _server_data._screenshot_cache['has_changed'] = False
             return dict(changes=True, data=_server_data._screenshot_cache['data'].__dict__)

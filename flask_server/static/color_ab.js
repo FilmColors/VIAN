@@ -14,8 +14,10 @@ class ColorAB {
             tools: "pan,wheel_zoom,box_zoom,reset,save",
             height: 300,
             width: 300,
+            x_axis_label: "A-Channel",
+            y_axis_label: "Y-Channel", 
             x_range: new Bokeh.Range1d({ start: -128, end: 128 }),
-            y_range: new Bokeh.Range1d({ start: -128, end: 128 })
+            y_range: new Bokeh.Range1d({ start: -128, end: 128 }), 
         });
 
 
@@ -33,13 +35,11 @@ class ColorAB {
             w: 20,
             h: 20 * this.aspect,
             anchor: "center",
-            global_alpha: 0.2,
+            // global_alpha: 0.2,
             source: this.source
             });
         r.glyph.h.units = "screen"
         r.glyph.w.units = "screen"
-
-        console.log(r)
 
         this.q = 20
         for (var i = 0; i < 10; i++) {
@@ -67,7 +67,7 @@ class ColorAB {
             },
             error: function (error, timeout) {
                 console.log(error);
-            }
+            },
             complete: function(){
                 setTimeout(function(){that.poll(pollTime); }, pollTime);
             }

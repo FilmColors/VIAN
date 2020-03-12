@@ -2,6 +2,7 @@
 The Computation Module contains a list of often used operations in VIAN.
 These operations can be of arbitrary type and are not categorized. 
 """
+from datetime import datetime
 
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
@@ -27,6 +28,10 @@ import math
 def tuple2point(tpl):
     return QtCore.QPoint(tpl[0], tpl[1])
 
+
+def ms2datetime(time_ms):
+    return time_ms
+    return datetime.utcfromtimestamp(int(time_ms / 1000))
 
 def cart2pol(x, y):
     """

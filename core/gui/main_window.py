@@ -1307,6 +1307,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.allow_dispatch_on_change = True
         self.dispatch_on_changed()
+        if isinstance(job, LoadScreenshotsJob):
+            self.web_view.reload()
         # print(self.thread_pool.)
         # progress.deleteLater()
 
@@ -1413,6 +1415,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.experiment_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.query_widget)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.web_view)
+            
 
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)

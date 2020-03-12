@@ -515,7 +515,6 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
         return self
 
-
     def get_type(self):
         return SEGMENT
 

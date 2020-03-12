@@ -2,11 +2,13 @@
 
 class ColorDT {
     constructor(divName) {
+
         this.divName = divName;
         this.grid_col = "rgb(255,255,255)"
         this.background = "rgb(17,17,17)"
 
-        this.source = new Bokeh.ColumnDataSource({data:{url : [],
+        this.source = new Bokeh.ColumnDataSource({data:{
+            url : [],
             x : [],
             y : [],
             sat: [],
@@ -16,7 +18,6 @@ class ColorDT {
             a: [], 
             b: [], 
             // scene_ids : [],
-            image:  []
         }});
 
         this.menu = [("Saturation", "Saturation"), ("Chroma", "Chroma"), ("Hue", "Hue"), ("Luminance", "Luminance"), ("A-Channel", "A-Channel"), ("B-Channel", "B-Channel")]
@@ -24,13 +25,13 @@ class ColorDT {
 
         var that = this;
         this.dropdown.change.connect(function(){that.parameterChanged(that.source, that.dropdown)})
-        console.log(this.dropdown)
         this.plot = Bokeh.Plotting.figure({
             title:'Color dT',
             tools: "pan,wheel_zoom,box_zoom,reset,save",
             height: 500,
             width: 1200,
-            // x_axis_type: "datetime"
+            x_axis_type: "datetime",
+            y_axis_label: "Saturation", 
         });
 
         
@@ -42,18 +43,39 @@ class ColorDT {
         this.plot.border_fill_alpha = 0.0
         this.plot.sizing_mode = "scale_width"
         this.aspect = 9.0 / 16
+        
+        this.plot.below[0].axis_label = "Time"
+        // seconds = ['%Ss']
+        
+        let args = {
+            seconds: ['%Ss'],
+            minsec: [':%M:%S'],
+            minutes: [':%M', '%Mm'],
+            hourmin: ['%H:%M'],
+            hours: ['%Hh', '%H:%M']
+        }
+        args = {
+            seconds:['%Ss'], minutes:["%H:%M:%S"], hours:["%H"], hourmin:["%H:%M:%S"],
+                                                 months:["%H:%M:%S"], years:["%H:%M:%S"]
+        }
+        let f = new Bokeh.DatetimeTickFormatter(args)
+        // console.log(f)
 
+        this.plot.below[0].formatter = f;
+        // this.plot.left[0]
+       
 
-        var r = this.plot.image_url({url: { field: "image" },x: { field: "x" },y: { field: "y" },
+        var r = this.plot.image_url({url: { field: "url" },x: { field: "x" },y: { field: "y" },
             w: 20,
             h: 20 * this.aspect,
             anchor: "center",
-            global_alpha: 0.2,
+            // global_alpha: 0.2,
             source: this.source
             });
         r.glyph.h.units = "screen"
         r.glyph.w.units = "screen"
-
+        
+        console.log(this.plot);
         var doc = new Bokeh.Document();
         doc.add_root(new Bokeh.Column({children: [this.dropdown, this.plot], sizing_mode: "scale_width"}));
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
@@ -68,8 +90,12 @@ class ColorDT {
             dataType: 'json',
             url: "/screenshot-data/",
             success: function (e) {
-                console.log(e)
-                if (e.changes || that.source.data.x.length == 0) {
+                if (that.source.data.x.length != e.data.time.length) {
+                    let time = []
+                    for (var i = 0; i < e.data.time.length; i++){
+                        time.push(new Date(e.data.time[i]))
+                    }
+
                     that.source.data.x = e.data.time;
                     that.source.data.y = e.data.luminance;
 
@@ -81,12 +107,12 @@ class ColorDT {
                     that.source.data.a = e.data.a;
                     that.source.data.b = e.data.b;
 
-                    that.source.data.image = e.data.urls
+                    that.source.data.url = e.data.urls
                 }
             },
             error: function (error, timeout) {
                 console.log(error);
-            }
+            },
             complete: function(){
                 setTimeout(function(){that.poll(pollTime); }, pollTime);
             }
