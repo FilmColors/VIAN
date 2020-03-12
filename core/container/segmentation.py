@@ -4,7 +4,7 @@ from core.container.container_interfaces import IProjectContainer, IHasName, ISe
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
 from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
-
+from .annotation_body import AnnotationBody
 
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     """
@@ -457,7 +457,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
              end_ms = self.end,
 
              name = self.name,
-             annotation_body = self.annotation_body,
+             annotation_body = [AnnotationBody(content=self.annotation_body).serialize()],
              notes = self.notes,
              locked = self.locked,
              media_objects = media_objects
@@ -487,7 +487,10 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             self.locked = False
 
         if 'annotation_body' in serialization:
-            self.annotation_body = serialization['annotation_body']
+            try:
+                self.annotation_body = AnnotationBody().deserialize(serialization['annotation_body'][0]).content
+            except:
+                self.annotation_body = serialization['annotation_body']
         else:
             self.annotation_body = ""
 

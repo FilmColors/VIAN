@@ -1197,7 +1197,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.profiler.disable()
             self.profiler.dump_stats("Profile.prof")
 
-
         QCoreApplication.quit()
         return True
 

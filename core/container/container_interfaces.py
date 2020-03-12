@@ -2,25 +2,16 @@
 In this Module, all interfaces used by VIAN are defined.
 """
 import os
-
+from uuid import uuid4
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import GENERIC
 from core.data.log import log_error, log_warning
+from .annotation_body import AnnotationBody
+
 
 _VIAN_ROOT = os.path.abspath(os.path.split( __file__)[0] + "/../..")
 print(_VIAN_ROOT,  os.path.split( __file__)[0] + "/../..")
 
-class AnnotationBody(QObject):
-    MIMETYPE_TEXT_PLAIN = "text/plain"
-    MIMETYPE_TEXT_RICH = "text/rich"
-
-    def __init__(self, content, mime_type = None):
-        super(AnnotationBody, self).__init__()
-        self.content = content
-
-        if mime_type is None:
-            mime_type = self.MIMETYPE_TEXT_PLAIN
-        self.mime_type = mime_type
 
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)

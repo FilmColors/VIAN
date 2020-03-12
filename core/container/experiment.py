@@ -754,13 +754,15 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.semantic_segmentation_labels = (serialization['semantic_segmentation_labels']['model'],
                                                      [t['label'] for t in serialization['semantic_segmentation_labels']['labels']])
             except Exception as e:
-                print(e)
+                print("Exception in SemanticSegmentation Deserializiation", e)
                 self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
+
 
             print(self.semantic_segmentation_labels)
         except Exception as e:
             log_error("Exception in deserialize", e)
-
+        if self.semantic_segmentation_labels is None:
+            self.semantic_segmentation_labels = ("", [])
         return self
 
 
