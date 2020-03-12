@@ -242,7 +242,7 @@ class Player_VLC(VideoPlayer):
     def __init__(self, main_window):
         super(Player_VLC, self).__init__(main_window)
 
-        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --quiet --no-embedded-video" #--verbose 0
+        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat" #--verbose 0
         self.media_player = None
         self.vlc_instance = None
         # self.media_player = self.vlc_instance.media_player_new()
@@ -464,8 +464,10 @@ class Player_VLC(VideoPlayer):
             time = self.duration - 1
         if self.media_player is None:
             return
+
         self.media_player.set_time(int(time))
         self.timeChanged.emit(time)
+
         self.last_set_frame = time
 
     def get_media_time(self):

@@ -35,8 +35,6 @@ class ColorDT {
         });
 
         
-        this.plot.center[0].grid_line_alpha = 0.0
-        this.plot.center[1].grid_line_alpha = 0.0
 
         this.plot.background_fill_color = this.background
         this.plot.background_fill_alpha = 0.0
@@ -118,6 +116,21 @@ class ColorDT {
             }
 
         });
+    }
+
+    setBackgroundColor(r, g, b){
+        let col = "rgb(" + r + "," + g + "," + b + ")";
+
+        this.plot.background_fill_color = col;
+
+        if (r < 100){
+            this.plot.background_fill_alpha = 0.0;
+            this.plot.border_fill_alpha = 0.0;
+        }else{
+            this.plot.background_fill_alpha = 1.0;
+            this.plot.border_fill_alpha = 1.0;
+        }
+        console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
     }
 
     parameterChanged(source, dropdown){

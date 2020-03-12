@@ -58,7 +58,6 @@ class ServerData:
 
 
     def update_screenshot_data(self):
-        print("Updating Screenshot Data")
         a = []
         b = []
         chroma = []
@@ -138,7 +137,6 @@ class FlaskServer(QObject):
 
     @pyqtSlot()
     def run_server(self):
-        print("Running Server")
         self.app.run()
 
     def on_loaded(self, project):
@@ -182,16 +180,6 @@ class FlaskWebWidget(EDockWidget):
 @app.route("/")
 def index():
     return render_template("color_dt.tmpl.html")
-
-
-# @app.route("/color-ab-plot")
-# def color_ab_plot():
-#     return render_template("color_ab.tmpl.html")
-#
-#
-# @app.route("/color-dt-plot")
-# def color_dt_plot():
-#     return render_template("color_dt.tmpl.html")
 
 
 @app.route("/screenshot_vis/")

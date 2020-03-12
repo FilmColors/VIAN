@@ -288,6 +288,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_toolbar = PipelineToolbar(self)
 
         self.search_window = SearchWindow(self)
+        self.search_window.hide()
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
@@ -575,6 +576,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowState(Qt.WindowMaximized)
         self.settings.apply_ui_settings()
 
+        # self.set_overlay_visibility(False)
         # This can be used for a oneshot forced command.
         force_file_path = os.path.abspath("install/force.txt")
         if os.path.isfile(force_file_path):

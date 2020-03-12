@@ -5,6 +5,8 @@ class ColorAB {
         this.grid_col = "rgb(255,255,255)"
         this.background = "rgb(17,17,17)"
 
+        this.grid_renderer = []
+
         this.source = new Bokeh.ColumnDataSource({
             data: { x: [], y: [], image: [] }
         });
@@ -43,13 +45,37 @@ class ColorAB {
 
         this.q = 20
         for (var i = 0; i < 10; i++) {
-            this.plot.circle({ x: 0, y: 0, radius: i * this.q, fill_alpha: 0, line_color: this.grid_col, line_alpha: 0.2, line_width: 1.0 })
+            let t = this.plot.circle({ x: 0, y: 0, radius: i * this.q, fill_alpha: 0, line_color: this.grid_col, line_alpha: 0.2, line_width: 1.0 })
+            this.grid_renderer.push(t);
+
         }
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
         this.source.change.emit()
     }
+
+    setBackgroundColor(r, g, b){
+        let col = "rgb(" + r + "," + g + "," + b + ")";
+        let line = "rgb(255,255,255)";
+        if (r + g + b > 300){
+            line = "rgb(0,0,0)"
+        }
+        this.grid_renderer.forEach(function(elem){
+            elem.glyph.line_color = line;
+        });
+        this.plot.background_fill_color = col;
+        this.plot.background_fill_color = col;
+        if (r < 100){
+            this.plot.background_fill_alpha = 0.0;
+            this.plot.border_fill_alpha = 0.0;
+        }else{
+            this.plot.background_fill_alpha = 1.0;
+            this.plot.border_fill_alpha = 1.0;
+        }
+        console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
+    }
+
     poll(pollTime) {
         var that = this;
         this.source.change.emit();
