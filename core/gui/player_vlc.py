@@ -383,6 +383,7 @@ class Player_VLC(VideoPlayer):
         self.set_media_time(0)
         self.pause_timer.start()
 
+        log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
 
         # if self.main_window.is_darwin:
@@ -459,6 +460,8 @@ class Player_VLC(VideoPlayer):
         log_debug(NotImplementedError("Method <set_frame_steps_to_frame_begin> not implemented"))
 
     def set_media_time(self, time):
+        if time > self.duration - 1:
+            time = self.duration - 1
         if self.media_player is None:
             return
         self.media_player.set_time(int(time))
