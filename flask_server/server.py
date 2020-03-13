@@ -178,7 +178,6 @@ class FlaskWebWidget(EDockWidget):
         self.view.setPage(WebPage())
         self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
         self.view.settings().setAttribute(QWebEngineSettings.Accelerated2dCanvasEnabled, True)
-        self.view.settings().setAttribute(QWebEngineSettings.Ext)
         self.setWidget(self.view)
 
 
