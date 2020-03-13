@@ -8,7 +8,7 @@
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
     <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">AB-Plane</a>
     <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Color-dT</a>
-    <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Colorspace 3D</a>
+    <a class="nav-item nav-link" id="nav-3d-palette-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Colorspace 3D</a>
     <a class="nav-item nav-link" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab" aria-controls="nav-settings" aria-selected="false">Settings</a>
   </div>
 </nav>
@@ -26,7 +26,7 @@
       </div>
   </div>
   </div>
-  <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+  <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-3d-palette-tab">
     <div style="padding: 5px;">
     <div id="renderframe"  style="width:100%; height:100%">
       <canvas id="palette-3d" style="width:100%; height:100%"></canvas>
@@ -80,9 +80,31 @@
 <script type="module">
   import * as RENDERER from '/static/threeJsPlot2.js';
   console.log(RENDERER)
-  var plot = new RENDERER.ThreeJSView("palette-3d", "renderframe")
+  var plot = new RENDERER.Palette3D("renderframe", "palette-3d")
   // RENDERER.initScene(env_lines, "palette-3d", "renderframe");
-  plot.animate(env_lines)
+
+  $("#nav-3d-palette-tab").on("click", function(){
+    setTimeout(function(){plot.onWindowResize(); console.log("Hello"); }, 500)
+    
+  })
+
+  plot.animate()
+
+  let rgbs = []
+
+  for ( var i = 0; i < 1000; i ++ ) {
+      var r = Math.random();
+      var g =  Math.random();
+      var b =   Math.random();
+
+      plot.addPoint(
+          Math.floor(255 * r)- 128, 
+          Math.floor(255 * g) - 128, 
+          Math.floor(255 * b)- 128
+          , [r, b, g]);
+  }
+
+  
 
 </script>
 {% endblock %}

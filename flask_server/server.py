@@ -3,13 +3,13 @@ import cv2
 from functools import partial
 
 from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
 
 from flask import Flask, render_template, send_file, url_for
 
 from core.gui.ewidgetbase import EDockWidget
 from core.container.project import VIANProject, Screenshot, Segment
-from core.analysis.analysis_import import ColorFeatureAnalysis
+from core.analysis.analysis_import import ColorFeatureAnalysis, ColorPaletteAnalysis
 from core.data.computation import lab_to_lch, lab_to_sat, ms2datetime
 
 app = Flask(__name__)
@@ -31,6 +31,8 @@ class ScreenshotData:
         self.hue = []
         self.time = []
         self.uuids = []
+
+        # self.palettes = []
 
 
 class ServerData:
@@ -66,6 +68,8 @@ class ServerData:
         time = []
         hue = []
 
+        # palettes = []
+
         uuids = []
         for i, s in enumerate(self.project.screenshots):
             t = s.get_connected_analysis(ColorFeatureAnalysis)
@@ -81,6 +85,10 @@ class ServerData:
                 chroma.append(float(lch[1]))
                 hue.append(float(lch[2]))
                 saturation.append(float(lab_to_sat(arr)))
+
+            # t2 = s.get_connected_analysis(ColorPaletteAnalysis)
+            # if len(t2) > 0:
+            #     arr = t[0].get_adata()
 
         data = ScreenshotData()
 
@@ -157,18 +165,27 @@ class FlaskServer(QObject):
         pass
 
 
+
+class WebPage(QWebEnginePage):
+    def javaScriptConsoleMessage(self, level: 'QWebEnginePage.JavaScriptConsoleMessageLevel', message: str, lineNumber: int, sourceID: str) -> None:
+        print(message)
+
 class FlaskWebWidget(EDockWidget):
     def __init__(self, main_window):
         super(FlaskWebWidget, self).__init__(main_window, False)
         self.setWindowTitle("WebView Debug")
         self.view = QWebEngineView(self)
-        self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
+        self.view.setPage(WebPage())
+        self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
+        self.view.settings().setAttribute(QWebEngineSettings.Accelerated2dCanvasEnabled, True)
+        self.view.settings().setAttribute(QWebEngineSettings.Ext)
         self.setWidget(self.view)
 
 
     def set_url(self, url):
         QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
         QWebEngineProfile.defaultProfile().clearHttpCache()
+
         self.view.setUrl(QUrl(url))
         self.view.reload()
 
@@ -203,8 +220,6 @@ def screenshot_data():
             return dict(changes=True, data=_server_data._screenshot_cache['data'].__dict__)
         else:
             return dict(changes=False, data=_server_data._screenshot_cache['data'].__dict__)
-
-
 
 if __name__ == '__main__':
     app.debug = True

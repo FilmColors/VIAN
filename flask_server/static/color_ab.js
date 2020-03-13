@@ -49,6 +49,7 @@ class ColorAB {
             this.grid_renderer.push(t);
 
         }
+        
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
