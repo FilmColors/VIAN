@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QScrollArea, QFrame, QGridLayout
+from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QScrollArea, QFrame, QGridLayout, QCompleter
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QEvent
 from PyQt5.QtGui import QPixmap, QMouseEvent, QPainter, QColor, QPen
 
-from core.container.project import Segment, VIANProject, Screenshot
+from core.container.project import Segment, VIANProject, Screenshot, UniqueKeyword
 
 class SearchWindow(QMainWindow):
     """
@@ -34,6 +34,8 @@ class SearchWindow(QMainWindow):
         self.project = VIANProject()
 
         self.line_edit_input.textChanged.connect(self.on_search)
+        self.completer = QCompleter()
+        self.keyword_mapping = dict()
 
     def on_search(self):
         if self.project is None:
@@ -70,7 +72,12 @@ class SearchWindow(QMainWindow):
                     result.append((s, "keywords"))
                     break
 
-        print("Results", result)
+        t = self.line_edit_input.text()
+        for k in t.split(" "):
+            if "Keyword:" in k and k in self.keyword_mapping:
+                keyword = self.keyword_mapping[k] #type:UniqueKeyword
+                for c in keyword.tagged_containers:
+                    result.append((c, "keywords"))
         self.show_result(result)
 
     def show_result(self, result):
@@ -93,6 +100,17 @@ class SearchWindow(QMainWindow):
 
     def showEvent(self, a0) -> None:
         super(SearchWindow, self).showEvent(a0)
+        self.keyword_mapping = dict()
+        for e in self.project.experiments:
+            for k in e.get_unique_keywords():
+                self.keyword_mapping["Keyword:" + k.get_full_name()] = k
+
+        self.completer = QCompleter(self.keyword_mapping.keys())
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.completer.setFilterMode(Qt.MatchContains)
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        self.line_edit_input.setCompleter(self.completer)
+
         self.line_edit_input.setFocus()
 
 class ResultWidget(QWidget):

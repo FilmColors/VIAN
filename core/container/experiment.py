@@ -791,7 +791,7 @@ class UniqueKeyword(IProjectContainer):
         return self.word_obj.get_name()
 
     def get_full_name(self):
-        return ":".join([self.class_obj.name, self.voc_obj.name, self.word_obj.name])
+        return ":".join([self.class_obj.name, self.voc_obj.name, self.word_obj.name]).replace(" ", "-")
 
     def serialize(self):
         data = dict(
