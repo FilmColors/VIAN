@@ -47,7 +47,9 @@ class ServerData:
     def __init__(self):
         self.project = None #type: VIANProject
         self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
+
         self._needs_update = False
+        self._project_closed = False
 
     def set_project(self, project:VIANProject):
         self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
@@ -65,6 +67,10 @@ class ServerData:
 
 
     def update(self):
+        if self._project_closed:
+            self._clear()
+            return
+
         if self._needs_update:
             self.update_screenshot_data()
         self._needs_update = False
@@ -157,10 +163,11 @@ class ServerData:
         return ps
 
     def clear(self):
-        self.project = None #type: VIANProject
-        self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
+        self._project_closed = True
 
-
+    def _clear(self):
+        self.project = None  # type: VIANProject
+        self._screenshot_cache = dict(uuids=set(), has_changed=False, data=ScreenshotData())
 
 _server_data = ServerData()
 
@@ -180,6 +187,7 @@ class FlaskServer(QObject):
 
     def on_closed(self):
         global _server_data
+
         _server_data.clear()
 
     def on_changed(self, project, item):

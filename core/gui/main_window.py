@@ -1874,14 +1874,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.worker_manager.on_closed()
 
         if self.project is not None:
+
             if self.project.undo_manager.has_modifications():
                 answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
                 if answer == QMessageBox.Yes:
                     self.on_save_project(sync=True)
 
+            self.flask_server.on_closed()
             self.player.stop()
             self.abortAllConcurrentThreads.emit()
-            self.flask_server.on_closed()
+
             if self.colormetry_running:
                 self.toggle_colormetry()
             self.project.cleanup()

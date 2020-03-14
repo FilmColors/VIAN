@@ -113,6 +113,7 @@ class SearchWindow(QMainWindow):
 
         self.line_edit_input.setFocus()
 
+
 class ResultWidget(QWidget):
     def __init__(self, parent, wnd):
         super(ResultWidget, self).__init__(parent)
