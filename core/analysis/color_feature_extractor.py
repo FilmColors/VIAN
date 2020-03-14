@@ -117,12 +117,10 @@ class ColorFeatureAnalysis(IAnalysisJob):
             cap.set(cv2.CAP_PROP_POS_FRAMES, start)
             c = start
 
-            while (c < stop + self.resolution):
-                if c % self.resolution != 0:
-                    c += 1
-                    continue
-
-                cap.set(cv2.CAP_PROP_POS_FRAMES, c)
+            for i in range(start, stop  + 1, self.resolution):
+                sign_progress((c - start) / ((stop - start) + 1))
+                print(i)
+                cap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = cap.read()
                 if frame is None:
                     break

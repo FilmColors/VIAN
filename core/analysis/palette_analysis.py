@@ -84,13 +84,10 @@ class ColorPaletteAnalysis(IAnalysisJob):
         c = start
 
         model = None
-        while c < stop + self.resolution:
-            if c % self.resolution != 0:
-                c += 1
-                continue
+        for i in range(start, stop + 1, self.resolution):
             sign_progress((c - start) / ((stop - start) + 1))
 
-            cap.set(cv2.CAP_PROP_POS_FRAMES, c)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i )
             ret, frame = cap.read()
 
             if frame is None:
