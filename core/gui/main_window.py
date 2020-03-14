@@ -1881,6 +1881,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.player.stop()
             self.abortAllConcurrentThreads.emit()
+            self.flask_server.on_closed()
             if self.colormetry_running:
                 self.toggle_colormetry()
             self.project.cleanup()

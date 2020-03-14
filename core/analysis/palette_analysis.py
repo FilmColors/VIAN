@@ -241,20 +241,30 @@ def get_palette_at_merge_depth(palette, depth = 10):
     all_bins = t[2]
 
     stored_depths = np.unique(all_depths)
-    indices = np.where(all_depths == stored_depths[depth])[0]
-    n_bins_total = np.sum(all_bins[indices])
-    res = []
+    try:
+        indices = np.where(all_depths == stored_depths[np.clip(depth, 0, stored_depths.shape[0])])[0]
+        n_bins_total = np.sum(all_bins[indices])
+        res = []
 
-    for i in indices:
-        lab = tpl_bgr_to_lab(all_cols[i]).tolist()
-        res.append(dict(
-            bgr = all_cols[i].tolist(),
-            lab = lab,
-            amount = np.round((all_bins[i] / n_bins_total), 4).tolist()
-        ))
+        all_bins /= n_bins_total
+        all_bins = np.round(all_bins, 6)
+        all_bins = np.nan_to_num(all_bins)
 
-    # print(res)
-    return res
+        all_cols = np.nan_to_num(all_cols)
+        all_cols = np.clip(all_cols, 0, 255)
+
+        for i in indices:
+            lab = tpl_bgr_to_lab(all_cols[i]).tolist()
+            amount = float(all_bins[i])
+
+            res.append(dict(
+                bgr = all_cols[i].tolist(),
+                lab = lab,
+                amount = amount
+            ))
+        return res
+    except Exception as e:
+        return None
 
 
 

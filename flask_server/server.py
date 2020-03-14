@@ -1,11 +1,14 @@
 import os
 import cv2
 from functools import partial
+import json
+
+import numpy as np
 
 from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
 from PyQt5 import QtGui
-from flask import Flask, render_template, send_file, url_for
+from flask import Flask, render_template, send_file, url_for, jsonify
 
 from core.gui.ewidgetbase import EDockWidget
 from core.container.project import VIANProject, Screenshot, Segment
@@ -16,12 +19,13 @@ app = Flask(__name__)
 app.root_path = os.path.split(__file__)[0]
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-import logging
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+# import logging
+# log = logging.getLogger('werkzeug')
+# log.setLevel(logging.ERROR)
 
 import mimetypes
 mimetypes.add_type('application/javascript', '.js')
+mimetypes.add_type('application/json', '.json')
 
 
 class ScreenshotData:
@@ -105,18 +109,20 @@ class ServerData:
             t2 = s.get_connected_analysis(ColorPaletteAnalysis)
             if len(t2) > 0:
                 arr = t2[0].get_adata()
-                palettes.extend(get_palette_at_merge_depth(arr, depth = 15))
+                pal = get_palette_at_merge_depth(arr, depth = 15)
+                if pal is not None:
+                    palettes.extend(pal)
 
 
         data = ScreenshotData()
 
-        data.a = a
-        data.b = b
-        data.chroma = chroma
-        data.luminance = luminance
-        data.saturation = saturation
-        data.hue = hue
-        data.time = time
+        data.a = np.nan_to_num(a).tolist()
+        data.b =  np.nan_to_num(b).tolist()
+        data.chroma =  np.nan_to_num(chroma).tolist()
+        data.luminance =  np.nan_to_num(luminance).tolist()
+        data.saturation =  np.nan_to_num(saturation).tolist()
+        data.hue = np.nan_to_num( hue).tolist()
+        data.time =  np.nan_to_num(time).tolist()
 
         data.uuids = uuids
 
@@ -125,14 +131,15 @@ class ServerData:
         self._screenshot_cache['has_changed'] = True
         self._screenshot_cache['data'] = data
         self.export_screenshots()
+        print("Screenshots Updated")
 
 
     def screenshot_url(self, s:Screenshot = None, uuid = None):
         if self.project is None:
             return
         if uuid is None:
-            return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), s.unique_id + ".jpg")
-        return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), uuid + ".jpg")
+            return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(s.unique_id) + ".jpg")
+        return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(uuid) + ".jpg")
 
 
     def export_screenshots(self):
@@ -143,7 +150,7 @@ class ServerData:
 
         for s in self.project.screenshots:
             if s.img_movie.shape[0] > 100:
-                p = os.path.join(rdir, s.unique_id + ".jpg")
+                p = os.path.join(rdir, str(s.unique_id) + ".jpg")
                 if not os.path.isfile(p):
                     cv2.imwrite(p, s.img_movie)
                 ps.append(p)
@@ -243,7 +250,7 @@ def screenshot_data():
         if _server_data._screenshot_cache['has_changed']:
             _server_data._screenshot_cache['data'].urls = [url_for("screenshot", uuid=u) for u in _server_data._screenshot_cache['data'].uuids]
             _server_data._screenshot_cache['has_changed'] = False
-            return dict(changes=True, data=_server_data._screenshot_cache['data'].__dict__)
+            return json.dumps(dict(changes=True, data=_server_data._screenshot_cache['data'].__dict__))
         else:
             return dict(changes=False, data=_server_data._screenshot_cache['data'].__dict__)
 

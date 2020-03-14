@@ -100,18 +100,15 @@
     function pollScreenshot(pollTime) {
       $.ajax({
         type: 'GET',
-        contentType: 'application/json',
         dataType: 'json',
         url: "/screenshot-data/",
         success: function (e) {
           if (e.changes == true) {
             $(document).trigger("screenshotPollUpdate", [e.data]);
           }
-
-
         },
-        error: function (error, timeout) {
-          console.log("Error", error);
+        error: function (jqXHR, textStatus, errorThrown ) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
         },
         complete: function () {
           setTimeout(function () { pollScreenshot(pollTime); }, pollTime);
