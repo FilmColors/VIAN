@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QScrollArea, QFrame, QGridLayout
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QEvent
-from PyQt5.QtGui import QPixmap, QMouseEvent
+from PyQt5.QtGui import QPixmap, QMouseEvent, QPainter, QColor, QPen
 
 from core.container.project import Segment, VIANProject, Screenshot
 
@@ -91,6 +91,9 @@ class SearchWindow(QMainWindow):
         self.main_window.player.set_media_time(container.get_start())
         self.hide()
 
+    def showEvent(self, a0) -> None:
+        super(SearchWindow, self).showEvent(a0)
+        self.line_edit_input.setFocus()
 
 class ResultWidget(QWidget):
     def __init__(self, parent, wnd):
@@ -109,6 +112,7 @@ class ResultWidget(QWidget):
         self.list.layout().addWidget(self.span)
         self.span.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        self.hovered = False
         self.entries = []
 
     def add_entry(self, container, main_window):
@@ -124,6 +128,7 @@ class ResultWidget(QWidget):
         for e in self.entries:
             e.close()
         self.entries = []
+
 
 
 class Entry(QFrame):
@@ -145,6 +150,7 @@ class Entry(QFrame):
         self.label.setText(str(self.container.__class__.__name__) + ": " + self.container.get_name())
 
         self.project = VIANProject
+        self.hovered = False
         if isinstance(self.container, Segment):
             for i, t in enumerate(self.container.project.get_screenshots_of_segment(self.container)):
                 (qimage, qpixmap) = t.get_preview()
@@ -165,12 +171,30 @@ class Entry(QFrame):
         lbl_notes = QLabel("Notes: " + self.container.get_notes(), self)
         self.layout().addWidget(lbl_notes)
 
+    def paintEvent(self, a0) -> None:
+        super(Entry, self).paintEvent(a0)
+        if self.hovered:
+            qp = QPainter()
+            pen = QPen()
 
-    def enterEvent(self, a0: QEvent) -> None:
+            qp.begin(self)
+            pen.setColor(QColor(255, 160, 47, 100))
+            pen.setWidth(5)
+            qp.setPen(pen)
+            # qp.fillRect(self.rect(), QColor(255, 160, 47, 50))
+            qp.drawRect(self.rect())
+
+            qp.end()
+
+    def enterEvent(self, a0) -> None:
         super(Entry, self).enterEvent(a0)
+        self.hovered = True
+        self.update()
 
-    def leaveEvent(self, a0: QEvent) -> None:
+    def leaveEvent(self, a0) -> None:
         super(Entry, self).leaveEvent(a0)
+        self.hovered = False
+        self.update()
 
     def mouseDoubleClickEvent(self, a0: QMouseEvent) -> None:
         self.onDoubleClicked.emit(self.container)
