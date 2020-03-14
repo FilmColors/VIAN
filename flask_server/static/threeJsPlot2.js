@@ -17,7 +17,7 @@ function floatRgb2ThreeColor(r, g, b){
     return t
 }
 class ThreeJSView{
-    constructor(frame_name, canvas_name, background_color = "rgb(255,255,255)"){
+    constructor(frame_name, canvas_name, background_color = [17/255,17/255,17/255]){
         this.frame_name = frame_name; 
         this.canvas_name = canvas_name; 
         
@@ -43,7 +43,7 @@ class ThreeJSView{
         var orthoWidth = VERTEX_SCALE
 
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
-        this.scene.background = new THREE.Color(this.background_color);
+        this.scene.background = new THREE.Color("rgb(17,17,17)");
         this.renderer.setSize(this.renderWidth, this.renderHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.gammaInput = true;
@@ -57,9 +57,10 @@ class ThreeJSView{
         this.controls.dampingFactor = 0.05;
         this.controls.screenSpacePanning = true;
         this.controls.minDistance = 1;
-        this.controls.maxDistance = 500;
+        this.controls.maxDistance = 800;
         this.controls.enablePan = false;
         this.controls.maxPolarAngle = Math.PI / 2;
+        this.camera.position.set(0,300,0)
         // this.controls.target.set(VERTEX_SCALE / 2, 0, 0);
 
         var targetObject = new THREE.Object3D();
@@ -128,7 +129,7 @@ class ThreeJSView{
     }
 
     clear(){
-        this.scene.clear()
+        this.scene.remove.apply(this.scene, this.scene.children);
     }
 
 
@@ -142,7 +143,7 @@ class Palette3D extends ThreeJSView{
         this._sprite = new THREE.TextureLoader().load( '/static/textures/disc.png' );
 
     }
-    addPoint(l, a, b, col){
+    addPoint(l, a, b, col, size=10){
         let p = {}
         p.luminance = l;
         p.a=a;
@@ -151,19 +152,19 @@ class Palette3D extends ThreeJSView{
         this._palette.push(p);
         
         let vertices = []
-        vertices.push(a, b, l)
+        vertices.push(a, l, b)
         
         var geometry = new THREE.BufferGeometry();
         geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
 
-        var material = new THREE.PointsMaterial( { size: 15, sizeAttenuation: false, map: this._sprite, alphaTest: 0.5, transparent: true } );
+        var material = new THREE.PointsMaterial( { size: size, sizeAttenuation: false, map: this._sprite, alphaTest: 0.5, transparent: true } );
         material.color.setRGB(col[0], col[1], col[2] );
 
         var particles = new THREE.Points( geometry, material );
         this.scene.add( particles );
     }
     clear(){
-        this.scene.clear()
+        this.scene.remove.apply(this.scene, this.scene.children);
         this._palette = []
     }
 }

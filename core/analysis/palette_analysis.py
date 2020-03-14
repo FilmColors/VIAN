@@ -237,6 +237,30 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return dict(dist=db_data[:, 0], tree=layers)
 
 
+def get_palette_at_merge_depth(palette, depth = 10):
+    t = palette['tree']
+    all_depths = t[0]
+    all_cols = t[1]
+    all_bins = t[2]
+
+    stored_depths = np.unique(all_depths)
+    indices = np.where(all_depths == stored_depths[depth])[0]
+    n_bins_total = np.sum(all_bins[indices])
+    res = []
+
+    for i in indices:
+        lab = tpl_bgr_to_lab(all_cols[i]).tolist()
+        res.append(dict(
+            bgr = all_cols[i].tolist(),
+            lab = lab,
+            amount = np.round((all_bins[i] / n_bins_total), 4).tolist()
+        ))
+
+    # print(res)
+    return res
+
+
+
 class ColorPaletteParameterWidget(ParameterWidget):
     """
     We want the User to be able to determine the resolution of frames when reading and the 

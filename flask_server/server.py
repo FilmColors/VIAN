@@ -4,20 +4,24 @@ from functools import partial
 
 from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
-
+from PyQt5 import QtGui
 from flask import Flask, render_template, send_file, url_for
 
 from core.gui.ewidgetbase import EDockWidget
 from core.container.project import VIANProject, Screenshot, Segment
-from core.analysis.analysis_import import ColorFeatureAnalysis, ColorPaletteAnalysis
+from core.analysis.analysis_import import ColorFeatureAnalysis, ColorPaletteAnalysis, get_palette_at_merge_depth
 from core.data.computation import lab_to_lch, lab_to_sat, ms2datetime
 
 app = Flask(__name__)
 app.root_path = os.path.split(__file__)[0]
+# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+
+import mimetypes
+mimetypes.add_type('application/javascript', '.js')
 
 
 class ScreenshotData:
@@ -32,13 +36,14 @@ class ScreenshotData:
         self.time = []
         self.uuids = []
 
-        # self.palettes = []
+        self.palettes = []
 
 
 class ServerData:
     def __init__(self):
         self.project = None #type: VIANProject
         self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
+        self._needs_update = False
 
     def set_project(self, project:VIANProject):
         self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
@@ -46,18 +51,28 @@ class ServerData:
         self.project = project
         # self.project.onProjectChanged.connect(partial(self.update_screenshot_data))
         self.project.onScreenshotAdded.connect(self.on_screenshot_added)
-        self.project.onAnalysisAdded.connect(partial(self.update_screenshot_data))
-
-        self.project.onAnalysisAdded.connect(partial(self.update_screenshot_data))
+        self.project.onAnalysisAdded.connect(partial(self.queue_update))
+        self.project.onAnalysisAdded.connect(partial(self.queue_update))
         for s in self.project.screenshots:
-            s.onScreenshotChanged.connect(partial(self.update_screenshot_data))
+            s.onScreenshotChanged.connect(partial(self.queue_update))
+
+        self._needs_update = True
         self.update_screenshot_data()
 
+
+    def update(self):
+        if self._needs_update:
+            self.update_screenshot_data()
+        self._needs_update = False
 
     def on_screenshot_added(self, s:Screenshot):
-        s.onScreenshotChanged.connect(partial(self.update_screenshot_data))
-        self.update_screenshot_data()
 
+        s.onScreenshotChanged.connect(partial(self.update_screenshot_data))
+        # self.update_screenshot_data()
+        self._needs_update = True
+
+    def queue_update(self):
+        self._needs_update = True
 
     def update_screenshot_data(self):
         a = []
@@ -68,7 +83,7 @@ class ServerData:
         time = []
         hue = []
 
-        # palettes = []
+        palettes = []
 
         uuids = []
         for i, s in enumerate(self.project.screenshots):
@@ -86,9 +101,12 @@ class ServerData:
                 hue.append(float(lch[2]))
                 saturation.append(float(lab_to_sat(arr)))
 
-            # t2 = s.get_connected_analysis(ColorPaletteAnalysis)
-            # if len(t2) > 0:
-            #     arr = t[0].get_adata()
+
+            t2 = s.get_connected_analysis(ColorPaletteAnalysis)
+            if len(t2) > 0:
+                arr = t2[0].get_adata()
+                palettes.extend(get_palette_at_merge_depth(arr, depth = 15))
+
 
         data = ScreenshotData()
 
@@ -101,6 +119,8 @@ class ServerData:
         data.time = time
 
         data.uuids = uuids
+
+        data.palettes = palettes
 
         self._screenshot_cache['has_changed'] = True
         self._screenshot_cache['data'] = data
@@ -175,9 +195,11 @@ class FlaskWebWidget(EDockWidget):
         super(FlaskWebWidget, self).__init__(main_window, False)
         self.setWindowTitle("WebView Debug")
         self.view = QWebEngineView(self)
+        self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
         self.view.setPage(WebPage())
+        self.view.reload()
         self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
-        self.view.settings().setAttribute(QWebEngineSettings.Accelerated2dCanvasEnabled, True)
+
         self.setWidget(self.view)
 
 
@@ -187,6 +209,10 @@ class FlaskWebWidget(EDockWidget):
 
         self.view.setUrl(QUrl(url))
         self.view.reload()
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+        self.reload()
+        super(FlaskWebWidget, self).showEvent(a0)
 
     def reload(self):
         print("Reload")
@@ -213,6 +239,7 @@ def screenshot_data():
     if _server_data.project is None:
         return dict(changes=False, data = ScreenshotData().__dict__)
     else:
+        _server_data.update()
         if _server_data._screenshot_cache['has_changed']:
             _server_data._screenshot_cache['data'].urls = [url_for("screenshot", uuid=u) for u in _server_data._screenshot_cache['data'].uuids]
             _server_data._screenshot_cache['has_changed'] = False

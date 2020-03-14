@@ -255,7 +255,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
         self.web_view.set_url("http://127.0.0.1:5000/screenshot_vis")
-        self.web_view.set_url("https://threejs.org/examples/#webgl_camera")
+        # self.web_view.set_url("https://threejs.org/examples/#webgl_camera")
 
         self.web_view.hide()
 

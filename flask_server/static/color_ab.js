@@ -77,6 +77,13 @@ class ColorAB {
         console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
     }
 
+    setData(a, b, urls){
+        this.source.data.x = a;
+        this.source.data.y =b;
+        this.source.data.image = urls
+        this.source.change.emit();
+    }
+    
     poll(pollTime) {
         var that = this;
         this.source.change.emit();

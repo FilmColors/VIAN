@@ -158,7 +158,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
     def _start(self):
         if len(self.queue) > 0:
-            print("Queue:", len(self.queue), [q[0].__class__ for q in self.queue])
+            print("Queue:", len(self.queue)) # [q[0].__class__ for q in self.queue]
             analysis, params = self.queue.pop(0)
             self.queue_identify.pop(0)
             self.running = analysis
@@ -178,11 +178,11 @@ class WorkerManager(QObject, IProjectChangeNotify):
             try:
                 if isinstance(result, list):
                     for r in result:
-                        self.running.modify_project(self.project, r, main_window=self.main_window)
+                        r.get_analysis().modify_project(self.project, r, main_window=self.main_window)
                         self.project.add_analysis(r, dispatch=False)
                         r.unload_container()
                 else:
-                    self.running.modify_project(self.project, result, main_window=self.main_window)
+                    result.get_analysis().modify_project(self.project, result, main_window=self.main_window)
                     self.project.add_analysis(result)
                     result.unload_container()
             except Exception as e:
@@ -248,7 +248,7 @@ class AnalysisWorker(QObject):
         self.signals.analysisStarted.emit()
         print("Scheduled", self.scheduled_task)
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
-            print("Performing", i, self.aborted, (task_id, args))
+            print("Performing", i) #, self.aborted, (task_id, args))
 
             if self.aborted:
                 break

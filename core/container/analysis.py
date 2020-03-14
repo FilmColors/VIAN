@@ -133,6 +133,11 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def set_target_classification_obj(self, class_obj):
         self.target_classification_object = class_obj
 
+    def get_analysis(self):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        return self.a_class()
+
     def serialize(self):
         if self.target_classification_object is not None:
             class_obj_id = self.target_classification_object.unique_id

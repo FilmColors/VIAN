@@ -133,6 +133,27 @@ class ColorDT {
         console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
     }
 
+    setData(times, luminance, saturation, chroma, hue, a, b, urls){
+        let time = []
+        for (var i = 0; i < times.length; i++){
+            time.push(new Date(times[i]))
+        }
+
+        this.source.data.x =time;
+        this.source.data.y = luminance;
+
+        this.source.data.sat = saturation;
+        this.source.data.lum = luminance;
+        this.source.data.chroma =chroma;
+        this.source.data.hue = hue;
+
+        this.source.data.a = a;
+        this.source.data.b = b;
+
+        this.source.data.url = urls
+        this.source.change.emit();
+    }
+
     parameterChanged(source, dropdown){
         var t = dropdown.value;
         var values = null;
