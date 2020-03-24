@@ -1,8 +1,9 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QScrollArea, QFrame, QGridLayout, QCompleter
+from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QScrollArea, QFrame, QGridLayout, QCompleter, QPushButton
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QEvent
 from PyQt5.QtGui import QPixmap, QMouseEvent, QPainter, QColor, QPen
 
 from core.container.project import Segment, VIANProject, Screenshot, UniqueKeyword
+
 
 class SearchWindow(QMainWindow):
     """
@@ -32,6 +33,7 @@ class SearchWindow(QMainWindow):
         self.setCentralWidget(self.central)
 
         self.project = VIANProject()
+        self.last_results = []
 
         self.line_edit_input.textChanged.connect(self.on_search)
         self.completer = QCompleter()
@@ -82,9 +84,18 @@ class SearchWindow(QMainWindow):
 
     def show_result(self, result):
         self.w_result.clear()
+        self.clear_highlighted()
 
         for r in result:
+            self.last_results.append(r[0])
+            r[0].set_classification_highlight(True)
             self.w_result.add_entry(r[0], self.main_window)
+
+    def clear_highlighted(self):
+        for r in self.last_results:
+            r.set_classification_highlight(False)
+        self.last_results = []
+
 
     @pyqtSlot(object)
     def on_loaded(self, project):
@@ -147,7 +158,6 @@ class ResultWidget(QWidget):
         for e in self.entries:
             e.close()
         self.entries = []
-
 
 
 class Entry(QFrame):
@@ -217,3 +227,5 @@ class Entry(QFrame):
 
     def mouseDoubleClickEvent(self, a0: QMouseEvent) -> None:
         self.onDoubleClicked.emit(self.container)
+
+

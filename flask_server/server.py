@@ -10,6 +10,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEng
 from PyQt5 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify
 
+from core.data.log import log_error
 from core.gui.ewidgetbase import EDockWidget
 from core.container.project import VIANProject, Screenshot, Segment
 from core.analysis.analysis_import import ColorFeatureAnalysis, ColorPaletteAnalysis, get_palette_at_merge_depth
@@ -99,7 +100,11 @@ class ServerData:
         for i, s in enumerate(self.project.screenshots):
             t = s.get_connected_analysis(ColorFeatureAnalysis)
             if len(t) > 0:
-                arr = t[0].get_adata()['color_lab']
+                try:
+                    arr = t[0].get_adata()['color_lab']
+                except Exception as e:
+                    log_error(e)
+                    continue
                 d = arr.tolist()
                 a.append(d[1])
                 b.append(d[2])
@@ -114,11 +119,14 @@ class ServerData:
 
             t2 = s.get_connected_analysis(ColorPaletteAnalysis)
             if len(t2) > 0:
-                arr = t2[0].get_adata()
+                try:
+                    arr = t2[0].get_adata()
+                except Exception as e:
+                    log_error(e)
+                    continue
                 pal = get_palette_at_merge_depth(arr, depth = 15)
                 if pal is not None:
                     palettes.extend(pal)
-
 
         data = ScreenshotData()
 
@@ -200,10 +208,10 @@ class FlaskServer(QObject):
         pass
 
 
-
 class WebPage(QWebEnginePage):
     def javaScriptConsoleMessage(self, level: 'QWebEnginePage.JavaScriptConsoleMessageLevel', message: str, lineNumber: int, sourceID: str) -> None:
         print(message)
+
 
 class FlaskWebWidget(EDockWidget):
     def __init__(self, main_window):
@@ -261,6 +269,7 @@ def screenshot_data():
             return json.dumps(dict(changes=True, data=_server_data._screenshot_cache['data'].__dict__))
         else:
             return dict(changes=False, data=_server_data._screenshot_cache['data'].__dict__)
+
 
 if __name__ == '__main__':
     app.debug = True

@@ -520,6 +520,13 @@ class VocabularyView(QWidget, IProjectChangeNotify):
     def on_selected(self, sender, selected):
         pass
 
+    def on_vocabulary_removed(self, v):
+        if v.project == self.vocabulary_collection:
+            try:
+                p = self.vocabulary_index[v.uuid]['path']
+                os.remove(p)
+            except Exception as e:
+                print(e)
 
 class VocabularyTreeView(QTreeView):
     def __init__(self, parent, vocabulary_manager: VocabularyView, collection:VIANProject, allow_create=True):
@@ -680,7 +687,13 @@ class VocabularyContextMenu(QMenu):
             to_remove.append(item)
 
         for item in to_remove:
+            # If the item is a vocabulary, let the manager check if there is a file to be removed
+            if isinstance(item, Vocabulary):
+                self.manager.on_vocabulary_removed(item)
+
             item.save_delete()
+
+
 
 
 class VocabularyTreeItemModel(QStandardItemModel):

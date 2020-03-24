@@ -1020,6 +1020,7 @@ class MainWindow(QtWidgets.QMainWindow):
         exit = self.on_exit()
         if not exit:
             a0.ignore()
+            super(MainWindow, self).closeEvent(a0)
 
     def resizeEvent(self, *args, **kwargs):
         QtWidgets.QMainWindow.resizeEvent(self, *args, **kwargs)
@@ -1190,11 +1191,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_closed()
         self.settings.store(self.dock_widgets)
 
+        log_info("Closing Frame Update")
         self.frame_update_thread.quit()
+        log_info("Closing flask_server_thread")
         self.flask_server_thread.quit()
+        log_info("Closing audio_handler_thread")
         self.audio_handler_thread.quit()
+        log_info("Closing vian_event_handler_thread")
         self.vian_event_handler_thread.quit()
 
+        log_info("Closing player")
+        self.player.on_closed()
+
+        log_info("Closing abortAllConcurrentThreads")
         self.abortAllConcurrentThreads.emit()
 
         if PROFILE:

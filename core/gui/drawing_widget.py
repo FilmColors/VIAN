@@ -589,15 +589,6 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             qp.end()
         else:
             pass
-            qp = QtGui.QPainter()
-            pen = QtGui.QPen()
-            pen.setWidth(1)
-            pen.setColor(QtGui.QColor(255, 100, 100))
-
-            qp.begin(self)
-            qp.setPen(pen)
-            qp.drawRect(QtCore.QRect(self.rect().x(), self.rect().y(), self.rect().width()-1, self.rect().height()-1))
-            qp.end()
 
     def on_opencv_frame_visibilty_changed(self, visibility):
         """

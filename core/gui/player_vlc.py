@@ -242,7 +242,7 @@ class Player_VLC(VideoPlayer):
     def __init__(self, main_window):
         super(Player_VLC, self).__init__(main_window)
 
-        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat" #--verbose 0
+        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat --quiet"
         self.media_player = None
         self.vlc_instance = None
         # self.media_player = self.vlc_instance.media_player_new()
@@ -611,6 +611,7 @@ class Player_VLC(VideoPlayer):
 
     def on_closed(self):
         self.release_player()
+
 
     def on_selected(self,sender, selected):
         pass
