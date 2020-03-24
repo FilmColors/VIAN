@@ -99,6 +99,9 @@
          <property name="toolTip">
           <string>The Medium's ID</string>
          </property>
+         <property name="maximum">
+          <number>9999999</number>
+         </property>
         </widget>
        </item>
        <item>
@@ -106,12 +109,18 @@
          <property name="toolTip">
           <string>The Manifestation of the Medium (i.e. Director's Cut, A/B Negativ)</string>
          </property>
+         <property name="maximum">
+          <number>9999999</number>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QSpinBox" name="spinBox_ID_2">
          <property name="toolTip">
           <string>The Copy of the Media (i.e. DVD 1 of 2)</string>
+         </property>
+         <property name="maximum">
+          <number>999999</number>
          </property>
         </widget>
        </item>

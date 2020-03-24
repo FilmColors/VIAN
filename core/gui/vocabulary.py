@@ -528,6 +528,7 @@ class VocabularyView(QWidget, IProjectChangeNotify):
             except Exception as e:
                 print(e)
 
+
 class VocabularyTreeView(QTreeView):
     def __init__(self, parent, vocabulary_manager: VocabularyView, collection:VIANProject, allow_create=True):
         super(VocabularyTreeView, self).__init__(parent)
@@ -692,8 +693,6 @@ class VocabularyContextMenu(QMenu):
                 self.manager.on_vocabulary_removed(item)
 
             item.save_delete()
-
-
 
 
 class VocabularyTreeItemModel(QStandardItemModel):
