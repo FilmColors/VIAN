@@ -24,12 +24,10 @@ import subprocess
 from datetime import datetime
 from threading import Thread
 
+from core.hidden_imports import *
 
 abspath = os.path.abspath(sys.executable)
 dname = os.path.dirname(abspath)
-# os.chdir(dname)
-# print(dname)
-# print(os.getcwd())
 
 import logging
 logging.getLogger('tensorfyylow').disabled = True
@@ -46,7 +44,6 @@ from core.gui.main_window import MainWindow, version
 
 DEBUG = os.path.isfile("is_dev.txt")
 MAIN_WINDOW = None
-
 
 class SuperFilter(QObject):
     def __init__(self, parent):
@@ -130,11 +127,19 @@ if __name__ == '__main__':
 
     settings = UserSettings()
     settings.load()
+    print("Settings loaded")
+
 
     app = QApplication(sys.argv)
+    print("ApplicationDone")
+
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
     # filter = SuperFilter(app)
     # app.installEventFilter(filter)
+
+    print("Setting UI")
+    print(os.getcwd())
+
     app.setWindowIcon(QIcon("qt_ui/images/main.png"))
     set_attributes(app)
     set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
@@ -149,6 +154,7 @@ if __name__ == '__main__':
     splash.show()
     app.processEvents()
 
+    print("Starting Up")
     main = MainWindow(splash)
     MAIN_WINDOW = main
     sys.exit(app.exec_())

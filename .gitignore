@@ -25,3 +25,6 @@ build/*
 log-files/*
 vian-update.zip
 is_dev.txt
+
+dist/*
+build/*
