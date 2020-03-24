@@ -39,25 +39,8 @@ class ColorHistogramAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(ColorHistogramAnalysis, self).prepare(project, targets, fps, class_objs)
-        args = []
         fps = project.movie_descriptor.fps
-        for tgt in targets:
-            semseg = None
-            if isinstance(tgt, Screenshot):
-                if class_objs is not None:
-                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
-                    if len(semseg) > 0:
-                        semseg = semseg[0]
-                    else:
-                        semseg = None
-
-            args.append([ms_to_frames(tgt.get_start(), fps),
-                         ms_to_frames(tgt.get_end(), fps),
-                         project.movie_descriptor.movie_path,
-                         tgt.get_id(),
-                         project.movie_descriptor.get_letterbox_rect(),
-                         semseg])
+        targets, args = super(ColorHistogramAnalysis, self).prepare(project, targets, fps, class_objs)
         return args
 
     def process(self, args, sign_progress):
@@ -66,11 +49,11 @@ class ColorHistogramAnalysis(IAnalysisJob):
         # Signal the Progress
         sign_progress(0.0)
 
-        start = args[0]
-        stop = args[1]
-        movie_path = args[2]
-        margins = args[4]
-        semseg = args[5]
+        start = args['start']
+        stop = args['end']
+        movie_path = args['movie_path']
+        margins = args['margins']
+        semseg = args['semseg']
 
         cap = cv2.VideoCapture(movie_path)
         cap.set(cv2.CAP_PROP_POS_FRAMES, start)
@@ -119,7 +102,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
             results = final_hist,
             analysis_job_class=self.__class__,
             parameters=dict(resolution=self.resolution),
-            container=args[3]
+            container=args['target']
         )
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):

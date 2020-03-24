@@ -52,22 +52,8 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(SemanticSegmentationAnalysis, self).prepare(project, targets, fps, class_objs)
-
-        args = []
         fps = project.movie_descriptor.fps
-        for tgt in targets:
-            if tgt.get_type() == SCREENSHOT_GROUP:
-                for s in tgt.screenshots:
-                    args.append([ms_to_frames(s.get_start(), fps),
-                                 ms_to_frames(s.get_end(), fps),
-                                 project.movie_descriptor.movie_path,
-                                 s.get_id()])
-            else:
-                args.append([ms_to_frames(tgt.get_start(), fps),
-                             ms_to_frames(tgt.get_end(), fps),
-                             project.movie_descriptor.movie_path,
-                             tgt.get_id()])
+        targets, args = super(SemanticSegmentationAnalysis, self).prepare(project, targets, fps, class_objs)
         return args
 
     def process(self, args, sign_progress):
@@ -102,8 +88,8 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                 raise Exception("Model not Found")
 
             for arg in args:
-                start = arg[0]
-                movie_path = arg[2]
+                start = arg['start']
+                movie_path = arg['movie_path']
 
                 cap = cv2.VideoCapture(movie_path)
                 cap.set(cv2.CAP_PROP_POS_FRAMES, start)
@@ -121,7 +107,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
                     results=np.argmax(masks, axis=2).astype(np.uint8),
                     analysis_job_class=self.__class__,
                     parameters=dict(model = self.model_name, resolution=self.resolution),
-                    container=arg[3],
+                    container=arg['target'],
                     dataset=model_name
                 ))
 

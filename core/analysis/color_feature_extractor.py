@@ -51,46 +51,11 @@ class ColorFeatureAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(ColorFeatureAnalysis, self).prepare(project, targets, fps, class_objs)
-        self.hdf5_manager = project.hdf5_manager
-
-        args = []
         fps = project.movie_descriptor.fps
-        for tgt in targets:
-            if isinstance(tgt, Screenshot):
-                if class_objs is not None:
-                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
-                    if len(semseg) > 0:
-                        semseg = semseg[0]
-                    else:
-                        semseg = None
-                else:
-                    semseg = None
+        targets, args = super(ColorFeatureAnalysis, self).prepare(project, targets, fps, class_objs)
 
-                args.append([tgt.frame_pos,
-                             tgt.frame_pos,
-                             project.movie_descriptor.movie_path,
-                             tgt.get_id(),
-                             project.movie_descriptor.get_letterbox_rect(),
-                             semseg])
-            elif isinstance(tgt, Segmentation):
-                for s in tgt.segments:
-                    args.append([
-                        ms_to_frames(s.get_start(), fps),
-                        ms_to_frames(s.get_end(), fps),
-                        project.movie_descriptor.movie_path,
-                        s.get_id(),
-                        project.movie_descriptor.get_letterbox_rect(),
-                        None])
-
-            else:
-                args.append([
-                ms_to_frames(tgt.get_start(), fps),
-                ms_to_frames(tgt.get_end(), fps),
-                project.movie_descriptor.movie_path,
-                tgt.get_id(),
-                project.movie_descriptor.get_letterbox_rect(),
-                None])
+        # TODO Why is this here?
+        self.hdf5_manager = project.hdf5_manager
 
         return args
 
@@ -104,11 +69,11 @@ class ColorFeatureAnalysis(IAnalysisJob):
             sign_progress(counter / len(argst))
             counter += 1
 
-            start = args[0]
-            stop = args[1]
-            movie_path = args[2]
-            margins = args[4]
-            semseg = args[5]
+            start = args['start']
+            stop = args['end']
+            movie_path = args['movie_path']
+            margins = args['margins']
+            semseg = args['semseg']
             colors_lab = []
             colors_bgr = []
 
@@ -119,7 +84,6 @@ class ColorFeatureAnalysis(IAnalysisJob):
 
             for i in range(start, stop  + 1, self.resolution):
                 sign_progress((c - start) / ((stop - start) + 1))
-                print(i)
                 cap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = cap.read()
                 if frame is None:
@@ -172,7 +136,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                ),
                 analysis_job_class=self.__class__,
                 parameters=dict(resolution = self.resolution),
-                container=args[3]
+                container=args['target']
             )
             )
         return result

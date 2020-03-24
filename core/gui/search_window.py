@@ -49,6 +49,7 @@ class SearchWindow(QMainWindow):
 
         t = self.line_edit_input.text().lower()
         if t == "":
+            self.show_result([])
             return
 
         result = []

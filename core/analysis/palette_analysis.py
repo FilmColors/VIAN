@@ -38,27 +38,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
-        args = []
         fps = project.movie_descriptor.fps
-        if not isinstance(targets, list):
-            targets = [targets]
-        for tgt in targets:
-            semseg = None
-            if isinstance(tgt, Screenshot):
-                if class_objs is not None:
-                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
-                    if len(semseg) > 0:
-                        semseg = semseg[0]
-                    else:
-                        semseg = None
-
-            args.append([ms_to_frames(tgt.get_start(), fps),
-                         ms_to_frames(tgt.get_end(), fps),
-                         project.movie_descriptor.movie_path,
-                         tgt.get_id(),
-                         project.movie_descriptor.get_letterbox_rect(),
-                         semseg])
+        targets, args = super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
         return args
 
     def process(self, args, sign_progress):
@@ -66,11 +47,11 @@ class ColorPaletteAnalysis(IAnalysisJob):
         # Signal the Progress
         sign_progress(0.0)
 
-        start = args[0]
-        stop = args[1]
-        movie_path = args[2]
-        margins = args[4]
-        semseg = args[5]
+        start = args['start']
+        stop = args['end']
+        movie_path = args['movie_path']
+        margins = args['margins']
+        semseg = args['semseg']
         bin_mask = None
         if semseg is not None:
             name, labels = self.target_class_obj.semantic_segmentation_labels
@@ -128,7 +109,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
                 results = dict(tree=result.tree, dist = result.merge_dists),
                 analysis_job_class=self.__class__,
                 parameters=dict(resolution=self.resolution),
-                container=args[3]
+                container=args['target']
             )
         return None
 

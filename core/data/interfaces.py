@@ -1,6 +1,8 @@
 """
 In this Module, all interfaces used by VIAN are defined. 
 """
+from typing import List, Union, Dict, Tuple
+
 import numpy as np
 from random import randint
 from collections import namedtuple
@@ -11,7 +13,8 @@ from scipy.signal import savgol_filter, resample
 from core.data.log import log_debug, log_info, log_error
 from core.container.container_interfaces import ITimelineItem
 from core.container.analysis import AnalysisContainer
-
+from core.container.project import Screenshot, ScreenshotGroup, Segment, Segmentation, Annotation, AnnotationLayer, ITimeRange
+from core.data.computation import ms_to_frames
 
 from typing import TYPE_CHECKING
 
@@ -98,7 +101,7 @@ class IAnalysisJob(QObject):
     def get_name(self):
         return self.name
 
-    def prepare(self, project, targets, fps, class_objs = None):
+    def prepare(self, project, targets, fps, class_objs = None) -> Tuple[List[Union[Screenshot, Annotation, Segment]], Dict]:
         """
         A step that should be performed in the main-thread before the processing takes place. 
         This is a good point to fetch all necessary data from the project and pack it to your needs.
@@ -111,7 +114,37 @@ class IAnalysisJob(QObject):
         :return: A List of packed Data which will be handed to the IAnalysisJob.process()
         """
         self.target_class_obj = class_objs
-        return None
+
+        res_targets = []
+        for t in targets:
+            if isinstance(t, Screenshot) or isinstance(t, Annotation) or isinstance(t, Segment):
+                res_targets.append(t)
+            elif isinstance(t, ScreenshotGroup):
+                res_targets.extend(t.screenshots)
+            elif isinstance(t, AnnotationLayer):
+                res_targets.extend(t.annotations)
+            elif isinstance(t, Segmentation):
+                res_targets.extend(t.segments)
+
+        targets, args = [], []
+        for t in list(set(res_targets)):
+            semseg = None
+            if isinstance(t, Screenshot):
+                if class_objs is not None:
+                    semantic_segmentations = t.get_connected_analysis("SemanticSegmentationAnalysis")
+                    if len(semantic_segmentations) > 0:
+                        semseg = semantic_segmentations[0]
+            targets.append(t)
+            args.append(
+                 dict(
+                    start=ms_to_frames(t.get_start(), fps),
+                    end=ms_to_frames(t.get_end(), fps),
+                    movie_path=project.movie_descriptor.movie_path,
+                    target=t.get_id(),
+                    margins=project.movie_descriptor.get_letterbox_rect(),
+                    semseg=semseg
+                 ))
+        return targets, args
 
     def process(self, args, sign_progress):
         """
