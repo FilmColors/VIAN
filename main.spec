@@ -13,7 +13,9 @@ hiddenimports_SKLEARN = [
 
 data_paths = [
     ('data', 'data'),
-    ('qt_ui', 'qt_ui')
+    ('qt_ui', 'qt_ui'),
+    ('flask_server/static', 'flask_server/static'),
+    ('flask_server/templates', 'flask_server/templates')
 ]
 
 
@@ -30,6 +32,8 @@ if sys.platform == "win32":
     binaries = [
         (VLC_ROOT + "\plugins", "plugins")
     ]
+    icon='qt_ui/images/main_round.ico'
+
 
 a = Analysis(['main.py'],
              pathex=['E:\\Programming\\Git\\visual-movie-annotator'],
@@ -52,12 +56,13 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='VIAN - A visual movie annotator',
+          name='VIAN',
           debug=True,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True)
+          console=True,
+          icon=icon)
 
 
 coll = COLLECT(exe,
@@ -67,4 +72,5 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='main')
+               name='VIAN',
+               icon=icon)

@@ -10,7 +10,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEng
 from PyQt5 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify
 
-from core.data.log import log_error
+from core.data.log import log_error, log_info
 from core.gui.ewidgetbase import EDockWidget
 from core.container.project import VIANProject, Screenshot, Segment
 from core.analysis.analysis_import import ColorFeatureAnalysis, ColorPaletteAnalysis, get_palette_at_merge_depth
@@ -18,6 +18,7 @@ from core.data.computation import lab_to_lch, lab_to_sat, ms2datetime
 
 app = Flask(__name__)
 app.root_path = os.path.split(__file__)[0]
+log_info("FLASK ROOT", app.root_path)
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # import logging
