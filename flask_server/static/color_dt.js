@@ -18,7 +18,6 @@ class ColorDT {
             a: [], 
             b: [], 
             uuids: []
-            // scene_ids : [],
         }});
 
         this.menu = [("Saturation", "Saturation"), ("Chroma", "Chroma"), ("Hue", "Hue"), ("Luminance", "Luminance"), ("A-Channel", "A-Channel"), ("B-Channel", "B-Channel")]
@@ -34,8 +33,6 @@ class ColorDT {
             x_axis_type: "datetime",
             y_axis_label: "Saturation", 
         });
-
-        
 
         this.plot.background_fill_color = this.background
         this.plot.background_fill_alpha = 0.0
@@ -139,12 +136,15 @@ class ColorDT {
     }
 
     setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids){
+        console.log(uuids);
+
         let time = []
         for (var i = 0; i < times.length; i++){
             time.push(new Date(times[i]))
         }
+        console.log(this.source)
 
-        this.source.data.x =time;
+        this.source.data.x = time;
         this.source.data.y = luminance;
 
         this.source.data.sat = saturation;
@@ -155,7 +155,7 @@ class ColorDT {
         this.source.data.a = a;
         this.source.data.b = b;
 
-        this.source.uuids = uuids;
+        this.source.data.uuids = uuids;
 
         this.source.data.url = urls
         this.source.change.emit();

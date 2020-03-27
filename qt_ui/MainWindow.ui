@@ -211,6 +211,9 @@
     <addaction name="separator"/>
     <addaction name="actionStart_AudioExtraction"/>
     <addaction name="separator"/>
+    <addaction name="actionBrowserVisualizations"/>
+    <addaction name="actionProjectSummary"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
     <property name="title">
@@ -826,7 +829,7 @@
   </action>
   <action name="actionColorFeatures">
    <property name="text">
-    <string>Color Features</string>
+    <string>Color Average</string>
    </property>
   </action>
   <action name="actionCopy">
@@ -949,7 +952,7 @@
   </action>
   <action name="actionZProjection">
    <property name="text">
-    <string>Z-Projection</string>
+    <string>Color Z-Projection</string>
    </property>
   </action>
   <action name="actionExportCSV">
@@ -963,6 +966,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionBrowserVisualizations">
+   <property name="text">
+    <string>Browser Visualizations</string>
+   </property>
+  </action>
+  <action name="actionHello">
+   <property name="text">
+    <string>Hello</string>
+   </property>
+  </action>
+  <action name="actionProjectSummary">
+   <property name="text">
+    <string>Project Summary</string>
    </property>
   </action>
  </widget>

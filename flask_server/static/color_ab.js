@@ -126,6 +126,7 @@ class ColorAB {
     }
 
     onSelectionChanged(source, selection){
+        
         if (this.selectionCallback != null){
             let uuids = [];
             selection.indices.forEach(elem=>{

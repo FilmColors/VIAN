@@ -34,7 +34,6 @@ UPDATE_LOCK = Lock()
 
 class ScreenshotData:
     def __init__(self):
-
         self.a = []
         self.b = []
         self.urls = []
@@ -46,6 +45,7 @@ class ScreenshotData:
         self.uuids = []
 
         self.palettes = []
+
 
 class ServerData:
     def __init__(self):
@@ -198,6 +198,7 @@ class ServerData:
         self.project = None  # type: VIANProject
         self._screenshot_cache = dict(revision = 0, data=ScreenshotData())
 
+
 _server_data = ServerData()
 
 
@@ -247,7 +248,7 @@ class WebPage(QWebEnginePage):
 class FlaskWebWidget(EDockWidget):
     def __init__(self, main_window):
         super(FlaskWebWidget, self).__init__(main_window, False)
-        self.setWindowTitle("WebView Debug")
+        self.setWindowTitle("Bokeh Visualizations")
         self.view = QWebEngineView(self)
         self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
         self.view.setPage(WebPage())
@@ -288,20 +289,6 @@ def screenshot(uuid):
     return send_file(_server_data.screenshot_url(uuid=uuid))
 
 
-# @app.route("/check-updates/", methods=['POST'])
-# def check_update():
-#     if _server_data.project is None:
-#         return make_response(dict(screenshots_changed=False, uuids=[]))
-#
-#     d = request.json
-#     screenshot_uuids = d['screenshot_uuids']
-#
-#     _server_data.update()
-#     screenshots_changed = _server_data._screenshot_cache['data'].has_changed(screenshot_uuids)
-#     return dict(screenshots_changed = screenshots_changed,
-#                 uuids = _server_data._screenshot_cache['data'].uuids)
-
-
 @app.route("/screenshot-data/<int:revision>")
 def screenshot_data(revision):
     if _server_data.project is None:
@@ -325,9 +312,12 @@ def set_selection():
         selected.remove(None)
 
     _server_data.project.set_selected(_server_data, selected)
-    print(selected_uuids)
     return make_response("OK")
 
+
+@app.route("/summary/")
+def summary():
+    return render_template("summary.tmpl.html")
 
 if __name__ == '__main__':
     app.debug = True

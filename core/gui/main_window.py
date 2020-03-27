@@ -427,14 +427,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
+        self.actionBrowserVisualizations.triggered.connect(partial(self.on_browser_visualization))
+        self.actionProjectSummary.triggered.connect(partial(self.on_project_summary))
+
         # Keras is optional, if available create Actions
         if KERAS_AVAILABLE:
             self.actionSemanticSegmentation = self.menuAnalysis.addAction("Semantic Segmentation")
             self.actionSemanticSegmentation.triggered.connect(partial(self.analysis_triggered, SemanticSegmentationAnalysis()))
-            self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
-            self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
+
+            # self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
+            # self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
             # self.create_facial_identification_dock()
-            self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
+            # self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
             # self.facial_identification_dock.identificator.onModelTrained.connect(self.frame_update_worker.load_face_rec_model)
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
@@ -954,6 +958,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.analysis_results_widget_dock.show()
                 self.analysis_results_widget_dock.raise_()
                 self.analysis_results_widget_dock.activateWindow()
+
+    def create_analysis_results_widget2(self):
+        if self.web_view is None:
+            self.web_view = FlaskWebWidget(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.web_view, Qt.Vertical)
+        else:
+            if not self.web_view.visibleRegion().isEmpty():
+                self.web_view.hide()
+            else:
+                self.web_view.show()
+                self.web_view.raise_()
+                self.web_view.activateWindow()
+
 
     def create_colorimetry_live(self):
         if self.colorimetry_live is None:
@@ -1778,9 +1795,16 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def on_facial_reconition(self):
+        return
+
         if self.facial_identification_dock is None:
             self.facial_identification_dock.raise_()
 
+    def on_browser_visualization(self):
+        webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")
+
+    def on_project_summary(self):
+        webbrowser.open("http://127.0.0.1:5000/summary/")
     # endregion
 
     #region Project Management
