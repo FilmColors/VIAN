@@ -17,12 +17,18 @@ from core.container.hdf5_manager import vian_analysis
 @vian_analysis
 class ColorHistogramAnalysis(IAnalysisJob):
     """
-    A CIELab Color Histogram encoded as np.float32.
-    The corresponding dataset structure in the HDF5 File is an array of 3 dimensional histograms with 16 bins each.
+    IAnalysisJob to extract color histograms in VIAN.
 
-    HDF5-Shape: (n-frames, 16, 16, 16)
-    HDF5-Meaning: (analysis, Bins-Luminance, Bins-A, Bins-B)
+    .. note:: **HDF5 Memory Layout**
+
+        - 1st: index of the feature vector
+        - 2nd: Color Histograms
+
+             - [0]: Bins Luminance {0.0, ..., 100.0}
+             - [1]: Bins A-Channel {-128.0, ..., 128.0}
+             - [2]: Bins B-Channel {-128.0, ..., 128.0}
     """
+
     def __init__(self, resolution=30):
         super(ColorHistogramAnalysis, self).__init__("Color Histogram", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorHistograms",
@@ -34,11 +40,6 @@ class ColorHistogramAnalysis(IAnalysisJob):
         self.resolution = resolution
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
-        """
-        This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
-        and gather all data we need.
-
-        """
         fps = project.movie_descriptor.fps
         targets, args = super(ColorHistogramAnalysis, self).prepare(project, targets, fps, class_objs)
         return args
@@ -106,34 +107,20 @@ class ColorHistogramAnalysis(IAnalysisJob):
         )
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
-        """
-        This Function will be called after the processing is completed. 
-        Since this function is called within the Main-Thread, we can modify our project here.
-        """
         result.set_target_container(project.get_by_id(result.target_container))
         result.set_target_classification_obj(self.target_class_obj)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
-        """
-        This should return the Widget that is shown in the Inspector when the analysis is selected
-        """
         view = HistogramVis(None)
         view.plot_color_histogram(analysis.get_adata())
         return view
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
-        """
-        This function should show the complete Visualization
-        """
         view = HistogramVis(None)
         view.plot_color_histogram(analysis.get_adata())
         return [VisualizationTab(widget=view, name="Color Histogram", use_filter=False, controls=view.get_param_widget())]
 
     def get_parameter_widget(self):
-        """
-        Returning a ParameterWidget subclass which will be displayed in the Analysis Dialog, when the user 
-        activates the Analysis.
-        """
         return ColorHistogramParameterWidget()
 
     def deserialize(self, data_dict):

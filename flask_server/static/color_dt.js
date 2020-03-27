@@ -39,6 +39,9 @@ class ColorDT {
         this.plot.background_fill_color = this.background
         this.plot.background_fill_alpha = 0.0
         this.plot.border_fill_alpha = 0.0
+        this.plot.center[0].grid_line_alpha = 0.3
+        this.plot.center[1].grid_line_alpha = 0.3
+
         this.plot.sizing_mode = "scale_width"
         this.aspect = 9.0 / 16
         
@@ -62,12 +65,13 @@ class ColorDT {
         this.plot.below[0].formatter = f;
         // this.plot.left[0]
        
+        this.plot.line({x: { field: "x" }, y: { field: "y" }, line_color : "rgb(255,255,255)", line_alpha:0.2, source: this.source});
 
         var r = this.plot.image_url({url: { field: "url" },x: { field: "x" },y: { field: "y" },
             w: 20,
             h: 20 * this.aspect,
             anchor: "center",
-            // global_alpha: 0.2,
+            global_alpha: 0.8,
             source: this.source
             });
         r.glyph.h.units = "screen"
@@ -179,96 +183,3 @@ class ColorDT {
     }
 
 }
-
-// // // Define a new component called button-counter
-// // function poll(timeout){
-// // console.log("Poll DT")
-// //     $.ajax({
-// //                 type: 'GET',
-// //                 contentType: 'application/json',
-// //                 dataType: 'json',
-// //                 url: "/screenshot-data/",
-// //                 success: function (e) {
-// //                     if (e.changes || source.data.x.length == 0){
-// //                         source.data.x = e.data.a;
-// //                         source.data.y = e.data.b;
-// //                         source.data.image = e.data.urls
-// //                         source.change.emit()
-// //                     }
-
-
-// //                     setTimeout(function(){ poll(timeout) ;}, timeout)
-// //                 },
-// //                 error: function (error, timeout) {
-// //                     console.log(error);
-// //                     setTimeout(function(){poll(timeout); }, timeout)
-// //                 }
-// //     })
-// // }
-
-// // var source = new Bokeh.ColumnDataSource({data:{url : [],
-// //                                       x : [],
-// //                                       y : [],
-// //                                       h : [],
-// //                                       w : [],
-// //                                       sat : [],
-// //                                       lab : [],
-// //                                       lch : [],
-// //                                       scene_ids : [],
-// //                                       ids : [],
-// //                                       sids : []}});
-
-
-
-// // function onFeatureSelected(t){
-// //     console.log(t)
-// // }
-// // var menu = [("Saturation", "Saturation"), ("Chroma", "Chroma"), ("Hue", "Hue"), ("Luminance", "Luminance"), ("A-Channel", "a-channel"), ("B-Channel", "b-channel")]
-// // var dropdown = new Bokeh.Widgets.Dropdown({label:"Select Feature", button_type:"warning", menu:menu}) // callback:new Bokeh.CustomJS({args: [], code:{onFeatureSelected("H")})
-
-// // // make a plot with some tools
-// // var plot = Bokeh.Plotting.figure({
-// //     title:'Color CIE-Lab (AB - Plane)',
-// //     tools: "pan,wheel_zoom,box_zoom,reset,save",
-// //     height: 500,
-// //     width: 1200,
-// //     x_axis_type: "datetime"
-// // });
-
-
-
-// // var grid_col = "rgb(255,255,255)"
-// // var background = "rgb(17,17,17)"
-
-// // //plot.center[0].grid_line_alpha = 0.0
-// // //plot.center[1].grid_line_alpha = 0.0
-
-// // plot.background_fill_color = background
-// // plot.background_fill_alpha = 0.0
-// // plot.border_fill_alpha = 0.0
-// // plot.sizing_mode = "scale_width"
-// // var aspect = 9.0 / 16
-
-// // plot.image_url({ field:"url"}, { field: "x" }, { field: "y" },
-// //      dw = 10,
-// //      dh = 10 * aspect,
-// //      dw_units ="screen",
-// //      dh_units ="screen",
-// //      anchor="center",
-// //      global_alpha=0.2,
-// //      {
-// //     source: source
-// // });
-
-// // console.log(plot)
-// // var q = 20
-// // for (var i = 0; i < 10; i++){
-// // console.log(i * q)
-// //     plot.circle({x:0, y:0, radius: i * q, fill_alpha: 0, line_color: grid_col, line_alpha: 0.2, line_width: 1.0})
-// // }
-
-// // var doc = new Bokeh.Document();
-// // doc.add_root(new Bokeh.Column({children: [dropdown, plot], sizing_mode: "scale_width"}));
-// // Bokeh.embed.add_document_standalone(doc, document.getElementById("dt-color"));
-
-// // poll(1000);

@@ -20,6 +20,21 @@ from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class ColorPaletteAnalysis(IAnalysisJob):
+    """
+    IAnalysisJob to extract color palettes in VIAN.
+
+    .. note:: **HDF5 Memory Layout**
+
+        - 1st: index of the feature vector
+        - 2nd: Palette Clusters
+
+            - [0]: Merge Distance
+            - [1]: Merge Depth
+            - [2] Cluster Color: B-Channel (BGR) {0, ..., 255}
+            - [3] Cluster Color: G-Channel (BGR) {0, ..., 255}
+            - [4] Cluster Color: R-Channel (BGR) {0, ..., 255}
+            - [5] Number of Pixels
+    """
     def __init__(self, resolution = 30, input_width = 300, n_super_pixel = 200):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorPalettes",
@@ -33,11 +48,6 @@ class ColorPaletteAnalysis(IAnalysisJob):
         self.n_super_pixel = n_super_pixel
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
-        """
-        This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
-        and gather all data we need.
-
-        """
         fps = project.movie_descriptor.fps
         targets, args = super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
         return args
@@ -114,17 +124,10 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return None
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
-        """
-        This Function will be called after the processing is completed. 
-        Since this function is called within the Main-Thread, we can modify our project here.
-        """
         result.set_target_container(project.get_by_id(result.target_container))
         result.set_target_classification_obj(self.target_class_obj)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
-        """
-        This should return the Widget that is shown in the Inspector when the analysis is selected
-        """
         view = PaletteView(None)
         view.depth = 10
         image = QImage(QSize(1024,256), QImage.Format_RGBA8888)
@@ -136,19 +139,12 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return view
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
-        """
-        This function should show the complete Visualization
-        """
         view = PaletteWidget(None)
         view.set_palette(analysis.get_adata()['tree'])
         view.draw_palette()
         return [VisualizationTab(widget=view, name="Color Palette", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):
-        """
-        Returning a ParameterWidget subclass which will be displayed in the Analysis Dialog, when the user 
-        activates the Analysis.
-        """
         return ColorPaletteParameterWidget()
 
     def serialize(self, data_dict):

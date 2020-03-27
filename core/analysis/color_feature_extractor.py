@@ -35,6 +35,24 @@ array Structure:
 
 @vian_analysis
 class ColorFeatureAnalysis(IAnalysisJob):
+    """
+    IAnalysisJob to extract average color values in VIAN.
+
+    .. note:: **HDF5 Memory Layout**
+
+        - 1st: index of the feature vector
+        - 2nd: Average Color Features
+
+            - [0]: Average Value: Luminance (CIELab) {0.0, ..., 100.0 }
+            - [1] Average Value: A-Channel (CIELab) {-128.0, ..., 128.0}
+            - [2] Average Value: B-Channel (CIELab) {-128.0, ..., 128.0}
+            - [3] Average Value: B-Channel (BGR) {0, ..., 255}
+            - [4] Average Value: G-Channel (BGR) {0, ..., 255}
+            - [5] Average Value: R-Channel (BGR) {0, ..., 255}
+            - [6] Average Value: Luebbe Saturation (BGR) {0, ..., 1.0} (Deprecated, this will be removed at some point)
+            - [7] Average Value: Experimental Saturation (BGR) {0, ..., 1.0} (Deprecated, this will be removed at some point)
+    """
+
     def __init__(self, resolution = 30):
         super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorFeatures",

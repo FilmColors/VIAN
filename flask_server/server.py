@@ -8,7 +8,7 @@ import numpy as np
 from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
 from PyQt5 import QtGui
-from flask import Flask, render_template, send_file, url_for, jsonify
+from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
 
 from core.data.log import log_error, log_info
 from core.gui.ewidgetbase import EDockWidget
@@ -29,9 +29,12 @@ import mimetypes
 mimetypes.add_type('application/javascript', '.js')
 mimetypes.add_type('application/json', '.json')
 
+from threading import Lock
+UPDATE_LOCK = Lock()
 
 class ScreenshotData:
     def __init__(self):
+
         self.a = []
         self.b = []
         self.urls = []
@@ -44,47 +47,35 @@ class ScreenshotData:
 
         self.palettes = []
 
-
 class ServerData:
     def __init__(self):
         self.project = None #type: VIANProject
-        self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
 
-        self._needs_update = False
+        self._recompute_screenshot_cache = False
+        self._screenshot_cache = dict(revision = 0, data=ScreenshotData())
+
         self._project_closed = False
+        self.selected_uuids = None
 
-    def set_project(self, project:VIANProject):
-        self._screenshot_cache = dict(uuids = set(), has_changed = False, data=ScreenshotData())
-
-        self.project = project
-        # self.project.onProjectChanged.connect(partial(self.update_screenshot_data))
-        self.project.onScreenshotAdded.connect(self.on_screenshot_added)
-        self.project.onAnalysisAdded.connect(partial(self.queue_update))
-        self.project.onAnalysisAdded.connect(partial(self.queue_update))
-        for s in self.project.screenshots:
-            s.onScreenshotChanged.connect(partial(self.queue_update))
-
-        self._needs_update = True
-        self.update_screenshot_data()
-
-
-    def update(self):
-        if self._project_closed:
-            self._clear()
-            return
-
-        if self._needs_update:
+    def get_screenshot_data(self, revision = 0):
+        if self._recompute_screenshot_cache:
+            self._recompute_screenshot_cache = False
             self.update_screenshot_data()
-        self._needs_update = False
+            self._screenshot_cache['revision'] += 1
 
-    def on_screenshot_added(self, s:Screenshot):
-
-        s.onScreenshotChanged.connect(partial(self.update_screenshot_data))
-        # self.update_screenshot_data()
-        self._needs_update = True
-
-    def queue_update(self):
-        self._needs_update = True
+        if revision != self._screenshot_cache['revision']:
+            for k, v in self._screenshot_cache['data'].__dict__.items():
+                try:
+                    print(k, len(v))
+                except:
+                    pass
+            return dict(update=True,
+                        revision = self._screenshot_cache['revision'],
+                        data=self._screenshot_cache['data'].__dict__)
+        else:
+            return dict(update=False,
+                        revision = self._screenshot_cache['revision'],
+                        data=dict())
 
     def update_screenshot_data(self):
         a = []
@@ -99,6 +90,9 @@ class ServerData:
 
         uuids = []
         for i, s in enumerate(self.project.screenshots):
+            if self.selected_uuids is not None and s.unique_id not in self.selected_uuids:
+                continue
+
             t = s.get_connected_analysis(ColorFeatureAnalysis)
             if len(t) > 0:
                 try:
@@ -117,7 +111,6 @@ class ServerData:
                 hue.append(float(lch[2]))
                 saturation.append(float(lab_to_sat(arr)))
 
-
             t2 = s.get_connected_analysis(ColorPaletteAnalysis)
             if len(t2) > 0:
                 try:
@@ -125,29 +118,57 @@ class ServerData:
                 except Exception as e:
                     log_error(e)
                     continue
-                pal = get_palette_at_merge_depth(arr, depth = 15)
+                pal = get_palette_at_merge_depth(arr, depth=15)
                 if pal is not None:
                     palettes.extend(pal)
 
         data = ScreenshotData()
-
         data.a = np.nan_to_num(a).tolist()
-        data.b =  np.nan_to_num(b).tolist()
-        data.chroma =  np.nan_to_num(chroma).tolist()
-        data.luminance =  np.nan_to_num(luminance).tolist()
-        data.saturation =  np.nan_to_num(saturation).tolist()
-        data.hue = np.nan_to_num( hue).tolist()
-        data.time =  np.nan_to_num(time).tolist()
+        data.b = np.nan_to_num(b).tolist()
+        data.chroma = np.nan_to_num(chroma).tolist()
+        data.luminance = np.nan_to_num(luminance).tolist()
+        data.saturation = np.nan_to_num(saturation).tolist()
+        data.hue = np.nan_to_num(hue).tolist()
+        data.time = np.nan_to_num(time).tolist()
 
         data.uuids = uuids
-
         data.palettes = palettes
 
         self._screenshot_cache['has_changed'] = True
         self._screenshot_cache['data'] = data
         self.export_screenshots()
-        print("Screenshots Updated")
 
+    def set_project(self, project:VIANProject):
+        self.project = project
+
+        self._screenshot_cache = dict(revision = 0, data=ScreenshotData())
+
+        self.project.onScreenshotAdded.connect(self.on_screenshot_added)
+        self.project.onAnalysisAdded.connect(partial(self.queue_update))
+        self.project.onAnalysisAdded.connect(partial(self.queue_update))
+
+        for s in self.project.screenshots:
+            s.onScreenshotChanged.connect(partial(self.queue_update))
+
+        self._screenshot_cache['revision'] += 1
+        self.update_screenshot_data()
+
+    def queue_update(self):
+        self._recompute_screenshot_cache = True
+
+    def update(self):
+        if self._project_closed:
+            self._clear()
+            return False
+
+        if self.project is not None:
+            self.update_screenshot_data()
+            return True
+        else:
+            return False
+
+    def on_screenshot_added(self, s:Screenshot):
+        s.onScreenshotChanged.connect(partial(self.update_screenshot_data))
 
     def screenshot_url(self, s:Screenshot = None, uuid = None):
         if self.project is None:
@@ -155,7 +176,6 @@ class ServerData:
         if uuid is None:
             return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(s.unique_id) + ".jpg")
         return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(uuid) + ".jpg")
-
 
     def export_screenshots(self):
         ps = []
@@ -176,7 +196,7 @@ class ServerData:
 
     def _clear(self):
         self.project = None  # type: VIANProject
-        self._screenshot_cache = dict(uuids=set(), has_changed=False, data=ScreenshotData())
+        self._screenshot_cache = dict(revision = 0, data=ScreenshotData())
 
 _server_data = ServerData()
 
@@ -196,7 +216,6 @@ class FlaskServer(QObject):
 
     def on_closed(self):
         global _server_data
-
         _server_data.clear()
 
     def on_changed(self, project, item):
@@ -206,6 +225,14 @@ class FlaskServer(QObject):
         return None
 
     def on_selected(self, sender, selected):
+        if _server_data.project is not None and len(selected) > 0:
+            for s in selected:
+                if isinstance(s, Segment):
+                    selected.extend(_server_data.project.get_screenshots_of_segment(s))
+            selected = list(set(selected))
+            _server_data.selected_uuids = [s.unique_id for s in selected]
+
+            _server_data.queue_update()
         pass
 
 
@@ -258,18 +285,38 @@ def screenshot(uuid):
     return send_file(_server_data.screenshot_url(uuid=uuid))
 
 
-@app.route("/screenshot-data/")
-def screenshot_data():
+# @app.route("/check-updates/", methods=['POST'])
+# def check_update():
+#     if _server_data.project is None:
+#         return make_response(dict(screenshots_changed=False, uuids=[]))
+#
+#     d = request.json
+#     screenshot_uuids = d['screenshot_uuids']
+#
+#     _server_data.update()
+#     screenshots_changed = _server_data._screenshot_cache['data'].has_changed(screenshot_uuids)
+#     return dict(screenshots_changed = screenshots_changed,
+#                 uuids = _server_data._screenshot_cache['data'].uuids)
+
+
+@app.route("/screenshot-data/<int:revision>")
+def screenshot_data(revision):
     if _server_data.project is None:
-        return dict(changes=False, data = ScreenshotData().__dict__)
+        return json.dumps(_server_data.get_screenshot_data(revision))
     else:
-        _server_data.update()
-        if _server_data._screenshot_cache['has_changed']:
-            _server_data._screenshot_cache['data'].urls = [url_for("screenshot", uuid=u) for u in _server_data._screenshot_cache['data'].uuids]
-            _server_data._screenshot_cache['has_changed'] = False
-            return json.dumps(dict(changes=True, data=_server_data._screenshot_cache['data'].__dict__))
-        else:
-            return dict(changes=False, data=_server_data._screenshot_cache['data'].__dict__)
+        ret = _server_data.get_screenshot_data(revision)
+        if 'uuids' in ret['data']:
+            ret['data']['urls'] = [url_for("screenshot", uuid=u) for u in ret['data']['uuids']]
+        return json.dumps(_server_data.get_screenshot_data(revision))
+
+@app.route("/set-selection/", methods=['POST'])
+def set_selection():
+    if _server_data.project is None:
+        return make_response(dict(screenshots_changed=False, uuids=[]))
+    d = request.json
+    selected_uuids = d['selected_uuids']
+    print(selected_uuids)
+    return make_response("OK")
 
 
 if __name__ == '__main__':

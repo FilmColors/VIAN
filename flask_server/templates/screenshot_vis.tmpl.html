@@ -62,6 +62,8 @@
     var color_ab_plot = null;
     var color_dt_plot = null;
 
+    var screenshot_revision = 0;
+
     $(document).ready(function () {
       color_ab_plot = new ColorAB("ab-color");
       color_dt_plot = new ColorDT("dt-color");
@@ -88,30 +90,53 @@
         color_ab_plot.setBackgroundColor(17, 17, 17);
       })
 
-      pollScreenshot(1000);
+      updateScreenshotVis(1000);
     });
 
 
-
-
-
-
-
-    function pollScreenshot(pollTime) {
+    function checkUpdate(pollTime) {
       $.ajax({
-        type: 'GET',
+        url: "/check-updates/",
+        data: JSON.stringify({
+          screenshot_uuids: screenshot_uuids, 
+          h:"Hello World",
+        }),
         dataType: 'json',
-        url: "/screenshot-data/",
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
         success: function (e) {
-          if (e.changes == true) {
-            $(document).trigger("screenshotPollUpdate", [e.data]);
+          screenshot_uuids = e.uuids;
+          console.log(e);
+          if (e.screenshots_changed){
+            updateScreenshotVis();
           }
         },
         error: function (jqXHR, textStatus, errorThrown ) {
           console.log("Error", jqXHR, textStatus, errorThrown);
         },
         complete: function () {
-          setTimeout(function () { pollScreenshot(pollTime); }, pollTime);
+          setTimeout(function () { checkUpdate(pollTime); }, pollTime);
+        }
+      });
+    }
+
+    function updateScreenshotVis(pollTime) {
+      console.log("Pulling Screenshots ")
+      $.ajax({
+        type: 'GET',
+        dataType: 'json',
+        url: "/screenshot-data/" + screenshot_revision,
+        success: function (e) {
+          if (e.update){
+            $(document).trigger("screenshotPollUpdate", [e.data]);
+          }
+          screenshot_revision = e.revision;
+        },
+        error: function (jqXHR, textStatus, errorThrown ) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+        complete: function () {
+          setTimeout(function () { updateScreenshotVis(pollTime); }, pollTime);
         }
       });
     }
