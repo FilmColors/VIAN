@@ -13,15 +13,15 @@ Introduction
 ************
 Often, one does not only want to segment a film into temporal and spatial segments using VIANs
 :ref:`segmentation`, :ref:`screenshots` or :ref:`annotation` functionality, but also **classify** these by means of tags.
-The intention behind this to structure the qualitative analysis using well defined sets of words, which allows querying
+The intention behind this is to structure the qualitative analysis using well defined sets of words, which allows querying
 and visualization of the collected data in a later stage. VIAN uses the term **classification** to describe this task,
 some would however call this tagging.
 
-VIAN comes supports this using its **experiments**. An Experiment simply encapsulates everything related to
+VIAN supports this using a techinique, called **experiments**. An Experiment simply encapsulates everything related to
 classification, making it possible to perform several unrelated classifications within one project.
 
-The short an Experiment can be described as follows:
-Once one has collected data in VIAN, that is, creating Segments, Stills or Annotations, he wants to classify
+In short, an Experiment can be described as follows:
+Once one has collected data in VIAN, that is, creating Segments, Stills or Annotations, one wants to classify
 this data by specific vocabularies.
 An experiment consists of a set of rules about how and which data should be classified. It defines which data should
 be classified by which **vocabularies** and which **classification objects**.
@@ -33,7 +33,7 @@ be classified by which **vocabularies** and which **classification objects**.
    and if the mediated emotion of the scene is happy, thrilling or sad.
 
    In VIAN he would thus create two **vocabularies**: "Saturation" and "Emotion"
-   "Saturation" contains two word: "saturated" and "desaturated",
+   "Saturation" contains two words: "saturated" and "desaturated",
    "Emotion" contains three: "happy", "thrilled" and "sad".
 
    Since Bob knows that the saturation of the protagonist's dress is a completely different thing than the one of the
