@@ -1307,6 +1307,9 @@ class TimelineBar(QtWidgets.QFrame):
             qp.fillRect(self.rect(), QtGui.QColor(255, 255, 255, 50))
         qp.end()
 
+    def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
+        if self.timeline.project() is not None:
+            self.timeline.project().set_selected(self.timeline, [])
 
 class TimebarSlice(QtWidgets.QWidget):
     def __init__(self, parent:TimelineBar, item, timeline, color = (232, 174, 12, 100)):

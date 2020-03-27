@@ -32,6 +32,7 @@ mimetypes.add_type('application/json', '.json')
 from threading import Lock
 UPDATE_LOCK = Lock()
 
+
 class ScreenshotData:
     def __init__(self):
         self.a = []
@@ -229,12 +230,15 @@ class FlaskServer(QObject):
         if sender is _server_data:
             return
 
-        if _server_data.project is not None and len(selected) > 0:
-            for s in selected:
-                if isinstance(s, Segment):
-                    selected.extend(_server_data.project.get_screenshots_of_segment(s))
-            selected = list(set(selected))
-            _server_data.selected_uuids = [s.unique_id for s in selected]
+        if _server_data.project is not None:
+            if len(selected) > 0:
+                for s in selected:
+                    if isinstance(s, Segment):
+                        selected.extend(_server_data.project.get_screenshots_of_segment(s))
+                selected = list(set(selected))
+                _server_data.selected_uuids = [s.unique_id for s in selected]
+            else:
+                _server_data.selected_uuids = None
 
             _server_data.queue_update()
         pass
@@ -270,7 +274,6 @@ class FlaskWebWidget(EDockWidget):
         super(FlaskWebWidget, self).showEvent(a0)
 
     def reload(self):
-        print("Reload")
         self.view.reload()
 
 
