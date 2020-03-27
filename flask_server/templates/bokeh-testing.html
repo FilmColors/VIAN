@@ -33,17 +33,10 @@
         });
         
         plot.circle({x: {field:'x'}, y:{field:'y'}, source:source})
-        console.log(source)
-        plot.circle()
         
-        // This works
-        var callback = new Bokeh.CustomJS({args:{'source': source}, code:"console.log(source.data.x[0]);"})
-        plot.add_tools(new Bokeh.HoverTool({callback:callback}))
-        
-        // This doesn't work
-        // var callback2 = new Bokeh.CustomJS({args:{'source': source}, code:"console.log(source.data.x[0]);"})
-        // console.log(source.selected.js_on_change)
-        // source.selected.js_on_change({'indices': callback2})
+        source.selected.change.connect(function(a, selection){
+            console.log(selection.indices)
+        })
 
         Bokeh.Plotting.show(plot);
         

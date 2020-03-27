@@ -4,18 +4,24 @@ class ColorAB {
         this.divName = divName;
         this.grid_col = "rgb(255,255,255)"
         this.background = "rgb(17,17,17)"
+        
+        this.selectionCallback = null;
 
         this.grid_renderer = []
 
         this.source = new Bokeh.ColumnDataSource({
-            data: { x: [], y: [], image: [] }
+            data: { x: [], y: [], image: [], uuids: [] }
         });
-        this.source.selected.callback = function(){console.log("Hello World")}
+        var that = this;
+        // this.source.selected.callback = function(){console.log("Hello World")}
+        this.source.selected.change.connect(function(a, selection){
+            that.onSelectionChanged(that.source, selection);
+        })
         console.log(this.source)
 
         this.plot = Bokeh.Plotting.figure({
             title: 'Color CIE-Lab (AB - Plane)',
-            tools: "pan,wheel_zoom,box_zoom,reset,save",
+            tools: "lasso_select, pan,wheel_zoom,box_zoom,reset,save",
             height: 300,
             width: 300,
             x_axis_label: "A-Channel",
@@ -33,6 +39,12 @@ class ColorAB {
         this.plot.sizing_mode = "scale_width"
         this.aspect = 9.0 / 16
 
+        this.plot.circle({
+            x:{field:'x'},
+            y:{field:'y'}, 
+            fill_alpha:0.0, 
+            line_alpha:0.0, 
+            source:this.source})
 
         var r = this.plot.image_url({url: { field: "image" },x: { field: "x" },y: { field: "y" },
             w: 20,
@@ -80,10 +92,11 @@ class ColorAB {
         console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
     }
 
-    setData(a, b, urls){
+    setData(a, b, urls, uuids){
         this.source.data.x = a;
         this.source.data.y =b;
-        this.source.data.image = urls
+        this.source.data.image = urls;
+        this.source.data.uuids = uuids;
         this.source.change.emit();
     }
     
@@ -110,5 +123,21 @@ class ColorAB {
             }
         });
 
+    }
+
+    onSelectionChanged(source, selection){
+        if (this.selectionCallback != null){
+            let uuids = [];
+            selection.indices.forEach(elem=>{
+                uuids.push(source.data.uuids[elem]);
+            })
+            if (uuids.length == 0){
+                this.selectionCallback(source.data.uuids);
+            }
+            else{
+                this.selectionCallback(uuids);
+            }
+           
+        }
     }
 }

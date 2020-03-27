@@ -17,6 +17,7 @@ class ColorDT {
             hue : [],
             a: [], 
             b: [], 
+            uuids: []
             // scene_ids : [],
         }});
 
@@ -137,7 +138,7 @@ class ColorDT {
         console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
     }
 
-    setData(times, luminance, saturation, chroma, hue, a, b, urls){
+    setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids){
         let time = []
         for (var i = 0; i < times.length; i++){
             time.push(new Date(times[i]))
@@ -153,6 +154,8 @@ class ColorDT {
 
         this.source.data.a = a;
         this.source.data.b = b;
+
+        this.source.uuids = uuids;
 
         this.source.data.url = urls
         this.source.change.emit();

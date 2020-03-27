@@ -225,6 +225,9 @@ class FlaskServer(QObject):
         return None
 
     def on_selected(self, sender, selected):
+        if sender is _server_data:
+            return
+
         if _server_data.project is not None and len(selected) > 0:
             for s in selected:
                 if isinstance(s, Segment):
@@ -314,7 +317,14 @@ def set_selection():
     if _server_data.project is None:
         return make_response(dict(screenshots_changed=False, uuids=[]))
     d = request.json
-    selected_uuids = d['selected_uuids']
+    selected_uuids = d['uuids']
+    selected = [_server_data.project.get_by_id(uuids) for uuids in selected_uuids]
+
+    selected = list(set(selected))
+    if None in selected:
+        selected.remove(None)
+
+    _server_data.project.set_selected(_server_data, selected)
     print(selected_uuids)
     return make_response("OK")
 

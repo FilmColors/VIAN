@@ -66,10 +66,11 @@
 
     $(document).ready(function () {
       color_ab_plot = new ColorAB("ab-color");
+      color_ab_plot.selectionCallback = setSelected;
       color_dt_plot = new ColorDT("dt-color");
 
       $(document).on("screenshotPollUpdate", function (event, data) {
-        color_ab_plot.setData(data.a, data.b, data.urls);
+        color_ab_plot.setData(data.a, data.b, data.urls, data.uuids);
         color_dt_plot.setData(data.time,
           data.luminance,
           data.saturation,
@@ -77,7 +78,8 @@
           data.hue,
           data.a,
           data.b,
-          data.urls);
+          data.urls, 
+          data.uuids);
       });
 
       $("#setting-bg-white").on("click", function () {
@@ -138,6 +140,26 @@
         complete: function () {
           setTimeout(function () { updateScreenshotVis(pollTime); }, pollTime);
         }
+      });
+    }
+
+    function setSelected(selected_uuids) {
+      console.log(selected_uuids);
+      $.ajax({
+        url: "/set-selection/",
+        data: JSON.stringify({
+          uuids: selected_uuids, 
+          h:"Hello World",
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Selection Set")
+        },
+        error: function (jqXHR, textStatus, errorThrown ) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
       });
     }
 
