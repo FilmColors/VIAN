@@ -173,10 +173,16 @@ class ServerData:
 
     def screenshot_url(self, s:Screenshot = None, uuid = None):
         if self.project is None:
-            return
+            return None
+
         if uuid is None:
-            return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(s.unique_id) + ".jpg")
-        return os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(uuid) + ".jpg")
+            file = os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(s.unique_id) + ".jpg")
+        else:
+            file = os.path.join(os.path.join(self.project.export_dir, "screenshot_thumbnails"), str(uuid) + ".jpg")
+        if os.path.isfile(file):
+            return file
+        else:
+            return None
 
     def export_screenshots(self):
         ps = []
@@ -288,7 +294,12 @@ def screenshot_vis():
 
 @app.route("/screenshot/<string:uuid>")
 def screenshot(uuid):
-    return send_file(_server_data.screenshot_url(uuid=uuid))
+    file = _server_data.screenshot_url(uuid=uuid)
+    if file is None:
+        print("Not Found", file)
+        return make_response("Not found", 404)
+    else:
+        return send_file(file)
 
 
 @app.route("/screenshot-data/<int:revision>")
