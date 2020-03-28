@@ -239,7 +239,6 @@ class FlaskServer(QObject):
                 _server_data.selected_uuids = [s.unique_id for s in selected]
             else:
                 _server_data.selected_uuids = None
-
             _server_data.queue_update()
         pass
 
