@@ -2,8 +2,8 @@
 
 block_cipher = None
 
-
-hiddenimports_SKLEARN = [
+binaries = []
+hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
     'sklearn.utils.sparsetools._graph_tools',
     'sklearn.utils.lgamma',
@@ -29,17 +29,19 @@ if sys.platform == "win32":
         (VLC_ROOT + '/npvlc.dll', '.')
     ]
     data_paths += vlc_dlls
-    binaries = [
+    binaries += [
         (VLC_ROOT + "\plugins", "plugins")
     ]
     icon='qt_ui/images/main_round.ico'
 
+elif sys.platform.startswith("linux"):
+    hiddenimports += ['pkg_resources.py2_warn']
 
 a = Analysis(['main.py'],
              pathex=['E:\\Programming\\Git\\visual-movie-annotator'],
              binaries=binaries,
              datas=data_paths,
-             hiddenimports=hiddenimports_SKLEARN,
+             hiddenimports=hiddenimports,
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -52,20 +54,42 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 
-exe = EXE(pyz,
-          a.scripts,
-          [],
-          exclude_binaries=True,
-          name='VIAN',
-          debug=True,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          console=True,
-          icon=icon)
 
+print(sys.platform)
+if sys.platform.startswith('linux'):
+    exe = EXE(pyz,
+              a.scripts,
+              [],
+              exclude_binaries=True,
+              name='VIAN',
+              debug=True,
+              bootloader_ignore_signals=False,
+              strip=False,
+              upx=True,
+              console=True)
 
-coll = COLLECT(exe,
+    coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=[],
+               name='VIAN')
+else:
+    exe = EXE(pyz,
+              a.scripts,
+              [],
+              exclude_binaries=True,
+              name='VIAN',
+              debug=True,
+              bootloader_ignore_signals=False,
+              strip=False,
+              upx=True,
+              console=True,
+              icon=icon)
+
+    coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
