@@ -41,6 +41,9 @@ if sys.platform == "win32":
 elif sys.platform.startswith("linux"):
     hiddenimports += ['pkg_resources.py2_warn']
 
+else:
+    icon='qt_ui/images/main_round.ico'
+    
 a = Analysis(['main.py'],
              pathex=['E:\\Programming\\Git\\visual-movie-annotator'],
              binaries=binaries,
