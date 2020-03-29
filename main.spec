@@ -2,6 +2,9 @@
 
 block_cipher = None
 
+BUILD_PYTHON_DIR = os.environ['vian_build_dir']
+print(BUILD_PYTHON_DIR)
+
 binaries = []
 hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
@@ -18,7 +21,6 @@ data_paths = [
     ('flask_server/templates', 'flask_server/templates')
 ]
 
-
 import sys
 if sys.platform == "win32":
     VLC_ROOT = 'C:/Program Files/VideoLAN/VLC/'
@@ -30,7 +32,9 @@ if sys.platform == "win32":
     ]
     data_paths += vlc_dlls
     binaries += [
-        (VLC_ROOT + "\plugins", "plugins")
+        (VLC_ROOT + "\plugins", "plugins"),
+        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/sklearn/.libs/vcomp140.dll"), "."),
+        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/cv2/opencv_videoio_ffmpeg420_64.dll"), ".")
     ]
     icon='qt_ui/images/main_round.ico'
 
