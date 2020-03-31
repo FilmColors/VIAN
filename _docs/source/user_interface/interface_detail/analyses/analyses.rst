@@ -3,13 +3,35 @@
 Analyses
 ===========
 
-The Analyses Window lets you explore the following different color properties of Entities like **Screenshots** and **Segments**:
+The Analyses Window lets you explore the different color properties of Entities like **Screenshots** and **Segments**. This is one of the most powerful Features that VIAN has to offer: You can run several analyses on entities in your project and inspect them in this widget.
+Let's say you are interested in Color Histogram of the **Screenshots** you have taken so far in your project:
 
-- Color Features
-- Color Histogram
-- Color Palette
+Running Analyses
+----------------
 
-To be able to view these properties in the Analyses Window, you have to select the element that you want to run the analyses on and select *Analysis* and then the respective analysis, e.g. *Color Features*. The appearing Mas will look something like in the following picture:
+In the header menu, click **Analysis**. The following dropdown menu will appear:
+
+.. figure:: analyses_dropdown.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   The Analyses dropdown menu.
+
+Select the analysis you want to carry out, in this case we said that we are interested in Color Histogram.
+Once you clicked it, the following window will appear:
+
+
+
+
+
+
+
+
+
+Inspecting Analyses
+-------------------
+
 
 .. figure:: analyses_mask.png
    :scale: 60%
