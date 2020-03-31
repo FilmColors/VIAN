@@ -21,10 +21,25 @@ In the header menu, click **Analysis**. The following dropdown menu will appear:
 Select the analysis you want to carry out, in this case we said that we are interested in Color Histogram.
 Once you clicked it, the following window will appear:
 
+.. figure:: analyses_select_entitites_marked.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   The Entitie Selection Window.
 
+In the Window **1**, the entities on which the anasyses are to be run are being displayed in the «Targets» field. Since you ran this the first time, the list is empty.
+To add entities on which to perform the analyses, sekect them in the :ref:`outliner` **2**. If you haven't the Outliner open already, you can do this by selecting it from the toolbar **3**, or by pressing **ALT-O**.
 
+.. figure:: analyses_selected_entitites_marked.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   The Entitie Selection Window.
 
-
+After selecting the intended Screenshots in the Outliner **1**, click **+** **2** to add them to the «Target» list.
+To apply the analyses, click «Apply» **3**.
 
 
 
