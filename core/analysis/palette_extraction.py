@@ -9,6 +9,7 @@ import cv2
 from typing import List
 import time
 
+
 class PaletteAsset():
     def __init__(self, tree, merge_dists):
         self.tree = tree

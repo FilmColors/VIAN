@@ -563,6 +563,7 @@ class VocabularyTreeView(QTreeView):
                 self.open_context_menu(QMouseEvent)
 
     def selectionChanged(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection) -> None:
+        super(VocabularyTreeView, self).selectionChanged(selected, deselected)
         try:
             self.selected_vocabularies = []
             for t in self.selectedIndexes():

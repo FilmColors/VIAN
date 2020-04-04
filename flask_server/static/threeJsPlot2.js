@@ -131,19 +131,6 @@ class ThreeJSView {
         this.renderer.render( that.scene, that.camera );
     }
 
-
-
-    // animate() {
-    //     var that = this;
-    //     requestAnimationFrame(function () { that.animate() });
-
-    //     this.handleController( that.controller1 );
-    //     this.handleController( that.controller2 );
-
-    //     this.controls.update();
-    //     this.renderer.render(this.scene, this.camera);
-    // }
-
     onWindowResize() {
         var frame = this.frame;
         var width = frame.clientWidth;
@@ -277,6 +264,36 @@ class Palette3D extends ThreeJSView {
         var particles = new THREE.Points(geometry, material);
         this.scene.add(particles);
     }
+
+    addPoints(ls, as, bs, cols, sizes){
+        var ps = [];
+
+        var vertices = []
+        var colors = []
+        for (var i = 0; i < ls.length; i ++){
+            vertices.push(as[i], ls[i], bs[i])
+            colors.push(cols[i][0], cols[i][1], cols[i][2], 0.5)
+        }
+
+        var geometry = new THREE.BufferGeometry();
+        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+        geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 4 ) );
+        geometry.setAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1 ).setUsage( THREE.DynamicDrawUsage ) );
+
+        var material = new THREE.PointsMaterial({ 
+            size: 15, 
+            sizeAttenuation: false, 
+            map: this._sprite, 
+            alphaTest: 0.5,
+            transparent: true, 
+            vertexColors:true });
+        
+
+        var particles = new THREE.Points(geometry, material);
+        this.scene.add(particles);
+
+    }
+
     clear() {
         this.scene.remove.apply(this.scene, this.scene.children);
         this._palette = []

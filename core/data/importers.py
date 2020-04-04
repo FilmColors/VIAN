@@ -496,7 +496,6 @@ class VocabularyCSVImporter(CSVImporter):
 
                 counter += 1
 
-
         project.inhibit_dispatch = False
         project.dispatch_changed()
 
