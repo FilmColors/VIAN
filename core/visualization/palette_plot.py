@@ -20,6 +20,7 @@ from random import randint
 import numpy as np
 import time
 
+
 class PaletteWidget(QWidget):
     onReloadData = pyqtSignal()
 
@@ -423,6 +424,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
             color = cols_to_draw[q]
             radius = self.dot_size
             lab = tpl_bgr_to_lab(color)
+            lab[2] = -1 * lab[2]
 
             color_rgb  = QColor(int(color[2]), int(color[1]), int(color[0]))
 
