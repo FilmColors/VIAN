@@ -49,6 +49,7 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
                 idx_start = int(ms_to_frames(s.get_start(), fps) / res)
                 idx_end = int(ms_to_frames(s.get_end(), fps) / res)
                 indices = range(idx_start, idx_end, 1)
+                frame_indices = np.array(indices) * res
                 hists = hdf5_manager.col_histograms()[indices]
             else:
                 res = 15
@@ -56,23 +57,23 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
                 idx_end = int(np.clip(ms_to_frames(s.get_end(), fps), idx_start + 1, duration))
                 n_hists = int(np.ceil((idx_end - idx_start) / res))
                 hists = np.zeros(shape=(n_hists, 16,16,16))
-
-                print(len(list(range(idx_start, idx_end, res))), n_hists)
-                for n, i in enumerate(range(idx_start, idx_end, res)):
+                frame_indices = []
+                for h_idx, i in enumerate(range(idx_start, idx_end, res)):
                     cap.set(cv2.CAP_PROP_POS_FRAMES, i)
                     ret, frame = cap.read()
 
                     if frame is None:
                         continue
 
+                    frame_indices.append(i)
                     frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2Lab)
-                    hists[n] = np.divide(calculate_histogram(frame_lab, 16), (width * height))
+                    hists[h_idx] = np.divide(calculate_histogram(frame_lab, 16), (width * height))
 
             hists = np.reshape(hists, newshape=(hists.shape[0], hists.shape[1]* hists.shape[2] * hists.shape[3]))
             hists /= np.sqrt(np.sum(hists ** 2, axis=1, keepdims=True))
             result = select_rows(hists, np.clip(n, 1, hists.shape[0]))
 
-            frame_pos.extend([idx_start +  (f * res) for f in result])
+            frame_pos.extend([frame_indices[f] for f in result])
 
 
     return frame_pos
