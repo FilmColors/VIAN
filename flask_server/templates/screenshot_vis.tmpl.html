@@ -180,15 +180,31 @@
 
     $(document).on("screenshotPollUpdate", function (event, data) {
       plot.clear();
-
+      
+      var ls = []
+      var as = []
+      var bs = []
+      var cols = []
+      var sizes = []
+      
       data.palettes.forEach((elem) => {
         let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
-        plot.addPoint(
-          elem.lab[0],
-          elem.lab[1],
-          elem.lab[2]
-          , rgb);
+        ls.push(elem.lab[0]);
+        as.push(elem.lab[1]);
+        bs.push(elem.lab[2]);
+        sizes.push(10);
+        cols.push(rgb);
       });
+      plot.addPoints(ls, as, bs, cols,sizes);
+
+      // data.palettes.forEach((elem) => {
+      //  let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
+      //  plot.addPoint(
+      //    elem.lab[0],
+      //    elem.lab[1],
+      //    elem.lab[2]
+      //    , rgb);
+      // });
     });
 
 
