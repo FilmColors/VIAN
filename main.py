@@ -13,7 +13,10 @@ Visualization and MultimediaLab
 """
 
 import os
+import sys
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import platform
 import sys
 from time import sleep
@@ -21,13 +24,19 @@ import time
 import cProfile
 import traceback as tb
 import subprocess
+
 from datetime import datetime
 from threading import Thread
 
 from core.hidden_imports import *
 
-abspath = os.path.abspath(sys.executable)
+abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
+print("Directory", dname)
+
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+    os.chdir(application_path)
 
 import logging
 logging.getLogger('tensorfyylow').disabled = True
@@ -129,9 +138,9 @@ if __name__ == '__main__':
     settings.load()
     print("Settings loaded")
 
-
     app = QApplication(sys.argv)
     print("ApplicationDone")
+
 
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
     # filter = SuperFilter(app)

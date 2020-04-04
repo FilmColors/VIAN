@@ -1,10 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
-import glob
 
 block_cipher = None
-
-BUILD_PYTHON_DIR = os.environ['vian_build_dir']
-print(BUILD_PYTHON_DIR)
 
 binaries = []
 hiddenimports = [
@@ -33,9 +29,7 @@ if sys.platform == "win32":
     ]
     data_paths += vlc_dlls
     binaries += [
-        (VLC_ROOT + "\plugins", "plugins"),
-        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/sklearn/.libs/vcomp140.dll"), "."),
-        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/cv2/opencv_videoio_ffmpeg420_64.dll"), ".")
+        (VLC_ROOT + "\plugins", "plugins")
     ]
     icon='qt_ui/images/main_round.ico'
 
@@ -43,15 +37,7 @@ elif sys.platform.startswith("linux"):
     hiddenimports += ['pkg_resources.py2_warn']
 
 else:
-    binaries = [
-        ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
-        ('/System/Library/Frameworks/Tcl.framework/Tcl','tcl')
-        ]
-    for g in glob.glob("/Applications/VLC.app/Contents/MacOS/lib/*"):
-        print(g)
-        binaries.append((g, '.'))
-    icon='qt_ui/images/main_round.icns'
-    
+    icon='qt_ui/images/main_round.ico'
 a = Analysis(['main.py'],
              pathex=['E:\\Programming\\Git\\visual-movie-annotator'],
              binaries=binaries,
@@ -91,6 +77,7 @@ if sys.platform.startswith('linux'):
                upx=True,
                upx_exclude=[],
                name='VIAN')
+
 else:
     exe = EXE(pyz,
               a.scripts,
@@ -101,7 +88,7 @@ else:
               bootloader_ignore_signals=False,
               strip=False,
               upx=True,
-              console=False,
+              console=True,
               icon=icon)
 
     coll = COLLECT(exe,
@@ -115,20 +102,11 @@ else:
                icon=icon)
 
 if sys.platform == "darwin":
-    app = BUNDLE(coll,
+    app = BUNDLE(exe,
              name='VIAN.app',
-             icon=icon,
+             icon=None,
              bundle_identifier=None,
              info_plist={
-                'NSPrincipalClass': 'NSApplication',
-                'NSAppleScriptEnabled': False,
-                'CFBundleDocumentTypes': [
-                    {
-                        'CFBundleTypeName': 'Editor',
-                        'CFBundleTypeRole':'Editor',
-                        'CFBundleTypeIconFile': icon,
-                        'LSItemContentTypes': ['com.example.myformat'],
-                        'LSHandlerRank': 'Owner'
-                        }
-                    ]
-                },)
+                'NSHighResolutionCapable': 'True'
+                },
+             )

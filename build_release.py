@@ -3,18 +3,20 @@ import os
 import shutil
 
 BUILD_PYTHON_WIN = "C:/Users/gaude/AppData/Local/Programs/Python/Python36/python.exe"
-BUILD_PYTHON_OSX = "/Users/Kris/vian/bin/pyinstaller"
+BUILD_PYTHON_OSX = "/Users/Kris/Documents/Gaudenz/vian_env/bin/pyinstaller"
+
 
 SPEC_FILE = "main.spec"
 
-arguments = ["-y"]
+arguments = ["-y", "--debug=all"]
 if sys.platform.startswith("win"):
     build_python = BUILD_PYTHON_WIN
     build_dir = os.path.split(build_python)[0]
-
     build_archive = "VIAN-Windows-64bit"
     pyinstaller = os.path.join(build_dir, "Scripts/pyinstaller")
+
 elif sys.platform.startswith("darwin"):
+    arguments += ["--windowed"]
     build_python = BUILD_PYTHON_OSX
     build_archive = "VIAN-OSX"
 
