@@ -1,0 +1,11 @@
+tensorflow==1.15.0
+keras
+sqlalchemy
+opencv-python
+requests
+PyQt5
+PyQtWebEngine
+scikit-learn
+flask
+fastcluster
+moviepy

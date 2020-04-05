@@ -191,6 +191,9 @@ class ServerData:
             os.mkdir(rdir)
 
         for s in self.project.screenshots:
+            if s.img_movie is None:
+                continue
+
             if s.img_movie.shape[0] > 100:
                 p = os.path.join(rdir, str(s.unique_id) + ".jpg")
                 if not os.path.isfile(p):

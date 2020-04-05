@@ -8,7 +8,7 @@ BUILD_PYTHON_OSX = "/Users/Kris/Documents/Gaudenz/vian_env/bin/pyinstaller"
 
 SPEC_FILE = "main.spec"
 
-arguments = ["-y", "--debug=all"]
+arguments = ["-y", "--debug=all", "--additional-hooks-dir=hooks"]
 if sys.platform.startswith("win"):
     build_python = BUILD_PYTHON_WIN
     build_dir = os.path.split(build_python)[0]

@@ -6,6 +6,10 @@ block_cipher = None
 BUILD_PYTHON_DIR = os.environ['vian_build_dir']
 print(BUILD_PYTHON_DIR)
 
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+tf_hidden_imports = collect_submodules('tensorflow_core')
+tf_datas = collect_data_files('tensorflow_core', subdir=None, include_py_files=True)
+
 binaries = []
 hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
@@ -13,14 +17,14 @@ hiddenimports = [
     'sklearn.utils.lgamma',
     'sklearn.utils.weight_vector'
     'sklearn.neighbors._typedefs'
-]
+] + tf_hidden_imports
 
 data_paths = [
     ('data', 'data'),
     ('qt_ui', 'qt_ui'),
     ('flask_server/static', 'flask_server/static'),
     ('flask_server/templates', 'flask_server/templates')
-]
+] + tf_datas
 
 import sys
 if sys.platform == "win32":
@@ -47,9 +51,9 @@ else:
         ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
         ('/System/Library/Frameworks/Tcl.framework/Tcl','tcl')
         ]
-    for g in glob.glob("/Applications/VLC.app/Contents/MacOS/lib/*"):
-        print(g)
-        binaries.append((g, '.'))
+     #for g in glob.glob("/Applications/VLC.app/Contents/MacOS/lib/*"):
+     #   print(g)
+     #   binaries.append((g, '.'))
     icon='qt_ui/images/main_round.icns'
     
 a = Analysis(['main.py'],
@@ -124,10 +128,10 @@ if sys.platform == "darwin":
                 'NSAppleScriptEnabled': False,
                 'CFBundleDocumentTypes': [
                     {
-                        'CFBundleTypeName': 'Editor',
+                        'CFBundleTypeName': '.eext',
                         'CFBundleTypeRole':'Editor',
                         'CFBundleTypeIconFile': icon,
-                        'LSItemContentTypes': ['com.example.myformat'],
+                        'LSItemContentTypes': ['com.example.eext'],
                         'LSHandlerRank': 'Owner'
                         }
                     ]

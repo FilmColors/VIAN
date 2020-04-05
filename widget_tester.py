@@ -48,15 +48,16 @@ MAIN_WINDOW = None
 
 print(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath))
 
-class MW(QMainWindow):p
+class MW(QMainWindow):
     def __init__(self, widget):
         super(MW, self).__init__()
         self.central = QWidget(self)
         self.central.setLayout(QVBoxLayout())
 
         self.v = QWebEngineView(self)
-        self.v.load(QUrl("http://www.google.com"))
-        self.v.setStyleSheet("QWebEngineView{background-color:rgb(0,0,0); border: 10px solid black;}")
+        # self.v = QWidget();
+        # self.v.load(QUrl("http://www.google.com"))
+        # self.v.setStyleSheet("QWebEngineView{background-color:rgb(0,0,0); border: 10px solid black;}")
         # self.browser = QWebEngineView()
         # self.browser.load(QUrl('http://www.google.com'))
         self.lineedit = QLineEdit(self)
@@ -65,12 +66,13 @@ class MW(QMainWindow):p
         self.central.layout().addWidget(self.lineedit)
         self.centralWidget().layout().addWidget(self.v)
 
-        self.v.show()
+        # self.v.show()
 
-        self.v.loadFinished.connect(print)
-        self.v.loadProgress.connect(print)
+        # self.v.loadFinished.connect(print)
+        # self.v.loadProgress.connect(print)
         print(self.v)
         self.show()
+
         print(self.v.isVisible())
 
     def on_change(self):
