@@ -10,6 +10,7 @@ from core.gui.ewidgetbase import EDockWidget
 from core.data.computation import ms_to_string
 from core.data.interfaces import TimelineDataset
 from core.container.project import *
+from core.container.container_interfaces import ILockable
 from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 from core.gui.ewidgetbase import ImagePreviewPopup, TextEditPopup
@@ -1017,7 +1018,6 @@ class TimelineControl(QtWidgets.QWidget):
         self.h_exp = 300
         self.h_col = 100
         self.name = name
-        self.set_name()
         self.groups = []
         self.setMouseTracking(True)
         self.is_selected = False
@@ -1028,6 +1028,21 @@ class TimelineControl(QtWidgets.QWidget):
         self.resize_offset = 0
         self.show()
         self.group_height = self.timeline.group_height
+
+        self.setLayout(QVBoxLayout())
+        self.lbl_title = QLabel(self)
+        self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
+        self.layout().addWidget(self.lbl_title)
+
+        self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+
+        self.bottom_line = None
+        self.btn_lock = None
+        self.text_loc = (5, 5)
+
+        self.set_name()
+        self._add_spacer()
+
         if self.item.strip_height == -1:
             self.resize(self.width(), 45)
         else:
@@ -1036,7 +1051,35 @@ class TimelineControl(QtWidgets.QWidget):
         if not isinstance(self.item, TimelineDataset):
             self.item.onSelectedChanged.connect(self.on_selected_changed)
 
+    def _add_spacer(self):
+        self.bottom_line = QWidget(self)
+        self.bottom_line.setStyleSheet("QWidget{padding:1px; margin:0pt; background:transparent;}")
+        self.bottom_line.setLayout(QHBoxLayout())
+        self.bottom_line.layout().setSpacing(0)
 
+        if isinstance(self.item, ILockable):
+            self.btn_lock = QPushButton(create_icon("qt_ui/icons/icon_locked2.png"), "", self)
+            if self.item.is_locked():
+                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
+            else:
+                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_lock_green.png"))
+            self.btn_lock.clicked.connect(self.toggle_lock)
+
+        self.bottom_line.layout().addWidget(self.btn_lock)
+        self.bottom_line.layout().addItem(QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
+        self.layout().addItem(self.expand)
+        self.layout().addWidget(self.bottom_line)
+
+
+    def toggle_lock(self):
+        if isinstance(self.item, ILockable):
+
+            if self.item.is_locked():
+                self.item.unlock()
+                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_lock_green.png"))
+            else:
+                self.item.lock()
+                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
 
     @pyqtSlot(bool)
     def on_selected_changed(self, state):
@@ -1050,6 +1093,7 @@ class TimelineControl(QtWidgets.QWidget):
     def set_name(self):
         if self.item is not None:
             self.name = self.item.get_name()
+            self.lbl_title.setText(self.name)
 
     def update_info(self, layer):
         self.set_name()
@@ -1150,7 +1194,7 @@ class TimelineControl(QtWidgets.QWidget):
         qp.drawLine(QtCore.QPoint(0,0), QtCore.QPoint(self.width(), 0))
 
         # Title of the Control
-        qp.drawText(QRect(5, 5, self.width(), 25), Qt.AlignVCenter | Qt.AlignLeft, self.name)
+        # qp.drawText(QRect(self.text_loc[0], self.text_loc[1], self.width(), 25), Qt.AlignVCenter | Qt.AlignLeft, self.name)
 
         if isinstance(self.item, ILockable):
             if self.item.is_locked():
@@ -1311,6 +1355,7 @@ class TimelineBar(QtWidgets.QFrame):
         if self.timeline.project() is not None:
             self.timeline.project().set_selected(self.timeline, [])
 
+
 class TimebarSlice(QtWidgets.QWidget):
     def __init__(self, parent:TimelineBar, item, timeline, color = (232, 174, 12, 100)):
         super(TimebarSlice, self).__init__(parent)
@@ -1365,7 +1410,6 @@ class TimebarSlice(QtWidgets.QWidget):
         self.previous_slice = None
         self.next_slice = None
         self.on_media_objects_changed()
-
 
     @pyqtSlot(bool)
     def on_selected_changed(self, state):

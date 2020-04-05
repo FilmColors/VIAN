@@ -142,7 +142,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     print("ApplicationDone")
 
-
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
     # filter = SuperFilter(app)
     # app.installEventFilter(filter)
