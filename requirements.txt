@@ -1,7 +1,7 @@
 tensorflow==1.15.0
 keras
 sqlalchemy
-opencv-python
+opencv-contrib-python
 requests
 PyQt5
 PyQtWebEngine

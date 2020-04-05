@@ -54,6 +54,7 @@ from core.gui.main_window import MainWindow, version
 DEBUG = os.path.isfile("is_dev.txt")
 MAIN_WINDOW = None
 
+
 class SuperFilter(QObject):
     def __init__(self, parent):
         super(SuperFilter, self).__init__(parent)

@@ -8,6 +8,7 @@ from core.container.project import *
 from core.concurrent.auto_segmentation import ApplySegmentationWindow
 from core.analysis.colorimetry.computation import calculate_histogram
 
+
 def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, hdf5_manager, sign_progress):
     frame_pos = []
     if method == "Uniform Distribution":
@@ -74,7 +75,6 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
             result = select_rows(hists, np.clip(n, 1, hists.shape[0]))
 
             frame_pos.extend([frame_indices[f] for f in result])
-
 
     return frame_pos
 

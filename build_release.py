@@ -36,5 +36,9 @@ print("Zipping")
 build_archive = "dist/" + build_archive
 if os.path.isfile(build_archive):
     os.remove(build_archive)
-shutil.make_archive(build_archive, "zip", "dist/VIAN")
+
+if sys.platform == "darwin":
+    shutil.make_archive(build_archive, "zip", "dist/VIAN.app")
+else:
+    shutil.make_archive(build_archive, "zip", "dist/VIAN")
 print("Done")

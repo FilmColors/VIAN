@@ -10,6 +10,7 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 tf_hidden_imports = collect_submodules('tensorflow_core')
 tf_datas = collect_data_files('tensorflow_core', subdir=None, include_py_files=True)
 
+
 binaries = []
 hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
@@ -18,6 +19,7 @@ hiddenimports = [
     'sklearn.utils.weight_vector'
     'sklearn.neighbors._typedefs'
 ] + tf_hidden_imports
+
 
 data_paths = [
     ('data', 'data'),
