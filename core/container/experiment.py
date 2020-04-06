@@ -3,7 +3,6 @@ import time
 from uuid import uuid4
 import numpy as np
 
-
 from typing import List, Tuple
 
 from core.data.log import log_warning, log_debug, log_info, log_error
@@ -19,6 +18,7 @@ from core.analysis.deep_learning.labels import LIPLabels
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
 
+from functools import partial
 
 def delete_even_if_connected_msgbox(mode="word"):
     """
@@ -577,7 +577,7 @@ class ClassificationObject(IProjectContainer, IHasName):
         self.parent = parent
         self.children = []
         self.classification_vocabularies = []
-        self.unique_keywords = []
+        self.unique_keywords = [] # type:List[UniqueKeyword]
         self.target_container = []
         self.semantic_segmentation_labels = ("", [])
 
@@ -853,6 +853,10 @@ class Experiment(IProjectContainer, IHasName):
         self.correlation_matrix = None
         self.pipeline_script = None
 
+        self.onClassificationObjectRemoved.connect(partial(self.onExperimentChanged.emit, self))
+        self.onClassificationObjectAdded.connect(partial(self.onExperimentChanged.emit, self))
+
+
     def get_name(self):
         return self.name
 
@@ -974,6 +978,10 @@ class Experiment(IProjectContainer, IHasName):
             self.classification_objects.append(obj)
             self.onClassificationObjectAdded.emit(self)
 
+        obj.onClassificationObjectChanged.connect(partial(self.onExperimentChanged.emit, self))
+        obj.onUniqueKeywordsChanged.connect(partial(self.onExperimentChanged.emit, self))
+
+
     def remove_classification_object(self, obj: ClassificationObject):
         if obj in self.classification_objects:
             self.classification_objects.remove(obj)
@@ -1040,8 +1048,10 @@ class Experiment(IProjectContainer, IHasName):
         tag = [container, keyword]
         if tag not in self.classification_results:
             self.tag_container(container, keyword)
+            return True
         else:
             self.remove_tag(container, keyword)
+            return False
 
     def has_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         tag = [container, keyword]

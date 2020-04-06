@@ -35,10 +35,13 @@ class TimelineControl(QtWidgets.QWidget):
         self.show()
         self.group_height = self.timeline.group_height
 
-        self.setLayout(QVBoxLayout())
+        self.setLayout(QGridLayout(self))
+        self.layout().setSpacing(2)
         self.lbl_title = QLabel(self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
-        self.layout().addWidget(self.lbl_title)
+        self.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+        self.layout().addWidget(self.lbl_title,0,1)
 
         self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
 
@@ -46,6 +49,7 @@ class TimelineControl(QtWidgets.QWidget):
         self.btn_lock = None
         self.text_loc = (5, 5)
 
+        self.show_classification = False
         self.set_name()
         self._add_spacer()
 
@@ -58,23 +62,31 @@ class TimelineControl(QtWidgets.QWidget):
             self.item.onSelectedChanged.connect(self.on_selected_changed)
 
     def _add_spacer(self):
-        self.bottom_line = QWidget(self)
-        self.bottom_line.setStyleSheet("QWidget{padding:1px; margin:0pt; background:transparent;}")
-        self.bottom_line.setLayout(QHBoxLayout())
-        self.bottom_line.layout().setSpacing(0)
+        # self.bottom_line = QWidget(self)
+        # self.bottom_line.setStyleSheet("QWidget{padding:1px; margin:0pt; background:transparent;}")
+        # self.bottom_line.setLayout(QHBoxLayout())
+        # self.bottom_line.layout().setSpacing(0)
 
         if isinstance(self.item, ILockable):
             self.btn_lock = QPushButton(create_icon("qt_ui/icons/icon_locked2.png"), "", self)
+
+            self.layout().addWidget(self.btn_lock,0,0)
+
             if self.item.is_locked():
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
             else:
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_lock_green.png"))
             self.btn_lock.clicked.connect(self.toggle_lock)
 
-        self.bottom_line.layout().addWidget(self.btn_lock)
-        self.bottom_line.layout().addItem(QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
-        self.layout().addItem(self.expand)
-        self.layout().addWidget(self.bottom_line)
+        if isinstance(self.item, Segmentation):
+            self.btn_classification = QPushButton(create_icon("qt_ui/icons/icon_classification"), "", self)
+            # self.bottom_line.layout().addItem(QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
+            self.layout().addWidget(self.btn_classification,1,0)
+            self.btn_classification.clicked.connect(self.toggle_classification)
+
+        # self.bottom_line.layout().addItem(QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
+        self.layout().addItem(self.expand,2,0)
+        # self.layout().addWidget(self.bottom_line)
 
     def toggle_lock(self):
         if isinstance(self.item, ILockable):
@@ -85,6 +97,10 @@ class TimelineControl(QtWidgets.QWidget):
             else:
                 self.item.lock()
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
+
+    def toggle_classification(self):
+        self.show_classification = not self.show_classification
+        self.timeline.update_ui()
 
     @pyqtSlot(bool)
     def on_selected_changed(self, state):
@@ -264,7 +280,7 @@ class TimelineBar(QtWidgets.QFrame):
         """
         This is called when the User drags the size handle into one direction in the control widget,
         usually it does not have to be used since the resizing is done in the timeline update_ui() directly.
-        Screenshots override it to resize he pixmaps as well
+        Screenshots override it to resize the pixmaps as well
         :param height:
         :return:
         """
