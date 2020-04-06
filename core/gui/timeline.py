@@ -1070,7 +1070,6 @@ class TimelineControl(QtWidgets.QWidget):
         self.layout().addItem(self.expand)
         self.layout().addWidget(self.bottom_line)
 
-
     def toggle_lock(self):
         if isinstance(self.item, ILockable):
 
@@ -1209,26 +1208,6 @@ class TimelineControl(QtWidgets.QWidget):
             qp.setPen(pen)
             qp.drawLine(0, self.height() - 2, self.width(), self.height() - 2)
         qp.end()
-
-
-class TimelineAnnotationLayerControl(TimelineControl):
-    onHeightChanged = pyqtSignal(int)
-
-    def __init__(self, parent, timeline, item = None, name = "No Name"):
-        super(TimelineAnnotationLayerControl, self).__init__(parent, timeline, item, name)
-        self.layer = item
-
-    def add_group(self, annotation):
-        super(TimelineAnnotationLayerControl, self).add_group(annotation)
-        # self.group_height = (self.height() - self.timeline.group_height) / np.clip(len(self.groups), 1, None)
-
-
-class TimelineSegmentationControl(TimelineControl):
-    onHeightChanged = pyqtSignal(int)
-
-    def __init__(self, parent, timeline, item=None, name="No Name"):
-        super(TimelineSegmentationControl, self).__init__(parent, timeline, item, name)
-        self.segmentation = item
 
 
 class TimelineBar(QtWidgets.QFrame):
@@ -1766,6 +1745,14 @@ class TimebarSlice(QtWidgets.QWidget):
             popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
 
 
+class TimelineSegmentationControl(TimelineControl):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, item=None, name="No Name"):
+        super(TimelineSegmentationControl, self).__init__(parent, timeline, item, name)
+        self.segmentation = item
+
+
 class TimelineSegmentationBar(TimelineBar):
     onHeightChanged = pyqtSignal(int)
 
@@ -1808,6 +1795,18 @@ class TimebarSegmentationSlice(TimebarSlice):
                 self.color = self.default_color
         except:
             self.color = self.default_color
+
+
+class TimelineAnnotationLayerControl(TimelineControl):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, item = None, name = "No Name"):
+        super(TimelineAnnotationLayerControl, self).__init__(parent, timeline, item, name)
+        self.layer = item
+
+    def add_group(self, annotation):
+        super(TimelineAnnotationLayerControl, self).add_group(annotation)
+        # self.group_height = (self.height() - self.timeline.group_height) / np.clip(len(self.groups), 1, None)
 
 
 class TimelineAnnotationBar(TimelineBar):
