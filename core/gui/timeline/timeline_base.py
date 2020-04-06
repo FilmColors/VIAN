@@ -22,6 +22,9 @@ class TimelineControl(QtWidgets.QWidget):
         self.h_col = 100
         self.name = name
         self.groups = []
+
+        self.sub_segmentations = [] # type:List[TimelineSubSegmentation]
+
         self.setMouseTracking(True)
         self.is_selected = False
         self.bar = None
@@ -100,6 +103,17 @@ class TimelineControl(QtWidgets.QWidget):
     def update_info(self, layer):
         self.set_name()
 
+    def add_sub_segmentation(self, s):
+        self.sub_segmentations.append(s)
+
+    def get_sub_segmentation_height(self):
+        h = 0
+        for s in self.sub_segmentations:
+            if s.is_expanded is False:
+                continue
+            h += len(s) * s.strip_height
+        return h
+
     def add_group(self, annotation):
         y = len(self.groups) * self.timeline.group_height
         text = annotation.get_name()
@@ -112,6 +126,7 @@ class TimelineControl(QtWidgets.QWidget):
             self.onHeightChanged.emit((self.height() - self.timeline.group_height) / len(self.groups))
         else:
             self.onHeightChanged.emit(self.height())
+
         self.item.strip_height = self.height() - self.timeline.group_height
         self.group_height = self.item.strip_height / np.clip(len(self.groups), 1, None)
         self.update()
@@ -121,7 +136,6 @@ class TimelineControl(QtWidgets.QWidget):
             if not a0.pos().y() + self.resize_offset < self.timeline.bar_height_min:
                 self.resize(self.width(), a0.pos().y() + self.resize_offset)
                 self.update_strip_height()
-
         else:
             if a0.pos().y() > self.height() - 15:
                 self.size_grip_hovered = True
@@ -346,8 +360,6 @@ class TimebarSlice(QtWidgets.QWidget):
         self.timeline = timeline
         self.item = item
 
-        self.item.onSelectedChanged.connect(self.on_selected_changed)
-
         self.show()
         self.mode = "center"
         self.setMouseTracking(True)
@@ -356,6 +368,8 @@ class TimebarSlice(QtWidgets.QWidget):
         self.text = ""
         self.curr_pos = self.pos()
         self.curr_size = self.size()
+
+        self.item.onSelectedChanged.connect(self.on_selected_changed)
         self.item.onClassificationChanged.connect(self.on_classification_changed)
 
         self.has_classification = len(self.item.tag_keywords) > 0

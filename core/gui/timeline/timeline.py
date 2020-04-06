@@ -13,6 +13,8 @@ from .timeline_segmentation import TimebarSegmentationSlice, TimelineSegmentatio
 from .timeline_svg_annotation import TimebarAnnotationSlice, TimelineAnnotationLayerControl, TimelineAnnotationBar
 from .timeline_visualization import TimelineVisualizationControl, TimelineAreaPlot, TimelineLinePlot, TimelineVisualization
 from .timeline_screnshots import ScreenshotGroupBar, TimebarPicture
+from .timeline_subsegmentation import TimelineSubSegmentation, TimelineSubSegmentationEntry, \
+    TimebarSubSegmentationSlice, TimelineSubSegmentationBar, TimelineSubSegmentationControl
 
 from core.data.computation import ms_to_string
 from core.data.interfaces import TimelineDataset
@@ -190,6 +192,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_segments = []
         self.item_screenshots = []
         self.item_ann_layers = []
+        self.item_sub_segmentations = dict()
         self.item_visualizations = dict()
         self.items = []
 
@@ -324,7 +327,27 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         item = [control, [bars], self.bar_height_min]
         self.item_segments.append(item)
         self.items.append(item)
+
+        t = TimelineSubSegmentation("Hello World")
+        t.add_entry(TimelineSubSegmentationEntry("1:"))
+        t.add_entry(TimelineSubSegmentationEntry("2:"))
+        t.add_entry(TimelineSubSegmentationEntry("3:"))
+
+        self.add_sub_segmentation(segmentation, t)
         self.update_ui()
+
+
+    def add_sub_segmentation(self, target, sub:TimelineSubSegmentation):
+        ctrl = TimelineSubSegmentationControl(self.frame_Controls, self, target, sub=sub)
+        ctrl.show()
+        bars = [TimelineSubSegmentationBar(self.frame_Bars, self, ctrl, target) for e in sub.entries]
+        for b in bars:
+            b.show()
+        if target.get_id() not in self.item_sub_segmentations:
+            self.item_sub_segmentations[target.get_id()] = []
+        self.item_sub_segmentations[target.get_id()].append([ctrl, bars, self.bar_height_min])
+
+
 
     def on_interval_segment_start(self):
         if self.interval_segmentation_marker is not None:
@@ -510,7 +533,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         loc_y = self.time_bar_height
 
-        self.items = self.item_segments + self.item_ann_layers + self.item_screenshots + list(self.item_visualizations.values())
+        self.items = []
+
+        for lst in [self.item_segments, self.item_ann_layers, self.item_screenshots]:
+            for s in lst:
+                self.items.append(s)
+                if s[0].item.get_id() in self.item_sub_segmentations:
+                    self.items.extend(self.item_sub_segmentations[s[0].item.get_id()])
+                    print("Extending")
+        self.items += list(self.item_visualizations.values())
 
         for c, i in enumerate(self.items):
             bar_start = loc_y
@@ -518,7 +549,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             ctrl = i[0]
             bars = i[1]
             ctrl.move(2, loc_y)
-            if len(bars) >= 1 and len(bars[0].annotations) > 0:
+            if len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0:
                 loc_y += self.group_height
             if len(ctrl.groups) > 0:
                 item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
@@ -543,6 +574,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 ctrl.onHeightChanged.emit((ctrl.height() - ctrl.timeline.group_height) / np.clip(len(ctrl.groups), 1, None))
             else:
                 ctrl.onHeightChanged.emit(ctrl.height() / n_bars)
+
+
+            # loc_y += ctrl.sub_segmentation_height
 
         self.frame_Controls.setFixedSize(self.controls_width, loc_y)# self.frame_Controls.height())
         self.frame_Bars.setFixedSize(self.duration / self.scale + self.controls_width + self.timeline_tail,loc_y)
