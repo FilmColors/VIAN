@@ -95,6 +95,12 @@ Query Page
         
         <iframe src="https://player.vimeo.com/video/402360042" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
+Features Tool
+*************
+
+.. raw:: html
+        
+        <iframe src="https://player.vimeo.com/video/404388151" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
 * :ref:`genindex`
 * :ref:`modindex`
