@@ -17,15 +17,27 @@ and can be imported on project creation.
 .. note:: **Options**
 
    1. **Name**, how the template should appear in the "New Project Dialog"
-   2. **Include**, which entities of your project should be exported.
+   2. **Include**, which entities of your project should be exported. (Often you would only want to include the parts relevant for classification, i.e. the Vocabular and the Experiments)
 
 
-.. figure:: template_export.png
+.. figure:: export_template.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
 
    The Export Template Dialog
+
+
+Once a template has been created, it can be used when creating a :ref:`new_project`.
+If you want to send the template to others, it can be found in folder «templates» in the VIAN directory (normally under «Documents»):
+
+.. figure:: path_to_templates.png
+   :scale: 80 %
+   :align: center
+   :alt: map to buried treasure
+
+   The templates folder in the VIAN directory
+
 
 .. seealso::
 
