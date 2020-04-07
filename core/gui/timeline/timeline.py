@@ -187,6 +187,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.is_merging = False
         self.sticky_move = False #If true, the adjacent slice is edited as well
 
+        self.sticky_strip = None
         self.show_audio_volume = True
 
         self.item_segments = []
@@ -195,6 +196,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_sub_segmentations = dict()
         self.item_visualizations = dict()
         self.items = []
+        self.item_pinned = None
 
         # This is only for keeping the datasets when the timeline is forced to redraw
         self.visualization_datasets = []
@@ -271,6 +273,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.update_timer.timeout.connect(self.update_time)
         # self.update_timer.start()
 
+        self.corner_widget = QWidget(self)
+        op = QGraphicsOpacityEffect(self)
+        op.setOpacity(0.8)  # 0 to 1 will cause the fade effect to kick in
+
+
+        self.corner_widget.move(self.mapFromGlobal(self.scrollArea.widget().mapToGlobal(QPoint(6, 6))))
+        self.corner_widget.resize(self.controls_width, self.time_bar_height + 5)
+        self.corner_widget.setGraphicsEffect(op)
+
         self.scroll_block = False
         self.scroll_h_timer = QTimer()
         self.scroll_h_timer.setInterval(30)
@@ -295,6 +306,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.time_bar.move(self.scrollArea.mapToParent(QtCore.QPoint(0, value)))
         self.relative_corner = QtCore.QPoint(self.relative_corner.x(), value)
         self.time_bar.move(self.relative_corner)
+
+        if self.item_pinned is not None:
+            self.item_pinned.bar.move(self.item_pinned.bar.x(), self.time_bar.y() + self.time_bar.height())
+            self.item_pinned.move(self.item_pinned.x(), self.time_bar.y() + self.time_bar.height())
+            self.item_pinned.raise_()
+            self.item_pinned.bar.raise_()
+
         self.time_bar.raise_()
         self.time_scrubber.raise_()
 
@@ -320,7 +338,21 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     @pyqtSlot(bool)
     def on_classification_toggle(self, state):
         if state:
+            self.sticky_strip = self.item_segments[0][1][0]
             self.on_experiment_changed(None)
+        else:
+            self.sticky_strip = None
+
+    @pyqtSlot(bool, object)
+    def on_pinned(self, state, ctrl):
+        if self.item_pinned is not None:
+            if self.item_pinned != ctrl:
+                self.item_pinned.set_pinned(False)
+            self.item_pinned = None
+        if state:
+            self.item_pinned = ctrl
+        self.update_ui()
+        self.scroll_v()
 
 
     @pyqtSlot(object)
@@ -363,6 +395,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def add_segmentation(self, segmentation:Segmentation):
         control = TimelineSegmentationControl(self.frame_Controls, self, segmentation)
         control.onClassificationToggle.connect(self.on_classification_toggle)
+        control.onPinned.connect(self.on_pinned)
         bars = TimelineSegmentationBar(self.frame_Bars, self, control, segmentation)
         segmentation.onSegmentationChanged.connect(control.update_info)
         for i, s in enumerate(segmentation.segments):
@@ -372,7 +405,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.items.append(item)
 
         self.update_ui()
-
 
     def add_sub_segmentation(self, target, sub:TimelineSubSegmentation, cat = "Global"):
         if target.get_id() not in self.item_sub_segmentations:
@@ -390,7 +422,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         bars = [TimelineSubSegmentationBar(self.frame_Bars, self, ctrl, target, e) for e in sub.entries]
         self.item_sub_segmentations[target.get_id()][cat]['entries'].append([ctrl, bars, self.bar_height_min])
         self.update_ui()
-
 
     def clear_sub_segmentation(self):
         for key, cat in self.item_sub_segmentations.items():
@@ -477,6 +508,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     @pyqtSlot(object)
     def add_screenshots(self, screenshot_group):
         control = TimelineControl(self.frame_Controls, self, name = screenshot_group.name, item=screenshot_group)
+        control.onPinned.connect(self.on_pinned)
         bars = ScreenshotGroupBar(self.frame_Bars, self, screenshot_group, control)
         item = [control, [bars], self.bar_height_min]
         self.item_screenshots.append(item)

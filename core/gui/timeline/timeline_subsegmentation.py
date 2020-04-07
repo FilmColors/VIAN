@@ -86,7 +86,7 @@ class TimelineControlParent(QWidget):
 
         self.groups = []
 
-
+        self.btn_expand.raise_()
         self.collapse()
 
 

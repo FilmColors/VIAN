@@ -13,6 +13,7 @@ from core.gui.ewidgetbase import TextEditPopup
 class TimelineControl(QtWidgets.QWidget):
     onHeightChanged = pyqtSignal(int)
     onClassificationToggle = pyqtSignal(bool)
+    onPinned = pyqtSignal(bool, object)
 
     def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineControl, self).__init__(parent)
@@ -32,6 +33,8 @@ class TimelineControl(QtWidgets.QWidget):
 
         self.size_grip_hovered = False
         self.is_resizing = False
+        self.is_pinned = False
+
         self.resize_offset = 0
         self.show()
         self.group_height = self.timeline.group_height
@@ -41,8 +44,14 @@ class TimelineControl(QtWidgets.QWidget):
         self.lbl_title = QLabel(self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
         self.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.layout().addWidget(self.lbl_title,0, 1, 1, 3)
 
-        self.layout().addWidget(self.lbl_title,0,1)
+        self.btn_pin = QPushButton(create_icon("qt_ui/icons/icon_pin.png"), "", self)
+        self.btn_pin.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.btn_pin.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
+        self.layout().addWidget(self.btn_pin, 0, 0)
+
+        self.btn_pin.clicked.connect(self.toggle_pin)
 
         self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
 
@@ -70,8 +79,9 @@ class TimelineControl(QtWidgets.QWidget):
 
         if isinstance(self.item, ILockable):
             self.btn_lock = QPushButton(create_icon("qt_ui/icons/icon_locked2.png"), "", self)
-
-            self.layout().addWidget(self.btn_lock,0,0)
+            self.btn_lock.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
+            self.btn_lock.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            self.layout().addWidget(self.btn_lock,1,0,1,1)
 
             if self.item.is_locked():
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
@@ -81,13 +91,28 @@ class TimelineControl(QtWidgets.QWidget):
 
         if isinstance(self.item, Segmentation):
             self.btn_classification = QPushButton(create_icon("qt_ui/icons/icon_classification"), "", self)
-            # self.bottom_line.layout().addItem(QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
-            self.layout().addWidget(self.btn_classification,1,0)
+            self.btn_classification.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
+            self.btn_classification.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            self.layout().addWidget(self.btn_classification,1,1,1,1)
             self.btn_classification.clicked.connect(self.toggle_classification)
 
-        # self.bottom_line.layout().addItem(QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
         self.layout().addItem(self.expand,2,0)
-        # self.layout().addWidget(self.bottom_line)
+
+
+    def toggle_pin(self):
+        self.is_pinned = not self.is_pinned
+        if self.is_pinned:
+            self.btn_pin.setIcon(create_icon("qt_ui/icons/icon_pin_on.png"))
+        else:
+            self.btn_pin.setIcon(create_icon("qt_ui/icons/icon_pin.png"))
+        self.onPinned.emit(self.is_pinned, self)
+
+    def set_pinned(self, state):
+        self.is_pinned = state
+        if self.is_pinned:
+            self.btn_pin.setIcon(create_icon("qt_ui/icons/icon_pin_on.png"))
+        else:
+            self.btn_pin.setIcon(create_icon("qt_ui/icons/icon_pin.png"))
 
     def toggle_lock(self):
         if isinstance(self.item, ILockable):
@@ -192,6 +217,9 @@ class TimelineControl(QtWidgets.QWidget):
         pen.setColor(QtGui.QColor(255, 255, 255, 50))
         pen.setWidth(1)
         qp.setPen(pen)
+
+        if self.is_pinned:
+            qp.fillRect(self.rect(), QColor(17,17,17))
 
         for i,a in enumerate(self.groups):
             y = i * self.group_height + self.timeline.group_height
