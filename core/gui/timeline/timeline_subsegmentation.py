@@ -114,6 +114,7 @@ class TimelineControlParent(QWidget):
             c.hide()
         self.timeline.update_ui()
 
+
 class TimelineSubSegmentationControl(QWidget):
     onHeightChanged = pyqtSignal(int)
 
@@ -313,7 +314,9 @@ class TimelineSubSegmentationBar(QWidget):
         self.slices = []
         self.slices_index = dict()
 
-        self.shift_pressed = False
+        self.selection_update_state = False
+        self.is_selecting = False
+        self.selection_rect = None
 
         if isinstance(self.parent_item, Segmentation):
             self.parent_item.onSegmentDeleted.connect(self.remove_slice)
@@ -335,7 +338,6 @@ class TimelineSubSegmentationBar(QWidget):
         """
         self.resize(self.width(), height)
         self.onHeightChanged.emit(height)
-
 
     def add_slice(self, item):
         slice = TimebarSubSegmentationSlice(self, item, self.timeline,
@@ -370,8 +372,32 @@ class TimelineSubSegmentationBar(QWidget):
         slice.is_active = kwd.experiment.toggle_tag(slice.parent_item, kwd)
 
     def mouseMoveEvent(self, a0: QtGui.QMouseEvent) -> None:
-        if self.shift_pressed:
-            print("Hello")
+        if self.is_selecting:
+            if self.selection_rect is None:
+                self.selection_rect = (a0.pos(), a0.pos() + QPoint(1, 0))
+            else:
+                self.selection_rect = (self.selection_rect[0], QPoint(a0.pos().x(), self.selection_rect[0].y()))
+            self.update()
+
+    def mouseReleaseEvent(self, a0: QtGui.QMouseEvent) -> None:
+        self.is_selecting = False
+        if self.selection_rect is not None:
+            t = QRect(self.selection_rect[0].x(),
+                      self.selection_rect[0].y(),
+                      self.selection_rect[1].x() - self.selection_rect[0].x(), 5)
+
+            for w in self.slices:
+                w_rect = QRect(w.pos(), w.rect().size())
+                if w_rect.intersects(t):
+                    w.set_active(self.selection_update_state)
+            self.selection_rect = None
+
+        print("Hello Release")
+
+    def set_selecting(self, new_state):
+        self.selection_update_state = new_state
+        self.is_selecting = True
+
 
     def rescale(self):
         if self.control.is_expanded:
@@ -389,6 +415,12 @@ class TimelineSubSegmentationBar(QWidget):
         pen.setWidth(1)
         qp.setPen(pen)
 
+        if self.is_selecting and self.selection_rect is not None:
+            pen.setColor(QtGui.QColor(174, 55, 55))
+            pen.setWidth(5)
+            qp.setPen(pen)
+            qp.drawLine(self.selection_rect[0], self.selection_rect[1])
+
         pen.setColor(QtGui.QColor(200, 200, 200, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -404,6 +436,7 @@ class TimebarSubSegmentationSlice(QWidget):
     def __init__(self, parent:TimelineSubSegmentationBar, parent_item, timeline, mime_data=None, is_active = False):
         super(TimebarSubSegmentationSlice, self).__init__(parent)
         self.timeline = timeline
+        self.bar = parent
         self.setMouseTracking(True)
 
         self.default_color = (50, 50, 50, 150)
@@ -428,11 +461,21 @@ class TimebarSubSegmentationSlice(QWidget):
         else:
             self.is_active = False
 
+    @pyqtSlot(bool)
+    def set_active(self, state):
+        if self.is_active == state:
+            return
+
+        self.is_active = state
+        self.onClicked.emit(self.is_active, self)
+        self.update()
+
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         super(TimebarSubSegmentationSlice, self).mousePressEvent(a0)
         if a0.button() == Qt.LeftButton:
             self.is_active = not self.is_active
             self.onClicked.emit(self.is_active, self)
+            self.bar.set_selecting(self.is_active)
             self.update()
 
     def on_height_changed(self, int_height):
