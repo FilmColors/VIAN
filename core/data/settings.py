@@ -206,10 +206,17 @@ class UserSettings():
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
+
         if sys.platform.startswith('linux'):
             self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
+        elif sys.platform.startswith("darwin"):
+            if os.path.isdir(os.path.join(self.DIR_USERHOME, "documents/")):
+                self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+            else:
+                self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
         else:
             self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+
         self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
         self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
         self.store_path = self.DIR_ROOT + "settings.json"
