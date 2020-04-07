@@ -60,28 +60,6 @@ class TimelineLinePlot(TimelineVisualization):
         self.setFixedHeight(height)
 
     def render_image(self):
-        # t_start = self.timeline.get_current_t_start()
-        # t_end = self.timeline.get_current_t_end()
-        # data, ms = self.dataset.get_data_range(t_start, t_end)
-        #
-        # qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
-        # qimage.fill(QtCore.Qt.transparent)
-        # qp = QtGui.QPainter(qimage)
-        #
-        # pen = QtGui.QPen()
-        # pen.setColor(self.line_color)
-        #
-        # qp.setPen(pen)
-        # qp.begin(qimage)
-        # qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        # qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
-        #
-        # rect = QRect(self.rect().x(),
-        #              self.rect().y(),
-        #              np.clip(self.rect().width(), None, self.timeline.duration/self.timeline.scale),
-        #              self.rect().height())
-        #
-        # qp.fillRect(rect, QtGui.QColor(12, 12, 12))
         qimage, qp, data, t_start, t_end, ms = super(TimelineLinePlot, self).render_image()
         pen = QtGui.QPen()
         pen.setColor(self.line_color)
@@ -144,19 +122,6 @@ class TimelineAreaPlot(TimelineVisualization):
         self.setFixedHeight(height)
 
     def render_image(self):
-        # t_start = self.timeline.get_current_t_start()
-        # t_end = self.timeline.get_current_t_end()
-        # data, ms = self.dataset.get_data_range(t_start, t_end)
-        #
-        # qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
-        # qimage.fill(QtCore.Qt.transparent)
-        # qp = QtGui.QPainter(qimage)
-        # pen = QtGui.QPen()
-        # qp.begin(qimage)
-        # qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        # qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
-        # pen.setColor(QtGui.QColor(255, 255, 255))
-        # qp.fillRect(self.rect(), QtGui.QColor(12, 12, 12))
         qimage, qp, data, t_start, t_end, ms = super(TimelineAreaPlot, self).render_image()
         itms = list(range(data.shape[0]))
         path = None

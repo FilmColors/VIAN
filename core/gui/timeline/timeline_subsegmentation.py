@@ -42,6 +42,78 @@ class TimelineSubSegmentation:
         return len(self.entries)
 
 
+class TimelineControlParent(QWidget):
+    onHeightChanged = pyqtSignal(int)
+
+    def __init__(self, parent, timeline, children = None, name="Global"):
+        super(TimelineControlParent, self).__init__(parent)
+        self.children = children
+        self.name = name
+        self.is_expanded = False
+        if self.children is None:
+            self.children = []
+
+        self.hidden = False
+
+        self.timeline = timeline
+        self.setMouseTracking(True)
+
+        self.indent = 20
+
+        self.btn_expand = QtWidgets.QPushButton("+", self)
+        self.btn_expand.clicked.connect(self.toggle_expand)
+        self.btn_expand.setStyleSheet("QWidget{background:rgba(42, 116, 145, 100); margin:0pt; border-radius: 5px; font-size: 15pt;}")
+        self.btn_expand.move(5, 5)
+        self.btn_expand.setFixedSize(QtCore.QSize(20, 20))
+
+        self.btn_expand.show()
+
+        self.setLayout(QHBoxLayout())
+        self.indent_widget = QWidget(self)
+        self.indent_widget.setStyleSheet("QWidget{background:transparent; margin:0pt; border-radius: 5 px;}")
+        self.indent_widget.setFixedWidth(self.indent)
+        self.layout().addWidget(self.indent_widget)
+
+        self.vbox = QVBoxLayout(self)
+        self.layout().addItem(self.vbox)
+        self.lbl_title = QLabel(self.name, self)
+        self.lbl_title.setStyleSheet("QWidget{background:transparent; }")
+        self.lbl_title.setAlignment(Qt.AlignLeft)
+        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.expander = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.vbox.addWidget(self.lbl_title)
+        self.vbox.addItem(self.expander)
+
+        self.groups = []
+
+
+        self.collapse()
+
+
+    def add_child(self, c):
+        self.children.append(c)
+        c.set_indent(self.indent + 10)
+
+    def toggle_expand(self):
+        if self.is_expanded:
+            self.collapse()
+        else:
+            self.expand()
+
+    def expand(self):
+        self.is_expanded = True
+        for c in self.children:
+            c.set_expanded(False)
+            c.show()
+        self.timeline.update_ui()
+
+    def collapse(self):
+        self.is_expanded = False
+        for c in self.children:
+            c.set_expanded(False)
+            c.hide()
+        self.timeline.update_ui()
+
 class TimelineSubSegmentationControl(QWidget):
     onHeightChanged = pyqtSignal(int)
 
@@ -95,13 +167,31 @@ class TimelineSubSegmentationControl(QWidget):
         self.resize_offset = 0
         self.highlighted_entry = None
 
+    def set_indent(self, d):
+        self.indent = d
+        self.btn_expand.move(5 + d, 5)
+        self.indent_widget.setFixedWidth(self.indent + self.btn_expand.width())
+        self.update()
+
     def toggle_expand(self):
         if self.btn_expand.text() == "+":
             self.is_expanded = True
             self.btn_expand.setText("-")
             for t in self.sub.entries:
                 t.strip.show()
+        else:
+            self.is_expanded = False
+            self.btn_expand.setText("+")
+            for t in self.sub.entries:
+                t.strip.hide()
+        self.timeline.update_ui()
 
+    def set_expanded(self, state):
+        if state:
+            self.is_expanded = True
+            self.btn_expand.setText("-")
+            for t in self.sub.entries:
+                t.strip.show()
         else:
             self.is_expanded = False
             self.btn_expand.setText("+")
@@ -112,7 +202,6 @@ class TimelineSubSegmentationControl(QWidget):
     def highlight_entry(self, entry):
         self.highlighted_entry = entry
         self.update()
-
 
     def update_strip_height(self):
         if len(self.sub.entries) > 0:
@@ -145,13 +234,12 @@ class TimelineSubSegmentationControl(QWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.LeftButton:
-            if QMouseEvent.pos().y() > self.height() - 15:
+            if QMouseEvent.pos().y() > self.height() - 15 and self.is_expanded:
                 self.is_resizing = True
                 self.resize_offset = self.height() - QMouseEvent.pos().y()
 
     def mouseReleaseEvent(self, a0: QtGui.QMouseEvent):
         self.is_resizing = False
-
 
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
         super(TimelineSubSegmentationControl, self).paintEvent(a0)
@@ -225,6 +313,8 @@ class TimelineSubSegmentationBar(QWidget):
         self.slices = []
         self.slices_index = dict()
 
+        self.shift_pressed = False
+
         if isinstance(self.parent_item, Segmentation):
             self.parent_item.onSegmentDeleted.connect(self.remove_slice)
             self.parent_item.onSegmentAdded.connect(self.add_slice)
@@ -248,7 +338,9 @@ class TimelineSubSegmentationBar(QWidget):
 
 
     def add_slice(self, item):
-        slice = TimebarSubSegmentationSlice(self, item, self.timeline, mime_data=self.sub_entry.mime_data)
+        slice = TimebarSubSegmentationSlice(self, item, self.timeline,
+                                            mime_data=self.sub_entry.mime_data,
+                                            is_active=item.has_word(self.sub_entry.mime_data['keyword']))
         self.sub_entry.slices.append(slice)
 
         self.onHeightChanged.connect(slice.on_height_changed)
@@ -276,6 +368,10 @@ class TimelineSubSegmentationBar(QWidget):
     def on_clicked(self, state, slice):
         kwd = self.sub_entry.mime_data['keyword'] #type:UniqueKeyword
         slice.is_active = kwd.experiment.toggle_tag(slice.parent_item, kwd)
+
+    def mouseMoveEvent(self, a0: QtGui.QMouseEvent) -> None:
+        if self.shift_pressed:
+            print("Hello")
 
     def rescale(self):
         if self.control.is_expanded:
@@ -318,6 +414,9 @@ class TimebarSubSegmentationSlice(QWidget):
         self.is_hovered = False
         self.is_active = is_active
 
+        # When the mouse move event + key spawned already this is true
+        self.already_changed = False
+
         self.mime_data = mime_data
         self.parent_item.onClassificationChanged.connect(self.on_classification_changed)
 
@@ -330,21 +429,33 @@ class TimebarSubSegmentationSlice(QWidget):
             self.is_active = False
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
+        super(TimebarSubSegmentationSlice, self).mousePressEvent(a0)
         if a0.button() == Qt.LeftButton:
             self.is_active = not self.is_active
             self.onClicked.emit(self.is_active, self)
+            self.update()
 
     def on_height_changed(self, int_height):
         self.resize(self.width(), int_height)
 
-
     def enterEvent(self, QEvent):
+        super(TimebarSubSegmentationSlice, self).enterEvent(QEvent)
         self.is_hovered = True
         self.onHoverEnter.emit(self)
         self.update()
 
+    def mouseMoveEvent(self, a0: QtGui.QMouseEvent) -> None:
+        super(TimebarSubSegmentationSlice, self).mouseMoveEvent(a0)
+        if a0.button() == Qt.LeftButton and not self.already_changed:
+            self.is_active = not self.is_active
+            self.onClicked.emit(self.is_active, self)
+            self.already_changed = True
+            self.update()
+
     def leaveEvent(self, QEvent):
+        super(TimebarSubSegmentationSlice, self).leaveEvent(QEvent)
         self.is_hovered = False
+        self.already_changed = False
         self.onHoverLeave.emit(self)
         self.update()
 

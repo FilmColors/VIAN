@@ -14,7 +14,7 @@ from .timeline_svg_annotation import TimebarAnnotationSlice, TimelineAnnotationL
 from .timeline_visualization import TimelineVisualizationControl, TimelineAreaPlot, TimelineLinePlot, TimelineVisualization
 from .timeline_screnshots import ScreenshotGroupBar, TimebarPicture
 from .timeline_subsegmentation import TimelineSubSegmentation, TimelineSubSegmentationEntry, \
-    TimebarSubSegmentationSlice, TimelineSubSegmentationBar, TimelineSubSegmentationControl
+    TimebarSubSegmentationSlice, TimelineSubSegmentationBar, TimelineSubSegmentationControl, TimelineControlParent
 
 from core.data.computation import ms_to_string
 from core.data.interfaces import TimelineDataset
@@ -317,29 +317,52 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.visualization_datasets.append(dataset)
             self.update_ui()
 
+    @pyqtSlot(bool)
+    def on_classification_toggle(self, state):
+        if state:
+            self.on_experiment_changed(None)
+
 
     @pyqtSlot(object)
     def on_experiment_changed(self, e:Experiment):
+        self.clear_sub_segmentation()
+
+        if e is None:
+            if len(self.project().experiments) > 0:
+                e = self.project().experiments[0]
+            else:
+                log_warning("No Experiment found in Timeline.on_experiment_changed")
+                return
+
+        if len(self.item_segments) > 0 and self.item_segments[0][0].show_classification is False:
+            log_warning("Classification Hidden Timeline.on_experiment_changed")
+            return
+
         subsegments = dict()
-        self.item_sub_segmentations[self.project().get_main_segmentation().get_id()] = []
+        self.item_sub_segmentations[self.project().get_main_segmentation().get_id()] = dict()
 
         for clobj in e.classification_objects:
-            for kwd in clobj.unique_keywords:
-                cat = clobj.name + ":" + kwd.voc_obj.name
-                if cat not in subsegments:
-                    subsegments[cat] = []
-                subsegments[cat].append(kwd)
+            if clobj not in subsegments:
+                subsegments[clobj.name] = dict()
 
-        for cat, kwds in subsegments.items():
-            group = TimelineSubSegmentation(cat)
-            for k in kwds:
-                group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
-            self.add_sub_segmentation(self.project().get_main_segmentation(), group)
+            for kwd in clobj.unique_keywords:
+                cat = kwd.voc_obj.name
+                if cat not in subsegments[clobj.name]:
+                    subsegments[clobj.name][cat] = (clobj.name, [])
+                subsegments[clobj.name][cat][1].append(kwd)
+
+        for j, t in subsegments.items():
+            for voc, (cl_obj, kwds) in subsegments[j].items():
+                group = TimelineSubSegmentation(voc)
+                for k in kwds:
+                    group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
+                self.add_sub_segmentation(self.project().get_main_segmentation(), group, cat=cl_obj)
 
 
     @pyqtSlot(object)
     def add_segmentation(self, segmentation:Segmentation):
         control = TimelineSegmentationControl(self.frame_Controls, self, segmentation)
+        control.onClassificationToggle.connect(self.on_classification_toggle)
         bars = TimelineSegmentationBar(self.frame_Bars, self, control, segmentation)
         segmentation.onSegmentationChanged.connect(control.update_info)
         for i, s in enumerate(segmentation.segments):
@@ -351,14 +374,33 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
 
 
-    def add_sub_segmentation(self, target, sub:TimelineSubSegmentation):
-        ctrl = TimelineSubSegmentationControl(self.frame_Controls, self, target, sub=sub)
-        ctrl.show()
-        bars = [TimelineSubSegmentationBar(self.frame_Bars, self, ctrl, target, e) for e in sub.entries]
+    def add_sub_segmentation(self, target, sub:TimelineSubSegmentation, cat = "Global"):
         if target.get_id() not in self.item_sub_segmentations:
-            self.item_sub_segmentations[target.get_id()] = []
-        self.item_sub_segmentations[target.get_id()].append([ctrl, bars, self.bar_height_min])
+            self.item_sub_segmentations[target.get_id()] = dict()
+        if cat not in self.item_sub_segmentations[target.get_id()]:
+            group = TimelineControlParent(self.frame_Controls, self, None, cat)
+            group.show()
+            self.item_sub_segmentations[target.get_id()][cat] = dict(group=[group, [], self.bar_height_min], entries = [])
 
+        group = self.item_sub_segmentations[target.get_id()][cat]['group']
+        ctrl = TimelineSubSegmentationControl(self.frame_Controls, self, target, sub=sub)
+        group[0].add_child(ctrl)
+        ctrl.show()
+
+        bars = [TimelineSubSegmentationBar(self.frame_Bars, self, ctrl, target, e) for e in sub.entries]
+        self.item_sub_segmentations[target.get_id()][cat]['entries'].append([ctrl, bars, self.bar_height_min])
+        self.update_ui()
+
+
+    def clear_sub_segmentation(self):
+        for key, cat in self.item_sub_segmentations.items():
+            for v, subs in cat.items():
+                subs['group'][0].close()
+                for sub in subs['entries']:
+                    sub[0].close()
+                    for b in sub[1]:
+                        b.close()
+        self.item_sub_segmentations = dict()
 
 
     def on_interval_segment_start(self):
@@ -550,16 +592,19 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for lst in [self.item_segments, self.item_ann_layers, self.item_screenshots]:
             for s in lst:
                 self.items.append(s)
-                if  s[0].item.get_id() in self.item_sub_segmentations:
-                    if s[0].show_classification:
-                        self.items.extend(self.item_sub_segmentations[s[0].item.get_id()])
-                        for c in self.item_sub_segmentations[s[0].item.get_id()]:
-                            c[0].show()
-                    else:
-                        for c in self.item_sub_segmentations[s[0].item.get_id()]:
-                            c[0].hide()
-                            for t in c[1]:
-                                t.hide()
+                if s[0].item.get_id() in self.item_sub_segmentations:
+                    for cat, val in self.item_sub_segmentations[s[0].item.get_id()].items():
+                        entries = val['entries']
+                        group = val['group']
+                        group[0].setVisible(s[0].show_classification)
+                        self.items.append(group)
+                        self.items.extend(entries)
+
+                        for c in entries:
+                            if s[0].show_classification and group[0].is_expanded:
+                                c[0].show()
+                            else:
+                                c[0].hide()
 
         self.items += list(self.item_visualizations.values())
 
@@ -567,6 +612,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             bar_start = loc_y
             ctrl_height = 6
             ctrl = i[0]
+
+            if not ctrl.isVisible():
+                continue
+
             bars = i[1]
             ctrl.move(2, loc_y)
 
@@ -576,7 +625,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
             if len(ctrl.groups) > 0 and isinstance(bars[0], TimelineAnnotationBar):
                 item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
-            elif isinstance(bars[0], TimelineSubSegmentationBar):
+            elif len(bars) > 0 and isinstance(bars[0], TimelineSubSegmentationBar):
                 item_height = np.clip(ctrl.sub.strip_height, 1, None)
             else:
                 item_height = (ctrl.height() / np.clip(len(bars), 1, None))
@@ -634,7 +683,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         project.onAnnotationLayerRemoved.connect(self.recreate_timeline)
         project.onScreenshotGroupAdded.connect(self.add_screenshots)
         project.onScreenshotGroupRemoved.connect(self.recreate_timeline)
-        project.experiments[0].onExperimentChanged.connect(self.on_experiment_changed)
+
+        if len(project.experiments) > 0:
+            project.experiments[0].onExperimentChanged.connect(self.on_experiment_changed)
 
         self.update_time_bar()
         self.update_visualizations()
@@ -644,19 +695,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()
 
-        # self.clear()
         self.duration = project.get_movie().duration
-
-        # for s in project.segmentation:
-        #     if s.get_timeline_visibility() is True:
-        #         self.add_segmentation(s)
-
-        # for l in project.annotation_layers:
-        #     if l.get_timeline_visibility() is True:
-        #         self.add_annotation_layer(l)
-
-        # for grp in project.screenshot_groups:
-        #     self.add_screenshots(grp.screenshots, grp, grp.get_name())
 
         self.on_selected(None, project.selected)
         self.update_ui()

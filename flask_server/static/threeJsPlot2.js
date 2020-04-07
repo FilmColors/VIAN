@@ -281,7 +281,7 @@ class Palette3D extends ThreeJSView {
         geometry.setAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1 ).setUsage( THREE.DynamicDrawUsage ) );
 
         var material = new THREE.PointsMaterial({ 
-            size: 15, 
+            size: 10, 
             sizeAttenuation: false, 
             map: this._sprite, 
             alphaTest: 0.5,

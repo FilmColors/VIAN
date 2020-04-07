@@ -12,6 +12,7 @@ from core.gui.ewidgetbase import TextEditPopup
 
 class TimelineControl(QtWidgets.QWidget):
     onHeightChanged = pyqtSignal(int)
+    onClassificationToggle = pyqtSignal(bool)
 
     def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineControl, self).__init__(parent)
@@ -100,6 +101,7 @@ class TimelineControl(QtWidgets.QWidget):
 
     def toggle_classification(self):
         self.show_classification = not self.show_classification
+        self.onClassificationToggle.emit(self.show_classification)
         self.timeline.update_ui()
 
     @pyqtSlot(bool)

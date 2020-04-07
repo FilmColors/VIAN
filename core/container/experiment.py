@@ -853,8 +853,8 @@ class Experiment(IProjectContainer, IHasName):
         self.correlation_matrix = None
         self.pipeline_script = None
 
-        self.onClassificationObjectRemoved.connect(partial(self.onExperimentChanged.emit, self))
-        self.onClassificationObjectAdded.connect(partial(self.onExperimentChanged.emit, self))
+        self.onClassificationObjectRemoved.connect(partial(self.emit_change))
+        self.onClassificationObjectAdded.connect(partial(self.emit_change))
 
 
     def get_name(self):
@@ -978,9 +978,8 @@ class Experiment(IProjectContainer, IHasName):
             self.classification_objects.append(obj)
             self.onClassificationObjectAdded.emit(self)
 
-        obj.onClassificationObjectChanged.connect(partial(self.onExperimentChanged.emit, self))
-        obj.onUniqueKeywordsChanged.connect(partial(self.onExperimentChanged.emit, self))
-
+        obj.onClassificationObjectChanged.connect(partial(self.emit_change))
+        obj.onUniqueKeywordsChanged.connect(partial(self.emit_change))
 
     def remove_classification_object(self, obj: ClassificationObject):
         if obj in self.classification_objects:
@@ -1089,6 +1088,10 @@ class Experiment(IProjectContainer, IHasName):
         self.pipeline_script = pipeline_script
         self.onPipelineScriptChanged.emit(self.pipeline_script)
 
+    def emit_change(self):
+        print("Emit Change")
+        self.onExperimentChanged.emit(self)
+
     def serialize(self):
         analyses = []
         for a in self.analyses:
@@ -1159,6 +1162,8 @@ class Experiment(IProjectContainer, IHasName):
 
         for ser in serialization['classification_objects']:
             obj = ClassificationObject("", self).deserialize(ser, project)
+            obj.onClassificationObjectChanged.connect(partial(self.emit_change))
+            obj.onUniqueKeywordsChanged.connect(partial(self.emit_change))
 
         analyses = serialization['analyses']
         if len(analyses) > 0:
