@@ -338,10 +338,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     @pyqtSlot(bool)
     def on_classification_toggle(self, state):
         if state:
-            self.sticky_strip = self.item_segments[0][1][0]
             self.on_experiment_changed(None)
-        else:
-            self.sticky_strip = None
 
     @pyqtSlot(bool, object)
     def on_pinned(self, state, ctrl):
@@ -640,44 +637,56 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.items += list(self.item_visualizations.values())
 
+        if self.item_pinned is not None:
+            loc_y += self.item_pinned.height()
+
         for c, i in enumerate(self.items):
-            bar_start = loc_y
-            ctrl_height = 6
             ctrl = i[0]
+            bars = i[1]
+            n_bars = np.clip(1, len(bars), None)
 
             if not ctrl.isVisible():
                 continue
 
-            bars = i[1]
-            ctrl.move(2, loc_y)
-
-            if (len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0) \
-                or isinstance(ctrl, TimelineSubSegmentationControl):
-                loc_y += self.group_height
-
-            if len(ctrl.groups) > 0 and isinstance(bars[0], TimelineAnnotationBar):
-                item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
-            elif len(bars) > 0 and isinstance(bars[0], TimelineSubSegmentationBar):
-                item_height = np.clip(ctrl.sub.strip_height, 1, None)
+            # If it is pinned, we only update the scaling and leave positioning to the scroll and zoom event
+            if i[0] is self.item_pinned:
+                for b in bars:
+                    if b.isVisible() is False:
+                        continue
+                    b.resize(self.duration / self.scale, i[0].height())  # item_height)
+                    b.rescale()
             else:
-                item_height = (ctrl.height() / np.clip(len(bars), 1, None))
+                bar_start = loc_y
+                ctrl_height = 6
 
-            for b in bars:
-                if b.isVisible() is False:
-                    continue
-                b.move(0, loc_y)
-                b.resize(self.duration/self.scale, item_height)#item_height)
-                loc_y += item_height #item_height
-                ctrl_height += item_height # + item_height
-                b.rescale()
+                ctrl.move(2, loc_y)
 
-            if loc_y - bar_start < self.bar_height_min:
-                loc_y = self.bar_height_min + bar_start
-                ctrl.resize(self.controls_width - 4, self.bar_height_min)
-            else:
-                ctrl.resize(self.controls_width - 4, loc_y - bar_start)
+                if (len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0) \
+                    or isinstance(ctrl, TimelineSubSegmentationControl):
+                    loc_y += self.group_height
 
-            n_bars = np.clip(1, len(bars), None)
+                if len(ctrl.groups) > 0 and isinstance(bars[0], TimelineAnnotationBar):
+                    item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
+                elif len(bars) > 0 and isinstance(bars[0], TimelineSubSegmentationBar):
+                    item_height = np.clip(ctrl.sub.strip_height, 1, None)
+                else:
+                    item_height = (ctrl.height() / np.clip(len(bars), 1, None))
+
+                for b in bars:
+                    if b.isVisible() is False:
+                        continue
+                    b.move(0, loc_y)
+                    b.resize(self.duration/self.scale, item_height)#item_height)
+                    loc_y += item_height #item_height
+                    ctrl_height += item_height # + item_height
+                    b.rescale()
+
+                if loc_y - bar_start < self.bar_height_min:
+                    loc_y = self.bar_height_min + bar_start
+                    ctrl.resize(self.controls_width - 4, self.bar_height_min)
+                else:
+                    ctrl.resize(self.controls_width - 4, loc_y - bar_start)
+
             if isinstance(ctrl, TimelineAnnotationLayerControl):
                 ctrl.onHeightChanged.emit((ctrl.height() - ctrl.timeline.group_height) / np.clip(len(ctrl.groups), 1, None))
             elif isinstance(ctrl, TimelineSubSegmentationControl):
@@ -889,6 +898,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.interval_segmentation_marker.move(QPoint(self.interval_segmentation_start/self.scale, 0))
 
             self.scrollArea.horizontalScrollBar().setValue(side_offset // self.scale)
+
+            if self.item_pinned is not None:
+                self.item_pinned.bar.move(self.item_pinned.bar.x(), self.time_bar.y() + self.time_bar.height())
+                self.item_pinned.move(self.item_pinned.x(), self.time_bar.y() + self.time_bar.height())
+                self.item_pinned.raise_()
+                self.item_pinned.bar.raise_()
+
 
     def frame_time_range(self, t_start, t_end):
         scale = (t_end - t_start) / (self.width() - self.controls_width) + 3

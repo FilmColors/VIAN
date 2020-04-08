@@ -65,11 +65,6 @@ class ServerData:
             self._screenshot_cache['revision'] += 1
 
         if revision != self._screenshot_cache['revision']:
-            for k, v in self._screenshot_cache['data'].__dict__.items():
-                try:
-                    print(k, len(v))
-                except:
-                    pass
             return dict(update=True,
                         revision = self._screenshot_cache['revision'],
                         data=self._screenshot_cache['data'].__dict__)

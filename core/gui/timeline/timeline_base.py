@@ -127,6 +127,8 @@ class TimelineControl(QtWidgets.QWidget):
     def toggle_classification(self):
         self.show_classification = not self.show_classification
         self.onClassificationToggle.emit(self.show_classification)
+        if not self.is_pinned:
+            self.toggle_pin()
         self.timeline.update_ui()
 
     @pyqtSlot(bool)
