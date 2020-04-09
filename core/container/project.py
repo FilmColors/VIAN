@@ -1834,6 +1834,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def get_name(self):
         return self.name
 
+    def set_name(self, name):
+        self.name = name
+
     def create_unique_id(self):
         """
         Creates a new unique id for a given IProjectContainer within the project.

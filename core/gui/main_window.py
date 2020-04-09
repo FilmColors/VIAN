@@ -1985,6 +1985,7 @@ class MainWindow(QtWidgets.QMainWindow):
             path = self.project.path
             args = [self.project, path]
         else:
+            path = self.project.path
             args = [self.project, self.project.path]
 
         if sync:
@@ -1993,7 +1994,7 @@ class MainWindow(QtWidgets.QMainWindow):
             worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
             self.start_worker(worker, "Saving Project")
 
-        log_info("Saving to:", self.project.folder)
+        log_info("Saving to:", path)
         self.settings.add_to_recent_files(self.project)
         self.project.undo_manager.no_changes = True
 

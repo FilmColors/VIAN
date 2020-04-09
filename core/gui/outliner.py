@@ -795,6 +795,7 @@ class ProjectOutlinerItem(AbstractOutlinerItem):
 
     def set_name(self, name):
         self.project.set_name(name)
+        self.update_item()
 
     def get_name(self):
         return self.project.name

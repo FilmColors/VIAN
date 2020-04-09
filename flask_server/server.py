@@ -234,6 +234,13 @@ class FlaskServer(QObject):
         if sender is _server_data:
             return
 
+        q = None
+        for t in selected:
+            if isinstance(t, VIANProject):
+                q = t
+        if q is not None:
+            selected.remove(q)
+
         if _server_data.project is not None:
             if len(selected) > 0:
                 for s in selected:

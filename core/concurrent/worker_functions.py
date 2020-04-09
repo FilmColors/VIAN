@@ -131,6 +131,7 @@ def store_project_concurrent(args, sign_progress):
     try:
         with open(project_path, 'w') as f:
             json.dump(data, f)
+        project.path = project_path
     except Exception as e:
         print("Exception during Storing: ", str(e))
 
