@@ -14,9 +14,13 @@ MIME_TYPES = dict(
 )
 
 class AnnotationEditorPopup(QMainWindow):
-    def __init__(self, parent, annotation, pos, size = None):
+    def __init__(self, parent, annotation, pos, size = None, multi_annotation = True):
         super(AnnotationEditorPopup, self).__init__(parent)
-        self.inner = AnnotationEditor(self, annotation)
+        if multi_annotation:
+            self.inner = AnnotationEditor(self, annotation)
+        else:
+            self.inner = AnnotationEditorSimple(self, annotation)
+
         self.setCentralWidget(self.inner)
         self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
 
@@ -38,6 +42,7 @@ class AnnotationEditor(QWidget):
         self.annotatable = annotation
 
         self.mime_types = dict()
+
         for k, v in MIME_TYPES.items():
             self.mime_types[v] = k
             self.comboBox_Type.addItem(k)
@@ -131,10 +136,36 @@ class AnnotationEditor(QWidget):
             if len(self.entries_lst) > 0:
                 self.annotationList.setCurrentItem((self.entries_lst[len(self.entries_lst) - 1]))
 
-
     def showEvent(self, a0: QShowEvent) -> None:
         super(AnnotationEditor, self).showEvent(a0)
         self.plainTextEdit.setFocus()
+
+
+class AnnotationEditorSimple(QPlainTextEdit):
+    def __init__(self, parent, annotable):
+        super(AnnotationEditorSimple, self).__init__(parent)
+        self.annotable = annotable
+        self.dialog = parent
+        self.textChanged.connect(self.update_annotation)
+
+    def update_annotation(self):
+        t = self.toPlainText()
+        bodies = self.annotable.get_annotations(mime_type=AnnotationBody.MIMETYPE_TEXT_PLAIN)
+
+        if len(bodies) == 0:
+            self.annotable.add_annotation(AnnotationBody(t, mime_type=AnnotationBody.MIMETYPE_TEXT_PLAIN))
+        else:
+            bodies[0].set_content(t)
+
+    def keyPressEvent(self, a0: QKeyEvent):
+        super(AnnotationEditorSimple, self).keyPressEvent(a0)
+        if a0.key() == Qt.Key_Enter:
+            self.update_annotation()
+            self.dialog.close()
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        super(AnnotationEditorSimple, self).showEvent(a0)
+        self.setFocus()
 
 
 

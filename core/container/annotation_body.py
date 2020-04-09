@@ -95,6 +95,7 @@ class Annotatable:
     def add_annotation(self, a: AnnotationBody):
         self._annotations.append(a)
         a.onAnnotationChanged.connect(self._emit_change)
+        a.onAnnotationChanged.emit(a)
         return a
 
     def remove_annotation(self, a: AnnotationBody):

@@ -740,10 +740,16 @@
    <property name="text">
     <string>VIAN Experiment</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionImportVIANExperiment">
    <property name="text">
     <string>VIAN Experiment</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionCreateCorpus">

@@ -83,6 +83,11 @@ class TimelineContainer(EDockWidget):
         self.a_inhibit_overlap.setChecked(True)
         self.a_inhibit_overlap.triggered.connect(self.update_settings)
 
+        self.a_use_multi_annotation = self.menu_options.addAction("\tUse Multi Annotation")
+        self.a_use_multi_annotation.setCheckable(True)
+        self.a_use_multi_annotation.setChecked(False)
+        self.a_use_multi_annotation.triggered.connect(self.update_settings)
+
         self.a_forward_segmentation = self.menu_options.addAction("\tForward Segmentation")
         self.a_forward_segmentation.setCheckable(True)
         self.a_forward_segmentation.setChecked(False)
@@ -137,6 +142,7 @@ class TimelineContainer(EDockWidget):
         self.timeline.show_text = self.a_show_text.isChecked()
         self.timeline.inhibit_overlap = self.a_inhibit_overlap.isChecked()
         self.timeline.settings.USE_GRID = self.a_use_grid.isChecked()
+        self.timeline.multi_annotation = self.a_use_multi_annotation.isChecked()
 
         self.timeline.show_time_indicator = self.a_show_time_indicator.isChecked()
 
@@ -186,6 +192,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.is_cutting = False
         self.is_merging = False
         self.sticky_move = False #If true, the adjacent slice is edited as well
+        self.multi_annotation = False
 
         self.sticky_strip = None
         self.show_audio_volume = True
@@ -201,9 +208,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # This is only for keeping the datasets when the timeline is forced to redraw
         self.visualization_datasets = []
 
+
         self.bar_height_min = 40
         self.group_height = 25
-        self.controls_width = 200
+        self.controls_width = int(QApplication.desktop().screenGeometry().width() / 9) #200
         self.time_bar_height = 50
         self.timeline_tail = 100
         self.opencv_frame_scale_threshold = 200

@@ -793,7 +793,15 @@ class TimebarSlice(QtWidgets.QWidget):
 
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
         if self.item.get_type() == SEGMENT:
-            popup = AnnotationEditorPopup(self, self.item, self.mapToGlobal(a0.pos()), size = None)
+            popup = AnnotationEditorPopup(self, self.item, self.mapToGlobal(a0.pos()), size = None,
+                                          multi_annotation=self.timeline.multi_annotation)
+            popup.resize(int(self.timeline.width() / 2.5), popup.height())
+
+            x0 = popup.x()
+            y0 = popup.y()
+            if popup.x() + popup.width() > self.timeline.width():
+                x0 = self.timeline.width() - popup.width()
+            popup.move(x0, y0)
             # popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
 
 
