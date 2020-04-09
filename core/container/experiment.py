@@ -796,7 +796,7 @@ class UniqueKeyword(IProjectContainer):
     def serialize(self):
         data = dict(
             unique_id = self.unique_id,
-            # voc_obj = self.voc_obj.unique_id,
+            voc_obj = self.voc_obj.unique_id,
             word_obj = self.word_obj.unique_id,
             class_obj = self.class_obj.unique_id,
             vian_webapp_external_id = self.external_id
@@ -807,10 +807,18 @@ class UniqueKeyword(IProjectContainer):
     def deserialize(self, serialization, project):
         self.unique_id = serialization['unique_id']
         self.word_obj = project.get_by_id(serialization['word_obj'])
-        self.voc_obj = self.word_obj.vocabulary
+        # self.voc_obj = self.word_obj.vocabulary
 
-        # self.voc_obj = project.get_by_id(serialization['voc_obj'])
-        self.class_obj = project.get_by_id(serialization['class_obj'])
+        # We Fix a bug in old VIAN, where it could be possible to have a word from a wrong vocabulary references
+        try:
+            self.voc_obj = project.get_by_id(serialization['voc_obj'])
+            if not self.word_obj.vocabulary == self.voc_obj:
+                has_word = self.voc_obj.get_word_by_name(self.word_obj.name)
+                if has_word is not None:
+                    self.word_obj = has_word
+            self.class_obj = project.get_by_id(serialization['class_obj'])
+        except:
+            self.voc_obj = self.word_obj.vocabulary
 
         try:
             self.external_id = deprecation_serialization(serialization,['vian_webapp_external_id', 'external_id'])
