@@ -1277,12 +1277,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
             # self.main_window.print_message("Loading Node Scripts failed", "Red")
             # self.main_window.print_message(e, "Red")
 
-        try:
-            [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
-            self.active_pipeline_script = self.get_by_id(my_dict['active_pipeline_script'])
-            self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
-        except Exception as e:
-            print("Exception in Load Pipelines", str(e))
+        # try:
+        #     [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
+        #     self.active_pipeline_script = self.get_by_id(my_dict['active_pipeline_script'])
+        #     self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
+        # except Exception as e:
+        #     print("Exception in Load Pipelines", str(e))
 
         try:
             for e in my_dict['experiments']:

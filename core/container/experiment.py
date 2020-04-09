@@ -742,7 +742,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             try:
                 self.unique_keywords.append(UniqueKeyword(self.experiment).deserialize(ser, project))
             except Exception as e:
-                print(e, ser['word_obj'])
+                log_error(e, ser['word_obj'])
 
         ts = [project.get_by_id(uid) for uid in serialization['target_container']]
 
@@ -754,7 +754,7 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.semantic_segmentation_labels = (serialization['semantic_segmentation_labels']['model'],
                                                      [t['label'] for t in serialization['semantic_segmentation_labels']['labels']])
             except Exception as e:
-                print("Exception in SemanticSegmentation Deserializiation", e)
+                log_error("Importing old style SemanticSegmentation Labels", e)
                 self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
 
         except Exception as e:
@@ -814,7 +814,8 @@ class UniqueKeyword(IProjectContainer):
 
         try:
             self.external_id = deprecation_serialization(serialization,['vian_webapp_external_id', 'external_id'])
-        except:
+        except Exception as e:
+            log_error("Could not deserialize vian_webapp_external_id")
             pass
 
         if self.voc_obj is None or self.word_obj is None or self.class_obj is None:
@@ -1089,7 +1090,6 @@ class Experiment(IProjectContainer, IHasName):
         self.onPipelineScriptChanged.emit(self.pipeline_script)
 
     def emit_change(self):
-        print("Emit Change")
         self.onExperimentChanged.emit(self)
 
     def serialize(self):
