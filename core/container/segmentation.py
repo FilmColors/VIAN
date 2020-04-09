@@ -4,7 +4,7 @@ from core.container.container_interfaces import IProjectContainer, IHasName, ISe
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
 from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
-from .annotation_body import AnnotationBody
+from .annotation_body import AnnotationBody, Annotatable
 
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     """
@@ -314,7 +314,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             if property_name == "Segment ID":
                 return str(segm.ID)
             elif property_name == "Segment Text":
-                return str(segm.annotation_body)
+                return str(segm.get_annotations(AnnotationBody.MIMETYPE_TEXT_PLAIN))
             elif property_name == "Segment Name":
                 return str(segm.get_name())
             else:
@@ -327,16 +327,17 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         :param containers: 
         :return: 
         """
+        # TODO New AnnotationBody
         if target is None or target == self.project or target == self or not isinstance(target, Segmentation):
             new_seg = self.project.create_segmentation(self.name)
             for s in self.segments:
-                new_seg.create_segment2(s.get_start(), s.get_end(), body=s.annotation_body)
+                new_seg.create_segment2(s.get_start(), s.get_end(), body=s.get_annotations())
         else:
             for s in self.segments:
-                target.create_segment2(s.get_start(), s.get_end(), body=s.annotation_body)
+                target.create_segment2(s.get_start(), s.get_end(), body=s.get_annotations())
 
 
-class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject):
+class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject, Annotatable):
     """
     :var name: the Name of the Segment
     :var start: Time start in MS
@@ -360,6 +361,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         ILockable.__init__(self)
         IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
+        Annotatable.__init__(self)
 
         self.MIN_SIZE = 10
         self.ID = ID
@@ -368,7 +370,9 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.name = name
 
         self.duration = duration
-        self.annotation_body = annotation_body
+
+        self.annotation_body = self.deprecate_string_to_annotation(annotation_body)
+
         self.timeline_visibility = True
         self.segmentation = segmentation
         self.notes = ""
@@ -436,13 +440,17 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def set_annotation_body(self, annotation):
-        self.project.undo_manager.to_undo((self.set_annotation_body, [annotation]), (self.set_annotation_body, [self.annotation_body]))
-        self.annotation_body = annotation
+        self.project.undo_manager.to_undo((self.set_annotation_body, [annotation]), (self.set_annotation_body, [self.get_annotations()]))
+        self.annotation_body = self.deprecate_string_to_annotation(annotation)
         self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_annotation_body(self):
-        return self.annotation_body
+        t = self.get_annotations(AnnotationBody.MIMETYPE_TEXT_PLAIN)
+        if len(t) > 0:
+            return t[0].content
+        else:
+            return ""
 
     def serialize(self):
 
@@ -457,7 +465,8 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
              end_ms = self.end,
 
              name = self.name,
-             annotation_body = [AnnotationBody(content=self.annotation_body).serialize()],
+             # annotation_body = [AnnotationBody(content=self.annotation_body).serialize()],
+             annotation_body = self.serialize_annotations(),
              notes = self.notes,
              locked = self.locked,
              media_objects = media_objects
@@ -488,12 +497,20 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
         if 'annotation_body' in serialization:
             try:
+
                 if isinstance(serialization['annotation_body'], str):
-                    self.annotation_body = serialization['annotation_body']
+                    if serialization['annotation_body'] != "":
+                        self.annotation_body = serialization['annotation_body']
+                        self.add_annotation(AnnotationBody(serialization['annotation_body'], AnnotationBody.MIMETYPE_TEXT_PLAIN))
+                    else:
+                        self.annotation_body = ""
+
                 elif isinstance(serialization['annotation_body'], dict):
-                    self.annotation_body = AnnotationBody().deserialize(serialization['annotation_body']).content
+                    ann = self.deserialize_annotations([serialization['annotation_body']])
+                    self.annotation_body = self.get_first_annotation_string()
                 else:
-                    self.annotation_body = AnnotationBody().deserialize(serialization['annotation_body'][0]).content
+                    ann = self.deserialize_annotations(serialization['annotation_body'])
+                    self.annotation_body = self.get_first_annotation_string()
             except Exception as e:
                 log_error("Couldn't parse annotation body", e)
                 self.annotation_body = ""

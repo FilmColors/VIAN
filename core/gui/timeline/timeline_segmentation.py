@@ -44,6 +44,7 @@ class TimebarSegmentationSlice(TimebarSlice):
         self.col_hovered = (54, 146, 182, 240)
         item.onSegmentChanged.connect(self.update_text)
         item.onAnalysisAdded.connect(self.set_color)
+        item.onAnnotationsChanged.connect(self.update_text)
 
         self.set_color(None)
 

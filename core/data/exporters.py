@@ -288,6 +288,8 @@ class CSVExporter(ExportDevice):
         if self.export_segm:
             segments = []
             [segments.extend(s.segments) for s in project.segmentation]
+
+            #TODO How to multi handle annotation body
             for segm in segments:  #type:Segment
                 r = dict(
                     ROW = c,

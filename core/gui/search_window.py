@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxL
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QEvent
 from PyQt5.QtGui import QPixmap, QMouseEvent, QPainter, QColor, QPen
 
-from core.container.project import Segment, VIANProject, Screenshot, UniqueKeyword
+from core.container.project import Segment, VIANProject, Screenshot, UniqueKeyword, Annotatable
 
 
 class SearchWindow(QMainWindow):
@@ -68,8 +68,12 @@ class SearchWindow(QMainWindow):
         for s in searchable:
             if s_notes and t in s.get_notes().lower():
                 result.append((s, "notes", s.get_notes()))
-            if s_body and isinstance(s, Segment) and t in s.annotation_body.lower():
-                result.append((s, "body", s.annotation_body))
+            if s_body and isinstance(s, Annotatable):
+                for an in s.get_annotations():
+                    if t in an.to_string().lower():
+                        result.append((s, "body", an.to_string()))
+                        break
+
             for k in kwds_to_search:
                 if k in s.tag_keywords:
                     result.append((s, "keywords"))
@@ -190,7 +194,7 @@ class Entry(QFrame):
                 self.preview.layout().addWidget(lbl)
                 if i == 10:
                     break
-            lbl_annotation = QLabel("Body: " + self.container.annotation_body, self)
+            lbl_annotation = QLabel("Body: " + self.container.get_first_annotation_string(), self)
             self.layout().addWidget(lbl_annotation)
         elif isinstance(self.container, Screenshot):
             (qimage, qpixmap) = self.container.get_preview()

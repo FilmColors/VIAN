@@ -335,8 +335,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.visualization_datasets.append(dataset)
             self.update_ui()
 
-    @pyqtSlot(bool)
-    def on_classification_toggle(self, state):
+    @pyqtSlot(object, bool)
+    def on_classification_toggle(self, new, state):
         if state:
             self.on_experiment_changed(None)
 
@@ -362,30 +362,35 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             else:
                 log_warning("No Experiment found in Timeline.on_experiment_changed")
                 return
+        # if len(self.item_segments) > 0 and self.item_segments[0][0].show_classification is False:
+        #     log_warning("Classification Hidden Timeline.on_experiment_changed")
+        #     return
 
-        if len(self.item_segments) > 0 and self.item_segments[0][0].show_classification is False:
-            log_warning("Classification Hidden Timeline.on_experiment_changed")
-            return
+        for i, s in enumerate(self.project().segmentation):
+            if self.item_segments[i][0].show_classification is False:
+                continue
 
-        subsegments = dict()
-        self.item_sub_segmentations[self.project().get_main_segmentation().get_id()] = dict()
+            subsegments = dict()
+            for clobj in e.classification_objects:
 
-        for clobj in e.classification_objects:
-            if clobj not in subsegments:
-                subsegments[clobj.name] = dict()
+                # We only add it, if this segmentation is in the targets of the classification object,
+                # if the classification objec has no target it means, it should belong to every segmentation
+                if s in clobj.target_container or len(clobj.target_container) == 0:
+                    if clobj not in subsegments:
+                        subsegments[clobj.name] = dict()
 
-            for kwd in clobj.unique_keywords:
-                cat = kwd.voc_obj.name
-                if cat not in subsegments[clobj.name]:
-                    subsegments[clobj.name][cat] = (clobj.name, [])
-                subsegments[clobj.name][cat][1].append(kwd)
+                    for kwd in clobj.unique_keywords:
+                        cat = kwd.voc_obj.name
+                        if cat not in subsegments[clobj.name]:
+                            subsegments[clobj.name][cat] = (clobj.name, [])
+                        subsegments[clobj.name][cat][1].append(kwd)
 
-        for j, t in subsegments.items():
-            for voc, (cl_obj, kwds) in subsegments[j].items():
-                group = TimelineSubSegmentation(voc)
-                for k in kwds:
-                    group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
-                self.add_sub_segmentation(self.project().get_main_segmentation(), group, cat=cl_obj)
+            for j, t in subsegments.items():
+                for voc, (cl_obj, kwds) in subsegments[j].items():
+                    group = TimelineSubSegmentation(voc)
+                    for k in kwds:
+                        group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
+                    self.add_sub_segmentation(s, group, cat=cl_obj)
 
 
     @pyqtSlot(object)
@@ -618,6 +623,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.items = []
 
+        classification_shown = []
         for lst in [self.item_segments, self.item_ann_layers, self.item_screenshots]:
             for s in lst:
                 self.items.append(s)
@@ -626,8 +632,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                         entries = val['entries']
                         group = val['group']
                         group[0].setVisible(s[0].show_classification)
-                        self.items.append(group)
-                        self.items.extend(entries)
+                        if s[0].show_classification and s[0].is_pinned:
+                            classification_shown.append(group)
+                            classification_shown.extend(entries)
+                        else:
+                            self.items.append(group)
+                            self.items.extend(entries)
 
                         for c in entries:
                             if s[0].show_classification and group[0].is_expanded:
@@ -635,10 +645,12 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                             else:
                                 c[0].hide()
 
+        self.items = classification_shown + self.items
         self.items += list(self.item_visualizations.values())
 
         if self.item_pinned is not None:
             loc_y += self.item_pinned.height()
+
 
         for c, i in enumerate(self.items):
             ctrl = i[0]

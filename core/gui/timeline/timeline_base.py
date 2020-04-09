@@ -8,11 +8,11 @@ from core.container.project import *
 from core.container.container_interfaces import ILockable
 from core.gui.context_menu import open_context_menu
 from core.gui.ewidgetbase import TextEditPopup
-
+from core.gui.annotation_editor import AnnotationEditorPopup
 
 class TimelineControl(QtWidgets.QWidget):
     onHeightChanged = pyqtSignal(int)
-    onClassificationToggle = pyqtSignal(bool)
+    onClassificationToggle = pyqtSignal(object, bool)
     onPinned = pyqtSignal(bool, object)
 
     def __init__(self, parent, timeline, item = None, name = "No Name"):
@@ -98,7 +98,6 @@ class TimelineControl(QtWidgets.QWidget):
 
         self.layout().addItem(self.expand,2,0)
 
-
     def toggle_pin(self):
         self.is_pinned = not self.is_pinned
         if self.is_pinned:
@@ -126,9 +125,7 @@ class TimelineControl(QtWidgets.QWidget):
 
     def toggle_classification(self):
         self.show_classification = not self.show_classification
-        self.onClassificationToggle.emit(self.show_classification)
-        if not self.is_pinned:
-            self.toggle_pin()
+        self.onClassificationToggle.emit(self, self.show_classification)
         self.timeline.update_ui()
 
     @pyqtSlot(bool)
@@ -147,17 +144,6 @@ class TimelineControl(QtWidgets.QWidget):
 
     def update_info(self, layer):
         self.set_name()
-
-    def add_sub_segmentation(self, s):
-        self.sub_segmentations.append(s)
-
-    def get_sub_segmentation_height(self):
-        h = 0
-        for s in self.sub_segmentations:
-            if s.is_expanded is False:
-                continue
-            h += len(s) * s.strip_height
-        return h
 
     def add_group(self, annotation):
         y = len(self.groups) * self.timeline.group_height
@@ -807,7 +793,8 @@ class TimebarSlice(QtWidgets.QWidget):
 
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
         if self.item.get_type() == SEGMENT:
-            popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
+            popup = AnnotationEditorPopup(self, self.item, self.mapToGlobal(a0.pos()), size = None)
+            # popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
 
 
 class MediaObjectWidget(QWidget):

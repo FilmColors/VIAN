@@ -61,7 +61,7 @@ class WebAnnotationDevice():
                     type = "Annotation",
                     body = dict(
                         type = "TextualBody",
-                        value = segm.annotation_body,
+                        value = segm.get_first_annotation_string(),
                         format = "text/plain",
                         language = "en",
                         purpose = "describing"

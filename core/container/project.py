@@ -307,11 +307,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for s in segmentation.segments:
             # segm = new.create_segment(start = s.get_start(), stop = s.get_end(), dispatch=False)
             segm = new.create_segment2(start = s.get_start(), stop = s.get_end(),
-                                       dispatch=False,
+                                       dispatch=False, body=s.annotation_body,
                                        mode=SegmentCreationMode.INTERVAL)
             if segm is None:
                 continue
-            segm.annotation_body = s.annotation_body
+            # segm.annotation_body = s.annotation_body
 
         self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
         self.dispatch_changed(item = new)

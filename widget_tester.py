@@ -36,8 +36,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
-
-# from core.data.settings import UserSettings
 from PyQt5.Qt import PYQT_VERSION_STR
 
 print("PyQt version:", PYQT_VERSION_STR)
@@ -56,8 +54,12 @@ class MW(QMainWindow):
 
         self.v = QWebEngineView(self)
         # self.v = QWidget();
-        # self.v.load(QUrl("http://www.google.com"))
-        # self.v.setStyleSheet("QWebEngineView{background-color:rgb(0,0,0); border: 10px solid black;}")
+        self.v.load(QUrl("http://www.google.com"))
+        self.v.setStyleSheet("QWebEngineView{background-color:rgb(0,0,0); border: 10px solid black;}")
+        self.settings = QWebEngineSettings.globalSettings()
+        self.settings.setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True )
+        self.settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True )
+
         # self.browser = QWebEngineView()
         # self.browser.load(QUrl('http://www.google.com'))
         self.lineedit = QLineEdit(self)

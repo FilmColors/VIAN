@@ -4,6 +4,7 @@ from core.data.tracking import BasicTrackingJob
 from core.gui.context_menu import open_context_menu
 from core.gui.perspectives import Perspective
 from core.node_editor.node_editor import *
+from core.gui.annotation_editor import AnnotationEditor
 
 from PyQt5 import QtCore
 
@@ -377,19 +378,22 @@ class AttributesSegment(QWidget):
         path = os.path.abspath("qt_ui/AttributesSegment.ui")
         uic.loadUi(path, self)
         self.descriptor = descriptor
-        self.textEdit_AnnotationBody.setPlainText(self.descriptor.annotation_body)
 
-        self.textEdit_AnnotationBody.installEventFilter(self)
+        self.annotation_editor = AnnotationEditor(self, self.descriptor)
+        self.widgetInner.layout().addWidget(self.annotation_editor)
 
-    def on_body_changed(self):
-        text = self.textEdit_AnnotationBody.toPlainText()
-        self.descriptor.set_annotation_body(text)
+        # self.textEdit_AnnotationBody.setPlainText(self.descriptor.get_annotation_body())
+        # self.textEdit_AnnotationBody.installEventFilter(self)
 
-    def eventFilter(self, QObject, QEvent):
-        if QEvent.type() == QtCore.QEvent.FocusOut:
-            self.on_body_changed()
+    # def on_body_changed(self):
+    #     text = self.textEdit_AnnotationBody.toPlainText()
+    #     self.descriptor.set_annotation_body(text)
 
-        return super(AttributesSegment, self).eventFilter(QObject, QEvent)
+    # def eventFilter(self, QObject, QEvent):
+    #     if QEvent.type() == QtCore.QEvent.FocusOut:
+    #         self.on_body_changed()
+    #
+    #     return super(AttributesSegment, self).eventFilter(QObject, QEvent)
 
 
 class AttributesMediaObject(QWidget):

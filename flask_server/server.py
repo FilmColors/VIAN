@@ -21,9 +21,9 @@ app.root_path = os.path.split(__file__)[0]
 log_info("FLASK ROOT", app.root_path)
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-# import logging
-# log = logging.getLogger('werkzeug')
-# log.setLevel(logging.ERROR)
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 import mimetypes
 mimetypes.add_type('application/javascript', '.js')
