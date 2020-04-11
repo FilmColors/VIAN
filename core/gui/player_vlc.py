@@ -13,6 +13,7 @@ from core.gui.ewidgetbase import EDockWidget
 from core.data.computation import parse_file_path
 from core.data.interfaces import IProjectChangeNotify
 from core.data.log import log_error, log_info, log_debug
+
 import vlc
 # from core.vlc.v3_0_3 import vlc
 import os

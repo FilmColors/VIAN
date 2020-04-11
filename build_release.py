@@ -5,7 +5,6 @@ import shutil
 BUILD_PYTHON_WIN = "C:/Users/gaude/AppData/Local/Programs/Python/Python36/python.exe"
 BUILD_PYTHON_OSX = "/Users/Kris/Documents/Gaudenz/vian_env/bin/pyinstaller"
 
-
 SPEC_FILE = "main.spec"
 
 arguments = ["-y", "--debug=all", "--additional-hooks-dir=hooks"]

@@ -21,8 +21,8 @@ from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
 from core.data.enums import DataSerialization
 from core.container.hdf5_manager import vian_analysis
 
-from matplotlib import cm
-from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+# from matplotlib import cm
+# from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 
 

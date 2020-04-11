@@ -29,7 +29,9 @@ data_paths = [
 ] + tf_datas
 
 import sys
+console = False
 if sys.platform == "win32":
+    console = True
     VLC_ROOT = 'C:/Program Files/VideoLAN/VLC/'
     vlc_dlls = [
         (VLC_ROOT + '/libvlc.dll', '.'),
@@ -38,6 +40,7 @@ if sys.platform == "win32":
         (VLC_ROOT + '/npvlc.dll', '.')
     ]
     data_paths += vlc_dlls
+    data_paths += [(os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/astor/"), "astor/")]
     binaries += [
         (VLC_ROOT + "\plugins", "plugins"),
         (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/sklearn/.libs/vcomp140.dll"), "."),
@@ -87,7 +90,7 @@ if sys.platform.startswith('linux'):
               bootloader_ignore_signals=False,
               strip=False,
               upx=True,
-              console=True)
+              console=False)
 
     coll = COLLECT(exe,
                a.binaries,
@@ -107,7 +110,7 @@ else:
               bootloader_ignore_signals=False,
               strip=False,
               upx=True,
-              console=False,
+              console=console,
               icon=icon)
 
     coll = COLLECT(exe,
