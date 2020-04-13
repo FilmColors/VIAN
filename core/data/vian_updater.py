@@ -14,7 +14,6 @@ from core.corpus.client.corpus_client import get_vian_version, download_vian_upd
 import requests, zipfile, io
 import os
 
-#TODO MS - 0.9.0
 class VianUpdater(IConcurrentJob):
     def __init__(self, main_window, current_version):
         v = current_version.split(".")
@@ -96,6 +95,7 @@ class VianUpdater(IConcurrentJob):
                 if os.path.exists(dst_file):
                     os.remove(dst_file)
                     move(src_file, dst_dir)
+
 
 class VianUpdaterJob(IConcurrentJob):
 
