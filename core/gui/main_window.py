@@ -152,7 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
 
-        self.updater = VianUpdater(self, self.version)
+        # self.updater = VianUpdater(self, self.version)
 
         # Central Widgets
         self.video_player = None
@@ -445,8 +445,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
 
-        self.actionUpdate.triggered.connect(self.update_vian)
-        self.actionCheck_for_Beta.triggered.connect(partial(self.update_vian, True, True))
+        # self.actionUpdate.triggered.connect(self.update_vian)
+        # self.actionCheck_for_Beta.triggered.connect(partial(self.update_vian, True, True))
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
@@ -570,7 +570,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.setState(False)
 
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
-        self.update_vian(False)
+        # self.update_vian(False)
 
         self.project.undo_manager.clear()
         self.close_project()
@@ -1155,28 +1155,28 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 log_error(e)
 
-    def update_vian(self, show_newest = True, allow_beta = False):
-        try:
-            result, version_id = self.updater.get_server_version()
-        except:
-            return
-
-        if result:
-            answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
-            if answer == QMessageBox.Yes:
-                self.updater.update()
-            else:
-                self.print_message("Update Aborted", "Orange")
-        else:
-            if show_newest:
-                answer = QMessageBox.question(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version + "\n" +
-                                        "Do you want to update anyway?")
-                if answer == QMessageBox.Yes:
-                    self.updater.update(force = True)
-                else:
-                    self.print_message("Update Aborted", "Orange")
-            else:
-                self.print_message("VIAN is up to date with version: " + str(version.__version__), "Green")
+    # def update_vian(self, show_newest = True, allow_beta = False):
+    #     try:
+    #         result, version_id = self.updater.get_server_version()
+    #     except:
+    #         return
+    #
+    #     if result:
+    #         answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
+    #         if answer == QMessageBox.Yes:
+    #             self.updater.update()
+    #         else:
+    #             self.print_message("Update Aborted", "Orange")
+    #     else:
+    #         if show_newest:
+    #             answer = QMessageBox.question(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version + "\n" +
+    #                                     "Do you want to update anyway?")
+    #             if answer == QMessageBox.Yes:
+    #                 self.updater.update(force = True)
+    #             else:
+    #                 self.print_message("Update Aborted", "Orange")
+    #         else:
+    #             self.print_message("VIAN is up to date with version: " + str(version.__version__), "Green")
 
     def open_preferences(self):
         dialog = DialogPreferences(self)
