@@ -1760,9 +1760,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_about(self):
         about = ""
-        about += "Author:".ljust(12) + version.__author__ + "\n"
-        about += "Copyright:".ljust(12) + version.__copyright__ + "\n"
-        about += "Version:".ljust(12) + version.__version__ + "\n"
+        about += "Author:".ljust(12) + str(version.__author__) + "\n"
+        about += "Copyright:".ljust(12) + str(version.__copyright__) + "\n"
+        about += "Version:".ljust(12) + str(version.__version__) + "\n"
         about += "Credits:".ljust(12) + str(version.__credits__) + "\n"
         QMessageBox.about(self, "About", about)
 
@@ -2275,17 +2275,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def get_version_as_string(self):
 
         result = "VIAN - Visual Movie Annotation\n"
-        result += "Version: ".ljust(15) + version.__version__ + "\n"
+        result += "Version: ".ljust(15) + str(version.__version__) + "\n"
         result += "\n\n"
-        result += "Author: ".ljust(15) + version.__author__ + "\n"
-        result += "Copyright: ".ljust(15) + version.__copyright__ + "\n"
+        result += "Author: ".ljust(15) + str(version.__author__) + "\n"
+        result += "Copyright: ".ljust(15) + str(version.__copyright__) + "\n"
         result += "Credits: ".ljust(15) + str(version.__credits__[0]) + "\n"
         for i in range(1, len(version.__credits__)):
             result += "".ljust(15) + str(version.__credits__[i]) + "\n"
-        result += "License: ".ljust(15) + version.__license__ + "\n"
-        result += "Maintainer: ".ljust(15) + version.__maintainer__ + "\n"
-        result += "Email: ".ljust(15) + version.__email__ + "\n"
-        result += "Status: ".ljust(15) + version.__status__ + "\n"
+        result += "License: ".ljust(15) + str(version.__license__) + "\n"
+        result += "Maintainer: ".ljust(15) + str(version.__maintainer__) + "\n"
+        result += "Email: ".ljust(15) + str(version.__email__) + "\n"
+        result += "Status: ".ljust(15) + str(version.__status__) + "\n"
 
         return result
 
