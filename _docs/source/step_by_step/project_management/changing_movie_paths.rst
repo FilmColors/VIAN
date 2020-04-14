@@ -15,7 +15,7 @@ is located at a different location, or when the movie file has been changed.
 .. note:: **Options**
    1. Some **Option**
 
-.. figure:: elan_project.png
+.. figure:: set_movie_path.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure

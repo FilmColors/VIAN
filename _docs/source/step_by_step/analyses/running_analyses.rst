@@ -16,12 +16,12 @@ To run an Analysis, do the following:
 .. note::
    Alternatively, one can select all targets *before* opening the Analysis Dialog. These will automatically be added.
 
-.. figure:: analyses_dialog.jpg
-   :scale: 80 %
+.. figure:: running_analysis.png
+   :scale: 60 %
    :align: center
    :alt: map to buried treasure
 
-   The Analysis Dialog as it appears when running a Mosaic Plot Analysis.
+   The Analysis Dialog as it appears when running a Color Histogram Analysis. 1. Select the wished targets in the Outliner 2. Add them with the "+"-Button to the Analysis window.
 
 .. seealso::
 

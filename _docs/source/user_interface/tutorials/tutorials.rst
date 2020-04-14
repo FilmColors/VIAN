@@ -1,9 +1,12 @@
-.. _tutorials::
+.. _tutorials:
+
 =========
 Tutorials
 =========
 
 Here you can find short instructing videos to the following topics:
+
+.. _create_new_project_no_autoname:
 
 Create a new Project (no autoname)
 **********************************
@@ -12,12 +15,16 @@ Create a new Project (no autoname)
         
         <iframe src="https://player.vimeo.com/video/378389696" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
+.. _create_new_project_with_autoname:
+
 Create a new Project (with autoname)
 ************************************
 
 .. raw:: html
         
         <iframe src="https://player.vimeo.com/video/378584129" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+
+.. _create_new_segmentation:
 
 Create new Segmentation
 ************************
@@ -26,12 +33,16 @@ Create new Segmentation
         
         <iframe src="https://player.vimeo.com/video/378584492" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
+.. _rename_segmentation:
+
 Rename Segmentation
 *******************
 
 .. raw:: html
         
         <iframe src="https://player.vimeo.com/video/378585032" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+
+.. _create_auto-segmentation:
 
 Create auto-Segmentation
 ************************
@@ -40,12 +51,16 @@ Create auto-Segmentation
         
         <iframe src="https://player.vimeo.com/video/378585409" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
+.. _take_screenshots:
+
 Take Screenshots
 ****************
 
 .. raw:: html
         
         <iframe src="https://player.vimeo.com/video/378585998" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+
+.. _auto-generated_screenshots:
 
 Auto-generated Screenshots
 **************************
@@ -54,6 +69,8 @@ Auto-generated Screenshots
         
         <iframe src="https://player.vimeo.com/video/378586785" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
+.. _run_colorimetry:
+
 Colorimetry
 ***********
 
@@ -61,12 +78,16 @@ Colorimetry
         
         <iframe src="https://player.vimeo.com/video/378587418" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
+.. _run_classification:
+
 Classification
 **************
 
 .. raw:: html
         
         <iframe src="https://player.vimeo.com/video/378587731" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+
+.. _analysis:
 
 Analyses
 ********

@@ -7,7 +7,7 @@ Creating Segmentations
 
 To create a new Segmentation, do the following
 
-1. **Right-Click** onto the upper-left corner the *Timeline*.
+1. **Right-Click** onto the upper-left corner of the *Timeline*.
 2. In the Context Menu, select **New Segmentation**.
 3. **Select** the newly created Segmentation.
 4. Do one of the following:
@@ -20,7 +20,7 @@ To create a new Segmentation, do the following
 
    **Tools/Add Segmentation**
 
-.. figure:: create_segmentation.png
+.. figure:: create_new_segmentation.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
@@ -32,6 +32,7 @@ To create a new Segmentation, do the following
    * :ref:`new_project`
    * :ref:`import_elan_projects`
    * :ref:`changing_movie_paths`
+   * :ref:`create_new_segmentation`
 
 
 * :ref:`genindex`

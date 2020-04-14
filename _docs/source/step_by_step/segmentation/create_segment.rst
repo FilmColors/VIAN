@@ -25,7 +25,7 @@ Time Slice Dragging
    2. **Include**, which entities of your project should be exported.
 
 
-.. figure:: create_segment_01.png
+.. figure:: create_new_segment_drag.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
@@ -55,7 +55,7 @@ Fast Segmentation
    cutting the overlapping Segment if existing.
 
 
-.. figure:: create_segment_02.png
+.. figure:: create_new_segment_right_click.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
@@ -71,7 +71,7 @@ Interval Selection
 6. Press **Ctrl + E** to finish up the new Segment
 
 
-.. figure:: create_segment_03.png
+.. figure:: create_new_segment_start_end_point.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure

@@ -28,7 +28,7 @@ To import a set of Screnshots do the following
    4. **Position Segment** The Index Position of the Segment-ID the Screenshot is within. (Keep at -1 if this is not given)
    5. **Position Time** The Index Position of the Time Values within the File Names. (H:M:S:MS)
 
-.. figure:: import_screenshots.jpg
+.. figure:: import_screenshots.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
