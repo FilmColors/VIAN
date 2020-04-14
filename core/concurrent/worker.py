@@ -158,7 +158,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
     def _start(self):
         if len(self.queue) > 0:
-            print("Queue:", len(self.queue), [q[0].__class__ for q in self.queue])
+            print("Queue:", len(self.queue)) # [q[0].__class__ for q in self.queue]
             analysis, params = self.queue.pop(0)
             self.queue_identify.pop(0)
             self.running = analysis
@@ -168,7 +168,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
                     self.onPushTask.emit(analysis, arg)
             else:
                 self.onPushTask.emit(analysis, args)
-            self.onStartWorker.emit()
+            # self.onStartWorker.emit()
         else:
             self.running = None
 
@@ -178,11 +178,11 @@ class WorkerManager(QObject, IProjectChangeNotify):
             try:
                 if isinstance(result, list):
                     for r in result:
-                        self.running.modify_project(self.project, r, main_window=self.main_window)
+                        r.get_analysis().modify_project(self.project, r, main_window=self.main_window)
                         self.project.add_analysis(r, dispatch=False)
                         r.unload_container()
                 else:
-                    self.running.modify_project(self.project, result, main_window=self.main_window)
+                    result.get_analysis().modify_project(self.project, result, main_window=self.main_window)
                     self.project.add_analysis(result)
                     result.unload_container()
             except Exception as e:
@@ -230,17 +230,26 @@ class AnalysisWorker(QObject):
 
         self.done = []
         self.aborted = False
+        self._running = False
 
     @pyqtSlot(object, object)
     def push_task(self, analysis, args):
         task_id = generate_id(self.scheduled_task.keys())
         self.scheduled_task[task_id] = (task_id, analysis, args, self._on_progress)
         self.signals.sign_create_progress_bar.emit(task_id, analysis.__class__.__name__, None, None)
+        if not self._running:
+            self.run_worker()
 
     @pyqtSlot()
     def run_worker(self):
+        self._running = True
+        self.aborted = False
+        
         self.signals.analysisStarted.emit()
+        print("Scheduled", self.scheduled_task)
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
+            print("Performing", i) #, self.aborted, (task_id, args))
+
             if self.aborted:
                 break
             self.current_task_id = task_id
@@ -257,6 +266,7 @@ class AnalysisWorker(QObject):
         self.finished_tasks = dict()
         self.signals.analysisEnded.emit()
         self.aborted = False
+        self._running = False
 
     def _run_task(self, task_id, analysis, args, on_progress):
         log_info("Running Analysis", analysis.__class__)

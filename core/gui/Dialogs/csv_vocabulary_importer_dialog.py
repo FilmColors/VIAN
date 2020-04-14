@@ -19,11 +19,12 @@ class CSVVocabularyImportDialog(EDialogWidget):
 
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_OK.clicked.connect(self.on_ok)
+        self.btn_OK.setEnabled(False)
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.btn_Browse.clicked.connect(self.on_browse)
 
         self.lineEdit_Path.textChanged.connect(self.on_path_changed)
-
+        self.file_path = None
         self.field_boxes = [
                             self.cB_WordName,
                             self.cB_ParentField,
@@ -32,15 +33,15 @@ class CSVVocabularyImportDialog(EDialogWidget):
                             self.cB_HelpURL
                             ]
 
-
     def on_ok(self):
-        self.importer.import_voc(self.path, self.project,
+        if self.path is not None:
+            self.importer.import_voc(self.path, self.project,
                                  field_category=self.cB_CategoryField.currentText(),
                                  field_name=self.cB_WordName.currentText(),
                                  field_parent=self.cB_ParentField.currentText(),
                                  field_comment=self.cB_Comment.currentText(),
                                  field_help=self.cB_HelpURL.currentText())
-
+            self.close()
 
     def on_cancel(self):
         self.close()
@@ -54,8 +55,10 @@ class CSVVocabularyImportDialog(EDialogWidget):
         ret, fields = self.importer.get_fields(path)
         if ret:
             self.path = path
+            self.btn_OK.setEnabled(True)
         else:
             self.path = None
+            self.btn_OK.setEnabled(False)
 
         self.set_combobox_enabled(ret)
         self.update_combobox_entries(fields)

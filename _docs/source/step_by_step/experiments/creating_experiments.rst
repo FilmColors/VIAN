@@ -24,10 +24,20 @@ VIAN's way of looking at things.
 Once you have configured your experiment as described in :ref:`_creating_experiments` you can edit the experiment
 in the experiment editor. You should now see this widget:
 
-.. figure:: experiment_editor.jpg
-   :scale: 80 %
+.. figure:: experiment_overview.png
+   :scale: 60%
    :align: center
    :alt: Experiment editor in VIAN.
+
+   The Experiment set-up of VIAN.
+
+
+Indicated Information:
+
+- **1**: Under «Classification Objects» you find the objects - be they conceptual like Soundtrack or actual like Male Protagonist - that are being classified in your project.
+- **2**: If you click one of the objects, you can define on which targets you want to classify this object; targets are mainly Segments and Screenshots.
+- **3**: Under «Attached Vocabularies» you see the vocabularies that are selected to the respective object. Since in this example the object «Global» is selected, a lot of vocabularies are attached to it, for other objects the selection might well be much smaller.
+- **4**: Lastly, under **4** you see the patterns that the Semantic Segmentation is able to detect. Since this Algorithm has no knowledge of the real-world properties of the things it is able to detect, you have to manually attach these to the correct object (it does e.g. not know that «hats» belong to entities such as people etc. It simply detects objects (i.e. pixel-structures) that look like hats).
 
 
 To add classification objects, do the following:

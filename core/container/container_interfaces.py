@@ -2,13 +2,16 @@
 In this Module, all interfaces used by VIAN are defined.
 """
 import os
-
+from uuid import uuid4
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from core.data.enums import GENERIC
 from core.data.log import log_error, log_warning
+from .annotation_body import AnnotationBody
+
 
 _VIAN_ROOT = os.path.abspath(os.path.split( __file__)[0] + "/../..")
 print(_VIAN_ROOT,  os.path.split( __file__)[0] + "/../..")
+
 
 class IClassifiable():
     onQueryHighlightChanged = pyqtSignal(bool)
@@ -62,6 +65,9 @@ class IProjectContainer(QObject):
 
     def get_id(self):
         return self.unique_id
+
+    def get_annotation_body(self):
+        return AnnotationBody("", "text/plain")
 
     def set_expanded(self, expanded):
         self.outliner_expanded = expanded
@@ -276,6 +282,8 @@ class AutomatedTextSource():
         return ""
 
 
-
-
-
+def deprecation_serialization(d, keys):
+    for k in keys:
+        if k in d:
+            return d[k]
+    return None

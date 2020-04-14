@@ -13,6 +13,7 @@ from core.gui.ewidgetbase import EDockWidget
 from core.data.computation import parse_file_path
 from core.data.interfaces import IProjectChangeNotify
 from core.data.log import log_error, log_info, log_debug
+
 import vlc
 # from core.vlc.v3_0_3 import vlc
 import os
@@ -242,7 +243,7 @@ class Player_VLC(VideoPlayer):
     def __init__(self, main_window):
         super(Player_VLC, self).__init__(main_window)
 
-        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --quiet --no-embedded-video" #--verbose 0
+        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat --quiet"
         self.media_player = None
         self.vlc_instance = None
         # self.media_player = self.vlc_instance.media_player_new()
@@ -383,6 +384,7 @@ class Player_VLC(VideoPlayer):
         self.set_media_time(0)
         self.pause_timer.start()
 
+        log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
 
         # if self.main_window.is_darwin:
@@ -459,10 +461,14 @@ class Player_VLC(VideoPlayer):
         log_debug(NotImplementedError("Method <set_frame_steps_to_frame_begin> not implemented"))
 
     def set_media_time(self, time):
+        if time > self.duration - 1:
+            time = self.duration - 1
         if self.media_player is None:
             return
+
         self.media_player.set_time(int(time))
         self.timeChanged.emit(time)
+
         self.last_set_frame = time
 
     def get_media_time(self):
@@ -606,6 +612,7 @@ class Player_VLC(VideoPlayer):
 
     def on_closed(self):
         self.release_player()
+
 
     def on_selected(self,sender, selected):
         pass

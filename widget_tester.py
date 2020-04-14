@@ -30,50 +30,84 @@ import logging
 logging.getLogger('tensorfyylow').disabled = True
 
 
-import PyQt5
-from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox, QMainWindow
-from PyQt5.QtCore import Qt, QObject, QEvent
-from PyQt5.QtGui import QPixmap, QIcon
+# from OpenGL import GL
 
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtWebEngineWidgets import *
+from PyQt5.Qt import PYQT_VERSION_STR
 
-from core.data.settings import UserSettings
-from core.gui.drop_image_container import DropImageContainer
-from core.gui.ewidgetbase import MultiItemTextInput
-from core.gui.corpus_widget import CorpusDockWidget, FilmographyWidget2
+print("PyQt version:", PYQT_VERSION_STR)
 DEBUG = True
 MAIN_WINDOW = None
 
 
+
+print(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath))
+
 class MW(QMainWindow):
     def __init__(self, widget):
         super(MW, self).__init__()
-        self.setCentralWidget(FilmographyWidget2(self))
-        self.dock_widgets = []
-        self.addDockWidget(Qt.LeftDockWidgetArea, CorpusDockWidget(self))
+        self.central = QWidget(self)
+        self.central.setLayout(QVBoxLayout())
 
-def set_style_sheet(app, path):
-    style_sheet = open(os.path.abspath(path), 'r')
-    style_sheet = style_sheet.read()
-    app.setStyleSheet(style_sheet)
+        self.v = QWebEngineView(self)
+        # self.v = QWidget();
+        self.v.load(QUrl("http://www.google.com"))
+        self.v.setStyleSheet("QWebEngineView{background-color:rgb(0,0,0); border: 10px solid black;}")
+        self.settings = QWebEngineSettings.globalSettings()
+        self.settings.setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True )
+        self.settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True )
 
+        # self.browser = QWebEngineView()
+        # self.browser.load(QUrl('http://www.google.com'))
+        self.lineedit = QLineEdit(self)
+        self.lineedit.editingFinished.connect(self.on_change)
+        self.setCentralWidget(self.central)
+        self.central.layout().addWidget(self.lineedit)
+        self.centralWidget().layout().addWidget(self.v)
 
-def set_attributes(app):
-    app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    if sys.platform == "darwin":
-        app.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
+        # self.v.show()
 
-settings = UserSettings()
-settings.load()
+        # self.v.loadFinished.connect(print)
+        # self.v.loadProgress.connect(print)
+        print(self.v)
+        self.show()
+
+        print(self.v.isVisible())
+
+    def on_change(self):
+        t = QUrl(self.lineedit.text())
+        self.v.load(t)
+
+        # print(os.environ['QTWEBENGINEPROCESS_PATH '])
+        # self.dock_widgets = []
+        # self.addDockWidget(Qt.LeftDockWidgetArea, NodeEditorDock(self))
+
+# def set_style_sheet(app, path):
+#     style_sheet = open(os.path.abspath(path), 'r')
+#     style_sheet = style_sheet.read()
+#     app.setStyleSheet(style_sheet)
+#
+#
+# def set_attributes(app):
+#     app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+#     if sys.platform == "darwin":
+#         app.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
+
+# settings = UserSettings()
+# settings.load()
 
 
 app = QApplication(sys.argv)
 # filter = SuperFilter(app)
 # app.installEventFilter(filter)
-app.setWindowIcon(QIcon("qt_ui/images/main.png"))
-set_attributes(app)
-set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
+# app.setWindowIcon(QIcon("qt_ui/images/main.png"))
+# set_attributes(app)
+# set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
 
-main = MW(MultiItemTextInput(None, "TestInput"))
+main = MW(None)
 main.show()
 sys.exit(app.exec_())
 

@@ -3,7 +3,7 @@ import glob
 from random import randint
 import sys
 import subprocess
-import tempfile as tmp
+
 from shutil import copytree, move
 import shutil
 from core.data.interfaces import IConcurrentJob
@@ -13,8 +13,6 @@ from PyQt5.QtWidgets import QMessageBox, QApplication
 from core.corpus.client.corpus_client import get_vian_version, download_vian_update
 import requests, zipfile, io
 import os
-
-import urllib.request, urllib.error, urllib.parse
 
 class VianUpdater(IConcurrentJob):
     def __init__(self, main_window, current_version):
@@ -97,6 +95,7 @@ class VianUpdater(IConcurrentJob):
                 if os.path.exists(dst_file):
                     os.remove(dst_file)
                     move(src_file, dst_dir)
+
 
 class VianUpdaterJob(IConcurrentJob):
 

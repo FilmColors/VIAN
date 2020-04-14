@@ -31,10 +31,20 @@ palette_beach = Palette(palette_name="Ocean", palette_colors=[[3,63,99],[40,102,
 palette_earth = Palette(palette_name="Earth", palette_colors=[[252,170,103],[176,65,62],[255,255,199],[84,134,135],[71,51,53]])
 palette_gray = Palette(palette_name="Gray", palette_colors=[[0,0,0],[50,50,50],[100,100,100],[150,150,150],[200,200,200],[255,255,255]])
 
+print(os.curdir)
+print(os.path.abspath("data/config.json"))
+
+# determine if application is a script file or frozen exe
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+    os.chdir(application_path)
+print("Working Dir", os.curdir)
+
 try:
     with open("data/config.json", "r") as f:
         CONFIG = json.load(f)
-except:
+except Exception as e:
+    print(e)
     try:
         with open("../data/config.json", "r") as f:
             CONFIG = json.load(f)
@@ -89,10 +99,20 @@ class UserSettings():
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
+
         if sys.platform.startswith('linux'):
             self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
+        elif sys.platform.startswith("darwin"):
+            if os.path.isdir(os.path.join(self.DIR_USERHOME, "documents/")):
+                self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+            else:
+                self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
         else:
             self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+
+        log_info("User Home:", self.DIR_USERHOME)
+        log_info("VIAN Root:", self.DIR_ROOT)
+
         self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
         self.store_path = self.DIR_ROOT + path
         self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
@@ -102,6 +122,8 @@ class UserSettings():
         self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
         self.DIR_VOCABULARIES = self.DIR_ROOT + "/vocabularies/"
         self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
+
+        self.MULTI_EXPERIMENTS = False
 
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
@@ -184,10 +206,17 @@ class UserSettings():
         self.DIR_USERHOME = os.path.expanduser("~") + "/"
         self.DIR_APPDATA = "data/"
         self.DIR_SCREENSHOTS = "shots/"
+
         if sys.platform.startswith('linux'):
             self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
+        elif sys.platform.startswith("darwin"):
+            if os.path.isdir(os.path.join(self.DIR_USERHOME, "documents/")):
+                self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+            else:
+                self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
         else:
             self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+
         self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
         self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
         self.store_path = self.DIR_ROOT + "settings.json"

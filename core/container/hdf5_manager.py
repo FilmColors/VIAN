@@ -79,13 +79,20 @@ class HDF5Manager():
             if a().data_serialization == DataSerialization.FILE:
                 continue
             c = a()
-            self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape, c.dataset_dtype)
+            self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape,
+                                    c.dataset_dtype, c.get_hdf5_description())
 
-    def initialize_dataset(self, name, shape, dtype):
+    def initialize_dataset(self, name, shape, dtype, attrs):
         if name not in self.h5_file:
             log_info("Init:", name, shape, dtype)
             self.h5_file.create_dataset(name=name, shape=shape, dtype=dtype, maxshape=(None, ) + shape[1:], chunks=True)
             self._index[name] = 0
+            print("HDF5 Attributes:")
+            print(self.h5_file[name].attrs)
+
+        for k, v in attrs.items():
+            self.h5_file[name].attrs[k] = v
+
 
     def dump(self, d, dataset_name, unique_id):
         with HDF5_WRITE_LOCK:
@@ -105,6 +112,15 @@ class HDF5Manager():
             self._index[dataset_name] += 1
             self.h5_file.flush()
 
+    def location_of(self, uuid):
+        try:
+            (dataset, pos) = self._uid_index[uuid]
+            return dict(hdf5_dataset=dataset, hdf5_index = pos)
+        except Exception as e:
+            log_info(e)
+            return None
+
+
     def load(self, unique_id):
         if self.h5_file is None:
             raise IOError("HDF5 File not opened yet")
@@ -115,7 +131,7 @@ class HDF5Manager():
     def get_location(self, unique_id):
         if self.h5_file is None:
             raise IOError("HDF5 File not opened yet")
-        pos = self._uid_index[unique_id]
+        pos = self._uid_index[str(unique_id)]
         return pos
 
     def set_indices(self, d):

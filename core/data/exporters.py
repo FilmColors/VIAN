@@ -12,6 +12,8 @@ import os
 import csv
 import shutil
 
+from core.data.csv_helper import CSVFile
+
 
 DEFAULT_NAMING_SCREENSHOTS = [
     ScreenshotNamingConventionOptions.Scene_ID.name,
@@ -21,6 +23,8 @@ DEFAULT_NAMING_SCREENSHOTS = [
     ScreenshotNamingConventionOptions.Movie_Year.name,
     ScreenshotNamingConventionOptions.Movie_Source.name,
         ]
+
+
 
 def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
@@ -270,47 +274,61 @@ class CSVExporter(ExportDevice):
         self.export_keywords = export_keywords
 
     def export(self, project, path):
-        if self.export_segm:
-            segm_outfile = path + "_segm.csv"
+        f = CSVFile()
+        headers = ["ROW", "ID", "START_MS", "END_MS", "ANNOTATION_TYPE", "ANNOTATION_TEXT", "NOTES"]
 
-            headers = ["UID", "Time Start", "Time End", "Body"]
-            if self.export_keywords:
-                keyword_mapping = get_keyword_columns(project)
-                keyword_columns = keyword_mapping.keys()
-                headers.extend(keyword_columns)
+        if self.export_keywords:
+            keyword_mapping = get_keyword_columns(project)
+            keyword_columns = keyword_mapping.keys()
+            headers.extend(keyword_columns)
+
+        f.set_header(headers)
+
+        c = 0
+        if self.export_segm:
             segments = []
             [segments.extend(s.segments) for s in project.segmentation]
-            with open(segm_outfile, "w", newline="") as out_file:
-                writer = csv.writer(out_file, delimiter=";")
-                writer.writerow(headers)
-                for s in segments: #type:Segment
-                    row = [s.unique_id, s.start, s.end, s.annotation_body]
-                    if self.export_keywords:
-                        row.extend([False] * (len(headers) - 4))
-                        for k in s.tag_keywords:
-                            name = k.get_full_name()
-                            row[headers.index(name)] = True
-                    writer.writerow(row)
+
+            #TODO How to multi handle annotation body
+            for segm in segments:  #type:Segment
+                r = dict(
+                    ROW = c,
+                    ID = segm.unique_id,
+                    START_MS = segm.get_start(),
+                    END_MS = segm.get_end(),
+                    ANNOTATION_TYPE = "SEGMENT",
+                    ANNOTATION_TEXT = segm.get_annotation_body(),
+                    NOTES = segm.notes
+                )
+                if self.export_keywords:
+                    for k in keyword_columns:
+                        r[k] = 0
+                    for k in segm.tag_keywords:
+                        name = k.get_full_name()
+                        r[name] = 1
+                f.append(r)
+                c += 1
+
         if self.export_scr:
-            segm_outfile = path + "_scr.csv"
-
-            headers = ["UID", "Time Start"]
-            if self.export_keywords:
-                keyword_mapping = get_keyword_columns(project)
-                keyword_columns = keyword_mapping.keys()
-                headers.extend(keyword_columns)
-            with open(segm_outfile, "w", newline="") as out_file:
-                writer = csv.writer(out_file, delimiter=";")
-                writer.writerow(headers)
-
-                for s in project.screenshots: # type: Screenshot
-                    row = [s.unique_id, s.movie_timestamp]
-                    if self.export_keywords:
-                        row.extend([False] * (len(headers) - 4))
-                        for k in s.tag_keywords:
-                            name = k.get_full_name()
-                            row[headers.index(name)] = True
-                    writer.writerow(row)
+            for scr in project.screenshots:  #type:Screenshot
+                r = dict(
+                    ROW = c,
+                    ID = scr.unique_id,
+                    START_MS = scr.get_start(),
+                    END_MS = scr.get_end(),
+                    ANNOTATION_TYPE = "SCREENSHOT",
+                    ANNOTATION_TEXT = "",
+                    NOTES = scr.notes
+                )
+                if self.export_keywords:
+                    for k in keyword_columns:
+                        r[k] = 0
+                    for k in scr.tag_keywords:
+                        name = k.get_full_name()
+                        r[name] = 1
+                f.append(r)
+                c += 1
+        f.save(path)
 
 
 def build_file_name(naming, screenshot, movie_descriptor):
@@ -354,3 +372,6 @@ def build_file_name(naming, screenshot, movie_descriptor):
     file_name = file_name.replace("All Shots_", "_")
 
     return file_name
+
+def build_segment_nomenclature(s:Segment):
+    return str(s.project.movie_descriptor.movie_id) + "_"+ s.segmentation.name +"_" + str(s.ID)

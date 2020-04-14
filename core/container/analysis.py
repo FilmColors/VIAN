@@ -1,5 +1,6 @@
 """
 :author Gaudenz Halter
+
 """
 
 import cv2
@@ -10,12 +11,12 @@ from typing import List
 import traceback
 
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
-from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT
+from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT, deprecation_serialization
 from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
 
 
-class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamableContainer):
+class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
     """
     This is the BaseClass of all AnalysisContainers in the VIAN Project.
 
@@ -65,7 +66,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamabl
             unique_id=self.unique_id,
             notes=self.notes,
             data = self.data,
-            analysis_job_class = self.analysis_job_class
+            vian_serialization_type = self.analysis_job_class
         )
 
         return data
@@ -81,99 +82,19 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable): #, IStreamabl
         self.project.remove_analysis(self)
 
 
-class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
-    """
-
-    """
-    def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
-        super(NodeScriptAnalysis, self).__init__(name, results)
-        self.script_id = script_id
-        self.final_node_ids = final_nodes_ids
-        self.analysis_job_class = "NodeScript"
-
-    def get_type(self):
-        return ANALYSIS_NODE_SCRIPT
-
-    def serialize(self):
-        data_json = []
-
-        try:
-            #Loop over each final node of the Script
-            for i, n in enumerate(self.data):
-                node_id = self.final_node_ids[i]
-                node_result = []
-                result_dtypes = []
-
-                # Loop over each result in the final node
-                for d in n:
-                    if isinstance(d, np.ndarray):
-                        node_result.append(d.tolist())
-                        result_dtypes.append(str(d.dtype))
-                    elif isinstance(d, list):
-                        node_result.append(d)
-                        result_dtypes.append("list")
-                    else:
-                        node_result.append(np.array(d).tolist())
-                        result_dtypes.append(str(np.array(d).dtype))
-                data_json.append([node_id, node_result, result_dtypes])
-
-            # We want to store the analysis container if it is not already stored
-
-            # self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
-        except Exception as e:
-            log_error("Exception in NodeScriptAnalysis.serialize(): ", str(e))
-
-        data = dict(
-            name=self.name,
-            analysis_container_class = self.__class__.__name__,
-            unique_id=self.unique_id,
-            script_id=self.script_id,
-            # data_json=data_json,
-            notes=self.notes
-        )
-
-        return data
-
-    def deserialize(self, serialization, streamer):
-        self.name = serialization['name']
-        self.unique_id = serialization['unique_id']
-        self.notes = serialization['notes']
-        self.script_id = serialization['script_id']
-
-        self.final_node_ids = []
-        self.data = []
-        try:
-            # data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
-            data_json = None
-            #TODO Numpy Storing obsolete for Scripts
-            # Loop over each final node of the Script
-            for r in data_json:
-
-                node_id = r[0]
-                node_results = r[1]
-                result_dtypes = r[2]
-
-                node_data = []
-                self.final_node_ids.append(node_id)
-
-                # Loop over each Result of the Final Node
-                for j, res in enumerate(node_results):
-                    if result_dtypes[j] == "list":
-                        node_data.append(res)
-                    else:
-                        node_data.append(np.array(res, dtype=result_dtypes[j]))
-
-                    self.data.append(node_data)
-        except Exception as e:
-            log_error("Exception in analysis deserialiation", e)
-
-        return self
-
-
 class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
+    """
+    An analysis result which has been performed on some annotation:
+
+    :var target_container: A IProjectContainer which has been analysed
+    :var analysis_job_class: The classname of the analysis which has been performed
+    :var target_classification_object: The classification object which has been targeted, if the ClassificationObject has a semantic segmentation defined it has been used during analysis
+
+
+    """
     def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None):
         super(IAnalysisJobAnalysis, self).__init__(name, results)
-        self.target_container = container
+        self.target_container = container #type: IProjectContainer
         if analysis_job_class is not None:
             self.analysis_job_class = analysis_job_class.__name__
         else:
@@ -184,23 +105,16 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         else:
             self.parameters = []
         self.target_classification_object = target_classification_object
-        # Evaluated self.analysis-job_class
         self.a_class = None
 
     def get_preview(self):
         try:
-            #return self.project.main_window.eval_class(self.analysis_job_class)().get_preview(self)
             return get_analysis_by_name(self.analysis_job_class)().get_preview(self)
         except Exception as e:
             print("Preview:", e)
 
     def get_visualization(self, main_window):
         try:
-            # return self.project.main_window.eval_class(self.analysis_job_class)().get_visualization(self,
-            #                                                                                  self.project.results_dir,
-            #                                                                                  self.project.data_dir,
-            #                                                                                  self.project,
-            #                                                                                  self.project.main_window)
             return get_analysis_by_name(self.analysis_job_class)().get_visualization(self,
                  self.project.results_dir,
                  self.project.data_dir,
@@ -209,8 +123,6 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
             )
         except Exception as e:
             print("Exception in get_visualization()", e)
-            # QMessageBox.warning(self.project.main_window,"Error in Visualization", "The Visualization of " + self.name +
-            #                     " has thrown an Exception.\n\n Please send the Console Output to the Developer.")
 
     def get_type(self):
         return ANALYSIS_JOB_ANALYSIS
@@ -222,17 +134,30 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def set_target_classification_obj(self, class_obj):
         self.target_classification_object = class_obj
 
+    def get_analysis(self):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        return self.a_class()
+
     def serialize(self):
         if self.target_classification_object is not None:
             class_obj_id = self.target_classification_object.unique_id
         else:
             class_obj_id = -1
 
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+
+        hdf5_location = self.project.hdf5_manager.location_of(self.unique_id)
+
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
-            analysis_container_class=self.__class__.__name__,
-            analysis_job_class=self.analysis_job_class,
+
+            hdf5_location = hdf5_location,
+
+            vian_serialization_type=self.__class__.__name__,
+            vian_analysis_type=self.analysis_job_class,
             parameters=self.parameters,
 
             notes=self.notes,
@@ -245,21 +170,14 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
-        self.analysis_job_class = serialization['analysis_job_class']
+        self.analysis_job_class = deprecation_serialization(serialization, ['vian_analysis_type','analysis_job_class'])
         self.notes = serialization['notes']
 
-        # VERSION > 0.6.8
         try:
-            # clobj = project.get_by_id(serialization['classification_obj'])
-            # if clobj is not None:
             self.target_classification_object = project.get_by_id(serialization['classification_obj'])
         except Exception as e:
             log_error("Exception in IAnalysisContainerAnalysis.deserialize()", e)
             pass
-
-        # self.data = []
-        # t = streamer.project.main_window.eval_class(self.analysis_job_class)
-        # self.data = t().deserialize(streamer.sync_load(self.unique_id))
         self.parameters = serialization['parameters']
 
         self.set_target_container(project.get_by_id(serialization['container']))
@@ -345,7 +263,7 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
         d = super(SemanticSegmentationAnalysisContainer, self).serialize()
         d['dataset'] = self.dataset
         d['entry_shape'] = self.entry_shape
-        d['analysis_container_class'] = SemanticSegmentationAnalysisContainer.__name__
+        d['vian_serialization_type'] = SemanticSegmentationAnalysisContainer.__name__
         return d
 
     def deserialize(self, serialization, project):
@@ -369,6 +287,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.analysis_job_class = "Colormetry"
 
         print("Colormetry Analysis Constructor", resolution)
+
         self.resolution = resolution
         self.has_finished = False
 
@@ -442,7 +361,6 @@ class ColormetryAnalysis(AnalysisContainer):
         return [time_palette_data, self.time_ms]
 
     def check_finished(self):
-        # print("IDX", self.current_idx, self.end_idx, self.current_idx == self.end_idx)
         if int(self.current_idx) >= int(self.end_idx - 1):
             self.has_finished = True
         return self.has_finished
@@ -450,7 +368,7 @@ class ColormetryAnalysis(AnalysisContainer):
     def clear(self):
         log_info("Clearing Colorimetry, Resolution:", self.resolution)
         n_frames = int(np.floor(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) / self.resolution))
-        # print(ms_to_frames(self.project.movie_descriptor.duration, self.project.movie_descriptor.fps) , self.resolution)
+
         self.project.hdf5_manager.initialize_colorimetry(n_frames)
         self.end_idx = n_frames
         self.curr_location = 0
@@ -464,14 +382,13 @@ class ColormetryAnalysis(AnalysisContainer):
         serialization = dict(
             name=self.name,
             unique_id=self.unique_id,
-            analysis_container_class=self.__class__.__name__,
+            vian_serialization_type=self.__class__.__name__,
             resolution = self.resolution,
             curr_idx = self.current_idx,
             time_ms = self.time_ms,
             end_idx = self.end_idx,
             notes=self.notes,
             has_finished = self.has_finished
-
         )
         return serialization
 
@@ -493,6 +410,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.time_ms = project.hdf5_manager.get_colorimetry_times()[:self.current_idx + 1].tolist()
         self.check_finished()
         return self
+
 
 with open(os.path.join(_VIAN_ROOT, "data/default_pipeline.py"), "r") as f:
     _PIPELINE_TEMPLATE = f.read()
@@ -581,6 +499,90 @@ class PipelineScript(IProjectContainer, IHasName):
         return self.name == other.name and self.script == other.script
 
 
+# class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
+#     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
+#         super(NodeScriptAnalysis, self).__init__(name, results)
+#         self.script_id = script_id
+#         self.final_node_ids = final_nodes_ids
+#         self.analysis_job_class = "NodeScript"
+#
+#     def get_type(self):
+#         return ANALYSIS_NODE_SCRIPT
+#
+#     def serialize(self):
+#         data_json = []
+#
+#         try:
+#             #Loop over each final node of the Script
+#             for i, n in enumerate(self.data):
+#                 node_id = self.final_node_ids[i]
+#                 node_result = []
+#                 result_dtypes = []
+#
+#                 # Loop over each result in the final node
+#                 for d in n:
+#                     if isinstance(d, np.ndarray):
+#                         node_result.append(d.tolist())
+#                         result_dtypes.append(str(d.dtype))
+#                     elif isinstance(d, list):
+#                         node_result.append(d)
+#                         result_dtypes.append("list")
+#                     else:
+#                         node_result.append(np.array(d).tolist())
+#                         result_dtypes.append(str(np.array(d).dtype))
+#                 data_json.append([node_id, node_result, result_dtypes])
+#
+#             # We want to store the analysis container if it is not already stored
+#
+#             # self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
+#         except Exception as e:
+#             log_error("Exception in NodeScriptAnalysis.serialize(): ", str(e))
+#
+#         data = dict(
+#             name=self.name,
+#             analysis_container_class = self.__class__.__name__,
+#             unique_id=self.unique_id,
+#             script_id=self.script_id,
+#             # data_json=data_json,
+#             notes=self.notes
+#         )
+#
+#         return data
+#
+#     def deserialize(self, serialization, streamer):
+#         self.name = serialization['name']
+#         self.unique_id = serialization['unique_id']
+#         self.notes = serialization['notes']
+#         self.script_id = serialization['script_id']
+#
+#         self.final_node_ids = []
+#         self.data = []
+#         try:
+#             # data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
+#             data_json = None
+#             #TODO Numpy Storing obsolete for Scripts
+#             # Loop over each final node of the Script
+#             for r in data_json:
+#
+#                 node_id = r[0]
+#                 node_results = r[1]
+#                 result_dtypes = r[2]
+#
+#                 node_data = []
+#                 self.final_node_ids.append(node_id)
+#
+#                 # Loop over each Result of the Final Node
+#                 for j, res in enumerate(node_results):
+#                     if result_dtypes[j] == "list":
+#                         node_data.append(res)
+#                     else:
+#                         node_data.append(np.array(res, dtype=result_dtypes[j]))
+#
+#                     self.data.append(node_data)
+#         except Exception as e:
+#             log_error("Exception in analysis deserialiation", e)
+#
+#         return self
 
 
 

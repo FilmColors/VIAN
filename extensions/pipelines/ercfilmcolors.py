@@ -30,7 +30,7 @@ class ERCFilmColorsVIANPipeline(VIANPipeline):
                         ],
                         annotation_analyses=[]
                         )
-    finished_threshold = 0.95
+    finished_threshold = 0.8
 
     def __init__(self):
         super(ERCFilmColorsVIANPipeline, self).__init__()

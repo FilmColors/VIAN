@@ -1,5 +1,11 @@
 .. _IAnalysisJob:
 
+
+.. toctree::
+   :maxdepth: 4
+
+   analyses/color_features
+
 IAnalysisJob
 ============
 To implement your own Analysis, subclass the IAnalysisJob Interface and add your class into the

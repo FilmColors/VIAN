@@ -3,6 +3,7 @@ import numpy as np
 from core.data.enums import NODE_SCRIPT, NODE
 from .container_interfaces import IProjectContainer, IHasName, ISelectable
 
+
 class NodeScript(IProjectContainer, IHasName, ISelectable):
     def __init__(self, name = ""):
         IProjectContainer.__init__(self)

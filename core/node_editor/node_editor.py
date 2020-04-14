@@ -18,6 +18,7 @@ NODETYPE_OUTPUT_NODE = 1
 NODE = 8
 NODE_SCRIPT = 9
 
+
 class ExecutorSignals(QObject):
     on_finish_execution = pyqtSignal(bool)
 
@@ -59,7 +60,7 @@ class NodeEditorDock(EDockWidget):
     def __init__(self, main_window):
         super(NodeEditorDock, self).__init__(main_window, False)
         self.setWindowTitle("Node Editor")
-        self.node_editor = NodeEditor(self, main_window.node_editor_results)
+        self.node_editor = NodeEditor(self, None)
         self.setWidget(self.node_editor)
 
 
@@ -71,11 +72,11 @@ class NodeEditor(QWidget, IProjectChangeNotify):
         self.setAttribute(Qt.WA_MouseTracking, True)
         self.show_grid = True
 
-        self.project = parent.project()
+        # self.project = parent.project()
 
         self.result_visualizer = result_visualizer
 
-        self.current_script = self.project.current_script
+        # self.current_script = self.project.current_script
         self.nodes = []
         self.connections = []
         self.selected_nodes = []
@@ -97,7 +98,6 @@ class NodeEditor(QWidget, IProjectChangeNotify):
 
         self.is_compiled = False
         self.lbl_compile_status = QLabel("Not Compiled", self)
-
 
         self.show()
 

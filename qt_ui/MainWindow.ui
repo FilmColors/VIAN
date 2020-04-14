@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1083</width>
-    <height>919</height>
+    <height>1520</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,6 +69,7 @@
      <addaction name="actionExportExperiment"/>
      <addaction name="actionExportVocabulary"/>
      <addaction name="separator"/>
+     <addaction name="actionExportCSV"/>
      <addaction name="actionScreenshotsExport"/>
      <addaction name="action_ExportSegmentation"/>
      <addaction name="separator"/>
@@ -194,6 +195,7 @@
     <addaction name="actionRun_Complete_Pipeline"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_all_Analyses"/>
+    <addaction name="actionFind"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -208,6 +210,9 @@
     <addaction name="actionClearColormetry"/>
     <addaction name="separator"/>
     <addaction name="actionStart_AudioExtraction"/>
+    <addaction name="separator"/>
+    <addaction name="actionBrowserVisualizations"/>
+    <addaction name="actionProjectSummary"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
@@ -735,10 +740,16 @@
    <property name="text">
     <string>VIAN Experiment</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionImportVIANExperiment">
    <property name="text">
     <string>VIAN Experiment</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionCreateCorpus">
@@ -824,7 +835,7 @@
   </action>
   <action name="actionColorFeatures">
    <property name="text">
-    <string>Color Features</string>
+    <string>Color Average</string>
    </property>
   </action>
   <action name="actionCopy">
@@ -947,7 +958,35 @@
   </action>
   <action name="actionZProjection">
    <property name="text">
-    <string>Z-Projection</string>
+    <string>Color Z-Projection</string>
+   </property>
+  </action>
+  <action name="actionExportCSV">
+   <property name="text">
+    <string>CSV</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="text">
+    <string>Find</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionBrowserVisualizations">
+   <property name="text">
+    <string>Browser Visualizations</string>
+   </property>
+  </action>
+  <action name="actionHello">
+   <property name="text">
+    <string>Hello</string>
+   </property>
+  </action>
+  <action name="actionProjectSummary">
+   <property name="text">
+    <string>Project Summary</string>
    </property>
   </action>
  </widget>

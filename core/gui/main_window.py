@@ -20,7 +20,9 @@ from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
-from core.gui.Dialogs.SegmentationImporterDialog import SegmentationImporterDialog
+
+from flask_server.server import FlaskServer, FlaskWebWidget
+
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
@@ -37,6 +39,7 @@ from core.gui.concurrent_tasks import ConcurrentTaskDock
 from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, \
     ALWAYS_VLC
 from core.analysis.analysis_import import *
+from core.gui.search_window import SearchWindow
 from core.gui.experiment_editor import ExperimentEditorDock
 # from core.gui.face_identificator import FaceIdentificatorDock
 from core.gui.history import HistoryView
@@ -44,22 +47,23 @@ from core.gui.inspector import Inspector
 from core.gui.outliner import Outliner
 from core.gui.perspectives import PerspectiveManager, Perspective
 from core.gui.player_controls import PlayerControls
-from core.gui.player_vlc import Player_VLC, PlayerDockWidget  # , Player_Qt
-from core.gui.quick_annotation import QuickAnnotationDock
+from core.gui.player_vlc import Player_VLC, PlayerDockWidget
+
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
-from core.gui.timeline import TimelineContainer
+from core.gui.timeline.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
 from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
 from core.gui.corpus_widget import CorpusDockWidget
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-from core.visualizer.visualizer import VIANVisualizer2
+
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses
-from core.gui.toolbar_widgets import WidgetsToolbar
+from core.gui.toolbar import WidgetsToolbar
 from core.data.log import log_warning, log_debug, log_info, log_error
+
 try:
     import keras.backend as K
     from core.analysis.semantic_segmentation import *
@@ -71,10 +75,10 @@ except Exception as e:
     log_info(e)
     KERAS_AVAILABLE = False
 
-
 VERSION = "0.8.0"
 
 PROFILE = False
+
 
 class MainWindow(QtWidgets.QMainWindow):
     onTimeStep = pyqtSignal(int)
@@ -92,7 +96,11 @@ class MainWindow(QtWidgets.QMainWindow):
     onMovieOpened = pyqtSignal(object)
     onProjectClosed = pyqtSignal()
 
+    onMultiExperimentChanged = pyqtSignal(bool)
     onSave = pyqtSignal()
+
+    onStartFlaskServer = pyqtSignal()
+    onStopFlaskServer = pyqtSignal()
 
     def __init__(self, loading_screen:QSplashScreen):
         super(MainWindow, self).__init__()
@@ -144,7 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
 
-        self.updater = VianUpdater(self, self.version)
+        # self.updater = VianUpdater(self, self.version)
 
         # Central Widgets
         self.video_player = None
@@ -198,18 +206,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.script_editor = None
         self.corpus_widget = None
 
-        self.corpus_visualizer = VIANVisualizer2(self)
-        self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
-
-        self.corpus_visualizer_dock = EDockWidget(self, False)
-        self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
-        self.corpus_visualizer_dock.setWindowTitle("Corpus Visualizer Query")
-        self.corpus_visualizer_result_dock = EDockWidget(self, False)
-        self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
-        self.corpus_visualizer_result_dock.setWindowTitle("Corpus Visualizer Results")
+        # self.corpus_visualizer = VIANVisualizer2(self)
+        # self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
+        #
+        # self.corpus_visualizer_dock = EDockWidget(self, False)
+        # self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
+        # self.corpus_visualizer_dock.setWindowTitle("Corpus Visualizer Query")
+        # self.corpus_visualizer_result_dock = EDockWidget(self, False)
+        # self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
+        # self.corpus_visualizer_result_dock.setWindowTitle("Corpus Visualizer Results")
 
         self.progress_popup = None
-        self.quick_annotation_dock = None
+
         self.colorimetry_live = None
         self.query_widget = None
 
@@ -237,6 +245,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.audio_handler.moveToThread(self.audio_handler_thread)
         self.audio_handler_thread.start()
 
+        self.flask_server = FlaskServer(None)
+        self.flask_server_thread = QThread()
+        self.flask_server.moveToThread(self.flask_server_thread)
+        self.flask_server_thread.start()
+        self.onStartFlaskServer.connect(self.flask_server.run_server)
+        self.onStartFlaskServer.emit()
+
+        self.web_view = FlaskWebWidget(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
+        self.web_view.set_url("http://127.0.0.1:5000/screenshot_vis")
+        # self.web_view.set_url("https://threejs.org/examples/#webgl_camera")
+
+        self.web_view.hide()
+
         self.create_widget_elan_status()
         self.create_widget_video_player()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
@@ -260,13 +282,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_vocabulary_matrix()
         self.create_query_widget()
         self.create_analysis_results_widget()
-        self.create_quick_annotation_dock()
+
         self.create_colorimetry_live()
         self.create_experiment_editor()
         self.create_corpus_widget()
 
-
         self.pipeline_toolbar = PipelineToolbar(self)
+
+        self.search_window = SearchWindow(self)
+        self.search_window.hide()
 
         self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
@@ -329,6 +353,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExit.triggered.connect(self.on_exit)
         self.actionScreenshotsExport.triggered.connect(self.on_export_screenshots)
         self.actionExportMovie_Segment.triggered.connect(self.on_export_movie_segments)
+        self.actionExportCSV.triggered.connect(self.on_export_csv)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -340,6 +365,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionRun_Pipeline_for_Selection.triggered.connect(self.pipeline_widget.pipeline.run_selection)
         self.actionRun_Complete_Pipeline.triggered.connect(self.pipeline_widget.pipeline.run_all)
         self.actionDelete_all_Analyses.triggered.connect(self.on_remove_all_analyses)
+        self.actionFind.triggered.connect(self.on_search)
 
         # Tab Windows
         self.actionScreenshot_Manager.triggered.connect(self.create_screenshot_manager_dock_widget)
@@ -401,22 +427,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
+        self.actionBrowserVisualizations.triggered.connect(partial(self.on_browser_visualization))
+        self.actionProjectSummary.triggered.connect(partial(self.on_project_summary))
+
         # Keras is optional, if available create Actions
         if KERAS_AVAILABLE:
             self.actionSemanticSegmentation = self.menuAnalysis.addAction("Semantic Segmentation")
             self.actionSemanticSegmentation.triggered.connect(partial(self.analysis_triggered, SemanticSegmentationAnalysis()))
-            self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
-            self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
+
+            # self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
+            # self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
             # self.create_facial_identification_dock()
-            self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
+            # self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
             # self.facial_identification_dock.identificator.onModelTrained.connect(self.frame_update_worker.load_face_rec_model)
 
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
 
-        self.actionUpdate.triggered.connect(self.update_vian)
-        self.actionCheck_for_Beta.triggered.connect(partial(self.update_vian, True, True))
+        # self.actionUpdate.triggered.connect(self.update_vian)
+        # self.actionCheck_for_Beta.triggered.connect(partial(self.update_vian, True, True))
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
@@ -433,6 +463,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
         self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
+
+        self.onMultiExperimentChanged.connect(self.outliner.on_multi_experiment_changed)
+        self.onMultiExperimentChanged.connect(self.experiment_dock.experiment_editor.on_multi_experiment_changed)
+        self.onMultiExperimentChanged.connect(self.vocabulary_matrix.on_multi_experiment_changed)
+        self.onMultiExperimentChanged.emit(self.settings.MULTI_EXPERIMENTS)
 
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
@@ -457,7 +492,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.colorimetry_live,
                                     self.query_widget,
                                     self.worker_manager,
-                                          self.corpus_client_toolbar
+                                    self.corpus_client_toolbar,
+                                    self.flask_server
                                           ]
 
         self.menus_list = [
@@ -534,7 +570,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.setState(False)
 
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
-        self.update_vian(False)
+        # self.update_vian(False)
 
         self.project.undo_manager.clear()
         self.close_project()
@@ -546,6 +582,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowState(Qt.WindowMaximized)
         self.settings.apply_ui_settings()
 
+        # self.set_overlay_visibility(False)
         # This can be used for a oneshot forced command.
         force_file_path = os.path.abspath("install/force.txt")
         if os.path.isfile(force_file_path):
@@ -922,15 +959,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.analysis_results_widget_dock.raise_()
                 self.analysis_results_widget_dock.activateWindow()
 
-    def create_quick_annotation_dock(self):
-        if self.quick_annotation_dock is None:
-            self.quick_annotation_dock = QuickAnnotationDock(self)
-            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.quick_annotation_dock, Qt.Vertical)
+    def create_analysis_results_widget2(self):
+        if self.web_view is None:
+            self.web_view = FlaskWebWidget(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.web_view, Qt.Vertical)
         else:
-            if not self.quick_annotation_dock.visibleRegion().isEmpty():
-                self.quick_annotation_dock.hide()
+            if not self.web_view.visibleRegion().isEmpty():
+                self.web_view.hide()
             else:
-                self.quick_annotation_dock.show()
+                self.web_view.show()
+                self.web_view.raise_()
+                self.web_view.activateWindow()
+
 
     def create_colorimetry_live(self):
         if self.colorimetry_live is None:
@@ -997,6 +1037,7 @@ class MainWindow(QtWidgets.QMainWindow):
         exit = self.on_exit()
         if not exit:
             a0.ignore()
+            super(MainWindow, self).closeEvent(a0)
 
     def resizeEvent(self, *args, **kwargs):
         QtWidgets.QMainWindow.resizeEvent(self, *args, **kwargs)
@@ -1114,28 +1155,28 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 log_error(e)
 
-    def update_vian(self, show_newest = True, allow_beta = False):
-        try:
-            result, version_id = self.updater.get_server_version()
-        except:
-            return
-
-        if result:
-            answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
-            if answer == QMessageBox.Yes:
-                self.updater.update()
-            else:
-                self.print_message("Update Aborted", "Orange")
-        else:
-            if show_newest:
-                answer = QMessageBox.question(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version + "\n" +
-                                        "Do you want to update anyway?")
-                if answer == QMessageBox.Yes:
-                    self.updater.update(force = True)
-                else:
-                    self.print_message("Update Aborted", "Orange")
-            else:
-                self.print_message("VIAN is up to date with version: " + str(version.__version__), "Green")
+    # def update_vian(self, show_newest = True, allow_beta = False):
+    #     try:
+    #         result, version_id = self.updater.get_server_version()
+    #     except:
+    #         return
+    #
+    #     if result:
+    #         answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
+    #         if answer == QMessageBox.Yes:
+    #             self.updater.update()
+    #         else:
+    #             self.print_message("Update Aborted", "Orange")
+    #     else:
+    #         if show_newest:
+    #             answer = QMessageBox.question(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version + "\n" +
+    #                                     "Do you want to update anyway?")
+    #             if answer == QMessageBox.Yes:
+    #                 self.updater.update(force = True)
+    #             else:
+    #                 self.print_message("Update Aborted", "Orange")
+    #         else:
+    #             self.print_message("VIAN is up to date with version: " + str(version.__version__), "Green")
 
     def open_preferences(self):
         dialog = DialogPreferences(self)
@@ -1167,7 +1208,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_closed()
         self.settings.store(self.dock_widgets)
 
+        log_info("Closing Frame Update")
         self.frame_update_thread.quit()
+        log_info("Closing flask_server_thread")
+        self.flask_server_thread.quit()
+        log_info("Closing audio_handler_thread")
+        self.audio_handler_thread.quit()
+        log_info("Closing vian_event_handler_thread")
+        self.vian_event_handler_thread.quit()
+
+        log_info("Closing player")
+        self.player.on_closed()
+
+        log_info("Closing abortAllConcurrentThreads")
         self.abortAllConcurrentThreads.emit()
 
         if PROFILE:
@@ -1284,6 +1337,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.allow_dispatch_on_change = True
         self.dispatch_on_changed()
+        if isinstance(job, LoadScreenshotsJob):
+            self.web_view.reload()
         # print(self.thread_pool.)
         # progress.deleteLater()
 
@@ -1332,6 +1387,11 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.print_message("Backup Failed", "Red")
             self.print_message(str(e), "Red")
+
+    def on_search(self):
+        self.search_window.show()
+        self.search_window.resize(QSize(int(self.width() * 0.8), int(self.height() * 0.8)))
+        self.search_window.move(QPoint(int(self.width() * 0.1), int(self.height() * 0.1)))
 
     def print_message(self, msg, color = "green"):
         self.output_line.print_message(msg, color)
@@ -1385,6 +1445,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.experiment_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.query_widget)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.web_view)
+            
 
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
@@ -1465,12 +1527,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.experiment_dock, self.vocabulary_manager)
             # self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
 
-        elif perspective == Perspective.QuickAnnotation:
-            self.player_dock_widget.show()
-            self.quick_annotation_dock.show()
-
-            self.addDockWidget(Qt.LeftDockWidgetArea,self.player_dock_widget)
-            self.addDockWidget(Qt.BottomDockWidgetArea, self.quick_annotation_dock)
 
         elif perspective == Perspective.Query:
             self.timeline.show()
@@ -1490,11 +1546,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshot_toolbar.show()
             self.screenshots_manager_dock.raise_()
 
-        elif perspective == Perspective.CorpusVisualizer:
-            self.corpus_visualizer_result_dock.show()
-            self.corpus_visualizer_dock.show()
-            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
+        # elif perspective == Perspective.CorpusVisualizer:
+        #     self.corpus_visualizer_result_dock.show()
+        #     self.corpus_visualizer_dock.show()
+        #     self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
+        #     self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
 
         elif perspective == Perspective.WebApp:
             self.timeline.show()
@@ -1540,14 +1596,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.screenshots_manager_dock.hide()
         self.player_dock_widget.hide()
         self.annotation_options.hide()
-        self.corpus_visualizer_dock.hide()
-        self.corpus_visualizer_result_dock.hide()
+        # self.corpus_visualizer_dock.hide()
+        # self.corpus_visualizer_result_dock.hide()
 
         if self.facial_identification_dock is not None:
             self.facial_identification_dock.hide()
 
         self.experiment_dock.hide()
-        self.quick_annotation_dock.hide()
+
         self.colorimetry_live.hide()
 
     def set_default_dock_sizes(self, perspective):
@@ -1630,11 +1686,6 @@ class MainWindow(QtWidgets.QMainWindow):
         #     worker = Worker(analysis.process, self, self.analysis_result, args, msg_finished=analysis.name+ " Finished", target_id=None, i_analysis_job=analysis)
         #     self.start_worker(worker, analysis.get_name())
 
-    # @pyqtSlot(object, object, object, object)
-    # def on_analysis_prepare(self, analysis, targets, parameters, class_objs):
-    #     fps = self.player.get_fps()
-    #     args = analysis.prepare(self.project, targets, parameters, fps, class_objs)
-
     def analysis_result(self, result):
         pass
         # analysis = result[1]
@@ -1709,18 +1760,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_about(self):
         about = ""
-        about += "Author:".ljust(12) + version.__author__ + "\n"
-        about += "Copyright:".ljust(12) + version.__copyright__ + "\n"
-        about += "Version:".ljust(12) + version.__version__ + "\n"
+        about += "Author:".ljust(12) + str(version.__author__) + "\n"
+        about += "Copyright:".ljust(12) + str(version.__copyright__) + "\n"
+        about += "Version:".ljust(12) + str(version.__version__) + "\n"
         about += "Credits:".ljust(12) + str(version.__credits__) + "\n"
         QMessageBox.about(self, "About", about)
 
     def increase_playrate(self):
-        self.player.set_rate(self.player.get_rate() + 0.1)
+        self.player.set_rate(np.clip(self.player.get_rate() + 0.1, 0.1, 10))
         self.player_controls.update_rate()
 
     def decrease_playrate(self):
-        self.player.set_rate(self.player.get_rate() - 0.1)
+        self.player.set_rate(np.clip(self.player.get_rate() - 0.1, 0.1, 10))
         self.player_controls.update_rate()
 
     def on_create_experiment(self):
@@ -1739,26 +1790,21 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.project is not None:
             self.player.on_loaded(self.project)
 
-    def on_start_visualizer(self):
-        self.switch_perspective(Perspective.CorpusVisualizer)
-        # try:
-        #     visualizer = VIANVisualizer2(self)
-        #     visualizer.show()
-        #     self.open_dialogs.append(visualizer)
-        # except Exception as e:
-        #     print(e)
-
-    def on_start_visualizer_legacy(self):
-        pass
-
     def on_export_screenshots(self):
         dialog = DialogScreenshotExporter(self, self.screenshots_manager)
         dialog.show()
 
     def on_facial_reconition(self):
+        return
+
         if self.facial_identification_dock is None:
             self.facial_identification_dock.raise_()
 
+    def on_browser_visualization(self):
+        webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")
+
+    def on_project_summary(self):
+        webbrowser.open("http://127.0.0.1:5000/summary/")
     # endregion
 
     #region Project Management
@@ -1773,6 +1819,7 @@ class MainWindow(QtWidgets.QMainWindow):
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
             if answer == QMessageBox.Yes:
                 self.on_save_project()
+
 
         dialog = NewProjectDialog(self, self.settings, movie_path,
                                   add_to_current_corpus=add_to_current_corpus)
@@ -1829,6 +1876,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
         self.onProjectOpened.emit(self.project)
 
+        #  Creating a Default Experiment and Classification Object in case the multi-experiment mode is turned off
+        if len(self.project.experiments) == 0:
+            exp = self.project.create_experiment("Default")
+        if len(self.project.experiments[0].classification_objects) == 0:
+            self.project.experiments[0].create_class_object("Global")
+
         dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
         dialog.set_movie(self.project.movie_descriptor)
         dialog.show()
@@ -1854,13 +1907,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.worker_manager.on_closed()
 
         if self.project is not None:
+
             if self.project.undo_manager.has_modifications():
                 answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
                 if answer == QMessageBox.Yes:
                     self.on_save_project(sync=True)
 
+            self.flask_server.on_closed()
             self.player.stop()
             self.abortAllConcurrentThreads.emit()
+
             if self.colormetry_running:
                 self.toggle_colormetry()
             self.project.cleanup()
@@ -1891,6 +1947,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.onProjectLoaded.connect(self.dispatch_on_loaded)
         self.project.onProjectChanged.connect(self.dispatch_on_changed)
         self.project.onSelectionChanged.connect(self.dispatch_on_selected)
+
+        # Creating a Default Experiment and Classification Object in case the multi-experiment mode is turned off
+        if len(self.project.experiments) == 0:
+            exp = self.project.create_experiment("Default")
+        if len(self.project.experiments[0].classification_objects) == 0:
+            self.project.experiments[0].create_class_object("Global")
 
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False
@@ -1923,6 +1985,7 @@ class MainWindow(QtWidgets.QMainWindow):
             path = self.project.path
             args = [self.project, path]
         else:
+            path = self.project.path
             args = [self.project, self.project.path]
 
         if sync:
@@ -1931,7 +1994,7 @@ class MainWindow(QtWidgets.QMainWindow):
             worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
             self.start_worker(worker, "Saving Project")
 
-        log_info("Saving to:", self.project.folder)
+        log_info("Saving to:", path)
         self.settings.add_to_recent_files(self.project)
         self.project.undo_manager.no_changes = True
 
@@ -1997,7 +2060,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_overlay()
         self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
 
-
     def create_analysis_list(self):
         self.analysis_list = []
         for name, obj in inspect.getmembers(sys.modules[__name__]):
@@ -2008,7 +2070,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def signal_timestep_update(self):
         if self.time_counter < self.clock_synchronize_step:
-            self.time += self.time_update_interval
+            self.time += self.time_update_interval * self.player.get_rate()
             self.time_counter += 1
         else:
             self.time = self.player.get_media_time()
@@ -2065,8 +2127,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def import_segmentation(self, path=None):
-        dialog = SegmentationImporterDialog(self, self.project, self)
-        dialog.show()
+        pass
 
     def import_webapp(self):
         if self.project is None:
@@ -2131,12 +2192,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message("Zipping Project Failed", "Red")
             self.print_message(str(e), "Red")
 
+    def on_export_csv(self):
+        file = QFileDialog.getSaveFileName()[0]
+        self.project.export(CSVExporter(), file)
+
     def on_export_movie_segments(self):
         if self.project is not None:
             to_export = []
             for s in self.project.selected:
                 if isinstance(s, Segment):
-                    to_export.append((s.get_start(), s.get_end()))
+                    name = build_segment_nomenclature(s)
+                    to_export.append((s.get_start(), s.get_end(), name))
 
             if len(to_export) > 0:
                 directory = QFileDialog.getExistingDirectory(caption="Select Directory to export Segments into", directory=self.project.export_dir)
@@ -2209,17 +2275,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def get_version_as_string(self):
 
         result = "VIAN - Visual Movie Annotation\n"
-        result += "Version: ".ljust(15) + version.__version__ + "\n"
+        result += "Version: ".ljust(15) + str(version.__version__) + "\n"
         result += "\n\n"
-        result += "Author: ".ljust(15) + version.__author__ + "\n"
-        result += "Copyright: ".ljust(15) + version.__copyright__ + "\n"
+        result += "Author: ".ljust(15) + str(version.__author__) + "\n"
+        result += "Copyright: ".ljust(15) + str(version.__copyright__) + "\n"
         result += "Credits: ".ljust(15) + str(version.__credits__[0]) + "\n"
         for i in range(1, len(version.__credits__)):
             result += "".ljust(15) + str(version.__credits__[i]) + "\n"
-        result += "License: ".ljust(15) + version.__license__ + "\n"
-        result += "Maintainer: ".ljust(15) + version.__maintainer__ + "\n"
-        result += "Email: ".ljust(15) + version.__email__ + "\n"
-        result += "Status: ".ljust(15) + version.__status__ + "\n"
+        result += "License: ".ljust(15) + str(version.__license__) + "\n"
+        result += "Maintainer: ".ljust(15) + str(version.__maintainer__) + "\n"
+        result += "Email: ".ljust(15) + str(version.__email__) + "\n"
+        result += "Status: ".ljust(15) + str(version.__status__) + "\n"
 
         return result
 
@@ -2242,6 +2308,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         w = InfoPopup(self, text, loc)
         w.show()
+
+    @pyqtSlot(bool)
+    def on_multi_experiment_changed(self, state):
+        """ If multi experiment is activated, a selector is shown, else the primary experiment is shown per default """
+        self.actionCreateExperiment.setVisible(state)
+        self.onMultiExperimentChanged.emit(state)
+        # self.recreate_tree()
 
     #region IProjectChangedNotify
 
@@ -2298,6 +2371,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
 
+        self.search_window.on_loaded(self.project)
         ready, colorimetry = self.project.get_colormetry()
         run_colormetry = False
         if not ready:
@@ -2323,9 +2397,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.timeline.timeline.set_colormetry_progress(0.0)
         else:
             self.on_colormetry_finished(None)
-
-        if self.current_perspective == Perspective.CorpusVisualizer.name:
-            self.switch_perspective(Perspective.Segmentation)
 
         log_info("\n#### --- Loaded Project --- ####")
         log_info("Folder:".rjust(15), self.project.folder)
@@ -2402,6 +2473,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.stop()
         for o in self.i_project_notify_reciever:
             o.on_closed()
+
+        self.search_window.on_close()
         self.pipeline_widget.pipeline.on_closed()
         self.set_ui_enabled(False)
 

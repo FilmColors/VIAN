@@ -2,6 +2,7 @@
 The Computation Module contains a list of often used operations in VIAN.
 These operations can be of arbitrary type and are not categorized. 
 """
+from datetime import datetime
 
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
@@ -26,6 +27,11 @@ import math
 
 def tuple2point(tpl):
     return QtCore.QPoint(tpl[0], tpl[1])
+
+
+def ms2datetime(time_ms):
+    return time_ms
+    return datetime.utcfromtimestamp(int(time_ms / 1000))
 
 
 def cart2pol(x, y):
@@ -382,8 +388,6 @@ def compare_images(imageA, imageB):
 
 
 def find_time_of_screenshot(movie, shot, start, end):
-
-
     # import the necessary packages
     # construct the argument parse and parse the arguments
 
@@ -526,12 +530,6 @@ def labels_to_binary_mask(multi_mask, labels, as_bool = False):
         return result.astype(np.bool)
     return result
 
-# def labels_to_binary_mask2(multi_mask, labels):
-#     result = np.zeros_like(multi_mask, dtype=np.bool)
-#     idx = np.intersect1d(multi_mask, labels, return_indices=True)[1]
-#     idx = np.unravel_index(idx, multi_mask.shape)
-#     result[idx] = True
-#     return result
 
 def apply_mask(img, mask, indices, mask_size = 100):
     if len(mask.shape) > 2:
@@ -627,10 +625,16 @@ def generate_id(not_list = None):
 
 
 def get_colormap(n=12, map="gist_ncar"):
-    from matplotlib import cm
+    try:
+        from matplotlib import cm
 
-    viridis = cm.get_cmap(map, n)
-    res = []
-    for i in range(n):
-        res.append(viridis(i / n))
-    return res
+        viridis = cm.get_cmap(map, n)
+        res = []
+        for i in range(n):
+            res.append(viridis(i / n))
+        return res
+    except:
+        res = []
+        for i in range(n):
+            res.append(np.random.random(3))
+        return res

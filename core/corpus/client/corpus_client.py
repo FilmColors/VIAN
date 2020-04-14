@@ -305,9 +305,9 @@ class WebAppCorpusInterface(QObject):
                 segment = project.get_main_segmentation().get_segment_of_time(scr.movie_timestamp)
                 if segment is None:continue
 
-                shots_index[scr.unique_id] = dict(
+                shots_index[str(scr.unique_id)] = dict(
                     scene_id=scr.scene_id,
-                    segment_id = segment.unique_id,
+                    segment_id = str(segment.unique_id),
                     shot_id_segm=scr.shot_id_segm,
                     group=grp_name,
                     hdf5_idx=i,
@@ -335,16 +335,16 @@ class WebAppCorpusInterface(QObject):
                                 # table = SQ_TABLE_MASKS
                                 data = a.get_adata()
                                 dataset = a.dataset
-                                mask_idx = project.hdf5_manager._uid_index[a.unique_id]
-
+                                mask_idx = project.hdf5_manager._uid_index[str(a.unique_id)]
+                                print("Mask Index", mask_idx)
                                 if dataset in masks_to_export_names:
                                     mask_path = mask_dir + dataset + "_" + str(scr.scene_id) + "_" + str(
                                         scr.shot_id_segm) + ".png"
 
-                                    if scr.unique_id not in mask_index:
+                                    if str(scr.unique_id) not in mask_index:
                                         mask_index[str(scr.unique_id)] = []
 
-                                    mask_index[scr.unique_id].append((dict(
+                                    mask_index[str(scr.unique_id)].append((dict(
                                         scene_id=scr.scene_id,
                                         dataset=dataset,
                                         shot_id_segm=scr.shot_id_segm,
@@ -357,7 +357,7 @@ class WebAppCorpusInterface(QObject):
             for i, a in enumerate(project.analysis):
                 if isinstance(a, FileAnalysis):
                     file_path = a.save(os.path.join(export_project_dir, str(a.unique_id)))
-                    file_analyses_index[a.unique_id] = dict(
+                    file_analyses_index[str(a.unique_id)] = dict(
                         target = a.target_container,
                         analysis = a.analysis_job_class,
                         file_path =file_path

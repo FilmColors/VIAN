@@ -242,6 +242,10 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
         to_check = []
         for k, v in to_compare.items():
             if k in vocabularies_collection:
+                if vocabularies_collection[k].is_builtin:
+                    QMessageBox.warning(self, "Builtin Vocabularies can not be updated",
+                             "There already exists a built-in Vocabulary "+ vocabularies_collection[k].name +" in the Library, which may not be edited. ")
+                    continue
                 changes = compare_vocabularies(v, vocabularies_collection[k])
                 if len(changes) > 0:
                     to_check.append(dict(voc=v, changes=changes))
@@ -251,11 +255,11 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
             dialog = VocabularyCompareDialog(self, to_check, to_apply, vocabularies_collection, self.finish_synchronize_from_project_to_library)
             dialog.show()
         else:
-            self.finish_synchronize_from_library_to_project(to_apply, [], vocabularies_collection)
+            self.finish_synchronize_from_project_to_library(to_apply, [], vocabularies_collection)
 
     def finish_synchronize_from_project_to_library(self, to_add, to_update, vocabularies_project):
         for v in to_add:
-            copy = self.main_window.project.vocabulary_collection.copy_vocabulary(v, add_to_global=False)
+            copy = self.main_window.project.copy_vocabulary(v, add_to_global=False)
             self.vocabulary_view.vocabulary_collection.add_vocabulary(copy)
         for v in to_update:
             vocabularies_project[v.uuid].update_vocabulary(v)
@@ -516,6 +520,14 @@ class VocabularyView(QWidget, IProjectChangeNotify):
     def on_selected(self, sender, selected):
         pass
 
+    def on_vocabulary_removed(self, v):
+        if v.project == self.vocabulary_collection:
+            try:
+                p = self.vocabulary_index[v.uuid]['path']
+                os.remove(p)
+            except Exception as e:
+                print(e)
+
 
 class VocabularyTreeView(QTreeView):
     def __init__(self, parent, vocabulary_manager: VocabularyView, collection:VIANProject, allow_create=True):
@@ -551,6 +563,7 @@ class VocabularyTreeView(QTreeView):
                 self.open_context_menu(QMouseEvent)
 
     def selectionChanged(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection) -> None:
+        super(VocabularyTreeView, self).selectionChanged(selected, deselected)
         try:
             self.selected_vocabularies = []
             for t in self.selectedIndexes():
@@ -619,13 +632,6 @@ class VocabularyTreeView(QTreeView):
         self.apply_name_changed()
         super(VocabularyTreeView, self).editorDestroyed(*args, **kwargs)
 
-    #
-    # def keyReleaseEvent(self, QKeyEvent):
-    #     if QKeyEvent.key() == Qt.Key_Shift:
-    #         self.setSelectionMode(self.SingleSelection)
-    #     else:
-    #         QKeyEvent.ignore()
-
 
 class VocabularyContextMenu(QMenu):
     def __init__(self, parent, pos, items, voc_collection, item_model, manager, view, selected_indices, allow_create=True):
@@ -641,14 +647,13 @@ class VocabularyContextMenu(QMenu):
         if len(items) > 0:
             self.a_remove = self.addAction("Remove Selected")
             self.a_remove.triggered.connect(self.on_remove)
-        if len(items) == 1 and isinstance(items[0], Vocabulary):
+        if len(items) == 1 and isinstance(items[0], Vocabulary) and allow_create:
             self.a_copy = self.addAction("Copy Vocabulary")
             self.a_copy.triggered.connect(self.on_copy)
 
         if allow_create:
             self.a_new_voc = self.addAction("New Vocabulary")
             self.a_new_voc.triggered.connect(self.on_new_voc)
-
         self.popup(pos)
 
     def on_create_word(self):
@@ -684,6 +689,10 @@ class VocabularyContextMenu(QMenu):
             to_remove.append(item)
 
         for item in to_remove:
+            # If the item is a vocabulary, let the manager check if there is a file to be removed
+            if isinstance(item, Vocabulary):
+                self.manager.on_vocabulary_removed(item)
+
             item.save_delete()
 
 

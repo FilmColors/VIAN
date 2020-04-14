@@ -1,16 +1,20 @@
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
 from core.container.container_interfaces import IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, \
-    AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject
+    AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
 from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
+from .annotation_body import AnnotationBody, Annotatable
 
 class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     """
     :var name: The Name of the Segmentation
     :var segments: A List of Segments
-    :var timeline_visibility: if it is visible in the timeline or not
     :var notes: Additional Notes that can be added to describe it in the Inspector
+
+    Application Variables
+
+    :var timeline_visibility: if it is visible in the timeline or not
     :var is_main_segmentation: If this is the main Segmentation
 
     """
@@ -22,24 +26,28 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         IProjectContainer.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         self.name = name
+
         if segments is None:
             segments = []
+
         self.segments = segments
-        self.timeline_visibility = True
+
         self.notes = ""
         self.is_main_segmentation = False
+
+        # Timeline
+        self.timeline_visibility = True
         self.strip_height = -1
 
         for s in self.segments:
             s.segmentation = self
 
-    def get_segmentation_Id_list(self):
-        if self.segments is not None and len(self.segments) > 0:
-            return (str(s.ID) for s in self.segments)
-        else:
-            return None
-
     def get_segment_of_time(self, time_ms):
+        """
+        Returns a Segment containing the given time ms, if none exists returns None
+        :param time_ms:
+        :return:
+        """
         for s in self.segments:
             if s.get_start() <= time_ms < s.get_end():
                 return s
@@ -147,6 +155,13 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.onSegmentDeleted.emit(segment)
 
     def cut_segment(self, segm, time):
+        """
+        Cuts one segment at given time into two different segments
+
+        :param segm: The Segment to cut
+        :param time: the time to cut the segment (absolute)
+        :return: None
+        """
         if segm in self.segments:
             old_end = segm.get_end()
             segm.end = time
@@ -156,6 +171,12 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             self.dispatch_on_changed(item=self)
 
     def merge_segments(self, a, b):
+        """
+        Merges two segments into one
+        :param a: The first segment
+        :param b: the second segment
+        :return:
+        """
         if abs(a.ID - b.ID) <= 1:
             if a.ID < b.ID:
                 start = a.get_start()
@@ -188,12 +209,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.segments = sorted(self.segments, key=lambda x: x.start)
         for i, s in enumerate(self.segments):
             s.ID = i + 1
-
-    def get_segment(self, time):
-        for s in self.segments:
-            if s.start < time < s.end:
-                return s
-        return None
 
     def remove_unreal_segments(self, length = 1):
         for s in self.segments:
@@ -254,6 +269,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         else:
             self.locked = False
 
+        self.update_segment_ids()
         return self
 
     def get_type(self):
@@ -298,7 +314,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             if property_name == "Segment ID":
                 return str(segm.ID)
             elif property_name == "Segment Text":
-                return str(segm.annotation_body)
+                return str(segm.get_annotations(AnnotationBody.MIMETYPE_TEXT_PLAIN))
             elif property_name == "Segment Name":
                 return str(segm.get_name())
             else:
@@ -311,26 +327,29 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         :param containers: 
         :return: 
         """
+        # TODO New AnnotationBody
         if target is None or target == self.project or target == self or not isinstance(target, Segmentation):
             new_seg = self.project.create_segmentation(self.name)
             for s in self.segments:
-                new_seg.create_segment2(s.get_start(), s.get_end(), body=s.annotation_body)
+                new_seg.create_segment2(s.get_start(), s.get_end(), body=s.get_annotations())
         else:
             for s in self.segments:
-                target.create_segment2(s.get_start(), s.get_end(), body=s.annotation_body)
+                target.create_segment2(s.get_start(), s.get_end(), body=s.get_annotations())
 
-class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject):
+
+class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject, Annotatable):
     """
-    :var MIN_SIZE: The Shortest size in MS
-    :var ID: The Segments ID in the Segmentation {0, ..., n}
+    :var name: the Name of the Segment
     :var start: Time start in MS
     :var end: Time end in MS
-    :var name: the Name of the Segment
+    :var segmentation: it's parent Segmentation, which it is grouped in
+    :var ID: The Segments Index within the Segmentation {0, ..., n}
+    :var annotation_body: The Annotation body as string
+
+    Application Variables:
 
     :var duration: The Duration of the Segment in MS
-    :var annotation_body: The Annotation Content Text
     :var timeline_visibility: If it is visible in the Timeline
-    :var segmentation: it's parent Timeline
     :var notes: Additional Notes that can be set in the Inspector
 
     """
@@ -342,6 +361,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         ILockable.__init__(self)
         IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
+        Annotatable.__init__(self)
 
         self.MIN_SIZE = 10
         self.ID = ID
@@ -350,7 +370,9 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.name = name
 
         self.duration = duration
-        self.annotation_body = annotation_body
+
+        self.annotation_body = self.deprecate_string_to_annotation(annotation_body)
+
         self.timeline_visibility = True
         self.segmentation = segmentation
         self.notes = ""
@@ -418,13 +440,17 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def set_annotation_body(self, annotation):
-        self.project.undo_manager.to_undo((self.set_annotation_body, [annotation]), (self.set_annotation_body, [self.annotation_body]))
-        self.annotation_body = annotation
+        self.project.undo_manager.to_undo((self.set_annotation_body, [annotation]), (self.set_annotation_body, [self.get_annotations()]))
+        self.annotation_body = self.deprecate_string_to_annotation(annotation)
         self.onSegmentChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
     def get_annotation_body(self):
-        return self.annotation_body
+        t = self.get_annotations(AnnotationBody.MIMETYPE_TEXT_PLAIN)
+        if len(t) > 0:
+            return t[0].content
+        else:
+            return ""
 
     def serialize(self):
 
@@ -435,11 +461,12 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         r = dict(
              scene_id = self.ID,
              unique_id = self.unique_id,
-             start = self.start,
-             end = self.end,
-             duration = self.duration,
+             start_ms = self.start,
+             end_ms = self.end,
+
              name = self.name,
-             annotation_body = self.annotation_body,
+             # annotation_body = [AnnotationBody(content=self.annotation_body).serialize()],
+             annotation_body = self.serialize_annotations(),
              notes = self.notes,
              locked = self.locked,
              media_objects = media_objects
@@ -450,10 +477,11 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.project = project
         self.ID = serialization["scene_id"]
         self.unique_id = serialization['unique_id']
-        self.start = serialization["start"]
-        self.end = serialization["end"]
-        self.duration = serialization["duration"]
 
+        self.start = deprecation_serialization(serialization, ["start_ms", "start"])
+        self.end = deprecation_serialization(serialization, ["end_ms", "end"])
+
+        self.duration = self.end - self.start
         self.notes = serialization['notes']
 
         # Backwards Compatibility
@@ -468,9 +496,27 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
             self.locked = False
 
         if 'annotation_body' in serialization:
-            self.annotation_body = serialization['annotation_body']
+            try:
+
+                if isinstance(serialization['annotation_body'], str):
+                    if serialization['annotation_body'] != "":
+                        self.annotation_body = serialization['annotation_body']
+                        self.add_annotation(AnnotationBody(serialization['annotation_body'], AnnotationBody.MIMETYPE_TEXT_PLAIN))
+                    else:
+                        self.annotation_body = ""
+
+                elif isinstance(serialization['annotation_body'], dict):
+                    ann = self.deserialize_annotations([serialization['annotation_body']])
+                    self.annotation_body = self.get_first_annotation_string()
+                else:
+                    ann = self.deserialize_annotations(serialization['annotation_body'])
+                    self.annotation_body = self.get_first_annotation_string()
+            except Exception as e:
+                log_error("Couldn't parse annotation body", e)
+                self.annotation_body = ""
         else:
             self.annotation_body = ""
+
 
         try:
             for w in serialization["media_objects"]:

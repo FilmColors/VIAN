@@ -53,7 +53,7 @@ html_theme_options = {
     'typekit_id': '',
     'canonical_url': '',
     'analytics_id': '',
-    'logo_only': False,
+    'logo_only': True,
     'display_version': True,
     # Toc options
     'collapse_navigation': False,
@@ -113,6 +113,7 @@ todo_include_todos = True
 # html_theme = 'guzzle_sphinx_theme'
 
 html_theme = "sphinx_rtd_theme"
+html_logo = "custom/logo.png"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # html_theme = "pyramid"

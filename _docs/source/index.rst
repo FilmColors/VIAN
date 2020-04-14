@@ -11,7 +11,6 @@ Welcome to VIAN's documentation!
    :maxdepth: 4
 
    Prerequisites
-   Shortcuts
    UserGuide
    DevelopersGuide
    whatsnew

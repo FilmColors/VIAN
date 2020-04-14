@@ -17,7 +17,7 @@ from core.data.computation import floatify_img, frame2ms
 
 import cv2
 from core.analysis.colorimetry.computation import calculate_histogram
-from sklearn.cluster.hierarchical import AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering
 
 MAX_CLUSTER = 500
 MAX_DEPTH = 500

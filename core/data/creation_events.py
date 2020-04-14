@@ -150,17 +150,20 @@ def vian_pipeline(cl):
     ALL_REGISTERED_PIPELINES[cl.name] = (cl, path)
     return cl
 
+
 def get_path_of_pipeline_script(name):
     if name in ALL_REGISTERED_PIPELINES:
         return ALL_REGISTERED_PIPELINES[name][1]
     else:
         return None
 
+
 def get_name_of_script_by_path(spath):
     for name, (module, path) in ALL_REGISTERED_PIPELINES.items():
         if path == spath:
             return name
     return None
+
 
 class VIANPipeline(QObject):
     name = "NoName"

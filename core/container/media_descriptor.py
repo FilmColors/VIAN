@@ -39,7 +39,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.duration = duration
         self.notes = ""
         self.fps = fps
-        self.is_relative = False
+        # self.is_relative = False
         self.meta_data = dict()
         self.letterbox_rect = None
 
@@ -59,7 +59,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
             source=self.source,
             duration=self.duration,
             notes=self.notes,
-            is_relative = self.is_relative,
+            # is_relative = self.is_relative,
             meta_data = self.meta_data,
             letterbox_rect = self.letterbox_rect
         )
@@ -105,20 +105,17 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         return ["Current Time", "Current Frame", "Movie Name", "Movie Path", "Movie ID", "Year", "Source", "Duration", "Notes"]
 
     def get_movie_path(self):
-        if self.is_relative:
-            print(self.project.folder)
-            print(self.movie_path)
-            abs_path = os.path.normpath(self.project.folder + "/" + self.movie_path)
-            if os.path.isfile(abs_path):
-                return abs_path
-            elif os.path.isfile(self.movie_path):
-                self.is_relative = False
-                return self.movie_path
-            else:
-                return ""
-
-        else:
-            return os.path.normpath(self.movie_path)
+        # if self.is_relative:
+        #     abs_path = os.path.normpath(self.project.folder + "/" + self.movie_path)
+        #     if os.path.isfile(abs_path):
+        #         return abs_path
+        #     elif os.path.isfile(self.movie_path):
+        #         self.is_relative = False
+        #         return self.movie_path
+        #     else:
+        #         return ""
+        # else:
+        return os.path.normpath(self.movie_path)
 
     def set_movie_path(self, path):
         """
@@ -127,14 +124,14 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         :param path:
         :return:
         """
-        if self.project.folder is not None and os.path.normpath(self.project.folder) in os.path.normpath(path):
-            common = os.path.commonpath([self.project.path, path])
-            self.movie_path = path.replace(common, "/")
-            self.is_relative = True
-        else:
-            self.movie_path = os.path.normpath(path)
-            self.is_relative = False
-        print("MoviePath set", self.movie_path, "Relative:", self.is_relative)
+        # if self.project.folder is not None and os.path.normpath(self.project.folder) in os.path.normpath(path):
+        #     common = os.path.commonpath([self.project.path, path])
+        #     self.movie_path = path.replace(common, "/")
+        #     self.is_relative = True
+        # else:
+        self.movie_path = os.path.normpath(path)
+        # self.is_relative = False
+        # print("MoviePath set", self.movie_path, "Relative:", self.is_relative)
 
         cap = cv2.VideoCapture(self.get_movie_path())
         self.fps = cap.get(cv2.CAP_PROP_FPS)

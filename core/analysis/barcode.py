@@ -30,31 +30,14 @@ class BarcodeAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(BarcodeAnalysis, self).prepare(project, targets, fps, class_objs)
+        fps = project.movie_descriptor.fps
+        targets, args = super(BarcodeAnalysis, self).prepare(project, targets, fps, class_objs)
 
         if project.folder is None and self.output_dir is None:
             raise ValueError("Z-Projections need a directory-based project or an output_dir")
         elif project.folder is not None:
             self.output_dir = os.path.join(project.data_dir)
 
-        args = []
-        fps = project.movie_descriptor.fps
-        for tgt in targets:
-            semseg = None
-            if isinstance(tgt, Screenshot):
-                if class_objs is not None:
-                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
-                    if len(semseg) > 0:
-                        semseg = semseg[0]
-                    else:
-                        semseg = None
-
-            args.append(dict(start=ms_to_frames(tgt.get_start(), fps),
-                         end=ms_to_frames(tgt.get_end(), fps),
-                         movie_path=project.movie_descriptor.movie_path,
-                         target=tgt.get_id(),
-                         margins=project.movie_descriptor.get_letterbox_rect(),
-                         semseg=semseg))
         return args
 
     def process(self, args, sign_progress):
