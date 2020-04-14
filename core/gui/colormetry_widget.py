@@ -30,6 +30,7 @@ class ColorimetryWorker(QObject):
         except Exception as e:
             log_error(e)
 
+
 class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     draw = pyqtSignal(object)
 

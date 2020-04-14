@@ -12,9 +12,8 @@ of VIAN. If your a developer, please refer to the Developer's Guide.
 .. toctree::
     :maxdepth: 4
 
-    primer/primer
     user_interface/user_interface
     step_by_step/step_by_step
-    plugins/plugins
+    Shortcuts
 
 

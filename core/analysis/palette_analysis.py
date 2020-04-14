@@ -20,6 +20,21 @@ from core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class ColorPaletteAnalysis(IAnalysisJob):
+    """
+    IAnalysisJob to extract color palettes in VIAN.
+
+    .. note:: **HDF5 Memory Layout**
+
+        - 1st: index of the feature vector
+        - 2nd: Palette Clusters
+
+            - [0]: Merge Distance
+            - [1]: Merge Depth
+            - [2] Cluster Color: B-Channel (BGR) {0, ..., 255}
+            - [3] Cluster Color: G-Channel (BGR) {0, ..., 255}
+            - [4] Cluster Color: R-Channel (BGR) {0, ..., 255}
+            - [5] Number of Pixels
+    """
     def __init__(self, resolution = 30, input_width = 300, n_super_pixel = 200):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorPalettes",
@@ -33,32 +48,8 @@ class ColorPaletteAnalysis(IAnalysisJob):
         self.n_super_pixel = n_super_pixel
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
-        """
-        This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
-        and gather all data we need.
-
-        """
-        super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
-        args = []
         fps = project.movie_descriptor.fps
-        if not isinstance(targets, list):
-            targets = [targets]
-        for tgt in targets:
-            semseg = None
-            if isinstance(tgt, Screenshot):
-                if class_objs is not None:
-                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
-                    if len(semseg) > 0:
-                        semseg = semseg[0]
-                    else:
-                        semseg = None
-
-            args.append([ms_to_frames(tgt.get_start(), fps),
-                         ms_to_frames(tgt.get_end(), fps),
-                         project.movie_descriptor.movie_path,
-                         tgt.get_id(),
-                         project.movie_descriptor.get_letterbox_rect(),
-                         semseg])
+        targets, args = super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
         return args
 
     def process(self, args, sign_progress):
@@ -66,11 +57,11 @@ class ColorPaletteAnalysis(IAnalysisJob):
         # Signal the Progress
         sign_progress(0.0)
 
-        start = args[0]
-        stop = args[1]
-        movie_path = args[2]
-        margins = args[4]
-        semseg = args[5]
+        start = args['start']
+        stop = args['end']
+        movie_path = args['movie_path']
+        margins = args['margins']
+        semseg = args['semseg']
         bin_mask = None
         if semseg is not None:
             name, labels = self.target_class_obj.semantic_segmentation_labels
@@ -84,13 +75,10 @@ class ColorPaletteAnalysis(IAnalysisJob):
         c = start
 
         model = None
-        while c < stop + self.resolution:
-            if c % self.resolution != 0:
-                c += 1
-                continue
+        for i in range(start, stop + 1, self.resolution):
             sign_progress((c - start) / ((stop - start) + 1))
 
-            cap.set(cv2.CAP_PROP_POS_FRAMES, c)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i )
             ret, frame = cap.read()
 
             if frame is None:
@@ -131,22 +119,15 @@ class ColorPaletteAnalysis(IAnalysisJob):
                 results = dict(tree=result.tree, dist = result.merge_dists),
                 analysis_job_class=self.__class__,
                 parameters=dict(resolution=self.resolution),
-                container=args[3]
+                container=args['target']
             )
         return None
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
-        """
-        This Function will be called after the processing is completed. 
-        Since this function is called within the Main-Thread, we can modify our project here.
-        """
         result.set_target_container(project.get_by_id(result.target_container))
         result.set_target_classification_obj(self.target_class_obj)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
-        """
-        This should return the Widget that is shown in the Inspector when the analysis is selected
-        """
         view = PaletteView(None)
         view.depth = 10
         image = QImage(QSize(1024,256), QImage.Format_RGBA8888)
@@ -158,19 +139,12 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return view
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
-        """
-        This function should show the complete Visualization
-        """
         view = PaletteWidget(None)
         view.set_palette(analysis.get_adata()['tree'])
         view.draw_palette()
         return [VisualizationTab(widget=view, name="Color Palette", use_filter=False, controls=None)]
 
     def get_parameter_widget(self):
-        """
-        Returning a ParameterWidget subclass which will be displayed in the Analysis Dialog, when the user 
-        activates the Analysis.
-        """
         return ColorPaletteParameterWidget()
 
     def serialize(self, data_dict):
@@ -202,6 +176,21 @@ class ColorPaletteAnalysis(IAnalysisJob):
         ]
         return dict(dist = data_dict['dist'], tree=layers)
 
+    def get_hdf5_description(self):
+        return dict(
+            title = "Average Color Values",
+            description = "A bottom-up color palette clustering. ",
+            color_space = "BGR, computed in CIELab",
+            dimensions = "1st: index of the feature vector \\ "
+                         "2nd: Palette Clusters\\"
+                         " [0]: Merge Distance\\"
+                         " [1]: Merge Depth"
+                         " [3] Cluster Color: B-Channel (BGR) {0, ..., 255}\\"
+                         " [4] Cluster Color: G-Channel (BGR) {0, ..., 255}\\"
+                         " [5] Cluster Color: R-Channel (BGR) {0, ..., 255}\\"
+                         " [6] Number of Colors"
+        )
+
     def to_hdf5(self, data):
         d = np.zeros(shape=(COLOR_PALETTES_MAX_LENGTH, 6))
         count = COLOR_PALETTES_MAX_LENGTH
@@ -220,6 +209,40 @@ class ColorPaletteAnalysis(IAnalysisJob):
             np.array(db_data[:, 5])
         ]
         return dict(dist=db_data[:, 0], tree=layers)
+
+
+def get_palette_at_merge_depth(palette, depth = 10):
+    t = palette['tree']
+    all_depths = t[0]
+    all_cols = t[1]
+    all_bins = t[2]
+
+    stored_depths = np.unique(all_depths)
+    try:
+        indices = np.where(all_depths == stored_depths[np.clip(depth, 0, stored_depths.shape[0])])[0]
+        n_bins_total = np.sum(all_bins[indices])
+        res = []
+
+        all_bins /= n_bins_total
+        all_bins = np.round(all_bins, 6)
+        all_bins = np.nan_to_num(all_bins)
+
+        all_cols = np.nan_to_num(all_cols)
+        all_cols = np.clip(all_cols, 0, 255)
+
+        for i in indices:
+            lab = tpl_bgr_to_lab(all_cols[i]).tolist()
+            amount = float(all_bins[i])
+
+            res.append(dict(
+                bgr = all_cols[i].tolist(),
+                lab = lab,
+                amount = amount
+            ))
+        return res
+    except Exception as e:
+        return None
+
 
 
 class ColorPaletteParameterWidget(ParameterWidget):

@@ -496,7 +496,6 @@ class VocabularyCSVImporter(CSVImporter):
 
                 counter += 1
 
-
         project.inhibit_dispatch = False
         project.dispatch_changed()
 
@@ -601,7 +600,7 @@ class ExperimentTemplateImporter(ImportDevice):
         for entry in data['vocabularies']:
             # voc = project.create_vocabulary(name=entry['name'])
             voc = Vocabulary(name=entry['name'])
-            voc.unique_id = entry['uuid']
+            voc.unique_id = entry['unique_id']
             voc.uuid = entry['uuid']
             voc.category = entry['vocabulary_category']
             if voc.name in self.hidden_vocs:
@@ -646,6 +645,9 @@ class ExperimentTemplateImporter(ImportDevice):
 
 
 class ExperimentTemplateUpdater(ImportDevice):
+    # TODO Messeses up Vocabulary Word mapping.
+    # Either because the data source is wrong ot this code is wrong, needs investigation or removal
+
     hidden_vocs = ["Hues"]
 
     def import_(self, project:VIANProject, path):
@@ -676,7 +678,7 @@ class ExperimentTemplateUpdater(ImportDevice):
             if voc is None:
                 log_info("ExperimentTemplateUpdater: Creating Vocabulary Object:", (entry['name']))
                 voc = Vocabulary(name=entry['name'])
-                voc.unique_id = entry['uuid']
+                voc.unique_id = entry['unique_id']
                 voc.uuid = entry['uuid']
                 project.add_vocabulary(voc)
             else:
@@ -730,7 +732,6 @@ class ExperimentTemplateUpdater(ImportDevice):
 
         for vocabulary, clobj in vocs_to_add:
             clobj.add_vocabulary(vocabulary, keyword_override=unique_keywords[clobj.unique_id][vocabulary.unique_id])
-
 
 
 class WebAppProjectImporter(ImportDevice):

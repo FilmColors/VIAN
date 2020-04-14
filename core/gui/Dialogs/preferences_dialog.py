@@ -68,9 +68,10 @@ class DialogPreferences(EDialogWidget):
         # self.lineEdit_CorpusIP.setText(self.settings.CORPUS_IP)
         # self.lineEdit_CorpusPort.setText(str(self.settings.COPRUS_PORT))
         # self.lineEdit_CorpusPW.setText(self.settings.COPRUS_PW)
+        self.checkBoxMultiExperiments.setChecked(self.settings.MULTI_EXPERIMENTS)
 
-        self.checkBox_UseCorpus.setChecked(self.settings.USE_CORPUS)
-        self.checkBox_UseELANRemote.setChecked(self.settings.USE_ELAN)
+        # self.checkBox_UseCorpus.setChecked(self.settings.USE_CORPUS)
+        # self.checkBox_UseELANRemote.setChecked(self.settings.USE_ELAN)
         try:
             self.font_Picker.setCurrentText(self.settings.FONT_NAME)
         except:
@@ -117,6 +118,8 @@ class DialogPreferences(EDialogWidget):
         self.settings.EARLY_STOP = self.spinBox_EarlyStop.value()
         self.settings.FONT_NAME = self.font_Picker.currentText()
         self.settings.FONT_SIZE = self.spinBox_FontSize.value()
+        self.settings.MULTI_EXPERIMENTS = self.checkBoxMultiExperiments.isChecked()
+        self.main_window.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
 
     def font_changed(self):
         family = self.font_Picker.currentText()

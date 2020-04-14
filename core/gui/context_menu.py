@@ -12,8 +12,6 @@ from core.data.log import log_error, log_info, log_debug, log_warning
 
 
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):
-
-
     if len(containers) == 0 and (screenshot_root == False and scripts_root == False):
         return None
 

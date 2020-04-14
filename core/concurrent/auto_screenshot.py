@@ -6,48 +6,78 @@ from core.analysis.informative import select_rows
 from core.data.computation import ms_to_frames
 from core.container.project import *
 from core.concurrent.auto_segmentation import ApplySegmentationWindow
+from core.analysis.colorimetry.computation import calculate_histogram
 
-def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, hdf5_manager):
+
+def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, hdf5_manager, sign_progress):
+    frame_pos = []
+    if method == "Uniform Distribution":
         frame_ms = []
 
-        if method == "Uniform Distribution":
-            if distribution == "N - Per Segment":
-                for s in segmentation.segments:
-                    delta = (s.get_end() - s.get_start()) / n
-                    k = s.get_start()
-                    while k < s.get_end():
-                        frame_ms.append(k)
-                        k += delta
-
-            elif distribution == "N - Complete":
-                delta = project.movie_descriptor.duration / n
-                k = 0
-                while k < project.movie_descriptor.duration:
+        if distribution == "N - Per Segment":
+            for s in segmentation.segments:
+                delta = (s.get_end() - s.get_start()) / n
+                k = s.get_start()
+                while k < s.get_end():
                     frame_ms.append(k)
                     k += delta
 
-            elif distribution == "Every N-th Frame":
-                k = 0
-                while k < project.movie_descriptor.duration:
-                    frame_ms.append(k)
-                    k += frame2ms(n, project.movie_descriptor.fps)
+        elif distribution == "N - Complete":
+            delta = project.movie_descriptor.duration / n
+            k = 0
+            while k < project.movie_descriptor.duration:
+                frame_ms.append(k)
+                k += delta
 
-        elif method == "Most Informative":
-            for s in segmentation.segments:
-                idx_start = int(ms_to_frames(s.get_start(), project.movie_descriptor.fps) / project.colormetry_analysis.resolution)
-                idx_end = int(ms_to_frames(s.get_end(), project.movie_descriptor.fps) / project.colormetry_analysis.resolution)
-                indices = range(idx_start, idx_end, 1)
-                hists = hdf5_manager.col_histograms()[indices]
-                hists = np.reshape(hists, newshape=(hists.shape[0], hists.shape[1]* hists.shape[2] * hists.shape[3]))
-                hists /= np.sqrt(np.sum(hists ** 2, axis=1, keepdims=True))
-                result = select_rows(hists, np.clip(n, 1, hists.shape[0]))
+        elif distribution == "Every N-th Frame":
+            k = 0
+            while k < project.movie_descriptor.duration:
+                frame_ms.append(k)
+                k += frame2ms(n, project.movie_descriptor.fps)
 
-                frame_ms.extend([frame2ms((f + idx_start) * project.colormetry_analysis.resolution, project.movie_descriptor.fps) for f in result])
-
-        frame_pos = []
         for f in frame_ms:
             frame_pos.append(ms_to_frames(f, project.movie_descriptor.fps))
-        return frame_pos
+
+    elif method == "Most Informative":
+        cap = cv2.VideoCapture(project.movie_descriptor.movie_path)
+        width, height = cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        fps, duration = cap.get(cv2.CAP_PROP_FPS), cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+        for s_idx, s in enumerate(segmentation.segments):
+            sign_progress(s_idx / len(segmentation.segments))
+            if project.colormetry_analysis.check_finished():
+                res = project.colormetry_analysis.resolution
+                idx_start = int(ms_to_frames(s.get_start(), fps) / res)
+                idx_end = int(ms_to_frames(s.get_end(), fps) / res)
+                indices = range(idx_start, idx_end, 1)
+                frame_indices = np.array(indices) * res
+                hists = hdf5_manager.col_histograms()[indices]
+            else:
+                res = 15
+                idx_start = int(ms_to_frames(s.get_start(), fps))
+                idx_end = int(np.clip(ms_to_frames(s.get_end(), fps), idx_start + 1, duration))
+                n_hists = int(np.ceil((idx_end - idx_start) / res))
+                hists = np.zeros(shape=(n_hists, 16,16,16))
+                frame_indices = []
+                for h_idx, i in enumerate(range(idx_start, idx_end, res)):
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+                    ret, frame = cap.read()
+
+                    if frame is None:
+                        continue
+
+                    frame_indices.append(i)
+                    frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2Lab)
+                    hists[h_idx] = np.divide(calculate_histogram(frame_lab, 16), (width * height))
+
+            hists = np.reshape(hists, newshape=(hists.shape[0], hists.shape[1]* hists.shape[2] * hists.shape[3]))
+            hists /= np.sqrt(np.sum(hists ** 2, axis=1, keepdims=True))
+            result = select_rows(hists, np.clip(n, 1, hists.shape[0]))
+
+            frame_pos.extend([frame_indices[f] for f in result])
+
+    return frame_pos
+
 
 
 class DialogAutoScreenshot(EDialogWidget):
@@ -98,7 +128,8 @@ class AutoScreenshotJob(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         movie_path = args[0]
         project = args[1]
-        frame_pos = auto_screenshot(project, self.method, self.distribution, self.n, self.segmentation, self.hdf5_manager)
+        frame_pos = auto_screenshot(project, self.method, self.distribution, self.n, self.segmentation, self.hdf5_manager, sign_progress)
+        # frame_pos = args[1]
 
         cap = cv2.VideoCapture(movie_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
@@ -138,4 +169,3 @@ class AutoScreenshotJob(IConcurrentJob):
 
     def get_widget(self, parent, result):
         return ApplySegmentationWindow(parent, result[0], result[1], result[2], result[3], result[4], result[5])
-

@@ -35,6 +35,24 @@ array Structure:
 
 @vian_analysis
 class ColorFeatureAnalysis(IAnalysisJob):
+    """
+    IAnalysisJob to extract average color values in VIAN.
+
+    .. note:: **HDF5 Memory Layout**
+
+        - 1st: index of the feature vector
+        - 2nd: Average Color Features
+
+            - [0]: Average Value: Luminance (CIELab) {0.0, ..., 100.0 }
+            - [1] Average Value: A-Channel (CIELab) {-128.0, ..., 128.0}
+            - [2] Average Value: B-Channel (CIELab) {-128.0, ..., 128.0}
+            - [3] Average Value: B-Channel (BGR) {0, ..., 255}
+            - [4] Average Value: G-Channel (BGR) {0, ..., 255}
+            - [5] Average Value: R-Channel (BGR) {0, ..., 255}
+            - [6] Average Value: Luebbe Saturation (BGR) {0, ..., 1.0} (Deprecated, this will be removed at some point)
+            - [7] Average Value: Experimental Saturation (BGR) {0, ..., 1.0} (Deprecated, this will be removed at some point)
+    """
+
     def __init__(self, resolution = 30):
         super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorFeatures",
@@ -51,46 +69,11 @@ class ColorFeatureAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(ColorFeatureAnalysis, self).prepare(project, targets, fps, class_objs)
-        self.hdf5_manager = project.hdf5_manager
-
-        args = []
         fps = project.movie_descriptor.fps
-        for tgt in targets:
-            if isinstance(tgt, Screenshot):
-                if class_objs is not None:
-                    semseg = tgt.get_connected_analysis("SemanticSegmentationAnalysis")
-                    if len(semseg) > 0:
-                        semseg = semseg[0]
-                    else:
-                        semseg = None
-                else:
-                    semseg = None
+        targets, args = super(ColorFeatureAnalysis, self).prepare(project, targets, fps, class_objs)
 
-                args.append([tgt.frame_pos,
-                             tgt.frame_pos,
-                             project.movie_descriptor.movie_path,
-                             tgt.get_id(),
-                             project.movie_descriptor.get_letterbox_rect(),
-                             semseg])
-            elif isinstance(tgt, Segmentation):
-                for s in tgt.segments:
-                    args.append([
-                        ms_to_frames(s.get_start(), fps),
-                        ms_to_frames(s.get_end(), fps),
-                        project.movie_descriptor.movie_path,
-                        s.get_id(),
-                        project.movie_descriptor.get_letterbox_rect(),
-                        None])
-
-            else:
-                args.append([
-                ms_to_frames(tgt.get_start(), fps),
-                ms_to_frames(tgt.get_end(), fps),
-                project.movie_descriptor.movie_path,
-                tgt.get_id(),
-                project.movie_descriptor.get_letterbox_rect(),
-                None])
+        # TODO Why is this here?
+        self.hdf5_manager = project.hdf5_manager
 
         return args
 
@@ -104,11 +87,11 @@ class ColorFeatureAnalysis(IAnalysisJob):
             sign_progress(counter / len(argst))
             counter += 1
 
-            start = args[0]
-            stop = args[1]
-            movie_path = args[2]
-            margins = args[4]
-            semseg = args[5]
+            start = args['start']
+            stop = args['end']
+            movie_path = args['movie_path']
+            margins = args['margins']
+            semseg = args['semseg']
             colors_lab = []
             colors_bgr = []
 
@@ -117,12 +100,9 @@ class ColorFeatureAnalysis(IAnalysisJob):
             cap.set(cv2.CAP_PROP_POS_FRAMES, start)
             c = start
 
-            while (c < stop + self.resolution):
-                if c % self.resolution != 0:
-                    c += 1
-                    continue
-
-                cap.set(cv2.CAP_PROP_POS_FRAMES, c)
+            for i in range(start, stop  + 1, self.resolution):
+                sign_progress((c - start) / ((stop - start) + 1))
+                cap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = cap.read()
                 if frame is None:
                     break
@@ -174,7 +154,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                ),
                 analysis_job_class=self.__class__,
                 parameters=dict(resolution = self.resolution),
-                container=args[3]
+                container=args['target']
             )
             )
         return result
@@ -237,6 +217,24 @@ class ColorFeatureAnalysis(IAnalysisJob):
                  saturation_p=np.array(data_dict["saturation_p"]).tolist()
              )
         return d
+
+    def get_hdf5_description(self):
+        return dict(
+            title = "Average Color Values",
+            description = "Contains a list of average color values. ",
+            color_space = "CIELab, BGR",
+            dimensions = "1st: index of the feature vector \\ "
+                         " [0]: Average Value: Luminance (CIELab) {0.0, ..., 100.0 }\\"
+                         " [1] Average Value: A-Channel (CIELab) {-128.0, ..., 128.0}\\"
+                         " [2] Average Value: B-Channel (CIELab) {-128.0, ..., 128.0}\\"
+                         " [3] Average Value: B-Channel (BGR) {0, ..., 255}\\"
+                         " [4] Average Value: G-Channel (BGR) {0, ..., 255}\\"
+                         " [5] Average Value: R-Channel (BGR) {0, ..., 255}\\"
+                         " [6] Average Value: Luebbe Saturation (BGR) {0, ..., 1.0}, "
+                         "(Deprecated, this will be removed at some point)\\"
+                         " [7] Average Value: Experimental Saturation (BGR) {0, ..., 1.0}, "
+                         "(Deprecated, this will be removed at some point)\\"
+        )
 
     def to_hdf5(self, data):
         d = np.zeros(shape=8)

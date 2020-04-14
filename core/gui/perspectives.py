@@ -34,7 +34,7 @@ class Perspective(Enum):
         ExperimentSetup = 8
         QuickAnnotation = 9
         Query = 10
-        CorpusVisualizer = 11
+        # CorpusVisualizer = 11
         WebApp = 12
 
 

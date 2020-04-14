@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox, QPushButton, QLabel, QCheckBox
 from PyQt5 import uic
 from core.gui.ewidgetbase import EDialogWidget
-from core.gui.tools import DialogPrompt
 from core.data.exporters import SegmentationExporter
 import os
 import json

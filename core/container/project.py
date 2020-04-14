@@ -32,44 +32,36 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     A VIANProject is a FileSystem and a json File that is located inside this folder.
 
-    :var undo_manager = UndoRedoManager()
-    :var main_window: A Reference to the Main Window
-    :var inhibit_dispatch: if Dispatch should be inhibited
-
     :var path: The Path to the Projects .eext file (absolute)
     :var name: The Name of the Project
     :var folder: The Root Directory of the Project where the eext file lies inside
+
+    :var movie_descriptor: The Movie Descriptor of this Project
+    :var annotation_layers: A List of Annotation Layers
+    :var screenshots: A List of all Screenshots, without grouping
+    :var segmentation: A List of all Segmentations
+    :var analysis: A List of IAnalysisResult
+    :var screenshot_groups: All Screenshot Groups
+    :var vocabularies: All Vocabularies (deprecated these are now global)
+    :var experiments: A List of all Experiments
+    :var colormetry_analysis: The ColorimetryAnalysis Reference
+
+
+    Application Variables:
+    :var active_screenshot_group = self.screenshot_groups[0]
+    :var active_screenshot_group.is_current = True
+    :var main_segmentation_index: The index of the main Segmentation Layer in self.segmentations, by which Screenshots are sorted
+    :var current_annotation_layer: The Currently Selected Annotation Layer
+    :var id_list: A list of [Unique-ID, IProjectContainer] tuples
+    :var corpus_id: this is the VIANCorpus id of this project (default: -1)
+    :var undo_manager = UndoRedoManager()
+    :var main_window: A Reference to the Main Window
+    :var inhibit_dispatch: if Dispatch should be inhibited
+    :var selected: A List of Currently Selected IProjectContainers
     :var data_dir: the path to the data dir
     :var results_dir: the path to the result dir
     :var shots_dir: the path to the shot dir
     :var export_dir: the path to the export dir
-
-    :var corpus_id: this is the VIANCorpus id of this project (default: -1)
-
-    :var id_list: A list of [Unique-ID, IProjectContainer] tuples
-
-    :var annotation_layers: A List of Annotation Layers
-    :var current_annotation_layer: The Currently Selected Annotation Layer
-    :var screenshots: A List of all Screenshots
-    :var segmentation: A List of all Segmentations
-    :var main_segmentation_index: The index of the main Segmentation Layer in self.segmentations
-    :var movie_descriptor: The Movie Descriptor of this Project
-    :var analysis: A List of IAnalysisResult
-    :var screenshot_groups: All Screenshot Groups
-    :var vocabularies: All Vocabularies (deprecated these are now global)
-
-    :var experiments: A List of all Experiments
-
-    :var current_script: The Currently Selected NodeScript
-    :var node_scripts: A List of All Node Scripts
-
-    :var add_screenshot_group("All Shots", initial=True)
-    :var active_screenshot_group = self.screenshot_groups[0]
-    :var active_screenshot_group.is_current = True
-
-    :var colormetry_analysis: The ColorimetryAnalysis Reference
-
-    :var selected: A List of Currently Selected IProjectContainers
     """
 
     onScreenshotGroupAdded = pyqtSignal(object)
@@ -221,6 +213,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     result.append(itm)
         return result
 
+    def get_annotations(self):
+        res = []
+        for s in self.segmentation:
+            res.extend(s.segments)
+        for a in self.annotation_layers:
+            res.extend(a.annotations)
+        res.extend(self.screenshots)
+        return res
+
     def print_all(self, type = None):
         for c in self.get_all_containers():
             if type is not None and type == c.get_type():
@@ -306,11 +307,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for s in segmentation.segments:
             # segm = new.create_segment(start = s.get_start(), stop = s.get_end(), dispatch=False)
             segm = new.create_segment2(start = s.get_start(), stop = s.get_end(),
-                                       dispatch=False,
+                                       dispatch=False, body=s.annotation_body,
                                        mode=SegmentCreationMode.INTERVAL)
             if segm is None:
                 continue
-            segm.annotation_body = s.annotation_body
+            # segm.annotation_body = s.annotation_body
 
         self.undo_manager.to_undo((self.copy_segmentation, [segmentation]), (self.remove_segmentation, [new]))
         self.dispatch_changed(item = new)
@@ -592,27 +593,24 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.dispatch_changed()
             self.onScreenshotGroupRemoved.emit(grp)
 
-    # def get_screenshots_of_segment(self, main_segm_id, segmentation = None):
-    #     """
-    #     Returns all screenshots which are within a segment.
-    #
-    #     :param main_segm_id: The id of the segment do retrieve the screenshots from.
-    #
-    #     :param segmentation:
-    #     :return:
-    #     """
-    #     if segmentation is None:
-    #         segmentation = self.get_main_segmentation()
-    #     result = []
-    #     if segmentation is not None:
-    #         start = segmentation.segments[main_segm_id].get_start()
-    #         end = segmentation.segments[main_segm_id].get_end()
-    #
-    #         for s in self.screenshots:
-    #             if start <= s.movie_timestamp < end:
-    #                 result.append(s)
-    #
-    #     return result
+    def get_screenshots_of_segment(self, segment: Segment) -> List[Screenshot]:
+        """
+        Returns all screenshots which are within a segment.
+
+        :param main_segm_id: The id of the segment do retrieve the screenshots from.
+
+        :param segmentation:
+        :return:
+        """
+        result = []
+        start = segment.get_start()
+        end = segment.get_end()
+
+        for s in self.screenshots:
+            if start <= s.movie_timestamp < end:
+                result.append(s)
+
+        return result
 
     def set_current_screenshot_group(self, grp) -> ScreenshotGroup:
         """
@@ -633,10 +631,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Analysis
-    def create_node_analysis(self, name, result, script_id, final_node_ids):
-        analysis = NodeScriptAnalysis(name, result, script_id, final_node_ids)
-        self.add_analysis(analysis)
-        return analysis
+    # def create_node_analysis(self, name, result, script_id, final_node_ids):
+    #     analysis = NodeScriptAnalysis(name, result, script_id, final_node_ids)
+    #     self.add_analysis(analysis)
+    #     return analysis
 
     def add_analysis(self, analysis:AnalysisContainer, dispatch = False) -> AnalysisContainer:
         """
@@ -1011,7 +1009,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         screenshots_img = []
         screenshots_ann = []
         segmentations = []
-        analyzes = []
+        analyses = []
         screenshot_groups = []
         scripts = []
         experiments = []
@@ -1034,7 +1032,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             segmentations.append(c.serialize())
 
         for d in project.analysis:
-            analyzes.append(d.serialize())
+            analyses.append(d.serialize())
 
         for e in project.screenshot_groups:
             screenshot_groups.append(e.serialize())
@@ -1064,15 +1062,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
             uuid = project.uuid,
             annotation_layers=a_layer,
             notes=project.notes,
-            current_annotation_layer=None,
-            results_dir=project.results_dir,
-            export_dir=project.export_dir,
-            shots_dir=project.shots_dir,
-            data_dir=project.data_dir,
+            # current_annotation_layer=None,
+            # results_dir=project.results_dir,
+            # export_dir=project.export_dir,
+            # shots_dir=project.shots_dir,
+            # data_dir=project.data_dir,
             main_segmentation_index=project.main_segmentation_index,
             screenshots=screenshots,
             segmentation=segmentations,
-            analyzes=analyzes,
+            analyses=analyses,
             movie_descriptor=project.movie_descriptor.serialize(),
             version=version.__version__,
             screenshot_groups=screenshot_groups,
@@ -1278,12 +1276,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
             # self.main_window.print_message("Loading Node Scripts failed", "Red")
             # self.main_window.print_message(e, "Red")
 
-        try:
-            [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
-            self.active_pipeline_script = self.get_by_id(my_dict['active_pipeline_script'])
-            self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
-        except Exception as e:
-            print("Exception in Load Pipelines", str(e))
+        # try:
+        #     [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
+        #     self.active_pipeline_script = self.get_by_id(my_dict['active_pipeline_script'])
+        #     self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
+        # except Exception as e:
+        #     print("Exception in Load Pipelines", str(e))
 
         try:
             for e in my_dict['experiments']:
@@ -1291,13 +1289,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 self.add_experiment(new)
 
         except Exception as e:
-            # raise e
             print("Exception in Load Experiment", e)
 
-        for d in my_dict['analyzes']:
+        # Renaming the old analyzes to analyses due to a typo
+        analyses_fix = "analyses"
+        if analyses_fix not in my_dict:
+            analyses_fix = "analyzes"
+        for d in my_dict[analyses_fix]:
             if d is not None:
                 try:
-                    new = eval(d['analysis_container_class'])().deserialize(d, self)
+                    t = deprecation_serialization(d, ['vian_serialization_type', 'analysis_container_class'])
+                    new = eval(t)().deserialize(d, self)
                     if isinstance(new, ColormetryAnalysis):
                         try:
                             # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
@@ -1312,16 +1314,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                         self.add_analysis(new)
                 except Exception as e:
                     print("Exception in Load Analyses", str(e))
-        # Finalizing the Project, Hooking up the ID Connections
-        # Connecting the NodeScriptAnalysis Objects to their Final Nodes
-        for a in self.analysis:
-            if isinstance(a, NodeScriptAnalysis):
-                for i, res in enumerate(a.data):
-                    node = self.get_by_id(a.final_node_ids[i])
-                    if node is not None:
-                        node.operation.result = res
-
-        # self.movie_descriptor.set_movie_path(self.movie_descriptor.movie_path)
 
         if self.colormetry_analysis is not None:
             if not self.hdf5_manager.has_colorimetry():
@@ -1840,6 +1832,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def get_name(self):
         return self.name
+
+    def set_name(self, name):
+        self.name = name
 
     def create_unique_id(self):
         """

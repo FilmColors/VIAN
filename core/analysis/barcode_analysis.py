@@ -47,7 +47,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         and gather all data we need.
         
         """
-        super(BarcodeAnalysisJob, self).prepare(project, targets, fps, class_objs)
+        targets, args = super(BarcodeAnalysisJob, self).prepare(project, targets, fps, class_objs)
         # Since multiple_result is True, we want to generate a Barcode for each Segmentation
         # Thus an array of arguments has to be returned. For each Segmentation one argument Array
         args = []

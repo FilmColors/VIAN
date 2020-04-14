@@ -7,6 +7,9 @@ Kyoto University
 
 """
 import keras.backend as K
+
+import tensorflow as tf
+
 from keras.models import Model
 from keras.layers import Input, Reshape, Permute, Dense, Activation, Flatten, Conv2D
 from keras.layers import MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D, GlobalMaxPool2D, BatchNormalization
@@ -379,9 +382,8 @@ def duc(x, factor=8, output_shape=(512, 512, 1)):
 
 # interpolation
 def Interp(x, shape):
-    from keras.backend import tf as ktf
     new_height, new_width = shape
-    resized = ktf.image.resize_images(x, [int(new_height), int(new_width)], align_corners=True)
+    resized = tf.image.resize_images(x, [int(new_height), int(new_width)], align_corners=True)
     return resized
 
 

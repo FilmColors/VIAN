@@ -35,6 +35,8 @@ further keybindings:
 - Space   Play/Pause Movie
 - F10     Toggle StatusBar
 - F11     Full Screen
+- \+       Slow up video playing speed
+- \-       Slow down video playing speed
 
 
 .. toctree::

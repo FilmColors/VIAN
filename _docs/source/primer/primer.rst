@@ -1,56 +1,30 @@
-.. _primer:
 
-======
-Primer
-======
+===============
+Getting Started
+===============
 
-In this section, the typical workflow of VIAN and concepts behind it shall be explained. Links to more detailed descriptions of modules etc. are provided.
+In this section, the workflow of VIAN and concepts shall be explained.
 
 Creating a Project
 ==================
+In VIAN, each movie to annotate is a so called **project**. Creating a new project is easy:
 
-For each movie to analyse, you need to create a new project. Think of a project as a container which contains **1.** a movie, **2.** a corresponding experiment (objects and their vocabulary), **3.** all the annotations, segmentations, screenshots, analyses etc. which were / are to be performed on it.
+.. raw:: html
 
-The project ensures that you can close VIAN and continue to work on the project at another time, only having to load the project and having at hand the configuration and performed tasks.
-You can specifiy the location of your projects, the default hereby is: */Documents/VIAN/projects*.
+        <iframe src="https://player.vimeo.com/video/378389696" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
 .. seealso::
 
-   Video-Tutorials:
-
-   * :ref:`create_new_project_no_autoname`
-   * :ref:`create_new_project_with_autoname`
-
-   Other Wiki-Pages:
-
-   * :ref:`vian_projects`
+    * Step-by-Step Guide: :ref:`new_project`
 
 Segmentation
 ============
 
-A typical pre-step in annotating films is to divide the film into coherent sub-units, or segments (what «coherent» means, depends on your research question: coherent regarding narratology, color, length etc.). 
-Typically, you would further take a few representative screenshots for each segment, that can be analysed regarding their color properties (see **Color Analysis** further down on this page for more information).
 
-.. seealso::
-
-   Video-Tutorials:
-
-   * :ref:`create_new_segmentation`
-   * :ref:`rename_segmentation`
-   * :ref:`create_auto-segmentation`
-
-   Other Wiki-Pages:
-
-   * :ref:`segmentation`
 
 Experiments
 ===========
 
-.. seealso::
-
-   Other Wiki-Pages:
-
-   * :ref:`experiments`
 
 Classification
 ==============
@@ -62,26 +36,12 @@ Classification
 
    The Player Persepctive.
 
-.. seealso::
-
-   Video-Tutorials:
-
-   * :ref:`run_classification`
-
-   Other Wiki-Pages:
-
-   * :ref:`classification`
-
 Color Analysis
 ==============
 
 
-
-
-
 .. toctree::
     :maxdepth: 2
-
 
 
 
