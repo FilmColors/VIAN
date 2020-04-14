@@ -11,12 +11,10 @@ Make sure you have at least the following generations of OS, or newer:
 - **MacOS**: SnowLion
 - **Ubuntu**: 16.04
 
-<<<<<<< HEAD
 The following Software Tools need to be present (if not, normally they are being installed during the installation of VIAN):
 =======
 If you install VIAN manually (without the installer from the homepage),
 the following Software Tools need to be present:
->>>>>>> 5d8289700dc72b7909b82b324084a74680eadc0d
 
 - python3
 - VLC 64-bit Version
