@@ -2177,8 +2177,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.print_message(str(e), "Red")
 
     def on_export_csv(self):
-        file = QFileDialog.getSaveFileName()[0]
-        self.project.export(CSVExporter(), file)
+        file = QFileDialog.getSaveFileName(filter="*.csv")[0]
+        try:
+            self.project.export(CSVExporter(), file)
+        except Exception as e:
+            log_error(e)
 
     def on_export_movie_segments(self):
         if self.project is not None:

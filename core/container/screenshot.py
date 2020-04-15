@@ -3,15 +3,16 @@ import sys
 import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
-from core.container.container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, deprecation_serialization
+from .container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, deprecation_serialization
 from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
-from core.container.analysis import SemanticSegmentationAnalysisContainer
+from .analysis import SemanticSegmentationAnalysisContainer
+from .annotation_body import Annotatable
 from PyQt5.QtCore import pyqtSignal
 import datetime
 
 CACHE_WIDTH = 250
 
-class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable):
+class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, Annotatable):
     """
     :var title: The name of this Screenshot
     :var frame_pos: The Position of this Frame in Frames
@@ -44,6 +45,8 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
                  shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None, unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
         IClassifiable.__init__(self)
+        Annotatable.__init__(self)
+
         self.title = title
         self.img_movie = None
         self.set_img_movie(image)
