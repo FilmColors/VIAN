@@ -30,17 +30,27 @@ class CSVVocabularyImportDialog(EDialogWidget):
                             self.cB_ParentField,
                             self.cB_CategoryField,
                             self.cB_Comment,
+                            self.cB_OrganizationGroupField,
                             self.cB_HelpURL
                             ]
 
     def on_ok(self):
         if self.path is not None:
+            field_comment = self.cB_Comment.currentText()
+            field_help = self.cB_HelpURL.currentText()
+            field_organization_group = self.cB_OrganizationGroupField.currentText()
+
+            if field_comment == "": field_comment = None
+            if field_help == "": field_help = None
+            if field_organization_group == "": field_organization_group = None
+
             self.importer.import_voc(self.path, self.project,
                                  field_category=self.cB_CategoryField.currentText(),
                                  field_name=self.cB_WordName.currentText(),
                                  field_parent=self.cB_ParentField.currentText(),
-                                 field_comment=self.cB_Comment.currentText(),
-                                 field_help=self.cB_HelpURL.currentText())
+                                 field_comment=field_comment,
+                                 field_help=field_help,
+                                 field_organization_group=field_organization_group)
             self.close()
 
     def on_cancel(self):
@@ -52,15 +62,15 @@ class CSVVocabularyImportDialog(EDialogWidget):
 
     def on_path_changed(self):
         path = self.lineEdit_Path.text()
-        ret, fields = self.importer.get_fields(path)
-        if ret:
+        fields = self.importer.get_fields(path)
+        if len(fields) > 0:
             self.path = path
             self.btn_OK.setEnabled(True)
         else:
             self.path = None
             self.btn_OK.setEnabled(False)
 
-        self.set_combobox_enabled(ret)
+        self.set_combobox_enabled(len(fields) > 0)
         self.update_combobox_entries(fields)
 
     def set_combobox_enabled(self, state):
@@ -72,6 +82,7 @@ class CSVVocabularyImportDialog(EDialogWidget):
             cb.clear()
             self.cB_Comment.addItem("")
             self.cB_HelpURL.addItem("")
+            self.cB_OrganizationGroupField.addItem("")
             cb.addItems(fields)
 
         if "Term_EN" in fields:

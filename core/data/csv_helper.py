@@ -17,9 +17,7 @@ class CSVFile:
 
     def _read_data(self, path, with_header):
         with open(path, "r") as f:
-
             dialect = csv.Sniffer().sniff(f.read(1024))
-            print("CSV Dialect", dialect)
             f.seek(0)
 
             for i, r in enumerate(csv.reader(f, dialect)):
@@ -34,7 +32,6 @@ class CSVFile:
                 else:
                     for j, q in enumerate(self._header):
                         self._dataset[q].append(r[j])
-                        print(r)
 
     def read(self, p = None, with_header=True):
         self._header = []
@@ -73,6 +70,9 @@ class CSVFile:
 
         for k, v in r.items():
             self._dataset[k].append(v)
+
+    def header(self):
+        return self._header
 
     def extend(self, r):
         for q in r:

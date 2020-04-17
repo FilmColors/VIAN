@@ -16,6 +16,7 @@ from core.data.log import log_info, log_warning, log_error
 from core.container.project import *
 from core.visualization.feature_plot import *
 from core.visualization.image_plots import *
+from core.data.csv_helper import CSVFile
 
 class ImportDevice:
     def import_(self, project, path):
@@ -25,9 +26,9 @@ class ImportDevice:
 class ELANImportDevice(ImportDevice):
     pass
 
-
-class CSVImportDevice(ImportDevice):
-    pass
+#
+# class CSVImportDevice(ImportDevice):
+#     pass
 
 
 class ScreenshotImportDevice(ImportDevice):
@@ -405,96 +406,77 @@ class FileMakerVocImporter():
 
 class CSVImporter():
     def __init__(self):
-        self.delimiter = ";"
+        self.file = None
 
-    def get_fields(self, path, delimiter = ";"):
-        self.delimiter = delimiter
+    def read(self, p):
+        self.file = CSVFile().read(p)
 
-        try:
-            with open(path, 'r') as csvfile:
-                reader = csv.reader((line.replace('\0','') for line in csvfile) , delimiter=delimiter)
-                for row in reader:
-
-                    return True, row
-        except Exception as e:
-            log_error(e)
-            return False, []
+    def get_fields(self, path = None, delimiter = ";"):
+        if path is not None:
+            self.read(path)
+        return self.file.header()
 
 
 class VocabularyCSVImporter(CSVImporter):
     def __init__(self):
         super(VocabularyCSVImporter, self).__init__()
 
-    def import_voc(self, path, project: VIANProject, field_category, field_name, field_parent, field_comment ="", field_help =""):
+    def import_voc(self, path, project: VIANProject, field_category, field_name, field_parent,
+                   field_comment =None, field_help =None, field_organization_group = None):
         project.inhibit_dispatch = True
 
-        with open(path, 'r') as csvfile:
+        if self.file is None:
+            self.read(path)
 
-            # We do not want to dispatch until the end of the import
+        counter = 0
 
-            reader = csv.reader((line.replace('\0','') for line in csvfile), delimiter=';')
+        vocabularies = []
+        index_list = []
 
-            counter = 0
+        for row in self.file:
+            # Import this row as word
+            cat = row[field_category]
+            parent_name = row[field_parent]
+            w_name = row[field_name]
 
-            vocabularies = []
-            index_list = [] # To Index Parent Objects, and item is as follows: [name:str, voc:Vocabulary, word:Word or None]
+            # Check if the parent exists in the index list,  (this could either be a word or a vocabulary)
+            # if not, assume the parent is a not yet created vocabulary
+            if parent_name not in [v[0] for v in index_list]:
+                new_voc = project.create_vocabulary(parent_name)
+                new_voc.category = cat
+                vocabularies.append(new_voc)
+                index_list.append([parent_name, new_voc, None])
 
-            import_help = False
-            import_comment = False
+                if w_name != parent_name:
+                    new_word = new_voc.create_word(w_name)
+                    index_list.append([w_name, new_voc, new_word])
 
-            for row in reader:
+            else:
+                # Find the Parent in the index list and add the new Child Word
+                for v in index_list:
+                    if v[0] == parent_name:
 
-                # If this is the first Line, find the Header Fields
-                if counter == 0:
-                    idx_parent = row.index(field_parent)
-                    idx_cat = row.index(field_category)
-                    idx_word = row.index(field_name)
-                    if field_comment != "":
-                        idx_comment = row.index(field_comment)
-                        import_comment = True
-                    if field_help != "":
-                        idx_help = row.index(field_help)
-                        import_help = True
+                        # if the parent is a Word
+                        if v[2] is not None:
+                            new_word = v[1].create_word(w_name, parent_word=v[2])
+                        else:
+                            new_word = v[1].create_word(w_name)
 
+                        index_list.append([w_name, v[1], new_word])
 
-                else:
-                    # Import this row as word
-                    cat = row[idx_cat]
-                    parent_name = row[idx_parent]
-                    w_name = row[idx_word]
+                        if field_help is not None:
+                            new_word.info_url = row[field_help]
+                        if field_comment is not None:
+                            new_word.comment = row[field_comment]
+                        if field_organization_group is not None:
+                            try:
+                                int(row[field_organization_group])
+                                new_word.organization_group = int(row[field_organization_group])
+                            except Exception as e:
+                                log_warning("Could not convert OrganizationGroup field into integer", e)
+                        break
 
-                    # Check if the parent exists in the index list,  (this could either be a word or a vocabulary)
-                    # if not, assume the parent is a not yet created vocabulary
-                    if parent_name not in [v[0] for v in index_list]:
-                        new_voc = project.create_vocabulary(parent_name)
-                        new_voc.category = cat
-                        vocabularies.append(new_voc)
-                        index_list.append([parent_name, new_voc, None])
-
-                        if w_name != parent_name:
-                            new_word = new_voc.create_word(w_name)
-                            index_list.append([w_name, new_voc, new_word])
-
-                    else:
-                        # Find the Parent in the index list and add the new Child Word
-                        for v in index_list:
-                            if v[0] == parent_name:
-
-                                # if the parent is a Word
-                                if v[2] is not None:
-                                    new_word = v[1].create_word(w_name, parent_word = v[2])
-                                else:
-                                    new_word = v[1].create_word(w_name)
-
-                                index_list.append([w_name, v[1], new_word])
-
-                                if import_help:
-                                    new_word.info_url = row[idx_help]
-                                if import_comment:
-                                    new_word.comment = row[idx_comment]
-                                break
-
-                counter += 1
+            counter += 1
 
         project.inhibit_dispatch = False
         project.dispatch_changed()
