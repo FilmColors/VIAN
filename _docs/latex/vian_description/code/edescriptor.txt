@@ -1,7 +1,0 @@
-<MEDIA_DESCRIPTOR DURATION="9807872" FPS="30" IS_RELATIVE="False" MEDIA_URL="//abs_path/3774_1_1_Blade_Runner_2049_DVD.m4v" TIME_UNITS="milliseconds" YEAR="1982"/>
-
-@FPS: a float indicating the fps of this media
-@IS_RELATIVE: if MEDIA_URL is relative or not {True, False}
-@MEDIA_URL: Absolute or relative path to the media
-@YEAR: The creation year of the media
-

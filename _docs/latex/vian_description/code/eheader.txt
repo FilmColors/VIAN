@@ -1,5 +1,0 @@
-<HEADER PROJECT_NAME="107_1_1_Leave Her to Heaven_1945">
-	
-## HEADER
-@ PROJECT_NAME: The name of the project
-

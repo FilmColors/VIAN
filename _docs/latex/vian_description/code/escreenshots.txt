@@ -1,9 +1,0 @@
-<SCREENSHOTS>
-	<SCREENSHOT ID="2373585929" T_START="ts69"/>
-	<SCREENSHOT ID="7301671299" T_START="ts70"/>
-	<SCREENSHOT ID="7129636405" T_START="ts71"/>
-	...
-</SCREENSHOTS>
-
-@ID: The unique id of this screenshot
-@T_START: A reference to a TIME_SLOT indicating the start of this annotation
