@@ -23,7 +23,17 @@ Indicated in the image above are:
 - **2**: The different Layers that are being displayed in the Timeline: On the image above there is one Segmentation-Layer - **3** - and three Screenshot-Layers, where the first one shows all Screenshots, the second layer shows the one taken by hand, and the third one shows the ones that were automatically generated.
 - **3**: Below the Segmentation Layer are the clickable icons for two useful tools:
  - The locking Tool |lock_tool| is for disable the possibility of changing the segmentation - if it is red, you cannot manipulate Segments.
-  - The Classifying Tool |classify_tool| is useful if you want to quickly classify in the timeline certain Segments - this is espacially handy if you want to classify several successive Segments with the same Tag.
+ - The Classifying Tool |classify_tool| is useful if you want to quickly classify in the timeline certain Segments - this is espacially handy if you want to classify several successive Segments with the same Tag (see image below).
+
+.. figure:: timeline_classification.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+
+   The Classification inside the Timeline of VIAN.
+
+The red bar **1** was achieved by clicking «figurenzentriert» for Segment 1 and then dragging on the level of «figurenzentriert» into Segment 3.
+When the mouse click is released, all Segments under the red line become annotated with this Tag.
 
 .. |selection_tool| image:: timeline_selection_tool.png
    :height: 20px
