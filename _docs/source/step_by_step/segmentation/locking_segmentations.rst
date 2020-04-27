@@ -10,18 +10,24 @@ do one the following:
 
 1. In the Timeline:
 
-   1. **Right-Click** onto the name of the Segmentation you want to lock
-   2. In the Context Menu, choose **Lock**/**Unlock**
+   - **1**. Click the Lock-Symbol in the Segmentation you want to lock.
+   - **2**. **Right-Click** onto the name of the Segmentation you want to lock.
 
-1. In the Outliner:
-
-   1. **Right-Click** onto the name of the Segmentation you want to lock
-   2. In the Context Menu, choose **Lock**/**Unlock**
-
-.. figure:: change_main_segmentation.png
+.. figure:: lock_segmentation_timeline.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
+
+1. In the Outliner:
+
+   1. **Right-Click** onto the name of the Segmentation you want to lock.
+
+.. figure:: lock_segmentation_outliner.png
+   :scale: 80 %
+   :align: center
+   :alt: map to buried treasure
+
+|
 
 .. seealso::
 
