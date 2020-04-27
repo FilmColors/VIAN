@@ -41,5 +41,5 @@ Indicated Information:
 
 
 * :ref:`genindex`
-* :ref:`midindex`
+* :ref:`modindex`
 * :ref:`search`
