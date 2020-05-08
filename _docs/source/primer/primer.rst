@@ -19,6 +19,8 @@ In VIAN, each movie to annotate is a so called **project**. Creating a new proje
 
 Segmentation
 ============
+A crucial part of analyzing films is segmentation; breaking up a whole into logical subunits. VIAN offers the possibility to segment a movie several times, allowing for segmentation corresponding to different critera (aesthetic, story telling, etc.).
+See :ref:`segmentation` for introductory instructions.
 
 
 
