@@ -16,24 +16,23 @@ To Export the Segmentations of the Project, do the following:
 
    1. **General**
 
-      * **Path** The Path the Screenshots are exported to.
+      * **Path** The Path the Segmentations are exported to.
 
    2. **Options** Which Information for each exported Segmentation should be included.
 
       * **Annotation Text** If the Annotation Text should be included.
-      * **Frame Index** If the Segment locations should be included as Frame Indices
-      * **Time [Milliseconds]** If the Segment locations should be included in Milliseconds
-      * **Time [HH:MM:SS] Type** If the Segment locations should be included as Formated String
+      * **Frame Index** If the Segment locations should be included as Frame Indices.
+      * **Timestamp** If the Segment time information should be included as Formated String (chose format from dropdown).
 
    3. **Include** Which Information about the Locations should be included.
 
-      * **Segment Start** If the Start-Point should be included
-      * **Segment End** If the End-Point should be included
-      * **Segment Duration** If the Duration should be included
+      * **Segment Start** If the Start-Point should be included.
+      * **Segment End** If the End-Point should be included.
+      * **Segment Duration** If the Duration should be included.
 
    4. **Segmentations** Select all Segmentations you want to export.
 
-.. figure:: export_segmentations.png
+.. figure:: export_segmentation.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
