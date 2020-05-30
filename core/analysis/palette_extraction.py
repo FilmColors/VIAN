@@ -112,11 +112,11 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
             print(e)
             break
 
-    cols = np.zeros(shape=(0, 3), dtype=np.uint8)
+    cols = np.zeros(shape=(0, 3), dtype=np.float32)
     ns = np.zeros(shape=(0), dtype=np.uint16)
     layers = np.zeros(shape=(0), dtype=np.uint16)
 
-    all_col = np.array(all_col, dtype=np.uint8)
+    all_col = np.array(all_col, dtype=np.float32)
     all_n = np.array(all_n, dtype=np.uint16)
 
     i = 0
@@ -129,6 +129,7 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
         layers = np.concatenate((layers, np.array([i] * all_col[r].shape[0])))
         i += 1
 
+    cols = np.round(cv2.cvtColor(np.array([cols, cols], dtype=np.float32), cv2.COLOR_LAB2BGR)[0] * 255).astype(np.uint8)
     result = [layers, cols, ns]
     return result, merge_dists
 
@@ -151,6 +152,7 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
     frame = cv2.resize(frame, None, None, fx, fx, cv2.INTER_CUBIC)
     labels = cv2.resize(labels, None, None, fx, fx, cv2.INTER_NEAREST)
     frame_bgr = cv2.cvtColor(frame, cv2.COLOR_LAB2BGR)
+    frame_bgr = cv2.cvtColor(frame_bgr.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
 
     if mask is not None:
         mask = cv2.resize(mask, (labels.shape[1], labels.shape[0]), None, cv2.INTER_NEAREST)
@@ -192,9 +194,7 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
         all_cols.extend([avg_color] * int(np.round(bin / normalization_f)) * 2)
         all_labels.extend([lbl] * int(np.round(bin / normalization_f)) * 2)
 
-
     data = np.array(data)
-
     Z = linkage(data, 'ward')
 
     tree, merge_dists = to_cluster_tree(Z, all_labels, all_cols, n_merge_steps, n_merge_per_lvl)
