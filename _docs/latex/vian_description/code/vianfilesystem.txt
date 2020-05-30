@@ -1,9 +1,0 @@
-VIAN FileSystem: 
-Root - 	|
-       	| - myproject.json
-	| - data ------- |
-			 | - database.sqlite
-	| - results  // contains visualizations
-	| - export   // default exported data
-	| - shots    // default exported shots
-				

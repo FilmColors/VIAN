@@ -17,7 +17,10 @@ class CSVFile:
 
     def _read_data(self, path, with_header):
         with open(path, "r") as f:
-            for i, r in enumerate(csv.reader(f)):
+            dialect = csv.Sniffer().sniff(f.read(1024))
+            f.seek(0)
+
+            for i, r in enumerate(csv.reader(f, dialect)):
                 if i == 0:
                     if with_header:
                         self._header = r
@@ -29,34 +32,37 @@ class CSVFile:
                 else:
                     for j, q in enumerate(self._header):
                         self._dataset[q].append(r[j])
-                        print(r)
 
-    def read(self, p, with_header=True):
+    def read(self, p = None, with_header=True):
         self._header = []
         self._dataset = dict()
+
+        if p is not None:
+            self._path = p
         self._read_data(self._path, with_header)
 
-    def save(self, p, delimiter = ";"):
-        if sys.platform == "win32":
-            new_line = ""
-        else:
-            new_line = "\n"
+        return self
 
-        with open(p,"w", newline=new_line) as f:
-            w = csv.writer(f)
-            rows = [self._header]
-            for i in range(len(self._dataset[self._header[0]])):
-                r = []
-                for k in self._header:
-                    r.append(self._dataset[k][i])
-                rows.append(r)
-            w.writerows(rows)
+
+    def save(self, p):
+        new_line = "\n"
+        try:
+            with open(p,"w", newline=new_line, encoding="utf-8") as f:
+                w = csv.writer(f)
+                rows = [self._header]
+                for i in range(len(self._dataset[self._header[0]])):
+                    r = []
+                    for k in self._header:
+                        r.append(self._dataset[k][i])
+                    rows.append(r)
+                w.writerows(rows)
+        except Exception as e:
+            print(e)
 
     def set_header(self, header):
         self._header = header
         for q in self._header:
             self._dataset[q] = []
-
 
     def append(self, r):
         if set(r.keys()) != set(self._header):
@@ -64,6 +70,9 @@ class CSVFile:
 
         for k, v in r.items():
             self._dataset[k].append(v)
+
+    def header(self):
+        return self._header
 
     def extend(self, r):
         for q in r:

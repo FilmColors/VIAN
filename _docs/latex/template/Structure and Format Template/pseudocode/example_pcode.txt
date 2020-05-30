@@ -1,6 +1,0 @@
-nlevels = log2(I) + 1
-for l = nlevels : -1 : 1
-	loop over all 2x2x2 blocks (i,j,k)
-		A_l(i,j,k) = average(block)
-	end
-end

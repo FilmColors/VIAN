@@ -31,6 +31,7 @@ Most bindings with the ALT-key relate to windows and widgets:
 
 further keybindings:
 
+- CTRL + SHIFT + F      Search project (Annotations, Descriptions, etc.)
 - DEL     Delete Element (Segment, Screenshot etc.)
 - Space   Play/Pause Movie
 - F10     Toggle StatusBar

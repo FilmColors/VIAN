@@ -275,7 +275,9 @@ class CSVExporter(ExportDevice):
 
     def export(self, project, path):
         f = CSVFile()
-        headers = ["ROW", "ID", "START_MS", "END_MS", "ANNOTATION_TYPE", "ANNOTATION_TEXT", "NOTES"]
+        headers = ["ROW", "ID", "START_MS", "END_MS",
+                   "SELECTOR_TYPE", "ANNOTATION_MIME_TYPE", "ANNOTATION_BODY_ID", "ANNOTATION_BODY",
+                   "NOTES"]
 
         if self.export_keywords:
             keyword_mapping = get_keyword_columns(project)
@@ -289,45 +291,58 @@ class CSVExporter(ExportDevice):
             segments = []
             [segments.extend(s.segments) for s in project.segmentation]
 
-            #TODO How to multi handle annotation body
             for segm in segments:  #type:Segment
-                r = dict(
-                    ROW = c,
-                    ID = segm.unique_id,
-                    START_MS = segm.get_start(),
-                    END_MS = segm.get_end(),
-                    ANNOTATION_TYPE = "SEGMENT",
-                    ANNOTATION_TEXT = segm.get_annotation_body(),
-                    NOTES = segm.notes
-                )
-                if self.export_keywords:
-                    for k in keyword_columns:
-                        r[k] = 0
-                    for k in segm.tag_keywords:
-                        name = k.get_full_name()
-                        r[name] = 1
-                f.append(r)
-                c += 1
+                bodies = segm.get_annotations()
+                if len(bodies) == 0:
+                    bodies = [AnnotationBody()]
+                for bd in bodies:
+                    r = dict(
+                        ROW = c,
+                        ID = segm.unique_id,
+                        START_MS = segm.get_start(),
+                        END_MS = segm.get_end(),
+                        SELECTOR_TYPE = "SEGMENT",
+                        ANNOTATION_MIME_TYPE = bd.mime_type,
+                        ANNOTATION_BODY_ID = bd.unique_id,
+                        ANNOTATION_BODY = bd.content,
+                        NOTES = segm.notes
+                    )
+
+                    if self.export_keywords:
+                        for k in keyword_columns:
+                            r[k] = 0
+                        for k in segm.tag_keywords:
+                            name = k.get_full_name()
+                            r[name] = 1
+                    f.append(r)
+                    c += 1
 
         if self.export_scr:
             for scr in project.screenshots:  #type:Screenshot
-                r = dict(
-                    ROW = c,
-                    ID = scr.unique_id,
-                    START_MS = scr.get_start(),
-                    END_MS = scr.get_end(),
-                    ANNOTATION_TYPE = "SCREENSHOT",
-                    ANNOTATION_TEXT = "",
-                    NOTES = scr.notes
-                )
-                if self.export_keywords:
-                    for k in keyword_columns:
-                        r[k] = 0
-                    for k in scr.tag_keywords:
-                        name = k.get_full_name()
-                        r[name] = 1
-                f.append(r)
-                c += 1
+                bodies = scr.get_annotations()
+                if len(bodies) == 0:
+                    bodies = [AnnotationBody()]
+
+                for bd in bodies:
+                    r = dict(
+                        ROW = c,
+                        ID = scr.unique_id,
+                        START_MS = scr.get_start(),
+                        END_MS = scr.get_end(),
+                        SELECTOR_TYPE = "SCREENSHOT",
+                        ANNOTATION_MIME_TYPE=bd.mime_type,
+                        ANNOTATION_BODY_ID=bd.unique_id,
+                        ANNOTATION_BODY=bd.content,
+                        NOTES = scr.notes
+                    )
+                    if self.export_keywords:
+                        for k in keyword_columns:
+                            r[k] = 0
+                        for k in scr.tag_keywords:
+                            name = k.get_full_name()
+                            r[name] = 1
+                    f.append(r)
+                    c += 1
         f.save(path)
 
 

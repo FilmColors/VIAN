@@ -565,8 +565,7 @@ class TimebarSlice(QtWidgets.QWidget):
                 self.text += "Name: " +  str(self.item.get_name()) + "\t"
             if self.timeline.show_text:
                 self.text += "Text: " + str(self.item.get_annotation_body())
-
-            self.setToolTip("<FONT>" + self.item.get_annotation_body() + "</FONT>")
+            self.setToolTip("<FONT>" + str(self.item.get_annotation_body()) + "</FONT>")
         else:
             self.text = str(self.item.get_name())
 

@@ -39,7 +39,7 @@ To add entities on which to perform the analyses, sekect them in the :ref:`outli
    The Entitie Selection Window.
 
 After selecting the intended Screenshots in the Outliner **1**, click **+** **2** to add them to the «Target» list.
-To apply the analyses, click «Apply» **3**.
+To apply the analyses, click «Analyse» **3**.
 
 
 
@@ -47,19 +47,6 @@ To apply the analyses, click «Apply» **3**.
 Inspecting Analyses
 -------------------
 
-
-.. figure:: analyses_mask.png
-   :scale: 60%
-   :align: center
-   :alt: map to buried treasure
-   
-   The Analysis Mask that appears when analysis of an element shall be performed.
-
-Indicated Information:
-
-- **1**: The Segment, that was selected to analyze.
-- **2**: The *Analysis* Button under which the different Analyses can be selected.
-- **3**: The element on which the Analysis should be performed is again displayed (*note*: you have to actively select it again, so that the Analysis is performed)
 
 .. figure:: analyses_segment_5.png
    :scale: 60%
