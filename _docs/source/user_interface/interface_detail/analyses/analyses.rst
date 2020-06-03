@@ -47,8 +47,12 @@ To apply the analyses, click «Analyse» **3**.
 Inspecting Analyses
 -------------------
 
+After you ran an analysis, you can inspect the computed result in the following way:
 
-.. figure:: analyses_segment_5.png
+- The Color Histogram, the Color Palette, and the Color Z-Projection are visible in the respective element's **Inspector**
+- The Color Features are displayed in the **Analyses Widget**, where there are 3 different ways of plotting:
+
+.. figure:: Bookeh.png
    :scale: 60%
    :align: center
    :alt: map to buried treasure
@@ -57,9 +61,11 @@ Inspecting Analyses
 
 Indicated Information:
 
-- **1**: The Tabs indicating which Analyses have been run (in this case all three); the Color-Histogram being displayed.
-- **2**: The Entity (in this case the Segment #5)  on which the Analyses were performed is selected (if another Segment on which no Analyses were performed was to be selected, the Analysis Window would be empty).
-- **3**: The Cursor was manually dragged to a position in Segment #5 to get a Frame in the Video Player that corresponds more or less to the Analyses Window (*note*: this has to be done manually, the Cursor does not move to a Frame corresponding to the selected Entity automatically).
+- **1**: The first tab shows the selected items ploted in the AB-Plane
+- **2**: The second tab displays the elements in the Color-dT, which plots the elements over time according to their saturation
+- **3**: The third displaying is a 3-D plotting of the color features of the selected items
+
+There can sometimes be problems when it comes to display these visualizations directly in VIAN, if these visualizations are not being displayed directly in VIAN, try Analysis >> Browser Visualizations to display them in the web browser.
 
 * :ref:`genindex`
 * :ref:`modindex`
