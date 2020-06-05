@@ -45,12 +45,12 @@ To create a Segmentation automatically, do the following:
          i.e. Taking 30 to 60 Clusters gives results later in Segmentations with 30 up to 60 Segments from which can be chosen.
 
 
-.. figure:: auto_segmentation_even.jpg
+.. figure:: autosegmentation_even.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
 
-.. figure:: auto_segmentation_hist.jpg
+.. figure:: autosegmentation_histo.png
    :scale: 80 %
    :align: center
    :alt: map to buried treasure
