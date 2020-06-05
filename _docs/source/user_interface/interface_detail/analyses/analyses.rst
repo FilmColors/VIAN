@@ -49,7 +49,7 @@ Inspecting Analyses
 
 After you ran an analysis, you can inspect the computed result in the following way:
 
-- The Color Histogram, the Color Palette, and the Color Z-Projection are visible in the respective element's **Inspector**
+- The Color Histogram, the Color Palette, and the Color Z-Projection are visible in the respective element's :ref:`inspector`
 - The Color Features are displayed in the **Analyses Widget**, where there are 3 different ways of plotting:
 
 .. figure:: Bookeh.png
