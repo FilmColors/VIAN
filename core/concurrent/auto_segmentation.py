@@ -55,13 +55,15 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
         if ready:
             histograms = colormetry.get_histogram()
             frame_pos = colormetry.get_frame_pos()
+            resolution = colormetry.resolution
         else:
             histograms = None
             frame_pos  = None
+            resolution = resolution
 
         job = AutoSegmentingJob(
             [project.movie_descriptor.get_movie_path(),
-             colormetry.resolution,
+             resolution,
              project.movie_descriptor.fps,
              histograms,
              frame_pos,

@@ -608,7 +608,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             # print("Current Location", self.current_y, self.verticalScrollBar().value())
             self.verticalScrollBar().setValue(self.current_y)
 
-
     def clear_manager(self):
         self.current_y = self.verticalScrollBar().value()
         self.clear_scr_captions()
