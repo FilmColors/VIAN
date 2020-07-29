@@ -382,5 +382,6 @@ class ApplySegmentationWindow(QMainWindow):
                                          inhibit_overlap=False,
                                          dispatch=False)
 
+        QMessageBox.information(self, "Segmentation Created", "Segmentation has been created!")
         self.project.dispatch_changed()
 
