@@ -243,7 +243,7 @@ class Player_VLC(VideoPlayer):
     def __init__(self, main_window):
         super(Player_VLC, self).__init__(main_window)
 
-        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat --quiet"
+        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --verbose 0 --repeat" #--verbose 0 --quiet
         self.media_player = None
         self.vlc_instance = None
         # self.media_player = self.vlc_instance.media_player_new()
@@ -256,7 +256,6 @@ class Player_VLC(VideoPlayer):
             self.videoframe = QtWidgets.QMacCocoaViewContainer(0, None)
         else:
             self.videoframe = QtWidgets.QFrame()
-
 
         self.videoframe.setParent(self)
         self.palette = self.videoframe.palette()

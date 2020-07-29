@@ -146,7 +146,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
             sign_progress(1.0)
             result.append(
              IAnalysisJobAnalysis(
-                name="Color-Features",
+                name="Average Color",
                 results = dict(color_lab=colors_lab,
                                color_bgr = colors_bgr,
                                saturation_l=saturation_l,
@@ -178,14 +178,24 @@ class ColorFeatureAnalysis(IAnalysisJob):
         This should return the Widget that is shown in the Inspector when the analysis is selected
         """
         w = QWidget()
-        w.setLayout(QVBoxLayout(w))
-        w.layout().addWidget(QLabel("Color CIE-Lab:".rjust(20) + str(analysis.get_adata()['color_lab']), w))
-        w.layout().addWidget(QLabel("Color BGR:".rjust(20) + str(analysis.get_adata()['color_bgr']), w))
-        w.layout().addWidget(QLabel("Saturation Luebbe:".rjust(20) + str(analysis.get_adata()['saturation_l']), w))
-        w.layout().addWidget(QLabel("Saturation FilmCo:".rjust(20) + str(analysis.get_adata()['saturation_p']), w))
+        lt = QGridLayout(w)
+        w.setLayout(lt)
+
+        lt.addWidget(QLabel("Lab:"),0,0)
+        lbl1 = QLabel(str(analysis.get_adata()['color_lab']).replace("[", "(").replace("]",")"))
+        lt.addWidget(lbl1, 0, 1)
+
+        lt.addWidget(QLabel("RGB:"), 1, 0)
+        lbl2 = QLabel(str(analysis.get_adata()['color_bgr'][::-1]).replace("[", "(").replace("]",")"))
+        lt.addWidget(lbl2, 1, 1)
+
+        lt.addWidget(QLabel("LCH:"), 2, 0)
+        lbl3 = QLabel(str(lab_to_lch(analysis.get_adata()['color_lab'])).replace("[", "(").replace("]",")"))
+        lt.addWidget(lbl3, 2, 1)
+
         view = EGraphicsView(w)
         view.set_image(numpy_to_pixmap(np.array(([[analysis.get_adata()['color_bgr']] * 100 ] * 25)).astype(np.uint8)))
-        w.layout().addWidget(view)
+        lt.addWidget(view, 3, 0, 1, 2)
         return w
 
     def get_visualization(self, analysis, result_path, data_path, project, main_window):
