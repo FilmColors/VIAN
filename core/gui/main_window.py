@@ -576,7 +576,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.close_project()
 
         self.show()
-
+        self.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
         self.switch_perspective(Perspective.Segmentation)
         loading_screen.hide()
         self.setWindowState(Qt.WindowMaximized)
@@ -1759,6 +1759,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.update_rate()
 
     def on_create_experiment(self):
+        print("Hello Experiment")
         if self.project is not None:
             self.project.create_experiment()
 
