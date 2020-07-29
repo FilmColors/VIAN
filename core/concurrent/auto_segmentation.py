@@ -91,7 +91,7 @@ class DialogAutoSegmentation(EDialogWidget):
 
         self.lbl_not_ready = QLabel("The Colormetry has not finished yet,\n"
                                     "please wait until it is finished and try again.\n\n"
-                                    "The progress is indicated by the green line on the Timeline.")
+                                    "The progress is inAtrousConvolution2Ddicated by the green line on the Timeline.")
         self.lbl_not_ready.setStyleSheet("QLabel{foreground: red;}")
         #self.btn_start_colormetry = QPushButton("Start Colorimetry")
         #self.btn_start_colormetry.clicked.connect(self.main_window.toggle_colormetry)
@@ -121,7 +121,9 @@ class DialogAutoSegmentation(EDialogWidget):
         #     self.lbl_not_ready.hide()
         #     self.btn_Run.setEnabled(True)
 
+    @pyqtSlot()
     def on_ok(self):
+        print("Hello")
         if self.comboBox_Distribution.currentIndex() == 0:
             n_segments = self.spinBox_NSegments.value()
             segment_width = -1

@@ -13,7 +13,7 @@ import tensorflow as tf
 from keras.models import Model
 from keras.layers import Input, Reshape, Permute, Dense, Activation, Flatten, Conv2D
 from keras.layers import MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D, GlobalMaxPool2D, BatchNormalization
-from keras.layers import Convolution2D, UpSampling2D, AtrousConvolution2D, ZeroPadding2D, Lambda, Conv2DTranspose
+from keras.layers import Convolution2D, UpSampling2D, ZeroPadding2D, Lambda, Conv2DTranspose
 from keras.layers import multiply, add, concatenate, merge
 from keras.engine.topology import Layer
 from keras.engine import InputSpec

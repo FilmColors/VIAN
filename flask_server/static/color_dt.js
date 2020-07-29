@@ -181,6 +181,7 @@ class ColorDT {
         else {
             values = source.data.lum
         }
+        this.plot.left[0].axis_label = t
         source.data.y = values;
         source.change.emit()
     }
