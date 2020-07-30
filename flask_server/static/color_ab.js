@@ -100,6 +100,7 @@ class ColorAB {
 
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
+        console.log(this.plot)
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
         this.source.change.emit()
     }

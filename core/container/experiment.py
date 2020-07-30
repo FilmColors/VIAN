@@ -606,6 +606,8 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.unique_keywords.append(keyword)
                 keywords.append(keyword)
             self.onUniqueKeywordsChanged.emit(self)
+            voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
+            voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
             return keywords
         else:
             #Check if really there are new words in the vocabulary which are not yet added to the keywords.
@@ -629,6 +631,20 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.onUniqueKeywordsChanged.emit(self)
             return keywords
 
+    def on_vocabulary_word_added(self, w:VocabularyWord):
+        keyword = UniqueKeyword(self.experiment, w.vocabulary, w, self)
+        self.unique_keywords.append(keyword)
+        self.onUniqueKeywordsChanged.emit(self)
+
+    def on_vocabulary_word_removed(self, w:VocabularyWord):
+        to_remove = None
+        for kwd in self.unique_keywords:
+            if kwd.word_obj == w:
+                to_remove = kwd
+        if to_remove is not None:
+            self.unique_keywords.remove(to_remove)
+        self.onUniqueKeywordsChanged.emit(self)
+
     def remove_vocabulary(self, voc):
         if voc not in self.classification_vocabularies:
             return
@@ -640,6 +656,9 @@ class ClassificationObject(IProjectContainer, IHasName):
 
         for d in to_delete:
             self.project.remove_from_id_list(d)
+
+        voc.onVocabularyWordAdded.disconnect(self.on_vocabulary_word_added)
+        voc.onVocabularyWordRemoved.disconnect(self.on_vocabulary_word_removed)
 
         self.onUniqueKeywordsChanged.emit(self)
 
@@ -733,6 +752,8 @@ class ClassificationObject(IProjectContainer, IHasName):
             voc = project.get_by_id(uid)
             if voc is not None:
                 self.classification_vocabularies.append(voc)
+                voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
+                voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
             else:
                 raise Exception("Could not Resolve Vocabulary", uid)
                 log_warning("Could not Resolve Vocabulary:", uid)
