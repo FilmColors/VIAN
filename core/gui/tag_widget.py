@@ -56,7 +56,7 @@ class Tag(QFrame):
                             "margin: 1px; "
                             "padding: 1px;}")
 
-        self.btn_remove = QPushButton("X")
+        # self.btn_remove = QPushButton("X")
         self.lbl = QLabel(lbl)
 
         self.lbl.setStyleSheet("QWidget{border:0px solid white; margin: 1px; ""padding: 1px;}")
@@ -64,6 +64,6 @@ class Tag(QFrame):
         self.layout().setSpacing(1)
         self.layout().setContentsMargins(1,1,1,1)
         self.layout().addWidget(self.lbl)
-        self.layout().addWidget(self.btn_remove)
+        # self.layout().addWidget(self.btn_remove)
 
 
