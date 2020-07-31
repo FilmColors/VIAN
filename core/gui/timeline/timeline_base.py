@@ -118,10 +118,9 @@ class TimelineControl(QtWidgets.QWidget):
         if isinstance(self.item, ILockable):
             if self.item.is_locked():
                 self.item.unlock()
-                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_lock_green.png"))
             else:
                 self.item.lock()
-                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
+
 
     def update_lock(self, state):
         if isinstance(self.item, ILockable):
