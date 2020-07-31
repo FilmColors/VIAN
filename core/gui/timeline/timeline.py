@@ -168,6 +168,16 @@ class TimelineToolbar(QToolBar):
         self.a_merge.triggered.connect(self.timeline.activate_merge_tool)
         self.a_merge.setToolTip("Merge Tool")
 
+        self.a_zoom_in = self.addAction(create_icon("qt_ui/icons/icon_zoom_in.png"), "Zoom in (Ctrl + Scroll)")
+        self.a_zoom_out = self.addAction(create_icon("qt_ui/icons/icon_zoom_out.png"),"Zoom out (Ctrl + Scroll)")
+        
+        self.a_zoom_in.triggered.connect(partial(self.on_zoom, 180))
+        self.a_zoom_out.triggered.connect(partial(self.on_zoom, -180))
+
+    def on_zoom(self, angle):
+        pos = self.timeline.time_scrubber.pos()
+        angle = QPoint(angle, angle)
+        self.timeline.zoom_timeline(pos, angle, force=True)
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def __init__(self, main_window, parent):
@@ -241,7 +251,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scrollArea.horizontalScrollBar().valueChanged.connect(self.scroll_h)
         self.scrollArea.verticalScrollBar().valueChanged.connect(self.scroll_v)
         self.scrollArea.installEventFilter(self)
-
         # Settings
         self.show_id = True
         self.show_name = False
