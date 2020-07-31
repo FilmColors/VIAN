@@ -6,6 +6,7 @@ from core.gui.perspectives import Perspective
 from core.node_editor.node_editor import *
 from core.gui.annotation_editor import AnnotationEditor
 
+from core.gui.tag_widget import TagWidget
 from PyQt5 import QtCore
 
 class Inspector(EDockWidget, IProjectChangeNotify):
@@ -142,8 +143,12 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         if isinstance(target_item, IHasMediaObject):
             widgets.append(AttributesMediaObject(self, target_item))
 
+        if isinstance(target_item, IClassifiable):
+            widgets.append(AttributesClassifiable(self, target_item))
+
         for w in widgets:
             self.add_attribute_widget(w)
+
 
         # TODO VOcabularies should be removed completely from the Inspector
         # if self.item is not None and isinstance(self.item, IHasVocabulary):
@@ -659,5 +664,16 @@ class DefaultLiteral(AttributesNodeDefaultValues):
         super(DefaultLiteral, self).on_value_changed()
 
 
+class AttributesClassifiable(QWidget):
+    def __init__(self, parent, descriptor:IClassifiable):
+        super(AttributesClassifiable, self).__init__(parent)
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(QLabel("Classification"))
+        self.tag_widget = TagWidget(self)
+        self.layout().addWidget(self.tag_widget)
 
+        self.descriptor = descriptor
+        for t in descriptor.tag_keywords:
+            self.tag_widget.add_tag(":".join([t.class_obj.name, t.voc_obj.name, t.word_obj.name]))
+        self.show()
 

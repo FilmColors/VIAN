@@ -28,8 +28,6 @@ def cluster_histograms_adjacently(x, n_clusters = 2):
     return model.labels_
 
 
-
-
 def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100, resolution=30):
     duration = project.movie_descriptor.duration
     if mode == AUTO_SEGM_EVEN:
