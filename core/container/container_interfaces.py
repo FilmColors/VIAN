@@ -204,13 +204,16 @@ class ITimeRange():
 
 
 class ILockable():
+    onLockChanged = pyqtSignal(bool)
     def __init__(self):
         self.locked = False
 
     def lock(self):
+        self.onLockChanged.emit(True)
         self.locked = True
 
     def unlock(self):
+        self.onLockChanged.emit(False)
         self.locked = False
 
     def is_locked(self):

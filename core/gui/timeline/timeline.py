@@ -170,7 +170,7 @@ class TimelineToolbar(QToolBar):
 
         self.a_zoom_in = self.addAction(create_icon("qt_ui/icons/icon_zoom_in.png"), "Zoom in (Ctrl + Scroll)")
         self.a_zoom_out = self.addAction(create_icon("qt_ui/icons/icon_zoom_out.png"),"Zoom out (Ctrl + Scroll)")
-        
+
         self.a_zoom_in.triggered.connect(partial(self.on_zoom, 180))
         self.a_zoom_out.triggered.connect(partial(self.on_zoom, -180))
 

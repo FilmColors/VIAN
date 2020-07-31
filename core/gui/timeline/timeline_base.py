@@ -88,6 +88,7 @@ class TimelineControl(QtWidgets.QWidget):
             else:
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_lock_green.png"))
             self.btn_lock.clicked.connect(self.toggle_lock)
+            self.item.onLockChanged.connect(self.update_lock)
 
         if isinstance(self.item, Segmentation):
             self.btn_classification = QPushButton(create_icon("qt_ui/icons/icon_classification"), "", self)
@@ -115,12 +116,18 @@ class TimelineControl(QtWidgets.QWidget):
 
     def toggle_lock(self):
         if isinstance(self.item, ILockable):
-
             if self.item.is_locked():
                 self.item.unlock()
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_lock_green.png"))
             else:
                 self.item.lock()
+                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
+
+    def update_lock(self, state):
+        if isinstance(self.item, ILockable):
+            if not state:
+                self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_lock_green.png"))
+            else:
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
 
     def toggle_classification(self):
