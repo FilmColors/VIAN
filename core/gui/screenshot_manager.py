@@ -889,7 +889,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def rubber_band_selection(self, QRect, Union, QPointF=None, QPoint=None):
         self.rubberband_rect = self.mapToScene(QRect).boundingRect()
 
-    def export_screenshots(self, path, visibility=None, image_type=None, quality=None, naming=None, smooth=False):
+    def export_screenshots(self, path, visibility=None, image_type=None, quality=None, naming=None, smooth=False, apply_letterbox=False):
         screenshots = []
 
         # If there are selected Screenshots, only export those,
@@ -911,7 +911,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 os.mkdir(path)
 
             exporter = ScreenshotsExporter(self.main_window.settings, self.main_window.project, naming)
-            exporter.export(screenshots, path, visibility, image_type, quality, smooth)
+            exporter.export(screenshots, path, visibility, image_type, quality, smooth, apply_letterbox)
         except OSError as e:
             QMessageBox.warning(self.main_window, "Failed to Create Directory", "Please choose a valid path\n\n" + path)
             self.main_window.print_message("Failed to Create Directory: " + path, "Red")

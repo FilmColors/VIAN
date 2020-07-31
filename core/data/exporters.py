@@ -129,7 +129,12 @@ class ScreenshotsExporter():
         self.project = project
         self.naming = naming
 
-    def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100, smooth = False):
+    def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100, smooth = False, apply_letterbox=False):
+        lbox = None
+        if apply_letterbox is True:
+            lbox = self.project.movie_descriptor.get_letterbox_rect()
+            if lbox is None:
+                QMessageBox.warning(None, "No letterbox applied", "No letterbox has been applied, the default frame is used. To set a letterbox, go to Player/Set Letterbox prior to export.")
         for s in screenshots:
             if self.naming is None:
                 name = build_file_name(self.settings.SCREENSHOTS_EXPORT_NAMING, s, self.project.movie_descriptor)
@@ -149,6 +154,8 @@ class ScreenshotsExporter():
                 img = cv2.GaussianBlur(img, (3, 3), 0)
             # Export depending on the image Type selected
 
+            if lbox is not None:
+                img = img[lbox[1]:lbox[1] + lbox[3], lbox[0]:lbox[0] + lbox[2]]
             if image_type.value == ImageType.JPG.value:
                 cv2.imwrite(file_name + ".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, quality])
 
