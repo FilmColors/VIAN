@@ -119,7 +119,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
                 results = dict(tree=result.tree, dist = result.merge_dists),
                 analysis_job_class=self.__class__,
                 parameters=dict(resolution=self.resolution),
-                container=args['target']
+                container=args['target'],
             )
         return None
 

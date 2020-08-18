@@ -6,7 +6,7 @@ from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.auto_segmentation import DialogAutoSegmentation
 
-from core.data.webapp_interface import *
+from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
@@ -558,6 +558,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_toolbar.runAll.connect(self.pipeline_widget.pipeline.run_all)
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
+        self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
 
@@ -2152,7 +2153,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.import_(WebAppProjectImporter(self.project.movie_descriptor.movie_path,
                                                    directory=directory),
                              project_file)
-        self.dispatch_on_loaded()
+
+        self.project.store_project(self.project.path)
+        p = self.project.path
+        self.close_project()
+
+        self.load_project(p)
 
 
 

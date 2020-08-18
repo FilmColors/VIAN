@@ -964,24 +964,25 @@ class VIANProject(QObject, IHasName, IClassifiable):
         n_analyses_done = 0
 
         for c in containers:
-            for r in requirements:
+            for (analysis_name, class_obj_name, priority) in requirements:
                 found = False
+
                 for a in c.connected_analyses:
                     if a.target_classification_object is None:
                         continue
-                    if a.analysis_job_class == r[0] and a.target_classification_object.name == r[1]:
+                    if a.analysis_job_class == analysis_name and a.target_classification_object.name == class_obj_name:
                         found = True
                         break
                 if found:
                     n_analyses_done += 1
                 else:
-                    if r[2] not in missing_analyses:
-                        missing_analyses[r[2]] = dict()
-                    if r[0] not in missing_analyses[r[2]]:
-                        missing_analyses[r[2]][r[0]] = dict()
-                    if r[1] not in missing_analyses[r[2]][r[0]]:
-                        missing_analyses[r[2]][r[0]][r[1]] = []
-                    missing_analyses[r[2]][r[0]][r[1]].append(c)
+                    if priority not in missing_analyses:
+                        missing_analyses[priority] = dict()
+                    if analysis_name not in missing_analyses[priority]:
+                        missing_analyses[priority][analysis_name] = dict()
+                    if class_obj_name not in missing_analyses[priority][analysis_name]:
+                        missing_analyses[priority][analysis_name][class_obj_name] = []
+                    missing_analyses[priority][analysis_name][class_obj_name].append(c)
 
         return (missing_analyses, n_analyses, n_analyses_done)
 

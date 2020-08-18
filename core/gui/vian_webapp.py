@@ -6,10 +6,13 @@ from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import *
 from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
 from core.gui.misc.filmography_widget import FilmographyWidget2
+from core.container.project import VIANProject
 
+from core.data.log import log_warning, log_info
 
 class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
     runAllAnalyses = pyqtSignal()
+    onRunAnalysis = pyqtSignal(object)
 
     def __init__(self, main_window, corpus_client:CorpusClient):
         super(WebAppCorpusDock, self).__init__(main_window, False)
@@ -51,6 +54,7 @@ class CorpusProgressWidget(QWidget):
     onThresholdReached = pyqtSignal()
     onRunAll = pyqtSignal()
 
+
     def __init__(self, parent, corpus_widget, main_window):
         super(CorpusProgressWidget, self).__init__(parent)
         self.main_window = main_window
@@ -59,6 +63,10 @@ class CorpusProgressWidget(QWidget):
         self.setLayout(QVBoxLayout())
         self.btn_checkFiles = QPushButton("1. Check Project")
         self.btn_checkFiles.clicked.connect(self.update_state)
+
+        self.btn_runAll = QPushButton("2. Run All Analyses")
+        self.btn_runAll.clicked.connect(self.compute_missing)
+
         self.layout().addWidget(self.btn_checkFiles)
         self.list_widget = QWidget(self)
         self.list_widget.setLayout(QVBoxLayout())
@@ -67,16 +75,18 @@ class CorpusProgressWidget(QWidget):
         self.spacer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
 
         self.layout().addWidget(self.spacer)
-        self.lbl_Instructions = QLabel("The webapp requires a specific set of analyses performed before upload. "
-                                       "Currently these requirements are not met. To perform these analyses do the following:\n "
-                                       "1. Go to the pipeline manager\n"
-                                       "2. Select the ERCFilmColors Pipeline\n"
-                                       "3. In the Dropdown, select the ERC Advanced Grant FilmColors Experiment\n"
-                                       "4. Press 'Run All Missing Analyses'")
-        self.lbl_Instructions.setWordWrap(True)
+        self.layout().addWidget(self.btn_runAll)
+
+        # self.lbl_Instructions = QLabel("The webapp requires a specific set of analyses performed before upload. "
+        #                                "Currently these requirements are not met. To perform these analyses do the following:\n "
+        #                                "1. Go to the pipeline manager\n"
+        #                                "2. Select the ERCFilmColors Pipeline\n"
+        #                                "3. In the Dropdown, select the ERC Advanced Grant FilmColors Experiment\n"
+        #                                "4. Press 'Run All Missing Analyses'")
+        # self.lbl_Instructions.setWordWrap(True)
 
         self.requirements = ERCFilmColorsVIANPipeline.requirements
-        self.layout().addWidget(self.lbl_Instructions)
+        # self.layout().addWidget(self.lbl_Instructions)
         self.items = dict()
         self.missing_analyses = dict()
 
@@ -116,11 +126,35 @@ class CorpusProgressWidget(QWidget):
             if res["progress_screenshots"] >= ERCFilmColorsVIANPipeline.finished_threshold and \
                 res["progress_segmentation"] >= ERCFilmColorsVIANPipeline.finished_threshold:
                 self.onThresholdReached.emit()
-                self.lbl_Instructions.setVisible(False)
+                # self.lbl_Instructions.setVisible(False)
             else:
-                self.lbl_Instructions.setVisible(True)
+                pass
+                # self.lbl_Instructions.setVisible(True)
         else:
             QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
+
+    def compute_missing(self):
+        missing = self.main_window.project.get_missing_analyses(ERCFilmColorsVIANPipeline.requirements)
+        p = self.main_window.project #type:VIANProject
+
+        for k, (container_type, _, _) in missing.items():
+            for priority, by_priority in container_type.items():
+                for analysis_name, by_cl_obj in by_priority.items():
+                    analysis = self.main_window.eval_class(analysis_name)
+                    for clobj_name, containers in by_cl_obj.items():
+                        clobj = p.get_classification_object_global(clobj_name)
+                        if clobj is None:
+                            log_warning("Classification Object not found")
+                            continue
+                        d = dict(
+                            analysis=analysis(),
+                            targets=containers,
+                            parameters=None,
+                            classification_objs=clobj
+                        )
+                        log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
+                        self.corpus_widget.onRunAnalysis.emit(d)
+
 
 
 class ProgressItem(QWidget):
@@ -163,12 +197,14 @@ class CorpusClientWidget(QWidget):
         ret = False
         if self.main_window.settings.CONTRIBUTOR.token is not None:
             ret = self.corpus_client.connect_webapp(self.main_window.settings.CONTRIBUTOR)['success']
-
-        if self.main_window.settings.CONTRIBUTOR.token is None or ret is False:
+            if ret:
+                self.on_connected()
+            else:
+                dialog = WebAppLoginDialog(self.main_window, self.corpus_client)
+                dialog.show()
+        else:
             dialog = WebAppLoginDialog(self.main_window, self.corpus_client)
             dialog.show()
-        else:
-            self.on_disconnected()
 
     def on_options(self):
         menu = CorpusOptionMenu(self, self.corpus_client)

@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QSlider, QPushButton, QVBoxLayout, QGraphic
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QPen, QColor, QPainter, QPainterPath, QResizeEvent
 from PyQt5 import QtCore
+
 import cv2
 import os
 import numpy as np
@@ -10,6 +11,7 @@ import typing
 
 from core.data.computation import numpy_to_pixmap
 from core.gui.ewidgetbase import EDialogWidget
+
 
 class LetterBoxWidget(EDialogWidget):
     onFrameChanged = pyqtSignal(object)

@@ -582,7 +582,7 @@ class ExperimentTemplateImporter(ImportDevice):
         for entry in data['vocabularies']:
             # voc = project.create_vocabulary(name=entry['name'])
             voc = Vocabulary(name=entry['name'])
-            voc.unique_id = entry['unique_id']
+            voc.unique_id = entry['uuid']
             voc.uuid = entry['uuid']
             voc.category = entry['vocabulary_category']
             if voc.name in self.hidden_vocs:
