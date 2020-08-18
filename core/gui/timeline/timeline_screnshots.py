@@ -1,15 +1,12 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
+from PyQt5.QtCore import pyqtSlot
+from core.gui.timeline.timeline_base import TimelineBar
 
 from core.gui.context_menu import open_context_menu
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
-from core.container.project import Screenshot, ScreenshotGroup
-from core.gui.ewidgetbase import ImagePreviewPopup, TextEditPopup
+from core.container.project import Screenshot
+from core.gui.ewidgetbase import ImagePreviewPopup
 from core.data.computation import numpy_to_pixmap
 
 

@@ -5,14 +5,9 @@ June 2018
 
 """
 COLOR_PALETTES_MAX_LENGTH = 1024
-from typing import List
 
-from core.data.computation import ms_to_frames, numpy_to_pixmap
 from core.container.project import *
-from core.gui.ewidgetbase import EGraphicsView
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from core.analysis.palette_extraction import *
+from core.analysis.color.palette_extraction import *
 from core.visualization.palette_plot import *
 from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 from core.container.hdf5_manager import vian_analysis

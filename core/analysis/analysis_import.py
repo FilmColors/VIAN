@@ -1,16 +1,16 @@
-from core.analysis.color_feature_extractor import *
-from core.analysis.palette_analysis import *
-from core.analysis.barcode_analysis import *
 from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
-from core.analysis.histogram_analysis import ColorHistogramAnalysis
-from core.analysis.z_projection import ZProjectionAnalysis
 from core.container.hdf5_manager import vian_analysis
 
 # import dlib
 try:
     from core.analysis.semantic_segmentation import *
     from core.analysis.deep_learning.face_identification import *
+    from core.analysis.color.average_color import *
+    from core.analysis.color.histogram_analysis import *
+    from core.analysis.color.palette_analysis import *
+    from core.analysis.z_projection import *
+
     import os
     # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     from core.analysis.import_tensortflow import tf

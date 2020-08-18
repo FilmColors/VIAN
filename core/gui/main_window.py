@@ -10,6 +10,7 @@ from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
+from core.data.corpus_client import WebAppCorpusInterface
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
 from core.data.vian_updater import VianUpdaterJob
@@ -48,6 +49,8 @@ from core.gui.timeline.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
 from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
 from core.gui.corpus_widget import CorpusDockWidget
+from core.gui.misc.filmography_widget import query_initial
+
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
@@ -573,6 +576,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.undo_manager.clear()
         self.close_project()
 
+        query_initial(WebAppCorpusInterface())
         self.show()
         self.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
         self.on_pipeline_settings_changed()

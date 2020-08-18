@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 
 from core.data.log import log_error
 from core.data.computation import pixmap_to_numpy, numpy_to_pixmap
+from core.container.project import VIANProject
 import cv2
 from functools import partial
 from PyQt5 import uic
@@ -176,7 +177,7 @@ class EDockWidget(QDockWidget):
     def show(self):
         super(EDockWidget, self).show()
 
-    def project(self):
+    def project(self) -> VIANProject:
         try:
             return self.main_window.project
         except TypeError:

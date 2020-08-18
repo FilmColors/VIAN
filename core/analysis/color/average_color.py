@@ -5,19 +5,11 @@ June 2018
 
 """
 
-from typing import List
-
-from core.data.computation import ms_to_frames, numpy_to_pixmap, floatify_img, labels_to_binary_mask
-import json
 from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
-from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject, Segmentation
+from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, IProjectContainer, VIANProject
 from core.container.analysis import IAnalysisJobAnalysis
 
-from core.gui.ewidgetbase import EGraphicsView
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from core.analysis.palette_extraction import *
-from core.container.screenshot import Screenshot
+from core.analysis.color.palette_extraction import *
 from core.container.hdf5_manager import vian_analysis
 from core.visualization.palette_plot import *
 

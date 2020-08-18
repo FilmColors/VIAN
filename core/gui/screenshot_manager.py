@@ -1,25 +1,17 @@
-import os
-import cv2
-import numpy as np
-import time
-
-from functools import partial
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot, QRect
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
 from core.data.enums import *
-from collections import namedtuple
 
 from core.data.computation import *
 from core.container.project import VIANProject
 from core.container.screenshot import Screenshot
 from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
-from core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
-from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime, ImagePlotPlane
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
+from core.visualization.image_plots import ImagePlotCircular, ImagePlotTime, ImagePlotPlane
+from core.analysis.color.average_color import ColorFeatureAnalysis
 from core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
 
 SCALING_MODE_NONE = 0

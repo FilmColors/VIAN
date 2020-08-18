@@ -1,32 +1,22 @@
-from functools import partial
-
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtGui
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from core.gui.ewidgetbase import EDockWidget
 
-from .timeline_base import TimelineControl, TimelineBar, TimebarSlice, MediaObjectWidget, \
-    TimebarKey, TimelineScrubber, TimelineTimemark
-from .timeline_segmentation import TimebarSegmentationSlice, TimelineSegmentationControl, TimelineSegmentationBar
-from .timeline_svg_annotation import TimebarAnnotationSlice, TimelineAnnotationLayerControl, TimelineAnnotationBar
-from .timeline_visualization import TimelineVisualizationControl, TimelineAreaPlot, TimelineLinePlot, TimelineVisualization
-from .timeline_screnshots import ScreenshotGroupBar, TimebarPicture
+from .timeline_base import TimelineControl, TimelineBar, TimelineScrubber, TimelineTimemark
+from .timeline_segmentation import TimelineSegmentationControl, TimelineSegmentationBar
+from .timeline_svg_annotation import TimelineAnnotationLayerControl, TimelineAnnotationBar
+from .timeline_visualization import TimelineVisualizationControl, TimelineAreaPlot, TimelineLinePlot
+from .timeline_screnshots import ScreenshotGroupBar
 from .timeline_subsegmentation import TimelineSubSegmentation, TimelineSubSegmentationEntry, \
-    TimebarSubSegmentationSlice, TimelineSubSegmentationBar, TimelineSubSegmentationControl, TimelineControlParent
+    TimelineSubSegmentationBar, TimelineSubSegmentationControl, TimelineControlParent
 
-from core.data.computation import ms_to_string
 from core.data.interfaces import TimelineDataset
 from core.container.project import *
-from core.container.container_interfaces import ILockable
-from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
-
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
-
-import time
 
 
 class TimelineContainer(EDockWidget):

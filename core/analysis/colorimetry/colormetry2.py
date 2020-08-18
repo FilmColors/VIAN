@@ -1,9 +1,8 @@
 from core.container.project import VIANProject
-from core.data.interfaces import IConcurrentJob
 from core.analysis.colorimetry.computation import calculate_histogram
 from core.data.computation import frame2ms, ms_to_frames, lab_to_sat
 from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
-from core.analysis.palette_extraction import *
+from core.analysis.color.palette_extraction import *
 import cv2
 import numpy as np
 from collections import namedtuple

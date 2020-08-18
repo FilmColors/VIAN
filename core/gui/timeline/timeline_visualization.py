@@ -1,12 +1,9 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import *
+from PyQt5 import QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
+from core.gui.timeline.timeline_base import TimelineControl, TimelineBar
 
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
 from core.data.interfaces import TimelineDataset
 from core.container.project import *
 

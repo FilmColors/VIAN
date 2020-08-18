@@ -3,12 +3,39 @@ from PyQt5.QtCore import pyqtSignal
 
 from core.gui.ewidgetbase import MultiItemTextInput, QLabel
 
+# We query the database at startup once
+_persons = None
+_processes = None
+_genres = None
+_countries = None
+_companies = None
+
+def query_initial(corpus_client):
+    global _persons
+    global _processes
+    global _genres
+    global _countries
+    global _companies
+
+    _persons = corpus_client.get_persons()
+    _processes = corpus_client.get_color_processes()
+    _genres = corpus_client.get_genres()
+    _countries = corpus_client.get_countries()
+    _companies = corpus_client.get_companies()
+
+
 class FilmographyWidget2(QWidget):
     onFilmographyChanged = pyqtSignal()
 
     def __init__(self, parent, project = None, persons = None, processes = None, genres = None, countries = None, companies=None):
         super(FilmographyWidget2, self).__init__(parent)
         self.setLayout(QVBoxLayout(self))
+
+        persons = _persons if persons is None else None
+        processes = _processes if processes is None else None
+        genres = _genres if genres is None else None
+        countries = _countries if countries is None else None
+        companies = _companies if companies is None else None
 
         self.area = QScrollArea(self)
         self.layout().addWidget(self.area)

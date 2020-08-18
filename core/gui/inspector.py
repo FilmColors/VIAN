@@ -5,6 +5,7 @@ from core.gui.context_menu import open_context_menu
 from core.gui.perspectives import Perspective
 from core.node_editor.node_editor import *
 from core.gui.annotation_editor import AnnotationEditor
+from core.gui.misc.filmography_widget import FilmographyWidget2
 
 from core.gui.tag_widget import TagWidget
 from PyQt5 import QtCore
@@ -98,7 +99,11 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         s_type = selected[len(selected) - 1].get_type()
         if s_type == MOVIE_DESCRIPTOR:
             self.lbl_Type.setText("Movie Descriptor")
-            widgets = [AttributesMovieDescriptor(self, target_item)]
+            t = FilmographyWidget2(self, self.project())
+            def update_filmography(self, t):
+                self.project().movie_descriptor.meta_data = t.get_filmography()
+            t.onFilmographyChanged.connect(partial(update_filmography, self, t))
+            widgets = [AttributesMovieDescriptor(self, target_item), t]
 
         if s_type == SCREENSHOT:
             self.lbl_Type.setText("Screenshot")
