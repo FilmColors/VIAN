@@ -2,19 +2,18 @@ import os
 
 import cv2
 import numpy as np
-from functools import partial
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QFileDialog, QToolBar, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFontDialog, QSizePolicy, QTabWidget, QSlider
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtWidgets import QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFontDialog, QSizePolicy, QTabWidget, QSlider
+from PyQt5.QtGui import QFont
 
 from core.data.computation import create_icon, parse_file_path, tuple2point, get_mouse_handle_by_location
-from core.container.annotation import Annotation, AnnotationLayer, ANNOTATION_LAYER, ANNOTATION, AnnotationType
+from core.container.annotation import Annotation, AnnotationLayer, ANNOTATION, AnnotationType
 from core.gui.perspectives import Perspective
-from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending, IConcurrentJob
+from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
 from core.gui.color_palette import ColorSelector
 from core.gui.context_menu import open_context_menu
-from core.gui.hsv_color_picker import HSVColorPicker
+from core.gui.misc.hsv_color_picker import HSVColorPicker
 
 from .ewidgetbase import EDockWidget, EToolBar
 

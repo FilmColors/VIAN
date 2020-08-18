@@ -23,7 +23,7 @@ from core.gui.dialogs.new_project_dialog import NewProjectDialog
 from core.gui.dialogs.preferences_dialog import DialogPreferences
 from core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.dialogs.screenshot_importer_dialog import DialogScreenshotImport
-from core.gui.letterbox_widget import LetterBoxWidget
+from core.gui.dialogs.letterbox_widget import LetterBoxWidget
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.classification import ClassificationWindow

@@ -1,13 +1,12 @@
-import time
 import os
 from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox, QMenu, QHBoxLayout, QLabel, QSlider
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import numpy as np
-from core.data.computation import get_heatmap_value, ms_to_string, overlap_rect
+from core.data.computation import get_heatmap_value, ms_to_string
 from core.gui.ewidgetbase import EGraphicsView
 from core.analysis.colorimetry.hilbert import create_hilbert_transform
-from core.gui.image_export_dialog import ExportImageDialog
+from core.gui.dialogs.image_export_dialog import ExportImageDialog
 
 class IVIANVisualization():
     def __init__(self, naming_fields = None):

@@ -5,7 +5,7 @@ from core.data.corpus_client import CorpusClient
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import *
 from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
-from core.gui.filmography_widget import FilmographyWidget2
+from core.gui.misc.filmography_widget import FilmographyWidget2
 
 
 class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):

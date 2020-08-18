@@ -1,12 +1,9 @@
 
 import numpy as np
 
-from PyQt5 import QtCore, uic, QtGui
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtGui import QColor, QPalette
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QFrame, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QFrame
 
-from core.gui.flow_layout import FlowLayout
+from core.gui.misc.flow_layout import FlowLayout
 
 class TagWidget(QWidget):
     def __init__(self, parent):
