@@ -1,22 +1,9 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-import sip
-from core.data.settings import Contributor
-import os
 import numpy as np
-from PyQt5 import uic
-from core.data.log import log_warning, log_info, log_error, log_debug
+from core.data.log import log_debug
 from core.data.computation import create_icon
-from core.corpus.client.corpus_client import CorpusClient
-# from core.gui.Dialogs.new_project_dialog import FilmographyWidget2
-from functools import partial
+from core.data.corpus_client import CorpusClient
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import *
-import json
-import socket
-import threading
-import hashlib, uuid
 from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
 from core.gui.filmography_widget import FilmographyWidget2
 
@@ -79,11 +66,7 @@ class CorpusProgressWidget(QWidget):
         self.spacer = QWidget()
         self.spacer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
 
-        # self.btn_RunAll = QPushButton("2. Run all Missing Analyses")
-        # self.btn_RunAll.clicked.connect(self.run_all)
         self.layout().addWidget(self.spacer)
-        # self.layout().addWidget(self.btn_RunAll)
-
         self.lbl_Instructions = QLabel("The webapp requires a specific set of analyses performed before upload. "
                                        "Currently these requirements are not met. To perform these analyses do the following:\n "
                                        "1. Go to the pipeline manager\n"
@@ -169,12 +152,6 @@ class CorpusClientWidget(QWidget):
         self.btn_Connect.setEnabled(True)
         self.btn_Connect.clicked.connect(self.on_connect)
 
-        # self.comboBox_Corpora.addItem("ERC FilmColors") #type:QComboBox
-        # self.comboBox_Corpora.currentTextChanged.connect(self.on_corpus_changed)
-        #
-        # #  self.btn_.clicked.connect(self.corpus_client.connect)
-        #
-        # self.on_contributor_update(self.main_window.settings.CONTRIBUTOR)
         self.show()
 
     def on_connect(self):
@@ -303,12 +280,5 @@ class CorpusCommitDialog(EDialogWidget):
         self.main_window.project.movie_descriptor.movie_name = self.lineEditMovieName.text()
 
         if self.main_window.project is not None:
-            exists = self.corpus_client.check_project_exists(self.main_window.project)
-            # if exists:
-            #     QMessageBox.warning(self,"Project Already Uploaded",
-            #                 "This project has already been uploaded to the WebApp. "
-            #                 "Updating project is not yet supported.")
-            #     return
-
             self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
         self.close()

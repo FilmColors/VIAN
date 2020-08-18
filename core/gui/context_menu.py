@@ -6,8 +6,6 @@ from core.container.media_objects import AbstractMediaObject
 from core.container.project import MOVIE_DESCRIPTOR, SEGMENTATION, ANNOTATION, SEGMENT, ANNOTATION_LAYER, \
     SCREENSHOT, SCREENSHOT_GROUP, NODE_SCRIPT,MEDIA_OBJECT,EXPERIMENT, CLASSIFICATION_OBJECT, VIANProject, Screenshot,\
     Experiment
-from core.corpus.client.corpus_client import CorpusClient
-from core.corpus.legacy.sqlalchemy_entities import DBProject
 from core.data.log import log_error, log_info, log_debug, log_warning
 
 

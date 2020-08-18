@@ -4,15 +4,15 @@ this it can be used to perform operations in a batch process without having the 
 
 """
 
-from core.data.settings import UserSettings, Contributor
+from core.data.settings import Contributor
 from core.container.hdf5_manager import *
 from shutil import move
 # from core.gui.main_window import *
-from typing import Dict, Tuple
+from typing import Dict
 from core.analysis.analysis_import import *
 from threading import Lock, Thread
 from random import sample
-from core.corpus.client.corpus_client import WebAppCorpusInterface
+from core.data.corpus_client import WebAppCorpusInterface
 
 PROJECT_LOCK = Lock()
 _INIT_LOCK = Lock()

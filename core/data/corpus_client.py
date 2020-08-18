@@ -20,19 +20,13 @@ from random import sample
 import requests
 
 PAL_WIDTH = 720
-# EP_ROOT = "http://ercwebapp.westeurope.cloudapp.azure.com/api/"
-# EP_ROOT = "http://127.0.0.1:5000/api/"
 
 if IS_DEV:
     EP_ROOT = CONFIG['localhost']
 else:
     EP_ROOT = CONFIG['webapp_root']
 
-# EP_VIAN_VERSION = self.ep_root + "/vian/version"
-# self.ep_get_vian_update = self.ep_root + "/vian/download_vian/"
 
-# http://ercwebapp.westeurope.cloudapp.azure.com/api/vian/version
-# http://ercwebapp.westeurope.cloudapp.azure.com/api/vian/download_vian
 def get_vian_version():
     q = requests.get(EP_ROOT + "vian/version").json()
     version = q['version'].split("_")
@@ -80,28 +74,8 @@ class CorpusClient(QObject):
     def mode(self):
         if isinstance(self.corpus_interface, WebAppCorpusInterface):
             return "webapp"
-        elif isinstance(self.corpus_interface, LocalCorpusInterface):
-            return "local"
         else:
             return None
-
-    def connect_signals(self):
-        if self.corpus_interface is not None:
-            self.corpus_interface = LocalCorpusInterface
-
-    @pyqtSlot(object, str)
-    def connect_local(self, user: Contributor, filepath):
-        """
-        Connects the user to a local Database of VIAN Projects at given database.db file
-        :param user: the user object
-        :param filepath: the file path to the sqlite file
-        :return:
-        """
-        self.corpus_interface = LocalCorpusInterface()
-        self.execution_thread = QThread()
-        self.corpus_interface.moveToThread(self.execution_thread)
-        self.execution_thread.start()
-        pass
 
     @pyqtSlot(object)
     def connect_webapp(self, user: Contributor):
@@ -455,10 +429,5 @@ class WebAppCorpusInterface(QObject):
 
     def pull_vocabulary(self, vocabulary:Vocabulary):
         """ Tries to Pull a Vocabulary from the WebApp """
-        pass
-
-
-class LocalCorpusInterface():
-    def __init__(self):
         pass
 

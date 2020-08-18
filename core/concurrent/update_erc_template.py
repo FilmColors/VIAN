@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QObject
-from core.corpus.client.corpus_client import check_erc_template
+from core.data.corpus_client import check_erc_template
 
 
 

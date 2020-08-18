@@ -1,17 +1,14 @@
-import os
-import glob
-from random import randint
 import sys
 import subprocess
 
-from shutil import copytree, move
+from shutil import move
 import shutil
 from core.data.interfaces import IConcurrentJob
-from core.data.log import log_error, log_info, log_warning, log_debug
+from core.data.log import log_error, log_info
 from PyQt5.QtWidgets import QMessageBox, QApplication
 
-from core.corpus.client.corpus_client import get_vian_version, download_vian_update
-import requests, zipfile, io
+from core.data.corpus_client import get_vian_version, download_vian_update
+import zipfile, io
 import os
 
 class VianUpdater(IConcurrentJob):

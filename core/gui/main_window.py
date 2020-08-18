@@ -1,24 +1,18 @@
-import cProfile
-import glob
-
-from functools import partial
-
-from core.concurrent.auto_segmentation import *
-from core.concurrent.auto_screenshot import DialogAutoScreenshot
-from core.concurrent.image_loader import ClassificationObjectChangedJob
-from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
-from core.concurrent.worker import MinimalThreadWorker, WorkerManager
-from core import version
-from core.version import *
 from core.concurrent.worker_functions import *
 from core.concurrent.update_erc_template import ERCUpdateJob
-from core.corpus.client.widgets import *
+from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
+from core.concurrent.worker import WorkerManager, MinimalThreadWorker
+from core.concurrent.image_loader import ClassificationObjectChangedJob
+from core.concurrent.auto_screenshot import DialogAutoScreenshot
+from core.concurrent.auto_segmentation import DialogAutoSegmentation
+
+from core.data.webapp_interface import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
-from core.data.vian_updater import VianUpdater, VianUpdaterJob
+from core.data.vian_updater import VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from flask_server.server import FlaskServer, FlaskWebWidget
 
@@ -61,7 +55,7 @@ from extensions.extension_list import ExtensionList
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses
 from core.gui.toolbar import WidgetsToolbar
-from core.data.log import log_warning, log_debug, log_info, log_error
+from core.data.log import log_info
 
 try:
     import keras.backend as K

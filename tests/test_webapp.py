@@ -2,7 +2,7 @@ import unittest
 import os
 import cv2
 import shutil
-from core.corpus.client.corpus_client import WebAppCorpusInterface
+from core.data.corpus_client import WebAppCorpusInterface
 from core.container.project import VIANProject
 from core.data.settings import UserSettings
 from uuid import uuid4
