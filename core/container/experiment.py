@@ -11,7 +11,6 @@ from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, 
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from .container_interfaces import IProjectContainer, IHasName, IClassifiable, deprecation_serialization
 from .hdf5_manager import get_analysis_by_name
-from .analysis import PipelineScript
 
 from core.analysis.deep_learning.labels import LIPLabels
 
@@ -268,12 +267,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.comment = w['comment']
                 except:
                     pass
-
-        try:
-            self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
-        except:
-            self.pipeline_script = None
-
         try:
             self.is_visible = serialization['visible']
         except Exception as e:
@@ -871,7 +864,6 @@ class Experiment(IProjectContainer, IHasName):
     onExperimentChanged = pyqtSignal(object)
     onClassificationObjectAdded = pyqtSignal(object)
     onClassificationObjectRemoved = pyqtSignal(object)
-    onPipelineScriptChanged = pyqtSignal(object)
 
     def __init__(self, name="New Experiment", unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
@@ -882,7 +874,6 @@ class Experiment(IProjectContainer, IHasName):
         # This is a list of [IClassifiable, UniqueKeyword]
         self.classification_results = [] #type: List[Tuple[IClassifiable, UniqueKeyword]]
         self.correlation_matrix = None
-        self.pipeline_script = None
 
         self.onClassificationObjectRemoved.connect(partial(self.emit_change))
         self.onClassificationObjectAdded.connect(partial(self.emit_change))
@@ -1110,15 +1101,6 @@ class Experiment(IProjectContainer, IHasName):
     def remove_all_tags_with_container(self, container):
         self.classification_results[:] = [tup for tup in self.classification_results if not tup[0] is container]
 
-    def set_pipeline_script(self, pipeline_script:PipelineScript):
-        """
-        Sets the pipelinescript of the experiment. Only one may be assigned at the time.
-        :param pipeline_script: a PipelineScript Instance
-        :return: None
-        """
-        self.pipeline_script = pipeline_script
-        self.onPipelineScriptChanged.emit(self.pipeline_script)
-
     def emit_change(self):
         self.onExperimentChanged.emit(self)
 
@@ -1140,17 +1122,12 @@ class Experiment(IProjectContainer, IHasName):
                     class_obj=None
                 ))
 
-        pipeline_script = None
-        if self.pipeline_script is not None:
-            pipeline_script = self.pipeline_script.unique_id
-
         data = dict(
             name=self.name,
             unique_id = self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
             classification_results = [dict(target=c[0].unique_id, keyword=c[1].unique_id) for c in self.classification_results],
-            pipeline_script = pipeline_script
         )
         return data
 
@@ -1172,17 +1149,12 @@ class Experiment(IProjectContainer, IHasName):
                     class_obj=None
                 ))
 
-        pipeline_script = None
-        if self.pipeline_script is not None:
-            pipeline_script = self.pipeline_script.unique_id
-
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
             classification_results=[],
-            pipeline_script = pipeline_script
         )
         return data
 
@@ -1246,15 +1218,6 @@ class Experiment(IProjectContainer, IHasName):
         except Exception as e:
             log_error("Exeption during Experiment.deserialize:", e)
             pass
-
-        try:
-            self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
-            if self.pipeline_script is not None:
-                self.pipeline_script.experiment = self
-        except Exception as e:
-            log_error("Exception in Experiment.deserialize()", e, project.name)
-            self.pipeline_script = None
-
         return self
 
     def delete(self):

@@ -11,7 +11,7 @@ from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFon
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, \
     QCompleter,QSizePolicy, QDialog, QVBoxLayout, QLineEdit, QLabel, QPushButton, QComboBox
 from functools import partial
-from core.container.analysis import PipelineScript
+from core.analysis.pipeline_scripts.pipeline_script import PipelineScript
 
 
 def format(r, g, b, style=''):

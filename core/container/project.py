@@ -892,41 +892,41 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Python Scripts
-    def create_pipeline_script(self, name:str, author="no_author", path = None, script = None, unique_id=-1) -> PipelineScript:
-        """
-        Creates a new PipelineScript given a name and a script content
-        :param name: The name of the script
-        :param script: The actual python script text
-        :return: a PipelineScript class
-        """
-        pipeline_script = PipelineScript(name, author, path=path, script=script, unique_id=unique_id)
-        return self.add_pipeline_script(pipeline_script)
-
-    def add_pipeline_script(self, script:PipelineScript) -> PipelineScript:
-        """
-        Adds a script at a given path to the project.
-
-        :param path: Path to the pipeline python script.
-        :return: None
-        """
-        for s in self.pipeline_scripts:
-            if s.name == script.name and s.script == script.script:
-                return s
-
-        self.pipeline_scripts.append(script)
-        script.set_project(self)
-        return script
-
-    def remove_pipeline_script(self, script:PipelineScript):
-        """
-        Removes a given script path from the project.
-
-        :param path: The path to remove.
-        :return: None
-        """
-
-        if script in self.pipeline_scripts:
-            self.pipeline_scripts.remove(script)
+    # def create_pipeline_script(self, name:str, author="no_author", path = None, script = None, unique_id=-1) -> PipelineScript:
+    #     """
+    #     Creates a new PipelineScript given a name and a script content
+    #     :param name: The name of the script
+    #     :param script: The actual python script text
+    #     :return: a PipelineScript class
+    #     """
+    #     pipeline_script = PipelineScript(name, author, path=path, script=script, unique_id=unique_id)
+    #     return self.add_pipeline_script(pipeline_script)
+    #
+    # def add_pipeline_script(self, script:PipelineScript) -> PipelineScript:
+    #     """
+    #     Adds a script at a given path to the project.
+    #
+    #     :param path: Path to the pipeline python script.
+    #     :return: None
+    #     """
+    #     for s in self.pipeline_scripts:
+    #         if s.name == script.name and s.script == script.script:
+    #             return s
+    #
+    #     self.pipeline_scripts.append(script)
+    #     script.set_project(self)
+    #     return script
+    #
+    # def remove_pipeline_script(self, script:PipelineScript):
+    #     """
+    #     Removes a given script path from the project.
+    #
+    #     :param path: The path to remove.
+    #     :return: None
+    #     """
+    #
+    #     if script in self.pipeline_scripts:
+    #         self.pipeline_scripts.remove(script)
 
     def get_missing_analyses(self, requirements, segments = None, screenshots=None, annotations = None):
         # requirements = script.pipeline_type.requirements
@@ -985,11 +985,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         return (missing_analyses, n_analyses, n_analyses_done)
 
-    def get_pipeline_script_by_uuid(self, uuid):
-        for p in self.pipeline_scripts:
-            if p.uuid == uuid:
-                return p
-        return None
+    # def get_pipeline_script_by_uuid(self, uuid):
+    #     for p in self.pipeline_scripts:
+    #         if p.uuid == uuid:
+    #             return p
+    #     return None
     #endregion
 
     #region IO
@@ -1006,14 +1006,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         a_layer = []
         screenshots = []
-        screenshots_img = []
-        screenshots_ann = []
         segmentations = []
         analyses = []
         screenshot_groups = []
         scripts = []
         experiments = []
-        pipeline_scripts = []
         vocabularies = []
 
         for v in project.vocabularies:
@@ -1025,8 +1022,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for b in project.screenshots:
             src, img = b.serialize()
             screenshots.append(src)
-            # screenshots_img.append(img[0])
-            # screenshots_ann.append(img[1])
 
         for c in project.segmentation:
             segmentations.append(c.serialize())
@@ -1048,13 +1043,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             hdf_indices = project.hdf5_manager.get_indices()
 
-        for q in self.pipeline_scripts:
-            pipeline_scripts.append(q.serialize())
-
-        if self.active_pipeline_script is not None:
-            active_pipeline_script = self.active_pipeline_script.unique_id
-        else:
-            active_pipeline_script = None
         data = dict(
             path=project.path,
             name=project.name,
@@ -1062,11 +1050,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             uuid = project.uuid,
             annotation_layers=a_layer,
             notes=project.notes,
-            # current_annotation_layer=None,
-            # results_dir=project.results_dir,
-            # export_dir=project.export_dir,
-            # shots_dir=project.shots_dir,
-            # data_dir=project.data_dir,
             main_segmentation_index=project.main_segmentation_index,
             screenshots=screenshots,
             segmentation=segmentations,
@@ -1079,9 +1062,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             experiments=experiments,
             meta_data = project.meta_data,
             hdf_indices = hdf_indices,
-            pipeline_scripts = pipeline_scripts,
-            active_pipeline_script = active_pipeline_script,
-            compute_pipeline_settings = project.compute_pipeline_settings
         )
 
         if return_dict:
@@ -1439,45 +1419,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
             new = NodeScript().deserialize(n, self)
             self.add_script(new)
 
-        try:
-            if self.folder is None and script_export is None:
-                raise ValueError("Templates with pipeline scripts can only be "
-                                 "loaded into projects with a folder structure or by passing a script_export attribute.")
-            if script_export is not None:
-                loc = script_export
-            else:
-                loc = self.folder
-            for q in template['pipelines']:
-                try:
-                    pipeline = PipelineScript().deserialize(q, loc)
-                    new = None
-                    if merge:
-                        new = self.get_by_id(pipeline.unique_id)
-                    if new is None:
-                        new = pipeline
-                        self.add_pipeline_script(new)
-                        with open(pipeline.path, "w") as f:
-                            f.write(pipeline.script)
-                        merge_results.append(("Added PipelineScript", new.name))
-                    self.active_pipeline_script = self.get_by_id(template['active_pipeline'])
-                except TypeError as e:
-                    pass
-
-            log_info("Pipeline Template:", "Pipelines", self.pipeline_scripts)
-        except Exception as e:
-            raise e
-
         for e in template['experiments']:
             # If we want to merge the experiments, we need to create a temporary project, since Experiment relies on
             # the id introspection of a project (get_by_id())
             if merge:
                 with VIANProject("Temp") as temp_propj:
-                    for q in template['pipelines']:
-                        try:
-                            pipeline = PipelineScript().deserialize(q, loc)
-                            temp_propj.add_pipeline_script(pipeline)
-                        except Exception as exception:
-                            raise exception
                     for v in template['vocabularies']:
                         voc = Vocabulary("voc").deserialize(v, temp_propj)
                         temp_propj.add_vocabulary(voc)

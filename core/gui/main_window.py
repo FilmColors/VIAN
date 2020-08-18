@@ -20,7 +20,6 @@ from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
 from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
-
 from flask_server.server import FlaskServer, FlaskWebWidget
 
 from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
@@ -109,7 +108,6 @@ class MainWindow(QtWidgets.QMainWindow):
         log_info("VIAN: ", version.__version__)
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
-        # loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,200))
 
         if PROFILE:
             self.profiler = cProfile.Profile()
@@ -143,6 +141,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QApplication.instance().setAttribute(Qt.AA_DontUseNativeMenuBar)
         self.dock_widgets = []
         self.open_dialogs = []
+
         self.settings = UserSettings()
         self.settings.load()
 

@@ -93,10 +93,15 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         self.comboBoxExperiment.currentTextChanged.connect(self.on_experiment_combo_changed)
         self.pushButton_CreateExperiment.clicked.connect(self.main_window.on_create_experiment)
 
-        self.pushButton_NewScript.clicked.connect(self.create_pipeline_script)
-        self.pushButtonImportScript.clicked.connect(self.load_pipeline_script)
+        # self.pushButton_NewScript.clicked.connect(self.create_pipeline_script)
+        # self.pushButtonImportScript.clicked.connect(self.load_pipeline_script)
+        # self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
 
-        self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
+        self.label_4.hide()
+        self.pushButton_NewScript.hide()
+        self.pushButtonImportScript.hide()
+        self.comboBox_Pipeline.hide()
+
         self.lineEditSearchVoc.textChanged.connect(self.search_vocabulary)
 
         # Disable all controls that need a selected Classification Object:
@@ -138,7 +143,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.update_classification_object_tree()
             self.update_vocabulary_view()
             self.update_target_container_combobox()
-            self.update_pipeline_list()
+            # self.update_pipeline_list()
 
     def experiment_name_changed(self):
         if self.inhibit_ui_signals:
@@ -383,40 +388,40 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
     # endregion
 
     #region Pipeline
-    def create_pipeline_script(self):
-        self.main_window.pipeline_widget.raise_()
-        self.main_window.pipeline_widget.editor.new()
-
-    def load_pipeline_script(self):
-        self.main_window.pipeline_widget.raise_()
-        self.main_window.pipeline_widget.editor.load()
-
-    def update_pipeline_list(self):
-        self.comboBox_Pipeline.disconnect()
-        self.pipeline_scripts = dict()
-        self.comboBox_Pipeline.clear()
-        if self.main_window.project is None:
-            return
-        self.comboBox_Pipeline.addItem("Select Pipeline (optional)")
-
-        for p in self.main_window.project.pipeline_scripts:
-            self.comboBox_Pipeline.addItem(p.name)
-            self.pipeline_scripts[p.name] = p
-
-        if self.current_experiment is not None:
-            if self.current_experiment.pipeline_script is not None:
-                self.comboBox_Pipeline.setCurrentText(self.current_experiment.pipeline_script.name)
-        self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
-
-    def on_pipeline_script_changed(self):
-        if self.current_experiment is None:
-            return
-        name = self.comboBox_Pipeline.currentText()
-        if name == "Select Pipeline (optional)":
-            self.current_experiment.pipeline_script = None
-        else:
-            self.current_experiment.pipeline_script = self.pipeline_scripts[name]
-            self.pipeline_scripts[name].experiment = self.current_experiment
+    # def create_pipeline_script(self):
+    #     self.main_window.pipeline_widget.raise_()
+    #     self.main_window.pipeline_widget.editor.new()
+    #
+    # def load_pipeline_script(self):
+    #     self.main_window.pipeline_widget.raise_()
+    #     self.main_window.pipeline_widget.editor.load()
+    #
+    # def update_pipeline_list(self):
+    #     self.comboBox_Pipeline.disconnect()
+    #     self.pipeline_scripts = dict()
+    #     self.comboBox_Pipeline.clear()
+    #     if self.main_window.project is None:
+    #         return
+    #     self.comboBox_Pipeline.addItem("Select Pipeline (optional)")
+    #
+    #     for p in self.main_window.project.pipeline_scripts:
+    #         self.comboBox_Pipeline.addItem(p.name)
+    #         self.pipeline_scripts[p.name] = p
+    #
+    #     if self.current_experiment is not None:
+    #         if self.current_experiment.pipeline_script is not None:
+    #             self.comboBox_Pipeline.setCurrentText(self.current_experiment.pipeline_script.name)
+    #     self.comboBox_Pipeline.currentTextChanged.connect(self.on_pipeline_script_changed)
+    #
+    # def on_pipeline_script_changed(self):
+    #     if self.current_experiment is None:
+    #         return
+    #     name = self.comboBox_Pipeline.currentText()
+    #     if name == "Select Pipeline (optional)":
+    #         self.current_experiment.pipeline_script = None
+    #     else:
+    #         self.current_experiment.pipeline_script = self.pipeline_scripts[name]
+    #         self.pipeline_scripts[name].experiment = self.current_experiment
 
     #endregion
 
