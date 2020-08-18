@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 from functools import partial
 
+
 def delete_even_if_connected_msgbox(mode="word"):
     """
     Shows a Question dialog if a given keyword should be removed even if it has already been 

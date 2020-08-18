@@ -157,6 +157,7 @@ class UserSettings():
 
         self.USE_CORPUS = False
         self.USE_ELAN = False
+        self.USE_PIPELINES = False
 
         self.dock_widgets_data = []
 

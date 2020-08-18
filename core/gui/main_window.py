@@ -298,6 +298,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
+
+
         self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
@@ -565,7 +567,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
+
         self.update_recent_menu()
+
 
         self.player_controls.setState(False)
 
@@ -577,6 +581,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.show()
         self.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
+        self.on_pipeline_settings_changed()
+
         self.switch_perspective(Perspective.Segmentation)
         loading_screen.hide()
         self.setWindowState(Qt.WindowMaximized)
@@ -927,8 +933,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pipeline_widget = PipelineDock(self, self.vian_event_handler)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.pipeline_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
+            if self.settings.USE_PIPELINES is False:
+                self.pipeline_widget.hide()
         else:
-            if not self.pipeline_widget.visibleRegion().isEmpty():
+            if not self.pipeline_widget.visibleRegion().isEmpty() or self.settings.USE_PIPELINES:
                 self.pipeline_widget.hide()
             else:
                 self.pipeline_widget.show()
@@ -1076,6 +1084,14 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+
+    def on_pipeline_settings_changed(self):
+        if self.settings.USE_PIPELINES:
+            self.pipeline_widget.show()
+            self.pipeline_toolbar.show()
+        else:
+            self.pipeline_widget.hide()
+            self.pipeline_toolbar.hide()
 
     @pyqtSlot(float, str)
     def on_progress_popup(self, value, str):
@@ -1423,7 +1439,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
-            self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
+            if self.settings.USE_PIPELINES:
+                self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
@@ -1503,7 +1520,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_manager.show()
             # self.inspector.show()
             self.experiment_dock.show()
-            self.pipeline_widget.show()
+            if self.settings.USE_PIPELINES:
+                self.pipeline_widget.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_dock)

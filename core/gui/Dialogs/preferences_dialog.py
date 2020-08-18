@@ -119,7 +119,9 @@ class DialogPreferences(EDialogWidget):
         self.settings.FONT_NAME = self.font_Picker.currentText()
         self.settings.FONT_SIZE = self.spinBox_FontSize.value()
         self.settings.MULTI_EXPERIMENTS = self.checkBoxMultiExperiments.isChecked()
+        self.settings.USE_PIPELINES = self.checkBoxUsePipelines.isChecked()
         self.main_window.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
+        self.main_window.on_pipeline_settings_changed()
 
     def font_changed(self):
         family = self.font_Picker.currentText()
