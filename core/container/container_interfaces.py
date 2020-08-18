@@ -73,6 +73,12 @@ class IProjectContainer(QObject):
         self.outliner_expanded = expanded
 
     def add_analysis(self, analysis):
+        existing = self.has_analysis(analysis.analysis_job_class,
+                                     analysis.target_classification_object,
+                                     ret_analysis=True)
+        if existing is not None:
+            self.project.remove_analysis(existing)
+
         self.connected_analyses.append(analysis)
         analysis.set_project(self.project)
         self.onAnalysisAdded.emit(analysis)
@@ -124,6 +130,30 @@ class IProjectContainer(QObject):
 
         else:
             return to_return
+
+    def has_analysis(self, class_type, classification_object=None, ret_analysis = True):
+        """
+        Checks if a given analysis class is already present for this container.
+        If so it returns True/False when ret_analysis is False, else it returns the analysis or None.
+        """
+        if isinstance(class_type, str):
+            class_name = class_type
+        else:
+            class_name = class_type.__name__
+
+        result = None
+        for r in self.connected_analyses:
+            if classification_object is None \
+                    or classification_object == r.target_classification_object:
+                print(classification_object)
+                if r.analysis_job_class == class_name:
+                    result = r
+                    break
+
+        if result is not None:
+            return result if ret_analysis else True
+        else:
+            return None if ret_analysis else False
 
     def save_delete(self):
         """

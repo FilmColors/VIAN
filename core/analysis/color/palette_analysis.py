@@ -119,8 +119,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         return None
 
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
-        result.set_target_container(project.get_by_id(result.target_container))
-        result.set_target_classification_obj(self.target_class_obj)
+        super(ColorPaletteAnalysis, self).modify_project(project, result, main_window)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         view = PaletteView(None)

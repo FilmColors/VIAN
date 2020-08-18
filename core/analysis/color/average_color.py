@@ -157,13 +157,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
         Since this function is called within the Main-Thread, we can modify our project here.
         """
 
-        if isinstance(result, list):
-            for r in result:
-                r.set_target_container(project.get_by_id(r.target_container))
-                r.set_target_classification_obj(self.target_class_obj)
-        else:
-            result.set_target_container(project.get_by_id(result.target_container))
-            result.set_target_classification_obj(self.target_class_obj)
+        super(ColorFeatureAnalysis, self).modify_project(project, result, main_window)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """

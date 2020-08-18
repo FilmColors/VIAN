@@ -859,7 +859,7 @@ class AnalyzesOutlinerItem(AbstractOutlinerItem):
         self.item.set_name(name)
 
     def update_item(self):
-        self.setText(0, self.item.name)
+        self.setText(0, self.item.get_name())
 
 
 class AnalyzesOutlinerGroupItem(AbstractOutlinerItem):

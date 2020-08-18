@@ -100,8 +100,10 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         if s_type == MOVIE_DESCRIPTOR:
             self.lbl_Type.setText("Movie Descriptor")
             t = FilmographyWidget2(self, self.project())
+
             def update_filmography(self, t):
                 self.project().movie_descriptor.meta_data = t.get_filmography()
+
             t.onFilmographyChanged.connect(partial(update_filmography, self, t))
             widgets = [AttributesMovieDescriptor(self, target_item), t]
 

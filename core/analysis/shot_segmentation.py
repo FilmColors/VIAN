@@ -163,6 +163,7 @@ class ShotSegmentationAnalysis(IAnalysisJob):
         This Function will be called after the processing is completed.
         Since this function is called within the Main-Thread, we can modify our project here.
         """
+
         pass
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):

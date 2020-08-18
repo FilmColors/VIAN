@@ -176,7 +176,16 @@ class IAnalysisJob(QObject):
         :param result: The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()
         :return: None
         """
-        pass
+        if isinstance(result, list):
+            for r in result:
+                r.set_target_classification_obj(self.target_class_obj)
+                r.set_target_container(project.get_by_id(r.target_container))
+
+        else:
+            result.set_target_classification_obj(self.target_class_obj)
+            result.set_target_container(project.get_by_id(result.target_container))
+
+
 
     def get_parameter_widget(self):
         """

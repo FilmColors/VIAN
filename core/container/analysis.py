@@ -107,6 +107,10 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         self.target_classification_object = target_classification_object
         self.a_class = None
 
+    def get_name(self):
+        return "{n} ({c})".format(n=self.name,
+                                  c=self.target_classification_object.name if self.target_classification_object is not None else "Default")
+
     def get_preview(self):
         try:
             return get_analysis_by_name(self.analysis_job_class)().get_preview(self)
