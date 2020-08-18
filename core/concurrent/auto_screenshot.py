@@ -79,7 +79,6 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
     return frame_pos
 
 
-
 class DialogAutoScreenshot(EDialogWidget):
     def __init__(self, parent, project):
         super(DialogAutoScreenshot, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/segmentation/auto_segmentation.html")

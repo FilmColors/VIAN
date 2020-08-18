@@ -5,12 +5,14 @@ from core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_s
 
 from core.analysis.analysis_import import FaceRecognitionModel
 
+
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
     onColormetryUpdate = pyqtSignal(object, int)
     onLocationUpdate = pyqtSignal(list)
     onError = pyqtSignal(list)
     onMessage = pyqtSignal(str)
+
 
 class TimestepUpdateWorkerSingle(QObject):
     def __init__(self):
