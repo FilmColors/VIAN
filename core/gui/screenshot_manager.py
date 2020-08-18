@@ -16,7 +16,7 @@ from core.container.project import VIANProject
 from core.container.screenshot import Screenshot
 from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
-from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
+from core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
 from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime, ImagePlotPlane
 from core.analysis.color_feature_extractor import ColorFeatureAnalysis

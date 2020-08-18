@@ -22,13 +22,13 @@ from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from flask_server.server import FlaskServer, FlaskWebWidget
 
-from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
-from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
-from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
-from core.gui.Dialogs.new_project_dialog import NewProjectDialog
-from core.gui.Dialogs.preferences_dialog import DialogPreferences
-from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
-from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
+from core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
+from core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
+from core.gui.dialogs.export_template_dialog import ExportTemplateDialog
+from core.gui.dialogs.new_project_dialog import NewProjectDialog
+from core.gui.dialogs.preferences_dialog import DialogPreferences
+from core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
+from core.gui.dialogs.screenshot_importer_dialog import DialogScreenshotImport
 from core.gui.letterbox_widget import LetterBoxWidget
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
