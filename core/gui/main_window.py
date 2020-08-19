@@ -13,7 +13,6 @@ from core.data.importers import *
 from core.data.corpus_client import WebAppCorpusInterface
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
-from core.data.vian_updater import VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from flask_server.server import FlaskServer, FlaskWebWidget
 
@@ -1330,7 +1329,7 @@ class MainWindow(QtWidgets.QMainWindow):
         job = result[1]
         self.allow_dispatch_on_change = False
 
-        if not job.aborted or isinstance(job, VianUpdaterJob):
+        if not job.aborted:
             job.modify_project(project=self.project, result=res, main_window = self)
 
         self.allow_dispatch_on_change = True

@@ -190,7 +190,6 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
-    <addaction name="separator"/>
     <addaction name="actionRun_Pipeline_for_Selection"/>
     <addaction name="actionRun_Complete_Pipeline"/>
     <addaction name="separator"/>
@@ -937,6 +936,9 @@
    <property name="shortcut">
     <string>Ctrl+P</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionRun_Complete_Pipeline">
    <property name="text">
@@ -944,6 +946,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionDelete_all_Analyses">
