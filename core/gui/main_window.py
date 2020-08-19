@@ -10,7 +10,8 @@ from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
-from core.data.corpus_client import WebAppCorpusInterface
+from core.data.corpus_client import WebAppCorpusInterface, get_vian_version
+from core.data.computation import version_check
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
@@ -406,6 +407,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
+        self.actionUpdate.triggered.connect(self.check_update)
 
         self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
 
@@ -1805,6 +1807,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_project_summary(self):
         webbrowser.open("http://127.0.0.1:5000/summary/")
+
+    def check_update(self):
+        version, id = get_vian_version()
+        has_update = version_check(version, self.version)
+        if has_update:
+            QMessageBox.information(self, "New Version available", "A new VIAN version is available.\n"
+                                                                   "Go to https://www.vian.app/vian to "
+                                                                   "update to download the newest version.\n"
+                                                                   "Your Version: " + self.version + "\n"
+                                                                   "Newest Version: " + str(version))
+        else:
+            QMessageBox.information(self, "All set", "You have the newest version of VIAN!\n"
+                                                     "Your Version: " + self.version)
+
     # endregion
 
     #region Project Management

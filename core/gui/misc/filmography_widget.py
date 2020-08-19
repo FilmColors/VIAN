@@ -17,11 +17,15 @@ def query_initial(corpus_client):
     global _countries
     global _companies
 
-    _persons = corpus_client.get_persons()
-    _processes = corpus_client.get_color_processes()
-    _genres = corpus_client.get_genres()
-    _countries = corpus_client.get_countries()
-    _companies = corpus_client.get_companies()
+    try:
+        _persons = corpus_client.get_persons()
+        _processes = corpus_client.get_color_processes()
+        _genres = corpus_client.get_genres()
+        _countries = corpus_client.get_countries()
+        _companies = corpus_client.get_companies()
+    except Exception as e:
+        print(e)
+
 
 
 class FilmographyWidget2(QWidget):

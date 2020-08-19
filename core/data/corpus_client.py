@@ -28,11 +28,15 @@ else:
 
 
 def get_vian_version():
-    q = requests.get(EP_ROOT + "vian/version").json()
-    version = q['version'].split("_")
-    version = [int(i) for i in version]
-    version_id = q['id']
-    return version, version_id
+    try:
+        q = requests.get(EP_ROOT + "vian/version").json()
+        version = q['version'].split("_")
+        version = [int(i) for i in version]
+        version_id = q['id']
+        return version, version_id
+    except Exception as e:
+        raise e
+        return None
 
 
 def download_vian_update(version_id):
