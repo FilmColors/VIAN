@@ -3,8 +3,6 @@ import cv2
 from core.data.computation import *
 from core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_spacial_frequency_heatmap2
 
-from core.analysis.analysis_import import FaceRecognitionModel
-
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
@@ -37,14 +35,6 @@ class TimestepUpdateWorkerSingle(QObject):
         self.update_face_identification = True
         self.spacial_frequency_method = "edge-mean"
 
-        self.face_rec_model = FaceRecognitionModel(serving=True)
-        self.face_rec_model.load_weights(os.path.abspath("data/models/face_identification/age_of_innocence_sample.hdf5"))
-
-
-    @pyqtSlot(str)
-    def load_face_rec_model(self, str):
-        self.face_rec_model.load_weights(str)
-        # self.face_rec_model.graph.finalize()
 
     @pyqtSlot(str)
     def set_movie_path(self, movie_path):
@@ -135,8 +125,6 @@ class TimestepUpdateWorkerSingle(QObject):
                     f = None
                 heatmap, mask, denorm = get_spacial_frequency_heatmap(frame, method=self.spacial_frequency_method, normalize=True, norm_factor=f)
                 frame = heatmap
-            if self.update_face_rec:
-                frame = self.face_rec_model.draw_faces(frame, identify=self.update_face_identification)
 
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap

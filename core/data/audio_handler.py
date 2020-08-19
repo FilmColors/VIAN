@@ -39,7 +39,7 @@ class AudioHandler(QObject):
         self.audio_volume = None    #type: np.ndarray
         self.project = None
 
-        self.export_audio = False
+        self.export_audio = True
 
     @pyqtSlot(object)
     def project_changed(self, project:VIANProject):
@@ -59,6 +59,17 @@ class AudioHandler(QObject):
 
         self.project = project
         if self.project is None:
+            self.audioExtractingEnded.emit()
+
+        if os.path.isfile(os.path.join(self.project.data_dir, "audio.mp3")):
+            self._audioclip = AudioFileClip(os.path.join(self.project.data_dir, "audio.mp3"))
+            self.audio_samples = self._sample_audio(self.callback)
+            self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
+
+            self.audioProcessed.emit(
+                TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
+                                vis_type=TimelineDataset.VIS_TYPE_AREA))
+            self._audioclip.close()
             self.audioExtractingEnded.emit()
 
     @pyqtSlot()

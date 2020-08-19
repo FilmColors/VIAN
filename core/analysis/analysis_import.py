@@ -2,22 +2,15 @@ from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
 from core.container.hdf5_manager import vian_analysis
 
-# import dlib
 try:
     from core.analysis.semantic_segmentation import *
-    from core.analysis.deep_learning.face_identification import *
     from core.analysis.color.average_color import *
     from core.analysis.color.histogram_analysis import *
     from core.analysis.color.palette_analysis import *
     from core.analysis.z_projection import *
 
     import os
-    # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     from core.analysis.import_tensortflow import tf
-    # tf.test.is_gpu_available()
-    # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    # tf.logging.set_verbosity(tf.logging.FATAL)
-    # log_info("Verbosity", tf.logging.get_verbosity())
 
 except:
     from core.data.enums import DataSerialization
@@ -107,63 +100,9 @@ except:
             return data
 
         def from_json(self, database_data):
-            # return json.loads(database_data)
             return pickle.loads(database_data)
 
         def to_json(self, container_data):
             return pickle.dumps(container_data)
-            # return json.dumps(self.serialize(container_data))
 
-
-    class FaceRecognitionModel():
-        def __init__(self, cascPath="data/models/face_identification/haarcascade_frontalface_default.xml",
-                     predictor_path="data/models/face_identification/shape_predictor_68_face_landmarks.dat",
-                     weights_path="data/models/face_identification/weights.hdf5",
-                     cascPathside="data/models/face_identification/haarcascade_profileface.xml", serving = True):
-            if os.path.isfile(cascPath):
-                self.cascade = cv2.CascadeClassifier(cascPath)
-            else:
-                self.cascade = None
-            if os.path.isfile(cascPathside):
-                self.cascade_side = cv2.CascadeClassifier(cascPathside)
-            else:
-                self.cascade_side = None
-
-            try:
-                self.predictor = dlib.shape_predictor(predictor_path)
-                self.detector = dlib.get_frontal_face_detector()
-            except:
-                self.predictor = None
-                self.detector = None
-            self.weights_path = weights_path
-
-            self.dnn_model = None
-            self.nose_point_idx = 30
-
-        def init_model(self, n_classes, dropout):
-            pass
-
-        def extract_faces(self, frame_bgr, preview=False):
-            pass
-
-        def draw_faces(self, frame_bgr):
-            return frame_bgr
-
-        def get_vector(self, img, preview=True):
-            pass
-
-        def cluster_faces(self, eucl_dist_vecs, n_clusters=30):
-            pass
-
-        def load_weights(self, path=None):
-            pass
-
-        def store_weights(self, path=None):
-            pass
-
-        def train_model(self, X_train, y_train, X_test, y_test, load=False, callback=None):
-            pass
-
-        def predict(self, face_vec):
-            pass
 

@@ -28,3 +28,6 @@ is_dev.txt
 
 dist/*
 build/*
+flask_server/static/build/*
+flask_server/static/three/*
+venv/*

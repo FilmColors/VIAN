@@ -3,8 +3,8 @@ keras
 sqlalchemy
 opencv-contrib-python
 requests
-PyQt5
-PyQtWebEngine
+PyQt5==5.15
+PyQtWebEngine==5.15
 scikit-learn
 flask
 fastcluster
