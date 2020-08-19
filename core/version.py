@@ -2,14 +2,14 @@ __author__ = [
     "Gaudenz Halter",
     "Jonathan Schaber"
 ]
-__copyright__ = "Copyright 2019, Barbara Flueckiger and Gaudenz Halter"
+__copyright__ = "Copyright 2020, Barbara Flueckiger and Gaudenz Halter"
 __credits__ = [
     "ERC Advanced Grant FilmColors ",
     "Department of Film Studies, University of Zurich",
     "Visualization and Multimedia Lab, University of Zurich"
 ]
 __license__ = "GPL"
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 __maintainer__ = [
     "Gaudenz Halter",
     "Jonathan Schaber"

@@ -1761,10 +1761,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_about(self):
         about = ""
-        about += "Author:".ljust(12) + str(version.__author__) + "\n"
+        about += "Author:".ljust(12) + ", ".join(version.__author__)+ "\n"
         about += "Copyright:".ljust(12) + str(version.__copyright__) + "\n"
         about += "Version:".ljust(12) + str(version.__version__) + "\n"
-        about += "Credits:".ljust(12) + str(version.__credits__) + "\n"
+        about += "Credits:".ljust(12) + ",\n".join(version.__credits__)+ "\n"
         QMessageBox.about(self, "About", about)
 
     def increase_playrate(self):
