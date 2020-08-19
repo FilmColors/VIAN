@@ -146,6 +146,9 @@ if __name__ == '__main__':
     # filter = SuperFilter(app)
     # app.installEventFilter(filter)
 
+    if sys.platform.startswith("win"):
+        os.environ['QT_ENABLE_HIGHDPI_SCALING'] = "1"
+
     print("Setting UI")
     print(os.getcwd())
 

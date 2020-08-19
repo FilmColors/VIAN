@@ -219,46 +219,6 @@ class AutoSegmentingJob(IConcurrentJob):
         frames_total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
         pcounter, p_max = 0, len(np.unique(clusterings[0])) * 30
 
-        # print(indices)
-        # print(clusterings[0])
-        # last_index = -1
-        # for j, idx in enumerate(indices):
-        #
-        #     if clusterings[0][j] == last_index:
-        #         continue
-        #
-        #     last_index = clusterings[0][j]
-        #
-        #     frame_window = 15
-        #
-        #     fmin = int(np.clip(idx - frame_window, 0, frames_total))
-        #     fmax = int(np.clip(idx + frame_window, 0, frames_total))
-        #     t_indices = list(range(fmin, fmax))
-        #     hists = np.zeros(shape=(fmax - fmin, 16**3))
-        #     for x, f_idx  in enumerate(range(fmin, fmax)):
-        #         sign_progress(pcounter / p_max)
-        #         pcounter += 1
-        #
-        #         cap.set(cv2.CAP_PROP_POS_FRAMES, f_idx)
-        #         ret, frame = cap.read()
-        #
-        #         frame = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
-        #         frame = cv2.resize(frame, (300,300), interpolation=cv2.INTER_CUBIC)
-        #
-        #         data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
-        #         hists[x] = np.reshape(cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
-        #                         [16, 16, 16],
-        #                         [0, 100, -128, 128, -128, 128]), newshape=(16**3))
-        #
-        #     labels = cluster_histograms_adjacently(hists)
-        #
-        #     highest_idx = idx
-        #     for i, val in enumerate(labels):
-        #         if i != labels[0]:
-        #             highest_idx = t_indices[i]
-        #             break
-        #     indices[j] = highest_idx
-        #     print("Approximating of Indices", j, len(indices), labels, i, highest_idx)
         cap.release()
         return dict(clusterings=clusterings, frames=frames, indices=indices, fps=fps, frame_resolution=frame_resolution, cluster_range=n_cluster_range)
 

@@ -439,10 +439,11 @@ def create_icon(path):
 def version_check(smaller_than, version):
     if isinstance(version, str):
         version = version.split(".")
-        version = [int(v) for v in version]
+    version = [int(v) for v in version]
+
     if isinstance(smaller_than, str):
         smaller_than = smaller_than.split(".")
-        smaller_than = [int(v) for v in smaller_than]
+    smaller_than = [int(v) for v in smaller_than]
 
     if version[0] < smaller_than[0]:
         return True
