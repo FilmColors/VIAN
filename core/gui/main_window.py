@@ -5,6 +5,7 @@ from core.concurrent.worker import WorkerManager, MinimalThreadWorker
 from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.auto_segmentation import DialogAutoSegmentation
+from core.analysis.analysis_import import *
 
 from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
