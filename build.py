@@ -2,4 +2,4 @@ import os
 import shutil
 
 # Extract three.js Library to flask_server
-shutil.unpack_archive("three.zip", os.path.abspath(os.path.join("flask_server", "static")))
+shutil.unpack_archive("install/three.zip", os.path.abspath(os.path.join("flask_server", "static")))
