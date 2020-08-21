@@ -1984,7 +1984,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.onSave.emit()
 
-        if open_dialog is True or self.project.path is "" or self.project.name is "":
+        if open_dialog is True or self.project.path == "" or self.project.name == "":
 
             path = QFileDialog.getSaveFileName(caption="Select Project File to save", filter="*" + VIAN_PROJECT_EXTENSION)
 

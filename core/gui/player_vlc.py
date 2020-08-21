@@ -488,7 +488,7 @@ class Player_VLC(VideoPlayer):
         return self.media_player.get_rate()
 
     def is_frame_rate_auto_detected(self):
-        if self.get_rate() is not 0.0:
+        if self.get_rate() != 0.0:
             return True
         return False
 

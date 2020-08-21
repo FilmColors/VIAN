@@ -1,7 +1,7 @@
 import os
 from random import randint
 from PyQt5 import QtCore, uic, QtGui
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QTreeWidgetItem, QLineEdit, QMainWindow, QListWidget, QListWidgetItem, QHBoxLayout, QFrame, QWidget, QSizePolicy, QVBoxLayout, QSpacerItem
 from PyQt5.QtGui import QFont
@@ -48,6 +48,7 @@ class AnalysisDialog(EDialogWidget):
         self.lbl_Version.setText(self.analysis.version)
         self.setWindowTitle("Analysis: " + self.analysis.name)
 
+    @pyqtSlot()
     def remove_selected(self):
         selected = self.list_Targets.selectedItems()
         for s in selected:
@@ -57,6 +58,7 @@ class AnalysisDialog(EDialogWidget):
                     break
         self.update_list()
 
+    @pyqtSlot()
     def add_selection(self):
         targets = []
         for sel in self.main_window.project.selected:
@@ -71,6 +73,7 @@ class AnalysisDialog(EDialogWidget):
         for sel in self.targets:
             self.list_Targets.addItem(SelectedItem(sel))
 
+    @pyqtSlot()
     def on_analyse(self):
         parameters = self.param_widget.get_parameters()
         message = dict(
@@ -82,6 +85,7 @@ class AnalysisDialog(EDialogWidget):
         self.onAnalyse.emit(message)
         self.close()
 
+    @pyqtSlot()
     def on_cancel(self):
         self.close()
 

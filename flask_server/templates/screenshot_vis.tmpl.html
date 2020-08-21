@@ -22,7 +22,6 @@
       <div id="ab-color" style="width:100%; height:100%">
       </div>
     </div>
-
   </div>
   <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
     <div style="padding: 5px;">
@@ -34,8 +33,9 @@
     <div style="padding: 5px;">
       <div id="renderframe" style="width:100%; height:100%">
         <canvas id="palette-3d" style="width:100%; height:100%"></canvas>
+        </div>
+        {% include "color_3d.tmpl.html" %}
       </div>
-      <!--    {% include "color_3d.tmpl.html" %}-->
     </div>
     <div class="tab-pane fade" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
       <div class="dropdown">
@@ -79,7 +79,7 @@
           data.hue,
           data.a,
           data.b,
-          data.urls, 
+          data.urls,
           data.uuids);
       });
 
@@ -101,8 +101,8 @@
       $.ajax({
         url: "/check-updates/",
         data: JSON.stringify({
-          screenshot_uuids: screenshot_uuids, 
-          h:"Hello World",
+          screenshot_uuids: screenshot_uuids,
+          h: "Hello World",
         }),
         dataType: 'json',
         contentType: 'application/json;charset=UTF-8',
@@ -110,11 +110,11 @@
         success: function (e) {
           screenshot_uuids = e.uuids;
           console.log(e);
-          if (e.screenshots_changed){
+          if (e.screenshots_changed) {
             updateScreenshotVis();
           }
         },
-        error: function (jqXHR, textStatus, errorThrown ) {
+        error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error", jqXHR, textStatus, errorThrown);
         },
         complete: function () {
@@ -130,12 +130,12 @@
         dataType: 'json',
         url: "/screenshot-data/" + screenshot_revision,
         success: function (e) {
-          if (e.update){
+          if (e.update) {
             $(document).trigger("screenshotPollUpdate", [e.data]);
           }
           screenshot_revision = e.revision;
         },
-        error: function (jqXHR, textStatus, errorThrown ) {
+        error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error", jqXHR, textStatus, errorThrown);
         },
         complete: function () {
@@ -149,8 +149,8 @@
       $.ajax({
         url: "/set-selection/",
         data: JSON.stringify({
-          uuids: selected_uuids, 
-          h:"Hello World",
+          uuids: selected_uuids,
+          h: "Hello World",
         }),
         dataType: 'json',
         contentType: 'application/json;charset=UTF-8',
@@ -158,7 +158,7 @@
         success: function (e) {
           console.log("Selection Set")
         },
-        error: function (jqXHR, textStatus, errorThrown ) {
+        error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error", jqXHR, textStatus, errorThrown);
         },
       });
@@ -180,13 +180,13 @@
 
     $(document).on("screenshotPollUpdate", function (event, data) {
       plot.clear();
-      
+
       var ls = []
       var as = []
       var bs = []
       var cols = []
       var sizes = []
-      
+
       data.palettes.forEach((elem) => {
         let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
         ls.push(elem.lab[0]);
@@ -195,7 +195,7 @@
         sizes.push(10);
         cols.push(rgb);
       });
-      plot.addPoints(ls, as, bs, cols,sizes);
+      plot.addPoints(ls, as, bs, cols, sizes);
 
       // data.palettes.forEach((elem) => {
       //  let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];

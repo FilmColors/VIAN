@@ -22,7 +22,7 @@ class NewProjectDialog(EDialogWidget):
         self.auto_naming = False
 
         self.elan_segmentation = elan_segmentation
-        if movie_path is "":
+        if movie_path == "":
             self.project_dir = settings.DIR_PROJECTS
         else:
             mp = movie_path.replace("\\", "/")
@@ -151,7 +151,7 @@ class NewProjectDialog(EDialogWidget):
     def on_browse_project_path(self):
         path = QFileDialog.getExistingDirectory(caption="Select Root Directory of the Project", directory=self.project_dir)
         self.project_dir = path
-        self.lineEdit_ProjectPath.setText(self.project.folder)
+        self.lineEdit_ProjectPath.setText(self.project_dir)
 
     def on_browse_movie_path(self):
         if self.checkBox_FromImages.isChecked() is False:

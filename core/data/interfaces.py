@@ -416,10 +416,8 @@ class TimelineDataset(ITimelineItem):
             k = int(data.shape[0] / 1000)
             if k % 2 == 0:
                 f = k + 1
-                # order = np.clip(f, 1, k-1)
             else:
                 f = k
-                # order = np.clip(f, 1, k - 1)
 
             data = resample(data, data[0::k].shape[0])
             # data = data[0::k]
@@ -429,7 +427,7 @@ class TimelineDataset(ITimelineItem):
         try:
             return data, ms
         except Exception as e:
-            raise e
+            log_error(e)
         return np.array([]), np.array([])
 
     def get_name(self):
