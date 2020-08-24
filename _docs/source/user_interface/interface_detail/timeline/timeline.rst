@@ -56,6 +56,41 @@ When the mouse click is released, all Segments under the red line become annotat
    :height: 20px
    :width: 20px
 
+Adding Descriptions to Segments
+-------------------------------
+
+To add descriptions or notes to a Segment, double-click it, and insert the text you intend to.
+
+.. figure:: timeline_annotation.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+
+To add multiple descriptions to Segments, enable it under Options >> Use Multi Annotation.
+
+.. figure:: timeline_multiannotation.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+
+If you now double-click a Segment, you'll find an already added description under «0 text/plain» (arrow **1**).
+To add further descriptions, click «New» (arrow **2**).
+
+.. figure:: timeline_multiannotation_1.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+
+A new entry in the list to the left will appear.
+Here you can insert your second description for this Segment.
+You can also specify the MIME-type of your description or annotation (Text, Citation, URL).
+
+.. figure:: timeline_multiannotation_2.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+
+
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
