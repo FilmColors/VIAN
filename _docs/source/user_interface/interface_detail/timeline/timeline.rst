@@ -17,7 +17,7 @@ Use the Timeline to create and modify **Segments** and **Segmentaion-** and **Sc
 Indicated in the image above are:
 
 - **1**: Tools for manipulating Segmentations resp. Segments:
- - The Selection Tool |selection_tool| is simply for selecting a Segment, to e.g. view its properties in the **Inspector** or moving its bounderies.
+ - The Selection Tool |selection_tool| is simply for selecting a Segment, to e.g. view its properties in the **Inspector** or moving its bounderies. Tip: to move the bounderies of both adjoining segments, press SHIFT and move then the border.
  - The Splitting Tool |splitting_tool| is for splitting a existing Segment apart, e.g. when you realize that a Segment isn't coherent regarding its colorpattern. As you move the Splitting Tool over the Segment, you see in the **Player** at which frame you are at, so you can split the Segment right away at the correct point, so you don't have to adjust it afterwards.
  - The Merging Tool |merging_tool| is for merging two Segments into one, this is typically necessary after you did an auto-segmentation.
 - **2**: Buttons for zooming in and out of the Timeline (also possible with shortcut CTRL + Scroll).
