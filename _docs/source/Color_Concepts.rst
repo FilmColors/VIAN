@@ -26,10 +26,27 @@ which the colors are arranged in this color space:
 - **a**: The color on the green-red axis.
 - **b**: The color on the blue-yellow axis.
 
-An important property
+Normally, the **a** and **b** values are mapped into a 2D plane, while the
+**L** value is conceptualized orthogonal to this ab-plane.
+
+.. figure:: CIE_Lab.jpg
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   The CIE L*a*b* color space, modelled as sphere. Credits: [#]_.
+
+An important property of the CIE L*a*b* space is that it is a so called
+«perceptually uniform» representation of colors:
+If we were to add a certain amount of lightness to two different colors, the
+modelling in CIE L*a*b* would ensure that both resulting colors will end up in
+a similar place relevant to their original ones.
+
 
 For more details, see e.g. the CIE L*a*b* article in `Wikipedia
 <https://en.wikipedia.org/wiki/CIELAB_color_space>`_.
+
+.. [#] Ly, Bao & Dyer, Ethan & Feig, Jessica & Chien, Anna & Bino, Sandra. (2020). Research Techniques Made Simple: Cutaneous Colorimetry: A Reliable Technique for Objective Skin Color Measurement. The Journal of investigative dermatology. 140. 3-12.e1. 10.1016/j.jid.2019.11.003.
 
 .. toctree::
     :maxdepth: 4
