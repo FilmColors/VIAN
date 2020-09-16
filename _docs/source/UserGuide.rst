@@ -15,6 +15,6 @@ of VIAN. If your a developer, please refer to the Developer's Guide.
     user_interface/user_interface
     step_by_step/step_by_step
     Shortcuts
-    Color_Concepts
+    color_concepts/Color_Concepts
 
 
