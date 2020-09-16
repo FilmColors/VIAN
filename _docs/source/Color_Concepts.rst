@@ -46,6 +46,11 @@ a similar place relevant to their original ones.
 For more details, see e.g. the CIE L*a*b* article in `Wikipedia
 <https://en.wikipedia.org/wiki/CIELAB_color_space>`_.
 
+Further readings:
+
+- `Halter, Gaudenz; Ballester-Ripoll, Rafael; Flueckiger, Barbara; Pajarola, Renato (2019): VIAN. A Visual Annotation Tool for Film Analysis.  In: Computer Graphics Forum, 38,1.
+  <https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.13676>`_.
+
 .. [#] Ly, Bao & Dyer, Ethan & Feig, Jessica & Chien, Anna & Bino, Sandra. (2020). Research Techniques Made Simple: Cutaneous Colorimetry: A Reliable Technique for Objective Skin Color Measurement. The Journal of investigative dermatology. 140. 3-12.e1. 10.1016/j.jid.2019.11.003.
 
 .. toctree::
