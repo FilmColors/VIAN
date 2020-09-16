@@ -42,8 +42,21 @@ If we were to add a certain amount of lightness to two different colors, the
 modelling in CIE L*a*b* would ensure that both resulting colors will end up in
 a similar place relevant to their original ones.
 
+
 Visualizations of VIAN Analyses
 *******************************
+
+In VIAN, color properties of entities (Screenshots, Segments, etc.) can be
+calculated regarding different aspects:
+
+- **Color Average** computes the average color of the whole entity
+- **Color Histogram** computes the distribution of colors in the entity,
+  without providing information as how to these colors are grouped
+- **Color Palette** computes the distribution of colors in the entity, with
+  providing information as how to these colors are grouped
+- **Color Z-Projection** does not compute any color features, but it lays the
+  frames of a Segment onto each other - so movement of foreground in contrast
+  to the background are bettervisible
 
 
 
