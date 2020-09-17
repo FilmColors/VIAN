@@ -4,6 +4,8 @@ Shortcuts
 
 Important keybindings, listed according to the binding key.
 
+Note that CTRL equals ⌘ on Mac.
+
 Most bindings with the CTRL-key are the same as in other programs as well:
 
 **CTRL** +
