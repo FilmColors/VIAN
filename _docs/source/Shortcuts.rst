@@ -12,11 +12,11 @@ Most bindings with the CTRL-key are the same as in other programs as well:
 
 - C     Copy
 - D     Create new Segment (up to the cursor in the Timeline)
-- E     Set end point of new Segment
+- E     Set end point of new Segment
 - F     Take Screenshot
 - S     Save
 - V     Paste
-- W     Set start point of new Segment
+- W     Set start point of new Segment
 - Y     Redo
 - Z     Undo
 - Scroll Zoom In/Out of Window the cursor is in (functions not for all windows, but e. g. the **Timeline**, **Screenshot Manager** etc.
