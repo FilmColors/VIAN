@@ -58,6 +58,16 @@ calculated regarding different aspects:
   frames of a Segment onto each other - so movement of foreground in contrast
   to the background are bettervisible
 
+-------------
+Color Average
+-------------
+
+.. figure:: analyses_ab_plane.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   Color average analysed screenshots, mapped onto the a*b* plane.
 
 
 For more details, see e.g. the CIE L*a*b* article in `Wikipedia
