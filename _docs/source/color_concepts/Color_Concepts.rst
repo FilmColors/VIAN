@@ -62,12 +62,31 @@ calculated regarding different aspects:
 Color Average
 -------------
 
+Let's say you have several screenshots you want to analyse in your project.
+You would follow the steps described in the section ref:`analyses`, so VIAN
+computes the analysis you want it to, in this case **color average**.
+When the computation has finished, VIAN offers you several visualizations of
+these analyses.
+The first you see in the analyses widget is the **AB-Plane**, which refers to
+the a*b* dimension of the CIE L*a*b* color space.
+
+In the figure below, you see every screenshot mapped onto its position in the
+a*b* plane regarding the values of its average color:
+
 .. figure:: analyses_ab_plane.png
    :scale: 60%
    :align: center
    :alt: map to buried treasure
    
    Color average analysed screenshots, mapped onto the a*b* plane.
+
+.. figure:: analyses_colordT_saturation.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   Color average analysed screenshots, mapped regarding their saturation values
+   over time.
 
 
 For more details, see e.g. the CIE L*a*b* article in `Wikipedia
