@@ -80,12 +80,36 @@ a*b* plane regarding the values of its average color:
    
    Color average analysed screenshots, mapped onto the a*b* plane.
 
+You can imagine it as looking from the top (from the «northpole») of the color
+globe from the figure before onto the middle plane, where the colors are mapped
+according to their green-red and yellow-blue properties.
+
 .. figure:: analyses_colordT_saturation.png
    :scale: 60%
    :align: center
    :alt: map to buried treasure
    
    Color average analysed screenshots, mapped regarding their saturation values
+   over time.
+
+In the drop-down menu, you can select different features of the color average
+you want to plot over time.
+For example, you can plot the hue on the y-axis over time on the x-axis.
+However, since hue is conceptualized as laying in a circle, values with a very
+high and with a very low hue value actually lie close together.
+Due to the plotting of the hue value on a linear axis, this is not conceivable
+on the first look:
+The two screenshots marked with red arrows in the following picture are very
+far away from each other concerning their x-axis value, but actually they are
+almost the same color, since a very high and a very low hue value represent
+very similar colors.
+
+.. figure:: analyses_colordT_hue.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   Color average analysed screenshots, mapped regarding their hue values
    over time.
 
 
