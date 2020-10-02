@@ -4,6 +4,7 @@ Contains all Export Classes and Export Functions of VIAN
 
 import cv2
 import numpy as np
+import pandas as pd
 from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
@@ -351,6 +352,43 @@ class CSVExporter(ExportDevice):
                     f.append(r)
                     c += 1
         f.save(path)
+
+
+class ColorimetryExporter(ExportDevice):
+    def __init__(self):
+        pass
+
+    def export(self, project:VIANProject, path):
+        if project.colormetry_analysis is None:
+            raise Exception("Colorimetry has not been performed yet")
+
+        data = np.zeros(shape=(len(project.colormetry_analysis), 6))
+
+        timestamps = []
+        for i, entry in enumerate(project.colormetry_analysis.iter_avg_color()):
+            l,c,h = lch_to_human_readable([entry['l'], entry['c'],entry['h']])
+            data[i] = [
+              entry['time_ms'],
+              entry['l'],
+              entry['a'],
+              entry['b'],
+              c,
+              h,
+            ]
+            timestamps.append(ms_to_string(entry['time_ms']))
+
+        df = pd.DataFrame(dict(time_ms=data[:, 0],
+                               timestamp=timestamps,
+                               luminance=data[:, 1],
+                               a=data[:, 2],
+                               b=data[:, 3],
+                               chroma=data[:, 4],
+                               hue=data[:, 5]
+                               ))
+
+        df.to_csv(os.path.join(project.export_dir, path), index_label="ID")
+
+
 
 
 def build_file_name(naming, screenshot, movie_descriptor):

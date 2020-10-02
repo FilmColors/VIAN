@@ -1,5 +1,6 @@
 # from core.node_editor.node_editor import *
 from shutil import copy2
+from typing import Union
 from threading import Lock
 from uuid import uuid4
 
@@ -152,7 +153,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
 
-        self.colormetry_analysis = None
+        self.colormetry_analysis = None         # type: Union[ColormetryAnalysis|None]
 
         self.hdf5_manager = None
         self.hdf5_indices_loaded = dict(curr_pos=dict(), uidmapping=dict())

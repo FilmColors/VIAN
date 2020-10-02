@@ -332,7 +332,7 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def get_update(self, time_ms):
         try:
-            frame_idx = int(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution)
+            frame_idx = int(np.floor(ms_to_frames(time_ms, self.project.movie_descriptor.fps) / self.resolution))
             if frame_idx == self.last_idx or frame_idx > self.current_idx:
                 return None
             self.last_idx = frame_idx
@@ -407,7 +407,6 @@ class ColormetryAnalysis(AnalysisContainer):
             self.time_ms = serialization['time_ms']
             self.current_idx = len(self.time_ms)
             self.end_idx = serialization['end_idx']
-
         except Exception as e:
             log_error("Exception in Loading Analysis", str(e))
         self.current_idx = project.hdf5_manager.get_colorimetry_length() - 1
@@ -415,8 +414,44 @@ class ColormetryAnalysis(AnalysisContainer):
         self.check_finished()
         return self
 
+    def __iter__(self):
+        """
+        Returns a dictionary with all entries from the colorimetry:
 
+        palette = layers,
+        histogram=hist,
+        spatial=spatial,
+        times=times,
+        frame_idx = frame_idx,
+        current_idx = self.current_idx
 
+        :return:
+        """
+        _iter_idx  = 0
+        while _iter_idx < len(self.time_ms):
+            yield self.get_update(self.time_ms[_iter_idx])
+            _iter_idx += 1
+
+    def iter_avg_color(self):
+        _iter_idx = 0
+        while _iter_idx < len(self.time_ms):
+            time_ms = self.time_ms[_iter_idx]
+            hdf5_idx = _iter_idx
+            print(hdf5_idx)
+            l,a,b = tuple(self.project.hdf5_manager.get_colorimetry_feat(hdf5_idx)[:3])
+            _,c,h = tuple(lab_to_lch([l,a,b]))
+            yield dict(
+                time_ms=time_ms,
+                l = l,
+                a=a,
+                b=b,
+                c=c,
+                h=h
+            )
+            _iter_idx += 1
+
+    def __len__(self):
+        return len(self.time_ms)
 # class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
 #     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
 #         super(NodeScriptAnalysis, self).__init__(name, results)

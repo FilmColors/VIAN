@@ -352,6 +352,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionScreenshotsExport.triggered.connect(self.on_export_screenshots)
         self.actionExportMovie_Segment.triggered.connect(self.on_export_movie_segments)
         self.actionExportCSV.triggered.connect(self.on_export_csv)
+        self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -1801,6 +1802,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.facial_identification_dock is None:
             self.facial_identification_dock.raise_()
+
+    def on_export_colorimetry(self):
+        if self.project is None:
+            return
+        p = QFileDialog.getSaveFileName(filter="*.csv")[0]
+        try:
+            self.project.export(ColorimetryExporter(), p)
+        except Exception as e:
+            log_error(e)
+
+
 
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")

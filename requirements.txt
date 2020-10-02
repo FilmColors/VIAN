@@ -10,3 +10,4 @@ flask
 fastcluster
 moviepy
 python-vlc
+pandas

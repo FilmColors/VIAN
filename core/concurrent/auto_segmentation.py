@@ -59,7 +59,7 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
             frame_pos  = None
             resolution = resolution
 
-        job = AutoSegmentingJob(
+        job = AutoSegmentingJobHistogram(
             [project.movie_descriptor.get_movie_path(),
              resolution,
              project.movie_descriptor.fps,
@@ -136,7 +136,102 @@ class DialogAutoSegmentation(EDialogWidget):
         self.close()
 
 
-class AutoSegmentingJob(IConcurrentJob):
+class AutoSegmentingJobHistogram(IConcurrentJob):
+    def run_concurrent(self, args, sign_progress):
+        idx = 0
+        movie_path = args[0]
+        resolution = args[1]
+        in_hists = args[3]
+        fps = args[2]
+        indices = args[4]
+        frame_resolution = args[5]
+        n_cluster_range = args[6]
+        alt_resolution = args[7]
+        cluster_sizes = range(n_cluster_range[0], n_cluster_range[1], 1)
+        histograms = []
+        frames = []
+
+        cap = cv2.VideoCapture(movie_path)
+        length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        step = length / (10 * n_cluster_range[1])
+        resize_f = 192.0 / cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+        counter = 0
+        tot = len(list(range(0, int(length), int(step))))
+        for i in range(0, int(length), int(step)):
+            sign_progress(counter / tot)
+            counter += 1
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+            ret, frame = cap.read()
+            frames.append(dict(pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
+                     pos=i))
+
+        data_idx = 0
+        read_img = -1 # We only want to read every second image
+        if indices is None:
+            indices = []
+            resolution = alt_resolution
+        for i in range(int(length)):
+            if self.aborted:
+                return None
+            if i % resolution == 0:
+                read_img += 1
+                if in_hists is not None and data_idx >= len(in_hists):
+                    break
+
+                sign_progress(i / length)
+                if in_hists is not None:
+                    histograms.append(np.resize(in_hists[data_idx], new_shape=16 ** 3))
+                else:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+                    ret, frame = cap.read()
+                    if frame is None:
+                        break
+
+                    frame = cv2.cvtColor(floatify_img(frame), cv2.COLOR_BGR2LAB)
+                    data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
+                    hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+                                        [16, 16, 16],
+                                        [0, 100, -128, 128,
+                                         -128, 128])
+                    indices.append(i)
+                    histograms.append(np.resize(hist, new_shape=16 ** 3))
+                data_idx += 1
+
+        connectivity = np.zeros(shape=(len(histograms), len(histograms)), dtype=np.uint8)
+        for i in range(1, len(histograms) - 1, 1):
+            connectivity[i][i - 1] = 1
+            connectivity[i][i] = 1
+            connectivity[i][i + 1] = 1
+
+        clusterings = []
+        for i, n_cluster in enumerate(cluster_sizes):
+            sign_progress(i / len(cluster_sizes))
+
+            if len(histograms) > n_cluster:
+                model = AgglomerativeClustering(linkage="ward",
+                                                connectivity=connectivity,
+                                                n_clusters=n_cluster, compute_full_tree=True)
+                model.fit(histograms)
+                clusterings.append(model.labels_)
+
+        frames_total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        pcounter, p_max = 0, len(np.unique(clusterings[0])) * 30
+
+        cap.release()
+        return dict(clusterings=clusterings, frames=frames, indices=indices, fps=fps, frame_resolution=frame_resolution, cluster_range=n_cluster_range)
+
+    def modify_project(self, project, result, sign_progress=None, main_window = None):
+        if result is not None:
+            widget = self.get_widget(main_window, result)
+            widget.show()
+
+    def get_widget(self, parent, result):
+        return ApplySegmentationWindow(parent, **result)
+
+
+class AutoSegmentingJobAudio(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         idx = 0
         movie_path = args[0]

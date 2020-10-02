@@ -155,8 +155,25 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
     return result
 
 
-def lab_to_lch(lab):
-    lab = np.array(lab)
+def lab_to_lch(lab, human_readable = False):
+    """
+    Converts LAB to LCH, if human readable is true:
+    L: {0,...,100}
+    C: {0, 100}
+    H: {0, 360}
+
+    else:
+    L: {0,...,100}
+    C: {0, sqrt(128**2 + 128**2) == 181.019}
+    H: {-np.pi, np.pi}
+
+    :param lab:
+    :param human_readable:
+    :return:
+    """
+    if not isinstance(lab, np.ndarray):
+        lab = np.array(lab)
+
     if len(lab.shape) > 1:
         lch = np.empty(lab.shape, dtype=np.float32)
         lch[:, 0] = lab[:, 0]
@@ -167,6 +184,26 @@ def lab_to_lch(lab):
         lch[0] = lab[0]
         lch[1] = np.linalg.norm(lab[1:3])
         lch[2] = np.arctan2(lab[2], lab[1])
+
+    if human_readable:
+        lch = lch_to_human_readable(lch)
+    return lch
+
+def lch_to_human_readable(lch):
+    """
+    Converts LCH to human readable:
+    L: {0,...,100}
+    C: {0, 100}
+    H: {0, 360}
+
+    :param lch:
+    :return:
+    """
+    if not isinstance(lch, np.ndarray):
+        lch = np.array(lch)
+
+    lch[..., 1] = lch[..., 1] / np.sqrt(128**2 + 128**2) * 100.0
+    lch[..., 2] = np.rad2deg(lch[..., 2]) % 360
     return lch
 
 
