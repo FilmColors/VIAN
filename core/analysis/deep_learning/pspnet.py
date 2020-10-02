@@ -6,9 +6,9 @@ Yuta Kamikawa
 Kyoto University
 
 """
-import keras.backend as K
 
 import tensorflow as tf
+import keras.backend as K
 
 from keras.models import Model
 from keras.layers import Input, Reshape, Permute, Dense, Activation, Flatten, Conv2D

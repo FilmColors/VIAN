@@ -138,7 +138,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
             sign_progress(1.0)
             result.append(
              IAnalysisJobAnalysis(
-                name="Average Color",
+                name="Color Average",
                 results = dict(color_lab=colors_lab,
                                color_bgr = colors_bgr,
                                saturation_l=saturation_l,

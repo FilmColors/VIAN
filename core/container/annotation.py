@@ -72,12 +72,12 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.image = None
 
         # if t_end is not set, it shall be one second after t_start
-        if t_end is -1:
+        if t_end == -1:
             self.t_end = t_start + 1000
         else:
             self.t_end = t_end
 
-        if self.a_type == AnnotationType.Image and self.resource_path is not "":
+        if self.a_type == AnnotationType.Image and self.resource_path != "":
             self.load_image()
 
     def add_key(self, time, position):

@@ -6,10 +6,11 @@ block_cipher = None
 BUILD_PYTHON_DIR = os.environ['vian_build_dir']
 print(BUILD_PYTHON_DIR)
 
-from PyInstaller.utils.hooks import collect_submodules, collect_data_files
-tf_hidden_imports = collect_submodules('tensorflow_core')
-tf_datas = collect_data_files('tensorflow_core', subdir=None, include_py_files=True)
-
+# from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+# tf_hidden_imports = collect_submodules('tensorflow_core')
+# tf_datas = collect_data_files('tensorflow_core', subdir=None, include_py_files=True)
+tf_hidden_imports = []
+tf_datas = []
 
 binaries = []
 hiddenimports = [

@@ -12,7 +12,9 @@ try:
     import os
     from core.analysis.import_tensortflow import tf
 
-except:
+except Exception as e:
+    print("Import Failed", e)
+
     from core.data.enums import DataSerialization
     from core.analysis.deep_learning.labels import *
 

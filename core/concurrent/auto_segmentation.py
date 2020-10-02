@@ -121,7 +121,6 @@ class DialogAutoSegmentation(EDialogWidget):
 
     @pyqtSlot()
     def on_ok(self):
-        print("Hello")
         if self.comboBox_Distribution.currentIndex() == 0:
             n_segments = self.spinBox_NSegments.value()
             segment_width = -1

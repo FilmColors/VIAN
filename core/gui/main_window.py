@@ -5,6 +5,7 @@ from core.concurrent.worker import WorkerManager, MinimalThreadWorker
 from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.auto_segmentation import DialogAutoSegmentation
+from core.analysis.analysis_import import *
 
 from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
@@ -1995,7 +1996,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.onSave.emit()
 
-        if open_dialog is True or self.project.path is "" or self.project.name is "":
+        if open_dialog is True or self.project.path == "" or self.project.name == "":
 
             path = QFileDialog.getSaveFileName(caption="Select Project File to save", filter="*" + VIAN_PROJECT_EXTENSION)
 

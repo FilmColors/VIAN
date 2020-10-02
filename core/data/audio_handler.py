@@ -68,7 +68,7 @@ class AudioHandler(QObject):
 
             self.audioProcessed.emit(
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
-                                vis_type=TimelineDataset.VIS_TYPE_AREA))
+                                vis_type=TimelineDataset.VIS_TYPE_LINE))
             self._audioclip.close()
             self.audioExtractingEnded.emit()
 
@@ -87,7 +87,7 @@ class AudioHandler(QObject):
             project_audio_path = os.path.join(self.project.data_dir, "audio.mp3")
             self.audioProcessed.emit(
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
-                                vis_type=TimelineDataset.VIS_TYPE_AREA))
+                                vis_type=TimelineDataset.VIS_TYPE_LINE))
             try:
                 if not os.path.isfile(project_audio_path) and self.export_audio:
                     self._audioclip.write_audiofile(os.path.join(self.project.data_dir, "audio.mp3"))

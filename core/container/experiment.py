@@ -29,11 +29,11 @@ def delete_even_if_connected_msgbox(mode="word"):
     :return: an QMessageBox.Answer
     """
     if mode == "word":
-        text = 'This Keyword has already been connected used to classify, removing it from the vocabulary '
-        'also removes it from the classification. Do you want to remove it anyway?'
+        text = 'This Keyword has already been connected used to classify, removing it from the vocabulary ' + \
+               'also removes it from the classification. Do you want to remove it anyway?'
     else:
-        text = 'This Vocabulary contains keywords which have already been used to classify, removing the vocabulary'
-        'also removes the classification already done. Do you want to remove it anyway?'
+        text = 'This Vocabulary contains keywords which have already been used to classify, removing the vocabulary ' + \
+               'also removes the classification already done. Do you want to remove it anyway?'
 
     answer = QMessageBox.question(None, "Warning", text)
     return answer

@@ -1,10 +1,10 @@
 tensorflow
 keras
 sqlalchemy
-opencv-contrib-python
+opencv-contrib-python-headless
 requests
-PyQt5==5.15
-PyQtWebEngine==5.15
+PyQt5==5.14.2
+PyQtWebEngine==5.14
 scikit-learn
 flask
 fastcluster
