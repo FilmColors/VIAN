@@ -34,7 +34,7 @@ Normally, the **a** and **b** values are mapped into a 2D plane, while the
    :align: center
    :alt: map to buried treasure
    
-   The CIE L*a*b* color space, modelled as sphere. Credits: [#]_.
+   The CIE L*a*b* color space, modelled as sphere. Credits: Ly et al. (2020) [#]_.
 
 An important property of the CIE L*a*b* space is that it is a so called
 «perceptually uniform» representation of colors:
@@ -112,6 +112,45 @@ very similar colors.
    Color average analysed screenshots, mapped regarding their hue values
    over time.
 
+To inspect the **color average** analysis for single entities, in this case a
+single screenshot, open the inspector and select the screenshot you are
+interested in (either through the :ref:`outliner` or in the
+:ref:`screenshot_manager`).
+As you can see in the figure below, **1** points to the selected screenshot in
+the screenshot manager and the inspector.
+Just below the screenshot in the inspector, where **2** is pointing to, you see
+the computed results of the color average analysis:
+On th eone hand, you see the actual average color of the entity, as well as
+the actual numerical values of that average color in different color schemes.
+
+
+.. figure:: color_average_inspector.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   The color average analysis in the Inspector.
+
+
+
+---------------
+Color Histogram
+---------------
+
+-------------
+Color Palette
+-------------
+
+.. figure:: superpixels.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   Superpixels XXXXXXX. Credits: Halter et al. (2019) [#]_.
+
+------------------
+Color Z-Projection
+------------------
 
 For more details, see e.g. the CIE L*a*b* article in `Wikipedia
 <https://en.wikipedia.org/wiki/CIELAB_color_space>`_.
@@ -122,6 +161,8 @@ Further readings:
   <https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.13676>`_.
 
 .. [#] Ly, Bao & Dyer, Ethan & Feig, Jessica & Chien, Anna & Bino, Sandra. (2020). Research Techniques Made Simple: Cutaneous Colorimetry: A Reliable Technique for Objective Skin Color Measurement. The Journal of investigative dermatology. 140. 3-12.e1. 10.1016/j.jid.2019.11.003.
+
+.. [#] Halter, Gaudenz; Ballester-Ripoll, Rafael; Flueckiger, Barbara; Pajarola, Renato (2019): VIAN. A Visual Annotation Tool for Film Analysis. In: Computer Graphics Forum, 38,1.
 
 .. toctree::
     :maxdepth: 4
