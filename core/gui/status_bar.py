@@ -23,6 +23,8 @@ class StatusBar(QtWidgets.QWidget):
 
         self.stage_selector = StageSelector(self, main_window)
         self.layout.addWidget(self.stage_selector)
+        self.stage_selector.hide()
+
         self.layout.addItem(QSpacerItem(100, 10))
 
         self.label_selection = QtWidgets.QLabel(self)

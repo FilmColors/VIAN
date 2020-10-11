@@ -63,6 +63,7 @@ class TimelineControl(QtWidgets.QWidget):
         self.set_name()
         self._add_spacer()
 
+        
         if self.item.strip_height == -1:
             self.resize(self.width(), 45)
         else:

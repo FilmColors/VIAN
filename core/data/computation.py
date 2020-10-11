@@ -468,8 +468,18 @@ def parse_file_path(path):
 
 
 def create_icon(path):
+    # h_dir = os.path.join("qt_ui", "icons", "hdpi")
+    # if not os.path.isdir(os.path.join("qt_ui", "icons", "hdpi")):
+    #     os.mkdir(h_dir)
+    #
+    # f, end = os.path.split(path)[1].split(".")
+    # h_file = f + "@2x." + end
+    # h_path = os.path.join(h_dir, h_file)
+    # if not os.path.isfile(h_path):
+    #     shutil.copy2(path,h_path)
     icon = QIcon(path)
-    # print icon.availableSizes()
+    # icon.addFile(h_path)
+
     return icon
 
 

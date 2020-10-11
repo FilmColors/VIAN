@@ -143,17 +143,18 @@ if __name__ == '__main__':
     print("ApplicationDone")
 
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
+    # app.setAttribute(Qt.AA_UseHighDpiPixmaps)
     # filter = SuperFilter(app)
     # app.installEventFilter(filter)
 
-    if sys.platform.startswith("win"):
-        os.environ['QT_ENABLE_HIGHDPI_SCALING'] = "1"
+    # if sys.platform.startswith("win"):
+    #     os.environ['QT_ENABLE_HIGHDPI_SCALING'] = "1"
 
     print("Setting UI")
     print(os.getcwd())
 
     app.setWindowIcon(QIcon("qt_ui/images/main.png"))
-    set_attributes(app)
+    # set_attributes(app)
     set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
 
     screen = app.desktop().screenGeometry()

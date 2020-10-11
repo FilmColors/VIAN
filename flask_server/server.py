@@ -101,7 +101,7 @@ class ServerData:
                 b.append(d[2])
                 uuids.append(s.unique_id)
                 time.append(ms2datetime(s.get_start()))
-                lch = lab_to_lch(arr)
+                lch = lab_to_lch(arr, human_readable=True)
                 luminance.append(float(arr[0]))
                 chroma.append(float(lch[1]))
                 hue.append(float(lch[2]))

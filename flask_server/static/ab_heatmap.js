@@ -27,7 +27,7 @@ class ABHeatmap {
         this.plot.background_fill_color = this.background
         this.plot.background_fill_alpha = 0.0
         this.plot.border_fill_alpha = 0.0
-        this.plot.sizing_mode = "scale_width"
+        this.plot.sizing_mode = "scale_both"
 
         var r = annular_wedge({
             x: { field: "xs" },
