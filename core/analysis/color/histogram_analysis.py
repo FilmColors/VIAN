@@ -14,6 +14,7 @@ from core.visualization.basic_vis import HistogramVis
 from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 from core.container.hdf5_manager import vian_analysis
 
+from core.analysis.misc import preprocess_frame
 @vian_analysis
 class ColorHistogramAnalysis(IAnalysisJob):
     """
@@ -81,6 +82,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
+            frame = preprocess_frame(frame, self.max_width)
             if c == start:
                 shape = frame.shape
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)

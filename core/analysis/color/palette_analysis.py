@@ -12,6 +12,7 @@ from core.visualization.palette_plot import *
 from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 from core.container.hdf5_manager import vian_analysis
 
+from core.analysis.misc import preprocess_frame
 
 @vian_analysis
 class ColorPaletteAnalysis(IAnalysisJob):
@@ -81,6 +82,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
             # Get sub frame if there are any margins
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+            frame = preprocess_frame(frame, self.max_width)
 
             if model is None:
                 if self.seeds_input_width < frame.shape[0]:
@@ -89,6 +91,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
                 model = PaletteExtractorModel(frame, n_pixels=self.n_super_pixel, num_levels=8)
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+
             try:
                 pal = color_palette(frame, mask=bin_mask,
                                     mask_index=255,

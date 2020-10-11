@@ -56,13 +56,13 @@ class DialogPreferences(EDialogWidget):
 
         self.spinBox_GridSize.valueChanged.connect(self.set_grid_size)
 
-
         self.lineEdit_ProjectsFolder.setText(self.settings.DIR_PROJECTS)
         self.lineEdit_UpdateSource.setText(self.settings.UPDATE_SOURCE)
         self.spinBox_AutosaveTime.setValue(self.settings.AUTOSAVE_TIME)
 
         self.checkBox_AutoColormetry.setChecked(self.settings.AUTO_START_COLORMETRY)
         self.spinBox_GridSize.setValue(self.settings.GRID_SIZE)
+        self.spinBox_ProcessingWidth.setValue(self.settings.PROCESSING_WIDTH)
 
         # self.lineEdit_UserName.setText(self.settings.USER_NAME)
         # self.lineEdit_CorpusIP.setText(self.settings.CORPUS_IP)
@@ -120,6 +120,7 @@ class DialogPreferences(EDialogWidget):
         self.settings.FONT_SIZE = self.spinBox_FontSize.value()
         self.settings.MULTI_EXPERIMENTS = self.checkBoxMultiExperiments.isChecked()
         self.settings.USE_PIPELINES = self.checkBoxUsePipelines.isChecked()
+        self.settings.PROCESSING_WIDTH = self.spinBox_ProcessingWidth.value()
         self.main_window.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
         self.main_window.on_pipeline_settings_changed()
 

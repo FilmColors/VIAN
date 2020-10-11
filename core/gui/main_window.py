@@ -616,7 +616,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def toggle_colormetry(self):
         log_debug("toggle colormetry", self.project.movie_descriptor.fps / 2)
         if self.colormetry_running is False:
-            job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self)
+            job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self, self.settings.PROCESSING_WIDTH)
             args = job.prepare(self.project)
             self.actionColormetry.setText("Pause Colormetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)
@@ -1660,7 +1660,9 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.show()
             dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
 
-    def analysis_triggered(self, analysis):
+    def analysis_triggered(self, analysis:IAnalysisJob):
+        analysis.max_width = self.settings.PROCESSING_WIDTH
+
         targets = []
         for sel in self.project.selected:
             if sel.get_type() in analysis.source_types:

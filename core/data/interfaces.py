@@ -98,6 +98,8 @@ class IAnalysisJob(QObject):
         self.target_class_obj = None
         self.aborted = False
 
+        self.max_width = 1920
+
     def get_name(self):
         return self.name
 

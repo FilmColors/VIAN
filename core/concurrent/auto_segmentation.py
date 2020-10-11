@@ -6,7 +6,7 @@ from PyQt5.QtCore import QRect, Qt
 from core.data.interfaces import IConcurrentJob
 from core.data.enums import *
 from core.container.project import VIANProject
-
+from core.analysis.misc import preprocess_frame
 from core.data.computation import frame2ms, floatify_img
 
 AUTO_SEGM_EVEN = 0
@@ -44,7 +44,6 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
                                          inhibit_overlap=False,
                                          dispatch=False)
 
-            # segmentation.create_segment(i * segm_width, i * segm_width + segm_width, dispatch=False)
         project.dispatch_changed()
 
     elif mode == AUTO_SEGM_CHIST:
@@ -67,7 +66,8 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
              frame_pos,
              nth_frame,
              [n_cluster_lb, n_cluster_hb]
-             ,resolution] )
+             ,resolution],
+            max_width=main_window.settings.PROCESSING_WIDTH)
         main_window.run_job_concurrent(job)
 
 
@@ -91,13 +91,7 @@ class DialogAutoSegmentation(EDialogWidget):
                                     "please wait until it is finished and try again.\n\n"
                                     "The progress is inAtrousConvolution2Ddicated by the green line on the Timeline.")
         self.lbl_not_ready.setStyleSheet("QLabel{foreground: red;}")
-        #self.btn_start_colormetry = QPushButton("Start Colorimetry")
-        #self.btn_start_colormetry.clicked.connect(self.main_window.toggle_colormetry)
 
-        # self.widget_colorhist.layout().addWidget(self.lbl_not_ready)
-        # self.sl
-        # self.widget_colorhist.layout().addWidget(self.slider_resolution)
-        #self.widget_colorhist.layout().addWidget(self.btn_start_colormetry)
         self.btn_Run.clicked.connect(self.on_ok)
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_Cancel.clicked.connect(self.close)
@@ -136,6 +130,10 @@ class DialogAutoSegmentation(EDialogWidget):
 
 
 class AutoSegmentingJobHistogram(IConcurrentJob):
+    def __init__(self, args, show_modify_progress= False, max_width=1920):
+        super(AutoSegmentingJobHistogram, self).__init__(args, show_modify_progress)
+        self.max_width = max_width
+
     def run_concurrent(self, args, sign_progress):
         idx = 0
         movie_path = args[0]
@@ -188,6 +186,7 @@ class AutoSegmentingJobHistogram(IConcurrentJob):
                     if frame is None:
                         break
 
+                    frame = preprocess_frame(frame, self.max_width)
                     frame = cv2.cvtColor(floatify_img(frame), cv2.COLOR_BGR2LAB)
                     data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
                     hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,

@@ -124,6 +124,7 @@ class UserSettings():
         self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
 
         self.MULTI_EXPERIMENTS = False
+        self.PROCESSING_WIDTH = 1920
 
         self.UPDATE_SOURCE = ""#"\\\\130.60.131.134\\team\\Software\\VIAN\\OSX\\"
 
@@ -158,6 +159,8 @@ class UserSettings():
         self.USE_CORPUS = False
         self.USE_ELAN = False
         self.USE_PIPELINES = False
+
+
 
         self.dock_widgets_data = []
 

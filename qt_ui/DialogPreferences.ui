@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>854</width>
-    <height>403</height>
+    <width>1135</width>
+    <height>557</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -120,65 +120,6 @@
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="3" column="1">
-            <widget class="QSpinBox" name="spinBox_EarlyStop">
-             <property name="minimum">
-              <number>10</number>
-             </property>
-             <property name="maximum">
-              <number>5000</number>
-             </property>
-             <property name="singleStep">
-              <number>1000</number>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_20">
-             <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Player&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QComboBox" name="comboBox_Source">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <item>
-              <property name="text">
-               <string>Always VLC</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Always OpenCV</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Timeline Scale Dependent</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="3" column="2">
-            <widget class="QLabel" name="label_31">
-             <property name="text">
-              <string>ms</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QCheckBox" name="checkBox_AutoColormetry">
-             <property name="text">
-              <string>Active</string>
-             </property>
-            </widget>
-           </item>
            <item row="7" column="0">
             <widget class="QLabel" name="label_29">
              <property name="sizePolicy">
@@ -198,13 +139,10 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_30">
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_20">
              <property name="text">
-              <string>Early Stop:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Player&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -224,39 +162,10 @@
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_21">
-             <property name="minimumSize">
-              <size>
-               <width>150</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>OpenCV per Frame</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
            <item row="8" column="0">
             <widget class="QLabel" name="label_25">
              <property name="text">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Experiments&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLabel" name="label_11">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>ms</string>
              </property>
             </widget>
            </item>
@@ -289,10 +198,94 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_12">
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="spinBox_EarlyStop">
+             <property name="minimum">
+              <number>10</number>
+             </property>
+             <property name="maximum">
+              <number>5000</number>
+             </property>
+             <property name="singleStep">
+              <number>1000</number>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QCheckBox" name="checkBox_AutoColormetry">
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Timeline&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>Active</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="1">
+            <widget class="QCheckBox" name="checkBoxUsePipelines">
+             <property name="text">
+              <string>Use Pipelines</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="label_11">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>ms</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QComboBox" name="comboBox_Source">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <item>
+              <property name="text">
+               <string>Always VLC</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Always OpenCV</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Timeline Scale Dependent</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_30">
+             <property name="text">
+              <string>Early Stop:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="minimumSize">
+              <size>
+               <width>150</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>OpenCV per Frame</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -303,10 +296,44 @@
              </property>
             </widget>
            </item>
-           <item row="10" column="1">
-            <widget class="QCheckBox" name="checkBoxUsePipelines">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_12">
              <property name="text">
-              <string>Use Pipelines</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Timeline&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLabel" name="label_31">
+             <property name="text">
+              <string>ms</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
+            <widget class="QLabel" name="label_26">
+             <property name="text">
+              <string>Maximal Frame width during Computation</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="1">
+            <widget class="QSpinBox" name="spinBox_ProcessingWidth">
+             <property name="minimum">
+              <number>100</number>
+             </property>
+             <property name="maximum">
+              <number>12000</number>
+             </property>
+             <property name="value">
+              <number>1920</number>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Analysis&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>

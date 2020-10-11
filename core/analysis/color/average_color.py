@@ -13,6 +13,7 @@ from core.analysis.color.palette_extraction import *
 from core.container.hdf5_manager import vian_analysis
 from core.visualization.palette_plot import *
 
+from core.analysis.misc import preprocess_frame
 
 """
 array Structure: 
@@ -102,6 +103,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
                 # Get sub frame if there are any margins
                 if margins is not None:
                     frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
+
+                frame = preprocess_frame(frame, self.max_width)
 
                 bin_mask = None
                 if semseg is not None and self.target_class_obj is not None:

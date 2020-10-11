@@ -689,3 +689,13 @@ def get_colormap(n=12, map="gist_ncar"):
         for i in range(n):
             res.append(np.random.random(3))
         return res
+
+def resize_with_aspect(img, width = None, height = None, mode=cv2.INTER_CUBIC):
+    if width is not None:
+        fy = width / img.shape[1]
+    elif height is not None:
+        fy = width / img.shape[0]
+    else:
+        raise ValueError("Either width or height have to be given")
+
+    return cv2.resize(img, None, None, fy, fy, mode)

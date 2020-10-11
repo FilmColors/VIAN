@@ -10,6 +10,7 @@ from typing import List
 import time
 
 
+from core.analysis.misc import preprocess_frame
 class PaletteAsset():
     def __init__(self, tree, merge_dists):
         self.tree = tree
