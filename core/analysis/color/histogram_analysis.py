@@ -87,6 +87,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
                 shape = frame.shape
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
             if bin_mask is not None:
+                bin_mask = preprocess_frame(bin_mask, self.max_width, mode=cv2.INTER_NEAREST)
                 data = frame[np.where(bin_mask==True)]
             else:
                 data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))

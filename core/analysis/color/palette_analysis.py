@@ -63,6 +63,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
             name, labels = self.target_class_obj.semantic_segmentation_labels
             mask = semseg.get_adata()
             bin_mask = labels_to_binary_mask(mask, labels)
+            bin_mask = preprocess_frame(bin_mask, self.max_width, mode=cv2.INTER_NEAREST)
 
         palettes = []
 

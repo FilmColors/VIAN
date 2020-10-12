@@ -113,6 +113,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
                     bin_mask = labels_to_binary_mask(mask, labels)
                     if margins is not None:
                         bin_mask = bin_mask[margins[1]:margins[3], margins[0]:margins[2]]
+                    bin_mask = preprocess_frame(bin_mask, self.max_width, mode=cv2.INTER_NEAREST)
+
                 if bin_mask is not None:
                     indices = np.where(bin_mask > 0)
                     colors_bgr.append(np.mean(frame[indices], axis=(0)))
