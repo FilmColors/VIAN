@@ -137,6 +137,46 @@ the actual numerical values of that average color in different color schemes.
 Color Histogram
 ---------------
 
+A histogram is essentially a representation of the distribution of numerical
+data --- in terms of colors of a digital image, this simply means to look at
+each pixel individually and look at its color properties.
+The accumulation of this process can then be visualized in a color space.
+
+Consider an image like the following screenshot:
+
+.. figure:: bright_screenshot.png
+   :scale: 80%
+   :align: center
+   :alt: map to buried treasure
+   
+   A bright screenshot.
+
+When the **Color Histogram** analysis has been computed of this image, you can
+find a visualization of it in the inspector widget, below the actual image:
+
+.. figure:: histogram.png
+   :scale: 80%
+   :align: center
+   :alt: map to buried treasure
+   
+   Color Histogram of a bright screenshot, visualized in the Inspector.
+
+As can be seen in the histogram (and the screenshot as well, in this case),
+there are many pixels that have yellowish color properties --- in this picture
+those come from mainly from the sand in the background --- and there are also
+spikes for pink and red color tons --- from the dress of the woman.
+However, it has to be noted, that this is strictly speaking not visible from
+the histogram itself, it merely tells us that there are many yellowish pixels
+in the image, but it does not convey information as how these pixels are
+arranged in the picture.
+In fact ANY arrangement of the pixels in the original image (also completely
+random ones) would have the same histogram.
+
+Therefore, the histogram is not an analysis that conveys too much information
+for color analysis.
+
+The
+
 -------------
 Color Palette
 -------------
