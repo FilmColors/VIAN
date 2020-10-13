@@ -66,6 +66,8 @@
      <property name="title">
       <string>Export</string>
      </property>
+     <addaction name="actionProject_Summary"/>
+     <addaction name="separator"/>
      <addaction name="actionExportTemplate"/>
      <addaction name="actionExportExperiment"/>
      <addaction name="actionExportVocabulary"/>
@@ -1005,6 +1007,11 @@
   <action name="actionSRT_File">
    <property name="text">
     <string>SRT File</string>
+   </property>
+  </action>
+  <action name="actionProject_Summary">
+   <property name="text">
+    <string>Project Summary</string>
    </property>
   </action>
  </widget>

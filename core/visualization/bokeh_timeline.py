@@ -10,7 +10,7 @@ from random import sample
 from core.data.computation import resize_with_aspect
 
 def format_plot(p):
-    return 
+    return
     p.background_fill_color = (17,17,17)
 
 
@@ -38,7 +38,7 @@ def generate_classification_plot(exp:Experiment, TOOLTIPS, TOOLS, x_range):
         all_vis.append(p)
     return all_vis
 
-def generate_plot(project:VIANProject, return_as_embed=False):
+def generate_plot(project:VIANProject, return_as_embed=False, file_name=None):
     _SEGMENTATIONS = []
     d = dict(start = [], end = [], text=[], segmentation=[])
     for s in project.segmentation:
@@ -92,7 +92,7 @@ def generate_plot(project:VIANProject, return_as_embed=False):
     _COLORIMETRY = ["Luminance", "Chroma", "Hue"]
     colorimetry = ColumnDataSource(d2)
 
-    output_file("bars.html")
+
 
     TOOLTIPS = [
         ("Text", "@text"),
@@ -135,6 +135,7 @@ def generate_plot(project:VIANProject, return_as_embed=False):
     if return_as_embed:
         return components(lt)
     else:
+        output_file(file_name)
         show(lt, sizing_mode="stretch_width")
 
 

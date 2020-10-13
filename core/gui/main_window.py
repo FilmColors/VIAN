@@ -355,6 +355,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExportMovie_Segment.triggered.connect(self.on_export_movie_segments)
         self.actionExportCSV.triggered.connect(self.on_export_csv)
         self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
+        self.actionProject_Summary.triggered.connect(self.on_export_summary)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -1826,13 +1827,21 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_export_colorimetry(self):
         if self.project is None:
             return
-        p = QFileDialog.getSaveFileName(filter="*.csv")[0]
+        p = QFileDialog.getSaveFileName(filter="*.csv", directory=self.project.export_dir)[0]
         try:
             self.project.export(ColorimetryExporter(), p)
         except Exception as e:
             log_error(e)
 
-
+    def on_export_summary(self):
+        if self.project is None:
+            return
+        p = QFileDialog.getSaveFileName(filter="*.html", caption="Select Save Path", directory=self.project.export_dir)[0]
+        try:
+            from core.visualization.bokeh_timeline import generate_plot
+            generate_plot(self.project, file_name=p)
+        except Exception as e:
+            log_error(e)
 
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")
