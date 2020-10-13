@@ -117,6 +117,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
+        # self.btnRemarks.clicked.connect(self.on_remarks)
         self.a_complexity = QAction("Change Complexity", self.inner.menuBar())
         self.inner.menuBar().addAction(self.a_complexity)
 
@@ -133,7 +134,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.lbl_CurrentContainer.hide()
             self.comboBox_Sorting.hide()
             self.stackedWidget.setCurrentIndex(1)
-            self.progressBar.hide()
+            # self.progressBar.hide()
             self.btn_ResetQuery = QPushButton("Reset Query")
             w = QWidget()
             w.setLayout(QHBoxLayout())
@@ -149,6 +150,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             self.stackedWidget.widget(1).layout().addWidget(w)
 
             self.btn_ResetQuery.clicked.connect(self.on_reset_query)
+
 
     def on_changed(self, project, item):
         return
@@ -254,12 +256,12 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.classification_mode = self.comboBox_ClassificationMode.currentText()
 
         if self.classification_mode == "Sequential":
-            self.progressBar.show()
+            # self.progressBar.show()
             self.btn_Previous.show()
             self.btn_Next.show()
             self.update_widget()
         else:
-            self.progressBar.hide()
+            # self.progressBar.hide()
             self.btn_Previous.hide()
             self.btn_Next.hide()
             if len(self.project().selected) > 0:
@@ -325,7 +327,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 if len(self.sorted_containers) > self.current_idx:
                     self.current_container = self.sorted_containers[self.current_idx]
                     self.main_window.project.set_selected(self, selected=[self.current_container])
-                    self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
+                    # self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
                 else:
                     self.current_container = None
 
@@ -504,7 +506,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     self.current_container = self.sorted_containers[self.current_idx]
                     self.main_window.project.set_selected(None, selected=[self.current_container])
                 self.lbl_CurrentContainer.setText(self.current_container.__class__.__name__ +" "+ self.current_container.get_name())
-                self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
+                # self.progressBar.setValue((self.current_idx + 1) / len(self.sorted_containers) * 100)
             else:
                 self.current_container = None
             if self.current_container is None:

@@ -322,8 +322,8 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def append_data(self, data):
         try:
+            self.current_idx = len(self.time_ms)
             self.time_ms.append(data['time_ms'])
-            self.current_idx = self.project.hdf5_manager.get_colorimetry_length() - 1
             self.project.hdf5_manager.dump_colorimetry(data, self.current_idx, self.end_idx)
             self.check_finished()
 
@@ -365,7 +365,8 @@ class ColormetryAnalysis(AnalysisContainer):
         return [time_palette_data, self.time_ms]
 
     def check_finished(self):
-        if int(self.current_idx) >= int(self.end_idx - 1):
+        log_info("Status Colorimetry", int(self.current_idx), int(self.end_idx - 1))
+        if int(self.current_idx) >= int(self.end_idx - 10):
             self.has_finished = True
         return self.has_finished
 

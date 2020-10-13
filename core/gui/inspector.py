@@ -147,6 +147,9 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             for analysis in target_item.connected_analyses:
                 widgets.append(AttributesAnalysis(self, analysis))
 
+        if isinstance(target_item, VIANProject):
+            widgets.append(AttributesProject(self, target_item))
+
         if isinstance(target_item, IHasMediaObject):
             widgets.append(AttributesMediaObject(self, target_item))
 
@@ -180,6 +183,34 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             w.deleteLater()
         self.current_att_widgets = []
 
+
+class AttributesProject(QWidget):
+    def __init__(self,parent, project:VIANProject):
+        super(AttributesProject, self).__init__(parent)
+        path = os.path.abspath("qt_ui/AttributesProject.ui")
+        uic.loadUi(path, self)
+        self.project = project
+
+        self.lbl_ProjectTitle.setText(self.project.name)
+        self.lbl_MovieFile.setText(self.project.movie_descriptor.movie_path)
+
+        self.lbl_Segmentations.setText(str(len(self.project.segmentation)))
+        n_segments = 0
+        for s in self.project.segmentation:
+            n_segments += len(s.segments)
+
+        self.lbl_Segments.setText(str(n_segments))
+        self.lbl_Screenshots.setText(str(len(self.project.screenshots)))
+
+        self.lbl_Colorimetry.setText("Incomplete" if self.project.colormetry_analysis is None or not self.project.colormetry_analysis.has_finished else "Finished")
+        n_tags = 0
+        for e in self.project.experiments:
+            n_tags += len(e.classification_results)
+        self.lbl_Classification.setText("{t} Tags applied".format(t=n_tags))
+        # self.lbl_ProjectTitle.setText(self.project.name)
+
+
+        self.show()
 
 class AttributesMovieDescriptor(QWidget):
     def __init__(self,parent, descriptor):
