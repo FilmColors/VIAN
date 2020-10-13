@@ -135,6 +135,11 @@ if __name__ == '__main__':
     sys._excepthook = sys.excepthook
     sys.excepthook = my_exception_hook
 
+    file = None
+    print("Input Arguments", sys.argv)
+    if len(sys.argv) == 2:
+        file = sys.argv[1]
+
     settings = UserSettings()
     settings.load()
     print("Settings loaded")
@@ -168,7 +173,7 @@ if __name__ == '__main__':
     app.processEvents()
 
     print("Starting Up")
-    main = MainWindow(splash)
+    main = MainWindow(splash, file)
     MAIN_WINDOW = main
     sys.exit(app.exec_())
 

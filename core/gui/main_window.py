@@ -99,7 +99,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onStartFlaskServer = pyqtSignal()
     onStopFlaskServer = pyqtSignal()
 
-    def __init__(self, loading_screen:QSplashScreen):
+    def __init__(self, loading_screen:QSplashScreen, file = None):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
@@ -612,6 +612,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 log_info("Contributor:", self.settings.CONTRIBUTOR.email)
             except:
                 pass
+        if file is not None:
+            self.load_project(file)
 
     def toggle_colormetry(self):
         log_debug("toggle colormetry", self.project.movie_descriptor.fps / 2)

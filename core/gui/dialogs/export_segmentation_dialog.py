@@ -67,21 +67,13 @@ class ExportSegmentationDialog(EDialogWidget):
         segmentations = []
         for i, c in enumerate(self.segm_cBs):
             if c.isChecked():
-                segmentations.append(self.main_window.project.segmentation[i].serialize())
+                segmentations.append(self.main_window.project.segmentation[i])
 
 
         exporter = SegmentationExporter(path, milli, formated, formated_ms, formated_frame, text, frame, t_start,
-                                        t_end, t_duration, self.main_window.player.get_fps())
-        # segmentations = []
-        # for s in self.main_window.project.segmentation:
-        #     segmentations.append(s.serialize())
+                                        t_end, t_duration, self.main_window.player.get_fps(), segmentations)
+        self.main_window.project.export(exporter, path)
 
-        result, exception = exporter.export(segmentations)
-        if result:
-            self.main_window.print_message("Segmentation Exported to: " + path, "Green")
-        else:
-            self.main_window.print_message("Segmentation Export Failed: " + path, "Red")
-            self.main_window.print_message(str(exception), "Red")
 
         self.close()
 
