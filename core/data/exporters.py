@@ -26,7 +26,6 @@ DEFAULT_NAMING_SCREENSHOTS = [
         ]
 
 
-
 def zip_project(output_file, project_folder):
     shutil.make_archive(output_file, 'zip', project_folder)
 
@@ -290,6 +289,7 @@ class CSVExporter(ExportDevice):
 
     def export(self, project, path):
         f = CSVFile()
+
         headers = ["ROW", "ID", "START_MS", "END_MS",
                    "SELECTOR_TYPE", "ANNOTATION_MIME_TYPE", "ANNOTATION_BODY_ID", "ANNOTATION_BODY",
                    "NOTES"]

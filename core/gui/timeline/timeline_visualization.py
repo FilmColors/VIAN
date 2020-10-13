@@ -1,7 +1,7 @@
 from PyQt5 import QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-
+from PyQt5.QtWidgets import QSlider, QLabel
 from core.gui.timeline.timeline_base import TimelineControl, TimelineBar
 
 from core.data.interfaces import TimelineDataset
@@ -11,18 +11,27 @@ from core.container.project import *
 class TimelineVisualizationControl(TimelineControl):
     def __init__(self, parent,timeline, item = None, name = "No Name"):
         super(TimelineVisualizationControl, self).__init__(parent,timeline, item, name)
+        self.sp_filter = QSlider(Qt.Horizontal)
+        self.sp_filter.setMinimum(0)
+        self.sp_filter.setMaximum(4)
+
+        self.layout().addWidget(QLabel("Filter", self), 1, 0)
+        self.layout().addWidget(self.sp_filter, 1, 1)
 
 
 class TimelineVisualization(TimelineBar):
     def __init__(self, parent, timeline, control, dataset:TimelineDataset = None, height = 45):
         super(TimelineVisualization, self).__init__(parent, timeline, control, height)
         self.dataset = dataset
-        self.line_color = QColor(98, 161, 169)
+        control.sp_filter.valueChanged.connect(partial(self.render_image))
 
     def render_image(self):
         t_start = self.timeline.get_current_t_start()
         t_end = self.timeline.get_current_t_end()
-        data, ms = self.dataset.get_data_range(t_start, t_end)
+
+        filter_window = (np.arange(10) * 2 - 1)[self.control.sp_filter.value()]
+
+        data, ms = self.dataset.get_data_range(t_start, t_end, filter_window=filter_window)
 
         qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
         qimage.fill(QtCore.Qt.transparent)
@@ -59,7 +68,9 @@ class TimelineLinePlot(TimelineVisualization):
     def render_image(self):
         qimage, qp, data, t_start, t_end, ms = super(TimelineLinePlot, self).render_image()
         pen = QtGui.QPen()
-        pen.setColor(self.line_color)
+        pen.setColor(self.dataset.vis_color)
+        pen.setWidthF(3.0)
+
         qp.setPen(pen)
         path = None
         for i in range(data.shape[0]):

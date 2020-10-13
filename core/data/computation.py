@@ -24,6 +24,8 @@ import webbrowser
 import shutil
 from zipfile import ZipFile
 import math
+from scipy.signal import kaiserord, lfilter, firwin, freqz
+
 
 def tuple2point(tpl):
     return QtCore.QPoint(tpl[0], tpl[1])
@@ -699,3 +701,28 @@ def resize_with_aspect(img, width = None, height = None, mode=cv2.INTER_CUBIC):
         raise ValueError("Either width or height have to be given")
 
     return cv2.resize(img, None, None, fy, fy, mode)
+
+
+def fir_lowpass_filter(sample_rate):
+    # The Nyquist rate of the signal.
+    nyq_rate = sample_rate / 2.0
+
+    # The desired width of the transition from pass to stop,
+    # relative to the Nyquist rate.  We'll design the filter
+    # with a 5 Hz transition width.
+    width = 5.0 / nyq_rate
+
+    # The desired attenuation in the stop band, in dB.
+    ripple_db = 60.0
+
+    # Compute the order and Kaiser parameter for the FIR filter.
+    N, beta = kaiserord(ripple_db, width)
+
+    # The cutoff frequency of the filter.
+    cutoff_hz = 10.0
+
+    # Use firwin with a Kaiser window to create a lowpass FIR filter.
+    taps = firwin(N, cutoff_hz / nyq_rate, window=('kaiser', beta))
+
+    # Use lfilter to filter x with the FIR filter.
+    filtered_x = lfilter(taps, 1.0, x)

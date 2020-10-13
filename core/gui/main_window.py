@@ -652,7 +652,21 @@ class MainWindow(QtWidgets.QMainWindow):
                     TimelineDataset("Colorimetry: Luminance",
                          self.project.hdf5_manager.get_colorimetry_feat()[:,0],
                          ms_to_idx=ms_to_idx,
-                         vis_type=TimelineDataset.VIS_TYPE_LINE))
+                         vis_type=TimelineDataset.VIS_TYPE_LINE, vis_color=QColor(255, 166, 0)))
+                lch = lab_to_lch(self.project.hdf5_manager.get_colorimetry_feat()[:, :3], human_readable=True)
+                self.timeline.timeline.add_visualization(
+                    TimelineDataset("Colorimetry: Chroma",
+                                    lch[:,1],
+                                    ms_to_idx=ms_to_idx,
+                                    vis_type=TimelineDataset.VIS_TYPE_LINE, vis_color=QColor(188, 80, 144)))
+
+                self.timeline.timeline.add_visualization(
+                    TimelineDataset("Colorimetry: Hue",
+                                    lch[:,2],
+                                    ms_to_idx=ms_to_idx,
+                                    vis_type=TimelineDataset.VIS_TYPE_LINE,  vis_color=QColor(47, 75, 124)))
+
+
         except Exception as e:
             log_error("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 

@@ -12,7 +12,7 @@ from core.data.interfaces import TimelineDataset
 from core.data.log import log_error, log_info, log_warning, log_debug
 from core.container.project import VIANProject
 from core.container.hdf5_manager import HDF5_FILE_LOCK
-
+from scipy.signal import savgol_filter
 
 class AudioHandler(QObject):
     """
@@ -65,7 +65,6 @@ class AudioHandler(QObject):
             self._audioclip = AudioFileClip(os.path.join(self.project.data_dir, "audio.mp3"))
             self.audio_samples = self._sample_audio(self.callback)
             self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
-
             self.audioProcessed.emit(
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
                                 vis_type=TimelineDataset.VIS_TYPE_LINE))

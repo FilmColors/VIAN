@@ -8,6 +8,7 @@ from random import randint
 from collections import namedtuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt5.QtGui import QColor
 from core.data.enums import DataSerialization
 from scipy.signal import savgol_filter, resample
 from core.data.log import log_debug, log_info, log_error
@@ -394,14 +395,16 @@ class TimelineDataset(ITimelineItem):
     VIS_TYPE_AREA = 0
     VIS_TYPE_LINE = 1
 
-    def __init__(self, name, data, ms_to_idx = 1.0, vis_type = VIS_TYPE_LINE):
+    def __init__(self, name, data, ms_to_idx = 1.0, vis_type = VIS_TYPE_LINE, vis_color = QColor(98, 161, 169)):
         self.data = data
+
         self.strip_height = 45
         self.name = name
         self.ms_to_idx = ms_to_idx
         self.vis_type = vis_type
+        self.vis_color = vis_color
 
-    def get_data_range(self, t_start, t_end, norm=True, subsample=True):
+    def get_data_range(self, t_start, t_end, norm=True, subsample=True, filter_window = 1):
         idx_a = int(np.floor(t_start / self.ms_to_idx))
         idx_b = int(np.ceil(t_end / self.ms_to_idx))
 
@@ -412,6 +415,12 @@ class TimelineDataset(ITimelineItem):
         ms = np.subtract(ms, offset)
 
         data = np.array(self.data[idx_a:idx_b].copy())
+        if filter_window > 3:
+            try:
+                data = savgol_filter(np.nan_to_num(data), filter_window, 3)
+            except Exception as e:
+                log_info(e)
+
         if data.shape[0] == 0:
             return  np.array([]), np.array([])
         if data.shape[0] > 1000:
