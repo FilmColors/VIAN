@@ -342,6 +342,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
         self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
         self.actionImportWebApp.triggered.connect(self.import_webapp)
+        self.actionSRT_File.triggered.connect(self.import_srt)
 
         ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
@@ -2211,6 +2212,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.load_project(p)
 
 
+    def import_srt(self):
+        if self.project is None:
+            return
+        srt_file = QFileDialog.getOpenFileName(self, caption="Select SRT File", filter="*.srt")[0]
+        self.project.import_(SRTImporter(), srt_file)
 
     def export_segmentation(self):
         dialog = ExportSegmentationDialog(self)

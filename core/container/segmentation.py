@@ -206,7 +206,6 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
             self.dispatch_on_changed()
 
     def update_segment_ids(self):
-        self.segments = sorted(self.segments, key=lambda x: x.start)
         for i, s in enumerate(self.segments):
             s.ID = i + 1
 
@@ -417,17 +416,20 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     def get_end(self):
         return self.end
 
-    def move(self, start, end):
+    def move(self, start, end, dispatch=True):
         self.project.undo_manager.to_undo((self.move, [start, end]), (self.move, [self.start, self.end]))
         self.start = start
         self.end = end
 
         # Since the region has changed, we delete the analysis
         self.delete_analyses()
-
-        self.segmentation.update_segment_ids()
-        self.project.sort_screenshots()
         self.onSegmentChanged.emit(self)
+
+        import time
+        t = time.time()
+        if dispatch:
+            self.segmentation.update_segment_ids()
+            self.project.sort_screenshots()
         self.dispatch_on_changed(item=self)
 
     def get_name(self):

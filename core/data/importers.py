@@ -810,5 +810,38 @@ class WebAppProjectImporter(ImportDevice):
             project.experiments[0].tag_container(entity, ukw)
 
 
+class SRTImporter(ImportDevice):
+    def __init__(self):
+        super(SRTImporter, self).__init__()
 
 
+    def import_(self, project: VIANProject, path):
+        try:
+            import pysrt
+        except Exception as e:
+            log_error(e)
+            return
+
+        import pysrt
+        from core.data.computation import ts_to_ms
+        path = "data/examples/paris_texas_en.srt"
+
+        codecs = ["utf-8", "iso-8859-1"]
+        try:
+            subs = pysrt.open(path, encoding=codecs[0])
+        except Exception as e:
+            log_warning(e)
+            try:
+                subs = pysrt.open(path, encoding=codecs[1])
+            except Exception as e:
+                log_warning(e)
+                return
+
+        segm = project.create_segmentation("SRT File Import")
+        for s in subs:
+            text = s.text
+            start = ts_to_ms(s.start.hours, s.start.minutes, s.start.seconds, s.start.milliseconds)
+            end = ts_to_ms(s.end.hours, s.end.minutes, s.end.seconds, s.end.milliseconds)
+            segm.create_segment2(start, end, mode=SegmentCreationMode.INTERVAL, body=text, dispatch=False)
+
+        

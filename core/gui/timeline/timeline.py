@@ -169,6 +169,7 @@ class TimelineToolbar(QToolBar):
         angle = QPoint(angle, angle)
         self.timeline.zoom_timeline(pos, angle, force=True)
 
+
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def __init__(self, main_window, parent):
         super(Timeline, self).__init__(parent)
@@ -743,7 +744,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
         self.scroll_h()
 
-
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()
 
@@ -830,9 +830,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 for b in entry[1]:
                     b.is_selected = False
                     b.update()
-
-        # if self.selected is not None and dispatch:
-        #     self.project().set_selected(self, self.selected)
 
         self.update()
 

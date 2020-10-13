@@ -229,7 +229,7 @@ class ITimeRange():
     def set_end(self, end):
         log_warning("ITimelineItem: Not Implemented", self)
 
-    def move(self, start, end):
+    def move(self, start, end, dispatch = True):
         log_warning("ITimelineItem: Not Implemented", self)
 
 

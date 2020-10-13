@@ -43,6 +43,7 @@ class TimebarSegmentationSlice(TimebarSlice):
 
         self.set_color(None)
 
+
     @pyqtSlot(object)
     def set_color(self, analysis):
         color_analysis = self.item.get_connected_analysis(ColorFeatureAnalysis, None)

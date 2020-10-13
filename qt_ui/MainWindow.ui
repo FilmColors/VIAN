@@ -60,6 +60,7 @@
      <addaction name="actionImportCSVVocabulary"/>
      <addaction name="actionImportScreenshots"/>
      <addaction name="separator"/>
+     <addaction name="actionSRT_File"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="title">
@@ -999,6 +1000,11 @@
   <action name="actionExportColorimetry">
    <property name="text">
     <string>Colorimetry</string>
+   </property>
+  </action>
+  <action name="actionSRT_File">
+   <property name="text">
+    <string>SRT File</string>
    </property>
   </action>
  </widget>

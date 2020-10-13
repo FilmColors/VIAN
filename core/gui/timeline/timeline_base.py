@@ -122,7 +122,6 @@ class TimelineControl(QtWidgets.QWidget):
             else:
                 self.item.lock()
 
-
     def update_lock(self, state):
         if isinstance(self.item, ILockable):
             if not state:
@@ -199,6 +198,12 @@ class TimelineControl(QtWidgets.QWidget):
         if QMouseEvent.button() == Qt.RightButton:
             context = open_context_menu(self.timeline.main_window,self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
             context.show()
+
+    def mouseDoubleClickEvent(self, QMouseEvent):
+        if self.timeline.project() is not None and isinstance(self.item, Segmentation):
+            sel = [s for s in self.item.segments]
+            print("New Selection", sel)
+            self.timeline.project().set_selected(None, sel)
 
     def mouseReleaseEvent(self, a0: QtGui.QMouseEvent):
         self.is_resizing = False
@@ -604,10 +609,10 @@ class TimebarSlice(QtWidgets.QWidget):
                         else:
                             self.max_possible = self.timeline.duration * self.timeline.scale
 
-                    self.is_selected = True
-
-                    modifiers = QtWidgets.QApplication.keyboardModifiers()
-                    self.item.select(multi_select=modifiers == QtCore.Qt.ShiftModifier)
+                    if not self.is_selected:
+                        self.is_selected = True
+                        modifiers = QtWidgets.QApplication.keyboardModifiers()
+                        self.item.select(multi_select=modifiers == QtCore.Qt.ShiftModifier)
 
                     # self.timeline.project().set_selected(None, self.item)
                     self.offset = self.mapToParent(QMouseEvent.pos())
@@ -641,7 +646,19 @@ class TimebarSlice(QtWidgets.QWidget):
                         return
 
                 if self.mode == "center":
+                    new_start = int(round(self.pos().x() * self.timeline.scale, 0))
+                    offset = self.item.get_start() - new_start
                     self.item.move(int(round(self.pos().x() * self.timeline.scale, 0)), int(round((self.pos().x() + self.width()) * self.timeline.scale,0)))
+
+                    self.timeline.project().inhibit_dispatch = True
+                    if isinstance(self.item, Segment):
+                        for i, itm in enumerate(self.timeline.project().selected):
+                            if itm == self.item:
+                                continue
+                            if isinstance(itm, Segment):
+                                itm.move(itm.get_start() - offset, itm.get_end() - offset)
+                    self.timeline.project().inhibit_dispatch = False
+                    self.timeline.project().dispatch_changed(None, item=self.item)
                     return
                 if self.mode == "left":
                     self.item.set_start(int(round((self.pos().x() * self.timeline.scale),0)))
