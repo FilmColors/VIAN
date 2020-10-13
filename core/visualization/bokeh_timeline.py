@@ -1,16 +1,21 @@
 from bokeh.io import output_file, show
-from bokeh.models import ColumnDataSource, DatetimeTickFormatter, CrosshairTool, Div
+from bokeh.models import ColumnDataSource, DatetimeTickFormatter, CrosshairTool, Div, FactorRange
 from bokeh.plotting import figure
 from bokeh.layouts import layout
 from bokeh.embed import components
+from bokeh.palettes import Category20
+from bokeh.transform import factor_cmap
+
 
 from core.container.project import *
 import cv2
 from random import sample
 from core.data.computation import resize_with_aspect
 
+
 def ms2datetime(time_ms):
     return datetime.utcfromtimestamp(time_ms / 1000)
+
 
 def format_plot(p):
     p.xaxis.formatter = DatetimeTickFormatter(seconds="", minutes="%H:%M:%S", hours="", hourmin="%H:%M:%S",
@@ -21,28 +26,36 @@ def format_plot(p):
 
 def generate_classification_plot(exp:Experiment, TOOLTIPS, TOOLS, x_range):
     plots = dict()
+    categories = dict()
     for ukw in exp.get_unique_keywords():
         if len(ukw.tagged_containers) > 0:
             cl = ukw.class_obj.name + ":" + ukw.voc_obj.name
             if cl not in plots:
-                plots[cl] = dict(start=[], end=[], y=[], text=[])
+                plots[cl] = dict(start=[], end=[], y=[], text=[], group = [])
+                categories[cl] = []
+
             for c in ukw.tagged_containers:
                 plots[cl]['start'].append(ms2datetime(c.get_start()))
                 plots[cl]['end'].append(ms2datetime(c.get_end()))
-                plots[cl]['y'].append(ukw.word_obj.name)
+                plots[cl]['y'].append((str(ukw.word_obj.organization_group), ukw.word_obj.name))
                 plots[cl]['text'].append(c.get_annotation_body())
+                plots[cl]['group'].append(str(ukw.word_obj.organization_group))
+                categories[cl].append(str(ukw.word_obj.organization_group))
 
     all_vis = []
     for n, c in plots.items():
         ds = ColumnDataSource(c)
-        y_labels = list(set(c['y']))
+        y_labels = sorted(list(set(c['y'])), key=lambda x:x[0])
+
         height = 50 + len(y_labels) * 30
-        p = figure(plot_width=800, plot_height=height, y_range=y_labels, x_axis_type='datetime',
+        p = figure(plot_width=800, plot_height=height, y_range=FactorRange(*y_labels), x_axis_type='datetime',
                    title=n, tooltips=TOOLTIPS, tools=TOOLS, x_range = x_range)
 
-        p.hbar(left='start', right="end", y='y', source=ds, alpha=0.3)
+        p.hbar(left='start', right="end", y='y', source=ds, fill_color=factor_cmap("group",
+            palette=Category20[np.clip(len(list(set(c['group']))), 3, 20)], factors=list(set(c['group']))), alpha=0.8)
         all_vis.append(p)
     return all_vis
+
 
 def generate_plot(project:VIANProject, return_mode="show", file_name=None):
     _SEGMENTATIONS = []
