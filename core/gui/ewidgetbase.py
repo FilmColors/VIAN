@@ -3,6 +3,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import webbrowser
+
 from core.data.log import log_error
 from core.data.computation import pixmap_to_numpy, numpy_to_pixmap
 from core.container.project import VIANProject

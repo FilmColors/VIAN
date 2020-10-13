@@ -328,6 +328,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSaveAs.triggered.connect(self.on_save_project_as)
         self.actionBackup.triggered.connect(self.on_backup)
         self.actionCleanUpRecent.triggered.connect(self.cleanup_recent)
+        self.actionCompare_Project_with.triggered.connect(self.on_compare)
 
         self.actionNew_Corpus.triggered.connect(self.corpus_widget.on_new_corpus)
         self.actionLoad_Corpus.triggered.connect(self.corpus_widget.on_load_corpus)
@@ -1141,6 +1142,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.clean_up_recent()
         self.update_recent_menu()
 
+    def on_compare(self):
+        if self.project is None:
+            return
+        from core.visualization.bokeh_timeline import compare_with_project
+        f2 = QFileDialog.getOpenFileName(self, filter="*.eext")[0]
+        compare_with_project(self.project, f2)
+
+
     def clear_recent(self):
         self.settings.recent_files_name = []
         self.settings.recent_files_path = []
@@ -1847,7 +1856,10 @@ class MainWindow(QtWidgets.QMainWindow):
         webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")
 
     def on_project_summary(self):
-        webbrowser.open("http://127.0.0.1:5000/summary/")
+        dock = FlaskWebWidget(self)
+        dock.set_url("http://127.0.0.1:5000/summary/")
+        dock.setWindowTitle("Project Summary")
+        self.addDockWidget(Qt.RightDockWidgetArea, dock)
 
     def check_update(self):
         version, id = get_vian_version()
@@ -2297,6 +2309,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_ui_enabled(self, state):
         self.actionSave.setDisabled(not state)
+        self.actionCompare_Project_with.setDisabled(not state)
         self.actionSaveAs.setDisabled(not state)
         self.actionBackup.setDisabled(not state)
         self.actionClose_Project.setDisabled(not state)

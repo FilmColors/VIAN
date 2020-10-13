@@ -263,19 +263,27 @@ class FlaskWebWidget(EDockWidget):
     def __init__(self, main_window):
         super(FlaskWebWidget, self).__init__(main_window, False)
         self.setWindowTitle("Bokeh Visualizations")
+
         self.view = QWebEngineView(self)
         self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
         self.view.setPage(WebPage())
         self.view.reload()
         self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
-
+        self.a_open_browser = self.inner.menuBar().addAction("Open in Browser")
+        self.a_open_browser.triggered.connect(self.on_browser)
         self.setWidget(self.view)
+        self.url = None
 
+
+    def on_browser(self):
+        import webbrowser
+
+        webbrowser.open(self.url)
 
     def set_url(self, url):
         QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
         QWebEngineProfile.defaultProfile().clearHttpCache()
-
+        self.url = url
         self.view.setUrl(QUrl(url))
         self.view.reload()
 
@@ -336,7 +344,7 @@ def set_selection():
 @app.route("/summary/")
 def summary():
     from core.visualization.bokeh_timeline import generate_plot
-    html, script = generate_plot(_server_data.project, return_as_embed=True)
+    html, script = generate_plot(_server_data.project, return_mode="compontents")
     return render_template("template_inject.tmpl.html",script=html + script)
     # return render_template("summary.tmpl.html")
 

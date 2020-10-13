@@ -1,5 +1,5 @@
 from bokeh.io import output_file, show
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, DatetimeTickFormatter, CrosshairTool, Div
 from bokeh.plotting import figure
 from bokeh.layouts import layout
 from bokeh.embed import components
@@ -9,7 +9,12 @@ import cv2
 from random import sample
 from core.data.computation import resize_with_aspect
 
+def ms2datetime(time_ms):
+    return datetime.utcfromtimestamp(time_ms / 1000)
+
 def format_plot(p):
+    p.xaxis.formatter = DatetimeTickFormatter(seconds="", minutes="%H:%M:%S", hours="", hourmin="%H:%M:%S",
+                                                 months="%H:%M:%S", years="%H:%M:%S")
     return
     p.background_fill_color = (17,17,17)
 
@@ -22,8 +27,8 @@ def generate_classification_plot(exp:Experiment, TOOLTIPS, TOOLS, x_range):
             if cl not in plots:
                 plots[cl] = dict(start=[], end=[], y=[], text=[])
             for c in ukw.tagged_containers:
-                plots[cl]['start'].append(c.get_start())
-                plots[cl]['end'].append(c.get_end())
+                plots[cl]['start'].append(ms2datetime(c.get_start()))
+                plots[cl]['end'].append(ms2datetime(c.get_end()))
                 plots[cl]['y'].append(ukw.word_obj.name)
                 plots[cl]['text'].append(c.get_annotation_body())
 
@@ -31,14 +36,15 @@ def generate_classification_plot(exp:Experiment, TOOLTIPS, TOOLS, x_range):
     for n, c in plots.items():
         ds = ColumnDataSource(c)
         y_labels = list(set(c['y']))
-        p = figure(plot_width=800, plot_height=300, y_range=y_labels, x_axis_type='datetime',
+        height = 50 + len(y_labels) * 30
+        p = figure(plot_width=800, plot_height=height, y_range=y_labels, x_axis_type='datetime',
                    title=n, tooltips=TOOLTIPS, tools=TOOLS, x_range = x_range)
 
         p.hbar(left='start', right="end", y='y', source=ds, alpha=0.3)
         all_vis.append(p)
     return all_vis
 
-def generate_plot(project:VIANProject, return_as_embed=False, file_name=None):
+def generate_plot(project:VIANProject, return_mode="show", file_name=None):
     _SEGMENTATIONS = []
     d = dict(start = [], end = [], text=[], segmentation=[])
     for s in project.segmentation:
@@ -49,8 +55,8 @@ def generate_plot(project:VIANProject, return_as_embed=False, file_name=None):
             i += 1
         _SEGMENTATIONS.append(name)
         for t in s.segments:# type:Segment
-            d['start'].append(t.get_start())
-            d['end'].append(t.get_end())
+            d['start'].append(ms2datetime(t.get_start()))
+            d['end'].append(ms2datetime(t.get_end()))
             d['text'].append(t.get_annotation_body())
             d['segmentation'].append(name)
 
@@ -60,7 +66,7 @@ def generate_plot(project:VIANProject, return_as_embed=False, file_name=None):
     try:
         for i, entry in enumerate(project.colormetry_analysis.iter_avg_color()):
             l, c, h = lch_to_human_readable([entry['l'], entry['c'], entry['h']])
-            d2['t'].append(entry['time_ms'])
+            d2['t'].append(ms2datetime(entry['time_ms']))
             d2['l'].append(l)
             d2['c'].append(c)
             d2['h'].append(h)
@@ -81,7 +87,7 @@ def generate_plot(project:VIANProject, return_as_embed=False, file_name=None):
         view[:] = t[:]
 
         d3['img'].append(img[::-1])
-        d3['t'].append(scr.get_start())
+        d3['t'].append(ms2datetime(scr.get_start()))
         d3['y'].append(i*200)
         i += 1
         if i == 5:
@@ -106,7 +112,8 @@ def generate_plot(project:VIANProject, return_as_embed=False, file_name=None):
     p.css_classes.append("sticky-top")
 
     p_scr = figure(plot_width=800, plot_height=600, x_axis_type='datetime',
-               title="Segmentation", tooltips=TOOLTIPS,  x_range = p.x_range, y_range = None,tools=TOOLS)
+               title="Screenshots", tooltips=TOOLTIPS,  x_range = p.x_range, y_range = None,tools=TOOLS)
+
     p_scr.image_rgba(x='t', image="img", y="y", source= source_screenshots, dh_units="screen", dw_units="screen", dw =150, dh=150*(10/16) )
 
     p_colorimetry = figure(plot_width=800, plot_height=300, x_axis_type='datetime',
@@ -125,19 +132,64 @@ def generate_plot(project:VIANProject, return_as_embed=False, file_name=None):
     p.ygrid.grid_line_color = None
 
     ps = generate_classification_plot(project.experiments[0], TOOLTIPS, TOOLS, p.x_range)
-
-
     plots = [p_scr, p, p_colorimetry, p_colorimetry1, p_colorimetry2] + ps
+
     for p in plots:
         format_plot(p)
     lt = layout(plots, sizing_mode="stretch_width")
 
-    if return_as_embed:
+    if return_mode == "components":
         return components(lt)
+
+    elif return_mode == "list":
+        return plots
+
     else:
         output_file(file_name)
         show(lt, sizing_mode="stretch_width")
 
+
+def compare_with_project(p1, file_other):
+    _SORT = 5
+    p2 = VIANProject().load_project(file_other)
+    plots1 = generate_plot(p1, return_mode="list")
+    plots2 = generate_plot(p2, return_mode="list")
+    axis_share = plots1[0].x_range
+
+    for p in plots2:
+        p.x_range = axis_share
+
+    all_plots = [p.title.text for p in plots1[:_SORT]]
+
+    all_plots = all_plots + list(set([p.title.text for p in plots1[_SORT:] + plots2[_SORT:]]))
+
+    plots_d1, plots_d2 = dict(), dict()
+
+    for p in plots1:
+        plots_d1[p.title.text] = p
+    for p in plots2:
+        plots_d2[p.title.text] = p
+
+    final_1, final_2 = [], []
+    for k in all_plots:
+        if k in plots_d1 and k in plots_d2:
+            final_1.append(plots_d1[k])
+            final_2.append(plots_d2[k])
+
+            crosshair = CrosshairTool(dimensions="both")
+            plots_d1[k].add_tools(crosshair)
+            plots_d2[k].add_tools(crosshair)
+        elif k in plots_d1:
+            final_1.append(plots_d1[k])
+            final_2.append(Div(height=plots_d1[k].plot_height))
+        elif k in plots_d2:
+            final_2.append(plots_d2[k])
+            final_1.append(Div(height=plots_d2[k].plot_height))
+
+    lt = layout([[final_1, final_2]], sizing_mode="stretch_width")
+
+    output_file("comparison.html")
+    show(lt)
 
 if __name__ == '__main__':
     project = VIANProject().load_project("C:\\Users\\gaude\\Documents\\VIAN\\projects\\VIAN-Teaching_01\\VIAN-Teaching_01.eext")

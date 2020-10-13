@@ -95,6 +95,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionBackup"/>
+    <addaction name="actionCompare_Project_with"/>
     <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="actionNew_Corpus"/>
@@ -985,6 +986,9 @@
    </property>
   </action>
   <action name="actionBrowserVisualizations">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Browser Visualizations</string>
    </property>
@@ -995,6 +999,9 @@
    </property>
   </action>
   <action name="actionProjectSummary">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Project Summary</string>
    </property>
@@ -1012,6 +1019,11 @@
   <action name="actionProject_Summary">
    <property name="text">
     <string>Project Summary</string>
+   </property>
+  </action>
+  <action name="actionCompare_Project_with">
+   <property name="text">
+    <string>Compare Project with ...</string>
    </property>
   </action>
  </widget>
