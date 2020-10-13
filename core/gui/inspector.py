@@ -192,6 +192,7 @@ class AttributesProject(QWidget):
         self.project = project
 
         self.lbl_ProjectTitle.setText(self.project.name)
+
         self.lbl_MovieFile.setText(self.project.movie_descriptor.movie_path)
 
         self.lbl_Segmentations.setText(str(len(self.project.segmentation)))
@@ -211,6 +212,7 @@ class AttributesProject(QWidget):
 
 
         self.show()
+
 
 class AttributesMovieDescriptor(QWidget):
     def __init__(self,parent, descriptor):

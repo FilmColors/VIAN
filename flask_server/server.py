@@ -335,7 +335,10 @@ def set_selection():
 
 @app.route("/summary/")
 def summary():
-    return render_template("summary.tmpl.html")
+    from core.visualization.bokeh_timeline import generate_plot
+    html, script = generate_plot(_server_data.project, return_as_embed=True)
+    return render_template("template_inject.tmpl.html",script=html + script)
+    # return render_template("summary.tmpl.html")
 
 if __name__ == '__main__':
     app.debug = True
