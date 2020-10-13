@@ -11,3 +11,4 @@ fastcluster
 moviepy
 python-vlc
 pandas
+pysrt
