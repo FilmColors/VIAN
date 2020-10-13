@@ -268,7 +268,10 @@ class SegmentationExporter(ExportDevice):
                 for b in bodies.difference(bodies_added):
                     add(result, b, "")
 
-        pd.DataFrame(result).to_csv(path)
+        if ".xlsx" in path:
+            pd.DataFrame(result).to_excel(path)
+        else:
+            pd.DataFrame(result).to_csv(path)
 
 
 class JsonExporter():

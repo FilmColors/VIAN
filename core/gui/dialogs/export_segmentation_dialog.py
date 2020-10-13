@@ -12,6 +12,7 @@ class ExportSegmentationDialog(EDialogWidget):
         uic.loadUi(path, self)
         self.settings = main_window.settings
 
+        self.lineEdit_Path.setText(os.path.join(self.main_window.project.export_dir, "segmentation.csv"))
         self.segm_cBs = []
         for s in self.main_window.project.segmentation:
             cb = QCheckBox(self)
@@ -32,7 +33,7 @@ class ExportSegmentationDialog(EDialogWidget):
         self.label_Format.setEnabled(state)
 
     def on_browse(self):
-        path = QFileDialog.getSaveFileName(caption="Select Path", directory=self.main_window.project.path, filter="*.csv *.txt")[0]
+        path = QFileDialog.getSaveFileName(caption="Select Path", directory=self.main_window.project.export_dir, filter="*.csv")[0]
         self.lineEdit_Path.setText(path)
 
     def on_export(self):
@@ -72,6 +73,7 @@ class ExportSegmentationDialog(EDialogWidget):
 
         exporter = SegmentationExporter(path, milli, formated, formated_ms, formated_frame, text, frame, t_start,
                                         t_end, t_duration, self.main_window.player.get_fps(), segmentations)
+
         self.main_window.project.export(exporter, path)
 
 
