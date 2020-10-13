@@ -29,7 +29,7 @@ class ColorAB {
             height: 300,
             width: 300,
             x_axis_label: "A-Channel",
-            y_axis_label: "Y-Channel",
+            y_axis_label: "B-Channel",
             match_aspect:true, 
         });
 
