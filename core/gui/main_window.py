@@ -1860,6 +1860,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dock.set_url("http://127.0.0.1:5000/summary/")
         dock.setWindowTitle("Project Summary")
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
+        self.tabifyDockWidget(self.screenshots_manager_dock, dock)
 
     def check_update(self):
         version, id = get_vian_version()
