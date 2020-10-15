@@ -181,12 +181,31 @@ The
 Color Palette
 -------------
 
+The Color Palette is an analysis similar to the Histogram, but with one
+addition, which makes it more informational for interpretation:
+Instead of computing the color properties of each pixel, the Color Palette
+groups pixels that lie besides each other and share color properties together,
+to create so-called superpixels. Then it computes the color average of these
+superpixels.
+See the figure below to get an idea what superpixels look like.
+
 .. figure:: superpixels.png
    :scale: 60%
    :align: center
    :alt: map to buried treasure
    
    Superpixels XXXXXXX. Credits: Halter et al. (2019) [#]_.
+
+In fact, if you run the **Colorimetry**, this is what happens in the background
+for each frame in the movie.
+
+.. figure:: palette.gif
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   Test GIF
+
 
 ------------------
 Color Z-Projection
