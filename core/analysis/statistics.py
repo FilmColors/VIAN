@@ -9,6 +9,7 @@ def classification_clustering(X, n_clusters = 1):
     print(clustering.children_ )
     print(len(clustering.children_))
 
+
 def agglomerative_get_iteration(clustering:AgglomerativeClustering, iteration):
     n = len(clustering.children_)
 

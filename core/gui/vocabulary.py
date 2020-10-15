@@ -1,18 +1,16 @@
 import os
 import glob
-import json
-from random import randint
 from functools import partial
 
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QKeyEvent, QColor, QDropEvent, QDragEnterEvent
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
 from PyQt5 import uic
 from core.data.computation import create_icon
-from core.data.log import log_error, log_info, log_warning, log_debug
+from core.data.log import log_error, log_info
 from core.container.project import VIANProject
-from core.gui.drop_image_container import DropImageContainer
+from core.gui.misc.drop_image_container import DropImageContainer
 from core.container.experiment import Vocabulary, VocabularyWord, compare_vocabularies
 from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 from core.data.interfaces import IProjectChangeNotify

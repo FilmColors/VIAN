@@ -24,6 +24,8 @@ import webbrowser
 import shutil
 from zipfile import ZipFile
 import math
+from scipy.signal import kaiserord, lfilter, firwin, freqz
+
 
 def tuple2point(tpl):
     return QtCore.QPoint(tpl[0], tpl[1])
@@ -155,8 +157,25 @@ def lab_to_sat(lch = None, lab = None, implementation = "luebbe"):
     return result
 
 
-def lab_to_lch(lab):
-    lab = np.array(lab)
+def lab_to_lch(lab, human_readable = False):
+    """
+    Converts LAB to LCH, if human readable is true:
+    L: {0,...,100}
+    C: {0, 100}
+    H: {0, 360}
+
+    else:
+    L: {0,...,100}
+    C: {0, sqrt(128**2 + 128**2) == 181.019}
+    H: {-np.pi, np.pi}
+
+    :param lab:
+    :param human_readable:
+    :return:
+    """
+    if not isinstance(lab, np.ndarray):
+        lab = np.array(lab)
+
     if len(lab.shape) > 1:
         lch = np.empty(lab.shape, dtype=np.float32)
         lch[:, 0] = lab[:, 0]
@@ -167,6 +186,26 @@ def lab_to_lch(lab):
         lch[0] = lab[0]
         lch[1] = np.linalg.norm(lab[1:3])
         lch[2] = np.arctan2(lab[2], lab[1])
+
+    if human_readable:
+        lch = lch_to_human_readable(lch)
+    return lch
+
+def lch_to_human_readable(lch):
+    """
+    Converts LCH to human readable:
+    L: {0,...,100}
+    C: {0, 100}
+    H: {0, 360}
+
+    :param lch:
+    :return:
+    """
+    if not isinstance(lch, np.ndarray):
+        lch = np.array(lch)
+
+    lch[..., 1] = lch[..., 1] / np.sqrt(128**2 + 128**2) * 100.0
+    lch[..., 2] = np.rad2deg(lch[..., 2]) % 360
     return lch
 
 
@@ -431,15 +470,29 @@ def parse_file_path(path):
 
 
 def create_icon(path):
+    # h_dir = os.path.join("qt_ui", "icons", "hdpi")
+    # if not os.path.isdir(os.path.join("qt_ui", "icons", "hdpi")):
+    #     os.mkdir(h_dir)
+    #
+    # f, end = os.path.split(path)[1].split(".")
+    # h_file = f + "@2x." + end
+    # h_path = os.path.join(h_dir, h_file)
+    # if not os.path.isfile(h_path):
+    #     shutil.copy2(path,h_path)
     icon = QIcon(path)
-    # print icon.availableSizes()
+    # icon.addFile(h_path)
+
     return icon
 
 
 def version_check(smaller_than, version):
     if isinstance(version, str):
         version = version.split(".")
-    version = [int(version[0]), int(version[1]), int(version[2])]
+    version = [int(v) for v in version]
+
+    if isinstance(smaller_than, str):
+        smaller_than = smaller_than.split(".")
+    smaller_than = [int(v) for v in smaller_than]
 
     if version[0] < smaller_than[0]:
         return True
@@ -638,3 +691,38 @@ def get_colormap(n=12, map="gist_ncar"):
         for i in range(n):
             res.append(np.random.random(3))
         return res
+
+def resize_with_aspect(img, width = None, height = None, mode=cv2.INTER_CUBIC):
+    if width is not None:
+        fy = width / img.shape[1]
+    elif height is not None:
+        fy = width / img.shape[0]
+    else:
+        raise ValueError("Either width or height have to be given")
+
+    return cv2.resize(img, None, None, fy, fy, mode)
+
+
+def fir_lowpass_filter(sample_rate):
+    # The Nyquist rate of the signal.
+    nyq_rate = sample_rate / 2.0
+
+    # The desired width of the transition from pass to stop,
+    # relative to the Nyquist rate.  We'll design the filter
+    # with a 5 Hz transition width.
+    width = 5.0 / nyq_rate
+
+    # The desired attenuation in the stop band, in dB.
+    ripple_db = 60.0
+
+    # Compute the order and Kaiser parameter for the FIR filter.
+    N, beta = kaiserord(ripple_db, width)
+
+    # The cutoff frequency of the filter.
+    cutoff_hz = 10.0
+
+    # Use firwin with a Kaiser window to create a lowpass FIR filter.
+    taps = firwin(N, cutoff_hz / nyq_rate, window=('kaiser', beta))
+
+    # Use lfilter to filter x with the FIR filter.
+    filtered_x = lfilter(taps, 1.0, x)

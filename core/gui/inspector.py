@@ -5,7 +5,9 @@ from core.gui.context_menu import open_context_menu
 from core.gui.perspectives import Perspective
 from core.node_editor.node_editor import *
 from core.gui.annotation_editor import AnnotationEditor
+from core.gui.misc.filmography_widget import FilmographyWidget2
 
+from core.gui.tag_widget import TagWidget
 from PyQt5 import QtCore
 
 class Inspector(EDockWidget, IProjectChangeNotify):
@@ -97,7 +99,13 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         s_type = selected[len(selected) - 1].get_type()
         if s_type == MOVIE_DESCRIPTOR:
             self.lbl_Type.setText("Movie Descriptor")
-            widgets = [AttributesMovieDescriptor(self, target_item)]
+            t = FilmographyWidget2(self, self.project())
+
+            def update_filmography(self, t):
+                self.project().movie_descriptor.meta_data = t.get_filmography()
+
+            t.onFilmographyChanged.connect(partial(update_filmography, self, t))
+            widgets = [AttributesMovieDescriptor(self, target_item), t]
 
         if s_type == SCREENSHOT:
             self.lbl_Type.setText("Screenshot")
@@ -139,11 +147,18 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             for analysis in target_item.connected_analyses:
                 widgets.append(AttributesAnalysis(self, analysis))
 
+        if isinstance(target_item, VIANProject):
+            widgets.append(AttributesProject(self, target_item))
+
         if isinstance(target_item, IHasMediaObject):
             widgets.append(AttributesMediaObject(self, target_item))
 
+        if isinstance(target_item, IClassifiable):
+            widgets.append(AttributesClassifiable(self, target_item))
+
         for w in widgets:
             self.add_attribute_widget(w)
+
 
         # TODO VOcabularies should be removed completely from the Inspector
         # if self.item is not None and isinstance(self.item, IHasVocabulary):
@@ -167,6 +182,36 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             w.close()
             w.deleteLater()
         self.current_att_widgets = []
+
+
+class AttributesProject(QWidget):
+    def __init__(self,parent, project:VIANProject):
+        super(AttributesProject, self).__init__(parent)
+        path = os.path.abspath("qt_ui/AttributesProject.ui")
+        uic.loadUi(path, self)
+        self.project = project
+
+        self.lbl_ProjectTitle.setText(self.project.name)
+
+        self.lbl_MovieFile.setText(self.project.movie_descriptor.movie_path)
+
+        self.lbl_Segmentations.setText(str(len(self.project.segmentation)))
+        n_segments = 0
+        for s in self.project.segmentation:
+            n_segments += len(s.segments)
+
+        self.lbl_Segments.setText(str(n_segments))
+        self.lbl_Screenshots.setText(str(len(self.project.screenshots)))
+
+        self.lbl_Colorimetry.setText("Incomplete" if self.project.colormetry_analysis is None or not self.project.colormetry_analysis.has_finished else "Finished")
+        n_tags = 0
+        for e in self.project.experiments:
+            n_tags += len(e.classification_results)
+        self.lbl_Classification.setText("{t} Tags applied".format(t=n_tags))
+        # self.lbl_ProjectTitle.setText(self.project.name)
+
+
+        self.show()
 
 
 class AttributesMovieDescriptor(QWidget):
@@ -659,5 +704,16 @@ class DefaultLiteral(AttributesNodeDefaultValues):
         super(DefaultLiteral, self).on_value_changed()
 
 
+class AttributesClassifiable(QWidget):
+    def __init__(self, parent, descriptor:IClassifiable):
+        super(AttributesClassifiable, self).__init__(parent)
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(QLabel("Classification"))
+        self.tag_widget = TagWidget(self)
+        self.layout().addWidget(self.tag_widget)
 
+        self.descriptor = descriptor
+        for t in descriptor.tag_keywords:
+            self.tag_widget.add_tag(":".join([t.class_obj.name, t.voc_obj.name, t.word_obj.name]))
+        self.show()
 

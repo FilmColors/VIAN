@@ -3,11 +3,11 @@ from typing import Optional
 from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
     QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, \
     QFileDialog, QMessageBox, QFrame, QStackedWidget, QGridLayout, QDialog, QComboBox
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5 import uic
 
 from core.gui.ewidgetbase import EDockWidget, EditableListWidget
-from core.gui.filmography_widget import FilmographyWidget2
+from core.gui.misc.filmography_widget import FilmographyWidget2
 from core.container.corpus import Corpus
 from core.container.project import VIANProject
 from core.data.log import log_error

@@ -16,7 +16,7 @@ from core.gui.python_script_editor import PythonScriptEditor
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
 from core.data.log import log_error, log_info, log_warning
 from core.container.project import VIANProject, Screenshot, Annotation, Segment
-from core.container.analysis import PipelineScript
+from core.analysis.pipeline_scripts.pipeline_script import PipelineScript, PipelineScriptManager
 from core.data.computation import import_module_from_path, create_icon
 import numpy as np
 
@@ -268,11 +268,14 @@ class PipelineWidget(QWidget):
         self.all_experiments = dict()
 
         self.pipeline_library = dict()
+        self.pipeline_manager = PipelineScriptManager(self)
 
         self.event_manager = event_manager
         self.on_reload_scripts()
 
     def update_library(self):
+        return
+
         log_info("Updating Pipeline Library")
 
         # Fetch all registered pipelines and create a PipelineScript for each
@@ -311,6 +314,7 @@ class PipelineWidget(QWidget):
                     self.pipeline_library[k].save_script()
 
     def on_reload_scripts(self):
+        return
         # self.fetch_pipeline_scripts()
         last_selection = None
         if self.current_item is not None:
@@ -466,6 +470,8 @@ class PipelineWidget(QWidget):
 
     @pyqtSlot()
     def run_all(self):
+        return
+
         if self.project is not None:
             missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements)
             missing = dict()
@@ -543,7 +549,6 @@ class PipelineWidget(QWidget):
                             )
                             log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
                             self.onRunAnalysis.emit(d)
-
 
     @pyqtSlot(object)
     def on_loaded(self, project:VIANProject):

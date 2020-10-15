@@ -7,7 +7,7 @@ The Inspector is one of the most important Widgets of VIAN. It can be activated 
 adapts to the current selection. Most of the modifications regarding mate-information like the Title etc. to a specific item (i.e. a Segmentation, Segment,
 Annotation, Screenshot, etc.) can be performed using the Inspector.
 
-Depending on the selected item, the Inspector consists distinct parts, which are separated by black lines. If for example a Screenshot is selected, the Inspector looks as follows:
+Depending on the selected item, the Inspector consists of distinct parts, which are separated by black lines. If for example a Screenshot is selected, the Inspector looks as follows:
 
 
 .. figure:: inspector.png
@@ -15,16 +15,10 @@ Depending on the selected item, the Inspector consists distinct parts, which are
    :align: center
    :alt: map to buried treasure
 
-   The Inspector showing a Screenshot.
+   The Inspector showing information of a Screenshot.
 
-If a Segment is selected, the Inspector allows 
+As you can see in the image above, also the output of some :ref:`analyses` are being displayed in the insplector.
 
-.. figure:: inspector_segment.png
-   :scale: 80 %
-   :align: center
-   :alt: map to buried treasure
-
-   The Inspector and its field when a Segment is selected.
 
 
 * :ref:`genindex`

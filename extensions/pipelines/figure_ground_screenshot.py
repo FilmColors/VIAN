@@ -35,17 +35,17 @@ class FigureGroundScreenshotPipeline(VIANPipeline):
         self.cl_obj_gnd = None
 
         try:
-            self.graph = tf.Graph()
-            config = tf.ConfigProto()
-            config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-            config.gpu_options.per_process_gpu_memory_fraction = 0.4
+            # self.graph = tf.Graph()
+            # config = tf.ConfigProto()
+            # config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+            # config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
-            with self.graph.as_default():
-                self.session = tf.Session(config=config)
-                KTF.set_session(self.session)
-                self.model = PSPNetModelVIAN(input_shape=(512, 512, 3))
-                self.model.load_weights(KERAS_LIP_WEIGHTS)
-                self.model_name = DATASET_NAME_LIP
+            # with self.graph.as_default():
+            #     self.session = tf.Session(config=config)
+            #     KTF.set_session(self.session)
+            self.model = PSPNetModelVIAN(input_shape=(512, 512, 3))
+            self.model.load_weights(KERAS_LIP_WEIGHTS)
+            self.model_name = DATASET_NAME_LIP
         except Exception as e:
             log_error(e)
             self.model = None

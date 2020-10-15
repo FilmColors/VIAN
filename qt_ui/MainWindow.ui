@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1083</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -60,11 +60,14 @@
      <addaction name="actionImportCSVVocabulary"/>
      <addaction name="actionImportScreenshots"/>
      <addaction name="separator"/>
+     <addaction name="actionSRT_File"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="title">
       <string>Export</string>
      </property>
+     <addaction name="actionProject_Summary"/>
+     <addaction name="separator"/>
      <addaction name="actionExportTemplate"/>
      <addaction name="actionExportExperiment"/>
      <addaction name="actionExportVocabulary"/>
@@ -76,6 +79,8 @@
      <addaction name="actionZip_Project"/>
      <addaction name="separator"/>
      <addaction name="actionExportMovie_Segment"/>
+     <addaction name="separator"/>
+     <addaction name="actionExportColorimetry"/>
     </widget>
     <widget class="QMenu" name="menuRecently_Opened">
      <property name="title">
@@ -90,6 +95,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionBackup"/>
+    <addaction name="actionCompare_Project_with"/>
     <addaction name="actionClose_Project"/>
     <addaction name="separator"/>
     <addaction name="actionNew_Corpus"/>
@@ -190,7 +196,6 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
-    <addaction name="separator"/>
     <addaction name="actionRun_Pipeline_for_Selection"/>
     <addaction name="actionRun_Complete_Pipeline"/>
     <addaction name="separator"/>
@@ -937,6 +942,9 @@
    <property name="shortcut">
     <string>Ctrl+P</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionRun_Complete_Pipeline">
    <property name="text">
@@ -944,6 +952,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionDelete_all_Analyses">
@@ -975,6 +986,9 @@
    </property>
   </action>
   <action name="actionBrowserVisualizations">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Browser Visualizations</string>
    </property>
@@ -985,8 +999,31 @@
    </property>
   </action>
   <action name="actionProjectSummary">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Project Summary</string>
+   </property>
+  </action>
+  <action name="actionExportColorimetry">
+   <property name="text">
+    <string>Colorimetry</string>
+   </property>
+  </action>
+  <action name="actionSRT_File">
+   <property name="text">
+    <string>SRT File</string>
+   </property>
+  </action>
+  <action name="actionProject_Summary">
+   <property name="text">
+    <string>Project Summary</string>
+   </property>
+  </action>
+  <action name="actionCompare_Project_with">
+   <property name="text">
+    <string>Compare Project with ...</string>
    </property>
   </action>
  </widget>

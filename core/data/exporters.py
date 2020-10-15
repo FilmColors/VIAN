@@ -4,6 +4,7 @@ Contains all Export Classes and Export Functions of VIAN
 
 import cv2
 import numpy as np
+import pandas as pd
 from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
@@ -23,7 +24,6 @@ DEFAULT_NAMING_SCREENSHOTS = [
     ScreenshotNamingConventionOptions.Movie_Year.name,
     ScreenshotNamingConventionOptions.Movie_Source.name,
         ]
-
 
 
 def zip_project(output_file, project_folder):
@@ -129,7 +129,12 @@ class ScreenshotsExporter():
         self.project = project
         self.naming = naming
 
-    def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100, smooth = False):
+    def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100, smooth = False, apply_letterbox=False):
+        lbox = None
+        if apply_letterbox is True:
+            lbox = self.project.movie_descriptor.get_letterbox_rect()
+            if lbox is None:
+                QMessageBox.warning(None, "No letterbox applied", "No letterbox has been applied, the default frame is used. To set a letterbox, go to Player/Set Letterbox prior to export.")
         for s in screenshots:
             if self.naming is None:
                 name = build_file_name(self.settings.SCREENSHOTS_EXPORT_NAMING, s, self.project.movie_descriptor)
@@ -149,6 +154,8 @@ class ScreenshotsExporter():
                 img = cv2.GaussianBlur(img, (3, 3), 0)
             # Export depending on the image Type selected
 
+            if lbox is not None:
+                img = img[lbox[1]:lbox[1] + lbox[3], lbox[0]:lbox[0] + lbox[2]]
             if image_type.value == ImageType.JPG.value:
                 cv2.imwrite(file_name + ".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, quality])
 
@@ -157,12 +164,12 @@ class ScreenshotsExporter():
                 cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
 
 
-class SegmentationExporter(IConcurrentJob):
+class SegmentationExporter(ExportDevice):
     """
     A Class that is able to export a Segmentation into CSV
     """
     def __init__(self, file_path, export_ms, export_formated, export_formated_ms, export_formated_frame,
-                 export_text, export_frame, t_start, t_end, t_duration, fps):
+                 export_text, export_frame, t_start, t_end, t_duration, fps, segmentations):
         self.file_path = file_path
         self.fps = fps
         self.export_formated = export_formated
@@ -174,95 +181,102 @@ class SegmentationExporter(IConcurrentJob):
         self.t_end = t_end
         self.t_duration = t_duration
         self.export_ms = export_ms
+        self.segmentations = segmentations
 
-    def export(self, segmentations):
-        # tab = "\t"
-        result = ""
-        for segmentation in segmentations:
-            name = segmentation['name']
+    def export(self, project:VIANProject, path):
 
-            for s in segmentation['segments']:
-                id = s['scene_id']
-                line = name + "\t" + str(id) + "\t"
+        def add(d, k, v):
+            if k not in d:
+                d[k] = []
+            d[k].append(v)
 
-                start = int(s['start'])
-                end = int(s['end'])
-                duration = int(s["end"] - s['start'])
+        result = dict()
 
+        if self.segmentations is None:
+            self.segmentations = project.segmentation
+
+        # Make sure we have all bodies in the header
+        bodies = set()
+        for segmentation in self.segmentations:
+            for s in segmentation.segments:
+                for a in s.get_annotations():
+                    bodies.add("annotation_{}".format(a.name))
+        print("All bodies", bodies)
+
+        for segmentation in self.segmentations:
+            for s in segmentation.segments: # type:Segment
+                bodies_added = set()
+                add(result, "segment_id", s.ID)
+                add(result, "segmentation_name", segmentation.name)
                 if self.export_ms:
+
                     if self.t_start:
-                        line += str(start) + "\t"
+                        add(result, "start_ms", s.start)
 
                     if self.t_end:
-                        line += str(end) + "\t"
+                        add(result, "end_ms", s.end)
 
                     if self.t_duration:
-                        line += str(duration) + "\t"
+                        add(result, "duration_ms", s.duration)
 
                 if self.export_formated:
                     if self.t_start:
-                        line += ms_to_string(start) + "\t"
+                        add(result, "start_ts", ms_to_string(s.start))
 
                     if self.t_end:
-                        line += ms_to_string(end) + "\t"
+                        add(result, "end_ts", ms_to_string(s.end))
 
                     if self.t_duration:
-                        line += ms_to_string(duration) + "\t"
+                        add(result, "duration_ts", ms_to_string(s.duration))
 
-                if self.export_formated_ms:
+                elif self.export_formated_ms:
                     if self.t_start:
-                        line += ms_to_string(start, include_ms=True) + "\t"
+                        add(result, "start_ts", ms_to_string(s.start, include_ms=True))
 
                     if self.t_end:
-                        line += ms_to_string(end, include_ms=True) + "\t"
+                        add(result, "end_ts", ms_to_string(s.end, include_ms=True))
 
                     if self.t_duration:
-                        line += ms_to_string(duration, include_ms=True) + "\t"
+                        add(result, "duration_ts", ms_to_string(s.duration, include_ms=True))
 
-                if self.export_formated_frame:
+                elif self.export_formated_frame:
                     if self.t_start:
-                        line += ms_to_string(start, include_frame=True, fps = self.fps) + "\t"
+                        add(result, "start_ts", ms_to_string(s.start, include_frame=True))
 
                     if self.t_end:
-                        line += ms_to_string(end, include_frame=True, fps = self.fps) + "\t"
+                        add(result, "end_ts", ms_to_string(s.end, include_frame=True))
 
                     if self.t_duration:
-                        line += ms_to_string(duration, include_frame=True, fps = self.fps) + "\t"
+                        add(result, "duration_ts", ms_to_string(s.duration, include_frame=True))
 
                 if self.export_frame:
                     if self.t_start:
-                        line += str(ms_to_frames(start, self.fps)) + "\t"
+                        add(result, "start_frame", ms_to_frames(s.start, self.fps))
 
                     if self.t_end:
-                        line += str(ms_to_frames(end, self.fps)) + "\t"
+                        add(result, "end_frame", ms_to_frames(s.end, self.fps))
 
                     if self.t_duration:
-                        line += str(ms_to_frames(duration, self.fps)) + "\t"
+                        add(result, "duration_frame", ms_to_frames(s.duration, self.fps))
 
-                if self.export_text:
-                    line += s['annotation_body'].replace("\n", "")
-                result += line +"\n"
+                for b in s.get_annotations():  # type: AnnotationBody
+                    column = "annotation_{}".format(b.name)
+                    bodies_added.add(column)
+                    add(result, column, b.content)
 
-        try:
-            with open(self.file_path , "w") as output:
-                output.write(result)
-            return True, None
-        except Exception as e:
-            return False, e
+                for b in bodies.difference(bodies_added):
+                    add(result, b, "")
+
+        if ".xlsx" in path:
+            pd.DataFrame(result).to_excel(path)
+        else:
+            pd.DataFrame(result).to_csv(path)
 
 
 class JsonExporter():
     def segment2json(self, segment):
         pass
         # result = ""
-
-
-class XMLExchangeExporter():
-    def __init__(self):
-        pass
-
-    def export(self, project:VIANProject):
-        pass
 
 
 class CSVExporter(ExportDevice):
@@ -275,6 +289,7 @@ class CSVExporter(ExportDevice):
 
     def export(self, project, path):
         f = CSVFile()
+
         headers = ["ROW", "ID", "START_MS", "END_MS",
                    "SELECTOR_TYPE", "ANNOTATION_MIME_TYPE", "ANNOTATION_BODY_ID", "ANNOTATION_BODY",
                    "NOTES"]
@@ -344,6 +359,41 @@ class CSVExporter(ExportDevice):
                     f.append(r)
                     c += 1
         f.save(path)
+
+
+class ColorimetryExporter(ExportDevice):
+    def __init__(self):
+        pass
+
+    def export(self, project:VIANProject, path):
+        if project.colormetry_analysis is None:
+            raise Exception("Colorimetry has not been performed yet")
+
+        data = np.zeros(shape=(len(project.colormetry_analysis), 6))
+
+        timestamps = []
+        for i, entry in enumerate(project.colormetry_analysis.iter_avg_color()):
+            l,c,h = lch_to_human_readable([entry['l'], entry['c'],entry['h']])
+            data[i] = [
+              entry['time_ms'],
+              entry['l'],
+              entry['a'],
+              entry['b'],
+              c,
+              h,
+            ]
+            timestamps.append(ms_to_string(entry['time_ms']))
+
+        df = pd.DataFrame(dict(time_ms=data[:, 0],
+                               timestamp=timestamps,
+                               luminance=data[:, 1],
+                               a=data[:, 2],
+                               b=data[:, 3],
+                               chroma=data[:, 4],
+                               hue=data[:, 5]
+                               ))
+
+        df.to_csv(os.path.join(project.export_dir, path), index_label="ID")
 
 
 def build_file_name(naming, screenshot, movie_descriptor):

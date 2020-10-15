@@ -11,7 +11,6 @@ from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, 
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from .container_interfaces import IProjectContainer, IHasName, IClassifiable, deprecation_serialization
 from .hdf5_manager import get_analysis_by_name
-from .analysis import PipelineScript
 
 from core.analysis.deep_learning.labels import LIPLabels
 
@@ -19,6 +18,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
 
 from functools import partial
+
 
 def delete_even_if_connected_msgbox(mode="word"):
     """
@@ -29,11 +29,11 @@ def delete_even_if_connected_msgbox(mode="word"):
     :return: an QMessageBox.Answer
     """
     if mode == "word":
-        text = 'This Keyword has already been connected used to classify, removing it from the vocabulary '
-        'also removes it from the classification. Do you want to remove it anyway?'
+        text = 'This Keyword has already been connected used to classify, removing it from the vocabulary ' + \
+               'also removes it from the classification. Do you want to remove it anyway?'
     else:
-        text = 'This Vocabulary contains keywords which have already been used to classify, removing the vocabulary'
-        'also removes the classification already done. Do you want to remove it anyway?'
+        text = 'This Vocabulary contains keywords which have already been used to classify, removing the vocabulary ' + \
+               'also removes the classification already done. Do you want to remove it anyway?'
 
     answer = QMessageBox.question(None, "Warning", text)
     return answer
@@ -267,12 +267,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.comment = w['comment']
                 except:
                     pass
-
-        try:
-            self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
-        except:
-            self.pipeline_script = None
-
         try:
             self.is_visible = serialization['visible']
         except Exception as e:
@@ -606,6 +600,8 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.unique_keywords.append(keyword)
                 keywords.append(keyword)
             self.onUniqueKeywordsChanged.emit(self)
+            voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
+            voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
             return keywords
         else:
             #Check if really there are new words in the vocabulary which are not yet added to the keywords.
@@ -629,6 +625,20 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.onUniqueKeywordsChanged.emit(self)
             return keywords
 
+    def on_vocabulary_word_added(self, w:VocabularyWord):
+        keyword = UniqueKeyword(self.experiment, w.vocabulary, w, self)
+        self.unique_keywords.append(keyword)
+        self.onUniqueKeywordsChanged.emit(self)
+
+    def on_vocabulary_word_removed(self, w:VocabularyWord):
+        to_remove = None
+        for kwd in self.unique_keywords:
+            if kwd.word_obj == w:
+                to_remove = kwd
+        if to_remove is not None:
+            self.unique_keywords.remove(to_remove)
+        self.onUniqueKeywordsChanged.emit(self)
+
     def remove_vocabulary(self, voc):
         if voc not in self.classification_vocabularies:
             return
@@ -640,6 +650,9 @@ class ClassificationObject(IProjectContainer, IHasName):
 
         for d in to_delete:
             self.project.remove_from_id_list(d)
+
+        voc.onVocabularyWordAdded.disconnect(self.on_vocabulary_word_added)
+        voc.onVocabularyWordRemoved.disconnect(self.on_vocabulary_word_removed)
 
         self.onUniqueKeywordsChanged.emit(self)
 
@@ -733,6 +746,8 @@ class ClassificationObject(IProjectContainer, IHasName):
             voc = project.get_by_id(uid)
             if voc is not None:
                 self.classification_vocabularies.append(voc)
+                voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
+                voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
             else:
                 raise Exception("Could not Resolve Vocabulary", uid)
                 log_warning("Could not Resolve Vocabulary:", uid)
@@ -849,7 +864,6 @@ class Experiment(IProjectContainer, IHasName):
     onExperimentChanged = pyqtSignal(object)
     onClassificationObjectAdded = pyqtSignal(object)
     onClassificationObjectRemoved = pyqtSignal(object)
-    onPipelineScriptChanged = pyqtSignal(object)
 
     def __init__(self, name="New Experiment", unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
@@ -860,7 +874,6 @@ class Experiment(IProjectContainer, IHasName):
         # This is a list of [IClassifiable, UniqueKeyword]
         self.classification_results = [] #type: List[Tuple[IClassifiable, UniqueKeyword]]
         self.correlation_matrix = None
-        self.pipeline_script = None
 
         self.onClassificationObjectRemoved.connect(partial(self.emit_change))
         self.onClassificationObjectAdded.connect(partial(self.emit_change))
@@ -1088,15 +1101,6 @@ class Experiment(IProjectContainer, IHasName):
     def remove_all_tags_with_container(self, container):
         self.classification_results[:] = [tup for tup in self.classification_results if not tup[0] is container]
 
-    def set_pipeline_script(self, pipeline_script:PipelineScript):
-        """
-        Sets the pipelinescript of the experiment. Only one may be assigned at the time.
-        :param pipeline_script: a PipelineScript Instance
-        :return: None
-        """
-        self.pipeline_script = pipeline_script
-        self.onPipelineScriptChanged.emit(self.pipeline_script)
-
     def emit_change(self):
         self.onExperimentChanged.emit(self)
 
@@ -1118,17 +1122,12 @@ class Experiment(IProjectContainer, IHasName):
                     class_obj=None
                 ))
 
-        pipeline_script = None
-        if self.pipeline_script is not None:
-            pipeline_script = self.pipeline_script.unique_id
-
         data = dict(
             name=self.name,
             unique_id = self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
             classification_results = [dict(target=c[0].unique_id, keyword=c[1].unique_id) for c in self.classification_results],
-            pipeline_script = pipeline_script
         )
         return data
 
@@ -1150,17 +1149,12 @@ class Experiment(IProjectContainer, IHasName):
                     class_obj=None
                 ))
 
-        pipeline_script = None
-        if self.pipeline_script is not None:
-            pipeline_script = self.pipeline_script.unique_id
-
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
             classification_objects=[c.serialize() for c in self.get_classification_objects_plain()],
             analyses=analyses,
             classification_results=[],
-            pipeline_script = pipeline_script
         )
         return data
 
@@ -1224,15 +1218,6 @@ class Experiment(IProjectContainer, IHasName):
         except Exception as e:
             log_error("Exeption during Experiment.deserialize:", e)
             pass
-
-        try:
-            self.pipeline_script = project.get_by_id(serialization['pipeline_script'])
-            if self.pipeline_script is not None:
-                self.pipeline_script.experiment = self
-        except Exception as e:
-            log_error("Exception in Experiment.deserialize()", e, project.name)
-            self.pipeline_script = None
-
         return self
 
     def delete(self):

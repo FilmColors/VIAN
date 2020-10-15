@@ -1,6 +1,5 @@
 from core.analysis.deep_learning.pspnet import *
 import cv2
-import keras.backend.tensorflow_backend as KTF
 from core.analysis.import_tensortflow import tf
 from core.analysis.deep_learning.labels import *
 
@@ -109,37 +108,3 @@ class RealTimeHumanExtractor:
         return result
 
         # show the output image
-
-
-if __name__ == '__main__':
-    import glob
-    from core.analysis.deep_learning.labels import LIPLabels
-
-    with tf.Graph().as_default():
-
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-        # config.log_device_placement = True  # to log device placement (on which device the operation ran)
-
-        session = tf.Session(config)
-        KTF.set_session(session)
-
-        files = glob.glob("test_images/*.jpg")
-        model = PSPNetModelVIAN(input_shape=(512, 512, 3))
-        for f in files:
-            img = cv2.imread(f)
-            result = model.forward(img)
-            for r in range(result.shape[2]):
-                mask = cv2.cvtColor(result[:,:,r].astype(np.float32), cv2.COLOR_GRAY2BGR)
-                color = np.zeros_like(img)
-                color[:] = [200,0,0]
-                rimg = ((img * (1.0 - mask)) + (mask * color)).astype(np.uint8)
-
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                cv2.putText(rimg, LIPLabels(r).name, (10, 100), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
-
-                cv2.imshow("Window", rimg)
-                cv2.imshow("Mask", mask)
-                cv2.waitKey()
-
-

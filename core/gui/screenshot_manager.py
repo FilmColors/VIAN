@@ -1,25 +1,17 @@
-import os
-import cv2
-import numpy as np
-import time
-
-from functools import partial
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot, QRect
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
 from core.data.enums import *
-from collections import namedtuple
 
 from core.data.computation import *
 from core.container.project import VIANProject
 from core.container.screenshot import Screenshot
 from core.data.exporters import ScreenshotsExporter
 from core.data.interfaces import IProjectChangeNotify
-from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
-from core.visualization.image_plots import ImagePlotCircular, VIANPixmapGraphicsItem, ImagePlotTime, ImagePlotPlane
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
+from core.visualization.image_plots import ImagePlotCircular, ImagePlotTime, ImagePlotPlane
+from core.analysis.color.average_color import ColorFeatureAnalysis
 from core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
 
 SCALING_MODE_NONE = 0
@@ -608,7 +600,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             # print("Current Location", self.current_y, self.verticalScrollBar().value())
             self.verticalScrollBar().setValue(self.current_y)
 
-
     def clear_manager(self):
         self.current_y = self.verticalScrollBar().value()
         self.clear_scr_captions()
@@ -890,7 +881,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def rubber_band_selection(self, QRect, Union, QPointF=None, QPoint=None):
         self.rubberband_rect = self.mapToScene(QRect).boundingRect()
 
-    def export_screenshots(self, path, visibility=None, image_type=None, quality=None, naming=None, smooth=False):
+    def export_screenshots(self, path, visibility=None, image_type=None, quality=None, naming=None, smooth=False, apply_letterbox=False):
         screenshots = []
 
         # If there are selected Screenshots, only export those,
@@ -912,7 +903,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 os.mkdir(path)
 
             exporter = ScreenshotsExporter(self.main_window.settings, self.main_window.project, naming)
-            exporter.export(screenshots, path, visibility, image_type, quality, smooth)
+            exporter.export(screenshots, path, visibility, image_type, quality, smooth, apply_letterbox)
         except OSError as e:
             QMessageBox.warning(self.main_window, "Failed to Create Directory", "Please choose a valid path\n\n" + path)
             self.main_window.print_message("Failed to Create Directory: " + path, "Red")

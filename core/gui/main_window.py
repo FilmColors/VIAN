@@ -1,36 +1,31 @@
-import cProfile
-import glob
-
-from functools import partial
-
-from core.concurrent.auto_segmentation import *
-from core.concurrent.auto_screenshot import DialogAutoScreenshot
-from core.concurrent.image_loader import ClassificationObjectChangedJob
-from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
-from core.concurrent.worker import MinimalThreadWorker, WorkerManager
-from core import version
-from core.version import *
 from core.concurrent.worker_functions import *
 from core.concurrent.update_erc_template import ERCUpdateJob
-from core.corpus.client.widgets import *
+from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
+from core.concurrent.worker import WorkerManager, MinimalThreadWorker
+from core.concurrent.image_loader import ClassificationObjectChangedJob
+from core.concurrent.auto_screenshot import DialogAutoScreenshot
+from core.concurrent.auto_segmentation import DialogAutoSegmentation
+from core.analysis.analysis_import import *
+
+from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
+from core.data.corpus_client import WebAppCorpusInterface, get_vian_version
+from core.data.computation import version_check
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
-from core.data.vian_updater import VianUpdater, VianUpdaterJob
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
-
 from flask_server.server import FlaskServer, FlaskWebWidget
 
-from core.gui.Dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
-from core.gui.Dialogs.export_segmentation_dialog import ExportSegmentationDialog
-from core.gui.Dialogs.export_template_dialog import ExportTemplateDialog
-from core.gui.Dialogs.new_project_dialog import NewProjectDialog
-from core.gui.Dialogs.preferences_dialog import DialogPreferences
-from core.gui.Dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
-from core.gui.Dialogs.screenshot_importer_dialog import DialogScreenshotImport
-from core.gui.letterbox_widget import LetterBoxWidget
+from core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
+from core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
+from core.gui.dialogs.export_template_dialog import ExportTemplateDialog
+from core.gui.dialogs.new_project_dialog import NewProjectDialog
+from core.gui.dialogs.preferences_dialog import DialogPreferences
+from core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
+from core.gui.dialogs.screenshot_importer_dialog import DialogScreenshotImport
+from core.gui.dialogs.letterbox_widget import LetterBoxWidget
 from core.gui.analyses_widget import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.classification import ClassificationWindow
@@ -55,6 +50,8 @@ from core.gui.timeline.timeline import TimelineContainer
 from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
 from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
 from core.gui.corpus_widget import CorpusDockWidget
+from core.gui.misc.filmography_widget import query_initial
+
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
@@ -62,7 +59,7 @@ from extensions.extension_list import ExtensionList
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses
 from core.gui.toolbar import WidgetsToolbar
-from core.data.log import log_warning, log_debug, log_info, log_error
+from core.data.log import log_info
 
 try:
     import keras.backend as K
@@ -102,14 +99,13 @@ class MainWindow(QtWidgets.QMainWindow):
     onStartFlaskServer = pyqtSignal()
     onStopFlaskServer = pyqtSignal()
 
-    def __init__(self, loading_screen:QSplashScreen):
+    def __init__(self, loading_screen:QSplashScreen, file = None):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
         log_info("VIAN: ", version.__version__)
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
-        # loading_screen.showMessage("Loading, Please Wait... Initializing Main Window", Qt.AlignHCenter|Qt.AlignBottom, QColor(200,200,200,200))
 
         if PROFILE:
             self.profiler = cProfile.Profile()
@@ -143,6 +139,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QApplication.instance().setAttribute(Qt.AA_DontUseNativeMenuBar)
         self.dock_widgets = []
         self.open_dialogs = []
+
         self.settings = UserSettings()
         self.settings.load()
 
@@ -298,6 +295,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
+
+
         self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
@@ -329,6 +328,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSaveAs.triggered.connect(self.on_save_project_as)
         self.actionBackup.triggered.connect(self.on_backup)
         self.actionCleanUpRecent.triggered.connect(self.cleanup_recent)
+        self.actionCompare_Project_with.triggered.connect(self.on_compare)
 
         self.actionNew_Corpus.triggered.connect(self.corpus_widget.on_new_corpus)
         self.actionLoad_Corpus.triggered.connect(self.corpus_widget.on_load_corpus)
@@ -343,6 +343,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportScreenshots.triggered.connect(self.import_screenshots)
         self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
         self.actionImportWebApp.triggered.connect(self.import_webapp)
+        self.actionSRT_File.triggered.connect(self.import_srt)
 
         ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
@@ -354,6 +355,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionScreenshotsExport.triggered.connect(self.on_export_screenshots)
         self.actionExportMovie_Segment.triggered.connect(self.on_export_movie_segments)
         self.actionExportCSV.triggered.connect(self.on_export_csv)
+        self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
+        self.actionProject_Summary.triggered.connect(self.on_export_summary)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -409,6 +412,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
+        self.actionUpdate.triggered.connect(self.check_update)
 
         self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
 
@@ -563,9 +567,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_toolbar.runAll.connect(self.pipeline_widget.pipeline.run_all)
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
+        self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
         # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
         #                            QColor(200,200,200,100))
+
         self.update_recent_menu()
+
 
         self.player_controls.setState(False)
 
@@ -575,7 +582,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.undo_manager.clear()
         self.close_project()
 
+        query_initial(WebAppCorpusInterface())
         self.show()
+        self.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
+        self.on_pipeline_settings_changed()
 
         self.switch_perspective(Perspective.Segmentation)
         loading_screen.hide()
@@ -605,11 +615,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 log_info("Contributor:", self.settings.CONTRIBUTOR.email)
             except:
                 pass
+        if file is not None:
+            self.load_project(file)
 
     def toggle_colormetry(self):
         log_debug("toggle colormetry", self.project.movie_descriptor.fps / 2)
         if self.colormetry_running is False:
-            job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self)
+            job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self, self.settings.PROCESSING_WIDTH)
             args = job.prepare(self.project)
             self.actionColormetry.setText("Pause Colormetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)
@@ -643,7 +655,21 @@ class MainWindow(QtWidgets.QMainWindow):
                     TimelineDataset("Colorimetry: Luminance",
                          self.project.hdf5_manager.get_colorimetry_feat()[:,0],
                          ms_to_idx=ms_to_idx,
-                         vis_type=TimelineDataset.VIS_TYPE_LINE))
+                         vis_type=TimelineDataset.VIS_TYPE_LINE, vis_color=QColor(255, 166, 0)))
+                lch = lab_to_lch(self.project.hdf5_manager.get_colorimetry_feat()[:, :3], human_readable=True)
+                self.timeline.timeline.add_visualization(
+                    TimelineDataset("Colorimetry: Chroma",
+                                    lch[:,1],
+                                    ms_to_idx=ms_to_idx,
+                                    vis_type=TimelineDataset.VIS_TYPE_LINE, vis_color=QColor(188, 80, 144)))
+
+                self.timeline.timeline.add_visualization(
+                    TimelineDataset("Colorimetry: Hue",
+                                    lch[:,2],
+                                    ms_to_idx=ms_to_idx,
+                                    vis_type=TimelineDataset.VIS_TYPE_LINE,  vis_color=QColor(47, 75, 124)))
+
+
         except Exception as e:
             log_error("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
@@ -927,8 +953,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pipeline_widget = PipelineDock(self, self.vian_event_handler)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.pipeline_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
+            if self.settings.USE_PIPELINES is False:
+                self.pipeline_widget.hide()
         else:
-            if not self.pipeline_widget.visibleRegion().isEmpty():
+            if not self.pipeline_widget.visibleRegion().isEmpty() or self.settings.USE_PIPELINES:
                 self.pipeline_widget.hide()
             else:
                 self.pipeline_widget.show()
@@ -1077,6 +1105,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #region MainWindow Event Handlers
 
+    def on_pipeline_settings_changed(self):
+        if self.settings.USE_PIPELINES:
+            self.pipeline_widget.show()
+            self.pipeline_toolbar.show()
+        else:
+            self.pipeline_widget.hide()
+            self.pipeline_toolbar.hide()
+
     @pyqtSlot(float, str)
     def on_progress_popup(self, value, str):
         try:
@@ -1105,6 +1141,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def cleanup_recent(self):
         self.settings.clean_up_recent()
         self.update_recent_menu()
+
+    def on_compare(self):
+        if self.project is None:
+            return
+        from core.visualization.bokeh_timeline import compare_with_project
+        f2 = QFileDialog.getOpenFileName(self, filter="*.eext")[0]
+        compare_with_project(self.project, f2)
+
 
     def clear_recent(self):
         self.settings.recent_files_name = []
@@ -1316,7 +1360,7 @@ class MainWindow(QtWidgets.QMainWindow):
         job = result[1]
         self.allow_dispatch_on_change = False
 
-        if not job.aborted or isinstance(job, VianUpdaterJob):
+        if not job.aborted:
             job.modify_project(project=self.project, result=res, main_window = self)
 
         self.allow_dispatch_on_change = True
@@ -1423,7 +1467,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
-            self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
+            if self.settings.USE_PIPELINES:
+                self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.analysis_results_widget_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_widget)
@@ -1503,7 +1548,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vocabulary_manager.show()
             # self.inspector.show()
             self.experiment_dock.show()
-            self.pipeline_widget.show()
+            if self.settings.USE_PIPELINES:
+                self.pipeline_widget.show()
 
             self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
             self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_dock)
@@ -1641,7 +1687,9 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.show()
             dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
 
-    def analysis_triggered(self, analysis):
+    def analysis_triggered(self, analysis:IAnalysisJob):
+        analysis.max_width = self.settings.PROCESSING_WIDTH
+
         targets = []
         for sel in self.project.selected:
             if sel.get_type() in analysis.source_types:
@@ -1744,10 +1792,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_about(self):
         about = ""
-        about += "Author:".ljust(12) + str(version.__author__) + "\n"
+        about += "Author:".ljust(12) + ", ".join(version.__author__)+ "\n"
         about += "Copyright:".ljust(12) + str(version.__copyright__) + "\n"
         about += "Version:".ljust(12) + str(version.__version__) + "\n"
-        about += "Credits:".ljust(12) + str(version.__credits__) + "\n"
+        about += "Credits:".ljust(12) + ",\n".join(version.__credits__)+ "\n"
         QMessageBox.about(self, "About", about)
 
     def increase_playrate(self):
@@ -1759,6 +1807,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.update_rate()
 
     def on_create_experiment(self):
+        print("Hello Experiment")
         if self.project is not None:
             self.project.create_experiment()
 
@@ -1784,11 +1833,48 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.facial_identification_dock is None:
             self.facial_identification_dock.raise_()
 
+    def on_export_colorimetry(self):
+        if self.project is None:
+            return
+        p = QFileDialog.getSaveFileName(filter="*.csv", directory=self.project.export_dir)[0]
+        try:
+            self.project.export(ColorimetryExporter(), p)
+        except Exception as e:
+            log_error(e)
+
+    def on_export_summary(self):
+        if self.project is None:
+            return
+        p = QFileDialog.getSaveFileName(filter="*.html", caption="Select Save Path", directory=self.project.export_dir)[0]
+        try:
+            from core.visualization.bokeh_timeline import generate_plot
+            generate_plot(self.project, file_name=p)
+        except Exception as e:
+            log_error(e)
+
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")
 
     def on_project_summary(self):
-        webbrowser.open("http://127.0.0.1:5000/summary/")
+        dock = FlaskWebWidget(self)
+        dock.set_url("http://127.0.0.1:5000/summary/")
+        dock.setWindowTitle("Project Summary")
+        self.addDockWidget(Qt.RightDockWidgetArea, dock)
+        self.tabifyDockWidget(self.screenshots_manager_dock, dock)
+
+    def check_update(self):
+        version, id = get_vian_version()
+        has_update = version_check(version, self.version)
+        if has_update:
+            QMessageBox.information(self, "New Version available", "A new VIAN version is available.\n"
+                                                                   "Go to https://www.vian.app/vian to "
+                                                                   "update to download the newest version.\n"
+                                                                   "Your Version: " + self.version + "\n"
+                                                                   "Newest Version: " + str(version))
+        else:
+            QMessageBox.information(self, "All set", "You have the newest version of VIAN!\n"
+                                                     "Your Version: " + self.version)
+
     # endregion
 
     #region Project Management
@@ -1951,7 +2037,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.onSave.emit()
 
-        if open_dialog is True or self.project.path is "" or self.project.name is "":
+        if open_dialog is True or self.project.path == "" or self.project.name == "":
 
             path = QFileDialog.getSaveFileName(caption="Select Project File to save", filter="*" + VIAN_PROJECT_EXTENSION)
 
@@ -2140,9 +2226,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.import_(WebAppProjectImporter(self.project.movie_descriptor.movie_path,
                                                    directory=directory),
                              project_file)
-        self.dispatch_on_loaded()
+
+        self.project.store_project(self.project.path)
+        p = self.project.path
+        self.close_project()
+
+        self.load_project(p)
 
 
+    def import_srt(self):
+        if self.project is None:
+            return
+        srt_file = QFileDialog.getOpenFileName(self, caption="Select SRT File", filter="*.srt")[0]
+        self.project.import_(SRTImporter(), srt_file)
 
     def export_segmentation(self):
         dialog = ExportSegmentationDialog(self)
@@ -2214,6 +2310,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_ui_enabled(self, state):
         self.actionSave.setDisabled(not state)
+        self.actionCompare_Project_with.setDisabled(not state)
         self.actionSaveAs.setDisabled(not state)
         self.actionBackup.setDisabled(not state)
         self.actionClose_Project.setDisabled(not state)

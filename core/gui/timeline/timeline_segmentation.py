@@ -1,12 +1,7 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSlot
 from core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
 
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
+from core.analysis.color.average_color import ColorFeatureAnalysis
 from core.container.project import *
 
 class TimelineSegmentationControl(TimelineControl):
@@ -47,6 +42,7 @@ class TimebarSegmentationSlice(TimebarSlice):
         item.onAnnotationsChanged.connect(self.update_text)
 
         self.set_color(None)
+
 
     @pyqtSlot(object)
     def set_color(self, analysis):

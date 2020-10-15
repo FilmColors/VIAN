@@ -401,9 +401,9 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QProgressBar" name="progressBar">
-           <property name="value">
-            <number>24</number>
+          <widget class="QPushButton" name="btnRemarks">
+           <property name="text">
+            <string>Add Remarks</string>
            </property>
           </widget>
          </item>

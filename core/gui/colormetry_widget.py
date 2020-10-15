@@ -70,16 +70,6 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.worker_thread.start()
 
         self.current_data = None
-        # self.h_bgr = create_hilbert_color_pattern(8, multiplier=32, color_space=cv2.COLOR_Lab2RGB)
-        # self.h_indices = hilbert_mapping_3d(8, np.zeros(shape=(8,8,8)), HilbertMode.Indices_All)
-        #
-        # self.h_indices = np.array(self.h_indices)
-        # self.h_indices = np.array([self.h_indices[:, 0],self.h_indices[:, 1],self.h_indices[:, 2]])
-        #
-        # self.histogram = HistogramVis(self)
-        # self.histogram.plot(8**3 * [1.0], self.h_bgr)
-        # self.histogram.view.setYRange(min = 0.1, max = 1.0)
-        # self.histogram.view.setXRange(min = 0, max = 255)
 
         # self.palette = PaletteVis(self)
         self.palette = PaletteWidget(self)

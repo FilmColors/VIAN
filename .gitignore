@@ -24,7 +24,11 @@ dist/*
 build/*
 log-files/*
 vian-update.zip
-is_dev.txt
+tests/is_dev.txt
 
 dist/*
 build/*
+flask_server/static/build/*
+flask_server/static/three/*
+venv/*
+venv37/*

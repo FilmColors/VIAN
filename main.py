@@ -135,6 +135,11 @@ if __name__ == '__main__':
     sys._excepthook = sys.excepthook
     sys.excepthook = my_exception_hook
 
+    file = None
+    print("Input Arguments", sys.argv)
+    if len(sys.argv) == 2:
+        file = sys.argv[1]
+
     settings = UserSettings()
     settings.load()
     print("Settings loaded")
@@ -143,14 +148,18 @@ if __name__ == '__main__':
     print("ApplicationDone")
 
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
+    # app.setAttribute(Qt.AA_UseHighDpiPixmaps)
     # filter = SuperFilter(app)
     # app.installEventFilter(filter)
+
+    # if sys.platform.startswith("win"):
+    #     os.environ['QT_ENABLE_HIGHDPI_SCALING'] = "1"
 
     print("Setting UI")
     print(os.getcwd())
 
     app.setWindowIcon(QIcon("qt_ui/images/main.png"))
-    set_attributes(app)
+    # set_attributes(app)
     set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css") #settings.THEME_PATH
 
     screen = app.desktop().screenGeometry()
@@ -164,7 +173,7 @@ if __name__ == '__main__':
     app.processEvents()
 
     print("Starting Up")
-    main = MainWindow(splash)
+    main = MainWindow(splash, file)
     MAIN_WINDOW = main
     sys.exit(app.exec_())
 

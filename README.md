@@ -36,6 +36,10 @@ If you are interested in the source code or want to contribute to VIAN, you are 
 
 4. Install the corresponding environment:
 
+First we run the build.py file to setup the directory.
+
+```python build.py```
+
 <b>OSX:</b>
 ```conda env create -f install/env/env_osx_dl.yml``` 
 

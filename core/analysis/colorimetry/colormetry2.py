@@ -1,18 +1,19 @@
 from core.container.project import VIANProject
-from core.data.interfaces import IConcurrentJob
 from core.analysis.colorimetry.computation import calculate_histogram
 from core.data.computation import frame2ms, ms_to_frames, lab_to_sat
 from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
-from core.analysis.palette_extraction import *
+from core.analysis.color.palette_extraction import *
 import cv2
 import numpy as np
 from collections import namedtuple
 from PyQt5.QtCore import pyqtSlot, QObject
 
+from core.analysis.misc import preprocess_frame
+
 YieldedResult = namedtuple("YieldedResult", ["frame_pos", "time_ms", "hist", "avg_color", "palette"])
 
 class ColormetryJob2(QObject):
-    def __init__(self, resolution, main_window):
+    def __init__(self, resolution, main_window, max_width=1920):
         super(ColormetryJob2, self).__init__()
         self.resolution = resolution
         self.colormetry_analysis = None
@@ -20,6 +21,7 @@ class ColormetryJob2(QObject):
         self.duration =  None
         self.profile = False
         self.aborted = False
+        self.max_width = max_width
 
     def prepare(self, project:VIANProject):
         if project.colormetry_analysis is None:
@@ -81,6 +83,8 @@ class ColormetryJob2(QObject):
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
                 # cv2.imshow("", frame)
                 # cv2.waitKey(5)
+
+            frame = preprocess_frame(frame, self.max_width)
 
             t = time.time()
             t_total = time.time()

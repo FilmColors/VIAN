@@ -66,15 +66,15 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         tot = len(args)
         counter = 0
 
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-        # config.log_device_placement = True  # to log device placement (on which device the operation ran)
-        config.gpu_options.per_process_gpu_memory_fraction = 0.4
+        # config = tf.ConfigProto()
+        # config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+        # # config.log_device_placement = True  # to log device placement (on which device the operation ran)
+        # config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
         with self.graph.as_default():
-            if self.session is None:
-                self.session = tf.Session(config=config)
-            KTF.set_session(self.session)
+            # if self.session is None:
+            #     self.session = tf.Session(config=config)
+            # KTF.set_session(self.session)
 
             model = None
             if self.model is not None:
@@ -119,8 +119,7 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.
         """
-        result.set_target_container(project.get_by_id(result.target_container))
-        result.set_target_classification_obj(self.target_class_obj)
+        super(SemanticSegmentationAnalysis, self).modify_project(project, result, main_window)
 
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         """

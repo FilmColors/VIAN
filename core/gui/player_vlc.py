@@ -387,9 +387,6 @@ class Player_VLC(VideoPlayer):
         log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
 
-        # if self.main_window.is_darwin:
-        #     self.mac_frame.update()
-
     def play_pause(self):
         if not self.is_playing():
             self.play()
@@ -488,7 +485,7 @@ class Player_VLC(VideoPlayer):
         return self.media_player.get_rate()
 
     def is_frame_rate_auto_detected(self):
-        if self.get_rate() is not 0.0:
+        if self.get_rate() != 0.0:
             return True
         return False
 
@@ -562,33 +559,6 @@ class Player_VLC(VideoPlayer):
     def on_loaded(self, project):
         path = project.movie_descriptor.get_movie_path()
         self.media_descriptor = project.movie_descriptor
-
-        # # Check if the file exists locally
-        # success = True
-        # if not os.path.isfile(path):
-        #     exists = False
-        #
-        #     if path is "":
-        #         exists = False
-        #     else:
-        #         # Check if the File exists as URL
-        #         try:
-        #             request = requests.get(path)
-        #             if request.status_code == 200:
-        #                 exists = True
-        #         except Exception as e:
-        #             print("URL Could not be opened", str(e), path)
-        #
-        #
-        #     if not exists:
-        #         QMessageBox.information(self.main_window, "Could not find movie",
-        #                                 "Could not find movie: " + str(path) +
-        #                                 "\nPlease set it manually after clicking \"OK\".")
-        #         path = QtWidgets.QFileDialog.getOpenFileName(self)[0]
-        #         if os.path.isfile(path):
-        #             project.movie_descriptor.set_movie_path(path)
-        #         else:
-        #             success = False
 
         if os.path.isfile(path):
             self.open_movie(path)

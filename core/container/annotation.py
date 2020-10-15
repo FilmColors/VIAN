@@ -72,12 +72,12 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
         self.image = None
 
         # if t_end is not set, it shall be one second after t_start
-        if t_end is -1:
+        if t_end == -1:
             self.t_end = t_start + 1000
         else:
             self.t_end = t_end
 
-        if self.a_type == AnnotationType.Image and self.resource_path is not "":
+        if self.a_type == AnnotationType.Image and self.resource_path != "":
             self.load_image()
 
     def add_key(self, time, position):
@@ -124,11 +124,12 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
     def get_end(self):
         return self.t_end
 
-    def move(self, start, end):
+    def move(self, start, end, dispatch = True):
         self.project.undo_manager.to_undo((self.move, [start, end]), (self.move, [self.t_start, self.t_end]))
         self.t_start = start
         self.t_end = end
-        self.dispatch_on_changed(item=self)
+        if dispatch:
+            self.dispatch_on_changed(item=self)
 
     def set_color(self, color):
         self.project.undo_manager.to_undo((self.set_color, [color]), (self.set_color, [self.color]))
@@ -403,11 +404,13 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
     def get_end(self):
         return self.t_end
 
-    def move(self, start, end):
+    def move(self, start, end, dispatch=True):
         self.project.undo_manager.to_undo((self.move, [start, end]), (self.move, [self.t_start, self.t_end]))
         self.t_start = start
         self.t_end = end
-        self.dispatch_on_changed(item=self)
+
+        if dispatch:
+            self.dispatch_on_changed(item=self)
 
     def create_annotation(self, type = AnnotationType.Rectangle, position = (150,150), size=(100,100),
                           color = (255,255,255), line_width = 5, name = "New Annotation", font_size = 10,

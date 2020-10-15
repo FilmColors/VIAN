@@ -1,6 +1,6 @@
 import os
 import csv
-
+import pandas as pd
 import sys
 
 class CSVFile:
@@ -43,21 +43,12 @@ class CSVFile:
 
         return self
 
-
     def save(self, p):
-        new_line = "\n"
-        try:
-            with open(p,"w", newline=new_line, encoding="utf-8") as f:
-                w = csv.writer(f)
-                rows = [self._header]
-                for i in range(len(self._dataset[self._header[0]])):
-                    r = []
-                    for k in self._header:
-                        r.append(self._dataset[k][i])
-                    rows.append(r)
-                w.writerows(rows)
-        except Exception as e:
-            print(e)
+        _, file_extension = os.path.splitext(p)
+        if "json" in file_extension:
+            pd.DataFrame(self._dataset).to_json(p)
+        elif "csv" in file_extension:
+            pd.DataFrame(self._dataset).to_csv(p)
 
     def set_header(self, header):
         self._header = header

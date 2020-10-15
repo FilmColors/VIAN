@@ -6,7 +6,7 @@ from PyQt5.QtCore import QRect, Qt
 from core.data.interfaces import IConcurrentJob
 from core.data.enums import *
 from core.container.project import VIANProject
-
+from core.analysis.misc import preprocess_frame
 from core.data.computation import frame2ms, floatify_img
 
 AUTO_SEGM_EVEN = 0
@@ -28,8 +28,6 @@ def cluster_histograms_adjacently(x, n_clusters = 2):
     return model.labels_
 
 
-
-
 def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, segm_width = 10000, nth_frame = 4, n_cluster_lb =1, n_cluster_hb = 100, resolution=30):
     duration = project.movie_descriptor.duration
     if mode == AUTO_SEGM_EVEN:
@@ -46,7 +44,6 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
                                          inhibit_overlap=False,
                                          dispatch=False)
 
-            # segmentation.create_segment(i * segm_width, i * segm_width + segm_width, dispatch=False)
         project.dispatch_changed()
 
     elif mode == AUTO_SEGM_CHIST:
@@ -55,19 +52,22 @@ def auto_segmentation(project:VIANProject, mode, main_window, n_segment = -1, se
         if ready:
             histograms = colormetry.get_histogram()
             frame_pos = colormetry.get_frame_pos()
+            resolution = colormetry.resolution
         else:
             histograms = None
             frame_pos  = None
+            resolution = resolution
 
-        job = AutoSegmentingJob(
+        job = AutoSegmentingJobHistogram(
             [project.movie_descriptor.get_movie_path(),
-             colormetry.resolution,
+             resolution,
              project.movie_descriptor.fps,
              histograms,
              frame_pos,
              nth_frame,
              [n_cluster_lb, n_cluster_hb]
-             ,resolution] )
+             ,resolution],
+            max_width=main_window.settings.PROCESSING_WIDTH)
         main_window.run_job_concurrent(job)
 
 
@@ -89,15 +89,9 @@ class DialogAutoSegmentation(EDialogWidget):
 
         self.lbl_not_ready = QLabel("The Colormetry has not finished yet,\n"
                                     "please wait until it is finished and try again.\n\n"
-                                    "The progress is indicated by the green line on the Timeline.")
+                                    "The progress is inAtrousConvolution2Ddicated by the green line on the Timeline.")
         self.lbl_not_ready.setStyleSheet("QLabel{foreground: red;}")
-        #self.btn_start_colormetry = QPushButton("Start Colorimetry")
-        #self.btn_start_colormetry.clicked.connect(self.main_window.toggle_colormetry)
 
-        # self.widget_colorhist.layout().addWidget(self.lbl_not_ready)
-        # self.sl
-        # self.widget_colorhist.layout().addWidget(self.slider_resolution)
-        #self.widget_colorhist.layout().addWidget(self.btn_start_colormetry)
         self.btn_Run.clicked.connect(self.on_ok)
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_Cancel.clicked.connect(self.close)
@@ -119,6 +113,7 @@ class DialogAutoSegmentation(EDialogWidget):
         #     self.lbl_not_ready.hide()
         #     self.btn_Run.setEnabled(True)
 
+    @pyqtSlot()
     def on_ok(self):
         if self.comboBox_Distribution.currentIndex() == 0:
             n_segments = self.spinBox_NSegments.value()
@@ -134,7 +129,107 @@ class DialogAutoSegmentation(EDialogWidget):
         self.close()
 
 
-class AutoSegmentingJob(IConcurrentJob):
+class AutoSegmentingJobHistogram(IConcurrentJob):
+    def __init__(self, args, show_modify_progress= False, max_width=1920):
+        super(AutoSegmentingJobHistogram, self).__init__(args, show_modify_progress)
+        self.max_width = max_width
+
+    def run_concurrent(self, args, sign_progress):
+        idx = 0
+        movie_path = args[0]
+        resolution = args[1]
+        in_hists = args[3]
+        fps = args[2]
+        indices = args[4]
+        frame_resolution = args[5]
+        n_cluster_range = args[6]
+        alt_resolution = args[7]
+        cluster_sizes = range(n_cluster_range[0], n_cluster_range[1], 1)
+        histograms = []
+        frames = []
+
+        cap = cv2.VideoCapture(movie_path)
+        length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        step = length / (10 * n_cluster_range[1])
+        resize_f = 192.0 / cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+        counter = 0
+        tot = len(list(range(0, int(length), int(step))))
+        for i in range(0, int(length), int(step)):
+            sign_progress(counter / tot)
+            counter += 1
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+            ret, frame = cap.read()
+            frames.append(dict(pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
+                     pos=i))
+
+        data_idx = 0
+        read_img = -1 # We only want to read every second image
+        if indices is None:
+            indices = []
+            resolution = alt_resolution
+        for i in range(int(length)):
+            if self.aborted:
+                return None
+            if i % resolution == 0:
+                read_img += 1
+                if in_hists is not None and data_idx >= len(in_hists):
+                    break
+
+                sign_progress(i / length)
+                if in_hists is not None:
+                    histograms.append(np.resize(in_hists[data_idx], new_shape=16 ** 3))
+                else:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+                    ret, frame = cap.read()
+                    if frame is None:
+                        break
+
+                    frame = preprocess_frame(frame, self.max_width)
+                    frame = cv2.cvtColor(floatify_img(frame), cv2.COLOR_BGR2LAB)
+                    data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
+                    hist = cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
+                                        [16, 16, 16],
+                                        [0, 100, -128, 128,
+                                         -128, 128])
+                    indices.append(i)
+                    histograms.append(np.resize(hist, new_shape=16 ** 3))
+                data_idx += 1
+
+        connectivity = np.zeros(shape=(len(histograms), len(histograms)), dtype=np.uint8)
+        for i in range(1, len(histograms) - 1, 1):
+            connectivity[i][i - 1] = 1
+            connectivity[i][i] = 1
+            connectivity[i][i + 1] = 1
+
+        clusterings = []
+        for i, n_cluster in enumerate(cluster_sizes):
+            sign_progress(i / len(cluster_sizes))
+
+            if len(histograms) > n_cluster:
+                model = AgglomerativeClustering(linkage="ward",
+                                                connectivity=connectivity,
+                                                n_clusters=n_cluster, compute_full_tree=True)
+                model.fit(histograms)
+                clusterings.append(model.labels_)
+
+        frames_total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        pcounter, p_max = 0, len(np.unique(clusterings[0])) * 30
+
+        cap.release()
+        return dict(clusterings=clusterings, frames=frames, indices=indices, fps=fps, frame_resolution=frame_resolution, cluster_range=n_cluster_range)
+
+    def modify_project(self, project, result, sign_progress=None, main_window = None):
+        if result is not None:
+            widget = self.get_widget(main_window, result)
+            widget.show()
+
+    def get_widget(self, parent, result):
+        return ApplySegmentationWindow(parent, **result)
+
+
+class AutoSegmentingJobAudio(IConcurrentJob):
     def run_concurrent(self, args, sign_progress):
         idx = 0
         movie_path = args[0]
@@ -217,46 +312,6 @@ class AutoSegmentingJob(IConcurrentJob):
         frames_total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
         pcounter, p_max = 0, len(np.unique(clusterings[0])) * 30
 
-        # print(indices)
-        # print(clusterings[0])
-        # last_index = -1
-        # for j, idx in enumerate(indices):
-        #
-        #     if clusterings[0][j] == last_index:
-        #         continue
-        #
-        #     last_index = clusterings[0][j]
-        #
-        #     frame_window = 15
-        #
-        #     fmin = int(np.clip(idx - frame_window, 0, frames_total))
-        #     fmax = int(np.clip(idx + frame_window, 0, frames_total))
-        #     t_indices = list(range(fmin, fmax))
-        #     hists = np.zeros(shape=(fmax - fmin, 16**3))
-        #     for x, f_idx  in enumerate(range(fmin, fmax)):
-        #         sign_progress(pcounter / p_max)
-        #         pcounter += 1
-        #
-        #         cap.set(cv2.CAP_PROP_POS_FRAMES, f_idx)
-        #         ret, frame = cap.read()
-        #
-        #         frame = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
-        #         frame = cv2.resize(frame, (300,300), interpolation=cv2.INTER_CUBIC)
-        #
-        #         data = np.resize(frame, (frame.shape[0] * frame.shape[1], 3))
-        #         hists[x] = np.reshape(cv2.calcHist([data[:, 0], data[:, 1], data[:, 2]], [0, 1, 2], None,
-        #                         [16, 16, 16],
-        #                         [0, 100, -128, 128, -128, 128]), newshape=(16**3))
-        #
-        #     labels = cluster_histograms_adjacently(hists)
-        #
-        #     highest_idx = idx
-        #     for i, val in enumerate(labels):
-        #         if i != labels[0]:
-        #             highest_idx = t_indices[i]
-        #             break
-        #     indices[j] = highest_idx
-        #     print("Approximating of Indices", j, len(indices), labels, i, highest_idx)
         cap.release()
         return dict(clusterings=clusterings, frames=frames, indices=indices, fps=fps, frame_resolution=frame_resolution, cluster_range=n_cluster_range)
 
@@ -378,5 +433,6 @@ class ApplySegmentationWindow(QMainWindow):
                                          inhibit_overlap=False,
                                          dispatch=False)
 
+        QMessageBox.information(self, "Segmentation Created", "Segmentation has been created!")
         self.project.dispatch_changed()
 

@@ -146,6 +146,7 @@ class AnnotationEditorSimple(QPlainTextEdit):
         super(AnnotationEditorSimple, self).__init__(parent)
         self.annotable = annotable
         self.dialog = parent
+        self.setPlainText(annotable.get_first_annotation_string())
         self.textChanged.connect(self.update_annotation)
 
     def update_annotation(self):

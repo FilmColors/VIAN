@@ -765,6 +765,12 @@ QListWidget{
     border: 1px solid #252525;
 }
 
+TagWidget{
+    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #202020, stop: 0.5 #252525, stop:1 #202020);
+    border: 1px solid #252525;
+}
+
+
 QListView{
     background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #202020, stop: 0.5 #252525, stop:1 #202020);
     border: 1px solid #252525;

@@ -23,6 +23,8 @@ class StatusBar(QtWidgets.QWidget):
 
         self.stage_selector = StageSelector(self, main_window)
         self.layout.addWidget(self.stage_selector)
+        self.stage_selector.hide()
+
         self.layout.addItem(QSpacerItem(100, 10))
 
         self.label_selection = QtWidgets.QLabel(self)
@@ -96,7 +98,7 @@ class OutputLine(QtWidgets.QWidget):
             msg = curr_msg [0]
 
             self.text_line.setText(str(msg))
-            if color is not "":
+            if color != "":
                 self.setStyleSheet("QLabel{color : " + color + ";}")
 
             self.message_log.append(curr_msg)

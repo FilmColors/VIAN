@@ -186,7 +186,6 @@ class Outliner(EDockWidget, IProjectChangeNotify):
             self.item_list.append(experiment_item)
             self.item_index[s.get_id()] = experiment_item
 
-
     def remove_experiment(self, s):
         if self._show_experiment:
             if s.get_id() in self.item_index:
@@ -195,19 +194,26 @@ class Outliner(EDockWidget, IProjectChangeNotify):
                 self.item_index.pop(s.get_id())
 
     def add_analysis(self, s):
-        if s.analysis_job_class not in self.analyses_roots:
-            a_grp = AnalyzesOutlinerGroupItem(self.analyzes_group, 3, s.analysis_job_class)
-            self.analyses_roots[s.analysis_job_class] = a_grp
+        name = s.analysis_job_class
+        if name == "ColorFeatureAnalysis":
+            name = "AverageColor"
+        if name not in self.analyses_roots:
+            a_grp = AnalyzesOutlinerGroupItem(self.analyzes_group, 3, name)
+            self.analyses_roots[name] = a_grp
         else:
-            a_grp = self.analyses_roots[s.analysis_job_class]
+            a_grp = self.analyses_roots[name]
 
         analysis = AnalyzesOutlinerItem(a_grp, 0, s)
         self.item_list.append(analysis)
         self.item_index[s.get_id()] = analysis
 
     def remove_analysis(self, s):
+        name = s.analysis_job_class
+        if name == "ColorFeatureAnalysis":
+            name = "AverageColor"
+
         if s.get_id() in self.item_index:
-            self.analyses_roots[s.analysis_job_class].removeChild(self.item_index[s.get_id()])
+            self.analyses_roots[name].removeChild(self.item_index[s.get_id()])
             self.item_list.remove(self.item_index[s.get_id()])
             self.item_index.pop(s.get_id())
 
@@ -853,7 +859,7 @@ class AnalyzesOutlinerItem(AbstractOutlinerItem):
         self.item.set_name(name)
 
     def update_item(self):
-        self.setText(0, self.item.name)
+        self.setText(0, self.item.get_name())
 
 
 class AnalyzesOutlinerGroupItem(AbstractOutlinerItem):

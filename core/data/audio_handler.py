@@ -12,7 +12,7 @@ from core.data.interfaces import TimelineDataset
 from core.data.log import log_error, log_info, log_warning, log_debug
 from core.container.project import VIANProject
 from core.container.hdf5_manager import HDF5_FILE_LOCK
-
+from scipy.signal import savgol_filter
 
 class AudioHandler(QObject):
     """
@@ -39,7 +39,7 @@ class AudioHandler(QObject):
         self.audio_volume = None    #type: np.ndarray
         self.project = None
 
-        self.export_audio = False
+        self.export_audio = True
 
     @pyqtSlot(object)
     def project_changed(self, project:VIANProject):
@@ -61,6 +61,16 @@ class AudioHandler(QObject):
         if self.project is None:
             self.audioExtractingEnded.emit()
 
+        if os.path.isfile(os.path.join(self.project.data_dir, "audio.mp3")):
+            self._audioclip = AudioFileClip(os.path.join(self.project.data_dir, "audio.mp3"))
+            self.audio_samples = self._sample_audio(self.callback)
+            self.audio_volume = np.abs(np.mean(self.audio_samples, axis=1))
+            self.audioProcessed.emit(
+                TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
+                                vis_type=TimelineDataset.VIS_TYPE_LINE))
+            self._audioclip.close()
+            self.audioExtractingEnded.emit()
+
     @pyqtSlot()
     def extract(self):
         self.audioExtractingStarted.emit()
@@ -76,7 +86,7 @@ class AudioHandler(QObject):
             project_audio_path = os.path.join(self.project.data_dir, "audio.mp3")
             self.audioProcessed.emit(
                 TimelineDataset("Audio Volume", self.audio_volume, ms_to_idx=(self.resolution * 1000),
-                                vis_type=TimelineDataset.VIS_TYPE_AREA))
+                                vis_type=TimelineDataset.VIS_TYPE_LINE))
             try:
                 if not os.path.isfile(project_audio_path) and self.export_audio:
                     self._audioclip.write_audiofile(os.path.join(self.project.data_dir, "audio.mp3"))

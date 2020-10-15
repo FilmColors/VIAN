@@ -1,4 +1,4 @@
-// create a data source to hold data
+
 class ColorAB {
     constructor(divName) {
         this.divName = divName;
@@ -18,7 +18,6 @@ class ColorAB {
         });
 
         var that = this;
-        // this.source.selected.callback = function(){console.log("Hello World")}
         this.source.selected.change.connect(function (a, selection) {
             that.onSelectionChanged(that.source, selection);
         })
@@ -30,11 +29,8 @@ class ColorAB {
             height: 300,
             width: 300,
             x_axis_label: "A-Channel",
-            y_axis_label: "Y-Channel",
+            y_axis_label: "B-Channel",
             match_aspect:true, 
-
-            // x_range: new Bokeh.Range1d({ start: -128, end: 128 }),
-            // y_range: new Bokeh.Range1d({ start: -128, end: 128 }),
         });
 
         this.plot.center[0].grid_line_alpha = 0.0
@@ -43,7 +39,7 @@ class ColorAB {
         this.plot.background_fill_color = this.background
         this.plot.background_fill_alpha = 0.0
         this.plot.border_fill_alpha = 0.0
-        this.plot.sizing_mode = "scale_width"
+        this.plot.sizing_mode = "scale_both"
         this.aspect = 9.0 / 16
 
         this.plot.circle({
@@ -69,18 +65,6 @@ class ColorAB {
 
         this.q = 20
 
-        // for (var i = 0; i < 10; i++) {
-        //     let t = this.plot.circle({ x: 0, y: 0, 
-        //         radius: i * this.q, 
-        //         fill_alpha: 0, 
-        //         line_color: 
-        //         this.grid_col, 
-        //         line_alpha: 0.2, 
-        //         line_width: 1.0 }
-        //     )
-        //     this.grid_renderer.push(t);
-        // }
-
         for (var i = 0; i < 10; i++) {
             this.source_grid.data.x.push(0);
             this.source_grid.data.y.push(0);
@@ -100,6 +84,7 @@ class ColorAB {
 
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
+        console.log(this.plot)
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
         this.source.change.emit()
     }
@@ -196,7 +181,6 @@ class ColorAB {
     }
 
     onSelectionChanged(source, selection) {
-
         if (this.selectionCallback != null) {
             let uuids = [];
             selection.indices.forEach(elem => {

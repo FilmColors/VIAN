@@ -1,30 +1,28 @@
 """
 This is an adaption of the PSPNet Implementation by Yuta Kamikawa. 
-Thanks a lot for this work Yuta! 
+Thanks a lot for this work Yuta!
 
-Yuta Kamikawa
-Kyoto University
+PSPNet Paper: https://arxiv.org/pdf/1612.01105.pdf
+
 
 """
-import keras.backend as K
+import cv2
+import os
 
 import tensorflow as tf
 
-from keras.models import Model
-from keras.layers import Input, Reshape, Permute, Dense, Activation, Flatten, Conv2D
-from keras.layers import MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D, GlobalMaxPool2D, BatchNormalization
-from keras.layers import Convolution2D, UpSampling2D, AtrousConvolution2D, ZeroPadding2D, Lambda, Conv2DTranspose
-from keras.layers import multiply, add, concatenate, merge
-from keras.engine.topology import Layer
-from keras.engine import InputSpec
+import keras.backend as K
+import numpy as np
+from tensorflow.keras.layers import Layer, InputSpec
+from tensorflow.keras.layers import ZeroPadding2D, Lambda, Conv2DTranspose
+from tensorflow.keras.layers import Input, Reshape, Permute, Dense, Activation, Flatten, Conv2D
+from tensorflow.keras.layers import MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D, GlobalMaxPool2D, BatchNormalization
+from tensorflow.keras.layers import multiply, add, concatenate
+from tensorflow.keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
+
+from tensorflow.keras.models import Model
 from keras.utils import np_utils, conv_utils
 
-from os.path import splitext, join, isfile
-from os import environ
-from math import ceil
-import argparse
-import numpy as np
-from scipy import misc, ndimage
 
 
 class CroppingLike2D(Layer):
@@ -382,8 +380,11 @@ def duc(x, factor=8, output_shape=(512, 512, 1)):
 
 # interpolation
 def Interp(x, shape):
+
+
     new_height, new_width = shape
-    resized = tf.image.resize_images(x, [int(new_height), int(new_width)], align_corners=True)
+
+    resized = tf.image.resize(x, [int(new_height), int(new_width)])
     return resized
 
 
@@ -569,11 +570,6 @@ def PSPNet50(
     # x1 = aspp_block(x,256,rate_scale=rate_scale,output_stride=output_stride,input_shape=input_shape)
 
     x = pyramid_pooling_module(x, num_filters=512, input_shape=input_shape, output_stride=output_stride, levels=levels)
-
-    # x = merge([
-    #         x1,
-    #         x2,
-    #         ], mode='concat', concat_axis=3)
 
     # upsample_type
     if upsample_type=='duc':

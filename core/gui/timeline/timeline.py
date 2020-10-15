@@ -1,32 +1,22 @@
-from functools import partial
-
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtGui
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from core.gui.ewidgetbase import EDockWidget
 
-from .timeline_base import TimelineControl, TimelineBar, TimebarSlice, MediaObjectWidget, \
-    TimebarKey, TimelineScrubber, TimelineTimemark
-from .timeline_segmentation import TimebarSegmentationSlice, TimelineSegmentationControl, TimelineSegmentationBar
-from .timeline_svg_annotation import TimebarAnnotationSlice, TimelineAnnotationLayerControl, TimelineAnnotationBar
-from .timeline_visualization import TimelineVisualizationControl, TimelineAreaPlot, TimelineLinePlot, TimelineVisualization
-from .timeline_screnshots import ScreenshotGroupBar, TimebarPicture
+from .timeline_base import TimelineControl, TimelineBar, TimelineScrubber, TimelineTimemark
+from .timeline_segmentation import TimelineSegmentationControl, TimelineSegmentationBar
+from .timeline_svg_annotation import TimelineAnnotationLayerControl, TimelineAnnotationBar
+from .timeline_visualization import TimelineVisualizationControl, TimelineAreaPlot, TimelineLinePlot
+from .timeline_screnshots import ScreenshotGroupBar
 from .timeline_subsegmentation import TimelineSubSegmentation, TimelineSubSegmentationEntry, \
-    TimebarSubSegmentationSlice, TimelineSubSegmentationBar, TimelineSubSegmentationControl, TimelineControlParent
+    TimelineSubSegmentationBar, TimelineSubSegmentationControl, TimelineControlParent
 
-from core.data.computation import ms_to_string
 from core.data.interfaces import TimelineDataset
 from core.container.project import *
-from core.container.container_interfaces import ILockable
-from core.gui.context_menu import open_context_menu
 from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
-
-from core.analysis.color_feature_extractor import ColorFeatureAnalysis
-
-import time
 
 
 class TimelineContainer(EDockWidget):
@@ -168,6 +158,17 @@ class TimelineToolbar(QToolBar):
         self.a_merge.triggered.connect(self.timeline.activate_merge_tool)
         self.a_merge.setToolTip("Merge Tool")
 
+        self.a_zoom_in = self.addAction(create_icon("qt_ui/icons/icon_zoom_in.png"), "Zoom in (Ctrl + Scroll)")
+        self.a_zoom_out = self.addAction(create_icon("qt_ui/icons/icon_zoom_out.png"),"Zoom out (Ctrl + Scroll)")
+
+        self.a_zoom_in.triggered.connect(partial(self.on_zoom, 180))
+        self.a_zoom_out.triggered.connect(partial(self.on_zoom, -180))
+
+    def on_zoom(self, angle):
+        pos = self.timeline.time_scrubber.pos()
+        angle = QPoint(angle, angle)
+        self.timeline.zoom_timeline(pos, angle, force=True)
+
 
 class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def __init__(self, main_window, parent):
@@ -241,7 +242,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scrollArea.horizontalScrollBar().valueChanged.connect(self.scroll_h)
         self.scrollArea.verticalScrollBar().valueChanged.connect(self.scroll_v)
         self.scrollArea.installEventFilter(self)
-
         # Settings
         self.show_id = True
         self.show_name = False
@@ -364,41 +364,32 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def on_experiment_changed(self, e:Experiment):
         self.clear_sub_segmentation()
 
-        if e is None:
-            if len(self.project().experiments) > 0:
-                e = self.project().experiments[0]
-            else:
-                log_warning("No Experiment found in Timeline.on_experiment_changed")
-                return
-        # if len(self.item_segments) > 0 and self.item_segments[0][0].show_classification is False:
-        #     log_warning("Classification Hidden Timeline.on_experiment_changed")
-        #     return
+        for e in self.project().experiments:
+            for i, s in enumerate(self.project().segmentation):
+                if self.item_segments[i][0].show_classification is False:
+                    continue
 
-        for i, s in enumerate(self.project().segmentation):
-            if self.item_segments[i][0].show_classification is False:
-                continue
+                subsegments = dict()
+                for clobj in e.classification_objects:
 
-            subsegments = dict()
-            for clobj in e.classification_objects:
+                    # We only add it, if this segmentation is in the targets of the classification object,
+                    # if the classification objec has no target it means, it should belong to every segmentation
+                    if s in clobj.target_container or len(clobj.target_container) == 0:
+                        if clobj not in subsegments:
+                            subsegments[clobj.name] = dict()
 
-                # We only add it, if this segmentation is in the targets of the classification object,
-                # if the classification objec has no target it means, it should belong to every segmentation
-                if s in clobj.target_container or len(clobj.target_container) == 0:
-                    if clobj not in subsegments:
-                        subsegments[clobj.name] = dict()
+                        for kwd in clobj.unique_keywords:
+                            cat = kwd.voc_obj.name
+                            if cat not in subsegments[clobj.name]:
+                                subsegments[clobj.name][cat] = (clobj.name, [])
+                            subsegments[clobj.name][cat][1].append(kwd)
 
-                    for kwd in clobj.unique_keywords:
-                        cat = kwd.voc_obj.name
-                        if cat not in subsegments[clobj.name]:
-                            subsegments[clobj.name][cat] = (clobj.name, [])
-                        subsegments[clobj.name][cat][1].append(kwd)
-
-            for j, t in subsegments.items():
-                for voc, (cl_obj, kwds) in subsegments[j].items():
-                    group = TimelineSubSegmentation(voc)
-                    for k in kwds:
-                        group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
-                    self.add_sub_segmentation(s, group, cat=cl_obj)
+                for j, t in subsegments.items():
+                    for voc, (cl_obj, kwds) in subsegments[j].items():
+                        group = TimelineSubSegmentation(voc)
+                        for k in kwds:
+                            group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
+                        self.add_sub_segmentation(s, group, cat=cl_obj)
 
 
     @pyqtSlot(object)
@@ -745,8 +736,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         project.onScreenshotGroupAdded.connect(self.add_screenshots)
         project.onScreenshotGroupRemoved.connect(self.recreate_timeline)
 
-        if len(project.experiments) > 0:
-            project.experiments[0].onExperimentChanged.connect(self.on_experiment_changed)
+        for e in project.experiments: #type: Experiment
+            e.onExperimentChanged.connect(self.on_experiment_changed)
 
         self.update_time_bar()
         self.update_visualizations()
@@ -839,9 +830,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 for b in entry[1]:
                     b.is_selected = False
                     b.update()
-
-        # if self.selected is not None and dispatch:
-        #     self.project().set_selected(self, self.selected)
 
         self.update()
 

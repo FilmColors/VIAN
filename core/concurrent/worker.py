@@ -174,17 +174,19 @@ class WorkerManager(QObject, IProjectChangeNotify):
 
     @pyqtSlot(object)
     def on_worker_finished(self, finished_tasks):
-        for task_id, result in finished_tasks.items():
+        for task_id, (analysis, result) in finished_tasks.items():
             try:
                 if isinstance(result, list):
                     for r in result:
-                        r.get_analysis().modify_project(self.project, r, main_window=self.main_window)
-                        self.project.add_analysis(r, dispatch=False)
+                        analysis.modify_project(self.project, r, main_window=self.main_window)
+                        a = self.project.add_analysis(r, dispatch=False)
+                        print("Result Target:", a.target_classification_object)
                         r.unload_container()
                 else:
-                    result.get_analysis().modify_project(self.project, result, main_window=self.main_window)
-                    self.project.add_analysis(result)
+                    analysis.modify_project(self.project, result, main_window=self.main_window)
+                    a = self.project.add_analysis(result)
                     result.unload_container()
+                    print("Result Target:", a.target_classification_object)
             except Exception as e:
                 print("Exception in AnalysisWorker.analysis_result", str(e))
 
@@ -248,14 +250,14 @@ class AnalysisWorker(QObject):
         self.signals.analysisStarted.emit()
         print("Scheduled", self.scheduled_task)
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
-            print("Performing", i) #, self.aborted, (task_id, args))
+            print("Performing", ) #, self.aborted, (task_id, args))
 
             if self.aborted:
                 break
             self.current_task_id = task_id
             result = self._run_task(*args)
             if result is not None and not self.aborted:
-                self.finished_tasks[task_id] = result
+                self.finished_tasks[task_id] = (args[1], result)
         self.signals.sign_result.emit(self.finished_tasks)
 
         for i, (task_id, args) in enumerate(self.scheduled_task.items()):
