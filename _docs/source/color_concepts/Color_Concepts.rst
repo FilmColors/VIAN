@@ -194,25 +194,61 @@ See the figure below to get an idea what superpixels look like.
    :align: center
    :alt: map to buried treasure
    
-   Superpixels XXXXXXX. Credits: Halter et al. (2019) [#]_.
+   Superpixels visualized. Credits: Halter et al. (2019) [#]_.
 
 In fact, if you run the **Colorimetry**, this is what happens in the background
 for each frame in the movie.
+
+In the Colorimetry widget, you can actually
+control the size of the superpixels: The Slider *Layer Index* lets you define
+how many splits in superpixels you want in your image. If you set this value to
+zero splits, i.e. one superpixel, what you actually compute is the **Color
+Average** since the whole image is now the superpixel. If you increase the
+value to one, i.e. two superpixels, the image is divided into two superpixels
+so that both are as coherent as possible. If you increase to two, the process
+continues. Below, there is an example, where you can see on the player the very
+vaguely approximated superpixels and in the palette widget their mean hues.
 
 .. figure:: palette.gif
    :scale: 60%
    :align: center
    :alt: map to buried treasure
    
-   Test GIF
+   Palette with increasing superpixels, superpixels are approximated on the
+   left.
 
 
 ------------------
 Color Z-Projection
 ------------------
 
+The Z-Projection differs from the other color analysis in that it does not
+compute any features. It simply lays all the frames in a temporal entity, i.e.
+a Segment, on top of each other. This allows you to see where movement in a
+segment happens. However, if there are cuts or camera movements in the Segment,
+the Z-Projection will, of course, only produce some blurred image. See an
+example below: The background stays stable, while the two figures in the
+foreground are blurred, which means they move during the analyzed Segment
+
+.. figure:: z-projection.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   Result of a Z-Projection, visualized in the Inspector on the right side.
+   left.
+
+****
+
+Links & References
+******************
+
 For more details, see e.g. the CIE L*a*b* article in `Wikipedia
 <https://en.wikipedia.org/wiki/CIELAB_color_space>`_.
+
+Excellent explanation of core concepts, such as hue, saturation, brighness, etc.
+on `Youtube
+<https://www.youtube.com/watch?v=0IIb0tnLIcU>`_.
 
 Further readings:
 
