@@ -27,7 +27,19 @@ which the colors are arranged in this color space:
 - **b**: The color on the blue-yellow axis.
 
 Normally, the **a** and **b** values are mapped into a 2D plane, while the
-**L** value is conceptualized orthogonal to this ab-plane.
+**L** value is conceptualized orthogonal to this ab-plane. The result is a
+spherical color space, in which each color can be distinctly described and
+placed according to its **L**, **a**, and **b** parameters.
+
+On the circular **ab**-plane, there are two further metrics, which are often used
+in describing colors:
+
+- **Hue**: The angle on the circle identifies, which color one is talking
+  about, where a hue of value 0 corresponds to red. Notice, that after 1 turn
+  we are at 0 again (This is why very small and very high hues represent
+  similar colors. See below).
+- **Chroma**: The chroma indicates how «greyish» a color is, the nearer to the
+  circle center, the greyer the color.
 
 .. figure:: CIE_Lab.jpg
    :scale: 60%
