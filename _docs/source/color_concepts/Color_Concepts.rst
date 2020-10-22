@@ -36,6 +36,21 @@ Normally, the **a** and **b** values are mapped into a 2D plane, while the
    
    The CIE L*a*b* color space, modelled as sphere. Credits: Ly et al. (2020) [#]_.
 
+However, this is an abstraction, or rather idealization of the actual color
+space. The colors that can actually be displayed by a screen form not a perfect
+sphere, but rather a squished body, which is referred to as «gamut». In the
+figure below, a representation of it can be seen. For simplicity however, it is
+enough to remember the CIE L*a*b* color space as sphere, with the a* and b*
+axis on its great circle which stands orthogonal to the luminance axis.
+
+.. figure:: cielab_gamut.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   The CIE L*a*b* gamut. Credits: Hoffmann (2003) [#]_.
+   
+
 An important property of the CIE L*a*b* space is that it is a so called
 «perceptually uniform» representation of colors:
 If we were to add a certain amount of lightness to two different colors, the
@@ -243,7 +258,7 @@ foreground are blurred, which means they move during the analyzed Segment
 Links & References
 ******************
 
-For more details, see e.g. the CIE L*a*b* article in `Wikipedia
+For more information on CIE L*a*b* article in `Wikipedia
 <https://en.wikipedia.org/wiki/CIELAB_color_space>`_.
 
 Excellent explanation of core concepts, such as hue, saturation, brighness, etc.
@@ -256,6 +271,8 @@ Further readings:
   <https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.13676>`_.
 
 .. [#] Ly, Bao & Dyer, Ethan & Feig, Jessica & Chien, Anna & Bino, Sandra. (2020). Research Techniques Made Simple: Cutaneous Colorimetry: A Reliable Technique for Objective Skin Color Measurement. The Journal of investigative dermatology. 140. 3-12.e1. 10.1016/j.jid.2019.11.003.
+
+.. [#] Hoffmann, G. (2003). Cielab color space. Wikipedia, the free encyclopedia. mht.
 
 .. [#] Halter, Gaudenz; Ballester-Ripoll, Rafael; Flueckiger, Barbara; Pajarola, Renato (2019): VIAN. A Visual Annotation Tool for Film Analysis. In: Computer Graphics Forum, 38,1.
 
