@@ -39,7 +39,7 @@ The Screenshot Manager let's you manage your screenshots and has several display
 
 The Control Panel allows you to configure the VIAN interface with the Windows and tools you need for your current task. It indicates active Windows by highlighting them blue. If you closed a window (by accident or because you didn't it for the moment) you can always get it back by clicking the corresponding icon in the control panel (if ou hover the icons, you will see what Window it stands for).
 
-4. :ref:`timeline`
+4. :ref:`Timeline`
 ******************
 
 In the timeline you find a lot of useful information: You see an Overview of the different Layers your project has (Segmentation, Annotation), the Screenshots you took, the Luminance and Volume levels of the movie. The red line indicates where in the movie you are, as seen in the **Video Player**.

@@ -1,4 +1,4 @@
-.. _timeline:
+.. _Timeline:
 
 Timeline
 ========
