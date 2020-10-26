@@ -1,4 +1,4 @@
-.. _video_player:
+.. _Video Player:
 
 Video Player
 ============

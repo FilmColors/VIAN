@@ -1,4 +1,4 @@
-.. _screenshot_manager:
+.. _Screenshot Manager:
 
 Screenshot Manager
 ==================
