@@ -223,6 +223,28 @@ See the figure below to get an idea what superpixels look like.
    
    Superpixels visualized. Credits: Halter et al. (2019) [#]_.
 
+In contrast to the before described Histogram, the Palette reveals information
+about the distribution of the colors in the original image:
+Since the algorithm clusters adjoining pixels together, and computes the
+average color of those, you automatically know that if there is a large cluster in
+the Histogram, there is also a large amount of adjoining pixels in the original
+image, that share that average color.
+
+.. figure:: histo_palette_diff.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   Differences between Histogram and Palette, examples of indicative Palette
+   patterns marked.
+   
+.. figure:: colorspace_3d.png
+   :scale: 60%
+   :align: center
+   :alt: map to buried treasure
+   
+   The 3D Visualization of superpixels of some Screenshots.
+
 In fact, if you run the **Colorimetry**, this is what happens in the background
 for each frame in the movie.
 
