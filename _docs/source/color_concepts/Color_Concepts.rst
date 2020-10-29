@@ -164,7 +164,7 @@ the actual numerical values of that average color in different color schemes.
 Color Histogram
 ---------------
 
-A histogram is essentially a representation of the distribution of numerical
+A Histogram is essentially a representation of the distribution of numerical
 data --- in terms of colors of a digital image, this simply means to look at
 each pixel individually and look at its color properties.
 The accumulation of this process can then be visualized in a color space.
@@ -188,21 +188,19 @@ find a visualization of it in the inspector widget, below the actual image:
    
    Color Histogram of a bright screenshot, visualized in the Inspector.
 
-As can be seen in the histogram (and the screenshot as well, in this case),
+As can be seen in the Histogram (and the screenshot as well, in this case),
 there are many pixels that have yellowish color properties --- in this picture
 those come from mainly from the sand in the background --- and there are also
 spikes for pink and red color tons --- from the dress of the woman.
 However, it has to be noted, that this is strictly speaking not visible from
-the histogram itself, it merely tells us that there are many yellowish pixels
+the Histogram itself, it merely tells us that there are many yellowish pixels
 in the image, but it does not convey information as how these pixels are
 arranged in the picture.
 In fact ANY arrangement of the pixels in the original image (also completely
-random ones) would have the same histogram.
+random ones) would have the same Histogram.
 
-Therefore, the histogram is not an analysis that conveys too much information
+Therefore, the Histogram is not an analysis that conveys too much information
 for color analysis.
-
-The
 
 -------------
 Color Palette
@@ -231,12 +229,21 @@ the Histogram, there is also a large amount of adjoining pixels in the original
 image, that share that average color.
 
 .. figure:: histo_palette_diff.png
-   :scale: 60%
+   :scale: 40%
    :align: center
    :alt: map to buried treasure
    
    Differences between Histogram and Palette, examples of indicative Palette
    patterns marked.
+
+In the figure above, for example, you have a big spike in black pixels in the
+Histogram (marked with **1**). However, this does not indicate there is a
+fairly large pixel area in the original image - in this case, there are rather
+some small black pixel areas (cupboard handles, right side of the TV, hair of
+the man etc.) which accumulated lead to the overall spike of black pixels in
+the Histogram. 
+For the Palette, in contrast, there are clear correspondences for large Palette
+color areas in the original image (marked with the arrows under **2**).
    
 .. figure:: colorspace_3d.png
    :scale: 60%
@@ -256,7 +263,7 @@ Average** since the whole image is now the superpixel. If you increase the
 value to one, i.e. two superpixels, the image is divided into two superpixels
 so that both are as coherent as possible. If you increase to two, the process
 continues. Below, there is an example, where you can see on the player the very
-vaguely approximated superpixels and in the palette widget their mean hues.
+vaguely approximated superpixels and in the Palette widget their mean hues.
 
 .. figure:: palette.gif
    :scale: 60%
