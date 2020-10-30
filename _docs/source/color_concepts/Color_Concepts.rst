@@ -41,6 +41,13 @@ in describing colors:
 - **Chroma**: The chroma indicates how «greyish» a color is, the nearer to the
   circle center, the greyer the color.
 
+.. figure:: ab_plane.png
+   :scale: 80%
+   :align: center
+   :alt: map to buried treasure
+   
+   The a*b*-plane. Credits: A Guide to Understanding Color [#]_.
+   
 .. figure:: CIE_Lab.jpg
    :scale: 60%
    :align: center
@@ -49,7 +56,7 @@ in describing colors:
    The CIE L*a*b* color space, modelled as sphere. Credits: Ly et al. (2020) [#]_.
 
 However, this is an abstraction, or rather idealization of the actual color
-space. The colors that can actually be displayed by a screen form not a perfect
+space. The colors that can actually be perceived by the human eye form not a perfect
 sphere, but rather a squished body, which is referred to as «gamut». In the
 figure below, a representation of it can be seen. For simplicity however, it is
 enough to remember the CIE L*a*b* color space as sphere, with the a* and b*
@@ -299,7 +306,7 @@ foreground are blurred, which means they move during the analyzed Segment
 Links & References
 ******************
 
-For more information on CIE L*a*b* article in `Wikipedia
+For more information on CIE L*a*b*, see for example this  article in `Wikipedia
 <https://en.wikipedia.org/wiki/CIELAB_color_space>`_.
 
 Excellent explanation of core concepts, such as hue, saturation, brighness, etc.
@@ -310,6 +317,9 @@ Further readings:
 
 - `Halter, Gaudenz; Ballester-Ripoll, Rafael; Flueckiger, Barbara; Pajarola, Renato (2019): VIAN. A Visual Annotation Tool for Film Analysis.  In: Computer Graphics Forum, 38,1.
   <https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.13676>`_.
+
+.. [#]
+https://www.xrite.com/-/media/xrite/files/whitepaper_pdfs/l10-001_a_guide_to_understanding_color_communication/l10-001_understand_color_en.pdf
 
 .. [#] Ly, Bao & Dyer, Ethan & Feig, Jessica & Chien, Anna & Bino, Sandra. (2020). Research Techniques Made Simple: Cutaneous Colorimetry: A Reliable Technique for Objective Skin Color Measurement. The Journal of investigative dermatology. 140. 3-12.e1. 10.1016/j.jid.2019.11.003.
 
