@@ -10,7 +10,7 @@ Change the Subtitles as follows:
 Select subtitles (.rst) file under File >> Import >> SRT File 
 
 .. figure:: subtitles_import.png
-   :scale: 80 %
+   :scale: 50 %
    :align: center
    :alt: map to buried treasure
 
@@ -19,7 +19,7 @@ The time spans in which there is speech are Segments with the subtitles as text
 in them.
 
 .. figure:: subtitles.png
-   :scale: 80 %
+   :scale: 40 %
    :align: center
    :alt: map to buried treasure
 
