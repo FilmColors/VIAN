@@ -25,6 +25,7 @@ build/*
 log-files/*
 vian-update.zip
 tests/is_dev.txt
+*.swp
 
 dist/*
 build/*
