@@ -15,7 +15,7 @@ class TimelineControl(QtWidgets.QWidget):
     onClassificationToggle = pyqtSignal(object, bool)
     onPinned = pyqtSignal(bool, object)
 
-    def __init__(self, parent, timeline, item = None, name = "No Name"):
+    def __init__(self, parent, timeline, item = None, name = "No Name", height=45):
         super(TimelineControl, self).__init__(parent)
         self.timeline =  timeline
         self.item = item
@@ -63,11 +63,12 @@ class TimelineControl(QtWidgets.QWidget):
         self.set_name()
         self._add_spacer()
 
-        
+        h = 4 *  QtWidgets.QDesktopWidget().fontMetrics().height()
+
         if self.item.strip_height == -1:
-            self.resize(self.width(), 45)
+            self.resize(self.width(), h )
         else:
-            self.resize(self.width(), self.item.strip_height)
+            self.resize(self.width(),h)# self.item.strip_height)
 
         if not isinstance(self.item, TimelineDataset):
             self.item.onSelectedChanged.connect(self.on_selected_changed)

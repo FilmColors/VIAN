@@ -135,6 +135,8 @@ if __name__ == '__main__':
     sys._excepthook = sys.excepthook
     sys.excepthook = my_exception_hook
 
+    # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+
     file = None
     print("Input Arguments", sys.argv)
     if len(sys.argv) == 2:
@@ -148,12 +150,6 @@ if __name__ == '__main__':
     print("ApplicationDone")
 
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
-    # app.setAttribute(Qt.AA_UseHighDpiPixmaps)
-    # filter = SuperFilter(app)
-    # app.installEventFilter(filter)
-
-    # if sys.platform.startswith("win"):
-    #     os.environ['QT_ENABLE_HIGHDPI_SCALING'] = "1"
 
     print("Setting UI")
     print(os.getcwd())

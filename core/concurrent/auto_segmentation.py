@@ -161,8 +161,11 @@ class AutoSegmentingJobHistogram(IConcurrentJob):
             counter += 1
             cap.set(cv2.CAP_PROP_POS_FRAMES, i)
             ret, frame = cap.read()
-            frames.append(dict(pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
-                     pos=i))
+            if frame is not None:
+                frames.append(dict(
+                    pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
+                    pos=i)
+                )
 
         data_idx = 0
         read_img = -1 # We only want to read every second image
@@ -257,8 +260,10 @@ class AutoSegmentingJobAudio(IConcurrentJob):
             counter += 1
             cap.set(cv2.CAP_PROP_POS_FRAMES, i)
             ret, frame = cap.read()
-            frames.append(dict(pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
-                     pos=i))
+            frames.append(dict(
+                pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
+                pos=i)
+            )
 
         data_idx = 0
         read_img = -1 # We only want to read every second image

@@ -52,7 +52,7 @@ class FilmographyWidget2(QWidget):
         self.lineEdit_IMDB = QLineEdit(self.w)
         self.lt = QHBoxLayout(self.w)
 
-        self.lt.addWidget(QLabel("IMDB ID:", self.w))
+        self.lt.addWidget(QLabel("IMDB URL:", self.w))
         self.lt.addWidget(self.lineEdit_IMDB)
 
         self.w.layout().addItem(self.lt)
@@ -122,7 +122,17 @@ class FilmographyWidget2(QWidget):
 
     def get_filmography(self):
         filmography_meta = dict()
-        filmography_meta['imdb_id'] = self.lineEdit_IMDB.text().split(",")
+        try:
+            imdb_url = self.lineEdit_IMDB.text()
+            imdb_url = imdb_url.split("/")
+            if imdb_url[-1:] == "":
+                imdb_url = imdb_url[:-1]
+            imdb_id = imdb_url[-1:]
+            imdb_id = filter(lambda x: x.isdigit(), imdb_id)
+        except Exception as e:
+            imdb_id = ""
+            print(e)
+        filmography_meta['imdb_id'] = imdb_id
         filmography_meta['genre'] = self.lineEdit_Genre.get_items()
         filmography_meta['color_process'] = self.lineEdit_ColorProcess.get_items()
         filmography_meta['director'] = self.lineEdit_Director.get_items()

@@ -16,7 +16,7 @@ from core.data.computation import version_check
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
-from flask_server.server import FlaskServer, FlaskWebWidget
+from flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
 from core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -251,7 +251,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
-        self.web_view.set_url("http://127.0.0.1:5000/screenshot_vis")
+        self.web_view.set_url("http://127.0.0.1:{p}/screenshot_vis".format(p=VIAN_PORT))
         # self.web_view.set_url("https://threejs.org/examples/#webgl_camera")
 
         self.web_view.hide()
@@ -1853,11 +1853,11 @@ class MainWindow(QtWidgets.QMainWindow):
             log_error(e)
 
     def on_browser_visualization(self):
-        webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")
+        webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))
 
     def on_project_summary(self):
         dock = FlaskWebWidget(self)
-        dock.set_url("http://127.0.0.1:5000/summary/")
+        dock.set_url("http://127.0.0.1:{p}/summary/".format(p=VIAN_PORT))
         dock.setWindowTitle("Project Summary")
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.tabifyDockWidget(self.screenshots_manager_dock, dock)
