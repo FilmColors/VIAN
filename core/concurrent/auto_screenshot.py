@@ -45,30 +45,30 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
 
         for s_idx, s in enumerate(segmentation.segments):
             sign_progress(s_idx / len(segmentation.segments))
-            if project.colormetry_analysis.check_finished():
-                res = project.colormetry_analysis.resolution
-                idx_start = int(ms_to_frames(s.get_start(), fps) / res)
-                idx_end = int(ms_to_frames(s.get_end(), fps) / res)
-                indices = range(idx_start, idx_end, 1)
-                frame_indices = np.array(indices) * res
-                hists = hdf5_manager.col_histograms()[indices]
-            else:
-                res = 15
-                idx_start = int(ms_to_frames(s.get_start(), fps))
-                idx_end = int(np.clip(ms_to_frames(s.get_end(), fps), idx_start + 1, duration))
-                n_hists = int(np.ceil((idx_end - idx_start) / res))
-                hists = np.zeros(shape=(n_hists, 16,16,16))
-                frame_indices = []
-                for h_idx, i in enumerate(range(idx_start, idx_end, res)):
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
-                    ret, frame = cap.read()
+            # if project.colormetry_analysis.check_finished():
+            #     res = project.colormetry_analysis.resolution
+            #     idx_start = int(ms_to_frames(s.get_start(), fps) / res)
+            #     idx_end = int(ms_to_frames(s.get_end(), fps) / res)
+            #     indices = range(idx_start, idx_end, 1)
+            #     frame_indices = np.array(indices) * res
+            #     hists = hdf5_manager.col_histograms()[indices]
+            # else:
+            res = 15
+            idx_start = int(ms_to_frames(s.get_start(), fps))
+            idx_end = int(np.clip(ms_to_frames(s.get_end(), fps), idx_start + 1, duration))
+            n_hists = int(np.ceil((idx_end - idx_start) / res))
+            hists = np.zeros(shape=(n_hists, 16,16,16))
+            frame_indices = []
+            for h_idx, i in enumerate(range(idx_start, idx_end, res)):
+                cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+                ret, frame = cap.read()
 
-                    if frame is None:
-                        continue
+                if frame is None:
+                    continue
 
-                    frame_indices.append(i)
-                    frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2Lab)
-                    hists[h_idx] = np.divide(calculate_histogram(frame_lab, 16), (width * height))
+                frame_indices.append(i)
+                frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2Lab)
+                hists[h_idx] = np.divide(calculate_histogram(frame_lab, 16), (width * height))
 
             hists = np.reshape(hists, newshape=(hists.shape[0], hists.shape[1]* hists.shape[2] * hists.shape[3]))
             hists /= np.sqrt(np.sum(hists ** 2, axis=1, keepdims=True))
