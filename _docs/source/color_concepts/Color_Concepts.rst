@@ -37,9 +37,11 @@ in describing colors:
 - **Hue**: The angle on the circle identifies, which color one is talking
   about, where a hue of value 0 corresponds to red. Notice, that after 1 turn
   we are at 0 again (This is why very small and very high hues represent
-  similar colors. See below).
+  similar colors. See below). (The scale starts at 0°, red, and ends at 360°,
+  red again)
 - **Chroma**: The chroma indicates how «greyish» a color is, the nearer to the
-  circle center, the greyer the color.
+  circle center, the greyer the color. (A value of 0 indicates as grey as
+  possible and a value of 100 as saturated as possible)
 
 .. figure:: ab_plane.png
    :scale: 80%
