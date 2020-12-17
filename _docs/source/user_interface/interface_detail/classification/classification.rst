@@ -1,4 +1,4 @@
-.. _classification:
+.. _classification widget:
 
 Classification
 ==============
