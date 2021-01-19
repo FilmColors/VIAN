@@ -98,6 +98,8 @@ class DialogAutoSegmentation(EDialogWidget):
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_Cancel.clicked.connect(self.close)
 
+        dialog_with_margin(parent, self, "sm")
+
     def on_mode_changed(self, idx):
         self.stackedWidget.setCurrentIndex(idx)
         return
@@ -382,7 +384,7 @@ class ApplySegmentationWindow(QMainWindow):
         self.on_slider_changed()
 
     def on_slider_changed(self):
-        self.lbl_n_cluster.setText(str(self.slider.value()))
+        self.lbl_n_cluster.setText(str(self.slider.value() - 1))
         index = int(self.slider.value()) - 1 - self.cluster_range[0]
 
         segments = []

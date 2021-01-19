@@ -1,4 +1,18 @@
 // create a data source to hold data
+const templ =`
+<div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Select Channel
+  </button>
+  <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item w-100" id="btn-dt-chroma">Chroma</a>
+    <a class="dropdown-item w-100" id="btn-dt-hue">Hue</a>
+    <a class="dropdown-item w-100" id="btn-dt-luminance">Luminance</a>
+    <a class="dropdown-item w-100" id="btn-dt-a">A-Channel</a>
+    <a class="dropdown-item w-100" id="btn-dt-b">B-Channel</a>
+  </div>
+</div>`
+
 
 class ColorDT {
     constructor(divName) {
@@ -24,7 +38,10 @@ class ColorDT {
         this.dropdown = new Bokeh.Widgets.Dropdown({label:"Select Feature", button_type:"warning", menu:this.menu}) 
 
         var that = this;
-        this.dropdown.change.connect(function(){that.parameterChanged(that.source, that.dropdown)})
+        // this.dropdown.js_event_callbacks['change'] = { execute: (event) => { console.log("Hello World") }}
+//        this.dropdown.menu_item_click function(){console.log("Hello World")}).connect(
+//        function(){console.log("Hello World")
+//        that.parameterChanged(that.source, that.dropdown)})
         this.plot = Bokeh.Plotting.figure({
             title:'Color dT',
             tools: "pan,wheel_zoom,box_zoom,reset,save",
@@ -77,8 +94,22 @@ class ColorDT {
         
         console.log(this.plot);
         var doc = new Bokeh.Document();
-        doc.add_root(new Bokeh.Column({children: [this.dropdown, this.plot], sizing_mode: "scale_width"}));
-        Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
+        doc.add_root(new Bokeh.Column({children: [this.plot], sizing_mode: "scale_width"}));
+
+        var that = this; 
+        var docd = document.getElementById(divName)
+        docd.innerHTML = templ
+        var plotElem = document.createElement("div");
+        docd.appendChild(plotElem)
+
+        $("#btn-dt-chroma").click(function(){that.parameterChanged(that.source, "Chroma")})
+        $("#btn-dt-hue").click(function(){that.parameterChanged(that.source, "Hue")})
+        $("#btn-dt-luminance").click(function(){that.parameterChanged(that.source, "Luminance")})
+        $("#btn-dt-a").click(function(){that.parameterChanged(that.source, "A-Channel")})
+        $("#btn-dt-b").click(function(){that.parameterChanged(that.source, "B-Channel")})
+
+
+        Bokeh.embed.add_document_standalone(doc, plotElem);
         this.source.change.emit()
     }
     poll(pollTime) {
@@ -161,8 +192,9 @@ class ColorDT {
         this.source.change.emit();
     }
 
-    parameterChanged(source, dropdown){
-        var t = dropdown.value;
+    parameterChanged(source, value){
+        console.log("HELLOO", value)
+        var t = value;
         var values = null;
         if (t == "Saturation"){
             values = source.data.sat;
