@@ -7,7 +7,9 @@ from core.data.interfaces import IConcurrentJob
 from core.data.enums import *
 from core.container.project import VIANProject
 from core.analysis.misc import preprocess_frame
-from core.data.computation import frame2ms, floatify_img
+from core.data.computation import frame2ms, floatify_img, ms_to_frames
+
+from core.gui.misc.utils import dialog_with_margin
 
 AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1
@@ -375,7 +377,8 @@ class ApplySegmentationWindow(QMainWindow):
         self.w.layout().addWidget(self.w_slider)
         self.w.layout().addWidget(self.w_buttons)
 
-        self.resize(800, 500)
+        dialog_with_margin(parent, self)
+
         self.on_slider_changed()
 
     def on_slider_changed(self):
@@ -430,8 +433,12 @@ class ApplySegmentationWindow(QMainWindow):
     def apply_segmentation(self):
         segmentation = self.project.create_segmentation("Auto Segmentation", dispatch=False)
         for i, s in enumerate(self.segments):
-            if i < len(s) - 1:
+            if i < len(self.segments) - 1:
                 s['end'] = self.segments[i + 1]['start'] - 1
+            elif i == len(self.segments) - 1:
+                print("Final Duration")
+                s['end'] = ms_to_frames(self.project.movie_descriptor.duration, self.fps)
+
             segmentation.create_segment2(frame2ms(s['start'], self.fps),
                                          frame2ms(s['end'], self.fps),
                                          mode=SegmentCreationMode.INTERVAL,

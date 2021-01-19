@@ -692,6 +692,7 @@ def get_colormap(n=12, map="gist_ncar"):
             res.append(np.random.random(3))
         return res
 
+
 def resize_with_aspect(img, width = None, height = None, mode=cv2.INTER_CUBIC):
     if width is not None:
         fy = width / img.shape[1]
@@ -726,3 +727,4 @@ def fir_lowpass_filter(sample_rate):
 
     # Use lfilter to filter x with the FIR filter.
     filtered_x = lfilter(taps, 1.0, x)
+
