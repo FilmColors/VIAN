@@ -61,12 +61,12 @@ class TimelineControlParent(QWidget):
         self.setMouseTracking(True)
 
         self.indent = 20
+        self.group_height = self.fontMetrics().height() * 3
 
         self.btn_expand = QtWidgets.QPushButton("+", self)
         self.btn_expand.clicked.connect(self.toggle_expand)
         self.btn_expand.setStyleSheet("QWidget{background:rgba(42, 116, 145, 100); margin:0pt; border-radius: 5px; font-size: 15pt;}")
         self.btn_expand.move(5, 5)
-        self.btn_expand.setFixedSize(QtCore.QSize(20, 20))
 
         self.btn_expand.show()
 
@@ -78,13 +78,17 @@ class TimelineControlParent(QWidget):
 
         self.vbox = QVBoxLayout(self)
         self.layout().addItem(self.vbox)
+
         self.lbl_title = QLabel(self.name, self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; }")
         self.lbl_title.setAlignment(Qt.AlignLeft)
         self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.expander = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+
         self.vbox.addWidget(self.lbl_title)
         self.vbox.addItem(self.expander)
+
+        self.btn_expand.setFixedSize(QtCore.QSize(self.indent_widget.width(), self.lbl_title.height() - 5))
 
         self.groups = []
 
@@ -131,7 +135,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.parent_item = parent_item
         self.timeline = timeline
 
-        self.group_height = 60
+        self.group_height = self.fontMetrics().height() * 3
         self.indent = 30
         self.is_expanded = False
 
@@ -265,7 +269,7 @@ class TimelineSubSegmentationControl(QWidget):
         qp.fillRect(QtCore.QRect(self.indent, 0, self.width(), self.height()), gradient)
 
         if self.is_expanded:
-            y = self.timeline.group_height
+            y = self.timeline.group_height + self.sub.strip_height
             for i, s in enumerate(self.sub.entries):
                 text_rect = QtCore.QRect(0, y, self.width(), self.sub.strip_height)
                 if s.strip == self.highlighted_entry:
@@ -296,7 +300,6 @@ class TimelineSubSegmentationBar(QWidget):
     onHeightChanged = pyqtSignal(int)
     onHoverEnter = pyqtSignal(object)
     onHoverLeave = pyqtSignal(object)
-
 
     def __init__(self, parent, timeline, control, parent_item, sub_entry, height = 20):
         super(TimelineSubSegmentationBar, self).__init__(parent)

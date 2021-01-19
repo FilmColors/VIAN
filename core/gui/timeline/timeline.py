@@ -434,7 +434,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                         b.close()
         self.item_sub_segmentations = dict()
 
-
     def on_interval_segment_start(self):
         if self.interval_segmentation_marker is not None:
             self.interval_segmentation_marker.deleteLater()
@@ -672,10 +671,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
                 ctrl.move(2, loc_y)
 
-                if (len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0) \
-                    or isinstance(ctrl, TimelineSubSegmentationControl):
+                # Find the spacing between the p(0,0) of the control and the first bar, for segments, it's 0
+                if (len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0):
                     loc_y += self.group_height
+                elif isinstance(ctrl, TimelineControlParent):
+                    loc_y += ctrl.group_height
+                elif isinstance(ctrl, TimelineSubSegmentationControl):
+                    loc_y += ctrl.group_height
 
+                # Find the size of each bar
                 if len(ctrl.groups) > 0 and isinstance(bars[0], TimelineAnnotationBar):
                     item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
                 elif len(bars) > 0 and isinstance(bars[0], TimelineSubSegmentationBar):
@@ -687,9 +691,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                     if b.isVisible() is False:
                         continue
                     b.move(0, loc_y)
-                    b.resize(self.duration/self.scale, item_height)#item_height)
-                    loc_y += item_height #item_height
-                    ctrl_height += item_height # + item_height
+                    b.resize(self.duration / self.scale, item_height)
+                    loc_y += item_height
+                    ctrl_height += item_height
                     b.rescale()
 
                 if loc_y - bar_start < self.bar_height_min:
