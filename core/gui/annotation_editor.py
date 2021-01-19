@@ -48,8 +48,6 @@ class AnnotationEditor(QWidget):
             self.comboBox_Type.addItem(k)
 
         self.comboBox_Type.currentTextChanged.connect(self.on_mimetype_changed)
-
-        # self.annotationList = QListWidget()
         self.annotationList.setSelectionMode(QListWidget.SingleSelection)
 
         self.entries = dict()
@@ -59,6 +57,8 @@ class AnnotationEditor(QWidget):
         self.annotationList.itemSelectionChanged.connect(self.item_selected)
         self.plainTextEdit.textChanged.connect(self.on_content_changed)
         self.lineEdit_URL.textChanged.connect(self.on_content_changed)
+        self.lineEdit_Title.textChanged.connect(self.on_title_changed)
+
         self.btnAdd.clicked.connect(self.on_add)
         self.btnRemove.clicked.connect(self.on_remove)
 
@@ -77,13 +77,18 @@ class AnnotationEditor(QWidget):
             else:
                 an.set_content(self.lineEdit_URL.text())
 
+    def on_title_changed(self):
+        sel = self.annotationList.selectedItems()
+        if len(sel) > 0:
+            an = self.entries[sel[0].text()]
+            an.name = self.lineEdit_Title.text()
+            # sel[0].setText(an.name)
+
     def on_mimetype_changed(self):
         sel = self.annotationList.selectedItems()
         if len(sel) > 0:
             an = self.entries[sel[0].text()]
             an.set_mime_type(MIME_TYPES[self.comboBox_Type.currentText()])
-            an.set_name(MIME_TYPES[self.comboBox_Type.currentText()])
-
 
     def update_entries(self):
         self.entries = dict()
@@ -97,6 +102,7 @@ class AnnotationEditor(QWidget):
             self.entries_lst.append(itm)
             self.entries[t] = a
             self.annotationList.addItem(itm)
+
         if len(self.entries.keys()) == 0:
             self.widgetEdit.setEnabled(False)
         else:
