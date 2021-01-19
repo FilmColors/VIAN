@@ -129,7 +129,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.parent_item = parent_item
         self.timeline = timeline
 
-        self.group_height = 20
+        self.group_height = 60
         self.indent = 30
         self.is_expanded = False
 

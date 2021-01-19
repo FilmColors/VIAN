@@ -743,6 +743,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_visualizations()
         self.update_ui()
         self.scroll_h()
+        self.fit_movie_in_range()
 
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()
@@ -856,6 +857,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.shift_pressed = True
             self.sticky_move = True
+        elif QKeyEvent.key() == Qt.Key_F:
+            self.fit_movie_in_range()
+
         else:
             QKeyEvent.ignore()
 
@@ -913,11 +917,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.item_pinned.raise_()
                 self.item_pinned.bar.raise_()
 
-
     def frame_time_range(self, t_start, t_end):
         scale = (t_end - t_start) / (self.width() - self.controls_width) + 3
         self.zoom_timeline(QPoint(0,0), abs_scale=scale, force = True)
         self.scrollArea.horizontalScrollBar().setValue(t_start / self.scale - (self.scale/2))
+
+    def fit_movie_in_range(self):
+        self.frame_time_range(0, self.project().movie_descriptor.duration)
 
     def activate_move_tool(self):
         self.abort_cutting()

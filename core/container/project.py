@@ -731,11 +731,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param selected: A list of IProjectContainer
         :return:
         """
+
+        # if self.selected is None:
+        #     self.selected = []
+
         for t in self.selected:
             if not isinstance(t, VIANProject):
                 t.onSelectedChanged.emit(False)
-        if selected is None:
-            selected = []
+
 
         if not isinstance(selected, list):
             selected = [selected]
