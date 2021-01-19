@@ -7,7 +7,6 @@ from core.data.interfaces import TimelineDataset
 from core.container.project import *
 from core.container.container_interfaces import ILockable
 from core.gui.context_menu import open_context_menu
-from core.gui.ewidgetbase import TextEditPopup
 from core.gui.annotation_editor import AnnotationEditorPopup
 
 class TimelineControl(QtWidgets.QWidget):
@@ -818,7 +817,7 @@ class TimebarSlice(QtWidgets.QWidget):
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
         if self.item.get_type() == SEGMENT:
             popup = AnnotationEditorPopup(self, self.item, self.mapToGlobal(a0.pos()), size = None,
-                                          multi_annotation=self.timeline.multi_annotation)
+                                          multi_annotation=self.timeline.multi_annotation, timeline=self.timeline)
             popup.resize(int(self.timeline.width() / 2.5), popup.height())
 
             x0 = popup.x()

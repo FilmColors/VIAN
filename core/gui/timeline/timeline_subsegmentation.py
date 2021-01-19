@@ -5,9 +5,11 @@ from PyQt5.QtGui import QLinearGradient, QColor, QGradient, QPixmap
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from .timeline_base import TimelineControl, TimebarSlice, TimelineBar
-from core.container.project import Segmentation, UniqueKeyword
+from core.container.project import Segmentation, UniqueKeyword, Segment, AnnotationBody
 import numpy as np
 from functools import partial
+from core.gui.annotation_editor import AnnotationEditorPopup
+from core.gui.ewidgetbase import TextEditPopup
 
 
 class TimelineSubSegmentationEntry:
@@ -295,6 +297,7 @@ class TimelineSubSegmentationBar(QWidget):
     onHoverEnter = pyqtSignal(object)
     onHoverLeave = pyqtSignal(object)
 
+
     def __init__(self, parent, timeline, control, parent_item, sub_entry, height = 20):
         super(TimelineSubSegmentationBar, self).__init__(parent)
         self.setMouseTracking(True)
@@ -430,6 +433,7 @@ class TimelineSubSegmentationBar(QWidget):
 
 class TimebarSubSegmentationSlice(QWidget):
     onClicked = pyqtSignal(bool, object)
+    onDoubleClicked = pyqtSignal(object)
     onHoverEnter = pyqtSignal(object)
     onHoverLeave = pyqtSignal(object)
 
@@ -442,7 +446,7 @@ class TimebarSubSegmentationSlice(QWidget):
         self.default_color = (50, 50, 50, 150)
         self.col_active = (54, 146, 182, 200)
         self.col_hovered = (133, 42, 42, 100)
-        self.parent_item = parent_item
+        self.parent_item = parent_item #type: Segment
 
         self.is_hovered = False
         self.is_active = is_active
@@ -469,6 +473,21 @@ class TimebarSubSegmentationSlice(QWidget):
         self.is_active = state
         self.onClicked.emit(self.is_active, self)
         self.update()
+
+    def mouseDoubleClickEvent(self, QMouseEvent):
+        if not self.is_active:
+            self.is_active = True
+            self.onClicked.emit(self.is_active, self)
+
+        print(self.parent_item)
+        name = "Remark: {name}".format(name=self.mime_data['keyword'].get_root_name())
+        if len(self.parent_item.get_annotations(name=name)) == 0:
+            self.parent_item.add_annotation(AnnotationBody(name=name, mime_type=AnnotationBody.MIMETYPE_TEXT_PLAIN))
+
+        popup = AnnotationEditorPopup(self, self.parent_item, self.mapToGlobal(QMouseEvent.pos()), size=None,
+                                      multi_annotation=True, timeline=self.timeline)
+
+        popup.inner.select_by_name(name)
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         super(TimebarSubSegmentationSlice, self).mousePressEvent(a0)

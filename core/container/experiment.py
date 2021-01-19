@@ -808,6 +808,9 @@ class UniqueKeyword(IProjectContainer):
     def get_full_name(self):
         return ":".join([self.class_obj.name, self.voc_obj.name, self.word_obj.name]).replace(" ", "-")
 
+    def get_root_name(self):
+        return ":".join([self.class_obj.name, self.voc_obj.name]).replace(" ", "-")
+
     def serialize(self):
         data = dict(
             unique_id = self.unique_id,

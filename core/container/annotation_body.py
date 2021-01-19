@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from typing import List
 
+
 class AnnotationBody(QObject):
     onAnnotationChanged = pyqtSignal(object)
 
@@ -86,9 +87,11 @@ class Annotatable:
             self.add_annotation(a)
         return self._annotations
 
-    def get_annotations(self, mime_type = None):
-        if mime_type is None:
+    def get_annotations(self, mime_type = None, name = None):
+        if mime_type is None and name is None:
             return self._annotations
+        elif name is not None:
+            return [a for a in self._annotations if a.name == name]
         else:
             return [a for a in self._annotations if a.mime_type == mime_type]
 
