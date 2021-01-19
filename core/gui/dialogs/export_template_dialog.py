@@ -18,6 +18,10 @@ class ExportTemplateDialog(EDialogWidget):
 
     def on_export(self):
         name = self.lineEdit_Name.text()
+
+        path = QFileDialog.getSaveFileName(caption="Select Path", directory=os.path.join(self.settings.DIR_TEMPLATES, name + ".viant"), filter="*.viant")[0]
+
+        #
         segmentation = self.cB_Segmentation.isChecked()
         vocabulary = self.cB_Vocabulary.isChecked()
         annotation_layers = self.cB_AnnotationLayers.isChecked()
@@ -27,10 +31,11 @@ class ExportTemplateDialog(EDialogWidget):
         template = self.main_window.project.get_template(segmentation, vocabulary,
                                                          annotation_layers, node_scripts,
                                                          experiments)
-        path = self.settings.DIR_TEMPLATES + name + ".viant"
+        # path = self.settings.DIR_TEMPLATES + name + ".viant"
         try:
             with open(path, "w") as f:
                 json.dump(template, f)
+            QMessageBox.information(self.main_window, "Template Exported", "The template has been exported to {f}".format(f=path))
         except Exception as e:
             self.main_window.print_message("Template Export Failed:", "Red")
             self.main_window.print_message(e, "Red")
