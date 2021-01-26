@@ -51,6 +51,9 @@ class LetterBoxWidget(EDialogWidget):
         self.pos_slider.setValue(1)
 
         r = self.movie_descriptor.get_letterbox_rect()
+        if r is None:
+            return
+
         self.view.selector_left.setPos(r[0], 0)
         self.view.selector_up.setPos(0, r[1])
         self.view.selector_right.setPos(r[2] + r[0], 0)

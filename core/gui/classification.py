@@ -117,7 +117,6 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
         self.a_cat.triggered.connect(self.on_layout_changed)
         self.a_class.triggered.connect(self.on_layout_changed)
 
-        # self.btnRemarks.clicked.connect(self.on_remarks)
         self.a_complexity = QAction("Change Complexity", self.inner.menuBar())
         self.inner.menuBar().addAction(self.a_complexity)
 
@@ -125,6 +124,10 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         self.visibilityChanged.connect(self.on_visibility_changed)
         self.complexity_settings = None
+
+
+        self.widget_old.hide()
+
 
         if self.behaviour == "query":
             self.btn_StartClassification.hide()
@@ -164,7 +167,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                     self.comboBox_Experiment.addItem(e.get_name())
             else:
                 self.setEnabled(False)
-            self.stackedWidget.setCurrentIndex(0)
+            self.on_start_classification()
         else:
             if len(project.experiments) > 0:
                 self.current_query_keywords = []

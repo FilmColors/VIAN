@@ -78,7 +78,7 @@ class TimelineContainer(EDockWidget):
         self.a_use_multi_annotation.setChecked(False)
         self.a_use_multi_annotation.triggered.connect(self.update_settings)
 
-        self.a_forward_segmentation = self.menu_options.addAction("\tCut and Segment")
+        self.a_forward_segmentation = self.menu_options.addAction("\tCut and Forward-Segment")
         self.a_forward_segmentation.setCheckable(True)
         self.a_forward_segmentation.setChecked(True)
         self.a_forward_segmentation.triggered.connect(self.update_settings)
