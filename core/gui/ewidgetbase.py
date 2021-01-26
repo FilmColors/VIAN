@@ -204,7 +204,7 @@ class EDialogWidget(QDialog):
         self.help_path = help_path
 
         # self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Dialog)
-        self.setWindowFlags(Qt.Dialog|Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.Dialog)
         self.main_window = main_window
 
         if main_window is not None:
