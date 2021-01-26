@@ -88,7 +88,8 @@ class TimelineControlParent(QWidget):
         self.vbox.addWidget(self.lbl_title)
         self.vbox.addItem(self.expander)
 
-        self.btn_expand.setFixedSize(QtCore.QSize(self.indent_widget.width(), self.lbl_title.height() - 5))
+
+        # self.btn_expand.setFixedSize(QtCore.QSize(self.indent_widget.width(), self.indent_widget.width() + 5))
 
         self.groups = []
 
@@ -111,10 +112,12 @@ class TimelineControlParent(QWidget):
         for c in self.children:
             c.set_expanded(False)
             c.show()
+        self.btn_expand.setText("-")
         self.timeline.update_ui()
 
     def collapse(self):
         self.is_expanded = False
+        self.btn_expand.setText("+")
         for c in self.children:
             c.set_expanded(False)
             c.hide()
@@ -145,7 +148,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.btn_expand.clicked.connect(self.toggle_expand)
         self.btn_expand.setStyleSheet("QWidget{background:rgba(42, 116, 145, 100); margin:0pt; border-radius: 5px; font-size: 15pt;}")
         self.btn_expand.move(5, 5)
-        self.btn_expand.setFixedSize(QtCore.QSize(self.indent - 10, self.indent - 10))
+        # self.btn_expand.setFixedSize(QtCore.QSize(self.indent - 10, self.indent - 10))
 
         self.btn_expand.show()
 
