@@ -11,7 +11,7 @@ import typing
 
 from core.data.computation import numpy_to_pixmap
 from core.gui.ewidgetbase import EDialogWidget
-
+from core.gui.misc.utils import dialog_with_margin
 
 class LetterBoxWidget(EDialogWidget):
     onFrameChanged = pyqtSignal(object)
@@ -37,14 +37,25 @@ class LetterBoxWidget(EDialogWidget):
         self.movie_descriptor = None
         self.done_callback = done_callback
 
+        dialog_with_margin(self.main_window, self, mode="lg")
+
+
     def set_movie(self, movie_descriptor):
         self.movie_descriptor = movie_descriptor
         if not os.path.isfile(movie_descriptor.movie_path):
             return
         self.cap = cv2.VideoCapture(movie_descriptor.movie_path)
         self.duration = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
-        self.resize(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH) * 0.8, self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * 0.8)
+
+        # self.resize(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH) * 0.8, self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * 0.8)
         self.pos_slider.setValue(1)
+
+        r = self.movie_descriptor.get_letterbox_rect()
+        self.view.selector_left.setPos(r[0], 0)
+        self.view.selector_up.setPos(0, r[1])
+        self.view.selector_right.setPos(r[2] + r[0], 0)
+        self.view.selector_down.setPos(0, r[3] + r[1])
+
 
     def on_slider_change(self):
         if self.cap is None:
@@ -74,6 +85,7 @@ class LetterBoxView(QGraphicsView):
     def __init__(self, parent):
         super(LetterBoxView, self).__init__(parent)
         self.setScene(QGraphicsScene())
+        self.setRenderHint(QPainter.Antialiasing)
         self.setMouseTracking(True)
         self.frame_pmap = None
         self.selector_right = None
@@ -163,7 +175,7 @@ class LetterBoxSelector(QGraphicsItem):
         painter.setPen(self.pen)
         painter.drawLine(self.x1, self.y1, self.x2, self.y2)
 
-        painter.fillPath(path, QColor(255, 160, 47, 255))
+        painter.fillPath(path, QColor(7, 7, 7, 255))
         painter.drawPath(path)
         self.scene().update()
 

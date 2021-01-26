@@ -12,6 +12,7 @@ import cv2
 from functools import partial
 from PyQt5 import uic
 import os
+from core.gui.misc.utils import dialog_with_margin
 
 import sys
 # if sys.platform == "darwin":
@@ -203,7 +204,7 @@ class EDialogWidget(QDialog):
         self.help_path = help_path
 
         # self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Dialog)
-        self.setWindowFlags(Qt.Dialog)
+        self.setWindowFlags(Qt.Dialog|Qt.WindowStaysOnTopHint)
         self.main_window = main_window
 
         if main_window is not None:
