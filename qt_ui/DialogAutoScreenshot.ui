@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>465</width>
-    <height>203</height>
+    <width>506</width>
+    <height>362</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,84 +15,45 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Method:</string>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QComboBox" name="comboBox_Method">
-       <item>
-        <property name="text">
-         <string>Uniform Distribution</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Most Informative</string>
-        </property>
-       </item>
-      </widget>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboBox_Method"/>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
+     <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Distribution:</string>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QComboBox" name="comboBox_Distribution">
-       <item>
-        <property name="text">
-         <string>N - Per Segment</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>N - Complete</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Every N-th Frame</string>
-        </property>
-       </item>
-      </widget>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="comboBox_Distribution"/>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
+     <item row="2" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
         <string>Target Segmentation:</string>
        </property>
       </widget>
      </item>
-     <item>
+     <item row="2" column="1">
       <widget class="QComboBox" name="comboBox_Target"/>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
+     <item row="3" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>N:</string>
+        <string>Number of Screenshots:</string>
        </property>
       </widget>
      </item>
-     <item>
+     <item row="3" column="1">
       <widget class="QSpinBox" name="spinBox_N">
        <property name="minimum">
         <number>1</number>
