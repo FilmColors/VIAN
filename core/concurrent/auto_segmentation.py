@@ -103,19 +103,6 @@ class DialogAutoSegmentation(EDialogWidget):
     def on_mode_changed(self, idx):
         self.stackedWidget.setCurrentIndex(idx)
         return
-        # ret, c =  self.project.get_colormetry()
-        # if ret is False and idx == 1:
-        #     self.lbl_not_ready.show()
-        #     if c is None:
-        #         self.lbl_not_ready.setText(self.not_run_text)
-        #         #self.btn_start_colormetry.show()
-        #     else:
-        #         self.lbl_not_ready.setText(self.not_finished_text)
-        #         #self.btn_start_colormetry.hide()
-        #     self.btn_Run.setEnabled(False)
-        # else:
-        #     self.lbl_not_ready.hide()
-        #     self.btn_Run.setEnabled(True)
 
     @pyqtSlot()
     def on_ok(self):
@@ -349,6 +336,7 @@ class ApplySegmentationWindow(QMainWindow):
         self.setCentralWidget(self.w)
         self.w.setLayout(QVBoxLayout(self.w))
         self.view = EGraphicsView(self.w)
+
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(cluster_range[0], np.clip(cluster_range[1] - 1, None, len(self.clusterings) + cluster_range[0]) - 1)
         self.slider.valueChanged.connect(self.on_slider_changed)
@@ -449,4 +437,3 @@ class ApplySegmentationWindow(QMainWindow):
 
         QMessageBox.information(self, "Segmentation Created", "Segmentation has been created!")
         self.project.dispatch_changed()
-

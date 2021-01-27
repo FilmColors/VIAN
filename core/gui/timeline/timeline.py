@@ -78,9 +78,9 @@ class TimelineContainer(EDockWidget):
         self.a_use_multi_annotation.setChecked(False)
         self.a_use_multi_annotation.triggered.connect(self.update_settings)
 
-        self.a_forward_segmentation = self.menu_options.addAction("\tForward Segmentation")
+        self.a_forward_segmentation = self.menu_options.addAction("\tCut and Forward-Segment")
         self.a_forward_segmentation.setCheckable(True)
-        self.a_forward_segmentation.setChecked(False)
+        self.a_forward_segmentation.setChecked(True)
         self.a_forward_segmentation.triggered.connect(self.update_settings)
 
         self.a_kee_slider_in_view = self.menu_options.addAction("\tFollow Time Scrubber")
@@ -194,6 +194,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.is_merging = False
         self.sticky_move = False #If true, the adjacent slice is edited as well
         self.multi_annotation = False
+        self.only_show_used_keywords = False
 
         self.sticky_strip = None
         self.show_audio_volume = True
@@ -242,11 +243,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scrollArea.horizontalScrollBar().valueChanged.connect(self.scroll_h)
         self.scrollArea.verticalScrollBar().valueChanged.connect(self.scroll_v)
         self.scrollArea.installEventFilter(self)
+
         # Settings
         self.show_id = True
         self.show_name = False
         self.show_text = True
-        self.is_forward_segmenting = False
+
+        # Cut and Segment
+        self.is_forward_segmenting = True
+
         self.keep_slider_in_view = True
         self.use_color_features = True
 
@@ -410,6 +415,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def add_sub_segmentation(self, target, sub:TimelineSubSegmentation, cat = "Global"):
         if target.get_id() not in self.item_sub_segmentations:
             self.item_sub_segmentations[target.get_id()] = dict()
+
         if cat not in self.item_sub_segmentations[target.get_id()]:
             group = TimelineControlParent(self.frame_Controls, self, None, cat)
             group.show()
