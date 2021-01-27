@@ -22,7 +22,6 @@ def cluster_histograms_adjacently(x, n_clusters = 2):
         connectivity[i][i] = 1
         connectivity[i][i + 1] = 1
 
-
     model = AgglomerativeClustering(linkage="ward",
                                     connectivity=connectivity,
                                     n_clusters=n_clusters, compute_full_tree=True)
