@@ -105,13 +105,15 @@ class DialogAutoSegmentation(EDialogWidget):
 
     @pyqtSlot()
     def on_ok(self):
-        if self.comboBox_Distribution.currentIndex() == 0:
+        if self.comboBox_Distribution.currentIndex() == 1:
             n_segments = self.spinBox_NSegments.value()
             segment_width = -1
+            mode = 0
         else:
             n_segments = -1
             segment_width = self.spinBox_SegmentLength.value()
-        auto_segmentation(self.project, self.comboBox_Mode.currentIndex(), self.main_window,
+            mode = 1
+        auto_segmentation(self.project, mode, self.main_window,
                           n_segments,
                           segment_width,
                           n_cluster_lb=self.spinBox_lowBound.value(),
@@ -134,7 +136,7 @@ class AutoSegmentingJobHistogram(IConcurrentJob):
         frame_resolution = args[5]
         n_cluster_range = args[6]
         alt_resolution = args[7]
-        cluster_sizes = range(n_cluster_range[0], n_cluster_range[1], 1)
+        cluster_sizes = range(n_cluster_range[0], n_cluster_range[1] + 1, 1)
         histograms = []
         frames = []
 
@@ -337,7 +339,7 @@ class ApplySegmentationWindow(QMainWindow):
         self.view = EGraphicsView(self.w)
 
         self.slider = QSlider(Qt.Horizontal)
-        self.slider.setRange(cluster_range[0], np.clip(cluster_range[1] - 1, None, len(self.clusterings) + cluster_range[0]) - 1)
+        self.slider.setRange(cluster_range[0], np.clip(cluster_range[1] + 1, None, len(self.clusterings) + cluster_range[0]) - 1)
         self.slider.valueChanged.connect(self.on_slider_changed)
 
         self.w_slider = QWidget(self)
@@ -371,8 +373,8 @@ class ApplySegmentationWindow(QMainWindow):
         self.on_slider_changed()
 
     def on_slider_changed(self):
-        self.lbl_n_cluster.setText(str(self.slider.value() - 1))
-        index = int(self.slider.value()) - 1 - self.cluster_range[0]
+        self.lbl_n_cluster.setText(str(self.slider.value()))
+        index = int(self.slider.value()) - self.cluster_range[0]
 
         segments = []
         curr_lbl = -1
