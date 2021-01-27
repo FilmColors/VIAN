@@ -27,12 +27,12 @@
       <widget class="QComboBox" name="comboBox_Mode">
        <item>
         <property name="text">
-         <string>Even Distribution</string>
+         <string>Color Distribution</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Color Histogram</string>
+         <string>Even Distribution</string>
         </property>
        </item>
       </widget>
