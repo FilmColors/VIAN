@@ -16,9 +16,10 @@ be done:
 
 **1. Using the Classification Widget**
 
-The regular :ref:`classification widget` offers different modi on how you want
-to step through your movie (sequentially, only considering one entity,
-etc.). This is the standard way of doing classification in VIAN.
+The regular :ref:`classification widget` offers different modi on how
+you want to step through your movie (sequentially, only considering
+one entity, etc.). This is the standard way of doing classification
+in VIAN.
 
 This approach is recommended if you:
 
@@ -30,12 +31,12 @@ This approach is recommended if you:
 
 The other way is to classify directly in the :ref:`_timeline`:
 
-If you click on the *checked Box* icon in the Segmentation Layer you
-want to annotate, the vocabularies are being expanded below it.
+If you click on the *checked Box* icon in the Segmentation Layer
+you want to annotate, the vocabularies are being expanded below it.
 To toggle the Segmentation Layer, click the *lock* icon - this is
 especially useful, if your vocabulary is large, and/or you want to rely
-on annotation information which is visible in the Segmentation.
-For annotating a Segment with a certain key-word, identify the keyword
+on annotation information which is visible in the Segmentation. For
+annotating a Segment with a certain key-word, identify the keyword
 in the expanded vocabulary tree and simply click on the corresponding
 Segment.
 
