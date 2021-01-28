@@ -19,6 +19,7 @@ function floatRgb2ThreeColor(r, g, b) {
     t.setRGB(r, g, b)
     return t
 }
+
 class ThreeJSView {
     constructor(frame_name, canvas_name, background_color = [17 / 255, 17 / 255, 17 / 255], useVr = false) {
         this.frame_name = frame_name;
@@ -70,6 +71,7 @@ class ThreeJSView {
         this.controls.minPolarAngle = -Math.PI;
         this.controls.maxPolarAngle = Math.PI;
         this.camera.position.set(0, 300, 0)
+        this.initialTarget = this.controls.target;
         // this.controls.target.set(VERTEX_SCALE / 2, 0, 0);
 
         var targetObject = new THREE.Object3D();
@@ -77,11 +79,6 @@ class ThreeJSView {
 
         this.stats = new Stats();
         this.stats.showPanel(1);
-
-        // this.frame.addEventListener("mousedown", function(){onClick()}, false);
-        // this.frame.addEventListener("mouseup", function(){onRelease()}, false);
-        // this.frame.addEventListener("onwheel", function(){onWheel()}, false);
-        // this.canvas.onwheel = function(){onWheel(this)};
 
         this.gridHelper = new THREE.GridHelper(10, 10);
         this.scene.add(this.gridHelper);
@@ -93,6 +90,13 @@ class ThreeJSView {
         var that = this;
         window.addEventListener('resize', function () { that.onWindowResize() }, false);
         this.frame.addEventListener('resize', function () { that.onWindowResize() }, false);
+
+        this.frame.addEventListener("keydown", event => {
+          if (event.keyCode === 70) {
+            this.camera.position.set(0, 300, 0)
+            this.controls.target.set(0,0,0)
+          }
+        });
         // window.addEventListener('mousemove', function (event) { onMouseMove(event) }, false);
         this.animate();
         // this.renderer.render(this.scene, this.camera);

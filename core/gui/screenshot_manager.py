@@ -411,10 +411,10 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.show_segment_name = False
         self.only_show_current_segment = False
 
-        self.font = QFont("Consolas")
-        self.font_size = 40
+        self.font_captions = QFont()
+        self.font_size = self.font().pointSize() * 2
         self.font_size_segments = 120
-        self.font.setPointSize(self.font_size)
+        self.font_captions.setPointSize(self.font_size)
         self.color = QColor(225,225,225)
 
         self.loading_icon = None
@@ -577,7 +577,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if current_sm_object is not None:
                 current_sm_object.segm_images.append(item_image)
 
-                scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font)
+                scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font_captions)
                 scr_lbl.setPos(item_image.pos() + QPoint(10, item_image.qpixmap.height()))
                 scr_lbl.setDefaultTextColor(self.color)
                 # scr_lbl.setFlag(QGraphicsItem.ItemIgnoresTransformations)
@@ -628,8 +628,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             img_width = self.images_plain[0].pixmap().width()
             img_height = self.images_plain[0].pixmap().height()
             x_offset = int(img_width / 7)
-            y_offset = int(img_height / 7)
-            y_offset = x_offset
+            y_offset = self.font_captions.pointSize() * 3
             caption_width = int(img_width / 1.5)
 
             self.scene.setSceneRect(self.sceneRect().x(), self.sceneRect().y(), self.n_per_row * (img_width + x_offset), self.sceneRect().width())
@@ -702,7 +701,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         return line
 
     def add_caption(self, x, y, text):
-        caption = self.scene.addText(str(text), self.font)
+        caption = self.scene.addText(str(text), self.font_captions)
         caption.setDefaultTextColor(self.color)
         caption.setPos(QtCore.QPointF(x, y))
         # caption.setFlag(QGraphicsItem.ItemIgnoresTransformations)

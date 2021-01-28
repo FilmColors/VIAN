@@ -7,7 +7,9 @@ from core.data.interfaces import IConcurrentJob
 from core.data.enums import *
 from core.container.project import VIANProject
 from core.analysis.misc import preprocess_frame
-from core.data.computation import frame2ms, floatify_img
+from core.data.computation import frame2ms, floatify_img, ms_to_frames
+
+from core.gui.misc.utils import dialog_with_margin
 
 AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1
@@ -19,7 +21,6 @@ def cluster_histograms_adjacently(x, n_clusters = 2):
         connectivity[i][i - 1] = 1
         connectivity[i][i] = 1
         connectivity[i][i + 1] = 1
-
 
     model = AgglomerativeClustering(linkage="ward",
                                     connectivity=connectivity,
@@ -96,32 +97,23 @@ class DialogAutoSegmentation(EDialogWidget):
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_Cancel.clicked.connect(self.close)
 
+        dialog_with_margin(parent, self, "sm")
+
     def on_mode_changed(self, idx):
         self.stackedWidget.setCurrentIndex(idx)
         return
-        # ret, c =  self.project.get_colormetry()
-        # if ret is False and idx == 1:
-        #     self.lbl_not_ready.show()
-        #     if c is None:
-        #         self.lbl_not_ready.setText(self.not_run_text)
-        #         #self.btn_start_colormetry.show()
-        #     else:
-        #         self.lbl_not_ready.setText(self.not_finished_text)
-        #         #self.btn_start_colormetry.hide()
-        #     self.btn_Run.setEnabled(False)
-        # else:
-        #     self.lbl_not_ready.hide()
-        #     self.btn_Run.setEnabled(True)
 
     @pyqtSlot()
     def on_ok(self):
-        if self.comboBox_Distribution.currentIndex() == 0:
+        if self.comboBox_Distribution.currentIndex() == 1:
             n_segments = self.spinBox_NSegments.value()
             segment_width = -1
+            mode = 0
         else:
             n_segments = -1
             segment_width = self.spinBox_SegmentLength.value()
-        auto_segmentation(self.project, self.comboBox_Mode.currentIndex(), self.main_window,
+            mode = 1
+        auto_segmentation(self.project, mode, self.main_window,
                           n_segments,
                           segment_width,
                           n_cluster_lb=self.spinBox_lowBound.value(),
@@ -144,7 +136,7 @@ class AutoSegmentingJobHistogram(IConcurrentJob):
         frame_resolution = args[5]
         n_cluster_range = args[6]
         alt_resolution = args[7]
-        cluster_sizes = range(n_cluster_range[0], n_cluster_range[1], 1)
+        cluster_sizes = range(n_cluster_range[0], n_cluster_range[1] + 1, 1)
         histograms = []
         frames = []
 
@@ -161,8 +153,11 @@ class AutoSegmentingJobHistogram(IConcurrentJob):
             counter += 1
             cap.set(cv2.CAP_PROP_POS_FRAMES, i)
             ret, frame = cap.read()
-            frames.append(dict(pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
-                     pos=i))
+            if frame is not None:
+                frames.append(dict(
+                    pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
+                    pos=i)
+                )
 
         data_idx = 0
         read_img = -1 # We only want to read every second image
@@ -257,8 +252,10 @@ class AutoSegmentingJobAudio(IConcurrentJob):
             counter += 1
             cap.set(cv2.CAP_PROP_POS_FRAMES, i)
             ret, frame = cap.read()
-            frames.append(dict(pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
-                     pos=i))
+            frames.append(dict(
+                pixmap=numpy_to_pixmap(cv2.resize(frame, None, None, resize_f, resize_f, cv2.INTER_CUBIC)),
+                pos=i)
+            )
 
         data_idx = 0
         read_img = -1 # We only want to read every second image
@@ -340,8 +337,9 @@ class ApplySegmentationWindow(QMainWindow):
         self.setCentralWidget(self.w)
         self.w.setLayout(QVBoxLayout(self.w))
         self.view = EGraphicsView(self.w)
+
         self.slider = QSlider(Qt.Horizontal)
-        self.slider.setRange(cluster_range[0], np.clip(cluster_range[1] - 1, None, len(self.clusterings) + cluster_range[0]) - 1)
+        self.slider.setRange(cluster_range[0], np.clip(cluster_range[1] + 1, None, len(self.clusterings) + cluster_range[0]) - 1)
         self.slider.valueChanged.connect(self.on_slider_changed)
 
         self.w_slider = QWidget(self)
@@ -370,12 +368,14 @@ class ApplySegmentationWindow(QMainWindow):
         self.w.layout().addWidget(self.w_slider)
         self.w.layout().addWidget(self.w_buttons)
 
-        self.resize(800, 500)
+        dialog_with_margin(parent, self)
+        self.show()
         self.on_slider_changed()
+
 
     def on_slider_changed(self):
         self.lbl_n_cluster.setText(str(self.slider.value()))
-        index = int(self.slider.value()) - 1 - self.cluster_range[0]
+        index = int(self.slider.value()) - self.cluster_range[0]
 
         segments = []
         curr_lbl = -1
@@ -425,8 +425,12 @@ class ApplySegmentationWindow(QMainWindow):
     def apply_segmentation(self):
         segmentation = self.project.create_segmentation("Auto Segmentation", dispatch=False)
         for i, s in enumerate(self.segments):
-            if i < len(s) - 1:
+            if i < len(self.segments) - 1:
                 s['end'] = self.segments[i + 1]['start'] - 1
+            elif i == len(self.segments) - 1:
+                print("Final Duration")
+                s['end'] = ms_to_frames(self.project.movie_descriptor.duration, self.fps)
+
             segmentation.create_segment2(frame2ms(s['start'], self.fps),
                                          frame2ms(s['end'], self.fps),
                                          mode=SegmentCreationMode.INTERVAL,
@@ -435,4 +439,3 @@ class ApplySegmentationWindow(QMainWindow):
 
         QMessageBox.information(self, "Segmentation Created", "Segmentation has been created!")
         self.project.dispatch_changed()
-

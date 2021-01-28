@@ -16,7 +16,7 @@ from core.data.computation import version_check
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler import AudioHandler
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
-from flask_server.server import FlaskServer, FlaskWebWidget
+from flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
 from core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -202,6 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_widget = None
         self.script_editor = None
         self.corpus_widget = None
+        self.summary_dock = None
 
         # self.corpus_visualizer = VIANVisualizer2(self)
         # self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
@@ -251,7 +252,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
-        self.web_view.set_url("http://127.0.0.1:5000/screenshot_vis")
+        self.web_view.set_url("http://127.0.0.1:{p}/screenshot_vis".format(p=VIAN_PORT))
         # self.web_view.set_url("https://threejs.org/examples/#webgl_camera")
 
         self.web_view.hide()
@@ -283,6 +284,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_colorimetry_live()
         self.create_experiment_editor()
         self.create_corpus_widget()
+        self.create_summary_dock()
 
         self.pipeline_toolbar = PipelineToolbar(self)
 
@@ -1030,14 +1032,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.corpus_client_toolbar.raise_()
                 self.corpus_client_toolbar.activateWindow()
 
-    # def create_facial_identification_dock(self):
-    #     if self.facial_identification_dock is None:
-    #         self.facial_identification_dock = FaceIdentificatorDock(self)
-    #         self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
-    #         self.facial_identification_dock.show()
-    #
-    #     else:
-    #         self.facial_identification_dock.show()
+    def create_summary_dock(self):
+        if self.summary_dock is None:
+            self.summary_dock = FlaskWebWidget(self)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.summary_dock, Qt.Vertical)
+
+            self.summary_dock.hide()
+        else:
+            if not self.summary_dock.visibleRegion().isEmpty():
+                self.summary_dock.hide()
+            else:
+                self.summary_dock.show()
+                self.summary_dock.raise_()
+                self.summary_dock.activateWindow()
     #endregion
 
     #region QEvent Overrides
@@ -1475,6 +1482,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.screenshots_manager_dock, self.experiment_dock)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.query_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.web_view)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.summary_dock)
             
 
             if self.facial_identification_dock is not None:
@@ -1849,18 +1857,19 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             from core.visualization.bokeh_timeline import generate_plot
             generate_plot(self.project, file_name=p)
+            QMessageBox.information(self, "Summary Exported", "The Summary has been exported to {f}".format(f=p))
         except Exception as e:
             log_error(e)
 
     def on_browser_visualization(self):
-        webbrowser.open("http://127.0.0.1:5000/screenshot_vis/")
+        webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))
 
     def on_project_summary(self):
-        dock = FlaskWebWidget(self)
-        dock.set_url("http://127.0.0.1:5000/summary/")
-        dock.setWindowTitle("Project Summary")
-        self.addDockWidget(Qt.RightDockWidgetArea, dock)
-        self.tabifyDockWidget(self.screenshots_manager_dock, dock)
+        self.summary_dock.set_url("http://127.0.0.1:{p}/summary/".format(p=VIAN_PORT))
+        self.summary_dock.setWindowTitle("Project Summary")
+
+        # Just show it
+        self.create_summary_dock()
 
     def check_update(self):
         version, id = get_vian_version()

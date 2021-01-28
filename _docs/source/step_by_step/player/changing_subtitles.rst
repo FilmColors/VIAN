@@ -3,26 +3,30 @@
 Changing Subtitles
 ******************
 
-
+If you have subtitles for a movie and you want to include them in your
+project, you can import them with the following command:
 Change the Subtitles as follows:
 
-1. In the **Player Controls** Window press on the **Show Slider** Button (If you cant see this window use **ALT + P** to show it)
-2. Choose the Subtitle on the right side of the Window
+Select subtitles (.rst) file under File >> Import >> SRT File 
 
-.. figure:: player_controls_show_slider.png
-   :scale: 80 %
+.. figure:: subtitles_import.png
+   :scale: 50 %
    :align: center
    :alt: map to buried treasure
 
-.. figure:: player_controls_subtitles.png
-   :scale: 80 %
+The subtitles will be imported as a sort of segmentation Layer in the Player.
+The time spans in which there is speech are Segments with the subtitles as text
+in them.
+
+.. figure:: subtitles.png
+   :scale: 40 %
    :align: center
    :alt: map to buried treasure
 
 .. seealso::
 
    * :ref:`player`
-   * :ref:`video_player`
+   * :ref:`Video Player`
 
 
 * :ref:`genindex`

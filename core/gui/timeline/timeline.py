@@ -78,9 +78,9 @@ class TimelineContainer(EDockWidget):
         self.a_use_multi_annotation.setChecked(False)
         self.a_use_multi_annotation.triggered.connect(self.update_settings)
 
-        self.a_forward_segmentation = self.menu_options.addAction("\tForward Segmentation")
+        self.a_forward_segmentation = self.menu_options.addAction("\tCut and Forward-Segment")
         self.a_forward_segmentation.setCheckable(True)
-        self.a_forward_segmentation.setChecked(False)
+        self.a_forward_segmentation.setChecked(True)
         self.a_forward_segmentation.triggered.connect(self.update_settings)
 
         self.a_kee_slider_in_view = self.menu_options.addAction("\tFollow Time Scrubber")
@@ -194,6 +194,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.is_merging = False
         self.sticky_move = False #If true, the adjacent slice is edited as well
         self.multi_annotation = False
+        self.only_show_used_keywords = False
 
         self.sticky_strip = None
         self.show_audio_volume = True
@@ -242,11 +243,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scrollArea.horizontalScrollBar().valueChanged.connect(self.scroll_h)
         self.scrollArea.verticalScrollBar().valueChanged.connect(self.scroll_v)
         self.scrollArea.installEventFilter(self)
+
         # Settings
         self.show_id = True
         self.show_name = False
         self.show_text = True
-        self.is_forward_segmenting = False
+
+        # Cut and Segment
+        self.is_forward_segmenting = True
+
         self.keep_slider_in_view = True
         self.use_color_features = True
 
@@ -410,6 +415,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     def add_sub_segmentation(self, target, sub:TimelineSubSegmentation, cat = "Global"):
         if target.get_id() not in self.item_sub_segmentations:
             self.item_sub_segmentations[target.get_id()] = dict()
+
         if cat not in self.item_sub_segmentations[target.get_id()]:
             group = TimelineControlParent(self.frame_Controls, self, None, cat)
             group.show()
@@ -433,7 +439,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                     for b in sub[1]:
                         b.close()
         self.item_sub_segmentations = dict()
-
 
     def on_interval_segment_start(self):
         if self.interval_segmentation_marker is not None:
@@ -672,10 +677,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
                 ctrl.move(2, loc_y)
 
-                if (len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0) \
-                    or isinstance(ctrl, TimelineSubSegmentationControl):
+                # Find the spacing between the p(0,0) of the control and the first bar, for segments, it's 0
+                if (len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0):
                     loc_y += self.group_height
+                elif isinstance(ctrl, TimelineControlParent):
+                    loc_y += ctrl.group_height
+                elif isinstance(ctrl, TimelineSubSegmentationControl):
+                    loc_y += ctrl.group_height
 
+                # Find the size of each bar
                 if len(ctrl.groups) > 0 and isinstance(bars[0], TimelineAnnotationBar):
                     item_height = ((ctrl.height() - self.group_height) / np.clip(len(bars), 1, None))
                 elif len(bars) > 0 and isinstance(bars[0], TimelineSubSegmentationBar):
@@ -687,9 +697,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                     if b.isVisible() is False:
                         continue
                     b.move(0, loc_y)
-                    b.resize(self.duration/self.scale, item_height)#item_height)
-                    loc_y += item_height #item_height
-                    ctrl_height += item_height # + item_height
+                    b.resize(self.duration / self.scale, item_height)
+                    loc_y += item_height
+                    ctrl_height += item_height
                     b.rescale()
 
                 if loc_y - bar_start < self.bar_height_min:
@@ -743,6 +753,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_visualizations()
         self.update_ui()
         self.scroll_h()
+        self.fit_movie_in_range()
 
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()
@@ -856,6 +867,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         elif QKeyEvent.key() == Qt.Key_Shift:
             self.shift_pressed = True
             self.sticky_move = True
+        elif QKeyEvent.key() == Qt.Key_F:
+            self.fit_movie_in_range()
+
         else:
             QKeyEvent.ignore()
 
@@ -913,11 +927,13 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 self.item_pinned.raise_()
                 self.item_pinned.bar.raise_()
 
-
     def frame_time_range(self, t_start, t_end):
         scale = (t_end - t_start) / (self.width() - self.controls_width) + 3
         self.zoom_timeline(QPoint(0,0), abs_scale=scale, force = True)
         self.scrollArea.horizontalScrollBar().setValue(t_start / self.scale - (self.scale/2))
+
+    def fit_movie_in_range(self):
+        self.frame_time_range(0, self.project().movie_descriptor.duration)
 
     def activate_move_tool(self):
         self.abort_cutting()

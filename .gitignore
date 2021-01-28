@@ -25,6 +25,9 @@ build/*
 log-files/*
 vian-update.zip
 tests/is_dev.txt
+*.swp
+.notags
+comparison.html
 
 dist/*
 build/*

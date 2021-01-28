@@ -21,6 +21,8 @@ app.root_path = os.path.split(__file__)[0]
 log_info("FLASK ROOT", app.root_path)
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+VIAN_PORT = 5352
+
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -214,7 +216,7 @@ class FlaskServer(QObject):
 
     @pyqtSlot()
     def run_server(self):
-        self.app.run()
+        self.app.run(port=VIAN_PORT)
 
     def on_loaded(self, project):
         global _server_data

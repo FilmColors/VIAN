@@ -149,7 +149,7 @@ def generate_plot(project:VIANProject, return_mode="show", file_name=None):
 
     for p in plots:
         format_plot(p)
-    lt = layout(plots, sizing_mode="stretch_width")
+    lt = layout([Div(text="<h1>" +project.name +"</h1><br>" + project.path)] + plots, sizing_mode="stretch_width")
 
     if return_mode == "components":
         return components(lt)
@@ -183,7 +183,8 @@ def compare_with_project(p1, file_other):
     for p in plots2:
         plots_d2[p.title.text] = p
 
-    final_1, final_2 = [], []
+    final_1, final_2 = [Div(text="<h1>" +p1.name +"</h1><br>" + p1.path)], \
+                       [Div(text="<h1>" +p2.name +"</h1><br>" + p2.path)]
     for k in all_plots:
         if k in plots_d1 and k in plots_d2:
             final_1.append(plots_d1[k])

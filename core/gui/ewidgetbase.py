@@ -12,6 +12,7 @@ import cv2
 from functools import partial
 from PyQt5 import uic
 import os
+from core.gui.misc.utils import dialog_with_margin
 
 import sys
 # if sys.platform == "darwin":

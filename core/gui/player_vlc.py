@@ -245,7 +245,7 @@ class Player_VLC(VideoPlayer):
 
         self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat --quiet"
         self.media_player = None
-        self.vlc_instance = None
+        # self.vlc_instance = None
         # self.media_player = self.vlc_instance.media_player_new()
         self.media = None
 
@@ -276,19 +276,16 @@ class Player_VLC(VideoPlayer):
 
     # *** EXTENSION METHODS *** #
     def init_vlc(self):
-        self.vlc_instance = vlc.Instance(self.vlc_arguments)
-        self.media_player = self.vlc_instance.media_player_new()
+        # self.vlc_instance = vlc.Instance(self.vlc_arguments)
+        if self.media_player is None:
+            self.media_player = vlc.MediaPlayer()
 
         self.init_ui()
 
     def release_player(self):
         if self.media_player is not None:
-            self.media_player.stop()
-        if self.vlc_instance is not None:
-            self.vlc_instance.release()
-            self.vlc_instance = None
-            self.media_player = None
-            self.media = None
+            self.stop()
+            self.videoframe.hide()
 
     def get_frame(self):
         # fps = self.media_player.get_fps()
@@ -310,9 +307,9 @@ class Player_VLC(VideoPlayer):
         # you have to give the id of the QFrame (or similar object) to
         # vlc, different platforms have different functions for this
         if sys.platform.startswith('linux'):  # for Linux using the X Server
-            self.media_player.set_xwindow(self.videoframe.winId())
+            self.media_player.set_xwindow(int(self.videoframe.winId()))
         elif sys.platform == "win32":  # for Windows
-            self.media_player.set_hwnd(self.videoframe.winId())
+            self.media_player.set_hwnd(int(self.videoframe.winId()))
         elif sys.platform == "darwin":  # for MacOS
             self.media_player.set_nsobject(int(self.videoframe.winId()))
             # self.videoframe.setCocoaView(self.media_player.get_nsobject())
@@ -325,7 +322,10 @@ class Player_VLC(VideoPlayer):
             # self.setWindowFlags(Qt.ForeignWindow)
 
     def get_size(self):
-        return self.media_player.video_get_size()
+        if self.media_player is not None:
+            return self.media_player.video_get_size()
+        else:
+            return [1,1]
 
     def set_initial_values(self):
         self.offset = 0
@@ -355,8 +355,8 @@ class Player_VLC(VideoPlayer):
     def open_movie(self, path, from_server = False):
         # create the media
 
-        if self.vlc_instance is None:
-            self.init_vlc()
+        # if self.vlc_instance is None:
+        self.init_vlc()
 
         if sys.version < '3':
             filename = str(path)
@@ -364,13 +364,15 @@ class Player_VLC(VideoPlayer):
             filename = path
 
         self.movie_path = filename
-        self.media = self.vlc_instance.media_new(self.movie_path)
+        self.media = vlc.Media(self.movie_path)
 
         # put the media in the media player
         self.media_player.set_media(self.media)
 
         # parse the metadata of the file
         self.media.parse()
+
+        self.videoframe.show()
 
         # Running the movie, to ensure the initial values can be read by the VLC framework
         self.play()

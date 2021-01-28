@@ -1,4 +1,4 @@
-.. _player_controls:
+.. _Player Controls:
 
 Player Controls
 ===============

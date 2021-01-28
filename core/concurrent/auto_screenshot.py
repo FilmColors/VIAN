@@ -11,10 +11,10 @@ from core.analysis.colorimetry.computation import calculate_histogram
 
 def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, hdf5_manager, sign_progress):
     frame_pos = []
-    if method == "Uniform Distribution":
+    if method == AutoScreenshotJob.M_UNIFORM:
         frame_ms = []
 
-        if distribution == "N - Per Segment":
+        if distribution == AutoScreenshotJob.D_EVERY_N_FRAME:
             for s in segmentation.segments:
                 delta = (s.get_end() - s.get_start()) / n
                 k = s.get_start()
@@ -22,14 +22,14 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
                     frame_ms.append(k)
                     k += delta
 
-        elif distribution == "N - Complete":
+        elif distribution == AutoScreenshotJob.D_TOTAL:
             delta = project.movie_descriptor.duration / n
             k = 0
             while k < project.movie_descriptor.duration:
                 frame_ms.append(k)
                 k += delta
 
-        elif distribution == "Every N-th Frame":
+        elif distribution == AutoScreenshotJob.D_PER_SEGMENT:
             k = 0
             while k < project.movie_descriptor.duration:
                 frame_ms.append(k)
@@ -38,37 +38,29 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
         for f in frame_ms:
             frame_pos.append(ms_to_frames(f, project.movie_descriptor.fps))
 
-    elif method == "Most Informative":
+    elif method == AutoScreenshotJob.M_MOST_INFORMATIVE:
         cap = cv2.VideoCapture(project.movie_descriptor.movie_path)
         width, height = cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         fps, duration = cap.get(cv2.CAP_PROP_FPS), cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
         for s_idx, s in enumerate(segmentation.segments):
             sign_progress(s_idx / len(segmentation.segments))
-            if project.colormetry_analysis.check_finished():
-                res = project.colormetry_analysis.resolution
-                idx_start = int(ms_to_frames(s.get_start(), fps) / res)
-                idx_end = int(ms_to_frames(s.get_end(), fps) / res)
-                indices = range(idx_start, idx_end, 1)
-                frame_indices = np.array(indices) * res
-                hists = hdf5_manager.col_histograms()[indices]
-            else:
-                res = 15
-                idx_start = int(ms_to_frames(s.get_start(), fps))
-                idx_end = int(np.clip(ms_to_frames(s.get_end(), fps), idx_start + 1, duration))
-                n_hists = int(np.ceil((idx_end - idx_start) / res))
-                hists = np.zeros(shape=(n_hists, 16,16,16))
-                frame_indices = []
-                for h_idx, i in enumerate(range(idx_start, idx_end, res)):
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
-                    ret, frame = cap.read()
+            res = 15
+            idx_start = int(ms_to_frames(s.get_start(), fps))
+            idx_end = int(np.clip(ms_to_frames(s.get_end(), fps), idx_start + 1, duration))
+            n_hists = int(np.ceil((idx_end - idx_start) / res))
+            hists = np.zeros(shape=(n_hists, 16,16,16))
+            frame_indices = []
+            for h_idx, i in enumerate(range(idx_start, idx_end, res)):
+                cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+                ret, frame = cap.read()
 
-                    if frame is None:
-                        continue
+                if frame is None:
+                    continue
 
-                    frame_indices.append(i)
-                    frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2Lab)
-                    hists[h_idx] = np.divide(calculate_histogram(frame_lab, 16), (width * height))
+                frame_indices.append(i)
+                frame_lab = cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2Lab)
+                hists[h_idx] = np.divide(calculate_histogram(frame_lab, 16), (width * height))
 
             hists = np.reshape(hists, newshape=(hists.shape[0], hists.shape[1]* hists.shape[2] * hists.shape[3]))
             hists /= np.sqrt(np.sum(hists ** 2, axis=1, keepdims=True))
@@ -87,31 +79,63 @@ class DialogAutoScreenshot(EDialogWidget):
 
         self.project = project
         self.segmentations = []
+
         for s in self.project.segmentation:
             self.comboBox_Target.addItem(s.get_name())
             self.segmentations.append(s)
 
-        # If there are no segmentations, remove this option
-        if len(self.segmentations) == 0:
-            self.comboBox_Target.setEnabled(False)
-            self.comboBox_Distribution.removeItem(0)
+        for m in AutoScreenshotJob.DISTRIBUTION:
+            if len(self.segmentations) == 0 and m == AutoScreenshotJob.D_PER_SEGMENT:
+                continue
+            self.comboBox_Distribution.addItem(m)
 
+        for m in AutoScreenshotJob.METHODS:
+            self.comboBox_Method.addItem(m)
+
+        self.comboBox_Distribution.currentTextChanged.connect(self.on_distribution_changed)
+
+        self.comboBox_Target.setEnabled(False)
         self.btn_Run.clicked.connect(self.on_ok)
         self.btn_Help.clicked.connect(self.on_help)
         self.btn_Cancel.clicked.connect(self.close)
 
+    def on_distribution_changed(self):
+        if self.comboBox_Distribution.currentText() == AutoScreenshotJob.D_PER_SEGMENT:
+            self.comboBox_Target.setEnabled(True)
+        else:
+            self.comboBox_Target.setEnabled(False)
+
     def on_ok(self):
         segmentation = None
-        # if self.comboBox_Distribution.currentText() == "N - Per Segment":
-        segmentation = self.segmentations[self.comboBox_Target.currentIndex()]
-        job = AutoScreenshotJob(None, self.comboBox_Method.currentText(),
-                          self.comboBox_Distribution.currentText(),
-                            self.spinBox_N.value(), segmentation, self.project.hdf5_manager)
+        if self.comboBox_Distribution.currentText() == AutoScreenshotJob.D_PER_SEGMENT:
+            segmentation = self.segmentations[self.comboBox_Target.currentIndex()]
+        job = AutoScreenshotJob(None,
+                                self.comboBox_Method.currentText(),
+                                self.comboBox_Distribution.currentText(),
+                                self.spinBox_N.value(),
+                                segmentation,
+                                self.project.hdf5_manager)
+
         self.main_window.run_job_concurrent(job)
         self.close()
 
 
 class AutoScreenshotJob(IConcurrentJob):
+    D_TOTAL = "Total"
+    D_PER_SEGMENT = "Per Segment"
+    D_EVERY_N_FRAME = "Every n-th Frame"
+
+    DISTRIBUTION = [
+        D_TOTAL, D_PER_SEGMENT, D_EVERY_N_FRAME
+    ]
+
+    M_UNIFORM = "Even Distributed"
+    M_MOST_INFORMATIVE = "Most Informative"
+
+    METHODS = [
+        M_UNIFORM, M_MOST_INFORMATIVE
+    ]
+
     def __init__(self, args, method, distribution, n, segmentation, hdf5_manager):
         super(AutoScreenshotJob, self).__init__(args)
         self.method = method
@@ -128,7 +152,6 @@ class AutoScreenshotJob(IConcurrentJob):
         movie_path = args[0]
         project = args[1]
         frame_pos = auto_screenshot(project, self.method, self.distribution, self.n, self.segmentation, self.hdf5_manager, sign_progress)
-        # frame_pos = args[1]
 
         cap = cv2.VideoCapture(movie_path)
         fps = cap.get(cv2.CAP_PROP_FPS)

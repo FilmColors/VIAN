@@ -4,12 +4,14 @@ import cv2
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea
+from PyQt5.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea, QComboBox
 from core.container.project import VIANProject, VIAN_PROJECT_EXTENSION
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ELANProjectImporter
 from core.data.computation import images_to_movie
+
+from core.gui.misc.utils import dialog_with_margin
 
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path = "", elan_segmentation = None, add_to_current_corpus = False):
@@ -37,6 +39,8 @@ class NewProjectDialog(EDialogWidget):
 
         for s in MovieSource:
             self.comboBox_Source.addItem(s.name)
+        # Set DVD as default
+        self.comboBox_Source.setCurrentText(MovieSource.DVD.name)
 
         self.find_templates()
 
@@ -74,7 +78,7 @@ class NewProjectDialog(EDialogWidget):
 
         self.lineEdit_MoviePath.setText(movie_path)
         self.project.movie_descriptor.set_movie_path(movie_path)
-        self.checkBox_FromImages.stateChanged.connect(self.on_from_images_changed)
+        # self.checkBox_FromImages.stateChanged.connect(self.on_from_images_changed)
 
         self.lineEdit_ProjectName.setText(self.project_name)
         self.set_project_path()
@@ -89,11 +93,11 @@ class NewProjectDialog(EDialogWidget):
         else:
             self.comboBox_Template.setEnabled(True)
 
-    def on_from_images_changed(self):
-        if self.checkBox_FromImages.isChecked():
-            self.moviePathLabel.setText("Image Files")
-        else:
-            self.moviePathLabel.setText("Media Path")
+    # def on_from_images_changed(self):
+    #     if self.checkBox_FromImages.isChecked():
+    #         self.moviePathLabel.setText("Image Files")
+    #     else:
+    #         self.moviePathLabel.setText("Media Path")
 
     def on_automatic_naming_changed(self):
         auto = self.cB_AutomaticNaming.isChecked()
@@ -112,9 +116,16 @@ class NewProjectDialog(EDialogWidget):
 
         self.templates.append(None)
         self.comboBox_Template.addItem("No Template")
+        erc_template = None
         for t in templates:
             self.templates.append(t)
-            self.comboBox_Template.addItem(t.replace("\\" , "/").split("/").pop().replace(".viant", ""))
+            name = t.replace("\\" , "/").split("/").pop().replace(".viant", "")
+            self.comboBox_Template.addItem(name)
+            if "ERC" in name:
+                erc_template = name
+        if erc_template is not None:
+            self.comboBox_Template.setCurrentText(erc_template)
+
 
     def set_project_path(self):
         self.project.folder = self.project_dir
@@ -154,13 +165,15 @@ class NewProjectDialog(EDialogWidget):
         self.lineEdit_ProjectPath.setText(self.project_dir)
 
     def on_browse_movie_path(self):
-        if self.checkBox_FromImages.isChecked() is False:
+        # if self.checkBox_FromImages.isChecked() is False:
             path = QFileDialog.getOpenFileName()[0]
             # self.project.movie_descriptor.movie_path = path
             self.lineEdit_MoviePath.setText(path)
             self.path_set_from_dialog = True
-        else:
-            self.image_paths = QFileDialog.getOpenFileNames()[0]
+            name = os.path.splitext(os.path.split(path)[1])[0]
+            self.lineEdit_Name.setText(name)
+        # else:
+        #     self.image_paths = QFileDialog.getOpenFileNames()[0]
 
     def on_desc_name_changed(self):
         self.project.movie_descriptor.movie_name = self.lineEdit_Name.text()
@@ -219,24 +232,24 @@ class NewProjectDialog(EDialogWidget):
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
 
-        if self.checkBox_FromImages.isChecked():
-            if len(self.image_paths) == 0:
-                QMessageBox.warning(self, "No Images added",
-                                    "There are no images selected to generate a movie from.")
-                return
-            imgs = []
-            for p in self.image_paths:
-                try:
-                    imgs.append(cv2.imread(p))
-                except Exception as e:
-                    continue
-            if len(imgs) == 0:
-                QMessageBox.warning(self, "Failed to read Images",
-                                    "Failed to read images, are these files really images?")
-                return
-            path = self.project.folder + self.project_name + ".avi"
-            images_to_movie(imgs, path, size = (imgs[0].shape[0], imgs[0].shape[1]))
-            self.lineEdit_MoviePath.setText(path)
+        # if self.checkBox_FromImages.isChecked():
+        #     if len(self.image_paths) == 0:
+        #         QMessageBox.warning(self, "No Images added",
+        #                             "There are no images selected to generate a movie from.")
+        #         return
+        #     imgs = []
+        #     for p in self.image_paths:
+        #         try:
+        #             imgs.append(cv2.imread(p))
+        #         except Exception as e:
+        #             continue
+        #     if len(imgs) == 0:
+        #         QMessageBox.warning(self, "Failed to read Images",
+        #                             "Failed to read images, are these files really images?")
+        #         return
+        #     path = self.project.folder + self.project_name + ".avi"
+        #     images_to_movie(imgs, path, size = (imgs[0].shape[0], imgs[0].shape[1]))
+        #     self.lineEdit_MoviePath.setText(path)
 
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
 

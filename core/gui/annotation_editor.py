@@ -14,24 +14,40 @@ MIME_TYPES = dict(
 )
 
 class AnnotationEditorPopup(QMainWindow):
-    def __init__(self, parent, annotation, pos, size = None, multi_annotation = True):
+    def __init__(self, parent, annotation, pos, size = None, multi_annotation = True, timeline=None):
         super(AnnotationEditorPopup, self).__init__(parent)
         if multi_annotation:
             self.inner = AnnotationEditor(self, annotation)
         else:
             self.inner = AnnotationEditorSimple(self, annotation)
 
+        self.timeline = timeline
         self.setCentralWidget(self.inner)
         self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
 
-        if pos is not None:
-            self.move(pos)
-        if size is not None:
-            self.resize(size)
+
+        if timeline is not None:
+            width = int(self.timeline.width() * 0.4)
+            h_margin = 5
+            self.resize(width, int(self.timeline.height() - 2* h_margin))
+
+            x0 = self.timeline.mapToGlobal(QPoint(self.timeline.width() - width, 0)).x()
+            y0 = self.timeline.mapToGlobal(QPoint(0, 0)).y() + h_margin
+
+            # if popup.x() + popup.width() > self.timeline.width():
+            #     x0 = self.timeline.width() - popup.width()
+            self.move(x0, y0)
+        else:
+            if pos is not None:
+                self.move(pos)
+            if size is not None:
+                self.resize(size)
+
+
         self.show()
 
 
-class AnnotationEditor(QWidget):
+class AnnotationEditor(QSplitter):
     EDIT_TEXT_PLAIN = 0
     EDIT_URL = 1
 
@@ -48,8 +64,6 @@ class AnnotationEditor(QWidget):
             self.comboBox_Type.addItem(k)
 
         self.comboBox_Type.currentTextChanged.connect(self.on_mimetype_changed)
-
-        # self.annotationList = QListWidget()
         self.annotationList.setSelectionMode(QListWidget.SingleSelection)
 
         self.entries = dict()
@@ -59,6 +73,8 @@ class AnnotationEditor(QWidget):
         self.annotationList.itemSelectionChanged.connect(self.item_selected)
         self.plainTextEdit.textChanged.connect(self.on_content_changed)
         self.lineEdit_URL.textChanged.connect(self.on_content_changed)
+        self.lineEdit_Title.textChanged.connect(self.on_title_changed)
+
         self.btnAdd.clicked.connect(self.on_add)
         self.btnRemove.clicked.connect(self.on_remove)
 
@@ -77,13 +93,18 @@ class AnnotationEditor(QWidget):
             else:
                 an.set_content(self.lineEdit_URL.text())
 
+    def on_title_changed(self):
+        sel = self.annotationList.selectedItems()
+        if len(sel) > 0:
+            an = self.entries[sel[0].text()]
+            an.name = self.lineEdit_Title.text()
+            # sel[0].setText(an.name)
+
     def on_mimetype_changed(self):
         sel = self.annotationList.selectedItems()
         if len(sel) > 0:
             an = self.entries[sel[0].text()]
             an.set_mime_type(MIME_TYPES[self.comboBox_Type.currentText()])
-            an.set_name(MIME_TYPES[self.comboBox_Type.currentText()])
-
 
     def update_entries(self):
         self.entries = dict()
@@ -97,6 +118,7 @@ class AnnotationEditor(QWidget):
             self.entries_lst.append(itm)
             self.entries[t] = a
             self.annotationList.addItem(itm)
+
         if len(self.entries.keys()) == 0:
             self.widgetEdit.setEnabled(False)
         else:
@@ -135,6 +157,18 @@ class AnnotationEditor(QWidget):
 
             if len(self.entries_lst) > 0:
                 self.annotationList.setCurrentItem((self.entries_lst[len(self.entries_lst) - 1]))
+
+    def select_by_name(self, name):
+        r = 0
+        for i, itm in enumerate(self.entries_lst):
+            print(itm.text(), "                 ",name)
+            if itm.text().replace("{i} ".format(i=i), "") == name:
+                self.annotationList.setCurrentRow(r)
+                self.item_selected()
+                print("Selected", itm.text())
+                break
+            else:
+                r += 1
 
     def showEvent(self, a0: QShowEvent) -> None:
         super(AnnotationEditor, self).showEvent(a0)

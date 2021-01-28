@@ -7,7 +7,6 @@ from core.data.interfaces import TimelineDataset
 from core.container.project import *
 from core.container.container_interfaces import ILockable
 from core.gui.context_menu import open_context_menu
-from core.gui.ewidgetbase import TextEditPopup
 from core.gui.annotation_editor import AnnotationEditorPopup
 
 class TimelineControl(QtWidgets.QWidget):
@@ -15,7 +14,7 @@ class TimelineControl(QtWidgets.QWidget):
     onClassificationToggle = pyqtSignal(object, bool)
     onPinned = pyqtSignal(bool, object)
 
-    def __init__(self, parent, timeline, item = None, name = "No Name"):
+    def __init__(self, parent, timeline, item = None, name = "No Name", height=45):
         super(TimelineControl, self).__init__(parent)
         self.timeline =  timeline
         self.item = item
@@ -63,11 +62,12 @@ class TimelineControl(QtWidgets.QWidget):
         self.set_name()
         self._add_spacer()
 
-        
+        h = 4 *  QtWidgets.QDesktopWidget().fontMetrics().height()
+
         if self.item.strip_height == -1:
-            self.resize(self.width(), 45)
+            self.resize(self.width(), h )
         else:
-            self.resize(self.width(), self.item.strip_height)
+            self.resize(self.width(),h)# self.item.strip_height)
 
         if not isinstance(self.item, TimelineDataset):
             self.item.onSelectedChanged.connect(self.on_selected_changed)
@@ -817,7 +817,7 @@ class TimebarSlice(QtWidgets.QWidget):
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
         if self.item.get_type() == SEGMENT:
             popup = AnnotationEditorPopup(self, self.item, self.mapToGlobal(a0.pos()), size = None,
-                                          multi_annotation=self.timeline.multi_annotation)
+                                          multi_annotation=self.timeline.multi_annotation, timeline=self.timeline)
             popup.resize(int(self.timeline.width() / 2.5), popup.height())
 
             x0 = popup.x()

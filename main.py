@@ -40,7 +40,9 @@ if getattr(sys, 'frozen', False):
 
 import logging
 logging.getLogger('tensorfyylow').disabled = True
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["QT_MAC_WANTS_LAYER"] = "1"
 
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
@@ -135,6 +137,8 @@ if __name__ == '__main__':
     sys._excepthook = sys.excepthook
     sys.excepthook = my_exception_hook
 
+    # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+
     file = None
     print("Input Arguments", sys.argv)
     if len(sys.argv) == 2:
@@ -148,12 +152,6 @@ if __name__ == '__main__':
     print("ApplicationDone")
 
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
-    # app.setAttribute(Qt.AA_UseHighDpiPixmaps)
-    # filter = SuperFilter(app)
-    # app.installEventFilter(filter)
-
-    # if sys.platform.startswith("win"):
-    #     os.environ['QT_ENABLE_HIGHDPI_SCALING'] = "1"
 
     print("Setting UI")
     print(os.getcwd())

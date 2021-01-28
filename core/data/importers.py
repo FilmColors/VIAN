@@ -728,6 +728,7 @@ class WebAppProjectImporter(ImportDevice):
     def import_(self, project:VIANProject, path):
         with open(path, "r") as f:
             data = json.load(f)
+
         project.name = data['project_name']
         project.uuid = data['uuid']
         project.movie_descriptor.year = data['year']

@@ -5,9 +5,11 @@ from PyQt5.QtGui import QLinearGradient, QColor, QGradient, QPixmap
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from .timeline_base import TimelineControl, TimebarSlice, TimelineBar
-from core.container.project import Segmentation, UniqueKeyword
+from core.container.project import Segmentation, UniqueKeyword, Segment, AnnotationBody
 import numpy as np
 from functools import partial
+from core.gui.annotation_editor import AnnotationEditorPopup
+from core.gui.ewidgetbase import TextEditPopup
 
 
 class TimelineSubSegmentationEntry:
@@ -59,12 +61,12 @@ class TimelineControlParent(QWidget):
         self.setMouseTracking(True)
 
         self.indent = 20
+        self.group_height = self.fontMetrics().height() * 3
 
         self.btn_expand = QtWidgets.QPushButton("+", self)
         self.btn_expand.clicked.connect(self.toggle_expand)
         self.btn_expand.setStyleSheet("QWidget{background:rgba(42, 116, 145, 100); margin:0pt; border-radius: 5px; font-size: 15pt;}")
         self.btn_expand.move(5, 5)
-        self.btn_expand.setFixedSize(QtCore.QSize(20, 20))
 
         self.btn_expand.show()
 
@@ -76,13 +78,18 @@ class TimelineControlParent(QWidget):
 
         self.vbox = QVBoxLayout(self)
         self.layout().addItem(self.vbox)
+
         self.lbl_title = QLabel(self.name, self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; }")
         self.lbl_title.setAlignment(Qt.AlignLeft)
         self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.expander = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+
         self.vbox.addWidget(self.lbl_title)
         self.vbox.addItem(self.expander)
+
+
+        # self.btn_expand.setFixedSize(QtCore.QSize(self.indent_widget.width(), self.indent_widget.width() + 5))
 
         self.groups = []
 
@@ -105,10 +112,12 @@ class TimelineControlParent(QWidget):
         for c in self.children:
             c.set_expanded(False)
             c.show()
+        self.btn_expand.setText("-")
         self.timeline.update_ui()
 
     def collapse(self):
         self.is_expanded = False
+        self.btn_expand.setText("+")
         for c in self.children:
             c.set_expanded(False)
             c.hide()
@@ -129,7 +138,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.parent_item = parent_item
         self.timeline = timeline
 
-        self.group_height = 20
+        self.group_height = self.fontMetrics().height() * 3
         self.indent = 30
         self.is_expanded = False
 
@@ -139,7 +148,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.btn_expand.clicked.connect(self.toggle_expand)
         self.btn_expand.setStyleSheet("QWidget{background:rgba(42, 116, 145, 100); margin:0pt; border-radius: 5px; font-size: 15pt;}")
         self.btn_expand.move(5, 5)
-        self.btn_expand.setFixedSize(QtCore.QSize(self.indent - 10, self.indent - 10))
+        # self.btn_expand.setFixedSize(QtCore.QSize(self.indent - 10, self.indent - 10))
 
         self.btn_expand.show()
 
@@ -263,7 +272,7 @@ class TimelineSubSegmentationControl(QWidget):
         qp.fillRect(QtCore.QRect(self.indent, 0, self.width(), self.height()), gradient)
 
         if self.is_expanded:
-            y = self.timeline.group_height
+            y = self.timeline.group_height + self.sub.strip_height
             for i, s in enumerate(self.sub.entries):
                 text_rect = QtCore.QRect(0, y, self.width(), self.sub.strip_height)
                 if s.strip == self.highlighted_entry:
@@ -430,6 +439,7 @@ class TimelineSubSegmentationBar(QWidget):
 
 class TimebarSubSegmentationSlice(QWidget):
     onClicked = pyqtSignal(bool, object)
+    onDoubleClicked = pyqtSignal(object)
     onHoverEnter = pyqtSignal(object)
     onHoverLeave = pyqtSignal(object)
 
@@ -442,7 +452,7 @@ class TimebarSubSegmentationSlice(QWidget):
         self.default_color = (50, 50, 50, 150)
         self.col_active = (54, 146, 182, 200)
         self.col_hovered = (133, 42, 42, 100)
-        self.parent_item = parent_item
+        self.parent_item = parent_item #type: Segment
 
         self.is_hovered = False
         self.is_active = is_active
@@ -469,6 +479,21 @@ class TimebarSubSegmentationSlice(QWidget):
         self.is_active = state
         self.onClicked.emit(self.is_active, self)
         self.update()
+
+    def mouseDoubleClickEvent(self, QMouseEvent):
+        if not self.is_active:
+            self.is_active = True
+            self.onClicked.emit(self.is_active, self)
+
+        print(self.parent_item)
+        name = "Remark: {name}".format(name=self.mime_data['keyword'].get_root_name())
+        if len(self.parent_item.get_annotations(name=name)) == 0:
+            self.parent_item.add_annotation(AnnotationBody(name=name, mime_type=AnnotationBody.MIMETYPE_TEXT_PLAIN))
+
+        popup = AnnotationEditorPopup(self, self.parent_item, self.mapToGlobal(QMouseEvent.pos()), size=None,
+                                      multi_annotation=True, timeline=self.timeline)
+
+        popup.inner.select_by_name(name)
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         super(TimebarSubSegmentationSlice, self).mousePressEvent(a0)

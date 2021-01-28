@@ -11,6 +11,7 @@ Step-by-Step Guides
    segmentation/segmentation.rst
    annotation/annotation.rst
    screenshots/screenshots.rst
+   classification/classification.rst
    analyses/analyses.rst
    experiments/experiments.rst
    player/player.rst
