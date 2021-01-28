@@ -40,7 +40,9 @@ if getattr(sys, 'frozen', False):
 
 import logging
 logging.getLogger('tensorfyylow').disabled = True
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["QT_MAC_WANTS_LAYER"] = "1"
 
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox

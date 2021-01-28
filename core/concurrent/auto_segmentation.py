@@ -369,8 +369,9 @@ class ApplySegmentationWindow(QMainWindow):
         self.w.layout().addWidget(self.w_buttons)
 
         dialog_with_margin(parent, self)
-
+        self.show()
         self.on_slider_changed()
+
 
     def on_slider_changed(self):
         self.lbl_n_cluster.setText(str(self.slider.value()))
