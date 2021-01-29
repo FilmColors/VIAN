@@ -244,10 +244,12 @@ class Player_VLC(VideoPlayer):
         super(Player_VLC, self).__init__(main_window)
 
         self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat --quiet"
-        self.media_player = None
-        # self.vlc_instance = None
-        # self.media_player = self.vlc_instance.media_player_new()
+        self.instance = vlc.Instance(self.vlc_arguments)
+
         self.media = None
+
+        # Create an empty vlc media player
+        self.media_player = self.instance.media_player_new()
 
         self.vboxlayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.vboxlayout)
@@ -267,7 +269,7 @@ class Player_VLC(VideoPlayer):
 
         self.vboxlayout.addWidget(self.videoframe)
 
-        # self.init_vlc()
+        self.init_ui()
 
         self.pause_timer = QtCore.QTimer()
         self.pause_timer.setInterval(1000)
@@ -276,11 +278,12 @@ class Player_VLC(VideoPlayer):
 
     # *** EXTENSION METHODS *** #
     def init_vlc(self):
+        pass
         # self.vlc_instance = vlc.Instance(self.vlc_arguments)
-        if self.media_player is None:
-            self.media_player = vlc.MediaPlayer()
+        # if self.media_player is None:
+        #     self.media_player = vlc.MediaPlayer()
 
-        self.init_ui()
+        # self.init_ui()
 
     def release_player(self):
         if self.media_player is not None:
@@ -364,7 +367,7 @@ class Player_VLC(VideoPlayer):
             filename = path
 
         self.movie_path = filename
-        self.media = vlc.Media(self.movie_path)
+        self.media = self.instance.media_new(self.movie_path)
 
         # put the media in the media player
         self.media_player.set_media(self.media)
