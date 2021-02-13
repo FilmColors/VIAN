@@ -135,6 +135,7 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
     def play_pause(self):
         log_debug(NotImplementedError("Method <play_pause> not implemented"))
     # *** ELAN INTERFACE METHODS *** #
+
     def open_movie(self, path):
         log_debug(NotImplementedError("Method <open_movie> not implemented"))
 
@@ -260,7 +261,7 @@ class Player_VLC(VideoPlayer):
             self.videoframe = QtWidgets.QFrame()
 
 
-        self.videoframe.setParent(self)
+        # self.videoframe.setParent(self)
         self.palette = self.videoframe.palette()
         self.palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
         self.videoframe.setPalette(self.palette)
@@ -271,10 +272,10 @@ class Player_VLC(VideoPlayer):
 
         self.init_ui()
 
-        self.pause_timer = QtCore.QTimer()
-        self.pause_timer.setInterval(1000)
-        self.pause_timer.setSingleShot(True)
-        self.pause_timer.timeout.connect(self.pause)
+        # self.pause_timer = QtCore.QTimer()
+        # self.pause_timer.setInterval(1000)
+        # self.pause_timer.setSingleShot(True)
+        # self.pause_timer.timeout.connect(self.pause)
 
     # *** EXTENSION METHODS *** #
     def init_vlc(self):
@@ -387,7 +388,7 @@ class Player_VLC(VideoPlayer):
             self.new_movie_loaded = True
 
         self.set_media_time(0)
-        self.pause_timer.start()
+        # self.pause_timer.start()
 
         log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
