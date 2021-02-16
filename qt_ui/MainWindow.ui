@@ -50,11 +50,19 @@
       <addaction name="actionImportElanNewProject"/>
       <addaction name="actionImportElanThisProject"/>
      </widget>
+     <widget class="QMenu" name="menuVIAN_Template">
+      <property name="title">
+       <string>VIAN Template</string>
+      </property>
+      <addaction name="actionSelectTemplate_File"/>
+      <addaction name="separator"/>
+     </widget>
      <addaction name="menuELAN_Project"/>
      <addaction name="separator"/>
      <addaction name="actionImportVocabulary"/>
      <addaction name="actionImportVIANExperiment"/>
      <addaction name="actionImportWebApp"/>
+     <addaction name="menuVIAN_Template"/>
      <addaction name="separator"/>
      <addaction name="actionImportELANSegmentation"/>
      <addaction name="actionImportCSVVocabulary"/>
@@ -1024,6 +1032,11 @@
   <action name="actionCompare_Project_with">
    <property name="text">
     <string>Compare Project with ...</string>
+   </property>
+  </action>
+  <action name="actionSelectTemplate_File">
+   <property name="text">
+    <string>Select File...</string>
    </property>
   </action>
  </widget>

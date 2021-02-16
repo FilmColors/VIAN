@@ -346,6 +346,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
         self.actionImportWebApp.triggered.connect(self.import_webapp)
         self.actionSRT_File.triggered.connect(self.import_srt)
+        self.actionSelectTemplate_File.triggered.connect(partial(self.import_template, None))
+
+        import glob
+
+        templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
+        templates.extend(glob.glob("data/templates/" + "*.viant"))
+        for t in templates:
+            a = self.menuVIAN_Template.addAction(os.path.split(t)[1].split(".")[0])
+            a.triggered.connect(partial(self.import_template, t))
+
 
         ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
@@ -2265,6 +2275,13 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.print_message("Vocabulary Import Failed", "Red")
             self.print_message(str(e), "Red")
+
+    def import_template(self, path = None):
+        if path is None:
+            path = QFileDialog.getOpenFileName(self, caption="Select VIANT File", filter="*.viant")[0]
+        if self.project is not None:
+            self.project.apply_template(path)
+
 
     def export_vocabulary(self):
         dialog = VocabularyExportDialog(self)
