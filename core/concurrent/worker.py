@@ -188,6 +188,7 @@ class WorkerManager(QObject, IProjectChangeNotify):
                     result.unload_container()
                     print("Result Target:", a.target_classification_object)
             except Exception as e:
+                raise e
                 print("Exception in AnalysisWorker.analysis_result", str(e))
 
         self.project.dispatch_changed(item=self.project)

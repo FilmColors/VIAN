@@ -56,6 +56,79 @@ class ITimeStepDepending():
         log_debug("ITimeStepDepending: Not Implemented by", self)
 
 
+class SpatialOverlayDataset():
+    """
+    A SpatialOverlayDataset is a entity to register overlays over the player view.
+    As such, IAnalysisJob instances which contain analyses with spatial and temporal quantities,
+    can return a list of SpatialOverlayDataset which can be selected by the user in the player widget.
+
+    """
+
+    def get_overlay(self, analysis, project, time_ms):
+        return None
+
+
+class TimelineDataset(ITimelineItem):
+    """
+    A Dataset which can be displayed in the timeline.
+    The get_data_range function has to be overwritten accordingly.
+
+    """
+    VIS_TYPE_AREA = 0
+    VIS_TYPE_LINE = 1
+
+    def __init__(self, name, data, ms_to_idx = 1.0, vis_type = VIS_TYPE_LINE, vis_color = QColor(98, 161, 169)):
+        self.data = data
+
+        self.strip_height = 45
+        self.name = name
+        self.ms_to_idx = ms_to_idx
+        self.vis_type = vis_type
+        self.vis_color = vis_color
+
+    def get_data_range(self, t_start, t_end, norm=True, subsample=True, filter_window = 1):
+        idx_a = int(np.floor(t_start / self.ms_to_idx))
+        idx_b = int(np.ceil(t_end / self.ms_to_idx))
+
+        offset = (t_start / self.ms_to_idx) - int(np.floor(t_start / self.ms_to_idx))
+
+        ms = np.array(list(range(idx_a, idx_b)))
+        ms = np.multiply(ms, self.ms_to_idx)
+        ms = np.subtract(ms, offset)
+
+        data = np.array(self.data[idx_a:idx_b].copy())
+        if filter_window > 3:
+            try:
+                data = savgol_filter(np.nan_to_num(data), filter_window, 3)
+            except Exception as e:
+                log_info(e)
+
+        if data.shape[0] == 0:
+            return  np.array([]), np.array([])
+        if data.shape[0] > 1000:
+            k = int(data.shape[0] / 1000)
+            if k % 2 == 0:
+                f = k + 1
+            else:
+                f = k
+
+            data = resample(data, data[0::k].shape[0])
+            # data = data[0::k]
+            ms = ms[0::k]
+        if norm:
+            data /= np.amax(self.data)
+        try:
+            return data, ms
+        except Exception as e:
+            log_error(e)
+        return np.array([]), np.array([])
+
+    def get_name(self):
+        return self.name
+
+    def get_notes(self):
+        return ""
+
 class IAnalysisJob(QObject):
     """
     This is the BaseClass for all Analyses. 
@@ -223,6 +296,20 @@ class IAnalysisJob(QObject):
         """
         log_debug("get_name not implemented by", self)
 
+    def get_timeline_datasets(self, analysis, project) -> List[TimelineDataset]:
+        """
+        This function is called by VIAN after the creation of the Analysis to register any new datasets
+        which should be displayed in the Timeline.
+
+        If the data is not time dependent, this function should not be overloaded.
+        :return: A list of TimelineDataset
+        """
+        return []
+
+    def get_spatial_overlays(self, analysis, project) -> List[SpatialOverlayDataset]:
+        return []
+
+
     def get_preview(self, analysis):
         """
         The Preview should be a visual representation of your analysis data, which can be displayed in the 
@@ -385,64 +472,3 @@ class IConcurrentJob():
     def abort(self):
         self.aborted = True
 
-
-class TimelineDataset(ITimelineItem):
-    """
-    A Dataset which can be displayed in the timeline.
-    The get_data_range function has to be overwritten accordingly.
-
-    """
-    VIS_TYPE_AREA = 0
-    VIS_TYPE_LINE = 1
-
-    def __init__(self, name, data, ms_to_idx = 1.0, vis_type = VIS_TYPE_LINE, vis_color = QColor(98, 161, 169)):
-        self.data = data
-
-        self.strip_height = 45
-        self.name = name
-        self.ms_to_idx = ms_to_idx
-        self.vis_type = vis_type
-        self.vis_color = vis_color
-
-    def get_data_range(self, t_start, t_end, norm=True, subsample=True, filter_window = 1):
-        idx_a = int(np.floor(t_start / self.ms_to_idx))
-        idx_b = int(np.ceil(t_end / self.ms_to_idx))
-
-        offset = (t_start / self.ms_to_idx) - int(np.floor(t_start / self.ms_to_idx))
-
-        ms = np.array(list(range(idx_a, idx_b)))
-        ms = np.multiply(ms, self.ms_to_idx)
-        ms = np.subtract(ms, offset)
-
-        data = np.array(self.data[idx_a:idx_b].copy())
-        if filter_window > 3:
-            try:
-                data = savgol_filter(np.nan_to_num(data), filter_window, 3)
-            except Exception as e:
-                log_info(e)
-
-        if data.shape[0] == 0:
-            return  np.array([]), np.array([])
-        if data.shape[0] > 1000:
-            k = int(data.shape[0] / 1000)
-            if k % 2 == 0:
-                f = k + 1
-            else:
-                f = k
-
-            data = resample(data, data[0::k].shape[0])
-            # data = data[0::k]
-            ms = ms[0::k]
-        if norm:
-            data /= np.amax(self.data)
-        try:
-            return data, ms
-        except Exception as e:
-            log_error(e)
-        return np.array([]), np.array([])
-
-    def get_name(self):
-        return self.name
-
-    def get_notes(self):
-        return ""

@@ -137,7 +137,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     def update_timestep(self, data, time_ms):
         if data is not None:
             self.current_data = data
-            if not self.isVisible():
+            if self.visibleRegion().isEmpty():
+                print("Not Visible")
                 return
 
             if not self.worker_ready:

@@ -725,7 +725,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_visualizations()
         self.time_bar.raise_()
 
-    def on_loaded(self, project):
+    def on_loaded(self, project:VIANProject):
         self.setDisabled(False)
 
         self.clear()
@@ -745,6 +745,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         project.onAnnotationLayerRemoved.connect(self.recreate_timeline)
         project.onScreenshotGroupAdded.connect(self.add_screenshots)
         project.onScreenshotGroupRemoved.connect(self.recreate_timeline)
+        project.onAnalysisAdded.connect(self.on_analysis_added)
+
+        for a in project.analysis:
+            if issubclass(a.__class__, IAnalysisJobAnalysis):
+                timeline_datasets = a.get_timeline_datasets()
+                if len(timeline_datasets) > 0:
+                    print("Adding Dataset", timeline_datasets)
+                    for t in timeline_datasets:
+                        self.add_visualization(t)
 
         for e in project.experiments: #type: Experiment
             e.onExperimentChanged.connect(self.on_experiment_changed)
@@ -754,6 +763,19 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
         self.scroll_h()
         self.fit_movie_in_range()
+
+    def on_analysis_added(self, analysis:IAnalysisJobAnalysis):
+        """
+        Checks if the analysis added contains a TimelineDataset to visualize.
+        If so, it is added to the timeline.
+
+        :param analysis:
+        :return:
+        """
+        timeline_datasets = analysis.get_timeline_datasets()
+        if len(timeline_datasets) > 0:
+            for t in timeline_datasets:
+                self.add_visualization(t)
 
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()

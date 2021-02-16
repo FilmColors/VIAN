@@ -104,11 +104,18 @@ class TimestepUpdateWorkerSingle(QObject):
             self.signals.onError.emit([e])
 
     def get_opencv_frame(self, time_frame):
+        """
+        Returns the exact frame of the current visualization.
+        
+        :param time_frame:
+        :return:
+        """
         if self.video_capture is not None:
             self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, time_frame)
             ret, frame = self.video_capture.read()
             if frame is None:
                 return None
+
             # Calculate Spacial Frequency if necessary
             if self.update_spacial_frequency:
                 f = None
@@ -128,5 +135,6 @@ class TimestepUpdateWorkerSingle(QObject):
 
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap
+
         else:
             return None

@@ -8,7 +8,7 @@ try:
     from core.analysis.color.histogram_analysis import *
     from core.analysis.color.palette_analysis import *
     from core.analysis.z_projection import *
-
+    from core.analysis.eyetracking.eyetracking import *
     import os
     from core.analysis.import_tensortflow import tf
 

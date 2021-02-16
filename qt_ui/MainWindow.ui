@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1083</width>
+    <width>1662</width>
     <height>1520</height>
    </rect>
   </property>
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1083</width>
+     <width>1662</width>
      <height>31</height>
     </rect>
    </property>
@@ -227,6 +227,7 @@
     <addaction name="actionBrowserVisualizations"/>
     <addaction name="actionProjectSummary"/>
     <addaction name="separator"/>
+    <addaction name="actionEyetracking"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
     <property name="title">
@@ -1037,6 +1038,11 @@
   <action name="actionSelectTemplate_File">
    <property name="text">
     <string>Select File...</string>
+   </property>
+  </action>
+  <action name="actionEyetracking">
+   <property name="text">
+    <string>Eyetracking</string>
    </property>
   </action>
  </widget>

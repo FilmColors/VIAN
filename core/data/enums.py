@@ -28,6 +28,7 @@ CORPUS = 21
 
 FILE_EXT_PROJECT = ".eext"
 
+
 class DataSerialization(Enum):
     """
     This Enum defines how an object is stored in the sqlite file of the Project. 

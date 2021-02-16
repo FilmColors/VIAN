@@ -438,7 +438,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionColor_Histogram.triggered.connect(partial(self.analysis_triggered, ColorHistogramAnalysis()))
         self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
         self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
-        # self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
+        self.actionEyetracking.triggered.connect(partial(self.analysis_triggered, EyetrackingAnalysis()))
         # self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
         self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
