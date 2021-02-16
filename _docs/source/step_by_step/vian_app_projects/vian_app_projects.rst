@@ -35,22 +35,31 @@ In VIAN, go to `File` >> `Import` >> `VIAN WebAPP`. Chose the `.json`-File you d
 
 After you specified the project file, VIAN asks you for two more specifications:
 
-First, you need to specify the location where the project you are
-about to import should be stored on your computer. Normally, this
-would be the same directory where all your VIAN projects lie, by
-default: `/<path>/<to>/VIAN/projects`. In most cases, you can
-simply accept the default folder VIAN suggests to you.
+- **First**, VIAN asks you for the project file - a .json file - you want to import.
 
-Secondly, VIAN needs to know where the corresponding movie for the
-project file lies. Due to propriety issues, the VIAN WebApp cannot
-provide you the movie file with which the project was generated.
-Therefore, you must obtain the correct movie file by yourself. Note
-that it is well possible that even if you have the correct movie
-that this file might still slightly differ from the file with which
-the project was generated; in consequence, there might be small
-incorrections like slightly offsetted screenshots and segmentations
-and the like.
+- In a **second** step, you need to specify the location where the project you are
+  about to import should be stored on your computer. Normally, this
+  would be the same directory where all your VIAN projects lie, by
+  default: `/<path>/<to>/VIAN/projects`. In most cases, you can
+  simply accept the default folder VIAN suggests to you.
 
+- **Thirdly**, VIAN needs to know where the corresponding movie for the
+  project file lies. Due to propriety issues, the VIAN WebApp cannot
+  provide you the movie file with which the project was generated.
+  Therefore, you must obtain the correct movie file by yourself. Note
+  that it is well possible that even if you have the correct movie
+  that this file might still slightly differ from the file with which
+  the project was generated; in consequence, there might be small
+  incorrections like slightly offsetted screenshots and segmentations
+  and the like.
+
+
+.. figure:: imported_project.png
+   :scale: 50 %
+   :align: center
+   :alt: map to buried treasure
+
+   After importing the project file, specifying the project directory and movie path, you can explore the project in VIAN directly - e.g. check out the annotations of segments.
 
 
 Using VIAN WebApp Projects locally
