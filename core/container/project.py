@@ -123,7 +123,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.uuid = str(uuid4())
         self.id_list = dict()
 
-        self.meta_data = None
+        self.meta_data = dict()
 
         self.annotation_layers = []             # type: List[AnnotationLayer]
         self.current_annotation_layer = None    # type: AnnotationLayer
@@ -1084,6 +1084,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     json.dump(data, f)
             except Exception as e:
                 print("Exception during Storing: ", str(e))
+                raise e
         log_info("Project Stored to", path)
 
     def load_project(self, path=None, main_window = None, serialization = None):
@@ -1128,6 +1129,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         if 'meta_data' in my_dict:
             self.meta_data = my_dict['meta_data']
+
+        if self.meta_data is None:
+            self.meta_data = dict()
 
         if path is None and serialization is not None:
             path = "no-path" + VIAN_PROJECT_EXTENSION

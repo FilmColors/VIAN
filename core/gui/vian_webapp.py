@@ -22,7 +22,6 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
         self.central.setLayout(QVBoxLayout())
         self.corpus_client = corpus_client
         self.corpus_widget = CorpusClientWidget(self, corpus_client, main_window)
-        # self.corpus_widget.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.central.layout().addWidget(self.corpus_widget)
         self.stack = QStackedWidget(self)
         self.central.layout().addWidget(self.stack)
@@ -281,6 +280,7 @@ class CorpusCommitDialog(EDialogWidget):
             self.genres = self.corpus_client.corpus_interface.get_genres()
             self.countries = self.corpus_client.corpus_interface.get_countries()
             self.companies = self.corpus_client.corpus_interface.get_companies()
+            self.corporas = self.corpus_client.corpus_interface.get_corpora()
         except Exception as e:
             self.persons = []
             self.persons = []
@@ -288,7 +288,13 @@ class CorpusCommitDialog(EDialogWidget):
             self.genres = []
             self.countries = []
             self.companies = []
+            self.corporas = []
             log_error(e)
+
+        self.lineEdit_Corpus = QLineEdit(self)
+        q = QCompleter([p['name'] for p in self.corporas])
+        self.lineEdit_Corpus.setCompleter(q)
+
 
         self.filmography = FilmographyWidget2(self, main_window.project, persons=self.persons,
                                               processes=self.processes, genres=self.genres,
@@ -298,10 +304,14 @@ class CorpusCommitDialog(EDialogWidget):
         if main_window.project is not None:
             self.lineEditMovieName.setText(self.main_window.project.movie_descriptor.movie_name)
         self.lt = QHBoxLayout()
-        self.lt.addWidget(QLabel("Full Movie Name", self))
-        self.lt.addWidget(self.lineEditMovieName)
+        self.lt.addWidget(QLabel("Corpus", self))
+        self.lt.addWidget(self.lineEdit_Corpus)
+        self.lt2 = QHBoxLayout()
+        self.lt2.addWidget(QLabel("Full Movie Name", self))
+        self.lt2.addWidget(self.lineEditMovieName)
 
         self.horizontalLayoutUpper.addItem(self.lt)
+        self.horizontalLayoutUpper.addItem(self.lt2)
         self.horizontalLayoutUpper.addWidget(self.filmography)
         self.pushButton_Commit.clicked.connect(self.on_commit)
         self.pushButton_Cancel.clicked.connect(self.close)
@@ -314,6 +324,7 @@ class CorpusCommitDialog(EDialogWidget):
         for k, v in self.filmography.get_filmography().items():
             self.main_window.project.movie_descriptor.meta_data[k] = v
         self.main_window.project.movie_descriptor.movie_name = self.lineEditMovieName.text()
+        self.main_window.project.meta_data['corpus_name'] = self.lineEdit_Corpus.text()
 
         if self.main_window.project is not None:
             self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)

@@ -49,10 +49,6 @@ class PlayerDockWidget(EDockWidget):
         self.a_spacial_frequency_lum_var.setCheckable(True)
         self.a_spacial_frequency_lum_var.triggered.connect(partial(self.on_spacial_frequency_changed, "luminance-var"))
 
-        # self.a_face_rec = self.vis_menu.addAction("Face Recognition")
-        # self.a_face_rec.setCheckable(True)
-        # self.a_face_rec.triggered.connect(self.on_face_rec_changed)
-
         self.setFeatures(EDockWidget.NoDockWidgetFeatures | EDockWidget.DockWidgetClosable)
 
 
