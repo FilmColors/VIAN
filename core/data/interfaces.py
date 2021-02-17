@@ -90,7 +90,7 @@ class TimelineDataset(ITimelineItem):
 
     def __init__(self, name, data, ms_to_idx = 1.0, vis_type = VIS_TYPE_LINE, vis_color = QColor(98, 161, 169)):
         self.data = data
-
+        self.d_max = np.amax(self.data)
         self.strip_height = 45
         self.name = name
         self.ms_to_idx = ms_to_idx
@@ -133,6 +133,12 @@ class TimelineDataset(ITimelineItem):
         except Exception as e:
             log_error(e)
         return np.array([]), np.array([])
+
+    def get_value_at_time(self, ms):
+        ms = np.multiply(ms, self.ms_to_idx)
+        ms = np.clip(int(ms), 0, self.data.shape[0] - 1)
+
+        return self.data[int(ms)]/self.d_max
 
     def get_name(self):
         return self.name

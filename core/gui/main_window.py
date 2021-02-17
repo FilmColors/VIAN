@@ -537,7 +537,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.time = 0
         self.time_counter = 0
-        self.clock_synchronize_step = 20
+        self.clock_synchronize_step = 100
         self.last_segment_index = 0
 
         self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.QueuedConnection)
