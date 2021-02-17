@@ -1,8 +1,10 @@
 from PyQt5.QtCore import *
 import cv2
+from typing import Dict
 from core.data.computation import *
 from core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_spacial_frequency_heatmap2
-
+from core.container.project import VIANProject, IAnalysisJobAnalysis
+from core.data.interfaces import SpatialOverlayDataset
 
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
@@ -23,12 +25,17 @@ class TimestepUpdateWorkerSingle(QObject):
 
         self.position_ms = -1
         self.position_frame = -1
+        self.fps = 30
+
 
         self.movie_path = ""
         self.video_capture = None
 
         self.opencv_frame = False
         self.update_colormetry = True
+
+        self.spatial_datasets = dict() #type:Dict[str, SpatialOverlayDataset]
+        self.current_spatial_dataset = None  # type:SpatialOverlayDataset
 
         self.update_face_rec = False
         self.update_spacial_frequency = False
@@ -41,6 +48,7 @@ class TimestepUpdateWorkerSingle(QObject):
         self.movie_path = movie_path
         self.video_capture = cv2.VideoCapture(movie_path)
         ret, frame = self.video_capture.read()
+        self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
         if frame is not None:
             self.seedsmodel = cv2.ximgproc.createSuperpixelSEEDS(frame.shape[1], frame.shape[0], 3, 200,
                                                                  num_levels=6, histogram_bins=8)
@@ -56,8 +64,22 @@ class TimestepUpdateWorkerSingle(QObject):
         self.update_face_rec = state
         self.run()
 
-    def set_project(self, project):
+    def set_project(self, project:VIANProject):
         self.project = project
+        self.spatial_datasets = dict()
+
+        self.project.onAnalysisAdded.connect(self.on_analysis_added)
+        for a in project.analysis:
+            self.on_analysis_added(a)
+
+    @pyqtSlot(object)
+    def on_analysis_added(self, analysis):
+        if issubclass(analysis.__class__, IAnalysisJobAnalysis):
+            t = analysis.get_spatial_overlays()
+            if len(t) > 0:
+                for overlay in t: #type:SpatialOverlayDataset
+                    self.spatial_datasets[overlay.name] = overlay
+                    self.current_spatial_dataset = overlay
 
     def set_opencv_frame(self, state):
         self.opencv_frame = state
@@ -132,6 +154,9 @@ class TimestepUpdateWorkerSingle(QObject):
                     f = None
                 heatmap, mask, denorm = get_spacial_frequency_heatmap(frame, method=self.spacial_frequency_method, normalize=True, norm_factor=f)
                 frame = heatmap
+
+            if self.current_spatial_dataset is not None:
+                frame = self.current_spatial_dataset.get_overlay(frame2ms(time_frame, self.fps), frame)
 
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap

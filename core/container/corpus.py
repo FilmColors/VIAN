@@ -181,6 +181,7 @@ class Corpus(QObject, IHasName):
         if self.CORPUS_FILE_EXTENSION not in path:
             path += self.CORPUS_FILE_EXTENSION
 
+        self.file = path
         with open(path, "w") as f:
             json.dump(self.serialize(), f)
 

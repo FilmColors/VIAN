@@ -64,6 +64,8 @@ class XEyeTrackingHandler():
 
         result = dict()
 
+
+
         for index, r in self.fixations.iterrows():
             try:
                 is_bw = "bw_" in r.Stimulus
@@ -79,6 +81,12 @@ class XEyeTrackingHandler():
             if stimulus not in self.movie_meta:
                 print("Stimulus {f} not in passed movie files.".format(f=stimulus))
                 continue
+
+            width = self.movie_meta[stimulus]['width']
+            height = self.movie_meta[stimulus]['height']
+
+            fw = width / self.reference_frame[0]
+            fh = height / self.reference_frame[1]
 
             if stimulus not in result:
                 result[stimulus] = []
@@ -97,8 +105,8 @@ class XEyeTrackingHandler():
                 result[stimulus].append(dict(
                     Stimulus = stimulus,
                     isBlackWhite = is_bw,
-                    FixationX = x,
-                    FixationY = y,
+                    FixationX=int(x * fw),
+                    FixationY=int(y * fh),
                     FramePos = f0 + (i * f_step)
                 ))
 

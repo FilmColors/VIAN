@@ -67,11 +67,14 @@ class SpatialOverlayDataset:
     VIS_TYPE_HEATMAP = 1
     VIS_TYPE_COLOR_RGBA = 2
 
-    def __init__(self, name, ms_to_idx):
+    def __init__(self, name, ms_to_idx, project, analysis):
         self.name = name
         self.ms_to_idx = ms_to_idx
+        self.project = project
+        self.analysis = analysis
 
-    def get_overlay(self, analysis, project, time_ms):
+
+    def get_overlay(self, time_ms, frame):
         raise NotImplementedError("SpatialOverlayDataset:get_overlay not implemented")
 
 

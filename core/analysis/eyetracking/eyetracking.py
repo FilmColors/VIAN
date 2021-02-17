@@ -15,6 +15,9 @@ from core.container.hdf5_manager import vian_analysis
 from core.visualization.palette_plot import *
 
 import pandas as pd
+from matplotlib import cm
+
+colormap = cm.get_cmap("viridis")
 
 @vian_analysis
 class EyetrackingAnalysis(IAnalysisJob):
@@ -118,17 +121,29 @@ class EyetrackingAnalysis(IAnalysisJob):
         df = analysis.get_adata()
         fps = project.movie_descriptor.fps
         ms_to_idx = 1000 / (fps / self.resolution)
-        xs = df.FixationX
-        ys = df.FixationY
+
+        time_np = np.zeros(len(df.index))
+        fixations_np = np.zeros((len(df.index), 2))
+
+        for i, row in df.iterrows():
+            fixations_np[i] = [row.FixationX, row.FixationY]
+            time_np[i] = row.FramePos
+
+        time_np = np.array(time_np)
+        fixations_np = np.array(fixations_np)
 
         result = []
         for pos in range(int(np.floor(ms_to_frames(project.movie_descriptor.duration, fps) / self.resolution))):
-            points = df[df.FramePos < pos + fps] \
-                       [df.FramePos > pos - fps]
+            pos = pos * self.resolution
 
-            arr = np.array([points.FixationX, points.FixationY])
-            print(arr.shape)
-            result.append(float(np.var(arr)))
+            # Get all values which are within the time window
+            indices = np.where(np.logical_and(pos - (fps / 2) < time_np, time_np < pos + (fps / 2)))
+            points = fixations_np[indices]
+
+            # Compute the vector magnitude (from the screen root)
+            mag = np.linalg.norm(points, axis = 1)
+            # Compute the variance in vector magnitude
+            result.append(float(np.var(mag)))
 
         result = np.array(result)
         result -= np.amin(result)
@@ -145,7 +160,10 @@ class EyetrackingAnalysis(IAnalysisJob):
         ms_to_idx = 1000 / (project.movie_descriptor.fps / self.resolution)
 
         return [
-            RawPointsSpatialDataset(ms_to_idx, fixations_sampled=analysis.get_adata(), fps=project.movie_descriptor.fps)
+            RawPointsSpatialDataset(ms_to_idx, fixations_sampled=analysis.get_adata(),
+                                    fps=project.movie_descriptor.fps,
+                                    analysis=analysis,
+                                    project=project)
         ]
 
     def to_file(self, data, file_path):
@@ -160,22 +178,50 @@ class EyetrackingAnalysis(IAnalysisJob):
 
 
 class RawPointsSpatialDataset(SpatialOverlayDataset):
-    def __init__(self, ms_to_idx, fixations_sampled, fps):
-        super(RawPointsSpatialDataset, self).__init__("Eyetracking: Raw Points", ms_to_idx)
+    def __init__(self, ms_to_idx, analysis, project, fixations_sampled, fps):
+        super(RawPointsSpatialDataset, self).__init__("Eyetracking: Raw Points", ms_to_idx, project, analysis)
         self.fixations_sampled = fixations_sampled
-        self.fps = fps
 
-    def get_overlay(self, analysis, project, time_ms):
+        self.time_np = np.zeros(len(self.fixations_sampled.index))
+        self.fixations_np = np.zeros((len(self.fixations_sampled.index), 2))
+
+        for i, row in self.fixations_sampled.iterrows():
+            self.fixations_np[i] = [row.FixationX, row.FixationY]
+            self.time_np[i] = row.FramePos
+
+        self.time_np = np.array(self.time_np)
+        self.fixations_np = np.array(self.fixations_np)
+
+        print(self.fixations_np.shape, (self.time_np.nbytes + self.fixations_np.nbytes) / 1000000, "Megabytes")
+        self.fps = fps
+        cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
+        self.width =  cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+    def get_overlay(self, time_ms, frame):
         pos = ms_to_frames(time_ms, self.fps)
+        overlay = np.zeros(frame.shape, dtype=np.float32)
+
+        self.blend_alpha = 0.7
+
         if self.fixations_sampled is not None:
-            points = self.fixations_sampled[self.fixations_sampled.Stimulus] \
-                [self.fixations_sampled.FramePos < pos + self.fps] \
-                [self.fixations_sampled.FramePos > pos - self.fps]
-            # for i, d in points.iterrows():
-            #     if d.isBlackWhite:
-            #         self.view2.add_point(d.FixationX, d.FixationY)
-            #     else:
-            #         self.view1.add_point(d.FixationX, d.FixationY)
+            indices = np.where(np.logical_and(pos - (self.fps / 2) < self.time_np, self.time_np <  pos + (self.fps/2)))
+            points = self.fixations_np[indices]
+
+            points = np.unique(points, axis=0)
+            for x, y in points.tolist():
+                cv2.circle(overlay, (int(x), int(y)), radius=8, color=(1.0,1.0,1.0), thickness=-1)
+            overlay = cv2.blur(overlay, (10,10))
+
+        layer = cv2.cvtColor((colormap(overlay[:,:,0]) * 255).astype(np.uint8), cv2.COLOR_RGBA2BGR)
+        overlay = overlay - 0.2
+
+        overlay2 =      np.clip(overlay * layer.astype(np.float32), 0, 255)
+        frame =  np.clip((1.0 - overlay) * frame.astype(np.float32), 0, 255)
+
+        frame = (frame + overlay2).astype(np.uint8)
+
+        return frame
 
 
 from core.data.importers import ImportDevice
@@ -262,6 +308,7 @@ class DialogImportEyetracking(EDialogWidget):
             corpus.add_project(file=project_path)
 
         corpus.save(c_file)
+        self.main_window.corpus_widget.load_corpus(corpus.file)
 
 
 
