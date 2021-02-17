@@ -770,10 +770,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         :param analysis:
         :return:
         """
-        timeline_datasets = analysis.get_timeline_datasets()
-        if len(timeline_datasets) > 0:
-            for t in timeline_datasets:
-                self.add_visualization(t)
+        if issubclass(analysis.__class__, IAnalysisJobAnalysis):
+            timeline_datasets = analysis.get_timeline_datasets()
+            if len(timeline_datasets) > 0:
+                for t in timeline_datasets:
+                    self.add_visualization(t)
 
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()
