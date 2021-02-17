@@ -56,16 +56,24 @@ class ITimeStepDepending():
         log_debug("ITimeStepDepending: Not Implemented by", self)
 
 
-class SpatialOverlayDataset():
+class SpatialOverlayDataset:
     """
     A SpatialOverlayDataset is a entity to register overlays over the player view.
     As such, IAnalysisJob instances which contain analyses with spatial and temporal quantities,
     can return a list of SpatialOverlayDataset which can be selected by the user in the player widget.
 
     """
+    VIS_TYPE_HISTOGRAM = 0
+    VIS_TYPE_HEATMAP = 1
+    VIS_TYPE_COLOR_RGBA = 2
+
+    def __init__(self, name, ms_to_idx):
+        self.name = name
+        self.ms_to_idx = ms_to_idx
 
     def get_overlay(self, analysis, project, time_ms):
-        return None
+        raise NotImplementedError("SpatialOverlayDataset:get_overlay not implemented")
+
 
 
 class TimelineDataset(ITimelineItem):
@@ -308,7 +316,6 @@ class IAnalysisJob(QObject):
 
     def get_spatial_overlays(self, analysis, project) -> List[SpatialOverlayDataset]:
         return []
-
 
     def get_preview(self, analysis):
         """

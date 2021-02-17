@@ -364,7 +364,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
         self.scroll_v()
 
-
     @pyqtSlot(object)
     def on_experiment_changed(self, e:Experiment):
         self.clear_sub_segmentation()
@@ -395,7 +394,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                         for k in kwds:
                             group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
                         self.add_sub_segmentation(s, group, cat=cl_obj)
-
 
     @pyqtSlot(object)
     def add_segmentation(self, segmentation:Segmentation):

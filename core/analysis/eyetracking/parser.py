@@ -13,7 +13,7 @@ class XEyeTrackingHandler():
         super(XEyeTrackingHandler, self).__init__()
 
         self.show_live = False
-        self.movie_meta = None
+        self.movie_meta = dict()
         self.reference_frame = reference_frame
 
         for key, val in kwargs:
@@ -21,8 +21,8 @@ class XEyeTrackingHandler():
                 setattr(self, key, val)
 
     def import_(self, file_path, **kwargs):
-        # df_participants = pd.read_csv(DATA_ROOT + "/tabular/eyetracking-participants.txt", delimiter="\t")
         self.fixations = pd.read_csv(file_path, **kwargs)
+
 
     def import_movie_meta(self, files):
         """
@@ -34,12 +34,17 @@ class XEyeTrackingHandler():
 
         """
         for f in files:
-            cap = cv2.VideoCapture(f)
-            self.movie_meta[os.path.splitext(os.path.split(f)[1])[0]] = dict(
-                fps = cap.get(cv2.CAP_PROP_FPS),
-                width = cap.get(cv2.CAP_PROP_FRAME_WIDTH),
-                height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-            )
+            try:
+                cap = cv2.VideoCapture(f)
+                self.movie_meta[os.path.splitext(os.path.split(f)[1])[0]] = dict(
+                    fps = cap.get(cv2.CAP_PROP_FPS),
+                    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH),
+                    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT),
+                    path= f
+                )
+            except Exception as e:
+                print(e)
+                continue
         return self.movie_meta
 
 
@@ -57,7 +62,7 @@ class XEyeTrackingHandler():
         self.fixations_sampled = pd.DataFrame(["Stimulus", "FixationX", "FixationY", "FramePos", "isBlackWhite"])
         print(self.fixations_sampled)
 
-        q = []
+        result = dict()
 
         for index, r in self.fixations.iterrows():
             try:
@@ -71,6 +76,13 @@ class XEyeTrackingHandler():
                 print (e)
                 continue
 
+            if stimulus not in self.movie_meta:
+                print("Stimulus {f} not in passed movie files.".format(f=stimulus))
+                continue
+
+            if stimulus not in result:
+                result[stimulus] = []
+
             n = ms_to_frames(t1 - t0, self.movie_meta[stimulus]['fps'])
             if sample_fps != 0:
                 n = int(np.floor(n / sample_fps))
@@ -82,7 +94,7 @@ class XEyeTrackingHandler():
             # print(n)
 
             for i in range(n):
-                q.append(dict(
+                result[stimulus].append(dict(
                     Stimulus = stimulus,
                     isBlackWhite = is_bw,
                     FixationX = x,
@@ -90,20 +102,22 @@ class XEyeTrackingHandler():
                     FramePos = f0 + (i * f_step)
                 ))
 
-        self.fixations_sampled = pd.DataFrame(q)
-        self.fixations = self.fixations_sampled
+        final = dict()
+        for k, v in result.items():
+            final[k] = dict(
+                df = pd.DataFrame(v),
+                stimulus = self.movie_meta[k]
+            )
+        return final
 
 
 if __name__ == '__main__':
     files = glob.glob("E:/Programming/Datasets/eye-tracking/*.mp4")
 
     XEye = XEyeTrackingHandler("../resources/eyetracking/segmentation.hdf5")
-    XEye.import_("../resources/eyetracking/tabular/eyetracking-fixations.txt", delimiter="\t")
+    XEye.import_("eyetracking-fixations.txt", delimiter="\t")
     XEye.import_movie_meta(files)
     print(XEye.movie_meta)
     XEye.subsample()
-    XEye.save("../resources/eyetracking/tabular/eyetracking-fixations-sampled.txt")
-    XEye.evaluate()
-    XEye.save("../resources/eyetracking/tabular/eyetracking-fixations-labeled.txt")
 
     # XEye.print_hdf5()

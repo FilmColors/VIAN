@@ -64,6 +64,8 @@
      <addaction name="actionImportWebApp"/>
      <addaction name="menuVIAN_Template"/>
      <addaction name="separator"/>
+     <addaction name="actionImportEyetracking_Dataset"/>
+     <addaction name="separator"/>
      <addaction name="actionImportELANSegmentation"/>
      <addaction name="actionImportCSVVocabulary"/>
      <addaction name="actionImportScreenshots"/>
@@ -1043,6 +1045,11 @@
   <action name="actionEyetracking">
    <property name="text">
     <string>Eyetracking</string>
+   </property>
+  </action>
+  <action name="actionImportEyetracking_Dataset">
+   <property name="text">
+    <string>Eyetracking Dataset</string>
    </property>
   </action>
  </widget>

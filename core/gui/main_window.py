@@ -347,6 +347,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportWebApp.triggered.connect(self.import_webapp)
         self.actionSRT_File.triggered.connect(self.import_srt)
         self.actionSelectTemplate_File.triggered.connect(partial(self.import_template, None))
+        self.actionImportEyetracking_Dataset.triggered.connect(self.import_eyetracking)
 
         import glob
 
@@ -2258,6 +2259,11 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         srt_file = QFileDialog.getOpenFileName(self, caption="Select SRT File", filter="*.srt")[0]
         self.project.import_(SRTImporter(), srt_file)
+
+    def import_eyetracking(self):
+        dialog = DialogImportEyetracking(self)
+        dialog.show()
+        pass
 
     def export_segmentation(self):
         dialog = ExportSegmentationDialog(self)

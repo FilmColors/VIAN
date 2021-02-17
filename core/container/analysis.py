@@ -362,7 +362,13 @@ class ColormetryAnalysis(AnalysisContainer):
                 d[:, 2:5].astype(np.uint8),
                 d[:, 5].astype(np.int)
             ]
-            return dict(palette = layers, histogram=hist, spatial=spatial, times=times, frame_idx = frame_idx, current_idx = self.current_idx)
+            return dict(palette = layers,
+                        histogram=hist,
+                        spatial=spatial,
+                        times=times,
+                        frame_idx = frame_idx,
+                        current_idx = self.current_idx
+                        )
         except Exception as e:
             print(e)
             pass
