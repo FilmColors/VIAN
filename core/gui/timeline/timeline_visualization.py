@@ -2,14 +2,16 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QSlider, QLabel
-from core.gui.timeline.timeline_base import TimelineControl, TimelineBar
+from core.gui.timeline.timeline_base import TimelineControl, TimelineBar, QPushButton
 
 from core.data.interfaces import TimelineDataset
 from core.container.project import *
 
 
 class TimelineVisualizationControl(TimelineControl):
-    def __init__(self, parent,timeline, item = None, name = "No Name"):
+    onVisibilityChanged = pyqtSignal(bool)
+
+    def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineVisualizationControl, self).__init__(parent,timeline, item, name)
         self.sp_filter = QSlider(Qt.Horizontal)
         self.sp_filter.setMinimum(0)
@@ -17,6 +19,18 @@ class TimelineVisualizationControl(TimelineControl):
 
         self.layout().addWidget(QLabel("Filter", self), 1, 0)
         self.layout().addWidget(self.sp_filter, 1, 1)
+
+        self.btn_toggle_visible = QPushButton("Hide")
+        self.btn_toggle_visible.clicked.connect(self.on_hide)
+        self.layout().addWidget(self.btn_toggle_visible, 2, 0)
+
+    def on_hide(self):
+        if self.btn_toggle_visible.text() == "Hide":
+            self.onVisibilityChanged.emit(False)
+            self.btn_toggle_visible.setText("Show")
+        else:
+            self.onVisibilityChanged.emit(True)
+            self.btn_toggle_visible.setText("Hide")
 
 
 class TimelineVisualization(TimelineBar):
@@ -29,6 +43,11 @@ class TimelineVisualization(TimelineBar):
         self.t_start = 0
         self.t_end = 0
         self.hover_dot_size = int(self.fontMetrics().height() * 0.8)
+
+        self.control.onVisibilityChanged.connect(self.on_visibility_changed)
+
+    def on_visibility_changed(self, state):
+        self.setVisible(state)
 
     def render_image(self):
         t_start = self.timeline.get_current_t_start()

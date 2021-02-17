@@ -12,6 +12,7 @@ class TimestepUpdateSignals(QObject):
     onLocationUpdate = pyqtSignal(list)
     onError = pyqtSignal(list)
     onMessage = pyqtSignal(str)
+    onSpatialDatasetsChanged = pyqtSignal(object)
 
 
 class TimestepUpdateWorkerSingle(QObject):
@@ -26,7 +27,6 @@ class TimestepUpdateWorkerSingle(QObject):
         self.position_ms = -1
         self.position_frame = -1
         self.fps = 30
-
 
         self.movie_path = ""
         self.video_capture = None
@@ -80,6 +80,15 @@ class TimestepUpdateWorkerSingle(QObject):
                 for overlay in t: #type:SpatialOverlayDataset
                     self.spatial_datasets[overlay.name] = overlay
                     self.current_spatial_dataset = overlay
+
+                self.signals.onSpatialDatasetsChanged.emit(self.spatial_datasets.keys())
+
+    @pyqtSlot(str)
+    def on_set_spatial_dataset(self, name):
+        if name in self.spatial_datasets:
+            self.current_spatial_dataset = self.spatial_datasets[name]
+        else:
+            self.current_spatial_dataset = None
 
     def set_opencv_frame(self, state):
         self.opencv_frame = state

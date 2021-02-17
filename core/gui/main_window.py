@@ -235,6 +235,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_thread = QThread()
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
+
+
         # self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
 
@@ -298,7 +300,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
 
-
         self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
@@ -317,9 +318,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.history_view.hide()
         self.concurrent_task_viewer.hide()
 
+        self.frame_update_worker.signals.onSpatialDatasetsChanged.connect(
+            self.player_dock_widget.on_spatial_datasets_changed)
+        self.player_dock_widget.onCurrentSpatialDatasetSelected.connect(
+            self.frame_update_worker.on_set_spatial_dataset)
+
         self.worker_manager = WorkerManager(self)
-        # self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
-        # self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
 
         self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
         self.audio_handler.audioProcessed.connect(self.timeline.timeline.add_visualization)

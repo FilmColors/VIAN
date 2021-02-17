@@ -189,9 +189,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.export_dir = root + "/export"
         self.hdf5_path = self.data_dir + "/analyses.hdf5"
 
-        # if main_window is not None:
-        #     self.main_window.project_streamer.on_loaded(self)
-
     def create_file_structure(self):
         self.reset_file_paths(self.folder, self.path)
         if not os.path.isdir(self.data_dir):

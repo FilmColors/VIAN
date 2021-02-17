@@ -22,6 +22,7 @@ import os
 class PlayerDockWidget(EDockWidget):
     onSpacialFrequencyChanged = pyqtSignal(bool, str)
     onFaceRecognitionChanged = pyqtSignal(bool)
+    onCurrentSpatialDatasetSelected = pyqtSignal(str)
 
     def __init__(self, main_window):
         super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
@@ -32,6 +33,9 @@ class PlayerDockWidget(EDockWidget):
         self.vis_menu = self.inner.menuBar().addMenu("Visualization")
         self.spatial_frequency_menu = QMenu("Spatial Frequency")
         self.vis_menu.addMenu(self.spatial_frequency_menu)
+
+        self.menu_spatial = self.vis_menu.addMenu("Spatial Datasets")
+
 
         self.a_spacial_frequency = self.spatial_frequency_menu.addAction("Edge Mean")
         self.a_spacial_frequency.setCheckable(True)
@@ -51,7 +55,15 @@ class PlayerDockWidget(EDockWidget):
 
         self.setFeatures(EDockWidget.NoDockWidgetFeatures | EDockWidget.DockWidgetClosable)
 
+    @pyqtSlot(object)
+    def on_spatial_datasets_changed(self, datasets):
+        self.menu_spatial.clear()
+        a = self.menu_spatial.addAction("None")
+        a.triggered.connect(partial(self.onCurrentSpatialDatasetSelected.emit, "None"))
 
+        for d in datasets:
+            a = self.menu_spatial.addAction(d)
+            a.triggered.connect(partial(self.onCurrentSpatialDatasetSelected.emit, d))
 
     def on_spacial_frequency_changed(self, method):
         state = self.sender().isChecked()
