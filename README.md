@@ -27,6 +27,10 @@ If you are interested in the source code or want to contribute to VIAN, you are 
     
 ---
 
+
+```conda env create -f requirements.yml```
+
+
 ### Setting up the development environment
 1. Clone this repository on your computer
 2. Download the models from [OneDrive](https://1drv.ms/f/s!Avol1nnS24kLldQ6sI0KucWUrWWF6g) and copy it into the VIAN/data directory

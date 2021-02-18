@@ -11,5 +11,7 @@ fastcluster
 moviepy
 python-vlc
 pandas
+librosa
 pysrt
 bokeh==2.2.1
+matplotlib
