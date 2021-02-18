@@ -4,9 +4,12 @@ from PyQt5.QtGui import QFont
 import os
 
 from PyQt5 import uic
-
+from core.data.settings import COLORMAPS_SEQUENTIAL, UserSettings
 from core.data.enums import ScreenshotNamingConventionOptions
 from core.gui.ewidgetbase import EDialogWidget
+
+from matplotlib import cm
+
 
 
 class DialogPreferences(EDialogWidget):
@@ -15,7 +18,7 @@ class DialogPreferences(EDialogWidget):
         path = os.path.abspath("qt_ui/DialogPreferences.ui")
         uic.loadUi(path, self)
 
-        self.settings = parent.settings
+        self.settings = parent.settings #type:UserSettings
         # self.settings = UserSettings()
 
 
@@ -64,6 +67,12 @@ class DialogPreferences(EDialogWidget):
         self.spinBox_GridSize.setValue(self.settings.GRID_SIZE)
         self.spinBox_ProcessingWidth.setValue(self.settings.PROCESSING_WIDTH)
 
+        self.sliderOverlayQuality.setValue(self.settings.OVERLAY_RESOLUTION_WIDTH)
+        self.sliderOverlayQuality.valueChanged.connect(self.set_render_quality)
+        for colormap in COLORMAPS_SEQUENTIAL:
+            self.cbOverlayColormap.addItem(colormap)
+        self.cbOverlayColormap.currentTextChanged.connect(self.apply_settings)
+
         # self.lineEdit_UserName.setText(self.settings.USER_NAME)
         # self.lineEdit_CorpusIP.setText(self.settings.CORPUS_IP)
         # self.lineEdit_CorpusPort.setText(str(self.settings.COPRUS_PORT))
@@ -79,6 +88,10 @@ class DialogPreferences(EDialogWidget):
 
         self.spinBox_FontSize.setValue(self.settings.FONT_SIZE)
 
+    def set_render_quality(self):
+        v = self.sliderOverlayQuality.value()
+        self.labelOverlayQuality.setText(str(v))
+        self.settings.OVERLAY_RESOLUTION_WIDTH = v
 
     def set_autosave(self):
         state = self.checkBox_Autosave.isChecked()
@@ -123,6 +136,7 @@ class DialogPreferences(EDialogWidget):
         self.settings.PROCESSING_WIDTH = self.spinBox_ProcessingWidth.value()
         self.main_window.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
         self.main_window.on_pipeline_settings_changed()
+        self.settings.OVERLAY_VISUALIZATION_COLORMAP = self.cbOverlayColormap.currentText()
 
     def font_changed(self):
         family = self.font_Picker.currentText()

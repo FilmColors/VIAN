@@ -179,7 +179,11 @@ class EyetrackingAnalysis(IAnalysisJob):
 
 class RawPointsSpatialDataset(SpatialOverlayDataset):
     def __init__(self, ms_to_idx, analysis, project, fixations_sampled, fps):
-        super(RawPointsSpatialDataset, self).__init__("Eyetracking: Raw Points", ms_to_idx, project, analysis)
+        super(RawPointsSpatialDataset, self).__init__("Eyetracking: Raw Points",
+                                                      ms_to_idx,
+                                                      project,
+                                                      analysis,
+                                                      vis_type=SpatialOverlayDataset.VIS_TYPE_HEATMAP)
         self.fixations_sampled = fixations_sampled
 
         self.time_np = np.zeros(len(self.fixations_sampled.index))
@@ -198,30 +202,16 @@ class RawPointsSpatialDataset(SpatialOverlayDataset):
         self.width =  cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
-    def get_overlay(self, time_ms, frame):
+    def get_data_for_time(self, time_ms, frame):
         pos = ms_to_frames(time_ms, self.fps)
-        overlay = np.zeros(frame.shape, dtype=np.float32)
-
-        self.blend_alpha = 0.7
 
         if self.fixations_sampled is not None:
             indices = np.where(np.logical_and(pos - (self.fps / 2) < self.time_np, self.time_np <  pos + (self.fps/2)))
             points = self.fixations_np[indices]
 
-            points = np.unique(points, axis=0)
-            for x, y in points.tolist():
-                cv2.circle(overlay, (int(x), int(y)), radius=8, color=(1.0,1.0,1.0), thickness=-1)
-            overlay = cv2.blur(overlay, (10,10))
-
-        layer = cv2.cvtColor((colormap(overlay[:,:,0]) * 255).astype(np.uint8), cv2.COLOR_RGBA2BGR)
-        overlay = overlay - 0.2
-
-        overlay2 =      np.clip(overlay * layer.astype(np.float32), 0, 255)
-        frame =  np.clip((1.0 - overlay) * frame.astype(np.float32), 0, 255)
-
-        frame = (frame + overlay2).astype(np.uint8)
-
-        return frame
+            return np.unique(points, axis=0)
+        else:
+            return None
 
 
 from core.data.importers import ImportDevice

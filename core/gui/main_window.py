@@ -231,7 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project = VIANProject(name="Default Project", path=None)
         self.corpus_client = CorpusClient()
 
-        self.frame_update_worker = TimestepUpdateWorkerSingle()
+        self.frame_update_worker = TimestepUpdateWorkerSingle(self.settings)
         self.frame_update_thread = QThread()
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
@@ -2056,6 +2056,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close_project()
 
     def on_save_project(self, open_dialog=False, sync = False):
+        if self.project is None:
+            return
+
         if self.corpus_widget.in_template_mode:
             return
 

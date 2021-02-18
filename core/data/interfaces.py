@@ -66,16 +66,19 @@ class SpatialOverlayDataset:
     VIS_TYPE_HISTOGRAM = 0
     VIS_TYPE_HEATMAP = 1
     VIS_TYPE_COLOR_RGBA = 2
+    VIS_TYPE_POINTS = 3
 
-    def __init__(self, name, ms_to_idx, project, analysis):
+    def __init__(self, name, ms_to_idx, project, analysis, vis_type = VIS_TYPE_HEATMAP):
         self.name = name
         self.ms_to_idx = ms_to_idx
         self.project = project
         self.analysis = analysis
+        self.vis_type = vis_type
+
+    def get_data_for_time(self, time_ms, frame):
+        raise NotImplementedError("SpatialOverlayDataset:get_data_for_time not implemented")
 
 
-    def get_overlay(self, time_ms, frame):
-        raise NotImplementedError("SpatialOverlayDataset:get_overlay not implemented")
 
 
 

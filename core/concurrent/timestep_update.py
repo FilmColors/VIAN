@@ -6,6 +6,8 @@ from core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_s
 from core.container.project import VIANProject, IAnalysisJobAnalysis
 from core.data.interfaces import SpatialOverlayDataset
 
+from matplotlib import cm
+
 class TimestepUpdateSignals(QObject):
     onOpenCVFrameUpdate = pyqtSignal(object)
     onColormetryUpdate = pyqtSignal(object, int)
@@ -15,8 +17,87 @@ class TimestepUpdateSignals(QObject):
     onSpatialDatasetsChanged = pyqtSignal(object)
 
 
+class OverlayVisualization:
+    def __init__(self, dataset:SpatialOverlayDataset, blend_alpha=0.5):
+        self.dataset = dataset
+        self.blend_alpha = blend_alpha
+
+    def get_overlay(self, ms, frame, fx, colormap):
+        return frame
+
+
+class HeatmapOverlayVisualization(OverlayVisualization):
+    def __init__(self, dataset:SpatialOverlayDataset):
+        super(HeatmapOverlayVisualization, self).__init__(dataset)
+
+    def get_overlay(self, ms, frame, fx, colormap):
+        points = self.dataset.get_data_for_time(ms, frame)
+
+        overlay = np.zeros(frame.shape, dtype=np.float32)
+
+        for x, y in points.tolist():
+            cv2.circle(overlay, (int(x * fx), int(y * fx)), radius=int(8 * fx), color=(1.0,1.0,1.0), thickness=-1)
+        overlay = cv2.blur(overlay, (10,10))
+
+        layer = cv2.cvtColor((colormap(overlay[:,:,0]) * 255).astype(np.uint8), cv2.COLOR_RGBA2BGR)
+        overlay = overlay - self.blend_alpha
+
+        overlay2 =      np.clip(overlay * layer.astype(np.float32), 0, 255)
+        frame =  np.clip((1.0 - overlay) * frame.astype(np.float32), 0, 255)
+
+        frame = (frame + overlay2).astype(np.uint8)
+        return frame
+
+
+class PointsOverlayVisualization(OverlayVisualization):
+    def __init__(self, dataset: SpatialOverlayDataset):
+        super(PointsOverlayVisualization, self).__init__(dataset)
+
+    def get_overlay(self, ms, frame, fx, colormap):
+        points = self.dataset.get_data_for_time(ms, frame)
+
+        overlay = np.zeros(frame.shape, dtype=np.float32)
+
+        for x, y in points.tolist():
+            cv2.circle(overlay, (int(x * fx), int(y * fx)), radius=int(3 * fx), color=(1.0, 1.0, 1.0), thickness=-1)
+
+        layer = cv2.cvtColor((colormap(overlay[:, :, 0]) * 255).astype(np.uint8), cv2.COLOR_RGBA2BGR)
+        overlay = overlay - self.blend_alpha
+
+        overlay2 = np.clip(overlay * layer.astype(np.float32), 0, 255)
+        frame = np.clip((1.0 - overlay) * frame.astype(np.float32), 0, 255)
+
+        frame = (frame + overlay2).astype(np.uint8)
+        return frame
+
+
+class ImageOverlayVisualization(OverlayVisualization):
+    def __init__(self, dataset: SpatialOverlayDataset):
+        super(ImageOverlayVisualization, self).__init__(dataset)
+
+    def get_overlay(self, ms, frame, fx, colormap):
+
+        overlay = self.dataset.get_data_for_time(ms, frame)
+
+        overlay = overlay - self.blend_alpha
+        frame = (frame + overlay).astype(np.uint8)
+
+        return frame
+
+
+def get_overlay_visualization_for_dataset(dataset:SpatialOverlayDataset):
+    if dataset.vis_type == SpatialOverlayDataset.VIS_TYPE_HEATMAP:
+        return HeatmapOverlayVisualization(dataset)
+
+    elif dataset.vis_type == SpatialOverlayDataset.VIS_TYPE_POINTS:
+        return PointsOverlayVisualization(dataset)
+
+    elif dataset.vis_type == SpatialOverlayDataset.VIS_TYPE_COLOR_RGBA:
+        return ImageOverlayVisualization(dataset)
+
+
 class TimestepUpdateWorkerSingle(QObject):
-    def __init__(self):
+    def __init__(self, settings):
         super(TimestepUpdateWorkerSingle, self).__init__()
         self.signals = TimestepUpdateSignals()
         self.project = None
@@ -28,6 +109,9 @@ class TimestepUpdateWorkerSingle(QObject):
         self.position_frame = -1
         self.fps = 30
 
+        self.overlay_frame_width = settings.OVERLAY_RESOLUTION_WIDTH
+        self.overlay_colormap = cm.get_cmap(settings.OVERLAY_VISUALIZATION_COLORMAP)
+
         self.movie_path = ""
         self.video_capture = None
 
@@ -35,7 +119,7 @@ class TimestepUpdateWorkerSingle(QObject):
         self.update_colormetry = True
 
         self.spatial_datasets = dict() #type:Dict[str, SpatialOverlayDataset]
-        self.current_spatial_dataset = None  # type:SpatialOverlayDataset
+        self.current_spatial_dataset = None  # type:OverlayVisualization or None
 
         self.update_face_rec = False
         self.update_spacial_frequency = False
@@ -79,14 +163,14 @@ class TimestepUpdateWorkerSingle(QObject):
             if len(t) > 0:
                 for overlay in t: #type:SpatialOverlayDataset
                     self.spatial_datasets[overlay.name] = overlay
-                    self.current_spatial_dataset = overlay
+                    self.current_spatial_dataset = get_overlay_visualization_for_dataset(overlay)
 
                 self.signals.onSpatialDatasetsChanged.emit(self.spatial_datasets.keys())
 
     @pyqtSlot(str)
     def on_set_spatial_dataset(self, name):
         if name in self.spatial_datasets:
-            self.current_spatial_dataset = self.spatial_datasets[name]
+            self.current_spatial_dataset = get_overlay_visualization_for_dataset(self.spatial_datasets[name])
         else:
             self.current_spatial_dataset = None
 
@@ -134,6 +218,9 @@ class TimestepUpdateWorkerSingle(QObject):
             print("Exception in Timestep Update", e)
             self.signals.onError.emit([e])
 
+    def on_user_settings_changed(self, settings):
+        self.overlay_frame_width = settings.OVERLAY_RESOLUTION_WIDTH
+
     def get_opencv_frame(self, time_frame):
         """
         Returns the exact frame of the current visualization.
@@ -146,6 +233,8 @@ class TimestepUpdateWorkerSingle(QObject):
             ret, frame = self.video_capture.read()
             if frame is None:
                 return None
+            fx = self.overlay_frame_width / frame.shape[1]
+            frame = cv2.resize(frame, None, None, fx, fx, cv2.INTER_CUBIC)
 
             # Calculate Spacial Frequency if necessary
             if self.update_spacial_frequency:
@@ -165,7 +254,7 @@ class TimestepUpdateWorkerSingle(QObject):
                 frame = heatmap
 
             if self.current_spatial_dataset is not None:
-                frame = self.current_spatial_dataset.get_overlay(frame2ms(time_frame, self.fps), frame)
+                frame = self.current_spatial_dataset.get_overlay(frame2ms(time_frame, self.fps), frame, fx, self.overlay_colormap)
 
             qimage, qpixmap = numpy_to_qt_image(frame)
             return qpixmap

@@ -20,6 +20,12 @@ from PyQt5.QtGui import QFont, QColor
 
 from PyQt5.QtWidgets import QApplication
 
+COLORMAPS_SEQUENTIAL = [
+            'viridis', 'plasma', 'inferno', 'magma', 'cividis',
+    'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
+            'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
+            'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']
+
 Font = namedtuple('Font', ['font_family', 'font_size', 'font_color'])
 Palette = namedtuple('Palette', ['palette_name', 'palette_colors'])
 
@@ -160,7 +166,8 @@ class UserSettings():
         self.USE_ELAN = False
         self.USE_PIPELINES = False
 
-
+        self.OVERLAY_RESOLUTION_WIDTH = 1200
+        self.OVERLAY_VISUALIZATION_COLORMAP = "viridis"
 
         self.dock_widgets_data = []
 
@@ -292,7 +299,6 @@ class UserSettings():
             n_name.extend(self.recent_files_name)
             self.recent_files_name = n_name
 
-            #Update the File Path
             self.recent_files_path.pop(idx)
             n_path = [path]
             n_path.extend(self.recent_files_path)
