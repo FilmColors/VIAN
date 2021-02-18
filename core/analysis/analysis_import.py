@@ -107,4 +107,7 @@ except Exception as e:
         def to_json(self, container_data):
             return pickle.dumps(container_data)
 
-
+try:
+    from core.analysis.audio.audio_tempo import AudioTempoAnalysis
+except Exception as e:
+    log_warning(e)

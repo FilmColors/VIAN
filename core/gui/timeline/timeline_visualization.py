@@ -114,7 +114,7 @@ class TimelineVisualization(TimelineBar):
 
             f = (ms - times[idx0])/(times[idx1] - times[idx0])
             p = p.pointAtPercent(f)
-            val = data[idx0] + (f * (data[idx1] - data[idx0]))
+            val = (data[idx0] + (f * (data[idx1] - data[idx0]))) * self.dataset.d_max
             return p, val
         else:
             return None, None

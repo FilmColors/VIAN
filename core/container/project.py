@@ -716,7 +716,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # self.colormetry_analysis.clear()
         return colormetry
 
-
     #endregion
 
     # Getters for easier changes later in the project

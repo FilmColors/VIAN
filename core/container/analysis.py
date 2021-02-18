@@ -10,7 +10,7 @@ from uuid import uuid4
 from typing import List
 import traceback
 
-from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
+from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS, DataSerialization
 from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT, deprecation_serialization
 from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
@@ -87,7 +87,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         self.project.remove_analysis(self)
 
 
-class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
+class IAnalysisJobAnalysis(AnalysisContainer):
     """
     An analysis result which has been performed on some annotation:
 
@@ -214,12 +214,20 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def get_adata(self):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
+        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
+            return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
+        else:
+            return self.a_class().from_hdf5(self.project.hdf5_manager.load_single(self.unique_id))
 
     def set_adata(self, d):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+
+        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
+            self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+        else:
+            self.project.hdf5_manager.dump_single(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+
         self.data = None
 
     def delete(self):

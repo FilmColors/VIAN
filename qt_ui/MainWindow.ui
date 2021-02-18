@@ -225,6 +225,7 @@
     <addaction name="actionClearColormetry"/>
     <addaction name="separator"/>
     <addaction name="actionStart_AudioExtraction"/>
+    <addaction name="actionAudio_Tempo"/>
     <addaction name="separator"/>
     <addaction name="actionBrowserVisualizations"/>
     <addaction name="actionProjectSummary"/>
@@ -1050,6 +1051,11 @@
   <action name="actionImportEyetracking_Dataset">
    <property name="text">
     <string>Eyetracking Dataset</string>
+   </property>
+  </action>
+  <action name="actionAudio_Tempo">
+   <property name="text">
+    <string>Audio Tempo</string>
    </property>
   </action>
  </widget>

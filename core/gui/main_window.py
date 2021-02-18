@@ -14,7 +14,7 @@ from core.data.importers import *
 from core.data.corpus_client import WebAppCorpusInterface, get_vian_version
 from core.data.computation import version_check
 from core.data.settings import UserSettings, Contributor
-from core.data.audio_handler import AudioHandler
+from core.data.audio_handler2 import AudioHandler
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
@@ -444,7 +444,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
         self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
         self.actionEyetracking.triggered.connect(partial(self.analysis_triggered, EyetrackingAnalysis()))
-        # self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
+        self.actionAudio_Tempo.triggered.connect(partial(self.analysis_triggered, AudioTempoAnalysis()))
         self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
@@ -483,6 +483,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
         # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
+        self.audio_handler.audioExtractingProgress.connect(self.set_audio_extracting_progress)
         self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
 
         self.onMultiExperimentChanged.connect(self.outliner.on_multi_experiment_changed)
@@ -690,13 +691,19 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             log_error("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
+    def set_audio_extracting_progress(self, flt):
+        self.concurrent_task_viewer.update_progress("audio-extraction-task", flt)
+
+
     def set_audio_extracting(self, state):
         if state:
+            self.concurrent_task_viewer.add_task("audio-extraction-task", "Audio Extracion", None, job = None)
             self.actionColormetry.setText("Start Colorimetry (blocked)")
             self.actionClearColormetry.setText("Clear Colorimetry (blocked)")
             self.actionColormetry.setEnabled(False)
             self.actionClearColormetry.setEnabled(False)
         else:
+            self.concurrent_task_viewer.remove_task("audio-extraction-task")
             self.actionColormetry.setText("Start Colorimetry")
             self.actionClearColormetry.setText("Clear Colorimetry")
             self.actionColormetry.setEnabled(True)

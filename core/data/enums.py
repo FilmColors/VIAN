@@ -31,11 +31,21 @@ FILE_EXT_PROJECT = ".eext"
 
 class DataSerialization(Enum):
     """
-    This Enum defines how an object is stored in the sqlite file of the Project. 
-    see :module:~'core.data.project_streaming.SQLiteStreamer'
+    This enum decides on how the data of an IJobAnalysis is stored in the background.
+
+    - **HDF5_MULTIPLE**: The HDF5 File accepts multiple entries of this analysis. Each new analysis is appended to the
+    HDF5 File. In this case, the first dimension of the HDF5 Array corresponds to the entry.
+
+    - **HDF_SINGLE** The HDF5 File accepts exactly on entry of this analysis. In this case the first dimension of the HDF5 Array
+    corresponds to the first data dimension.
+
+    - **FILE** The data is stored as file in the VIANProject.data_dir of the project, using the unique id as filename.
+
     """
-    HDF5 = 0
-    FILE = 1
+
+    HDF5_MULTIPLE = 0
+    HDF5_SINGLE = 1
+    FILE = 2
 
 
 def get_type_as_string(type):
