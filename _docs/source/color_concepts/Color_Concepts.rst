@@ -47,14 +47,14 @@ in describing colors:
    :scale: 80%
    :align: center
    :alt: map to buried treasure
-   
+
    The a*b*-plane. Credits: A Guide to Understanding Color [#]_.
-   
+
 .. figure:: CIE_Lab.jpg
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    The CIE L*a*b* color space, modelled as sphere. Credits: Ly et al. (2020) [#]_.
 
 However, this is an abstraction, or rather idealization of the actual color
@@ -68,9 +68,9 @@ axis on its great circle which stands orthogonal to the luminance axis.
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    The CIE L*a*b* gamut. Credits: Hoffmann (2003) [#]_.
-   
+
 
 An important property of the CIE L*a*b* space is that it is a so called
 «perceptually uniform» representation of colors:
@@ -113,7 +113,7 @@ a*b* plane regarding the values of its average color:
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    Color average analysed screenshots, mapped onto the a*b* plane.
 
 You can imagine it as looking from the top (from the «northpole») of the color
@@ -124,7 +124,7 @@ according to their green-red and yellow-blue properties.
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    Color average analysed screenshots, mapped regarding their saturation values
    over time.
 
@@ -144,7 +144,7 @@ very similar colors.
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    Color average analysed screenshots, mapped regarding their hue values
    over time.
 
@@ -164,7 +164,7 @@ the actual numerical values of that average color in different color schemes.
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    The color average analysis in the Inspector.
 
 
@@ -184,7 +184,7 @@ Consider an image like the following screenshot:
    :scale: 80%
    :align: center
    :alt: map to buried treasure
-   
+
    A bright screenshot.
 
 When the **Color Histogram** analysis has been computed of this image, you can
@@ -194,7 +194,7 @@ find a visualization of it in the inspector widget, below the actual image:
    :scale: 80%
    :align: center
    :alt: map to buried treasure
-   
+
    Color Histogram of a bright screenshot, visualized in the Inspector.
 
 As can be seen in the Histogram (and the screenshot as well, in this case),
@@ -227,7 +227,7 @@ See the figure below to get an idea what superpixels look like.
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    Superpixels visualized. Credits: Halter et al. (2019) [#]_.
 
 In contrast to the before described Histogram, the Palette reveals information
@@ -241,7 +241,7 @@ image, that share that average color.
    :scale: 40%
    :align: center
    :alt: map to buried treasure
-   
+
    Differences between Histogram and Palette, examples of indicative Palette
    patterns marked.
 
@@ -250,15 +250,15 @@ Histogram (marked with **1**). However, this does not indicate there is a
 fairly large pixel area in the original image - in this case, there are rather
 some small black pixel areas (cupboard handles, right side of the TV, hair of
 the man etc.) which accumulated lead to the overall spike of black pixels in
-the Histogram. 
+the Histogram.
 For the Palette, in contrast, there are clear correspondences for large Palette
 color areas in the original image (marked with the arrows under **2**).
-   
+
 .. figure:: colorspace_3d.png
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    The 3D Visualization of superpixels of some Screenshots.
 
 In fact, if you run the **Colorimetry**, this is what happens in the background
@@ -278,7 +278,7 @@ vaguely approximated superpixels and in the Palette widget their mean hues.
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    Palette with increasing superpixels, superpixels are approximated on the
    left.
 
@@ -299,7 +299,7 @@ foreground are blurred, which means they move during the analyzed Segment
    :scale: 60%
    :align: center
    :alt: map to buried treasure
-   
+
    Result of a Z-Projection, visualized in the Inspector on the right side.
    left.
 
@@ -314,6 +314,9 @@ For more information on CIE L*a*b*, see for example this  article in `Wikipedia
 Excellent explanation of core concepts, such as hue, saturation, brighness, etc.
 on `Youtube
 <https://www.youtube.com/watch?v=0IIb0tnLIcU>`_.
+
+Short but insightful explanations of a lot of `color terms
+<http://changingminds.org/explanations/perception/visual/lightness_variants.htm>`_.
 
 Further readings:
 
