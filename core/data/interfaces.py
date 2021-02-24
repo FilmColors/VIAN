@@ -96,7 +96,7 @@ class TimelineDataset(ITimelineItem):
         self.vis_type = vis_type
         self.vis_color = vis_color
 
-    def get_data_range(self, t_start, t_end, norm=True, subsample=True, filter_window=1):
+    def get_data_range(self, t_start, t_end, norm=True, filter_window=1):
         idx_a = int(np.floor(t_start / self.ms_to_idx))
         idx_b = int(np.ceil(t_end / self.ms_to_idx))
 
@@ -107,26 +107,19 @@ class TimelineDataset(ITimelineItem):
         ms = np.subtract(ms, offset)
 
         data = np.array(self.data[idx_a:idx_b].copy())
-        if filter_window > 3:
-            try:
-                data = savgol_filter(np.nan_to_num(data), filter_window, 3)
-            except Exception as e:
-                log_info(e)
 
         if data.shape[0] == 0:
             return np.array([]), np.array([])
-        if data.shape[0] > 1000:
-            k = int(data.shape[0] / 1000)
-            if k % 2 == 0:
-                f = k + 1
-            else:
-                f = k
+
+        frac = data.shape[0] / 20
+        if data.shape[0] > frac:
+            k = filter_window
 
             data = resample(data, data[0::k].shape[0])
-            # data = data[0::k]
             ms = ms[0::k]
         if norm:
-            data /= np.amax(self.data)
+            tmax = np.amax([np.amax(resample(self.data, data[0::filter_window].shape[0])), np.amax(data)])
+            data /= tmax
         try:
             return data, ms
         except Exception as e:

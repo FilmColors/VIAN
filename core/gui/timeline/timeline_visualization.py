@@ -14,8 +14,8 @@ class TimelineVisualizationControl(TimelineControl):
     def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineVisualizationControl, self).__init__(parent,timeline, item, name)
         self.sp_filter = QSlider(Qt.Horizontal)
-        self.sp_filter.setMinimum(0)
-        self.sp_filter.setMaximum(4)
+        self.sp_filter.setMinimum(1)
+        self.sp_filter.setMaximum(20)
 
         self.layout().addWidget(QLabel("Filter", self), 1, 0)
         self.layout().addWidget(self.sp_filter, 1, 1)
@@ -56,7 +56,7 @@ class TimelineVisualization(TimelineBar):
         self.t_start = t_start
         self.t_end = t_end
 
-        filter_window = (np.arange(10) * 2 - 1)[self.control.sp_filter.value()]
+        filter_window = self.control.sp_filter.value()
 
         data, ms = self.dataset.get_data_range(t_start, t_end, filter_window=filter_window)
 
@@ -79,6 +79,7 @@ class TimelineVisualization(TimelineBar):
                      self.rect().height())
 
         qp.fillRect(rect, QtGui.QColor(12, 12, 12))
+        self.update()
         return qimage, qp, data, t_start, t_end, ms
 
     def get_current_value_and_pos(self):

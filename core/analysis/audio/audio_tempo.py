@@ -52,8 +52,10 @@ class AudioTempoAnalysis(IAnalysisJob):
         return args
 
     def process(self, argst, sign_progress):
+
         window = 22050
         window_s = 5
+
         audio = self.hdf5_manager.get_audio()
         if audio is None:
             return

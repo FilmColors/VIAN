@@ -14,6 +14,7 @@ from core.container.project import VIANProject
 from core.container.hdf5_manager import HDF5_FILE_LOCK
 from scipy.signal import savgol_filter
 
+
 class AudioHandler(QObject):
     """
     Handles reading audio data from the movie file.

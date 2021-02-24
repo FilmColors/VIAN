@@ -9,6 +9,7 @@ try:
     from core.analysis.color.palette_analysis import *
     from core.analysis.z_projection import *
     from core.analysis.eyetracking.eyetracking import *
+    from core.analysis.motion.optical_flow import *
     import os
     from core.analysis.import_tensortflow import tf
 
@@ -109,5 +110,6 @@ except Exception as e:
 
 try:
     from core.analysis.audio.audio_tempo import AudioTempoAnalysis
+    from core.analysis.audio.audio_volume import AudioVolumeAnalysis
 except Exception as e:
     log_warning(e)

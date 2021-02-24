@@ -6,6 +6,8 @@ June 2018
 """
 COLOR_PALETTES_MAX_LENGTH = 1024
 
+import cv2
+
 from core.container.project import *
 from core.analysis.color.palette_extraction import *
 from core.visualization.palette_plot import *

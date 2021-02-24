@@ -4,6 +4,8 @@ University of Zurich
 June 2018
 
 """
+import cv2
+
 from typing import List
 from core.data.computation import ms_to_frames, numpy_to_pixmap
 from core.container.project import *

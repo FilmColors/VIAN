@@ -221,11 +221,14 @@
     <addaction name="actionColor_Palette"/>
     <addaction name="actionZProjection"/>
     <addaction name="separator"/>
+    <addaction name="actionOptical_Flow"/>
+    <addaction name="separator"/>
     <addaction name="actionColormetry"/>
     <addaction name="actionClearColormetry"/>
     <addaction name="separator"/>
     <addaction name="actionStart_AudioExtraction"/>
     <addaction name="actionAudio_Tempo"/>
+    <addaction name="actionAudio_Volume"/>
     <addaction name="separator"/>
     <addaction name="actionBrowserVisualizations"/>
     <addaction name="actionProjectSummary"/>
@@ -1056,6 +1059,16 @@
   <action name="actionAudio_Tempo">
    <property name="text">
     <string>Audio Tempo</string>
+   </property>
+  </action>
+  <action name="actionOptical_Flow">
+   <property name="text">
+    <string>Optical Flow</string>
+   </property>
+  </action>
+  <action name="actionAudio_Volume">
+   <property name="text">
+    <string>Audio Volume</string>
    </property>
   </action>
  </widget>

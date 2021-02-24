@@ -442,9 +442,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
         self.actionColor_Histogram.triggered.connect(partial(self.analysis_triggered, ColorHistogramAnalysis()))
         self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
+        self.actionOptical_Flow.triggered.connect(partial(self.analysis_triggered, OpticalFlowAnalysis()))
         self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
         self.actionEyetracking.triggered.connect(partial(self.analysis_triggered, EyetrackingAnalysis()))
         self.actionAudio_Tempo.triggered.connect(partial(self.analysis_triggered, AudioTempoAnalysis()))
+        self.actionAudio_Volume.triggered.connect(partial(self.analysis_triggered, AudioVolumeAnalysis()))
         self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
