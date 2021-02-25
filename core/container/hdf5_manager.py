@@ -6,6 +6,7 @@ import numpy as np
 
 from core.data.enums import DataSerialization
 from core.data.log import log_info
+
 ALL_REGISTERED_ANALYSES = dict()
 
 
@@ -20,6 +21,8 @@ def get_analysis_by_name(name):
         print("No Such Visualization")
         raise ImportError("Analysis " +name+" not existent in the current environment.")
 
+def get_all_analyses():
+    return ALL_REGISTERED_ANALYSES
 
 DEFAULT_SIZE = (50,)
 DS_MOVIE = "movie"

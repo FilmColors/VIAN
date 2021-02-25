@@ -57,7 +57,7 @@ from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 
 from core.concurrent.worker import Worker
-from core.container.hdf5_manager import print_registered_analyses
+from core.container.hdf5_manager import print_registered_analyses, get_all_analyses
 from core.gui.toolbar import WidgetsToolbar
 from core.data.log import log_info
 
@@ -438,16 +438,32 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionAuto_Screenshots.triggered.connect(self.on_auto_screenshot)
 
 
+        #ANALYSES
+        analysis_menues = dict(
+            Color=self.menuColor,
+            Audio=self.menuAudio,
+            Movement=self.menuMovement,
+            Eyetracking=self.menuEyetracking
+        )
+
+        for k, v in get_all_analyses().items():
+            inst = v()
+            if inst.menu not in analysis_menues:
+                analysis_menues[inst.menu] = self.menuAnalysis.addMenu(inst.menu)
+            a = analysis_menues[inst.menu].addAction(inst.name)
+            a.triggered.connect(partial(self.analysis_triggered, v()))
+
         self.actionColormetry.triggered.connect(self.toggle_colormetry)
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
-        self.actionColor_Histogram.triggered.connect(partial(self.analysis_triggered, ColorHistogramAnalysis()))
-        self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
-        self.actionOptical_Flow.triggered.connect(partial(self.analysis_triggered, OpticalFlowAnalysis()))
-        self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
-        self.actionEyetracking.triggered.connect(partial(self.analysis_triggered, EyetrackingAnalysis()))
-        self.actionAudio_Tempo.triggered.connect(partial(self.analysis_triggered, AudioTempoAnalysis()))
-        self.actionAudio_Volume.triggered.connect(partial(self.analysis_triggered, AudioVolumeAnalysis()))
-        self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
+
+        # self.actionColor_Histogram.triggered.connect(partial(self.analysis_triggered, ColorHistogramAnalysis()))
+        # self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
+        # self.actionOptical_Flow.triggered.connect(partial(self.analysis_triggered, OpticalFlowAnalysis()))
+        # self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
+        # self.actionEyetracking.triggered.connect(partial(self.analysis_triggered, EyetrackingAnalysis()))
+        # self.actionAudio_Tempo.triggered.connect(partial(self.analysis_triggered, AudioTempoAnalysis()))
+        # self.actionAudio_Volume.triggered.connect(partial(self.analysis_triggered, AudioVolumeAnalysis()))
+        # self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
         self.actionBrowserVisualizations.triggered.connect(partial(self.on_browser_visualization))

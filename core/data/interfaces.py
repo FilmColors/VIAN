@@ -148,6 +148,7 @@ class IAnalysisJob(QObject):
     M_AUDIO = "Audio"
     M_COLOR = "Color"
     M_MOVEMENT = "Movement"
+    M_EYETRACKING = "Eyetracking"
 
     def __init__(self, name,
                  source_types,

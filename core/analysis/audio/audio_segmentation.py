@@ -25,6 +25,7 @@ class AudioSegmentation(IAnalysisJob):
 
     def __init__(self, resolution=30):
         super(AudioSegmentation, self).__init__("Barcode", [MOVIE_DESCRIPTOR, SEGMENTATION, SEGMENT],
+                                                menu=IAnalysisJob.M_AUDIO,
                                                  dataset_name="Barcodes",
                                                  dataset_shape=(3, 3),
                                                  dataset_dtype=np.uint8,

@@ -30,6 +30,7 @@ array Structure:
 class OpticalFlowAnalysis(IAnalysisJob):
     def __init__(self, resolution=30):
         super(OpticalFlowAnalysis, self).__init__("Optical Flow", [MOVIE_DESCRIPTOR],
+                                                 menu=IAnalysisJob.M_MOVEMENT,
                                                  dataset_name="OpticalFlow",
                                                  dataset_shape=(1,),
                                                  dataset_dtype=np.float16,

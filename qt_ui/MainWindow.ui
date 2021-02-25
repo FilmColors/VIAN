@@ -216,24 +216,42 @@
     <property name="title">
      <string>Analysis</string>
     </property>
-    <addaction name="actionColorFeatures"/>
-    <addaction name="actionColor_Histogram"/>
-    <addaction name="actionColor_Palette"/>
-    <addaction name="actionZProjection"/>
-    <addaction name="separator"/>
-    <addaction name="actionOptical_Flow"/>
-    <addaction name="separator"/>
-    <addaction name="actionColormetry"/>
-    <addaction name="actionClearColormetry"/>
-    <addaction name="separator"/>
-    <addaction name="actionStart_AudioExtraction"/>
-    <addaction name="actionAudio_Tempo"/>
-    <addaction name="actionAudio_Volume"/>
+    <widget class="QMenu" name="menuColor">
+     <property name="title">
+      <string>Color</string>
+     </property>
+     <addaction name="actionColormetry"/>
+     <addaction name="actionClearColormetry"/>
+     <addaction name="separator"/>
+    </widget>
+    <widget class="QMenu" name="menuAudio">
+     <property name="title">
+      <string>Audio</string>
+     </property>
+     <addaction name="actionStart_AudioExtraction"/>
+     <addaction name="separator"/>
+    </widget>
+    <widget class="QMenu" name="menuMovement">
+     <property name="title">
+      <string>Movement</string>
+     </property>
+     <addaction name="separator"/>
+    </widget>
+    <widget class="QMenu" name="menuEyetracking">
+     <property name="title">
+      <string>Eyetracking</string>
+     </property>
+     <addaction name="actionImportEyetracking_Dataset"/>
+     <addaction name="separator"/>
+    </widget>
+    <addaction name="menuColor"/>
+    <addaction name="menuAudio"/>
+    <addaction name="menuMovement"/>
+    <addaction name="menuEyetracking"/>
     <addaction name="separator"/>
     <addaction name="actionBrowserVisualizations"/>
     <addaction name="actionProjectSummary"/>
     <addaction name="separator"/>
-    <addaction name="actionEyetracking"/>
    </widget>
    <widget class="QMenu" name="menuPlayer">
     <property name="title">
@@ -1046,11 +1064,6 @@
     <string>Select File...</string>
    </property>
   </action>
-  <action name="actionEyetracking">
-   <property name="text">
-    <string>Eyetracking</string>
-   </property>
-  </action>
   <action name="actionImportEyetracking_Dataset">
    <property name="text">
     <string>Eyetracking Dataset</string>
@@ -1069,6 +1082,11 @@
   <action name="actionAudio_Volume">
    <property name="text">
     <string>Audio Volume</string>
+   </property>
+  </action>
+  <action name="actionAudio">
+   <property name="text">
+    <string>Audio</string>
    </property>
   </action>
  </widget>

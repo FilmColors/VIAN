@@ -28,6 +28,7 @@ array Structure:
 class AudioVolumeAnalysis(IAnalysisJob):
     def __init__(self, resolution=30):
         super(AudioVolumeAnalysis, self).__init__("Audio Volume", [MOVIE_DESCRIPTOR, SEGMENT],
+                                                  menu=IAnalysisJob.M_AUDIO,
                                                  dataset_name="AudioVolume",
                                                  dataset_shape=(1,),
                                                  dataset_dtype=np.float16,
