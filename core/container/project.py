@@ -154,6 +154,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.notes = ""
 
         self.colormetry_analysis = None         # type: Union[ColormetryAnalysis|None]
+        self.global_analyses = dict()
 
         self.hdf5_manager = None
         self.hdf5_indices_loaded = dict(curr_pos=dict(), uidmapping=dict())
@@ -642,13 +643,23 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param dispatch: if the main window should be informed.
         :return: The AnalysisContainer instance given.
         """
+
         analysis.set_project(self)
         self.analysis.append(analysis)
 
+        # if the analysis has no target, it is global, thus we have to check such an analysis has
+        # alread been created before and replace it if so.
+        if isinstance(analysis, IAnalysisJobAnalysis) and analysis.target_container is None:
+            if analysis.analysis_job_class in self.global_analyses:
+                self.remove_analysis(self.global_analyses[analysis.analysis_job_class])
+                self.global_analyses.pop(analysis.analysis_job_class)
+            self.global_analyses[analysis.analysis_job_class] = analysis
+       
         self.undo_manager.to_undo((self.add_analysis, [analysis]), (self.remove_analysis, [analysis]))
 
         if dispatch:
             self.dispatch_changed()
+
         self.onAnalysisAdded.emit(analysis)
         return analysis
 

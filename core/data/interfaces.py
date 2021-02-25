@@ -145,8 +145,13 @@ class IAnalysisJob(QObject):
     Subclass it to implement your own Analyses. 
     
     """
+    M_AUDIO = "Audio"
+    M_COLOR = "Color"
+    M_MOVEMENT = "Movement"
 
-    def __init__(self, name, source_types,
+    def __init__(self, name,
+                 source_types,
+                 menu = M_COLOR,
                  dataset_name=None, dataset_shape=None, dataset_dtype=None,
                  help_path="",
                  author="No Author",
@@ -170,6 +175,7 @@ class IAnalysisJob(QObject):
             raise ValueError("For HDF5 stored analyses a dataset has to be given")
 
         self.name = name
+        self.menu = menu
         self.source_types = source_types
         self.dataset_name = dataset_name
         self.dataset_shape = dataset_shape
