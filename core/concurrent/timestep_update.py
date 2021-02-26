@@ -1,5 +1,6 @@
 from PyQt5.QtCore import *
 import cv2
+from PyQt5.QtGui import QPainter, QPainterPath, QColor
 from typing import Dict
 from core.data.computation import *
 from core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_spacial_frequency_heatmap2
@@ -36,8 +37,23 @@ class HeatmapOverlayVisualization(OverlayVisualization):
         overlay = np.zeros(frame.shape, dtype=np.float32)
 
         for x, y in points.tolist():
-            cv2.circle(overlay, (int(x * fx), int(y * fx)), radius=int(8 * fx), color=(1.0,1.0,1.0), thickness=-1)
-        overlay = cv2.blur(overlay, (10,10))
+            cv2.circle(overlay, (int(x * fx), int(y * fx)), radius=int(4 * fx), color=(1.0,1.0,1.0), thickness=-1)
+
+        tsize = int(33 * fx)
+        if tsize % 2 == 0:
+            tsize = tsize -1
+
+        overlay = cv2.GaussianBlur(overlay, (tsize, tsize), 0)
+        overlay /= np.amax(overlay)
+
+        for i in range(5):
+            tt = i * (255/5) + 1
+            col = (np.array(colormap(tt / 255)) * 255).astype(np.uint8).tolist()
+
+            ret, thresh = cv2.threshold(overlay[:,:,0] * 255, int(tt), 255, 0)
+            contours, hierarchy, = cv2.findContours(thresh.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_TC89_KCOS)
+
+            cv2.drawContours(frame, contours, -1, (col[2], col[1], col[0]), 1)
 
         layer = cv2.cvtColor((colormap(overlay[:,:,0]) * 255).astype(np.uint8), cv2.COLOR_RGBA2BGR)
         overlay = overlay - self.blend_alpha
@@ -166,6 +182,12 @@ class TimestepUpdateWorkerSingle(QObject):
                     self.current_spatial_dataset = get_overlay_visualization_for_dataset(overlay)
 
                 self.signals.onSpatialDatasetsChanged.emit(self.spatial_datasets.keys())
+
+    @pyqtSlot(object)
+    def on_settings_changed(self, settings):
+        self.overlay_frame_width = settings.OVERLAY_RESOLUTION_WIDTH
+        self.overlay_colormap = cm.get_cmap(settings.OVERLAY_VISUALIZATION_COLORMAP)
+        self.run()
 
     @pyqtSlot(str)
     def on_set_spatial_dataset(self, name):

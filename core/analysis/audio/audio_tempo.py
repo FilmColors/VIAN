@@ -133,13 +133,11 @@ class AudioTempoAnalysis(IAnalysisJob):
         """
         return []
 
-
     def get_timeline_datasets(self, analysis, project) -> List[TimelineDataset]:
         ms_to_idx = 1000
         return [
             TimelineDataset("Audio Tempo (bpm)", analysis.get_adata(), ms_to_idx)
         ]
-
 
     def get_hdf5_description(self):
         return dict(

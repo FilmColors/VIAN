@@ -232,25 +232,6 @@ class NewProjectDialog(EDialogWidget):
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
 
-        # if self.checkBox_FromImages.isChecked():
-        #     if len(self.image_paths) == 0:
-        #         QMessageBox.warning(self, "No Images added",
-        #                             "There are no images selected to generate a movie from.")
-        #         return
-        #     imgs = []
-        #     for p in self.image_paths:
-        #         try:
-        #             imgs.append(cv2.imread(p))
-        #         except Exception as e:
-        #             continue
-        #     if len(imgs) == 0:
-        #         QMessageBox.warning(self, "Failed to read Images",
-        #                             "Failed to read images, are these files really images?")
-        #         return
-        #     path = self.project.folder + self.project_name + ".avi"
-        #     images_to_movie(imgs, path, size = (imgs[0].shape[0], imgs[0].shape[1]))
-        #     self.lineEdit_MoviePath.setText(path)
-
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
 
         if self.elan_segmentation is not None:

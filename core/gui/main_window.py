@@ -1255,6 +1255,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_preferences(self):
         dialog = DialogPreferences(self)
+        dialog.onSettingsChanged.connect(self.frame_update_worker.on_settings_changed)
         dialog.show()
 
     def on_movie_opened(self):

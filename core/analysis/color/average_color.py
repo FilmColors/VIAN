@@ -47,7 +47,8 @@ class ColorFeatureAnalysis(IAnalysisJob):
     """
 
     def __init__(self, resolution = 30):
-        super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
+        super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor",
+                                                   [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorFeatures",
                                                    dataset_shape=(8,),
                                                    dataset_dtype=np.float16,
