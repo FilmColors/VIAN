@@ -80,7 +80,7 @@ class OpticalFlowAnalysis(IAnalysisJob):
                 break
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            
+
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 

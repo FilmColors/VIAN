@@ -1,4 +1,4 @@
-from core.analysis.movie_mosaic.movie_mosaic import *
+# from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
 from core.container.hdf5_manager import vian_analysis
 
