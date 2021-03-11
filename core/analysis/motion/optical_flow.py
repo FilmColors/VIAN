@@ -75,11 +75,12 @@ class OpticalFlowAnalysis(IAnalysisJob):
 
             cap.set(cv2.CAP_PROP_POS_FRAMES, i)
             ret, frame = cap.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             if frame is None:
                 break
 
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            
             if margins is not None:
                 frame = frame[margins[1]:margins[3], margins[0]:margins[2]]
 
