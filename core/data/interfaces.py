@@ -156,7 +156,7 @@ class IAnalysisJob(QObject):
                  dataset_name=None, dataset_shape=None, dataset_dtype=None,
                  help_path="",
                  author="No Author",
-                 version="0.0.1",
+                 version="1.0.0",
                  multiple_result=False,
                  data_serialization=DataSerialization.HDF5_MULTIPLE):
         """
@@ -196,12 +196,12 @@ class IAnalysisJob(QObject):
     def get_name(self):
         return self.name
 
-    def prepare(self, project, targets, fps, class_objs=None) -> Tuple[
-        List[Union[Screenshot, Annotation, Segment]], Dict]:
+    def prepare(self, project, targets, fps, class_objs=None) -> Tuple[List[Union[Screenshot, Annotation, Segment]], Dict]:
         """
         A step that should be performed in the main-thread before the processing takes place. 
         This is a good point to fetch all necessary data from the project and pack it to your needs.
-        
+
+
         :param project: The current Project
         :param targets: The Target IProjectContainer Objects
         :param parameters: Additional Parameters as returned from your ParameterWidget.get_parameters()
@@ -211,9 +211,12 @@ class IAnalysisJob(QObject):
         """
         self.target_class_obj = class_objs
 
+        # We collect all selected targets which are valid, if they are a group we add their contained elements
         res_targets = []
         for t in targets:
-            if isinstance(t, Screenshot) or isinstance(t, Annotation) or isinstance(t, Segment):
+            if isinstance(t, Screenshot) \
+                    or isinstance(t, Annotation) \
+                    or isinstance(t, Segment):
                 res_targets.append(t)
             elif isinstance(t, ScreenshotGroup):
                 res_targets.extend(t.screenshots)
@@ -222,6 +225,7 @@ class IAnalysisJob(QObject):
             elif isinstance(t, Segmentation):
                 res_targets.extend(t.segments)
 
+        # Assemble the data for all elements
         targets, args = [], []
         for t in list(set(res_targets)):
             semseg = None
@@ -244,10 +248,10 @@ class IAnalysisJob(QObject):
 
     def process(self, args, sign_progress):
         """
-        The Processing function, this will be executed in a seperate thread. 
-        Make sure to **NOT** use the ProjectContainers within this Operation.
+        The Processing function, this will be executed in a separate thread.
+        Make sure to **NOT** edit the ProjectContainers within this Operation.
         
-        Also, for User-Convenience call the sign_progress function regularilly to indicate the current progress:
+        Also, for User-Convenience call the sign_progress function regularly to indicate the current progress:
         
         *Example*:
         progress is a number E [0.0, ... , 1.0]
@@ -261,12 +265,13 @@ class IAnalysisJob(QObject):
         if sign_progress is None:
             sign_progress = self.dummy_callback
         return args, sign_progress
-        # log_debug("get_name not implemented by", self)
 
     def modify_project(self, project, result, main_window=None):
         """
         If your Analysis should perform any modifications to the project, except storing the analysis,
-        this is the place to perform them. 
+        this is the place to perform them.
+
+        **Important: ** Make sure to call the super function.
         
         :param project: The Current Project to perform modifications on
         :param result: The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()
@@ -276,7 +281,6 @@ class IAnalysisJob(QObject):
             for r in result:
                 r.set_target_classification_obj(self.target_class_obj)
                 r.set_target_container(project.get_by_id(r.target_container))
-
         else:
             result.set_target_classification_obj(self.target_class_obj)
             result.set_target_container(project.get_by_id(result.target_container))
@@ -298,7 +302,7 @@ class IAnalysisJob(QObject):
         1. subclass QMainWindow and implement your visualization into it.
         2. if you use a WebBased visualization use 
             
-            save your visualitations into the results/ directory of the project
+            save your visualization into the results/ directory of the project
             during the IAnalysisJob.modify_project() or IAnalysisJob.process()
             
             and in this function:
@@ -310,6 +314,8 @@ class IAnalysisJob(QObject):
         :param analysis: The IAnalysisJobAnalysis Object created in IAnalysisJob.process()
         :param result_path: The Path to the results directory of the project
         :param data_path: The Path to the data directory of the project
+        :param project: The VIANProject
+        :param main_window: The Path to the data directory of the project
         :return: A QWidget which will be added to the Visualizations Tab
         """
         log_debug("get_name not implemented by", self)
@@ -319,15 +325,24 @@ class IAnalysisJob(QObject):
         This function is called by VIAN after the creation of the Analysis to register any new datasets
         which should be displayed in the Timeline.
 
-        If the data is not time dependent, this function should not be overloaded.
-        :return: A list of TimelineDataset
+        Overload this function, if the Dataset is time dependent.
+        :return: List[TimelineDataset]
         """
         return []
 
     def get_spatial_overlays(self, analysis, project) -> List[SpatialOverlayDataset]:
+        """
+         This function is called by VIAN after the creation of the Analysis to register any new datasets
+        which should be displayed on top of the player (spatial).
+
+        Overload this function, if the Dataset is time and space dependent.
+        :param analysis: The analysis entity (call analysis.adata()) to load your data
+        :param project: The VIANProject entity
+        :return: List[SpatialOverlayDataset]
+        """
         return []
 
-    def get_preview(self, analysis):
+    def get_preview(self, analysis) -> QWidget:
         """
         The Preview should be a visual representation of your analysis data, which can be displayed in the 
         Inspector, when the Analysis is selected. 
@@ -350,23 +365,11 @@ class IAnalysisJob(QObject):
         return self.source_types
 
     def serialization_type(self):
+        """
+        returns the serialization_type
+        :return:
+        """
         return self.data_serialization
-
-    def serialize(self, data_dict):
-        """
-        Override this Method if there needs to be a custom serialization
-        :param data_dict: 
-        :return: 
-        """
-        return data_dict
-
-    def deserialize(self, data_dict):
-        """
-        Override this Method if there needs to be a custom deserialization
-        :param data_dict: 
-        :return: 
-        """
-        return data_dict
 
     def get_hdf5_description(self):
         """
@@ -430,19 +433,69 @@ class IAnalysisJob(QObject):
         return res
 
     def from_hdf5(self, db_data):
+        """
+        How the data stored in the HDF5 array should be formatted when loading.
+
+        E.g one may want to have a dictionary as follows after loading analysis.get_adata():
+
+        dict(red=db_data[0],
+            green=db_data[1],
+            blue=db_data[2]
+        )
+
+        :param db_data: The HDF5 Array
+        :return: formatted data to you needs. Default: the hdf5 array
+        """
         return db_data
 
     def to_hdf5(self, data):
+        """
+        How to encode your data in the HDF5 Array.
+
+        if your analysis data looks as follows:
+        data = dict(red=10,
+            green=10,
+            blue=10
+        )
+
+        then one could do:
+        return np.array([data['red'], data['green'], data['blue']
+
+        :param data: the input data as passed to the IAnalysisContainerAnalysis in your IAnalysisJob.perform function
+        :return: A HDF5 Dataset matching you definition
+        """
         return data
 
     def to_file(self, data, file_path):
+        """
+        If the data_serialization is set to DataSerialization.FILE, define here how to store your file.
+
+        e.g. if you have a JSON file to store:
+
+        with open(file_path + ".json", "w") as f:
+            json.dump(data, f)
+
+        :param data: the input data as passed to the IAnalysisContainerAnalysis in your IAnalysisJob.perform function
+        :param file_path: A filepath without extension where you can store your data
+        :return: the file_path
+        """
         return file_path
 
     def from_file(self, file_path):
-        return None
+        """
+        If the data_serialization is set to DataSerialization.FILE, define here how to store your file.
 
-    def get_file_path(self, file_path):
-        return file_path
+        e.g. if you have a JSON file to store:
+
+        with open(file_path + ".json", "w") as f:
+            json.dump(data, f)
+
+        :param data: the input data as passed to the IAnalysisContainerAnalysis in your IAnalysisJob.perform function
+        :param file_path: A filepath without extension where you can store your data
+        :return: the file_path
+        """
+
+        return None
 
     def abort(self):
         pass

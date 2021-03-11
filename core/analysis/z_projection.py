@@ -153,8 +153,8 @@ class ZProjectionAnalysis(IAnalysisJob):
         """
         return ZProjectionParameterWidget()
 
-    def deserialize(self, data_dict):
-        return data_dict
+    # def deserialize(self, data_dict):
+    #     return data_dict
 
     def to_file(self, data, file_path):
         file_path = file_path + ".jpg"

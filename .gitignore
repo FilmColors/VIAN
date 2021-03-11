@@ -21,6 +21,7 @@ idea/
 *.mp4
 install/.DS_Store
 _docs/build/*
+_docs/source/_build/*
 dist/*
 build/*
 log-files/*

@@ -75,23 +75,23 @@ class PipelineScript():
             log_error(traceback.format_exc())
         return path
 
-    def serialize(self):
-        """ Returns a dict of json serializable values """
-        return dict(
-            name=self.name,
-            unique_id = self.unique_id,
-            script = self.script,
-            computation_settings = self.computation_setting
-        )
-
-    def deserialize(self, serialization, folder):
-        """ Applies a dict of json serializable values to this instance """
-        self.name = serialization['name']
-        self.unique_id = serialization['unique_id']
-        self.script = serialization['script']
-        self.path = os.path.join(folder, self.name.replace(".py", "") + ".py")
-        self.computation_setting = serialization['computation_settings']
-        return self
+    # def serialize(self):
+    #     """ Returns a dict of json serializable values """
+    #     return dict(
+    #         name=self.name,
+    #         unique_id = self.unique_id,
+    #         script = self.script,
+    #         computation_settings = self.computation_setting
+    #     )
+    #
+    # def deserialize(self, serialization, folder):
+    #     """ Applies a dict of json serializable values to this instance """
+    #     self.name = serialization['name']
+    #     self.unique_id = serialization['unique_id']
+    #     self.script = serialization['script']
+    #     self.path = os.path.join(folder, self.name.replace(".py", "") + ".py")
+    #     self.computation_setting = serialization['computation_settings']
+    #     return self
 
     def __eq__(self, other):
         print(self.name, other.name)

@@ -127,8 +127,8 @@ class ColorHistogramAnalysis(IAnalysisJob):
     def get_parameter_widget(self):
         return ColorHistogramParameterWidget()
 
-    def deserialize(self, data_dict):
-        return data_dict
+    # def deserialize(self, data_dict):
+    #     return data_dict
 
     def get_hdf5_description(self):
         return dict(

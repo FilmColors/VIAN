@@ -147,34 +147,34 @@ class ColorPaletteAnalysis(IAnalysisJob):
     def get_parameter_widget(self):
         return ColorPaletteParameterWidget()
 
-    def serialize(self, data_dict):
-        dist = data_dict['dist']
-        layers = data_dict['tree'][0]
-        all_cols = data_dict['tree'][1]
-        ns = data_dict['tree'][2]
-        if not isinstance(dist, list): dist = dist.tolist()
-        if not isinstance(layers, list): layers = layers.tolist()
-        if not isinstance(all_cols, list): all_cols = all_cols.tolist()
-        if not isinstance(ns, list): ns = ns.tolist()
-
-        d = dict(
-            dist = dist,
-            layers = layers,
-            all_cols = all_cols,
-            ns=ns)
-        for i, v in enumerate(data_dict['tree']):
-            if not isinstance(v, list):
-                v = v.tolist()
-            d[str(i)] = v
-        return d
-
-    def deserialize(self, data_dict):
-        layers = [
-            np.array(data_dict['layers']),
-            np.array(data_dict['all_cols']),
-            np.array(data_dict['ns'])
-        ]
-        return dict(dist = data_dict['dist'], tree=layers)
+    # def serialize(self, data_dict):
+    #     dist = data_dict['dist']
+    #     layers = data_dict['tree'][0]
+    #     all_cols = data_dict['tree'][1]
+    #     ns = data_dict['tree'][2]
+    #     if not isinstance(dist, list): dist = dist.tolist()
+    #     if not isinstance(layers, list): layers = layers.tolist()
+    #     if not isinstance(all_cols, list): all_cols = all_cols.tolist()
+    #     if not isinstance(ns, list): ns = ns.tolist()
+    #
+    #     d = dict(
+    #         dist = dist,
+    #         layers = layers,
+    #         all_cols = all_cols,
+    #         ns=ns)
+    #     for i, v in enumerate(data_dict['tree']):
+    #         if not isinstance(v, list):
+    #             v = v.tolist()
+    #         d[str(i)] = v
+    #     return d
+    #
+    # def deserialize(self, data_dict):
+    #     layers = [
+    #         np.array(data_dict['layers']),
+    #         np.array(data_dict['all_cols']),
+    #         np.array(data_dict['ns'])
+    #     ]
+    #     return dict(dist = data_dict['dist'], tree=layers)
 
     def get_hdf5_description(self):
         return dict(

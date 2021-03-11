@@ -256,11 +256,6 @@ class FileAnalysis(IAnalysisJobAnalysis):
         self._file_path = os.path.join(self.project.data_dir, str(self.unique_id))
         return self.a_class().from_file(self._file_path)
 
-    def get_file_path(self):
-        if self.a_class is None:
-            self.a_class = get_analysis_by_name(self.analysis_job_class)
-        return self.a_class().get_file_path(self._file_path)
-
     def save(self, file_path):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
