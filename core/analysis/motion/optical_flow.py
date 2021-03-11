@@ -148,14 +148,12 @@ class OpticalFlowAnalysis(IAnalysisJob):
         """
         return []
 
-
     def get_timeline_datasets(self, analysis, project) -> List[TimelineDataset]:
         ms_to_idx = 1000 / (project.movie_descriptor.fps / self.resolution)
 
         return [
             TimelineDataset("Optical Flow (mean)", analysis.get_adata(), ms_to_idx)
         ]
-
 
     def get_hdf5_description(self):
         return dict(
