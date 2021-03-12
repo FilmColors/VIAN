@@ -2,17 +2,18 @@
 from core.analysis.colorimetry.colormetry2 import *
 from core.container.hdf5_manager import vian_analysis
 
-try:
-    from core.analysis.semantic_segmentation import *
-    from core.analysis.color.average_color import *
-    from core.analysis.color.histogram_analysis import *
-    from core.analysis.color.palette_analysis import *
-    from core.analysis.z_projection import *
-    from core.analysis.eyetracking.eyetracking import *
-    from core.analysis.motion.optical_flow import *
-    import os
-    from core.analysis.import_tensortflow import tf
 
+from core.analysis.color.average_color import *
+from core.analysis.color.histogram_analysis import *
+from core.analysis.color.palette_analysis import *
+from core.analysis.z_projection import *
+from core.analysis.eyetracking.eyetracking import *
+from core.analysis.motion.optical_flow import *
+import os
+
+try:
+    from core.analysis.import_tensortflow import tf
+    from core.analysis.semantic_segmentation import *
 except Exception as e:
     print("Import Failed", e)
 

@@ -1,5 +1,7 @@
 miniconda/
 vian_update.zip
+venv/*
+venv37/*
 .idea/*
 .idea/workspace.xml
 .idea/workspace.xml
