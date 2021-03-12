@@ -87,22 +87,6 @@ except Exception as e:
             """
             return SemanticSegmentationParameterWidget()
 
-        # def serialize(self, data_dict):
-        #     data = dict(
-        #         mask=pickle.dumps(data_dict['mask']),
-        #         frame_sizes=data_dict['frame_sizes'],
-        #         dataset=data_dict['dataset']
-        #     )
-        #     return data
-        #
-        # def deserialize(self, data_dict):
-        #     data = dict(
-        #         mask=pickle.loads(data_dict['mask']),
-        #         frame_sizes=data_dict['frame_size'],
-        #         dataset=data_dict['dataset']
-        #     )
-        #     return data
-
         def from_json(self, database_data):
             return pickle.loads(database_data)
 

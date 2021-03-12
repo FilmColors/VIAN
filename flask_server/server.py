@@ -274,8 +274,11 @@ class FlaskWebWidget(EDockWidget):
         # there is a resolved issue on QT tracker
         # In a year or two, High sierra is gone anyway...
         self.mac_disable_web = False
-        if int(platform.mac_ver()[0].split(".")[1])<=13:
-            self.mac_disable_web = True
+        try:
+            if int(platform.mac_ver()[0].split(".")[1])<=13:
+                self.mac_disable_web = True
+        except Exception as e:
+            print(e)
         if not self.mac_disable_web:
             self.view = QWebEngineView(self)
             self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
