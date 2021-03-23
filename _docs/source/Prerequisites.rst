@@ -8,7 +8,7 @@ Installation
 Make sure you have at least the following generations of OS, or newer:
 
 - **Windows**: Windows 8
-- **MacOS**: SnowLion
+- **MacOS**: High Sierra
 - **Ubuntu**: 16.04
 
 The following Software Tools need to be present (if not, normally they are being installed during the installation of VIAN):
@@ -41,15 +41,13 @@ Minimal Requirements:
 
 - 5 GB Disc Storage
 - 8 GB Ram
-- Decent Processor
+
 
 Recommended Requirements:
 
-- 5 GB Disc Storage
+- enough Disc Storage for your usage (depending on how many / which films you want to annotate, there might be a lot of disk space needed)
 - 16 GB Ram
-- Very decent Processor :-)
 
-- Since VIAN computes the colorimetry of each frame of the movie when you start a new project, this process may take some while.
 
 
 
