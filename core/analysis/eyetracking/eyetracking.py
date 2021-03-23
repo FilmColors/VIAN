@@ -262,12 +262,12 @@ class DialogImportEyetracking(EDialogWidget):
             except Exception as e:
                 print(e)
 
-    def on_import(self):
+    def on_import(self, sfilter=None):
         if not os.path.isfile(self.import_path) or not os.path.isdir(self.stimuli_directory):
             return
 
         handler = XEyeTrackingHandler()
-        handler.import_(self.import_path, delimiter="\t")
+        handler.import_(self.import_path, delimiter="\t", sfilter=sfilter)
 
 
         stimuli = glob.glob(self.stimuli_directory + "/*")

@@ -374,6 +374,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExportCSV.triggered.connect(self.on_export_csv)
         self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
         self.actionProject_Summary.triggered.connect(self.on_export_summary)
+        self.actionExportVIANWebApp.triggered.connect(self.on_export_vianwebapp)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -1901,6 +1902,8 @@ class MainWindow(QtWidgets.QMainWindow):
             QMessageBox.information(self, "Summary Exported", "The Summary has been exported to {f}".format(f=p))
         except Exception as e:
             log_error(e)
+    def on_export_vianwebapp(self):
+        self.project.store_project(bake=True)
 
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))

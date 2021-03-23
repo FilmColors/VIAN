@@ -270,8 +270,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.main_window.onTimeStep.connect(self.on_timestep_update)
 
-        self.main_window.actionIntervalSegmentStart.triggered.connect(self.on_interval_segment_start)
-        self.main_window.actionIntervalSegmentEnd.triggered.connect(self.on_interval_segment_end)
+        try:
+            self.main_window.actionIntervalSegmentStart.triggered.connect(self.on_interval_segment_start)
+            self.main_window.actionIntervalSegmentEnd.triggered.connect(self.on_interval_segment_end)
+        except Exception as e:
+            print(e)
 
         self.time_label = QLabel("00:00:00::1000", self)
         self.time_label.setMinimumWidth(150)

@@ -157,15 +157,14 @@ class ZProjectionAnalysis(IAnalysisJob):
     #     return data_dict
 
     def to_file(self, data, file_path):
-        file_path = file_path + ".jpg"
+        file_path = file_path + self.get_extension()
         cv2.imwrite(file_path, data)
         return file_path
 
     def from_file(self, file_path):
-        file_path = file_path + ".jpg"
+        file_path = file_path + self.get_extension()
         img = cv2.imread(file_path)
         return img
-
 
 class ZProjectionParameterWidget(ParameterWidget):
     """

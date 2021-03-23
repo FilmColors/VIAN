@@ -65,7 +65,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
     def get_preview(self):
         pass
 
-    def serialize(self):
+    def serialize(self, bake=False):
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
@@ -155,7 +155,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
             self.a_class = get_analysis_by_name(self.analysis_job_class)
         return self.a_class()
 
-    def serialize(self):
+    def serialize(self, bake=False):
         if self.target_classification_object is not None:
             class_obj_id = self.target_classification_object.unique_id
         else:
@@ -169,22 +169,38 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         else:
             target_id = -1
 
-        hdf5_location = self.project.hdf5_manager.location_of(self.unique_id)
+        if bake:
+            data = dict(
+                name=self.name,
+                unique_id=self.unique_id,
 
-        data = dict(
-            name=self.name,
-            unique_id=self.unique_id,
+                data=self.get_data_raw().tolist(),
 
-            hdf5_location = hdf5_location,
+                vian_serialization_type=self.__class__.__name__,
+                vian_analysis_type=self.analysis_job_class,
+                parameters=self.parameters,
 
-            vian_serialization_type=self.__class__.__name__,
-            vian_analysis_type=self.analysis_job_class,
-            parameters=self.parameters,
+                notes=self.notes,
+                container=target_id,
+                classification_obj=class_obj_id
+            )
+        else:
+            hdf5_location = self.project.hdf5_manager.location_of(self.unique_id)
 
-            notes=self.notes,
-            container =target_id,
-            classification_obj = class_obj_id
-        )
+            data = dict(
+                name=self.name,
+                unique_id=self.unique_id,
+
+                hdf5_location = hdf5_location,
+
+                vian_serialization_type=self.__class__.__name__,
+                vian_analysis_type=self.analysis_job_class,
+                parameters=self.parameters,
+
+                notes=self.notes,
+                container =target_id,
+                classification_obj = class_obj_id
+            )
 
         return data
 
@@ -218,6 +234,14 @@ class IAnalysisJobAnalysis(AnalysisContainer):
             return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
         else:
             return self.a_class().from_hdf5(self.project.hdf5_manager.load_single(self.unique_id))
+
+    def get_data_raw(self):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
+            return np.array(self.project.hdf5_manager.load(self.unique_id))
+        else:
+            return np.array(self.project.hdf5_manager.load_single(self.unique_id))
 
     def set_adata(self, d):
         if self.a_class is None:
@@ -261,6 +285,12 @@ class FileAnalysis(IAnalysisJobAnalysis):
             self.a_class = get_analysis_by_name(self.analysis_job_class)
         return self.a_class().to_file(self.get_adata(), file_path)
 
+    def serialize(self, bake=False):
+        d = super(FileAnalysis, self).serialize()
+        if bake:
+            d['store_url'] = self.save(self.project.get_bake_path(self, ""))
+        return d
+
 
 class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
     def __init__(self, name = "NewAnalysisJobResult", results = None, analysis_job_class = None, parameters = None, container = None, target_classification_object = None, dataset = ""):
@@ -283,11 +313,15 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
         self.project.hdf5_manager.dump(d, self.a_class().dataset_name, self.unique_id)
         self.data = None
 
-    def serialize(self):
+    def serialize(self, bake=False):
         d = super(SemanticSegmentationAnalysisContainer, self).serialize()
         d['dataset'] = self.dataset
         d['entry_shape'] = self.entry_shape
         d['vian_serialization_type'] = SemanticSegmentationAnalysisContainer.__name__
+
+        if bake:
+            d['store_url'] = self.project.get_bake_path(self, ".png")
+            cv2.imwrite(d['store_url'], self.get_adata())
         return d
 
     def deserialize(self, serialization, project):
@@ -409,7 +443,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.has_finished = False
         self.current_idx = 0
 
-    def serialize(self):
+    def serialize(self, bake=False):
         serialization = dict(
             name=self.name,
             unique_id=self.unique_id,

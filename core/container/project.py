@@ -26,6 +26,8 @@ from .node_scripts import *
 # from core.data.exporters import ExportDevice
 VIAN_PROJECT_EXTENSION = ".eext"
 
+
+
 class VIANProject(QObject, IHasName, IClassifiable):
     """
     This Class hold the Complete VIAN Project.
@@ -200,6 +202,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
             os.mkdir(self.shots_dir)
         if not os.path.isdir(self.export_dir):
             os.mkdir(self.export_dir)
+
+    def get_bake_path(self, entity, file_extension):
+        directory = os.path.join(self.export_dir, "bake")
+        if not os.path.isdir(directory):
+            os.mkdir(directory)
+        if isinstance(entity, str):
+            return os.path.join(directory, entity + file_extension)
+        else:
+            return os.path.join(directory, str(entity.unique_id) + file_extension)
 
     def get_all_containers(self, types = None):
         result = []
@@ -1005,13 +1016,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region IO
-    def store_project(self, path = None, return_dict = False):
+    def store_project(self, path = None, return_dict = False, bake=False):
         """
         Stores the project json to the given filepath.
         if no path is given, the default path is used.
 
         :param settings:
-        :param path: 
+        :param path:
+        :param bake:
         :return: 
         """
         project = self
@@ -1032,14 +1044,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
             a_layer.append(a.serialize())
 
         for b in project.screenshots:
-            src, img = b.serialize()
+            src, img = b.serialize(bake=bake)
             screenshots.append(src)
 
         for c in project.segmentation:
             segmentations.append(c.serialize())
 
         for d in project.analysis:
-            analyses.append(d.serialize())
+            analyses.append(d.serialize(bake=bake))
 
         for e in project.screenshot_groups:
             screenshot_groups.append(e.serialize())
@@ -1087,8 +1099,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
             project_path = path + ".eext"
 
             try:
-                with open(project_path, 'w') as f:
-                    json.dump(data, f)
+                if bake:
+                    with open(self.get_bake_path(self.name, ".json"), 'w') as f:
+                        json.dump(data, f)
+                else:
+                    with open(project_path, 'w') as f:
+                        json.dump(data, f)
             except Exception as e:
                 print("Exception during Storing: ", str(e))
                 raise e

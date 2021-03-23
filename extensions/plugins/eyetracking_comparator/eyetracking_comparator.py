@@ -1,3 +1,8 @@
+if __name__ == '__main__':
+    import sys, os
+    os.chdir("../../../")
+
+
 import cv2
 import numpy as np
 
@@ -10,8 +15,9 @@ from core.data.plugin import *
 from core.data.computation import numpy_to_pixmap, ms_to_frames
 from core.gui.ewidgetbase import EGraphicsView
 
+from core.gui.timeline.timeline import TimelineContainer
 import pandas as pd
-
+from core.data.settings import UserSettings
 from extensions.plugins.eyetracking_comparator.eyetracking import XEyeTrackingHandler
 
 
@@ -38,9 +44,19 @@ class EyetrackingRenderer(EGraphicsView):
         pass
 
 class EyetrackingComparator(QMainWindow):
+    onTimeStep = pyqtSignal(int)
+    actionIntervalSegmentStart = pyqtSignal(int)
+    # onTimeStep = pyqtSignal(int)
+
     def __init__(self, parent, extension):
         super(EyetrackingComparator, self).__init__(parent)
         self.extension = extension
+        self.dock_widgets = []
+        self.settings = UserSettings()
+        self.player = None
+
+        self.timeline = TimelineContainer(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.timeline)
 
         self.fixations = None
         self.fixations_sampled = None
@@ -86,8 +102,10 @@ class EyetrackingComparator(QMainWindow):
 
         self.open("E:\Programming\Git\ERC_FilmColors/resources\eyetracking\snippets/14_1_2_UneFemmeEstUneFemme_1961_DVD.mp4",
                   None)
-        self.load_fixations("eyetracking-fixations.txt")
+        # self.load_fixations("eyetracking-fixations.txt")
 
+    def on_interval_segment(self):
+        pass
 
     def change_stimulus(self, s):
         self.open( m1 = os.path.join("E:\Programming\Datasets\eye-tracking", s) + ".mp4")
@@ -187,7 +205,9 @@ class EyetrackingComparator(QMainWindow):
 
 if __name__ == '__main__':
     import sys
+    # os.chdir("../../../")
 
+    print("Currdir", os.path.abspath(os.curdir))
     def my_exception_hook(exctype, value, traceback):
         # Print the error and traceback
         print((exctype, value, traceback))
@@ -206,7 +226,7 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
 
-    set_style_sheet(app, "../../../qt_ui/themes/qt_stylesheet_very_dark.css")
+    set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css")
 
     main = EyetrackingComparator(None, None)
     main.show()

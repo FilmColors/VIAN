@@ -20,8 +20,10 @@ class XEyeTrackingHandler():
             if hasattr(self, key):
                 setattr(self, key, val)
 
-    def import_(self, file_path, **kwargs):
+    def import_(self, file_path, sfilter=None, **kwargs):
         self.fixations = pd.read_csv(file_path, **kwargs)
+        if sfilter is not None:
+            self.fixations = self.fixations[self.fixations['Stimulus'].str.contains(sfilter)]
 
 
     def import_movie_meta(self, files):
@@ -49,9 +51,10 @@ class XEyeTrackingHandler():
 
 
     def subsample(self, sample_fps = 0):
-        """
+        """-+6*-+
+        .30
         Samples the fixations to a given frame_rate
-        :param sample_fps: the sampling frequency, if higher than the FPS of the segmented movie, it is clamped, if sample_fps = 0, the frame rate is used, default: 0
+Exception   Q        :param sample_fps: the sampling frequency, if higher than the FPS of the segmented movie, it is clamped, if sample_fps = 0, the frame rate is used, default: 0
         :return:
         """
         if self.fixations is None:
@@ -59,12 +62,10 @@ class XEyeTrackingHandler():
         if self.movie_meta is None:
             raise ValueError("Import the movie meta data first")
 
-        self.fixations_sampled = pd.DataFrame(["Stimulus", "FixationX", "FixationY", "FramePos", "isBlackWhite"])
+        self.fixations_sampled = pd.DataFrame(["Stimulus", "FixationX", "FixationY", "FramePos", "Variant"])
         print(self.fixations_sampled)
 
         result = dict()
-
-
 
         for index, r in self.fixations.iterrows():
             try:
@@ -104,7 +105,7 @@ class XEyeTrackingHandler():
             for i in range(n):
                 result[stimulus].append(dict(
                     Stimulus = stimulus,
-                    isBlackWhite = is_bw,
+                    Variant = is_bw,
                     FixationX=int(x * fw),
                     FixationY=int(y * fh),
                     FramePos = f0 + (i * f_step)

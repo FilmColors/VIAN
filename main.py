@@ -13,7 +13,9 @@ Visualization and MultimediaLab
 """
 
 import os
+
 import sys
+
 import time
 import logging
 import traceback as tb
@@ -30,6 +32,7 @@ from core.gui.main_window import MainWindow, version
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ["QT_MAC_WANTS_LAYER"] = "1"
+
 
 from datetime import datetime
 from threading import Thread
