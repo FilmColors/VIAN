@@ -5,7 +5,7 @@ import gc
 import numpy as np
 
 from core.data.enums import DataSerialization
-from core.data.log import log_info
+from core.data.log import log_info, log_warning
 
 ALL_REGISTERED_ANALYSES = dict()
 
@@ -19,7 +19,7 @@ def get_analysis_by_name(name):
         return ALL_REGISTERED_ANALYSES[name]
     else:
         print("No Such Visualization")
-        raise ImportError("Analysis " +name+" not existent in the current environment.")
+        log_warning("Analysis " +name+" not existent in the current environment.")
 
 def get_all_analyses():
     return ALL_REGISTERED_ANALYSES

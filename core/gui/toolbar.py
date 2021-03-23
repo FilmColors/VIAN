@@ -14,8 +14,7 @@ from collections import namedtuple
 from core.gui.perspectives import Perspective
 
 from core.gui.ewidgetbase import EToolBar
-from core.data.computation import create_icon
-
+from core.data.computation import create_icon, is_vian_light
 if TYPE_CHECKING:
     from core.gui.main_window import MainWindow
 
@@ -31,8 +30,11 @@ class WidgetsToolbar(EToolBar):
         self.a_player_controls = self.addAction(create_icon("qt_ui/icons/icon_player_controls.png"), "Player Controls")
         self.a_inspector = self.addAction(create_icon("qt_ui/icons/icon_inspector.png"), "Inspector")
 
+
         self.addSeparator()
         self.a_screenshot_manager = self.addAction(create_icon("qt_ui/icons/icon_screenshot_manager.png"), "Screenshot Manager")
+
+
         self.a_colorimetry = self.addAction(create_icon("qt_ui/icons/icon_colorimetry.png"), "Colorimetry")
         self.a_analyses = self.addAction(create_icon("qt_ui/icons/icon_analyses.png"), "Analyses")
         self.a_classification = self.addAction(create_icon("qt_ui/icons/icon_classification.png"), "Classification")
@@ -87,6 +89,15 @@ class WidgetsToolbar(EToolBar):
         self.hook_visibility(self.main_window.corpus_widget, self.a_corpus)
         self.hook_visibility(self.main_window.query_widget, self.a_query)
         self.hook_visibility(self.main_window.inspector, self.a_inspector)
+
+
+        if is_vian_light():
+            self.a_colorimetry.setVisible(False)
+            self.a_analyses.setVisible(False)
+            self.a_classification.setVisible(False)
+            self.a_query.setVisible(False)
+            self.a_corpus.setVisible(False)
+            self.a_cl_obj.setVisible(False)
 
         # self.main_window = main_window
         self.main_window.vocabulary_manager.visibilityChanged.connect(partial(self.on_visibility_changed, self.main_window.vocabulary_manager, self.a_vocabulary))

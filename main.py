@@ -14,6 +14,9 @@ Visualization and MultimediaLab
 
 import os
 
+# Comment this out for the full VIAN Version
+# os.environ['VIAN_LIGHT'] = "1"
+
 import sys
 
 import time
