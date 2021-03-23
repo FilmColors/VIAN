@@ -1,25 +1,33 @@
 # from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
 from core.container.hdf5_manager import vian_analysis
-
+from core.data.computation import is_vian_light
 
 from core.analysis.color.average_color import *
 from core.analysis.color.histogram_analysis import *
 from core.analysis.color.palette_analysis import *
 from core.analysis.z_projection import *
 from core.analysis.eyetracking.eyetracking import *
+
+
 from core.analysis.motion.optical_flow import *
 import os
 
-try:
-    from core.analysis.import_tensortflow import tf
-    from core.analysis.semantic_segmentation import *
-except Exception as e:
-    print("Import Failed", e)
 
+tf_loaded = False
+if not is_vian_light():
+    try:
+        from core.analysis.import_tensortflow import tf
+        from core.analysis.semantic_segmentation import *
+
+        tf_loaded = True
+    except Exception as e:
+        print("Import Failed", e)
+        pass
+
+if not tf_loaded:
     from core.data.enums import DataSerialization
     from core.analysis.deep_learning.labels import *
-
 
     @vian_analysis
     class SemanticSegmentationAnalysis(IAnalysisJob):
@@ -93,8 +101,7 @@ except Exception as e:
         def to_json(self, container_data):
             return pickle.dumps(container_data)
 
-try:
-    from core.analysis.audio.audio_tempo import AudioTempoAnalysis
-    from core.analysis.audio.audio_volume import AudioVolumeAnalysis
-except Exception as e:
-    log_warning(e)
+
+from core.analysis.audio.audio_tempo import AudioTempoAnalysis
+from core.analysis.audio.audio_volume import AudioVolumeAnalysis
+

@@ -6,6 +6,7 @@ from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.auto_segmentation import DialogAutoSegmentation
 from core.analysis.analysis_import import *
+from core.data.computation import is_vian_light
 
 from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
@@ -132,9 +133,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.setAttribute(Qt.WA_MacFrameworkScaled)
             self.setAttribute(Qt.WA_MacOpaqueSizeGrip)
 
+
         self.plugin_menu = self.extension_list.get_plugin_menu(self.menuWindows)
         self.menuBar().addMenu(self.plugin_menu)
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
+        if is_vian_light():
+            self.plugin_menu.menuAction().setVisible(False)
 
         QApplication.instance().setAttribute(Qt.AA_DontUseNativeMenuBar)
         self.dock_widgets = []
@@ -204,16 +208,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_widget = None
         self.summary_dock = None
 
-        # self.corpus_visualizer = VIANVisualizer2(self)
-        # self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
-        #
-        # self.corpus_visualizer_dock = EDockWidget(self, False)
-        # self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
-        # self.corpus_visualizer_dock.setWindowTitle("Corpus Visualizer Query")
-        # self.corpus_visualizer_result_dock = EDockWidget(self, False)
-        # self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
-        # self.corpus_visualizer_result_dock.setWindowTitle("Corpus Visualizer Results")
-
         self.progress_popup = None
 
         self.colorimetry_live = None
@@ -235,22 +229,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_thread = QThread()
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
-
-
-        # self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
 
         self.audio_handler = AudioHandler(resolution=0.1, callback=print)
-        self.audio_handler_thread = QThread()
-        self.audio_handler.moveToThread(self.audio_handler_thread)
-        self.audio_handler_thread.start()
+        if not is_vian_light():
+            self.audio_handler_thread = QThread()
+            self.audio_handler.moveToThread(self.audio_handler_thread)
+            self.audio_handler_thread.start()
 
         self.flask_server = FlaskServer(None)
-        self.flask_server_thread = QThread()
-        self.flask_server.moveToThread(self.flask_server_thread)
-        self.flask_server_thread.start()
-        self.onStartFlaskServer.connect(self.flask_server.run_server)
-        self.onStartFlaskServer.emit()
+        if not is_vian_light():
+            self.flask_server_thread = QThread()
+            self.flask_server.moveToThread(self.flask_server_thread)
+            self.flask_server_thread.start()
+            self.onStartFlaskServer.connect(self.flask_server.run_server)
+            self.onStartFlaskServer.emit()
+
 
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
@@ -454,17 +448,13 @@ class MainWindow(QtWidgets.QMainWindow):
             a = analysis_menues[inst.menu].addAction(inst.name)
             a.triggered.connect(partial(self.analysis_triggered, v()))
 
+        if is_vian_light():
+            for k, v in analysis_menues.items():
+                v.menuAction().setVisible(False)
+
         self.actionColormetry.triggered.connect(self.toggle_colormetry)
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
 
-        # self.actionColor_Histogram.triggered.connect(partial(self.analysis_triggered, ColorHistogramAnalysis()))
-        # self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
-        # self.actionOptical_Flow.triggered.connect(partial(self.analysis_triggered, OpticalFlowAnalysis()))
-        # self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
-        # self.actionEyetracking.triggered.connect(partial(self.analysis_triggered, EyetrackingAnalysis()))
-        # self.actionAudio_Tempo.triggered.connect(partial(self.analysis_triggered, AudioTempoAnalysis()))
-        # self.actionAudio_Volume.triggered.connect(partial(self.analysis_triggered, AudioVolumeAnalysis()))
-        # self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
         self.actionBrowserVisualizations.triggered.connect(partial(self.on_browser_visualization))
@@ -475,18 +465,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.actionSemanticSegmentation = self.menuAnalysis.addAction("Semantic Segmentation")
             self.actionSemanticSegmentation.triggered.connect(partial(self.analysis_triggered, SemanticSegmentationAnalysis()))
 
-            # self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
-            # self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
-            # self.create_facial_identification_dock()
-            # self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
-            # self.facial_identification_dock.identificator.onModelTrained.connect(self.frame_update_worker.load_face_rec_model)
-
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
 
-        # self.actionUpdate.triggered.connect(self.update_vian)
-        # self.actionCheck_for_Beta.triggered.connect(partial(self.update_vian, True, True))
+
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
@@ -495,12 +478,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClearRecent.triggered.connect(self.clear_recent)
         self.actionSet_Letterbox.triggered.connect(self.on_set_letterbox)
 
-        # Corpus
-        # self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
-        # self.actionOpenLocal.triggered.connect(self.open_local_corpus)
-        # self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
-        # self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
-        # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
         self.audio_handler.audioExtractingProgress.connect(self.set_audio_extracting_progress)
         self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
@@ -571,7 +548,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onMovieOpened.connect(self.audio_handler.project_changed)
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
-        # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
         self.player.stopped.connect(self.on_pause)
 
         self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, False))
@@ -605,8 +581,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
         self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
-        # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
-        #                            QColor(200,200,200,100))
 
         self.update_recent_menu()
 
@@ -614,7 +588,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.setState(False)
 
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
-        # self.update_vian(False)
 
         self.project.undo_manager.clear()
         self.close_project()
