@@ -2,19 +2,22 @@
 import glob
 import sys
 
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+
 block_cipher = None
 
 BUILD_PYTHON_DIR = os.environ['vian_build_dir']
 print(BUILD_PYTHON_DIR)
 
 if sys.platform.startswith("win"):
-    from PyInstaller.utils.hooks import collect_submodules, collect_data_files
     tf_hidden_imports = collect_submodules('tensorflow_core')
     tf_datas = collect_data_files('tensorflow_core', subdir=None, include_py_files=True)
 else:
     tf_hidden_imports = []
     tf_datas = []
 
+
+librosa_data = collect_data_files('librosa')
 binaries = []
 hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
@@ -30,7 +33,7 @@ data_paths = [
     ('qt_ui', 'qt_ui'),
     ('flask_server/static', 'flask_server/static'),
     ('flask_server/templates', 'flask_server/templates')
-] + tf_datas
+] + tf_datas + librosa_data
 
 
 console = False
