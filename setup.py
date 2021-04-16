@@ -13,11 +13,15 @@ requirements = [
     'fastcluster',
     'moviepy',
     'python-vlc',
+    'librosa',
+    'bokeh==2.2.1',
+    'matplotlib',
+    'numpy'
 ]
 
 setup(
     name='VIAN',
-    version='0.9.1',
+    version='0.9.3',
     packages=['core', 'core.gui', 'core.gui.misc', 'core.gui.dialogs', 'core.gui.timeline', 'core.data', 'core.data.io',
               'core.analysis', 'core.analysis.audio', 'core.analysis.color', 'core.analysis.colorimetry',
               'core.analysis.movie_mosaic', 'core.analysis.deep_learning', 'core.analysis.pipeline_scripts',
@@ -30,6 +34,6 @@ setup(
     author='Gaudenz',
     install_requires=requirements,
     author_email='gaudenz.halter@live.com',
-    description='A video annotator with a focus on visual properties of film material',
+    description='A video annotator with a focus on the aesthetics of film material',
     include_package_data=True
 )

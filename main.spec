@@ -51,7 +51,7 @@ if sys.platform == "win32":
     binaries += [
         (VLC_ROOT + "\plugins", "plugins"),
         (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/sklearn/.libs/vcomp140.dll"), "."),
-        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/cv2/opencv_videoio_ffmpeg420_64.dll"), ".")
+        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/cv2/opencv_videoio_ffmpeg440_64.dll"), ".")
     ]
     icon='qt_ui/images/main_round.ico'
 

@@ -259,8 +259,8 @@ class SegmentationExporter(ExportDevice):
                     if self.t_duration:
                         add(result, "duration_frame", ms_to_frames(s.duration, self.fps))
 
-                for b in s.get_annotations():  # type: AnnotationBody
-                    column = "annotation_{}".format(b.name)
+                for i, b in enumerate(s.get_annotations()):  # type: AnnotationBody
+                    column = "annotation_{i}_{f}".format(i=i, f=b.name)
                     bodies_added.add(column)
                     add(result, column, b.content)
 
@@ -437,6 +437,7 @@ def build_file_name(naming, screenshot, movie_descriptor):
     file_name = file_name.replace("All Shots_", "_")
 
     return file_name
+
 
 def build_segment_nomenclature(s:Segment):
     return str(s.project.movie_descriptor.movie_id) + "_"+ s.segmentation.name +"_" + str(s.ID)

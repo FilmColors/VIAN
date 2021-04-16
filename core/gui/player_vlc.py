@@ -10,14 +10,13 @@ from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 
 from core.gui.ewidgetbase import EDockWidget
-from core.data.computation import parse_file_path
+from core.data.computation import parse_file_path, is_vian_light
 from core.data.interfaces import IProjectChangeNotify
 from core.data.log import log_error, log_info, log_debug
 
 import vlc
 # from core.vlc.v3_0_3 import vlc
 import os
-
 
 class PlayerDockWidget(EDockWidget):
     onSpacialFrequencyChanged = pyqtSignal(bool, str)
@@ -30,12 +29,15 @@ class PlayerDockWidget(EDockWidget):
         self.video_player = None
         self.setMinimumWidth(100)
         self.setMinimumHeight(100)
+
+        if is_vian_light():
+            self.inner.menuBar().hide()
+
         self.vis_menu = self.inner.menuBar().addMenu("Visualization")
         self.spatial_frequency_menu = QMenu("Spatial Frequency")
         self.vis_menu.addMenu(self.spatial_frequency_menu)
 
         self.menu_spatial = self.vis_menu.addMenu("Spatial Datasets")
-
 
         self.a_spacial_frequency = self.spatial_frequency_menu.addAction("Edge Mean")
         self.a_spacial_frequency.setCheckable(True)
@@ -400,6 +402,7 @@ class Player_VLC(VideoPlayer):
 
         log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
+        self.resize(self.size())
 
     def play_pause(self):
         if not self.is_playing():

@@ -13,6 +13,7 @@ from core.data.computation import images_to_movie
 
 from core.gui.misc.utils import dialog_with_margin
 
+
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path = "", elan_segmentation = None, add_to_current_corpus = False):
         super(NewProjectDialog, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/project_management/create_project.html")
@@ -92,12 +93,6 @@ class NewProjectDialog(EDialogWidget):
             self.comboBox_Template.setEnabled(False)
         else:
             self.comboBox_Template.setEnabled(True)
-
-    # def on_from_images_changed(self):
-    #     if self.checkBox_FromImages.isChecked():
-    #         self.moviePathLabel.setText("Image Files")
-    #     else:
-    #         self.moviePathLabel.setText("Media Path")
 
     def on_automatic_naming_changed(self):
         auto = self.cB_AutomaticNaming.isChecked()

@@ -1204,29 +1204,6 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 log_error(e)
 
-    # def update_vian(self, show_newest = True, allow_beta = False):
-    #     try:
-    #         result, version_id = self.updater.get_server_version()
-    #     except:
-    #         return
-    #
-    #     if result:
-    #         answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
-    #         if answer == QMessageBox.Yes:
-    #             self.updater.update()
-    #         else:
-    #             self.print_message("Update Aborted", "Orange")
-    #     else:
-    #         if show_newest:
-    #             answer = QMessageBox.question(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version + "\n" +
-    #                                     "Do you want to update anyway?")
-    #             if answer == QMessageBox.Yes:
-    #                 self.updater.update(force = True)
-    #             else:
-    #                 self.print_message("Update Aborted", "Orange")
-    #         else:
-    #             self.print_message("VIAN is up to date with version: " + str(version.__version__), "Green")
-
     def open_preferences(self):
         dialog = DialogPreferences(self)
         dialog.onSettingsChanged.connect(self.frame_update_worker.on_settings_changed)
@@ -1261,9 +1238,11 @@ class MainWindow(QtWidgets.QMainWindow):
         log_info("Closing Frame Update")
         self.frame_update_thread.quit()
         log_info("Closing flask_server_thread")
-        self.flask_server_thread.quit()
-        log_info("Closing audio_handler_thread")
-        self.audio_handler_thread.quit()
+        if not is_vian_light():
+            self.flask_server_thread.quit()
+            log_info("Closing audio_handler_thread")
+            self.audio_handler_thread.quit()
+
         log_info("Closing vian_event_handler_thread")
         self.vian_event_handler_thread.quit()
 
@@ -1978,10 +1957,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.project.experiments[0].classification_objects) == 0:
             self.project.experiments[0].create_class_object("Global")
 
-        dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
-        dialog.set_movie(self.project.movie_descriptor)
-        dialog.show()
-        dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
+        if not is_vian_light():
+            dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
+            dialog.set_movie(self.project.movie_descriptor)
+            dialog.show()
+            dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
+        else:
+            self.dispatch_on_loaded()
 
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
@@ -2049,6 +2031,10 @@ class MainWindow(QtWidgets.QMainWindow):
             exp = self.project.create_experiment("Default")
         if len(self.project.experiments[0].classification_objects) == 0:
             self.project.experiments[0].create_class_object("Global")
+
+        import enzyme
+        with open(self.project.movie_descriptor.movie_path, 'rb') as f:
+            mkv = enzyme.MKV(f)
 
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False

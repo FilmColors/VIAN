@@ -766,6 +766,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # Setting the current annotation layer
         l = None
         for s in selected:
+            if s is None:
+                continue
+
             if s.get_type() == ANNOTATION_LAYER:
                 l = s
             if s.get_type() == NODE_SCRIPT:

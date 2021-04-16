@@ -142,8 +142,6 @@
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionWelcome"/>
-    <addaction name="actionUpdate"/>
-    <addaction name="actionCheck_for_Beta"/>
     <addaction name="actionDocumentation"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
