@@ -1233,17 +1233,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
 
-        # Attempt to load the Vocabularies, this might fail if the save is from VIAN 0.1.1
-        try:
-            self.vocabularies = []
-            for v in my_dict['vocabularies']:
-                voc = Vocabulary("voc").deserialize(v, self)
-                self.add_vocabulary(voc)
 
-        except Exception as e:
-            print("Loading Vocabulary failed", e)
-            # self.main_window.print_message("Loading Vocabularies failed", "Red")
-            # self.main_window.print_message(e, "Red")
+
+        self.vocabularies = []
+        for v in my_dict['vocabularies']:
+            voc = Vocabulary("voc").deserialize(v, self)
+            self.add_vocabulary(voc)
+
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)

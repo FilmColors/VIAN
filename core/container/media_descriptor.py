@@ -1,4 +1,5 @@
 import os
+from pymediainfo import MediaInfo
 
 import cv2
 from core.data.computation import ms_to_string, ms_to_frames
@@ -7,11 +8,13 @@ from core.data.enums import MOVIE_DESCRIPTOR
 from .container_interfaces import IProjectContainer, ISelectable, IHasName, ITimeRange, \
     AutomatedTextSource, IClassifiable
 
+
 class MediaDescriptor():
     """
     TODO: BaseClass for MovieDescriptor and future media types
     """
     pass
+
 
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
     """
@@ -42,6 +45,10 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         # self.is_relative = False
         self.meta_data = dict()
         self.letterbox_rect = None
+
+
+        self.frame_width = -1
+        self.frame_height = -1
 
     def set_letterbox_rect(self, rect):
         self.letterbox_rect = rect
@@ -135,6 +142,25 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
 
         cap = cv2.VideoCapture(self.get_movie_path())
         self.fps = cap.get(cv2.CAP_PROP_FPS)
+        try:
+            # TODO
+            self.width, self.height = self.get_frame_dimensions(self.movie_path)
+        except Exception as e:
+            print(e)
+
+    def get_frame_dimensions(self, movie_path):
+        media_info = MediaInfo.parse(movie_path)
+
+        height = None
+        display_aspect = None
+
+        for t in media_info.to_data()['tracks']:
+            if t['track_type'] == "Video":
+                height = int(t['sampled_height'])
+                display_aspect = float(t['display_aspect_ratio'])
+                break
+
+        return (int(height * display_aspect), height)
 
     def get_movie_id_list(self):
         return self.movie_id.split("_")

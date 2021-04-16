@@ -2032,9 +2032,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.project.experiments[0].classification_objects) == 0:
             self.project.experiments[0].create_class_object("Global")
 
-        import enzyme
-        with open(self.project.movie_descriptor.movie_path, 'rb') as f:
-            mkv = enzyme.MKV(f)
 
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False

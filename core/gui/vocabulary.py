@@ -282,9 +282,10 @@ class VocabularyView(QWidget, IProjectChangeNotify):
         self.project = None
         self.current_item = None
 
+        # TODO
         self.vocabulary_collection = VIANProject(name="VocabularyCollection")
-
         self.vocabulary_index = dict()  # A dict of vocabularies found on the file system
+
         self.fetch_vocabularies()
 
         self.complexities = {

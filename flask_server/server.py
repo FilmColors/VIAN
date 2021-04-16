@@ -246,6 +246,7 @@ class FlaskServer(QObject):
             selected.remove(q)
 
         if _server_data.project is not None:
+            # TODO this fails with corpus selection
             if len(selected) > 0:
                 for s in selected:
                     if isinstance(s, Segment):
