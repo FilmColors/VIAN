@@ -1,28 +1,38 @@
 import json
 from uuid import uuid4
-
+from PyQt5.QtCore import QObject, pyqtSignal
 from core.container.experiment import Vocabulary, VocabularyWord
 from typing import Dict, List
 
 from core.container.project import VIANProject
 
 
-class VocabularyCollection:
+class VocabularyCollection(QObject):
+    onCollectionChanged = pyqtSignal(object)
+
     def __init__(self, name="New Collection"):
+        super(VocabularyCollection, self).__init__()
         self.name = name
         self.unique_id = str(uuid4())
         self.vocabularies = dict()  # type: Dict[str, Vocabulary]
+        self.is_editable = True
+
+    def set_name(self, name):
+        self.name = name
+        self.onCollectionChanged.emit(self)
 
     def add_vocabulary(self, voc:Vocabulary, force = False):
         if voc.unique_id in self.vocabularies and not force:
             raise Exception("Vocabulary already in Collection")
         else:
             self.vocabularies[voc.unique_id] = voc
+        self.onCollectionChanged.emit(self)
         return voc
 
     def remove_vocabulary(self, voc:Vocabulary):
         if voc.unique_id in self.vocabularies:
             self.vocabularies.pop(voc)
+        self.onCollectionChanged.emit(self)
         return voc
 
     def __str__(self):
@@ -35,13 +45,14 @@ class VocabularyCollection:
         return dict(
             name = self.name,
             unique_id = self.unique_id,
-            vocabularies = [v.serialize() for v in self.vocabularies.values()]
+            vocabularies = [v.serialize() for v in self.vocabularies.values()],
+            is_editable = self.is_editable
         )
 
     @staticmethod
     def deserialize(data:Dict):
         new_instance = VocabularyCollection()
-
+        new_instance.is_editable = data['is_editable']
         new_instance.name = data['name']
         new_instance.unique_id = data['unique_id']
         for v in data['vocabularies']:
@@ -51,14 +62,16 @@ class VocabularyCollection:
         return new_instance
 
 
-class VocabularyLibrary:
+class VocabularyLibrary(QObject):
 
     """
     The VocabularyLibrary is the central place where all vocabularies of a user are stored and shared between different
     project. Whenever a user loads a Project, the current versions of the vocabularies are fetched.
     """
+    onLibraryChanged = pyqtSignal(object)
 
     def __init__(self):
+        super(VocabularyLibrary, self).__init__()
         self.collections = dict()
 
     def create_collection(self, name) -> VocabularyCollection:
@@ -69,6 +82,8 @@ class VocabularyLibrary:
         """
         col = VocabularyCollection(name)
         self.add_collection(col)
+
+        self.onLibraryChanged.emit(self)
         return col
 
     def add_collection(self, col:VocabularyCollection) -> VocabularyCollection:
@@ -78,6 +93,7 @@ class VocabularyLibrary:
         :return:
         """
         self.collections[col.unique_id] = col
+        self.onLibraryChanged.emit(self)
         return col
 
     def remove_collection(self, col:VocabularyCollection):
@@ -88,9 +104,11 @@ class VocabularyLibrary:
         """
         if col.unique_id in self.collections:
             self.collections.pop(col.unique_id)
+        self.onLibraryChanged.emit(self)
 
-    def copy_collection(self):
-        #todo
+    def copy_collection(self, col):
+        # TODO needs implementation
+        self.onLibraryChanged.emit(self)
         pass
 
     def save(self, filepath):
@@ -111,8 +129,7 @@ class VocabularyLibrary:
 
         return data
 
-    @staticmethod
-    def load(filepath):
+    def load(self, filepath):
         """
         Loads a collection from a filepath into the library.
         :param filepath:
@@ -121,11 +138,11 @@ class VocabularyLibrary:
         with open(filepath, "r") as f:
             data = json.load(f)
 
-        library = VocabularyLibrary()
         for json_data in data['collections']:
-            library.add_collection(VocabularyCollection.deserialize(json_data))
+            self.add_collection(VocabularyCollection.deserialize(json_data))
 
-        return library
+        self.onLibraryChanged.emit(self)
+        return self
 
 
 if __name__ == '__main__':
@@ -137,11 +154,11 @@ if __name__ == '__main__':
     for voc in p.vocabularies:
         col.add_vocabulary(voc)
 
-    library.save("mylibrary.json")
+    library.save("../../data/library.json")
 
-    library = VocabularyLibrary().load("mylibrary.json")
-    for i, col in library.collections.items():
-        print(col)
+    # library = VocabularyLibrary().load("mylibrary.json")
+    # for i, col in library.collections.items():
+    #     print(col)
         # col.add_vocabulary(voc)
 
 

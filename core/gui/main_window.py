@@ -48,7 +48,7 @@ from core.gui.player_vlc import Player_VLC, PlayerDockWidget
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline.timeline import TimelineContainer
-from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
+from core.gui.vocabulary import VocabularyManager #VocabularyExportDialog
 from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
 from core.gui.corpus_widget import CorpusDockWidget
 from core.gui.misc.filmography_widget import query_initial
@@ -2282,6 +2282,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def export_vocabulary(self):
+        return
+        #TODO
         dialog = VocabularyExportDialog(self)
         dialog.show()
 

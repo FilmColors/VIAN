@@ -133,7 +133,8 @@ class Vocabulary(IProjectContainer, IHasName):
         if word in self.words_plain:
             self.words_plain.remove(word)
 
-        self.project.remove_from_id_list(word)
+        if self.project is not None:
+            self.project.remove_from_id_list(word)
 
         if dispatch:
             self.dispatch_on_changed(item=self)
@@ -213,15 +214,22 @@ class Vocabulary(IProjectContainer, IHasName):
             log_warning("No UUID found in this vocabulary", self.name)
             pass
 
+        # Probably we will not need the hierarchy anymore but for the sake of functionality
+        # we do a local unique_id to object resolving
+        # TODO whe should get rid of the old therausus data structures where words are hierachical trees.
+        # todo replace words_plain with words
+
+        hierarchy_mapper = dict()
+        hierarchy_mapper[self.unique_id] = self
+
         for w in serialization['words']:
-            # TODO whe should get rid of the old therausus data structures where words are hierachical trees.
-            # todo replace words_plain with words
-            parent = self
+            parent = hierarchy_mapper[w['parent']]
+
             # parent = self.project.get_by_id(w['parent'])
             # If this is a root node in the Vocabulary
             if isinstance(parent, Vocabulary):
                 word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
-
+                hierarchy_mapper[word.unique_id] = word
                 # Fields introduced in 0.8.0
                 try:
                     word.complexity_lvl = int(w['complexity_lvl'])

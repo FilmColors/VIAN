@@ -1233,13 +1233,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
 
-
-
         self.vocabularies = []
         for v in my_dict['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
-
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
