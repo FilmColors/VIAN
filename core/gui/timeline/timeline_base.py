@@ -8,6 +8,9 @@ from core.container.project import *
 from core.container.container_interfaces import ILockable
 from core.gui.context_menu import open_context_menu
 from core.gui.annotation_editor import AnnotationEditorPopup
+from core.gui.vocabulary_selector import VocabularySelectorDialog
+from core.container.vocabulary_library import global_library
+
 
 class TimelineControl(QtWidgets.QWidget):
     onHeightChanged = pyqtSignal(int)
@@ -73,11 +76,6 @@ class TimelineControl(QtWidgets.QWidget):
             self.item.onSelectedChanged.connect(self.on_selected_changed)
 
     def _add_spacer(self):
-        # self.bottom_line = QWidget(self)
-        # self.bottom_line.setStyleSheet("QWidget{padding:1px; margin:0pt; background:transparent;}")
-        # self.bottom_line.setLayout(QHBoxLayout())
-        # self.bottom_line.layout().setSpacing(0)
-
         if isinstance(self.item, ILockable):
             self.btn_lock = QPushButton(create_icon("qt_ui/icons/icon_locked2.png"), "", self)
             self.btn_lock.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
@@ -97,6 +95,12 @@ class TimelineControl(QtWidgets.QWidget):
             self.btn_classification.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
             self.layout().addWidget(self.btn_classification,1,1,1,1)
             self.btn_classification.clicked.connect(self.toggle_classification)
+
+            self.btn_vocabulary = QPushButton(create_icon("qt_ui/icons/icon_vocabulary"), "", self)
+            self.btn_vocabulary.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
+            self.btn_vocabulary.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            self.layout().addWidget(self.btn_vocabulary, 1, 3, 1, 1)
+            self.btn_vocabulary.clicked.connect(self.show_vocabulary_setup)
 
         self.layout().addItem(self.expand,2,0)
 
@@ -133,6 +137,10 @@ class TimelineControl(QtWidgets.QWidget):
         self.show_classification = not self.show_classification
         self.onClassificationToggle.emit(self, self.show_classification)
         self.timeline.update_ui()
+
+    def show_vocabulary_setup(self):
+        dialog = VocabularySelectorDialog(self.timeline.main_window, self.item, global_library)
+        dialog.show()
 
     @pyqtSlot(bool)
     def on_selected_changed(self, state):

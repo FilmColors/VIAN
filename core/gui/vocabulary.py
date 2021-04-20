@@ -1,31 +1,23 @@
-import os
-import glob
 from functools import partial
+from typing import Dict, List
 
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor, QIcon
-from PyQt5 import uic
-from core.data.computation import create_icon
-from core.data.log import log_error, log_info
-from core.container.project import VIANProject
+from PyQt5.QtGui import QIcon
 
-from core.container.experiment import Vocabulary, VocabularyWord, compare_vocabularies
-from core.gui.ewidgetbase import EDockWidget, EDialogWidget
+
+from core.container.experiment import Vocabulary, VocabularyWord
+from core.gui.ewidgetbase import EDockWidget
 from core.data.interfaces import IProjectChangeNotify
+from core.container.project import Segmentation, VIANProject
 
 from core.container.vocabulary_library import VocabularyLibrary, VocabularyCollection
-#region --DEFINITIONS--
-#endregion
-
-
 
 
 class VocabularyManager(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(VocabularyManager, self).__init__(main_window, limit_size=False)
-        self.setWindowTitle("Vocabulary Manager: Library")
+        self.setWindowTitle("Vocabulary Library")
 
         self.library = VocabularyLibrary().load("data/library.json")
         self.tree_view = VocabularyTreeView(self, self.library)
@@ -48,11 +40,17 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
         word = self.word_list.get_selected_word()
         self.editor.set_word(word)
 
+
 class VocabularyTreeView(QWidget):
     onVocabularySelected = pyqtSignal(object)
+    onCheckStateChanged = pyqtSignal(object)
+
     onFilter = pyqtSignal(str)
 
-    def __init__(self, parent, vocabulary_library: VocabularyLibrary, allow_create=True):
+    MODE_EDITING = 0
+    MODE_SELECTING = 1
+
+    def __init__(self, parent, vocabulary_library: VocabularyLibrary, mode=MODE_EDITING):
         super(VocabularyTreeView, self).__init__(parent)
         self.setLayout(QVBoxLayout())
         self.line_search = QLineEdit(self)
@@ -60,18 +58,18 @@ class VocabularyTreeView(QWidget):
         self.line_search.textChanged.connect(self.on_search)
         self.layout().addWidget(self.line_search)
 
-        self.is_editing = False
         self.items = []
 
         self.vocabulary_library = vocabulary_library
         self.selected_vocabularies = []
 
         self.tree = CollectionTreeWidget(self)
+        self.tree.itemChanged.connect(self.on_item_check_changed)
         self.tree.setSelectionMode(self.tree.ExtendedSelection)
         self.tree.onContextMenu.connect(self.context_menu)
         self.layout().addWidget(self.tree)
 
-        self.allow_create = allow_create
+        self.mode = mode
         self.recreate_tree()
 
         # self.tree.itemChanged.connect(self.on_item_changed)
@@ -115,7 +113,7 @@ class VocabularyTreeView(QWidget):
         self.tree.clear()
         self.items = []
         for coll in self.vocabulary_library.collections.values():
-            widget = CollectionItem(self.tree, coll)
+            widget = CollectionItem(self.tree, coll, self.mode)
             self.items.append(widget)
             self.tree.addTopLevelItem(widget)
 
@@ -132,6 +130,9 @@ class VocabularyTreeView(QWidget):
             return None
         if isinstance(self.tree.selectedItems()[0], CollectionItem):
             return self.tree.selectedItems()[0].collection
+
+    def on_item_check_changed(self, itm):
+        self.onCheckStateChanged.emit(self.get_check_state())
 
     def on_item_changed(self, itm):
         if isinstance(itm, CollectionItem):
@@ -154,6 +155,9 @@ class VocabularyTreeView(QWidget):
 
     @pyqtSlot(object, object)
     def context_menu(self, QMouseEvent, mappedPoint):
+        if not self.mode == self.MODE_EDITING:
+            return
+
         if QMouseEvent.buttons() == Qt.RightButton:
 
             menu = QMenu(self.tree)
@@ -169,6 +173,19 @@ class VocabularyTreeView(QWidget):
 
             menu.popup(self.mapToGlobal(mappedPoint))
 
+    def set_check_status(self, vocabularies:List[Vocabulary]):
+        self.tree.itemChanged.disconnect()
+        for itm in self.items:
+            itm.set_check_status(vocabularies)
+        self.tree.itemChanged.connect(self.on_item_check_changed)
+
+    def get_check_state(self):
+        result = []
+        for itm in self.items:
+            result = itm.get_check_state(result)
+        return result
+
+
 class CollectionTreeWidget(QTreeWidget):
     onContextMenu = pyqtSignal(object, object)
 
@@ -182,30 +199,56 @@ class CollectionTreeWidget(QTreeWidget):
 
 
 class CollectionItem(QTreeWidgetItem):
-    def __init__(self, parent, collection:VocabularyCollection):
+    def __init__(self, parent, collection:VocabularyCollection, mode):
         super(CollectionItem, self).__init__(parent)
+
         self.collection = collection
+        self.mode = mode
+
         self.setText(0, self.collection.name)
         self.setIcon(0, QIcon("qt_ui/icons/icon_vocabulary.png"))
         self.items = dict()
-        self.setFlags(Qt.ItemIsEditable| Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+
+        if self.mode == VocabularyTreeView.MODE_EDITING:
+            self.setFlags(Qt.ItemIsEditable| Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+        else:
+            self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+
         self.recreate_vocabularies()
 
     def recreate_vocabularies(self):
         self.items = dict()
         for v in sorted(self.collection.vocabularies.values(), key=lambda x:x.name):
-            widget = VocabularyItem(self, v)
+            widget = VocabularyItem(self, v, self.mode)
             self.addChild(widget)
             self.items[v.unique_id] = widget
 
+    def set_check_status(self, vocabularies:List[Vocabulary]):
+        uuids = [v.unique_id for v in vocabularies]
+        for k, itm in self.items.items():
+            itm.setCheckState(0, Qt.Checked if k in uuids else Qt.Unchecked)
+
+    def get_check_state(self, result):
+        for k, itm in self.items.items():
+            result.append(dict(
+                vocabulary=itm.vocabulary,
+                state = itm.checkState(0) == Qt.Checked
+            ))
+        return result
+
 
 class VocabularyItem(QTreeWidgetItem):
-    def __init__(self, parent, vocabulary:Vocabulary, show_words = False):
+    def __init__(self, parent, vocabulary:Vocabulary, mode, show_words = False):
         super(VocabularyItem, self).__init__(parent)
         self.vocabulary = vocabulary
         self.setText(0, vocabulary.name)
         self.items = dict()
-        self.setFlags(Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+        self.mode = mode
+
+        if self.mode == VocabularyTreeView.MODE_EDITING:
+            self.setFlags(Qt.ItemIsEditable| Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+        else:
+            self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
 
         if show_words:
             self.recreate_words()
@@ -229,7 +272,6 @@ class WordsList(QListWidget):
     def __init__(self, parent):
         super(WordsList, self).__init__(parent)
         self.vocabulary = None
-
 
     @pyqtSlot(object)
     def set_vocabulary(self, voc:Vocabulary):
@@ -274,6 +316,7 @@ class WordsList(QListWidget):
                 a_delete.triggered.connect(partial(self.remove_word,  self.get_selected_word()))
 
             menu.popup(self.mapToGlobal(QMouseEvent.pos()))
+
 
 class WordEditor(QWidget):
     onWordChanged = pyqtSignal(object)

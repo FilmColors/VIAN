@@ -1724,6 +1724,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.onExperimentRemoved.emit(experiment)
             self.dispatch_changed()
 
+    def get_default_experiment(self) -> Experiment:
+        """
+        Returns the default experiment. If VIAN is run without multiple experiment mode, VIAN guarantees that
+        this function will always return an experiment, even if non exists yet.
+
+        :return:
+        """
+        if len(self.experiments) == 0:
+            return self.create_experiment("Default Experiment")
+        else:
+            return self.experiments[0]
+
     def get_classification_object_global(self, name) -> ClassificationObject:
         """
         Looks in all experiments if a specific classification object is present.
@@ -1870,6 +1882,39 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if exp.name == name:
                 return exp
         return None
+
+    def get_classification_objects_for_target(self, target) -> List[ClassificationObject]:
+        """
+        Returns all classification objects attached to a target.
+        :param target:
+        :return:
+        """
+        result = []
+        for e in self.experiments:
+            for clobj in e.get_classification_objects_plain():
+                if target in clobj.target_container or len(clobj.target_container) == 0:
+                    result.append(clobj)
+        return result
+
+    def get_vocabularies_for_target(self, target, clobjs=None) -> List[Vocabulary]:
+        """
+        Returns all vocabularies attached to a certain target.
+        Can additionally be filtered by the classification object.
+
+        :param target:
+        :param clobjs:
+        :return:
+        """
+        result = []
+        if clobjs is None:
+            clobjs = self.get_classification_objects_for_target(target)
+        elif isinstance(clobjs, ClassificationObject):
+            clobjs = [clobjs]
+
+        for c in clobjs:
+            result += c.get_vocabularies()
+        return result
+
     #endregion
 
     #region Dispatchers

@@ -55,7 +55,7 @@ class IProjectContainer(QObject):
 
     def __init__(self, unique_id = -1):
         QObject.__init__(self)
-        self.project = None
+        self.project = None #type: VIANProject
         self.outliner_expanded = False
         self.outliner_highlighted = False
         self.unique_id = unique_id

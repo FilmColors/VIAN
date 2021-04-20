@@ -6,6 +6,10 @@ from typing import Dict, List
 
 from core.container.project import VIANProject
 
+# TODO Implement Copy Collection Behaviour
+# TODO Storing Behaviour
+# TODO Implement Trash
+
 
 class VocabularyCollection(QObject):
     onCollectionChanged = pyqtSignal(object)
@@ -145,6 +149,7 @@ class VocabularyLibrary(QObject):
         return self
 
 
+global_library = None
 if __name__ == '__main__':
     p = VIANProject().load_project("C:/Users/gaude/Documents/VIAN/projects/project_name_netflix/project_name_netflix.eext")
 
@@ -155,7 +160,8 @@ if __name__ == '__main__':
         col.add_vocabulary(voc)
 
     library.save("../../data/library.json")
-
+else:
+    global_library = VocabularyLibrary().load("data/library.json")
     # library = VocabularyLibrary().load("mylibrary.json")
     # for i, col in library.collections.items():
     #     print(col)

@@ -954,6 +954,21 @@ class Experiment(IProjectContainer, IHasName):
             result.extend(clobj.get_vocabularies())
         return result
 
+    def get_vocabularies_for_target(self, target):
+        """
+        Returns all classification objects which are connected to a certain Segmentation or Screenshot Group.
+        Classification Objects with no target container defined, are assumed to be connected to all Segmentations and
+        Screenshot Groups.
+
+        :param target:
+        :return:
+        """
+        result = []
+        for clobj in self.get_classification_objects_plain():
+            if target in clobj.target_container or len(clobj.target_container) == 0:
+                result.append(target)
+        return result
+
     def get_complexity_groups(self):
         """
         Returns a list of all complexity groups used in the vocabularies attached to this Experiment
