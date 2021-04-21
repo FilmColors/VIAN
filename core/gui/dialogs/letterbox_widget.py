@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QPen, QColor, QPainter, QPainterPath, QResizeEvent
 from PyQt5 import QtCore
 
+from core.container.project import MovieDescriptor
 import cv2
 import os
 import numpy as np
@@ -34,7 +35,7 @@ class LetterBoxWidget(EDialogWidget):
 
         self.cap = None
         self.duration = 1000
-        self.movie_descriptor = None
+        self.movie_descriptor = None #type:None|MovieDescriptor
         self.done_callback = done_callback
 
         dialog_with_margin(self.main_window, self, mode="lg")
@@ -66,6 +67,13 @@ class LetterBoxWidget(EDialogWidget):
         self.cap.set(cv2.CAP_PROP_POS_FRAMES, int(self.pos_slider.value() * (self.duration / 1000)))
         ret, frame = self.cap.read()
         if frame is not None:
+
+            # Uncomment this for correct aspect in letterbox dialog
+            # if self.movie_descriptor.display_width is not None and self.movie_descriptor.display_height is not None:
+            #     frame = cv2.resize(frame,
+            #                        (self.movie_descriptor.display_width, self.movie_descriptor.display_height),
+            #                        interpolation=cv2.INTER_CUBIC)
+
             self.onFrameChanged.emit(numpy_to_pixmap(frame))
             self.get_rect()
 

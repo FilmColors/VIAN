@@ -464,29 +464,35 @@ class VIANProject(QObject, IHasName, IClassifiable):
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
         ret, frame = video_capture.read()
 
-        if ret:
-            # shot = Screenshot(title="New Screenshot", image=frame, img_blend=frame_annotated, timestamp=time, frame_pos=frame_pos, annotation_item_ids=annotation_ids)
+        video_capture.release()
 
-            new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos, unique_id=unique_id)
+        if ret:
+            new = Screenshot(name, frame,
+                             img_blend = None,
+                             timestamp=time_ms,
+                             frame_pos=frame_pos,
+                             unique_id=unique_id,
+                             display_width=self.movie_descriptor.display_width,
+                             display_height=self.movie_descriptor.display_height)
             self.add_screenshot(new)
             return new
         return None
 
-    def create_screenshot_headless(self, name, frame_pos = None, time_ms = None, fps = 29.0):
-        #TODO do we still need this?
-
-        if frame_pos is None and time_ms is None:
-            print("Either frame or ms has to be given")
-            return
-
-        if frame_pos is None:
-            frame_pos = ms_to_frames(time_ms, fps)
-        else:
-            time_ms = frame2ms(frame_pos, fps)
-
-        new = Screenshot(name, None, img_blend=None, timestamp=time_ms, frame_pos=frame_pos)
-        self.add_screenshot(new)
-        return new
+    # def create_screenshot_headless(self, name, frame_pos = None, time_ms = None, fps = 29.0):
+    #     #TODO do we still need this?
+    #
+    #     if frame_pos is None and time_ms is None:
+    #         print("Either frame or ms has to be given")
+    #         return
+    #
+    #     if frame_pos is None:
+    #         frame_pos = ms_to_frames(time_ms, fps)
+    #     else:
+    #         time_ms = frame2ms(frame_pos, fps)
+    #
+    #     new = Screenshot(name, None, img_blend=None, timestamp=time_ms, frame_pos=frame_pos)
+    #     self.add_screenshot(new)
+    #     return new
 
     def add_screenshot(self, screenshot, group = 0) -> Screenshot:
         """

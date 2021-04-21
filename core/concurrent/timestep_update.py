@@ -255,6 +255,12 @@ class TimestepUpdateWorkerSingle(QObject):
             ret, frame = self.video_capture.read()
             if frame is None:
                 return None
+
+            if self.project.movie_descriptor.display_width is not None and self.project.movie_descriptor.display_height is not None:
+                frame = cv2.resize(frame,
+                                   (self.project.movie_descriptor.display_width, self.project.movie_descriptor.display_height),
+                                   interpolation=cv2.INTER_CUBIC)
+                
             fx = self.overlay_frame_width / frame.shape[1]
             frame = cv2.resize(frame, None, None, fx, fx, cv2.INTER_CUBIC)
 

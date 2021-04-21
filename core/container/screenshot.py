@@ -3,7 +3,8 @@ import sys
 import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
-from .container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, deprecation_serialization
+from .container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, \
+    deprecation_serialization
 from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from .analysis import SemanticSegmentationAnalysisContainer
 from .annotation_body import Annotatable
@@ -40,18 +41,26 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     # TODO Refactor movie-timestamp > start_ms
 
     onScreenshotChanged = pyqtSignal(object)
-    onImageSet = pyqtSignal(object, object, object) # Screenshot, ndarray, QPixmap
+    onImageSet = pyqtSignal(object, object, object)  # Screenshot, ndarray, QPixmap
 
-    def __init__(self, title = "", image = None,
-                 img_blend = None, timestamp = "", scene_id = 0, frame_pos = 0,
-                 shot_id_global = -1, shot_id_segm = -1, annotation_item_ids = None, unique_id=-1):
+    def __init__(self, title="", image=None,
+                 img_blend=None, timestamp="", scene_id=0, frame_pos=0, display_width = None, display_height = None,
+                 shot_id_global=-1, shot_id_segm=-1, annotation_item_ids=None, unique_id=-1):
+
         IProjectContainer.__init__(self, unique_id=unique_id)
         IClassifiable.__init__(self)
         Annotatable.__init__(self)
 
         self.title = title
+
+        self.display_width = display_width
+        self.display_height = display_height
+
         self.img_movie = None
         self.set_img_movie(image)
+
+        # TODO this is related to containers.Annotations and no longer of any use,
+        #  it contained the rendered svg over the image
         self.img_blend = img_blend
         self.annotation_item_ids = annotation_item_ids
         self.frame_pos = frame_pos
@@ -75,17 +84,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
-    # def set_scene_id(self, scene_id):
-    #     self.scene_id = scene_id
-    #     self.onScreenshotChanged.emit(self)
-
-    # def set_shot_id_global(self, global_id):
-    #     self.shot_id_global = global_id
-    #     self.onScreenshotChanged.emit(self)
-    #
-    # def set_shot_id_segm(self, segm_id):
-    #     self.shot_id_segm = segm_id
-    #     self.onScreenshotChanged.emit(self)
+    def set_project(self, project):
+        super(Screenshot, self).set_project(project)
+        self.display_width = self.project.movie_descriptor.display_width
+        self.display_height = self.project.movie_descriptor.display_height
 
     def set_annotation_visibility(self, visibility):
         self.annotation_is_visible = visibility
@@ -99,16 +101,15 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def get_name(self):
         return self.title
 
-    def resize(self, scale = 1.0):
+    def resize(self, scale=1.0):
         streamed = self.project.streamer.from_stream(self.unique_id)
-        self.img_movie =  cv2.resize(streamed['img_movie'], None, None, scale, scale, cv2.INTER_CUBIC)
-
+        self.img_movie = cv2.resize(streamed['img_movie'], None, None, scale, scale, cv2.INTER_CUBIC)
         try:
-            self.img_blend =  cv2.resize(streamed['img_blend'], None, None, scale, scale, cv2.INTER_CUBIC)
+            self.img_blend = cv2.resize(streamed['img_blend'], None, None, scale, scale, cv2.INTER_CUBIC)
         except:
             self.img_blend = np.zeros_like(self.img_movie)
 
-    def get_preview(self, scale = 0.2):
+    def get_preview(self, scale=0.2):
         """
         Returns a resized tuple (qimage, qpixmap) from the movie-image. 
         THe Preview will be cached for fast updated
@@ -121,7 +122,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             return numpy_to_qt_image(self.img_movie)
         return self.preview_cache
 
-    def set_classification_object(self, clobj, recompute = False, hdf5_cache=None):
+    def set_classification_object(self, clobj, recompute=False, hdf5_cache=None):
         if not recompute and clobj.unique_id in self.masked_cache:
             result = self.masked_cache[clobj.unique_id]
         elif clobj is None or clobj.semantic_segmentation_labels[0] == "":
@@ -148,7 +149,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             self.onImageSet.emit(self, result, numpy_to_pixmap(result, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
         return result
 
-    def get_img_movie(self, ignore_cl_obj = False):
+    def get_img_movie(self, ignore_cl_obj=False):
         if not ignore_cl_obj:
             try:
                 return self.masked_cache[self.project.active_classification_object.unique_id]
@@ -158,14 +159,20 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             return self.img_movie
 
     def set_img_movie(self, img):
-        self.img_movie = img
         if img is None:
+            self.img_movie = None
             return
+
         if self.project is not None and self.project.headless_mode:
             return
-        fx = CACHE_WIDTH / img.shape[1]
-        img = cv2.resize(img, None, None, fx, fx, cv2.INTER_CUBIC)
-        self.img_movie = img
+
+        # Resize the image to the correct display aspect
+        if self.display_width is not None and self.display_height is not None:
+            img = cv2.resize(img, (self.display_width, self.display_height),
+                                        interpolation=cv2.INTER_CUBIC)
+
+        # Resize the image to the CACHE_WIDTH (250px wide)
+        self.img_movie = resize_with_aspect(img, width = CACHE_WIDTH)
 
         if img.shape[2] == 3:
             self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img))
@@ -173,9 +180,14 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
 
     def get_img_movie_orig_size(self):
+        """
+        Returns the screenshots image data in the original size.
+        :return:
+        """
         cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
         cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos)
         ret, frame = cap.read()
+        frame = cv2.resize(frame, (self.display_width, self.display_height), interpolation=cv2.INTER_CUBIC)
         cap.release()
         return frame
 
@@ -212,20 +224,20 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
     def serialize(self, bake=False):
         result = dict(
-            name = self.title,
+            name=self.title,
             unique_id=self.unique_id,
-            annotation_item_ids = self.annotation_item_ids,
-            frame_pos = self.frame_pos,
+            annotation_item_ids=self.annotation_item_ids,
+            frame_pos=self.frame_pos,
 
-            start_ms = self.movie_timestamp,
-            end_ms = self.movie_timestamp,
+            start_ms=self.movie_timestamp,
+            end_ms=self.movie_timestamp,
 
-            creation_timestamp = self.creation_timestamp,
-            notes = self.notes,
+            creation_timestamp=self.creation_timestamp,
+            notes=self.notes,
 
-            vian_webapp_scene_id = self.scene_id,
-            vian_webapp_shot_id_global = self.shot_id_global,
-            vian_webapp_shot_id_segm = self.shot_id_segm,
+            vian_webapp_scene_id=self.scene_id,
+            vian_webapp_shot_id_global=self.shot_id_global,
+            vian_webapp_shot_id_segm=self.shot_id_segm,
 
         )
 
@@ -251,7 +263,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.notes = serialization['notes']
         self.frame_pos = serialization['frame_pos']
 
-        self.img_movie = np.zeros(shape=(30,50,3), dtype=np.uint8)
+        self.img_movie = np.zeros(shape=(30, 50, 3), dtype=np.uint8)
         self.img_blend = None
 
         return self
@@ -273,7 +285,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
     def get_parent_container(self):
         return self.screenshot_group
 
-    def load_screenshots(self, cap:cv2.VideoCapture = None):
+    def load_screenshots(self, cap: cv2.VideoCapture = None):
         if cap is None:
             cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
         cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos)
@@ -293,7 +305,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     onScreenshotRemoved = pyqtSignal(object)
     onScreenshotGroupChanged = pyqtSignal(object)
 
-    def __init__(self, project, name = "New Screenshot Group", unique_id=-1):
+    def __init__(self, project, name="New Screenshot Group", unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
         self.set_project(project)
         self.name = name
@@ -340,8 +352,8 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
 
         data = dict(
             name=self.name,
-            unique_id = self.unique_id,
-            shots = shot_ids,
+            unique_id=self.unique_id,
+            shots=shot_ids,
         )
         return data
 

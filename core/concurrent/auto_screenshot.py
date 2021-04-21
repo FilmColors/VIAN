@@ -179,9 +179,17 @@ class AutoScreenshotJob(IConcurrentJob):
 
             project.inhibit_dispatch = True
 
+            display_width = project.movie_descriptor.display_width
+            display_height = project.movie_descriptor.display_height
+
             shots = []
             for s in result:
-                n = Screenshot(s['name'], image=s['img'], timestamp=s['ms_pos'], frame_pos=s['frame_pos'])
+                n = Screenshot(s['name'],
+                               image=s['img'],
+                               timestamp=s['ms_pos'],
+                               frame_pos=s['frame_pos'],
+                               display_width=display_width,
+                               display_height=display_height)
                 project.add_screenshot(n)
                 shots.append(n)
             project.inhibit_dispatch = False

@@ -11,8 +11,8 @@ from core.container.screenshot import *
 from core.data.computation import frame2ms
 from core.container.project import VIAN_PROJECT_EXTENSION
 
-def create_screenshot(args, sign_progress):
 
+def create_screenshot(args, sign_progress):
     drawing_overlay = args[0]
     frame = args[1]
     time = args[2]
@@ -94,7 +94,7 @@ def store_project_concurrent(args, sign_progress):
         path=project.path,
         name=project.name,
         corpus_id=project.corpus_id,
-        uuid = project.uuid,
+        uuid=project.uuid,
         annotation_layers=a_layer,
         notes=project.notes,
         # current_annotation_layer=None,
@@ -112,11 +112,11 @@ def store_project_concurrent(args, sign_progress):
         scripts=scripts,
         vocabularies=vocabularies,
         experiments=experiments,
-        meta_data = project.meta_data,
-        hdf_indices = hdf_indices,
-        pipeline_scripts = pipeline_scripts,
-        active_pipeline_script = active_pipeline_script,
-        compute_pipeline_settings = project.compute_pipeline_settings
+        meta_data=project.meta_data,
+        hdf_indices=hdf_indices,
+        pipeline_scripts=pipeline_scripts,
+        active_pipeline_script=active_pipeline_script,
+        compute_pipeline_settings=project.compute_pipeline_settings
     )
 
     sign_progress(0.6)
@@ -148,50 +148,43 @@ class LoadScreenshotsJob(IConcurrentJob):
     """
 
     def run_concurrent(self, project, sign_progress):
-        # [self.project.movie_descriptor.get_movie_path(), screenshot_position, screenshot_annotation_dicts]
-        # for s in self.project.screenshots:
-        #     screenshot_position.append(s.frame_pos)
-        #     a_dicts = []
-        #     if s.annotation_item_ids is not None:
-        #         for a_id in s.annotation_item_ids:
-        #             annotation_dict = self.project.get_by_id(a_id)
-        #             if annotation_dict is not None:
-        #                 a_dicts.append(annotation_dict.serialize())
-        #
-        #     screenshot_annotation_dicts.append(a_dicts)
         movie_path = project.movie_descriptor.get_movie_path()
         video_capture = cv2.VideoCapture(movie_path)
         fps = video_capture.get(cv2.CAP_PROP_FPS)
-        for i, scr in enumerate(project.screenshots): #type: Screenshot
+
+        for i, scr in enumerate(project.screenshots):  # type: Screenshot
+
             if self.aborted:
                 break
 
-            sign_progress(float(i)/len(project.screenshots))
+            sign_progress(float(i) / len(project.screenshots))
             video_capture.set(cv2.CAP_PROP_POS_FRAMES, scr.frame_pos)
             scr.movie_timestamp = frame2ms(scr.frame_pos, fps)
             ret, frame = video_capture.read()
-            a_dicts = []
-            if scr.annotation_item_ids is not None:
-                for a_id in scr.annotation_item_ids:
-                    annotation_dict = project.get_by_id(a_id)
-                    if annotation_dict is not None:
-                        a_dicts.append(annotation_dict.serialize())
-            if len(a_dicts) > 0:
-                try:
-                    annotation = render_annotations(frame, a_dicts[i])
-                    if annotation is not None:
-                        annotation = annotation.astype(np.uint8)
-                except:
-                    annotation = None
-            else:
-                annotation = None
+
+            # TODO this is related to the core.containers.Annotation and AnnotationLayer and is no longer of any use
+            # a_dicts = []
+            # if scr.annotation_item_ids is not None:
+            #     for a_id in scr.annotation_item_ids:
+            #         annotation_dict = project.get_by_id(a_id)
+            #         if annotation_dict is not None:
+            #             a_dicts.append(annotation_dict.serialize())
+            # if len(a_dicts) > 0:
+            #     try:
+            #         annotation = render_annotations(frame, a_dicts[i])
+            #         if annotation is not None:
+            #             annotation = annotation.astype(np.uint8)
+            #     except:
+            #         annotation = None
+            # else:
+            #     annotation = None
 
             scr.set_img_movie(frame)
-            scr.img_blend = annotation
+            # scr.img_blend = annotation
 
         return None
 
-    def modify_project(self, project, result, sign_progress = None, main_window = None):
+    def modify_project(self, project, result, sign_progress=None, main_window=None):
         # images = result[0]
         # annotations = result[1]
         #
@@ -242,14 +235,24 @@ class CreateScreenshotJob(IConcurrentJob):
 
         return [frame, frame_annotated, frame_pos, time, annotation_ids]
 
-    def modify_project(self, project, result, sign_progress = None, main_window = None):
+    def modify_project(self, project, result, sign_progress=None, main_window=None):
         frame = result[0]
         frame_annotated = result[1]
         frame_pos = result[2]
         time = result[3]
         annotation_ids = result[4]
 
-        shot = Screenshot(title="New Screenshot", image=frame, img_blend=frame_annotated, timestamp=time, frame_pos=frame_pos, annotation_item_ids=annotation_ids)
+        display_width = project.movie_descriptor.display_width
+        display_height = project.movie_descriptor.display_height
+
+        shot = Screenshot(title="New Screenshot",
+                          image=frame,
+                          img_blend=frame_annotated,
+                          timestamp=time,
+                          frame_pos=frame_pos,
+                          annotation_item_ids=annotation_ids,
+                          display_width=display_width,
+                          display_height=display_height)
         project.add_screenshot(shot)
         try:
             if project.has_segmentation():
@@ -278,7 +281,6 @@ class ImportScreenshotsJob(IConcurrentJob):
         shots_bgr_segment = []
         shots_gray_segment = []
 
-
         for i, p in enumerate(shots_paths):
             splitted = p.replace("\\", "/").split("/").pop().split("_")
             i_id = splitted.index("SCR") + 1
@@ -290,12 +292,11 @@ class ImportScreenshotsJob(IConcurrentJob):
                 shots_gray_segment = []
                 shots_bgr_segment = []
 
-
             img_bgr = cv2.imread(p)
             img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
             resized_image = cv2.resize(img_gray, (width, height))
             shots_bgr_segment.append(img_bgr)
-            shots_gray_segment.append([resized_image, 10**6, -1, p])
+            shots_gray_segment.append([resized_image, 10 ** 6, -1, p])
 
         # for i, s in enumerate(shots_gray_segment):
         #     for t in s:
@@ -321,10 +322,10 @@ class ImportScreenshotsJob(IConcurrentJob):
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
                 for j, s in enumerate(shots_gray):
-                        x = mse(gray, s[0])
-                        if x < s[1]:
-                            s[1] = x
-                            s[2] = i
+                    x = mse(gray, s[0])
+                    if x < s[1]:
+                        s[1] = x
+                        s[2] = i
 
             # x1 = mse(resized_image, shots_gray[current_shot_idx])
             # x2 = mse(resized_image, shots_gray[current_shot_idx + 1])
@@ -346,10 +347,8 @@ class ImportScreenshotsJob(IConcurrentJob):
             #     cv2.waitKey()
             #     current_shot_idx += 1
 
-
         for s in result:
             result_time.append(s[2])
-
 
         return [result_time, shots_bgr]
 
@@ -362,15 +361,15 @@ def render_annotations(frame, annotation_dicts):
         qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
 
         for a in annotation_dicts:
-            position    = a['orig_position']  # orig position has been modified depending on the keys
-            a_type      = AnnotationType(a['a_type'])
-            size        = a['size']
-            color       = a['color']
+            position = a['orig_position']  # orig position has been modified depending on the keys
+            a_type = AnnotationType(a['a_type'])
+            size = a['size']
+            color = a['color']
             color = QtGui.QColor(color[0], color[1], color[2])
-            line_width  = a['line_w']
-            text        = a['text']
-            font_size   = a['font_size']
-            resource    = a['resource_path']
+            line_width = a['line_w']
+            text = a['text']
+            font_size = a['font_size']
+            resource = a['resource_path']
             free_hand_paths = a['free_hand_paths']
 
             pen = QtGui.QPen()
@@ -388,9 +387,9 @@ def render_annotations(frame, annotation_dicts):
             l = line_width
             inner_rect_delta = 10
             inner_rect = QtCore.QRect(s.x() + l + inner_rect_delta,
-                                           s.y() + l + inner_rect_delta,
-                                           s.width() - 2 * l - 2 * inner_rect_delta,
-                                           s.height() - 2 * l - 2 * inner_rect_delta)
+                                      s.y() + l + inner_rect_delta,
+                                      s.width() - 2 * l - 2 * inner_rect_delta,
+                                      s.height() - 2 * l - 2 * inner_rect_delta)
 
             if a_type == AnnotationType.Ellipse:
                 qp.drawEllipse(inner_rect)
@@ -448,8 +447,5 @@ class ScreenshotStreamingJob(IConcurrentJob):
         for s in screenshots:
             s.resize(scale)
 
-
-    def modify_project(self, project, result, sign_progress = None, main_window = None):
-       pass
-
-
+    def modify_project(self, project, result, sign_progress=None, main_window=None):
+        pass
