@@ -478,22 +478,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             return new
         return None
 
-    # def create_screenshot_headless(self, name, frame_pos = None, time_ms = None, fps = 29.0):
-    #     #TODO do we still need this?
-    #
-    #     if frame_pos is None and time_ms is None:
-    #         print("Either frame or ms has to be given")
-    #         return
-    #
-    #     if frame_pos is None:
-    #         frame_pos = ms_to_frames(time_ms, fps)
-    #     else:
-    #         time_ms = frame2ms(frame_pos, fps)
-    #
-    #     new = Screenshot(name, None, img_blend=None, timestamp=time_ms, frame_pos=frame_pos)
-    #     self.add_screenshot(new)
-    #     return new
-
     def add_screenshot(self, screenshot, group = 0) -> Screenshot:
         """
         Adds a screenshot instance to the project.
@@ -1287,15 +1271,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 self.current_script = old_script
         except Exception as e:
             print("Loading Node Scripts failed", e)
-            # self.main_window.print_message("Loading Node Scripts failed", "Red")
-            # self.main_window.print_message(e, "Red")
-
-        # try:
-        #     [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
-        #     self.active_pipeline_script = self.get_by_id(my_dict['active_pipeline_script'])
-        #     self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
-        # except Exception as e:
-        #     print("Exception in Load Pipelines", str(e))
 
         try:
             for e in my_dict['experiments']:
@@ -1528,32 +1503,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param dispatch:
         :return: Vocabulary added
         """
-        not_ok = True
-        counter = 0
         name = voc.name
-        duplicate = None
-
-        # while(not_ok):
-        #     has_duplicate = False
-        #     for v in self.vocabularies:
-        #     #     if v.name == name:
-        #     #         name = voc.name + "_" + str(counter).zfill(2)
-        #     #         has_duplicate = True
-        #     #         counter += 1
-        #     #         duplicate = v
-        #     #         break
-        #     # if not has_duplicate:
-        #     #     not_ok = False
-        #     #     break
-        #     # else:
-        #         # If the Vocabulares are duplicates, we might want to replace the IDS in the Caller,
-        #         # Therefore we create a replacement table
-        #         x = [w.name for w in voc.words_plain]
-        #         y = [w.name for w in duplicate.words_plain]
-        #
-        #         if set(x) == set(y):
-        #             print("Vocabulary is duplicate")
-        #             return duplicate
 
         voc.name = name
         voc.set_project(self)

@@ -236,12 +236,10 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
-                    # print("Exception during Vocabulary:deserialize", e)
                     pass
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
-                    # print("Exception during Vocabulary:deserialize (II)", e)
                     pass
                 try:
                     word.uuid = w['uuid']
@@ -262,17 +260,17 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
+                    log_warning(e)
                     pass
-                    # print("Exception during Vocabulary:deserialize", e)
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
+                    log_warning(e)
                     pass
-                    # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
                     word.uuid = w['uuid']
-                except:
-                    # print("No UUID found in this vocabulary", self.name)
+                except Exception as e:
+                    log_warning(e)
                     pass
                 try:
                     word.comment = w['comment']
@@ -837,6 +835,9 @@ class UniqueKeyword(IProjectContainer):
         self.unique_id = serialization['unique_id']
         self.word_obj = project.get_by_id(serialization['word_obj'])
         self.voc_obj = self.word_obj.vocabulary
+        self.class_obj = project.get_by_id(serialization['class_obj'])
+
+        print(self.word_obj, self.voc_obj, self.class_obj)
 
         try:
             self.external_id = deprecation_serialization(serialization,['vian_webapp_external_id', 'external_id'])
