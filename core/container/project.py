@@ -22,6 +22,10 @@ from .analysis import *
 from .media_objects import *
 from .node_scripts import *
 
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core.container.vocabulary_library import VocabularyLibrary
 # from core.data.importers import ImportDevice
 # from core.data.exporters import ExportDevice
 VIAN_PROJECT_EXTENSION = ".eext"
@@ -1586,6 +1590,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             return new_voc
 
+    def load_from_library(self, library:VocabularyLibrary):
+
     #endregion
 
     #region MediaObjects
@@ -1706,11 +1712,22 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if t is not None:
                 cl_obj = t
                 break
+
         if cl_obj is None:
-            exp = self.create_experiment("Default Experiment")
+            exp = self.get_default_experiment()
             cl_obj = exp.create_class_object(name)
 
         return cl_obj
+
+    def get_all_classification_objects(self) -> List[ClassificationObject]:
+        """
+        Returns all available classification objects in the project.
+        :return:
+        """
+        res = []
+        for e in self.experiments:
+            res += [cl for cl in e.get_classification_objects_plain()]
+        return res
 
     def get_experiment_by_name(self, name):
         for e in self.experiments:

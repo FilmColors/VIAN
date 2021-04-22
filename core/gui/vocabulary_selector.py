@@ -57,7 +57,7 @@ class VocabularySelectorWidget(QWidget):
                 state = v['state']
                 if voc.unique_id not in obj_vocabulary and state == True:
                     self.selected_clobj.add_vocabulary(voc)
-        print("Voc Selection")
+
 
 class ClassificationObjectList(QWidget):
     onClassificationObjectSelected = pyqtSignal(object)
@@ -69,10 +69,22 @@ class ClassificationObjectList(QWidget):
         self.project = project      # type: VIANProject
 
         self.setLayout(QVBoxLayout())
+
+        self.add_bar = QHBoxLayout()
+        self.input_line = QLineEdit(self)
+        self.input_line.setPlaceholderText("Type here to add a new classification object")
+        self.completer = QCompleter([c.name for c in self.project.get_all_classification_objects()])
+        self.input_line.setCompleter(self.completer)
+
+        self.btn_add = QPushButton("Add", self)
+        self.btn_add.clicked.connect(self.add_classification_object)
+        self.add_bar.addWidget(self.input_line)
+        self.add_bar.addWidget(self.btn_add)
+
+        self.layout().addItem(self.add_bar)
         self.layout().addWidget(self.list)
 
         self.list.itemSelectionChanged.connect(self.on_selected)
-
         self.update_list()
 
     def update_list(self):
@@ -84,6 +96,14 @@ class ClassificationObjectList(QWidget):
         if len(self.list.selectedItems()) > 0:
             selected = self.list.selectedItems()[0]
             self.onClassificationObjectSelected.emit(selected.clobj)
+
+    def add_classification_object(self):
+
+        # TODO MULTI EXPERIMENT
+        clobj = self.project.get_classification_object_global(self.input_line.text())
+        clobj.target_container.append(self.target)
+        self.update_list()
+
 
 
 class ClassificationObjectItem(QListWidgetItem):

@@ -77,6 +77,19 @@ class VocabularyLibrary(QObject):
     def __init__(self):
         super(VocabularyLibrary, self).__init__()
         self.collections = dict()
+        self.voc_index = dict()
+        self.onLibraryChanged.connect(self.reindex)
+
+    def reindex(self):
+        self.voc_index = dict()
+        for c in self.collections.values():
+            for v in c.vocabularies.values():
+                self.voc_index[v.unique_id] = v
+
+        return voc
+
+    def get_vocabulary_by_id(self, unique_id):
+        return self.voc_index.get(unique_id)
 
     def create_collection(self, name) -> VocabularyCollection:
         """
@@ -148,6 +161,7 @@ class VocabularyLibrary(QObject):
         self.onLibraryChanged.emit(self)
         return self
 
+    def get_vocabulary(self):
 
 global_library = None
 if __name__ == '__main__':
