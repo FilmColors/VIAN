@@ -13,7 +13,7 @@ VIAN application itself.
 
    It is important that you are in possession of the **exact** same movie file - otherwise the project that will be re-built in your VIAN locally will be corrupted.
 
-To inspect a project locally in your VIAN application, select the move
+To inspect a project locally in your VIAN application, select the movie
 you are interested in and click `download`.
 
 
@@ -24,7 +24,7 @@ you are interested in and click `download`.
 
    The interface of a project in the VIAN WebApp.
 
-In VIAN, go to `File` >> `Import` >> `VIAN WebAPP`. Chose the `.json`-File you downloaded.
+In VIAN, go to `File` >> `Import` >> `VIAN WebAPP` to import the project locally:
 
 .. figure:: import_dialogue.png
    :scale: 50 %
@@ -35,7 +35,9 @@ In VIAN, go to `File` >> `Import` >> `VIAN WebAPP`. Chose the `.json`-File you d
 
 After you specified the project file, VIAN asks you for two more specifications:
 
-- **First**, VIAN asks you for the project file - a .json file - you want to import.
+- **First**, VIAN asks you for the project file - a *.json* file -
+  you want to import (of course, this is the file you downloaded
+  from vian.app).
 
 - In a **second** step, you need to specify the location where the project you are
   about to import should be stored on your computer. Normally, this
