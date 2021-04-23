@@ -1,4 +1,7 @@
+miniconda/
 vian_update.zip
+venv/*
+venv37/*
 .idea/*
 .idea/workspace.xml
 .idea/workspace.xml
@@ -20,6 +23,7 @@ idea/
 *.mp4
 install/.DS_Store
 _docs/build/*
+_docs/source/_build/*
 dist/*
 build/*
 log-files/*
@@ -33,5 +37,5 @@ dist/*
 build/*
 flask_server/static/build/*
 flask_server/static/three/*
-venv/*
+venv2/*
 venv37/*

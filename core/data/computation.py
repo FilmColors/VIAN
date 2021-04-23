@@ -26,6 +26,9 @@ from zipfile import ZipFile
 import math
 from scipy.signal import kaiserord, lfilter, firwin, freqz
 
+def is_vian_light():
+    return os.environ.get("VIAN_LIGHT") is not None
+
 
 def tuple2point(tpl):
     return QtCore.QPoint(tpl[0], tpl[1])
@@ -190,6 +193,7 @@ def lab_to_lch(lab, human_readable = False):
     if human_readable:
         lch = lch_to_human_readable(lch)
     return lch
+
 
 def lch_to_human_readable(lch):
     """

@@ -151,21 +151,8 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
             self.main_window.player.use_user_fps = True
             self.main_window.player.user_fps = self.sp_fps.value()
 
-    # def update_ui(self):
-    #     self.lbl_Rate.setText(str(round(self.main_window.player.get_rate(),1)))
-    #     self.is_connected = self.main_window.server.is_connected
-    #     if self.main_window.player.media is not None:
-    #         t = self.main_window.timeline.timeline.curr_movie_time
-    #         d = np.clip(self.main_window.player.duration, 1, None)
-    #         vlc_position = float(t)/d
-    #         vlc_volume = float(self.main_window.player.get_volume())
-    #         self.sl_position.setValue(vlc_position * 10000)
-    #         self.lbl_position_time.setText(ms_to_string(t))
-    #         self.lbl_position_frame.setText(str(int(float(t) / 1000 * 30)))
-    #         self.sl_volume.setValue(vlc_volume)
     def update_rate(self):
         self.lbl_Rate.setText(str(round(self.main_window.player.get_rate(), 1)))
-
 
     def setState(self, state):
         for c in self.controlsContainer.children():

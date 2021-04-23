@@ -176,21 +176,21 @@ class SemanticSegmentationAnalysis(IAnalysisJob):
         """
         return SemanticSegmentationParameterWidget()
 
-    def serialize(self, data_dict):
-        data = dict(
-            mask = pickle.dumps(data_dict['mask']),
-            frame_sizes = data_dict['frame_sizes'],
-            dataset = data_dict['dataset']
-        )
-        return data
-
-    def deserialize(self, data_dict):
-        data = dict(
-            mask=pickle.loads(data_dict['mask']),
-            frame_sizes=data_dict['frame_size'],
-            dataset=data_dict['dataset']
-        )
-        return data
+    # def serialize(self, data_dict):
+    #     data = dict(
+    #         mask = pickle.dumps(data_dict['mask']),
+    #         frame_sizes = data_dict['frame_sizes'],
+    #         dataset = data_dict['dataset']
+    #     )
+    #     return data
+    #
+    # def deserialize(self, data_dict):
+    #     data = dict(
+    #         mask=pickle.loads(data_dict['mask']),
+    #         frame_sizes=data_dict['frame_size'],
+    #         dataset=data_dict['dataset']
+    #     )
+    #     return data
 
     def get_hdf5_description(self):
         return dict(

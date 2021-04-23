@@ -1,23 +1,33 @@
-from core.analysis.movie_mosaic.movie_mosaic import *
+# from core.analysis.movie_mosaic.movie_mosaic import *
 from core.analysis.colorimetry.colormetry2 import *
 from core.container.hdf5_manager import vian_analysis
+from core.data.computation import is_vian_light
 
-try:
-    from core.analysis.semantic_segmentation import *
-    from core.analysis.color.average_color import *
-    from core.analysis.color.histogram_analysis import *
-    from core.analysis.color.palette_analysis import *
-    from core.analysis.z_projection import *
+from core.analysis.color.average_color import *
+from core.analysis.color.histogram_analysis import *
+from core.analysis.color.palette_analysis import *
+from core.analysis.z_projection import *
+from core.analysis.eyetracking.eyetracking import *
 
-    import os
-    from core.analysis.import_tensortflow import tf
 
-except Exception as e:
-    print("Import Failed", e)
+from core.analysis.motion.optical_flow import *
+import os
 
+
+tf_loaded = False
+if not is_vian_light():
+    try:
+        from core.analysis.import_tensortflow import tf
+        from core.analysis.semantic_segmentation import *
+
+        tf_loaded = True
+    except Exception as e:
+        print("Import Failed", e)
+        pass
+
+if not tf_loaded:
     from core.data.enums import DataSerialization
     from core.analysis.deep_learning.labels import *
-
 
     @vian_analysis
     class SemanticSegmentationAnalysis(IAnalysisJob):
@@ -85,26 +95,13 @@ except Exception as e:
             """
             return SemanticSegmentationParameterWidget()
 
-        def serialize(self, data_dict):
-            data = dict(
-                mask=pickle.dumps(data_dict['mask']),
-                frame_sizes=data_dict['frame_sizes'],
-                dataset=data_dict['dataset']
-            )
-            return data
-
-        def deserialize(self, data_dict):
-            data = dict(
-                mask=pickle.loads(data_dict['mask']),
-                frame_sizes=data_dict['frame_size'],
-                dataset=data_dict['dataset']
-            )
-            return data
-
         def from_json(self, database_data):
             return pickle.loads(database_data)
 
         def to_json(self, container_data):
             return pickle.dumps(container_data)
 
+
+from core.analysis.audio.audio_tempo import AudioTempoAnalysis
+from core.analysis.audio.audio_volume import AudioVolumeAnalysis
 

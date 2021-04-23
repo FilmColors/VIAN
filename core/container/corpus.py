@@ -1,5 +1,5 @@
 """
-A VIAN Corpus is merely a class which represents a collection of VIAN Projects,
+A VIAN Corpus is a class which represents a collection of VIAN Projects,
 all sharing a common template.
 
 
@@ -141,6 +141,10 @@ class Corpus(QObject, IHasName):
             project = VIANProject().load_project(project.path)
             self.projects_loaded[project.uuid] = project
 
+        # We don't want to keep the hdf5 files locked
+        for p in self.projects_loaded.values(): #type:VIANProject
+            p.hdf5_manager.on_close()
+
     def get_name(self):
         return self.name
 
@@ -181,6 +185,7 @@ class Corpus(QObject, IHasName):
         if self.CORPUS_FILE_EXTENSION not in path:
             path += self.CORPUS_FILE_EXTENSION
 
+        self.file = path
         with open(path, "w") as f:
             json.dump(self.serialize(), f)
 

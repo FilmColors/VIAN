@@ -60,6 +60,10 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Screenshot")
+
+        if is_vian_light():
+            self.inner.menuBar().hide()
+
         self.m_display = self.inner.menuBar().addMenu("Display")
         self.a_static = self.m_display.addAction("Static")
         self.a_static.setCheckable(True)
@@ -514,7 +518,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def update_manager(self):
         """
         Recreating the Data Structures
-        :return: 
+        :return:
         """
         if self.project is None:
             return
@@ -971,7 +975,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if self.rubberband_rect.width() > 20 and self.rubberband_rect.height() > 20:
             modifiers = QtWidgets.QApplication.keyboardModifiers()
             if not modifiers == QtCore.Qt.ShiftModifier:
-                self.project.set_selected(None)
+                self.project.set_selected(None, [])
 
             for i in self.images_plain:
                 i_rect = QtCore.QRectF(i.pos().x(), i.pos().y(),i.boundingRect().width(), i.boundingRect().height())

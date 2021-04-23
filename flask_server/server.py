@@ -2,10 +2,12 @@ import os
 import cv2
 from functools import partial
 import json
+import platform
 
 import numpy as np
 
 from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
+from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
 from PyQt5 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
@@ -244,6 +246,7 @@ class FlaskServer(QObject):
             selected.remove(q)
 
         if _server_data.project is not None:
+            # TODO this fails with corpus selection
             if len(selected) > 0:
                 for s in selected:
                     if isinstance(s, Segment):
@@ -266,14 +269,30 @@ class FlaskWebWidget(EDockWidget):
         super(FlaskWebWidget, self).__init__(main_window, False)
         self.setWindowTitle("Bokeh Visualizations")
 
-        self.view = QWebEngineView(self)
-        self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
-        self.view.setPage(WebPage())
-        self.view.reload()
-        self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
+        # On High Sierra and earlier QWebEngine crashes on load,
+        # it's a miracle, apple sucks, for f**** sake
+        # maybe I'm wrong and coded this shitty, no idea really,
+        # there is a resolved issue on QT tracker
+        # In a year or two, High sierra is gone anyway...
+        self.mac_disable_web = False
+        try:
+            if int(platform.mac_ver()[0].split(".")[1])<=13:
+                self.mac_disable_web = True
+        except Exception as e:
+            print(e)
+        if not self.mac_disable_web:
+            self.view = QWebEngineView(self)
+            self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
+            self.view.setPage(WebPage())
+            self.view.reload()
+            self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
+            self.setWidget(self.view)
+        else:
+            self.setWidget(QLabel("Sorry, VIAN on OSX High Sierra and below does not support the visualization. \n "
+                                  "Please watch them in your browser by clicking 'Open in Browser' on top"))
         self.a_open_browser = self.inner.menuBar().addAction("Open in Browser")
         self.a_open_browser.triggered.connect(self.on_browser)
-        self.setWidget(self.view)
+
         self.url = None
 
 
@@ -283,18 +302,20 @@ class FlaskWebWidget(EDockWidget):
         webbrowser.open(self.url)
 
     def set_url(self, url):
-        QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
-        QWebEngineProfile.defaultProfile().clearHttpCache()
         self.url = url
-        self.view.setUrl(QUrl(url))
-        self.view.reload()
+        if not self.mac_disable_web:
+            QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
+            QWebEngineProfile.defaultProfile().clearHttpCache()
+            self.view.setUrl(QUrl(url))
+            self.view.reload()
 
     def showEvent(self, a0: QtGui.QShowEvent) -> None:
         self.reload()
         super(FlaskWebWidget, self).showEvent(a0)
 
     def reload(self):
-        self.view.reload()
+        if not self.mac_disable_web:
+            self.view.reload()
 
 
 @app.route("/")

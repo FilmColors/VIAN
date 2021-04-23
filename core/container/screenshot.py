@@ -9,8 +9,10 @@ from .analysis import SemanticSegmentationAnalysisContainer
 from .annotation_body import Annotatable
 from PyQt5.QtCore import pyqtSignal
 import datetime
+from core.data.computation import resize_with_aspect
 
 CACHE_WIDTH = 250
+
 
 class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, Annotatable):
     """
@@ -208,7 +210,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
             self.scene_id = segment.ID
         return segment
 
-    def serialize(self):
+    def serialize(self, bake=False):
         result = dict(
             name = self.title,
             unique_id=self.unique_id,
@@ -227,6 +229,10 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
 
         )
 
+        if bake:
+            img = resize_with_aspect(self.get_img_movie_orig_size(), width=750)
+            result['bake_path'] = self.project.get_bake_path(self, ".jpg")
+            cv2.imwrite(result['bake_path'], img)
         # images = [self.img_movie.astype(np.uint8)]
         images = None
         return result, images

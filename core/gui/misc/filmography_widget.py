@@ -128,7 +128,7 @@ class FilmographyWidget2(QWidget):
             if imdb_url[-1:] == "":
                 imdb_url = imdb_url[:-1]
             imdb_id = imdb_url[-1:]
-            imdb_id = filter(lambda x: x.isdigit(), imdb_id)
+            imdb_id = "".join([x for x in imdb_id if x.isdigit()])
         except Exception as e:
             imdb_id = ""
             print(e)

@@ -16,6 +16,7 @@ Step-by-Step Guides
    experiments/experiments.rst
    player/player.rst
    vian_corpus/vian_corpus.rst
+   vian_app_projects/vian_app_projects.rst
 
 
 

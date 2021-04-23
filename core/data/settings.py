@@ -20,6 +20,12 @@ from PyQt5.QtGui import QFont, QColor
 
 from PyQt5.QtWidgets import QApplication
 
+COLORMAPS_SEQUENTIAL = [
+            'viridis', 'plasma', 'inferno', 'magma', 'cividis',
+    'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
+            'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
+            'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']
+
 Font = namedtuple('Font', ['font_family', 'font_size', 'font_color'])
 Palette = namedtuple('Palette', ['palette_name', 'palette_colors'])
 
@@ -31,26 +37,30 @@ palette_beach = Palette(palette_name="Ocean", palette_colors=[[3,63,99],[40,102,
 palette_earth = Palette(palette_name="Earth", palette_colors=[[252,170,103],[176,65,62],[255,255,199],[84,134,135],[71,51,53]])
 palette_gray = Palette(palette_name="Gray", palette_colors=[[0,0,0],[50,50,50],[100,100,100],[150,150,150],[200,200,200],[255,255,255]])
 
-print(os.curdir)
-print(os.path.abspath("data/config.json"))
 
-# determine if application is a script file or frozen exe
-if getattr(sys, 'frozen', False):
-    application_path = os.path.dirname(sys.executable)
-    os.chdir(application_path)
-print("Working Dir", os.curdir)
+if "Sphinx" not in os.environ:
+    # determine if application is a script file or frozen exe
+    if getattr(sys, 'frozen', False):
+        application_path = os.path.dirname(sys.executable)
+        os.chdir(application_path)
+    print("Working Dir", os.curdir)
 
-try:
-    with open("data/config.json", "r") as f:
-        CONFIG = json.load(f)
-except Exception as e:
-    print(e)
     try:
-        with open("../data/config.json", "r") as f:
+        print(os.curdir)
+        print(os.path.abspath("data/config.json"))
+        with open("data/config.json", "r") as f:
             CONFIG = json.load(f)
     except Exception as e:
-        raise e
-IS_DEV = os.path.isfile("is_dev.txt")
+        print(e)
+        try:
+            with open("../data/config.json", "r") as f:
+                CONFIG = json.load(f)
+        except Exception as e:
+            raise e
+    IS_DEV = os.path.isfile("is_dev.txt")
+else:
+    CONFIG = None
+    IS_DEV = False
 
 class UserSettings():
     """
@@ -160,7 +170,8 @@ class UserSettings():
         self.USE_ELAN = False
         self.USE_PIPELINES = False
 
-
+        self.OVERLAY_RESOLUTION_WIDTH = 1200
+        self.OVERLAY_VISUALIZATION_COLORMAP = "viridis"
 
         self.dock_widgets_data = []
 
@@ -292,7 +303,6 @@ class UserSettings():
             n_name.extend(self.recent_files_name)
             self.recent_files_name = n_name
 
-            #Update the File Path
             self.recent_files_path.pop(idx)
             n_path = [path]
             n_path.extend(self.recent_files_path)

@@ -11,6 +11,7 @@ from core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
 from core.visualization.line_plot import LinePlot
 import cv2
 import numpy as np
+from core.data.computation import is_vian_light
 
 from core.visualization.basic_vis import *
 
@@ -62,12 +63,14 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
         self.worker_ready = True
         self.latest_worker_data = None
 
+
         self.drawing_worker = ColorimetryWorker(self.work)
-        self.worker_thread = QThread()
-        self.draw.connect(self.drawing_worker.run)
-        self.drawing_worker.onProcessingDone.connect(self.on_worker_ready)
-        self.drawing_worker.moveToThread(self.worker_thread)
-        self.worker_thread.start()
+        if not is_vian_light():
+            self.worker_thread = QThread()
+            self.draw.connect(self.drawing_worker.run)
+            self.drawing_worker.onProcessingDone.connect(self.on_worker_ready)
+            self.drawing_worker.moveToThread(self.worker_thread)
+            self.worker_thread.start()
 
         self.current_data = None
 
@@ -137,7 +140,8 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
     def update_timestep(self, data, time_ms):
         if data is not None:
             self.current_data = data
-            if not self.isVisible():
+            if self.visibleRegion().isEmpty():
+                print("Not Visible")
                 return
 
             if not self.worker_ready:

@@ -1,21 +1,27 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QFontComboBox
 from PyQt5.QtGui import QFont
+from PyQt5.QtCore import pyqtSignal
 import os
 
 from PyQt5 import uic
-
+from core.data.settings import COLORMAPS_SEQUENTIAL, UserSettings
 from core.data.enums import ScreenshotNamingConventionOptions
 from core.gui.ewidgetbase import EDialogWidget
 
+from matplotlib import cm
+
+
 
 class DialogPreferences(EDialogWidget):
+    onSettingsChanged = pyqtSignal(object)
+
     def __init__(self, parent):
         super(DialogPreferences, self).__init__(parent, parent)
         path = os.path.abspath("qt_ui/DialogPreferences.ui")
         uic.loadUi(path, self)
 
-        self.settings = parent.settings
+        self.settings = parent.settings #type:UserSettings
         # self.settings = UserSettings()
 
 
@@ -64,14 +70,13 @@ class DialogPreferences(EDialogWidget):
         self.spinBox_GridSize.setValue(self.settings.GRID_SIZE)
         self.spinBox_ProcessingWidth.setValue(self.settings.PROCESSING_WIDTH)
 
-        # self.lineEdit_UserName.setText(self.settings.USER_NAME)
-        # self.lineEdit_CorpusIP.setText(self.settings.CORPUS_IP)
-        # self.lineEdit_CorpusPort.setText(str(self.settings.COPRUS_PORT))
-        # self.lineEdit_CorpusPW.setText(self.settings.COPRUS_PW)
-        self.checkBoxMultiExperiments.setChecked(self.settings.MULTI_EXPERIMENTS)
+        self.sliderOverlayQuality.setValue(self.settings.OVERLAY_RESOLUTION_WIDTH)
+        self.sliderOverlayQuality.valueChanged.connect(self.set_render_quality)
+        for colormap in COLORMAPS_SEQUENTIAL:
+            self.cbOverlayColormap.addItem(colormap)
+        self.cbOverlayColormap.currentTextChanged.connect(self.apply_settings)
 
-        # self.checkBox_UseCorpus.setChecked(self.settings.USE_CORPUS)
-        # self.checkBox_UseELANRemote.setChecked(self.settings.USE_ELAN)
+        self.checkBoxMultiExperiments.setChecked(self.settings.MULTI_EXPERIMENTS)
         try:
             self.font_Picker.setCurrentText(self.settings.FONT_NAME)
         except:
@@ -79,6 +84,11 @@ class DialogPreferences(EDialogWidget):
 
         self.spinBox_FontSize.setValue(self.settings.FONT_SIZE)
 
+    def set_render_quality(self):
+        v = self.sliderOverlayQuality.value()
+        self.labelOverlayQuality.setText(str(v))
+        self.settings.OVERLAY_RESOLUTION_WIDTH = v
+        self.onSettingsChanged.emit(self.settings)
 
     def set_autosave(self):
         state = self.checkBox_Autosave.isChecked()
@@ -123,6 +133,8 @@ class DialogPreferences(EDialogWidget):
         self.settings.PROCESSING_WIDTH = self.spinBox_ProcessingWidth.value()
         self.main_window.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
         self.main_window.on_pipeline_settings_changed()
+        self.settings.OVERLAY_VISUALIZATION_COLORMAP = self.cbOverlayColormap.currentText()
+        self.onSettingsChanged.emit(self.settings)
 
     def font_changed(self):
         family = self.font_Picker.currentText()

@@ -6,6 +6,7 @@ from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.auto_segmentation import DialogAutoSegmentation
 from core.analysis.analysis_import import *
+from core.data.computation import is_vian_light
 
 from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
@@ -14,7 +15,7 @@ from core.data.importers import *
 from core.data.corpus_client import WebAppCorpusInterface, get_vian_version
 from core.data.computation import version_check
 from core.data.settings import UserSettings, Contributor
-from core.data.audio_handler import AudioHandler
+from core.data.audio_handler2 import AudioHandler
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
@@ -57,7 +58,7 @@ from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 
 from core.concurrent.worker import Worker
-from core.container.hdf5_manager import print_registered_analyses
+from core.container.hdf5_manager import print_registered_analyses, get_all_analyses
 from core.gui.toolbar import WidgetsToolbar
 from core.data.log import log_info
 
@@ -132,9 +133,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.setAttribute(Qt.WA_MacFrameworkScaled)
             self.setAttribute(Qt.WA_MacOpaqueSizeGrip)
 
+
         self.plugin_menu = self.extension_list.get_plugin_menu(self.menuWindows)
         self.menuBar().addMenu(self.plugin_menu)
         self.menuAnalysis.addMenu(self.extension_list.get_analysis_menu(self.menuAnalysis, self))
+        if is_vian_light():
+            self.plugin_menu.menuAction().setVisible(False)
 
         QApplication.instance().setAttribute(Qt.AA_DontUseNativeMenuBar)
         self.dock_widgets = []
@@ -204,16 +208,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_widget = None
         self.summary_dock = None
 
-        # self.corpus_visualizer = VIANVisualizer2(self)
-        # self.corpus_visualizer, self.corpus_visualizer_result = self.corpus_visualizer.get_widgets()
-        #
-        # self.corpus_visualizer_dock = EDockWidget(self, False)
-        # self.corpus_visualizer_dock.setWidget(self.corpus_visualizer)
-        # self.corpus_visualizer_dock.setWindowTitle("Corpus Visualizer Query")
-        # self.corpus_visualizer_result_dock = EDockWidget(self, False)
-        # self.corpus_visualizer_result_dock.setWidget(self.corpus_visualizer_result)
-        # self.corpus_visualizer_result_dock.setWindowTitle("Corpus Visualizer Results")
-
         self.progress_popup = None
 
         self.colorimetry_live = None
@@ -231,24 +225,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project = VIANProject(name="Default Project", path=None)
         self.corpus_client = CorpusClient()
 
-        self.frame_update_worker = TimestepUpdateWorkerSingle()
+        self.frame_update_worker = TimestepUpdateWorkerSingle(self.settings)
         self.frame_update_thread = QThread()
         self.frame_update_worker.moveToThread(self.frame_update_thread)
         self.onUpdateFrame.connect(self.frame_update_worker.perform)
-        # self.frame_update_worker.signals.onMessage.connect(self.print_time)
         self.frame_update_thread.start()
 
         self.audio_handler = AudioHandler(resolution=0.1, callback=print)
-        self.audio_handler_thread = QThread()
-        self.audio_handler.moveToThread(self.audio_handler_thread)
-        self.audio_handler_thread.start()
+        if not is_vian_light():
+            self.audio_handler_thread = QThread()
+            self.audio_handler.moveToThread(self.audio_handler_thread)
+            self.audio_handler_thread.start()
 
         self.flask_server = FlaskServer(None)
-        self.flask_server_thread = QThread()
-        self.flask_server.moveToThread(self.flask_server_thread)
-        self.flask_server_thread.start()
-        self.onStartFlaskServer.connect(self.flask_server.run_server)
-        self.onStartFlaskServer.emit()
+        if not is_vian_light():
+            self.flask_server_thread = QThread()
+            self.flask_server.moveToThread(self.flask_server_thread)
+            self.flask_server_thread.start()
+            self.onStartFlaskServer.connect(self.flask_server.run_server)
+            self.onStartFlaskServer.emit()
+
 
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
@@ -298,7 +294,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.window_toolbar = WidgetsToolbar(self)
         self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
 
-
         self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
 
         self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
@@ -317,9 +312,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.history_view.hide()
         self.concurrent_task_viewer.hide()
 
+        self.frame_update_worker.signals.onSpatialDatasetsChanged.connect(
+            self.player_dock_widget.on_spatial_datasets_changed)
+        self.player_dock_widget.onCurrentSpatialDatasetSelected.connect(
+            self.frame_update_worker.on_set_spatial_dataset)
+
         self.worker_manager = WorkerManager(self)
-        # self.worker_manager.worker.signals.analysisStarted.connect(self.pipeline_toolbar.progress_widget.on_start_analysis)
-        # self.worker_manager.worker.signals.analysisEnded.connect(self.pipeline_toolbar.progress_widget.on_stop_analysis)
 
         self.concurrent_task_viewer.onTotalProgressUpdate.connect(self.progress_bar.set_progress)
         self.audio_handler.audioProcessed.connect(self.timeline.timeline.add_visualization)
@@ -346,6 +344,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportVIANExperiment.triggered.connect(self.import_experiment)
         self.actionImportWebApp.triggered.connect(self.import_webapp)
         self.actionSRT_File.triggered.connect(self.import_srt)
+        self.actionSelectTemplate_File.triggered.connect(partial(self.import_template, None))
+        self.actionImportEyetracking_Dataset.triggered.connect(self.import_eyetracking)
+
+        import glob
+
+        templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
+        templates.extend(glob.glob("data/templates/" + "*.viant"))
+        for t in templates:
+            a = self.menuVIAN_Template.addAction(os.path.split(t)[1].split(".")[0])
+            a.triggered.connect(partial(self.import_template, t))
+
 
         ## EXPORT
         self.action_ExportSegmentation.triggered.connect(self.export_segmentation)
@@ -359,6 +368,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExportCSV.triggered.connect(self.on_export_csv)
         self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
         self.actionProject_Summary.triggered.connect(self.on_export_summary)
+        self.actionExportVIANWebApp.triggered.connect(self.on_export_vianwebapp)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -423,14 +433,28 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionAuto_Screenshots.triggered.connect(self.on_auto_screenshot)
 
 
+        #ANALYSES
+        analysis_menues = dict(
+            Color=self.menuColor,
+            Audio=self.menuAudio,
+            Movement=self.menuMovement,
+            Eyetracking=self.menuEyetracking
+        )
+
+        for k, v in get_all_analyses().items():
+            inst = v()
+            if inst.menu not in analysis_menues:
+                analysis_menues[inst.menu] = self.menuAnalysis.addMenu(inst.menu)
+            a = analysis_menues[inst.menu].addAction(inst.name)
+            a.triggered.connect(partial(self.analysis_triggered, v()))
+
+        if is_vian_light():
+            for k, v in analysis_menues.items():
+                v.menuAction().setVisible(False)
+
         self.actionColormetry.triggered.connect(self.toggle_colormetry)
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
-        self.actionColor_Histogram.triggered.connect(partial(self.analysis_triggered, ColorHistogramAnalysis()))
-        self.actionColor_Palette.triggered.connect(partial(self.analysis_triggered, ColorPaletteAnalysis()))
-        self.actionZProjection.triggered.connect(partial(self.analysis_triggered, ZProjectionAnalysis()))
-        # self.actionMovie_Mosaic.triggered.connect(partial(self.analysis_triggered, MovieMosaicAnalysis()))
-        # self.actionMovie_Barcode.triggered.connect(partial(self.analysis_triggered, BarcodeAnalysisJob()))
-        self.actionColorFeatures.triggered.connect(partial(self.analysis_triggered, ColorFeatureAnalysis()))
+
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
 
         self.actionBrowserVisualizations.triggered.connect(partial(self.on_browser_visualization))
@@ -441,18 +465,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.actionSemanticSegmentation = self.menuAnalysis.addAction("Semantic Segmentation")
             self.actionSemanticSegmentation.triggered.connect(partial(self.analysis_triggered, SemanticSegmentationAnalysis()))
 
-            # self.actionFacialIdentification = self.menuAnalysis.addAction("Facial Identification")
-            # self.actionFacialIdentification.triggered.connect(self.on_facial_reconition)
-            # self.create_facial_identification_dock()
-            # self.player_dock_widget.onFaceRecognitionChanged.connect(self.frame_update_worker.toggle_face_recognition)
-            # self.facial_identification_dock.identificator.onModelTrained.connect(self.frame_update_worker.load_face_rec_model)
-
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
 
-        # self.actionUpdate.triggered.connect(self.update_vian)
-        # self.actionCheck_for_Beta.triggered.connect(partial(self.update_vian, True, True))
+
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
@@ -461,13 +478,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClearRecent.triggered.connect(self.clear_recent)
         self.actionSet_Letterbox.triggered.connect(self.on_set_letterbox)
 
-        # Corpus
-        # self.actionCreateCorpus.triggered.connect(self.on_create_corpus)
-        # self.actionOpenLocal.triggered.connect(self.open_local_corpus)
-        # self.actionOpenRemote.triggered.connect(self.open_remote_corpus)
-        # self.actionCorpus_Visualizer.triggered.connect(self.on_start_visualizer)
-        # self.actionCorpus_VisualizerLegacy.triggered.connect(self.on_start_visualizer_legacy)
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
+        self.audio_handler.audioExtractingProgress.connect(self.set_audio_extracting_progress)
         self.audio_handler.audioExtractingEnded.connect(partial(self.set_audio_extracting, False))
 
         self.onMultiExperimentChanged.connect(self.outliner.on_multi_experiment_changed)
@@ -526,7 +538,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.time = 0
         self.time_counter = 0
-        self.clock_synchronize_step = 20
+        self.clock_synchronize_step = 100
         self.last_segment_index = 0
 
         self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.QueuedConnection)
@@ -536,7 +548,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onMovieOpened.connect(self.audio_handler.project_changed)
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
-        # self.player.stopped.connect(partial(self.frame_update_worker.set_opencv_frame, True))
         self.player.stopped.connect(self.on_pause)
 
         self.player.started.connect(partial(self.drawing_overlay.on_opencv_frame_visibilty_changed, False))
@@ -570,8 +581,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
         self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
-        # loading_screen.showMessage("Finalizing", Qt.AlignHCenter|Qt.AlignBottom,
-        #                            QColor(200,200,200,100))
 
         self.update_recent_menu()
 
@@ -579,7 +588,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_controls.setState(False)
 
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
-        # self.update_vian(False)
 
         self.project.undo_manager.clear()
         self.close_project()
@@ -675,13 +683,19 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             log_error("Exception in MainWindow.on_colormetry_finished(): ", str(e))
 
+    def set_audio_extracting_progress(self, flt):
+        self.concurrent_task_viewer.update_progress("audio-extraction-task", flt)
+
+
     def set_audio_extracting(self, state):
         if state:
+            self.concurrent_task_viewer.add_task("audio-extraction-task", "Audio Extracion", None, job = None)
             self.actionColormetry.setText("Start Colorimetry (blocked)")
             self.actionClearColormetry.setText("Clear Colorimetry (blocked)")
             self.actionColormetry.setEnabled(False)
             self.actionClearColormetry.setEnabled(False)
         else:
+            self.concurrent_task_viewer.remove_task("audio-extraction-task")
             self.actionColormetry.setText("Start Colorimetry")
             self.actionClearColormetry.setText("Clear Colorimetry")
             self.actionColormetry.setEnabled(True)
@@ -1190,31 +1204,9 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 log_error(e)
 
-    # def update_vian(self, show_newest = True, allow_beta = False):
-    #     try:
-    #         result, version_id = self.updater.get_server_version()
-    #     except:
-    #         return
-    #
-    #     if result:
-    #         answer = QMessageBox.question(self, "Update Available", "A new Update is available, and will be updated now.\nVIAN will close after the Update. Please do not Update before you have saved the current Project. \n\n Do you want to Update now?")
-    #         if answer == QMessageBox.Yes:
-    #             self.updater.update()
-    #         else:
-    #             self.print_message("Update Aborted", "Orange")
-    #     else:
-    #         if show_newest:
-    #             answer = QMessageBox.question(self, "VIAN Up to Date", "VIAN is already on the newest version: " + self.version + "\n" +
-    #                                     "Do you want to update anyway?")
-    #             if answer == QMessageBox.Yes:
-    #                 self.updater.update(force = True)
-    #             else:
-    #                 self.print_message("Update Aborted", "Orange")
-    #         else:
-    #             self.print_message("VIAN is up to date with version: " + str(version.__version__), "Green")
-
     def open_preferences(self):
         dialog = DialogPreferences(self)
+        dialog.onSettingsChanged.connect(self.frame_update_worker.on_settings_changed)
         dialog.show()
 
     def on_movie_opened(self):
@@ -1246,9 +1238,11 @@ class MainWindow(QtWidgets.QMainWindow):
         log_info("Closing Frame Update")
         self.frame_update_thread.quit()
         log_info("Closing flask_server_thread")
-        self.flask_server_thread.quit()
-        log_info("Closing audio_handler_thread")
-        self.audio_handler_thread.quit()
+        if not is_vian_light():
+            self.flask_server_thread.quit()
+            log_info("Closing audio_handler_thread")
+            self.audio_handler_thread.quit()
+
         log_info("Closing vian_event_handler_thread")
         self.vian_event_handler_thread.quit()
 
@@ -1860,6 +1854,8 @@ class MainWindow(QtWidgets.QMainWindow):
             QMessageBox.information(self, "Summary Exported", "The Summary has been exported to {f}".format(f=p))
         except Exception as e:
             log_error(e)
+    def on_export_vianwebapp(self):
+        self.project.store_project(bake=True)
 
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))
@@ -1961,10 +1957,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.project.experiments[0].classification_objects) == 0:
             self.project.experiments[0].create_class_object("Global")
 
-        dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
-        dialog.set_movie(self.project.movie_descriptor)
-        dialog.show()
-        dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
+        if not is_vian_light():
+            dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
+            dialog.set_movie(self.project.movie_descriptor)
+            dialog.show()
+            dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
+        else:
+            self.dispatch_on_loaded()
 
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
@@ -2033,6 +2032,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.project.experiments[0].classification_objects) == 0:
             self.project.experiments[0].create_class_object("Global")
 
+
         self.onProjectOpened.emit(self.project)
         new.inhibit_dispatch = False
         try:
@@ -2041,6 +2041,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close_project()
 
     def on_save_project(self, open_dialog=False, sync = False):
+        if self.project is None:
+            return
+
         if self.corpus_widget.in_template_mode:
             return
 
@@ -2249,6 +2252,11 @@ class MainWindow(QtWidgets.QMainWindow):
         srt_file = QFileDialog.getOpenFileName(self, caption="Select SRT File", filter="*.srt")[0]
         self.project.import_(SRTImporter(), srt_file)
 
+    def import_eyetracking(self):
+        dialog = DialogImportEyetracking(self)
+        dialog.show()
+        pass
+
     def export_segmentation(self):
         dialog = ExportSegmentationDialog(self)
         dialog.show()
@@ -2265,6 +2273,13 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.print_message("Vocabulary Import Failed", "Red")
             self.print_message(str(e), "Red")
+
+    def import_template(self, path = None):
+        if path is None:
+            path = QFileDialog.getOpenFileName(self, caption="Select VIANT File", filter="*.viant")[0]
+        if self.project is not None:
+            self.project.apply_template(path)
+
 
     def export_vocabulary(self):
         dialog = VocabularyExportDialog(self)

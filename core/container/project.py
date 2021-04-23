@@ -26,6 +26,8 @@ from .node_scripts import *
 # from core.data.exporters import ExportDevice
 VIAN_PROJECT_EXTENSION = ".eext"
 
+
+
 class VIANProject(QObject, IHasName, IClassifiable):
     """
     This Class hold the Complete VIAN Project.
@@ -123,7 +125,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.uuid = str(uuid4())
         self.id_list = dict()
 
-        self.meta_data = None
+        self.meta_data = dict()
 
         self.annotation_layers = []             # type: List[AnnotationLayer]
         self.current_annotation_layer = None    # type: AnnotationLayer
@@ -154,6 +156,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.notes = ""
 
         self.colormetry_analysis = None         # type: Union[ColormetryAnalysis|None]
+        self.global_analyses = dict()
 
         self.hdf5_manager = None
         self.hdf5_indices_loaded = dict(curr_pos=dict(), uidmapping=dict())
@@ -189,9 +192,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.export_dir = root + "/export"
         self.hdf5_path = self.data_dir + "/analyses.hdf5"
 
-        # if main_window is not None:
-        #     self.main_window.project_streamer.on_loaded(self)
-
     def create_file_structure(self):
         self.reset_file_paths(self.folder, self.path)
         if not os.path.isdir(self.data_dir):
@@ -202,6 +202,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
             os.mkdir(self.shots_dir)
         if not os.path.isdir(self.export_dir):
             os.mkdir(self.export_dir)
+
+    def get_bake_path(self, entity, file_extension):
+        directory = os.path.join(self.export_dir, "bake")
+        if not os.path.isdir(directory):
+            os.mkdir(directory)
+        if isinstance(entity, str):
+            return os.path.join(directory, entity + file_extension)
+        else:
+            return os.path.join(directory, str(entity.unique_id) + file_extension)
 
     def get_all_containers(self, types = None):
         result = []
@@ -417,7 +426,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def get_segment_of_main_segmentation(self, index) -> Segment:
         """
-        Returns the segment of the Main Segmentation that is at index "index". 
+        Returns the segment of the Main Segmentation that is at index "index".
         Be aware, that the segment_id = <list_index> + 1. Since Segment IDS are counted from 1
 
         :param index: the index of the segment to choose within the main segmentation
@@ -645,13 +654,23 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param dispatch: if the main window should be informed.
         :return: The AnalysisContainer instance given.
         """
+
         analysis.set_project(self)
         self.analysis.append(analysis)
+
+        # if the analysis has no target, it is global, thus we have to check such an analysis has
+        # already been created before and replace it if so.
+        if isinstance(analysis, IAnalysisJobAnalysis) and analysis.target_container is None:
+            if analysis.analysis_job_class in self.global_analyses:
+                self.remove_analysis(self.global_analyses[analysis.analysis_job_class])
+                self.global_analyses.pop(analysis.analysis_job_class)
+            self.global_analyses[analysis.analysis_job_class] = analysis
 
         self.undo_manager.to_undo((self.add_analysis, [analysis]), (self.remove_analysis, [analysis]))
 
         if dispatch:
             self.dispatch_changed()
+
         self.onAnalysisAdded.emit(analysis)
         return analysis
 
@@ -719,7 +738,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # self.colormetry_analysis.clear()
         return colormetry
 
-
     #endregion
 
     # Getters for easier changes later in the project
@@ -748,6 +766,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         # Setting the current annotation layer
         l = None
         for s in selected:
+            if s is None:
+                continue
+
             if s.get_type() == ANNOTATION_LAYER:
                 l = s
             if s.get_type() == NODE_SCRIPT:
@@ -998,14 +1019,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region IO
-    def store_project(self, path = None, return_dict = False):
+    def store_project(self, path = None, return_dict = False, bake=False):
         """
         Stores the project json to the given filepath.
         if no path is given, the default path is used.
 
         :param settings:
-        :param path: 
-        :return: 
+        :param path:
+        :param bake:
+        :return:
         """
         project = self
 
@@ -1025,14 +1047,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
             a_layer.append(a.serialize())
 
         for b in project.screenshots:
-            src, img = b.serialize()
+            src, img = b.serialize(bake=bake)
             screenshots.append(src)
 
         for c in project.segmentation:
             segmentations.append(c.serialize())
 
         for d in project.analysis:
-            analyses.append(d.serialize())
+            analyses.append(d.serialize(bake=bake))
 
         for e in project.screenshot_groups:
             screenshot_groups.append(e.serialize())
@@ -1080,10 +1102,15 @@ class VIANProject(QObject, IHasName, IClassifiable):
             project_path = path + ".eext"
 
             try:
-                with open(project_path, 'w') as f:
-                    json.dump(data, f)
+                if bake:
+                    with open(self.get_bake_path(self.name, ".json"), 'w') as f:
+                        json.dump(data, f)
+                else:
+                    with open(project_path, 'w') as f:
+                        json.dump(data, f)
             except Exception as e:
                 print("Exception during Storing: ", str(e))
+                raise e
         log_info("Project Stored to", path)
 
     def load_project(self, path=None, main_window = None, serialization = None):
@@ -1128,6 +1155,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         if 'meta_data' in my_dict:
             self.meta_data = my_dict['meta_data']
+
+        if self.meta_data is None:
+            self.meta_data = dict()
 
         if path is None and serialization is not None:
             path = "no-path" + VIAN_PROJECT_EXTENSION
@@ -1203,17 +1233,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
 
-        # Attempt to load the Vocabularies, this might fail if the save is from VIAN 0.1.1
-        try:
-            self.vocabularies = []
-            for v in my_dict['vocabularies']:
-                voc = Vocabulary("voc").deserialize(v, self)
-                self.add_vocabulary(voc)
 
-        except Exception as e:
-            print("Loading Vocabulary failed", e)
-            # self.main_window.print_message("Loading Vocabularies failed", "Red")
-            # self.main_window.print_message(e, "Red")
+
+        self.vocabularies = []
+        for v in my_dict['vocabularies']:
+            voc = Vocabulary("voc").deserialize(v, self)
+            self.add_vocabulary(voc)
+
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
@@ -1823,7 +1849,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         Returns an item given by its IProjectContainer.unique_id
 
         :param id: IProjectContainer.unique_id
-        :return: 
+        :return:
         """
         if item_id in self.id_list:
             return self.id_list[item_id]

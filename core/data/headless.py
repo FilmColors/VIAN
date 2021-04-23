@@ -25,7 +25,6 @@ PNG_COMPRESSION_RATE = 9
 attributes = None
 
 
-
 class PlotWindow(QMainWindow):
     def __init__(self):
         super(PlotWindow, self).__init__()

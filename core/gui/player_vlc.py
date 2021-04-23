@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 
 from core.gui.ewidgetbase import EDockWidget
-from core.data.computation import parse_file_path
+from core.data.computation import parse_file_path, is_vian_light
 from core.data.interfaces import IProjectChangeNotify
 from core.data.log import log_error, log_info, log_debug
 
@@ -18,10 +18,10 @@ import vlc
 # from core.vlc.v3_0_3 import vlc
 import os
 
-
 class PlayerDockWidget(EDockWidget):
     onSpacialFrequencyChanged = pyqtSignal(bool, str)
     onFaceRecognitionChanged = pyqtSignal(bool)
+    onCurrentSpatialDatasetSelected = pyqtSignal(str)
 
     def __init__(self, main_window):
         super(PlayerDockWidget, self).__init__(main_window=main_window, limit_size=False)
@@ -29,9 +29,15 @@ class PlayerDockWidget(EDockWidget):
         self.video_player = None
         self.setMinimumWidth(100)
         self.setMinimumHeight(100)
+
+        if is_vian_light():
+            self.inner.menuBar().hide()
+
         self.vis_menu = self.inner.menuBar().addMenu("Visualization")
         self.spatial_frequency_menu = QMenu("Spatial Frequency")
         self.vis_menu.addMenu(self.spatial_frequency_menu)
+
+        self.menu_spatial = self.vis_menu.addMenu("Spatial Datasets")
 
         self.a_spacial_frequency = self.spatial_frequency_menu.addAction("Edge Mean")
         self.a_spacial_frequency.setCheckable(True)
@@ -49,13 +55,17 @@ class PlayerDockWidget(EDockWidget):
         self.a_spacial_frequency_lum_var.setCheckable(True)
         self.a_spacial_frequency_lum_var.triggered.connect(partial(self.on_spacial_frequency_changed, "luminance-var"))
 
-        # self.a_face_rec = self.vis_menu.addAction("Face Recognition")
-        # self.a_face_rec.setCheckable(True)
-        # self.a_face_rec.triggered.connect(self.on_face_rec_changed)
-
         self.setFeatures(EDockWidget.NoDockWidgetFeatures | EDockWidget.DockWidgetClosable)
 
+    @pyqtSlot(object)
+    def on_spatial_datasets_changed(self, datasets):
+        self.menu_spatial.clear()
+        a = self.menu_spatial.addAction("None")
+        a.triggered.connect(partial(self.onCurrentSpatialDatasetSelected.emit, "None"))
 
+        for d in datasets:
+            a = self.menu_spatial.addAction(d)
+            a.triggered.connect(partial(self.onCurrentSpatialDatasetSelected.emit, d))
 
     def on_spacial_frequency_changed(self, method):
         state = self.sender().isChecked()
@@ -135,6 +145,7 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
     def play_pause(self):
         log_debug(NotImplementedError("Method <play_pause> not implemented"))
     # *** ELAN INTERFACE METHODS *** #
+
     def open_movie(self, path):
         log_debug(NotImplementedError("Method <open_movie> not implemented"))
 
@@ -244,10 +255,12 @@ class Player_VLC(VideoPlayer):
         super(Player_VLC, self).__init__(main_window)
 
         self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat --quiet"
-        self.media_player = None
-        # self.vlc_instance = None
-        # self.media_player = self.vlc_instance.media_player_new()
+        self.instance = vlc.Instance(self.vlc_arguments)
+
         self.media = None
+
+        # Create an empty vlc media player
+        self.media_player = self.instance.media_player_new()
 
         self.vboxlayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.vboxlayout)
@@ -258,7 +271,7 @@ class Player_VLC(VideoPlayer):
             self.videoframe = QtWidgets.QFrame()
 
 
-        self.videoframe.setParent(self)
+        # self.videoframe.setParent(self)
         self.palette = self.videoframe.palette()
         self.palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
         self.videoframe.setPalette(self.palette)
@@ -267,20 +280,21 @@ class Player_VLC(VideoPlayer):
 
         self.vboxlayout.addWidget(self.videoframe)
 
-        # self.init_vlc()
+        self.init_ui()
 
-        self.pause_timer = QtCore.QTimer()
-        self.pause_timer.setInterval(1000)
-        self.pause_timer.setSingleShot(True)
-        self.pause_timer.timeout.connect(self.pause)
+        # self.pause_timer = QtCore.QTimer()
+        # self.pause_timer.setInterval(1000)
+        # self.pause_timer.setSingleShot(True)
+        # self.pause_timer.timeout.connect(self.pause)
 
     # *** EXTENSION METHODS *** #
     def init_vlc(self):
+        pass
         # self.vlc_instance = vlc.Instance(self.vlc_arguments)
-        if self.media_player is None:
-            self.media_player = vlc.MediaPlayer()
+        # if self.media_player is None:
+        #     self.media_player = vlc.MediaPlayer()
 
-        self.init_ui()
+        # self.init_ui()
 
     def release_player(self):
         if self.media_player is not None:
@@ -364,7 +378,7 @@ class Player_VLC(VideoPlayer):
             filename = path
 
         self.movie_path = filename
-        self.media = vlc.Media(self.movie_path)
+        self.media = self.instance.media_new(self.movie_path)
 
         # put the media in the media player
         self.media_player.set_media(self.media)
@@ -384,10 +398,11 @@ class Player_VLC(VideoPlayer):
             self.new_movie_loaded = True
 
         self.set_media_time(0)
-        self.pause_timer.start()
+        # self.pause_timer.start()
 
         log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
+        self.resize(self.size())
 
     def play_pause(self):
         if not self.is_playing():

@@ -5,7 +5,8 @@ import gc
 import numpy as np
 
 from core.data.enums import DataSerialization
-from core.data.log import log_info
+from core.data.log import log_info, log_warning
+
 ALL_REGISTERED_ANALYSES = dict()
 
 
@@ -18,8 +19,10 @@ def get_analysis_by_name(name):
         return ALL_REGISTERED_ANALYSES[name]
     else:
         print("No Such Visualization")
-        raise ImportError("Analysis " +name+" not existent in the current environment.")
+        log_warning("Analysis " +name+" not existent in the current environment.")
 
+def get_all_analyses():
+    return ALL_REGISTERED_ANALYSES
 
 DEFAULT_SIZE = (50,)
 DS_MOVIE = "movie"
@@ -76,7 +79,8 @@ class HDF5Manager():
         if analyses is None or len(analyses) == 0:
             analyses = ALL_REGISTERED_ANALYSES.values()
         for a in analyses:
-            if a().data_serialization == DataSerialization.FILE:
+            if a().data_serialization == DataSerialization.FILE \
+                    or a().data_serialization == DataSerialization.HDF5_SINGLE:
                 continue
             c = a()
             self.initialize_dataset(c.dataset_name, DEFAULT_SIZE + c.dataset_shape,
@@ -87,12 +91,9 @@ class HDF5Manager():
             log_info("Init:", name, shape, dtype)
             self.h5_file.create_dataset(name=name, shape=shape, dtype=dtype, maxshape=(None, ) + shape[1:], chunks=True)
             self._index[name] = 0
-            print("HDF5 Attributes:")
-            print(self.h5_file[name].attrs)
 
         for k, v in attrs.items():
             self.h5_file[name].attrs[k] = v
-
 
     def dump(self, d, dataset_name, unique_id):
         with HDF5_WRITE_LOCK:
@@ -112,6 +113,20 @@ class HDF5Manager():
             self._index[dataset_name] += 1
             self.h5_file.flush()
 
+    def dump_single(self, d, dataset_name, unique_id):
+        with HDF5_WRITE_LOCK:
+            if self.h5_file is None:
+                raise IOError("HDF5 File not opened yet")
+
+            self.initialize_dataset(unique_id, d.shape, d.dtype, dict(dataset_name=dataset_name))
+            self.h5_file[unique_id][:] = d
+            self.h5_file.flush()
+
+    def load_single(self, unique_id):
+        if self.h5_file is None:
+            raise IOError("HDF5 File not opened yet")
+        return self.h5_file[unique_id]
+
     def location_of(self, uuid):
         try:
             (dataset, pos) = self._uid_index[uuid]
@@ -119,7 +134,6 @@ class HDF5Manager():
         except Exception as e:
             log_info(e)
             return None
-
 
     def load(self, unique_id):
         if self.h5_file is None:
@@ -199,6 +213,20 @@ class HDF5Manager():
         self.h5_file[DS_COL_SPATIAL_LUMINANCE][idx] = d['spatial_luminance']
 
         self.h5_file.flush()
+
+    def dump_audio(self, data):
+        self.initialize_dataset("audio", data.shape, data.dtype, dict(
+            title = "Audio Mono Channel",
+            description = "A sampled audio mono channel",
+        ))
+        self.h5_file["audio"][:] = data
+        self.h5_file.flush()
+
+    def get_audio(self):
+        if "audio" in self.h5_file:
+            return self.h5_file['audio']
+        else:
+            return None
 
     def get_colorimetry_length(self):
         return np.where(np.array(self.h5_file[DS_COL_TIME])> 0)[0].shape[0] + 1

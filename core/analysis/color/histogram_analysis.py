@@ -4,6 +4,8 @@ University of Zurich
 June 2018
 
 """
+import cv2
+
 from typing import List
 from core.data.computation import ms_to_frames, numpy_to_pixmap
 from core.container.project import *
@@ -125,8 +127,8 @@ class ColorHistogramAnalysis(IAnalysisJob):
     def get_parameter_widget(self):
         return ColorHistogramParameterWidget()
 
-    def deserialize(self, data_dict):
-        return data_dict
+    # def deserialize(self, data_dict):
+    #     return data_dict
 
     def get_hdf5_description(self):
         return dict(

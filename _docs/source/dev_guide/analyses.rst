@@ -12,6 +12,8 @@ To implement your own Analysis, subclass the IAnalysisJob Interface and add your
 *extension/analysis/your_package/* folder.
 Your analysis will then automatically appear in the Analysis/Extensions Menu of the MainWindow.
 
+.. autoclass:: IAnalysisJob
+    :members:
 
 
 Functionality

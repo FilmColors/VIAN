@@ -14,7 +14,8 @@ from scipy.signal import savgol_filter, resample
 from core.data.log import log_debug, log_info, log_error
 from core.container.container_interfaces import ITimelineItem
 from core.container.analysis import AnalysisContainer
-from core.container.project import Screenshot, ScreenshotGroup, Segment, Segmentation, Annotation, AnnotationLayer, ITimeRange
+from core.container.project import Screenshot, ScreenshotGroup, Segment, Segmentation, Annotation, AnnotationLayer, \
+    ITimeRange
 from core.data.computation import ms_to_frames
 
 from typing import TYPE_CHECKING
@@ -23,13 +24,11 @@ if TYPE_CHECKING:
     from core.container.project import VIANProject
     from core.container.analysis import AnalysisContainer
 
-#
-# from core.data.project_streaming import STREAM_DATA_IPROJECT_CONTAINER
 VisualizationTab = namedtuple("VisualizationTab", ["name", "widget", "use_filter", "controls"])
 
 
 class IProjectChangeNotify():
-    def __init__(self, dummy = None):
+    def __init__(self, dummy=None):
         dummy = dummy
 
     def on_loaded(self, project):
@@ -49,11 +48,95 @@ class IProjectChangeNotify():
 
 
 class ITimeStepDepending():
-    def __init__(self,dummy = None):
+    def __init__(self, dummy=None):
         dummy = dummy
 
     def on_timestep_update(self, time):
         log_debug("ITimeStepDepending: Not Implemented by", self)
+
+
+class SpatialOverlayDataset:
+    """
+    A SpatialOverlayDataset is a entity to register overlays over the player view.
+    As such, IAnalysisJob instances which contain analyses with spatial and temporal quantities,
+    can return a list of SpatialOverlayDataset which can be selected by the user in the player widget.
+
+    """
+    VIS_TYPE_HISTOGRAM = 0
+    VIS_TYPE_HEATMAP = 1
+    VIS_TYPE_COLOR_RGBA = 2
+    VIS_TYPE_POINTS = 3
+
+    def __init__(self, name, ms_to_idx, project, analysis, vis_type=VIS_TYPE_HEATMAP):
+        self.name = name
+        self.ms_to_idx = ms_to_idx
+        self.project = project
+        self.analysis = analysis
+        self.vis_type = vis_type
+
+    def get_data_for_time(self, time_ms, frame):
+        raise NotImplementedError("SpatialOverlayDataset:get_data_for_time not implemented")
+
+
+class TimelineDataset(ITimelineItem):
+    """
+    A Dataset which can be displayed in the timeline.
+    The get_data_range function has to be overwritten accordingly.
+
+    """
+    VIS_TYPE_AREA = 0
+    VIS_TYPE_LINE = 1
+
+    def __init__(self, name, data, ms_to_idx=1.0, vis_type=VIS_TYPE_LINE, vis_color=QColor(98, 161, 169)):
+        self.data = data
+        self.d_max = np.amax(self.data)
+        self.strip_height = 45
+        self.name = name
+        self.ms_to_idx = ms_to_idx
+        self.vis_type = vis_type
+        self.vis_color = vis_color
+
+    def get_data_range(self, t_start, t_end, norm=True, filter_window=1):
+        idx_a = int(np.floor(t_start / self.ms_to_idx))
+        idx_b = int(np.ceil(t_end / self.ms_to_idx))
+
+        offset = (t_start / self.ms_to_idx) - int(np.floor(t_start / self.ms_to_idx))
+
+        ms = np.array(list(range(idx_a, idx_b)))
+        ms = np.multiply(ms, self.ms_to_idx)
+        ms = np.subtract(ms, offset)
+
+        data = np.array(self.data[idx_a:idx_b].copy())
+
+        if data.shape[0] == 0:
+            return np.array([]), np.array([])
+
+        frac = data.shape[0] / 20
+        if data.shape[0] > frac:
+            k = filter_window
+
+            data = resample(data, data[0::k].shape[0])
+            ms = ms[0::k]
+        if norm:
+            tmax = np.amax([np.amax(resample(self.data, data[0::filter_window].shape[0])), np.amax(data)])
+            data /= tmax
+        try:
+            return data, ms
+        except Exception as e:
+            log_error(e)
+        return np.array([]), np.array([])
+
+    def get_value_at_time(self, ms):
+        ms = np.multiply(ms, self.ms_to_idx)
+        ms = np.clip(int(ms), 0, self.data.shape[0] - 1)
+
+        return self.data[int(ms)] # / self.d_max
+
+    def get_name(self):
+        return self.name
+
+    def get_notes(self):
+        return ""
 
 
 class IAnalysisJob(QObject):
@@ -62,13 +145,20 @@ class IAnalysisJob(QObject):
     Subclass it to implement your own Analyses. 
     
     """
-    def __init__(self, name, source_types,
+    M_AUDIO = "Audio"
+    M_COLOR = "Color"
+    M_MOVEMENT = "Movement"
+    M_EYETRACKING = "Eyetracking"
+
+    def __init__(self, name,
+                 source_types,
+                 menu = M_COLOR,
                  dataset_name=None, dataset_shape=None, dataset_dtype=None,
-                 help_path = "",
+                 help_path="",
                  author="No Author",
-                 version = "0.0.1",
-                 multiple_result = False,
-                 data_serialization = DataSerialization.HDF5):
+                 version="1.0.0",
+                 multiple_result=False,
+                 data_serialization=DataSerialization.HDF5_MULTIPLE):
         """
         
         :param name: The name of the Analysis, used in the UI.
@@ -81,10 +171,12 @@ class IAnalysisJob(QObject):
         """
         super(IAnalysisJob, self).__init__()
         if (dataset_name is None or dataset_dtype is None or dataset_shape is None) and \
-                data_serialization == DataSerialization.HDF5:
+                (data_serialization == DataSerialization.HDF5_MULTIPLE
+                 or data_serialization == DataSerialization.HDF5_SINGLE):
             raise ValueError("For HDF5 stored analyses a dataset has to be given")
 
         self.name = name
+        self.menu = menu
         self.source_types = source_types
         self.dataset_name = dataset_name
         self.dataset_shape = dataset_shape
@@ -104,11 +196,12 @@ class IAnalysisJob(QObject):
     def get_name(self):
         return self.name
 
-    def prepare(self, project, targets, fps, class_objs = None) -> Tuple[List[Union[Screenshot, Annotation, Segment]], Dict]:
+    def prepare(self, project, targets, fps, class_objs=None) -> Tuple[List[Union[Screenshot, Annotation, Segment]], Dict]:
         """
         A step that should be performed in the main-thread before the processing takes place. 
         This is a good point to fetch all necessary data from the project and pack it to your needs.
-        
+
+
         :param project: The current Project
         :param targets: The Target IProjectContainer Objects
         :param parameters: Additional Parameters as returned from your ParameterWidget.get_parameters()
@@ -118,9 +211,12 @@ class IAnalysisJob(QObject):
         """
         self.target_class_obj = class_objs
 
+        # We collect all selected targets which are valid, if they are a group we add their contained elements
         res_targets = []
         for t in targets:
-            if isinstance(t, Screenshot) or isinstance(t, Annotation) or isinstance(t, Segment):
+            if isinstance(t, Screenshot) \
+                    or isinstance(t, Annotation) \
+                    or isinstance(t, Segment):
                 res_targets.append(t)
             elif isinstance(t, ScreenshotGroup):
                 res_targets.extend(t.screenshots)
@@ -129,6 +225,7 @@ class IAnalysisJob(QObject):
             elif isinstance(t, Segmentation):
                 res_targets.extend(t.segments)
 
+        # Assemble the data for all elements
         targets, args = [], []
         for t in list(set(res_targets)):
             semseg = None
@@ -139,22 +236,22 @@ class IAnalysisJob(QObject):
                         semseg = semantic_segmentations[0]
             targets.append(t)
             args.append(
-                 dict(
+                dict(
                     start=ms_to_frames(t.get_start(), fps),
                     end=ms_to_frames(t.get_end(), fps),
                     movie_path=project.movie_descriptor.movie_path,
                     target=t.get_id(),
                     margins=project.movie_descriptor.get_letterbox_rect(),
                     semseg=semseg
-                 ))
+                ))
         return targets, args
 
     def process(self, args, sign_progress):
         """
-        The Processing function, this will be executed in a seperate thread. 
-        Make sure to **NOT** use the ProjectContainers within this Operation.
+        The Processing function, this will be executed in a separate thread.
+        Make sure to **NOT** edit the ProjectContainers within this Operation.
         
-        Also, for User-Convenience call the sign_progress function regularilly to indicate the current progress:
+        Also, for User-Convenience call the sign_progress function regularly to indicate the current progress:
         
         *Example*:
         progress is a number E [0.0, ... , 1.0]
@@ -168,12 +265,13 @@ class IAnalysisJob(QObject):
         if sign_progress is None:
             sign_progress = self.dummy_callback
         return args, sign_progress
-        # log_debug("get_name not implemented by", self)
 
-    def modify_project(self, project, result, main_window = None):
+    def modify_project(self, project, result, main_window=None):
         """
         If your Analysis should perform any modifications to the project, except storing the analysis,
-        this is the place to perform them. 
+        this is the place to perform them.
+
+        **Important: ** Make sure to call the super function.
         
         :param project: The Current Project to perform modifications on
         :param result: The resulting AnalysisJobAnalysis as returned from IAnalysisJob.process()
@@ -183,12 +281,9 @@ class IAnalysisJob(QObject):
             for r in result:
                 r.set_target_classification_obj(self.target_class_obj)
                 r.set_target_container(project.get_by_id(r.target_container))
-
         else:
             result.set_target_classification_obj(self.target_class_obj)
             result.set_target_container(project.get_by_id(result.target_container))
-
-
 
     def get_parameter_widget(self):
         """
@@ -207,7 +302,7 @@ class IAnalysisJob(QObject):
         1. subclass QMainWindow and implement your visualization into it.
         2. if you use a WebBased visualization use 
             
-            save your visualitations into the results/ directory of the project
+            save your visualization into the results/ directory of the project
             during the IAnalysisJob.modify_project() or IAnalysisJob.process()
             
             and in this function:
@@ -219,11 +314,35 @@ class IAnalysisJob(QObject):
         :param analysis: The IAnalysisJobAnalysis Object created in IAnalysisJob.process()
         :param result_path: The Path to the results directory of the project
         :param data_path: The Path to the data directory of the project
+        :param project: The VIANProject
+        :param main_window: The Path to the data directory of the project
         :return: A QWidget which will be added to the Visualizations Tab
         """
         log_debug("get_name not implemented by", self)
 
-    def get_preview(self, analysis):
+    def get_timeline_datasets(self, analysis, project) -> List[TimelineDataset]:
+        """
+        This function is called by VIAN after the creation of the Analysis to register any new datasets
+        which should be displayed in the Timeline.
+
+        Overload this function, if the Dataset is time dependent.
+        :return: List[TimelineDataset]
+        """
+        return []
+
+    def get_spatial_overlays(self, analysis, project) -> List[SpatialOverlayDataset]:
+        """
+         This function is called by VIAN after the creation of the Analysis to register any new datasets
+        which should be displayed on top of the player (spatial).
+
+        Overload this function, if the Dataset is time and space dependent.
+        :param analysis: The analysis entity (call analysis.adata()) to load your data
+        :param project: The VIANProject entity
+        :return: List[SpatialOverlayDataset]
+        """
+        return []
+
+    def get_preview(self, analysis) -> QWidget:
         """
         The Preview should be a visual representation of your analysis data, which can be displayed in the 
         Inspector, when the Analysis is selected. 
@@ -246,23 +365,11 @@ class IAnalysisJob(QObject):
         return self.source_types
 
     def serialization_type(self):
+        """
+        returns the serialization_type
+        :return:
+        """
         return self.data_serialization
-
-    def serialize(self, data_dict):
-        """
-        Override this Method if there needs to be a custom serialization
-        :param data_dict: 
-        :return: 
-        """
-        return data_dict
-
-    def deserialize(self, data_dict):
-        """
-        Override this Method if there needs to be a custom deserialization
-        :param data_dict: 
-        :return: 
-        """
-        return data_dict
 
     def get_hdf5_description(self):
         """
@@ -272,7 +379,7 @@ class IAnalysisJob(QObject):
         """
         return dict()
 
-    def fit(self, targets, class_objs = None, callback=None) -> AnalysisContainer:
+    def fit(self, targets, class_objs=None, callback=None) -> AnalysisContainer:
         """
         Performs the analysis for given target containers and classification objects.
         If no classification object is given, a default one with the name "Global" is created.
@@ -281,7 +388,7 @@ class IAnalysisJob(QObject):
         :param class_objs: The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)
         """
         if isinstance(targets, list):
-            project = targets[0].project #type:VIANProject
+            project = targets[0].project  # type:VIANProject
         else:
             project = targets.project
             targets = [targets]
@@ -326,19 +433,69 @@ class IAnalysisJob(QObject):
         return res
 
     def from_hdf5(self, db_data):
+        """
+        How the data stored in the HDF5 array should be formatted when loading.
+
+        E.g one may want to have a dictionary as follows after loading analysis.get_adata():
+
+        dict(red=db_data[0],
+            green=db_data[1],
+            blue=db_data[2]
+        )
+
+        :param db_data: The HDF5 Array
+        :return: formatted data to you needs. Default: the hdf5 array
+        """
         return db_data
 
     def to_hdf5(self, data):
+        """
+        How to encode your data in the HDF5 Array.
+
+        if your analysis data looks as follows:
+        data = dict(red=10,
+            green=10,
+            blue=10
+        )
+
+        then one could do:
+        return np.array([data['red'], data['green'], data['blue']
+
+        :param data: the input data as passed to the IAnalysisContainerAnalysis in your IAnalysisJob.perform function
+        :return: A HDF5 Dataset matching you definition
+        """
         return data
 
     def to_file(self, data, file_path):
+        """
+        If the data_serialization is set to DataSerialization.FILE, define here how to store your file.
+
+        e.g. if you have a JSON file to store:
+
+        with open(file_path + ".json", "w") as f:
+            json.dump(data, f)
+
+        :param data: the input data as passed to the IAnalysisContainerAnalysis in your IAnalysisJob.perform function
+        :param file_path: A filepath without extension where you can store your data
+        :return: the file_path
+        """
         return file_path
 
     def from_file(self, file_path):
-        return None
+        """
+        If the data_serialization is set to DataSerialization.FILE, define here how to store your file.
 
-    def get_file_path(self, file_path):
-        return file_path
+        e.g. if you have a JSON file to store:
+
+        with open(file_path + ".json", "w") as f:
+            json.dump(data, f)
+
+        :param data: the input data as passed to the IAnalysisContainerAnalysis in your IAnalysisJob.perform function
+        :param file_path: A filepath without extension where you can store your data
+        :return: the file_path
+        """
+
+        return None
 
     def abort(self):
         pass
@@ -354,6 +511,7 @@ class ParameterWidget(QWidget):
     desired form.
     
     """
+
     def __init__(self):
         super(ParameterWidget, self).__init__(None)
 
@@ -367,7 +525,7 @@ class ParameterWidget(QWidget):
 
 
 class IConcurrentJob():
-    def __init__(self, args, show_modify_progress= False):
+    def __init__(self, args, show_modify_progress=False):
         self.show_modify_progress = show_modify_progress
         self.args = args
         self.task_id = randint(10000000, 99999999)
@@ -379,70 +537,8 @@ class IConcurrentJob():
     def run_concurrent(self, args, sign_progress):
         log_debug("run_concurrent not implemented by", self)
 
-    def modify_project(self, project, result, sign_progress = None, main_window = None):
+    def modify_project(self, project, result, sign_progress=None, main_window=None):
         pass
 
     def abort(self):
         self.aborted = True
-
-
-class TimelineDataset(ITimelineItem):
-    """
-    A Dataset which can be displayed in the timeline.
-    The get_data_range function has to be overwritten accordingly.
-
-    """
-    VIS_TYPE_AREA = 0
-    VIS_TYPE_LINE = 1
-
-    def __init__(self, name, data, ms_to_idx = 1.0, vis_type = VIS_TYPE_LINE, vis_color = QColor(98, 161, 169)):
-        self.data = data
-
-        self.strip_height = 45
-        self.name = name
-        self.ms_to_idx = ms_to_idx
-        self.vis_type = vis_type
-        self.vis_color = vis_color
-
-    def get_data_range(self, t_start, t_end, norm=True, subsample=True, filter_window = 1):
-        idx_a = int(np.floor(t_start / self.ms_to_idx))
-        idx_b = int(np.ceil(t_end / self.ms_to_idx))
-
-        offset = (t_start / self.ms_to_idx) - int(np.floor(t_start / self.ms_to_idx))
-
-        ms = np.array(list(range(idx_a, idx_b)))
-        ms = np.multiply(ms, self.ms_to_idx)
-        ms = np.subtract(ms, offset)
-
-        data = np.array(self.data[idx_a:idx_b].copy())
-        if filter_window > 3:
-            try:
-                data = savgol_filter(np.nan_to_num(data), filter_window, 3)
-            except Exception as e:
-                log_info(e)
-
-        if data.shape[0] == 0:
-            return  np.array([]), np.array([])
-        if data.shape[0] > 1000:
-            k = int(data.shape[0] / 1000)
-            if k % 2 == 0:
-                f = k + 1
-            else:
-                f = k
-
-            data = resample(data, data[0::k].shape[0])
-            # data = data[0::k]
-            ms = ms[0::k]
-        if norm:
-            data /= np.amax(self.data)
-        try:
-            return data, ms
-        except Exception as e:
-            log_error(e)
-        return np.array([]), np.array([])
-
-    def get_name(self):
-        return self.name
-
-    def get_notes(self):
-        return ""

@@ -11,6 +11,7 @@ from core.concurrent.worker import MinimalThreadWorker
 from core.data.computation import open_web_browser
 from collections import namedtuple
 
+
 class MovieTuple():
     def __init__(self, FilemakerID, MovieName, IMDb_ID, Status):
         self.FilemakerID = FilemakerID

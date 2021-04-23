@@ -270,8 +270,11 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.main_window.onTimeStep.connect(self.on_timestep_update)
 
-        self.main_window.actionIntervalSegmentStart.triggered.connect(self.on_interval_segment_start)
-        self.main_window.actionIntervalSegmentEnd.triggered.connect(self.on_interval_segment_end)
+        try:
+            self.main_window.actionIntervalSegmentStart.triggered.connect(self.on_interval_segment_start)
+            self.main_window.actionIntervalSegmentEnd.triggered.connect(self.on_interval_segment_end)
+        except Exception as e:
+            print(e)
 
         self.time_label = QLabel("00:00:00::1000", self)
         self.time_label.setMinimumWidth(150)
@@ -364,7 +367,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
         self.scroll_v()
 
-
     @pyqtSlot(object)
     def on_experiment_changed(self, e:Experiment):
         self.clear_sub_segmentation()
@@ -395,7 +397,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                         for k in kwds:
                             group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
                         self.add_sub_segmentation(s, group, cat=cl_obj)
-
 
     @pyqtSlot(object)
     def add_segmentation(self, segmentation:Segmentation):
@@ -725,7 +726,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_visualizations()
         self.time_bar.raise_()
 
-    def on_loaded(self, project):
+    def on_loaded(self, project:VIANProject):
         self.setDisabled(False)
 
         self.clear()
@@ -745,6 +746,15 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         project.onAnnotationLayerRemoved.connect(self.recreate_timeline)
         project.onScreenshotGroupAdded.connect(self.add_screenshots)
         project.onScreenshotGroupRemoved.connect(self.recreate_timeline)
+        project.onAnalysisAdded.connect(self.on_analysis_added)
+
+        for a in project.analysis:
+            if issubclass(a.__class__, IAnalysisJobAnalysis):
+                timeline_datasets = a.get_timeline_datasets()
+                if len(timeline_datasets) > 0:
+                    print("Adding Dataset", timeline_datasets)
+                    for t in timeline_datasets:
+                        self.add_visualization(t)
 
         for e in project.experiments: #type: Experiment
             e.onExperimentChanged.connect(self.on_experiment_changed)
@@ -754,6 +764,20 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_ui()
         self.scroll_h()
         self.fit_movie_in_range()
+
+    def on_analysis_added(self, analysis:IAnalysisJobAnalysis):
+        """
+        Checks if the analysis added contains a TimelineDataset to visualize.
+        If so, it is added to the timeline.
+
+        :param analysis:
+        :return:
+        """
+        if issubclass(analysis.__class__, IAnalysisJobAnalysis):
+            timeline_datasets = analysis.get_timeline_datasets()
+            if len(timeline_datasets) > 0:
+                for t in timeline_datasets:
+                    self.add_visualization(t)
 
     def on_changed(self, project, item):
         vlocation = self.scrollArea.verticalScrollBar().value()

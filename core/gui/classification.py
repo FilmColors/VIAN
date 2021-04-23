@@ -254,6 +254,9 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
     def on_start_classification(self):
         self.stackedWidget.setCurrentIndex(1)
         self.current_idx = 0
+        if len(self.main_window.project.experiments) < self.comboBox_Experiment.currentIndex():
+            return
+
         self.current_experiment = self.main_window.project.experiments[self.comboBox_Experiment.currentIndex()]
         self.sorted_containers = self.current_experiment.get_containers_to_classify()
         self.classification_mode = self.comboBox_ClassificationMode.currentText()

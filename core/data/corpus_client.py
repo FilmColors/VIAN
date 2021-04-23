@@ -163,6 +163,8 @@ class WebAppCorpusInterface(QObject):
         self.ep_query_genres = self.ep_root + "query/genre"
         self.ep_query_countries = self.ep_root + "query/country"
         self.ep_project_hash = self.ep_root + "query/project_hash"
+        self.ep_query_corpora = self.ep_root + "query/get_corpora"
+        self.ep_get_user = self.ep_root + "get_user_for_login"
 
         self.signals = CorpusInterfaceSignals()
         self.user_id = -1
@@ -187,13 +189,15 @@ class WebAppCorpusInterface(QObject):
             print(self.ep_token)
             # We need to get the identification token
             a = requests.post(self.ep_token, json=dict(email = user.email, password = user.password))
-            print("Server Responded:", a.headers, a.text)
+            p = json.loads(requests.post(self.ep_get_user, json=dict(email = user.email, password = user.password)).text)
+            print("Server Responded:", a.text, p)
             success = not "failed" in a.text
 
             if success:
                 # We don't want VIAN to see all Projects on the WebAppCorpus, thus returning an empty list
                 all_projects = []
                 user.token = a.text
+                self.user_id = p['id']
                 ret = dict(success = True)
                 #Todo return a good success description object
                 self.signals.onConnected.emit(ret)
@@ -401,6 +405,11 @@ class WebAppCorpusInterface(QObject):
     @pyqtSlot(object)
     def download_project(self, desc):
         pass
+
+    @pyqtSlot()
+    def get_corpora(self):
+        print("OK")
+        return requests.get(self.ep_query_corpora + "/" + str(self.user_id)).json()
 
     @pyqtSlot()
     def get_movies(self):

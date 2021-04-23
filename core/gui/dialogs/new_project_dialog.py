@@ -13,6 +13,7 @@ from core.data.computation import images_to_movie
 
 from core.gui.misc.utils import dialog_with_margin
 
+
 class NewProjectDialog(EDialogWidget):
     def __init__(self, parent, settings, movie_path = "", elan_segmentation = None, add_to_current_corpus = False):
         super(NewProjectDialog, self).__init__(parent, parent, "https://www.vian.app/static/manual/step_by_step/project_management/create_project.html")
@@ -92,12 +93,6 @@ class NewProjectDialog(EDialogWidget):
             self.comboBox_Template.setEnabled(False)
         else:
             self.comboBox_Template.setEnabled(True)
-
-    # def on_from_images_changed(self):
-    #     if self.checkBox_FromImages.isChecked():
-    #         self.moviePathLabel.setText("Image Files")
-    #     else:
-    #         self.moviePathLabel.setText("Media Path")
 
     def on_automatic_naming_changed(self):
         auto = self.cB_AutomaticNaming.isChecked()
@@ -231,25 +226,6 @@ class NewProjectDialog(EDialogWidget):
 
         self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
         self.project.folder = self.project_dir + "/" + self.project_name + "/"
-
-        # if self.checkBox_FromImages.isChecked():
-        #     if len(self.image_paths) == 0:
-        #         QMessageBox.warning(self, "No Images added",
-        #                             "There are no images selected to generate a movie from.")
-        #         return
-        #     imgs = []
-        #     for p in self.image_paths:
-        #         try:
-        #             imgs.append(cv2.imread(p))
-        #         except Exception as e:
-        #             continue
-        #     if len(imgs) == 0:
-        #         QMessageBox.warning(self, "Failed to read Images",
-        #                             "Failed to read images, are these files really images?")
-        #         return
-        #     path = self.project.folder + self.project_name + ".avi"
-        #     images_to_movie(imgs, path, size = (imgs[0].shape[0], imgs[0].shape[1]))
-        #     self.lineEdit_MoviePath.setText(path)
 
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
 

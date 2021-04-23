@@ -134,6 +134,7 @@ def store_project_concurrent(args, sign_progress):
         project.path = project_path
     except Exception as e:
         print("Exception during Storing: ", str(e))
+        raise e
 
     sign_progress(1.0)
 

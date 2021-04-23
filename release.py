@@ -41,4 +41,5 @@ if sys.platform == "darwin":
     shutil.make_archive(build_archive, "zip", "dist/VIAN.app")
 else:
     shutil.make_archive(build_archive, "zip", "dist/VIAN")
+
 print("Done")

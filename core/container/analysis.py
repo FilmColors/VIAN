@@ -10,10 +10,15 @@ from uuid import uuid4
 from typing import List
 import traceback
 
-from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS
+from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS, DataSerialization
 from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT, deprecation_serialization
 from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.data.interfaces import TimelineDataset, IAnalysisJob, SpatialOverlayDataset
 
 
 class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
@@ -60,7 +65,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
     def get_preview(self):
         pass
 
-    def serialize(self):
+    def serialize(self, bake=False):
         data = dict(
             name=self.name,
             unique_id=self.unique_id,
@@ -82,7 +87,7 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         self.project.remove_analysis(self)
 
 
-class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
+class IAnalysisJobAnalysis(AnalysisContainer):
     """
     An analysis result which has been performed on some annotation:
 
@@ -128,12 +133,19 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         except Exception as e:
             print("Exception in get_visualization()", e)
 
+    def get_timeline_datasets(self):
+        return self.get_analysis().get_timeline_datasets(self, self.project)
+
+    def get_spatial_overlays(self):
+        return self.get_analysis().get_spatial_overlays(self, self.project)
+
     def get_type(self):
         return ANALYSIS_JOB_ANALYSIS
 
     def set_target_container(self, container):
         self.target_container = container
-        self.target_container.add_analysis(self)
+        if self.target_container is not None:
+            self.target_container.add_analysis(self)
 
     def set_target_classification_obj(self, class_obj):
         self.target_classification_object = class_obj
@@ -143,7 +155,7 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
             self.a_class = get_analysis_by_name(self.analysis_job_class)
         return self.a_class()
 
-    def serialize(self):
+    def serialize(self, bake=False):
         if self.target_classification_object is not None:
             class_obj_id = self.target_classification_object.unique_id
         else:
@@ -152,22 +164,43 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
 
-        hdf5_location = self.project.hdf5_manager.location_of(self.unique_id)
+        if self.target_container is not None:
+            target_id = self.target_container.unique_id
+        else:
+            target_id = -1
 
-        data = dict(
-            name=self.name,
-            unique_id=self.unique_id,
+        if bake:
+            data = dict(
+                name=self.name,
+                unique_id=self.unique_id,
 
-            hdf5_location = hdf5_location,
+                data=self.get_data_raw().tolist(),
 
-            vian_serialization_type=self.__class__.__name__,
-            vian_analysis_type=self.analysis_job_class,
-            parameters=self.parameters,
+                vian_serialization_type=self.__class__.__name__,
+                vian_analysis_type=self.analysis_job_class,
+                parameters=self.parameters,
 
-            notes=self.notes,
-            container = self.target_container.unique_id,
-            classification_obj = class_obj_id
-        )
+                notes=self.notes,
+                container=target_id,
+                classification_obj=class_obj_id
+            )
+        else:
+            hdf5_location = self.project.hdf5_manager.location_of(self.unique_id)
+
+            data = dict(
+                name=self.name,
+                unique_id=self.unique_id,
+
+                hdf5_location = hdf5_location,
+
+                vian_serialization_type=self.__class__.__name__,
+                vian_analysis_type=self.analysis_job_class,
+                parameters=self.parameters,
+
+                notes=self.notes,
+                container =target_id,
+                classification_obj = class_obj_id
+            )
 
         return data
 
@@ -197,12 +230,28 @@ class IAnalysisJobAnalysis(AnalysisContainer): #, IStreamableContainer):
     def get_adata(self):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
+        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
+            return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
+        else:
+            return self.a_class().from_hdf5(self.project.hdf5_manager.load_single(self.unique_id))
+
+    def get_data_raw(self):
+        if self.a_class is None:
+            self.a_class = get_analysis_by_name(self.analysis_job_class)
+        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
+            return np.array(self.project.hdf5_manager.load(self.unique_id))
+        else:
+            return np.array(self.project.hdf5_manager.load_single(self.unique_id))
 
     def set_adata(self, d):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+
+        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
+            self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+        else:
+            self.project.hdf5_manager.dump_single(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+
         self.data = None
 
     def delete(self):
@@ -231,15 +280,16 @@ class FileAnalysis(IAnalysisJobAnalysis):
         self._file_path = os.path.join(self.project.data_dir, str(self.unique_id))
         return self.a_class().from_file(self._file_path)
 
-    def get_file_path(self):
-        if self.a_class is None:
-            self.a_class = get_analysis_by_name(self.analysis_job_class)
-        return self.a_class().get_file_path(self._file_path)
-
     def save(self, file_path):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
         return self.a_class().to_file(self.get_adata(), file_path)
+
+    def serialize(self, bake=False):
+        d = super(FileAnalysis, self).serialize()
+        if bake:
+            d['store_url'] = self.save(self.project.get_bake_path(self, ""))
+        return d
 
 
 class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
@@ -263,11 +313,15 @@ class SemanticSegmentationAnalysisContainer(IAnalysisJobAnalysis):
         self.project.hdf5_manager.dump(d, self.a_class().dataset_name, self.unique_id)
         self.data = None
 
-    def serialize(self):
+    def serialize(self, bake=False):
         d = super(SemanticSegmentationAnalysisContainer, self).serialize()
         d['dataset'] = self.dataset
         d['entry_shape'] = self.entry_shape
         d['vian_serialization_type'] = SemanticSegmentationAnalysisContainer.__name__
+
+        if bake:
+            d['store_url'] = self.project.get_bake_path(self, ".png")
+            cv2.imwrite(d['store_url'], self.get_adata())
         return d
 
     def deserialize(self, serialization, project):
@@ -345,7 +399,13 @@ class ColormetryAnalysis(AnalysisContainer):
                 d[:, 2:5].astype(np.uint8),
                 d[:, 5].astype(np.int)
             ]
-            return dict(palette = layers, histogram=hist, spatial=spatial, times=times, frame_idx = frame_idx, current_idx = self.current_idx)
+            return dict(palette = layers,
+                        histogram=hist,
+                        spatial=spatial,
+                        times=times,
+                        frame_idx = frame_idx,
+                        current_idx = self.current_idx
+                        )
         except Exception as e:
             print(e)
             pass
@@ -383,7 +443,7 @@ class ColormetryAnalysis(AnalysisContainer):
         self.has_finished = False
         self.current_idx = 0
 
-    def serialize(self):
+    def serialize(self, bake=False):
         serialization = dict(
             name=self.name,
             unique_id=self.unique_id,
@@ -453,90 +513,7 @@ class ColormetryAnalysis(AnalysisContainer):
 
     def __len__(self):
         return len(self.time_ms)
-# class NodeScriptAnalysis(AnalysisContainer):# , IStreamableContainer):
-#     def __init__(self, name = "NewNodeScriptResult", results = "None", script_id = -1, final_nodes_ids = None):
-#         super(NodeScriptAnalysis, self).__init__(name, results)
-#         self.script_id = script_id
-#         self.final_node_ids = final_nodes_ids
-#         self.analysis_job_class = "NodeScript"
-#
-#     def get_type(self):
-#         return ANALYSIS_NODE_SCRIPT
-#
-#     def serialize(self):
-#         data_json = []
-#
-#         try:
-#             #Loop over each final node of the Script
-#             for i, n in enumerate(self.data):
-#                 node_id = self.final_node_ids[i]
-#                 node_result = []
-#                 result_dtypes = []
-#
-#                 # Loop over each result in the final node
-#                 for d in n:
-#                     if isinstance(d, np.ndarray):
-#                         node_result.append(d.tolist())
-#                         result_dtypes.append(str(d.dtype))
-#                     elif isinstance(d, list):
-#                         node_result.append(d)
-#                         result_dtypes.append("list")
-#                     else:
-#                         node_result.append(np.array(d).tolist())
-#                         result_dtypes.append(str(np.array(d).dtype))
-#                 data_json.append([node_id, node_result, result_dtypes])
-#
-#             # We want to store the analysis container if it is not already stored
-#
-#             # self.project.main_window.numpy_data_manager.sync_store(self.unique_id, data_json)
-#         except Exception as e:
-#             log_error("Exception in NodeScriptAnalysis.serialize(): ", str(e))
-#
-#         data = dict(
-#             name=self.name,
-#             analysis_container_class = self.__class__.__name__,
-#             unique_id=self.unique_id,
-#             script_id=self.script_id,
-#             # data_json=data_json,
-#             notes=self.notes
-#         )
-#
-#         return data
-#
-#     def deserialize(self, serialization, streamer):
-#         self.name = serialization['name']
-#         self.unique_id = serialization['unique_id']
-#         self.notes = serialization['notes']
-#         self.script_id = serialization['script_id']
-#
-#         self.final_node_ids = []
-#         self.data = []
-#         try:
-#             # data_json = self.project.numpy_data_manager.sync_load(self.unique_id)
-#             data_json = None
-#             #TODO Numpy Storing obsolete for Scripts
-#             # Loop over each final node of the Script
-#             for r in data_json:
-#
-#                 node_id = r[0]
-#                 node_results = r[1]
-#                 result_dtypes = r[2]
-#
-#                 node_data = []
-#                 self.final_node_ids.append(node_id)
-#
-#                 # Loop over each Result of the Final Node
-#                 for j, res in enumerate(node_results):
-#                     if result_dtypes[j] == "list":
-#                         node_data.append(res)
-#                     else:
-#                         node_data.append(np.array(res, dtype=result_dtypes[j]))
-#
-#                     self.data.append(node_data)
-#         except Exception as e:
-#             log_error("Exception in analysis deserialiation", e)
-#
-#         return self
+
 
 
 
