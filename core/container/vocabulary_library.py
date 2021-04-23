@@ -88,7 +88,13 @@ class VocabularyLibrary(QObject):
 
         return voc
 
-    def get_vocabulary_by_id(self, unique_id):
+    def get_vocabulary_by_id(self, unique_id:str) -> Vocabulary | None:
+        """
+        Returns a vocabulary by a given unique_id.
+
+        :param unique_id: uuid
+        :return:
+        """
         return self.voc_index.get(unique_id)
 
     def create_collection(self, name) -> VocabularyCollection:
@@ -161,7 +167,6 @@ class VocabularyLibrary(QObject):
         self.onLibraryChanged.emit(self)
         return self
 
-    def get_vocabulary(self):
 
 global_library = None
 if __name__ == '__main__':

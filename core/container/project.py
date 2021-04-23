@@ -26,6 +26,7 @@ from .node_scripts import *
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from core.container.vocabulary_library import VocabularyLibrary
+
 # from core.data.importers import ImportDevice
 # from core.data.exporters import ExportDevice
 VIAN_PROJECT_EXTENSION = ".eext"
@@ -1107,7 +1108,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 raise e
         log_info("Project Stored to", path)
 
-    def load_project(self, path=None, main_window = None, serialization = None):
+    def load_project(self, path=None, main_window = None, serialization = None, library=None):
         """
         Loads a project from a given file.
 
@@ -1232,6 +1233,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
+        if library is not None:
+            self.sync_with_library()
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
@@ -1555,9 +1558,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         new = self.import_vocabulary(None, add_to_global, serialization=voc.serialize())
 
         if replace_uuid:
-            new.uuid = str(uuid4())
+            new.unique_id = str(uuid4())
             for w in new.words_plain:
-                w.uuid = str(uuid4())
+                w.unique_id = str(uuid4())
         self.inhibit_dispatch = False
         return new
 
@@ -1590,7 +1593,14 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             return new_voc
 
-    def load_from_library(self, library:VocabularyLibrary):
+    def sync_with_library(self,  library:VocabularyLibrary):
+        for v in self.vocabularies:
+            library_voc = library.get_vocabulary_by_id(v.unique_id)
+            if library_voc is not None:
+                v.update_vocabulary(library_voc)
+            else:
+                log_warning("Vocabulary not found in Library:", v.name)
+
 
     #endregion
 

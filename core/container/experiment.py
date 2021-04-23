@@ -55,7 +55,6 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def __init__(self, name="", unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
-        self.uuid = str(uuid4())
         self.name = name
         self.comment = ""
         self.info_url = ""
@@ -172,7 +171,6 @@ class Vocabulary(IProjectContainer, IHasName):
             data = dict(
                 name = w.name,
                 unique_id = w.unique_id,
-                uuid = str(w.uuid),
                 parent = w.parent.unique_id,
                 children = [a.unique_id for a in w.children],
                 organization_group = w.organization_group,
@@ -185,7 +183,6 @@ class Vocabulary(IProjectContainer, IHasName):
 
         voc_data = dict(
             name = self.name,
-            uuid = str(self.uuid),
             category = self.category,
             unique_id = self.unique_id,
             words = words_data,
@@ -201,12 +198,6 @@ class Vocabulary(IProjectContainer, IHasName):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.category = serialization['category']
-
-        try:
-            self.uuid = serialization['uuid']
-        except:
-            log_warning("No UUID found in this vocabulary", self.name)
-            pass
 
         try:
             self.comment = serialization['comment']
@@ -242,11 +233,6 @@ class Vocabulary(IProjectContainer, IHasName):
                 except Exception as e:
                     pass
                 try:
-                    word.uuid = w['uuid']
-                except:
-                    log_warning("No UUID found in this vocabulary", self.name)
-                    pass
-                try:
                     word.comment = w['comment']
                 except:
                     pass
@@ -264,11 +250,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     pass
                 try:
                     word.image_urls = w['image_urls']
-                except Exception as e:
-                    log_warning(e)
-                    pass
-                try:
-                    word.uuid = w['uuid']
                 except Exception as e:
                     log_warning(e)
                     pass
@@ -301,7 +282,7 @@ class Vocabulary(IProjectContainer, IHasName):
         old_id = serialization['unique_id']
         new_id = project.create_unique_id()
         self.unique_id = new_id
-        self.uuid = serialization['uuid']
+
         id_replacing_table.append([old_id, new_id])
         try:
             self.comment = serialization['comment']
@@ -350,11 +331,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     pass
                     # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
-                    word.uuid = w['uuid']
-                except:
-                    print("No UUID found in this vocabulary", self.name)
-                    pass
-                try:
                     word.comment = w['comment']
                 except:
                     log_warning("No UUID found in this vocabulary", self.name)
@@ -376,11 +352,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     pass
                     # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
-                    word.uuid = w['uuid']
-                except:
-                    log_warning("No UUID found in this vocabulary", self.name)
-                    pass
-                try:
                     word.comment = w['comment']
                 except:
                     log_warning("No UUID found in this vocabulary", self.name)
@@ -396,12 +367,13 @@ class Vocabulary(IProjectContainer, IHasName):
         to_remove = []
 
         for w in new_voc.words_plain:
-            words[w.uuid] = w
+            words[w.unique_id] = w
+
         for w in self.words_plain:
-            if w.uuid in words:
+            if w.unique_id in words:
                 for attr in WORD_COMPARE_ATTRS:
-                    setattr(w, attr, getattr(words[w.uuid], attr))
-                words.pop(w.uuid)
+                    setattr(w, attr, getattr(words[w.unique_id], attr))
+                words.pop(w.unique_id)
             else:
                 to_remove.append(w)
 
@@ -465,7 +437,6 @@ class VocabularyWord(IProjectContainer, IHasName):
     def __init__(self, name, vocabulary, parent = None, is_checkable = False, unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
-        self.uuid = str(uuid4())
         self.comment = ""
         self.info_url = ""
         self.vocabulary = vocabulary
@@ -1272,15 +1243,14 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
         voc = self.project.get_by_id(entry.unique_id)
 
         if voc is None:
-            voc = self.project.get_by_id(entry.uuid)
+            voc = self.project.get_by_id(entry.unique_id)
             if voc is not None:
                 print("Found by uuid")
-                entry.unique_id = voc.uuid
+                entry.unique_id = voc.unique_id
 
         if voc is None:
             voc = Vocabulary(name=entry.name)
             voc.unique_id = entry.unique_id
-            voc.uuid = entry.unique_id
             self.project.add_vocabulary(voc)
             changes.append(("Added Vocabulary Object", voc))
 
@@ -1291,7 +1261,6 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
             if word is None:
                 word = VocabularyWord(name=w.name, vocabulary=voc)
                 word.unique_id = w.unique_id
-                word.uuid = w.unique_id
                 voc.add_word(word)
                 changes.append(("Added Vocabulary Word", voc))
 
@@ -1445,11 +1414,11 @@ def compare_vocabularies(voc1: Vocabulary, voc2: Vocabulary):
 
     uuid_map_voc1 = dict()
     for w in voc1.words_plain: #type:VocabularyWord
-        uuid_map_voc1[w.uuid] = w
+        uuid_map_voc1[w.unique_id] = w
 
     uuid_map_voc2 = dict()
     for w in voc2.words_plain:  # type:VocabularyWord
-        uuid_map_voc2[w.uuid] = w
+        uuid_map_voc2[w.unique_id] = w
 
     words_to_add = []
     for uuid in uuid_map_voc1:
