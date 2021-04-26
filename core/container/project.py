@@ -1234,7 +1234,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.add_vocabulary(voc)
 
         if library is not None:
-            self.sync_with_library()
+            self.sync_with_library(library)
+
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
@@ -1544,6 +1545,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.vocabularies.remove(voc)
             self.remove_from_id_list(voc)
             self.onVocabularyRemoved.emit(voc)
+
         self.dispatch_changed()
 
     def copy_vocabulary(self, voc, add_to_global = True, replace_uuid = False):
@@ -1593,14 +1595,16 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             return new_voc
 
-    def sync_with_library(self,  library:VocabularyLibrary):
+    def sync_with_library(self,  library):
         for v in self.vocabularies:
             library_voc = library.get_vocabulary_by_id(v.unique_id)
+            if library_voc is None:
+                library_voc = library.get_vocabulary_by_name(v.name)
             if library_voc is not None:
+                log_info("Found Vocabulary", v.name)
                 v.update_vocabulary(library_voc)
             else:
                 log_warning("Vocabulary not found in Library:", v.name)
-
 
     #endregion
 

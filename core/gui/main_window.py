@@ -57,6 +57,7 @@ from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 
+from core.container.vocabulary_library import VocabularyLibrary
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses, get_all_analyses
 from core.gui.toolbar import WidgetsToolbar
@@ -245,6 +246,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.onStartFlaskServer.connect(self.flask_server.run_server)
             self.onStartFlaskServer.emit()
 
+        self.vocabulary_library = VocabularyLibrary().load("data/library.json")
+        self.vocabulary_library.onLibraryChanged.connect(self.on_vocabulary_library_changed)
 
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
@@ -253,6 +256,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.web_view.hide()
 
+        print("OK")
         self.create_widget_elan_status()
         self.create_widget_video_player()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
@@ -685,7 +689,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_audio_extracting_progress(self, flt):
         self.concurrent_task_viewer.update_progress("audio-extraction-task", flt)
-
 
     def set_audio_extracting(self, state):
         if state:
@@ -1125,6 +1128,11 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+
+    @pyqtSlot(object)
+    def on_vocabulary_library_changed(self, library):
+        if self.project is not None:
+            self.project.sync_with_library(library)
 
     def on_pipeline_settings_changed(self):
         if self.settings.USE_PIPELINES:
@@ -2016,7 +2024,7 @@ class MainWindow(QtWidgets.QMainWindow):
         new = VIANProject()
         log_info("Loading Project Path", path)
         new.inhibit_dispatch = True
-        new.load_project(path, main_window=self)
+        new.load_project(path, main_window=self, library=self.vocabulary_library)
 
         self.project = new
         self.settings.add_to_recent_files(self.project)

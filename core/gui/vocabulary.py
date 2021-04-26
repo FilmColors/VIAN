@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Dict, List
 
+from uuid import uuid4
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon
@@ -15,11 +16,13 @@ from core.container.vocabulary_library import VocabularyLibrary, VocabularyColle
 
 
 class VocabularyManager(EDockWidget, IProjectChangeNotify):
+    onUpdateProject = pyqtSignal(object)
+
     def __init__(self, main_window):
         super(VocabularyManager, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Vocabulary Library")
 
-        self.library = VocabularyLibrary().load("data/library.json")
+        self.library = main_window.vocabulary_library
         self.tree_view = VocabularyTreeView(self, self.library)
         self.word_list = WordsList(self)
 
@@ -30,11 +33,14 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
         self.widget.addWidget(self.word_list)
         self.widget.addWidget(self.editor)
 
+        # self.action_update = self.inner.menuBar().addAction("Sync with Project")
+        # self.action_update.triggered.connect(self.on_sync)
         self.editor.onWordChanged.connect(self.word_list.redraw)
         self.word_list.itemSelectionChanged.connect(self.set_word_selected)
         self.inner.setCentralWidget(self.widget)
 
         self.show()
+
 
     def set_word_selected(self):
         word = self.word_list.get_selected_word()
@@ -72,7 +78,7 @@ class VocabularyTreeView(QWidget):
         self.mode = mode
         self.recreate_tree()
 
-        # self.tree.itemChanged.connect(self.on_item_changed)
+        self.tree.itemChanged.connect(self.on_item_changed)
         self.tree.itemSelectionChanged.connect(self.on_selected)
 
     def on_search(self):
@@ -131,6 +137,12 @@ class VocabularyTreeView(QWidget):
         if isinstance(self.tree.selectedItems()[0], CollectionItem):
             return self.tree.selectedItems()[0].collection
 
+    def get_selected_vocabulary(self):
+        if len(self.tree.selectedItems()) == 0:
+            return None
+        if isinstance(self.tree.selectedItems()[0], VocabularyItem):
+            return self.tree.selectedItems()[0].collection, self.tree.selectedItems()[0].vocabulary
+
     def on_item_check_changed(self, itm):
         self.onCheckStateChanged.emit(self.get_check_state())
 
@@ -142,6 +154,14 @@ class VocabularyTreeView(QWidget):
 
     def new_collection(self, name="New Collection"):
         self.vocabulary_library.create_collection(name)
+        self.recreate_tree()
+
+    def new_vocabulary(self, col:VocabularyCollection):
+        col.create_vocabulary("AA New Vocabulary")
+        self.recreate_tree()
+
+    def remove_vocabulary(self, col:VocabularyCollection, voc:Vocabulary):
+        col.remove_vocabulary(voc)
         self.recreate_tree()
 
     def copy_collection(self, col):
@@ -164,12 +184,22 @@ class VocabularyTreeView(QWidget):
             a_new = menu.addAction("New Collection")
             a_new.triggered.connect(partial(self.new_collection, "New Collection"))
 
-            if self.get_selected_collection() != None:
+            if self.get_selected_collection() is not None:
+                a_new_vocabulary = menu.addAction("New Vocabulary")
+                a_new_vocabulary.triggered.connect(partial(self.new_vocabulary,  self.get_selected_collection()))
+
                 a_copy = menu.addAction("Copy Collection")
                 a_copy.triggered.connect(partial(self.copy_collection, self.get_selected_collection()))
 
                 a_delete = menu.addAction("Remove Collection")
                 a_delete.triggered.connect(partial(self.remove_collection,  self.get_selected_collection()))
+            elif self.get_selected_vocabulary() is not None:
+                a_remove_vocabulary = menu.addAction("Remove Vocabulary")
+                collection, vocabulary = self.get_selected_vocabulary()
+                a_remove_vocabulary.triggered.connect(partial(self.remove_vocabulary, collection, vocabulary))
+                menu_to = menu.addMenu("Copy to...")
+                for c in self.vocabulary_library.collections.values():
+                    menu_to.addAction(c.name)
 
             menu.popup(self.mapToGlobal(mappedPoint))
 
@@ -219,7 +249,7 @@ class CollectionItem(QTreeWidgetItem):
     def recreate_vocabularies(self):
         self.items = dict()
         for v in sorted(self.collection.vocabularies.values(), key=lambda x:x.name):
-            widget = VocabularyItem(self, v, self.mode)
+            widget = VocabularyItem(self, self.collection, v, self.mode)
             self.addChild(widget)
             self.items[v.unique_id] = widget
 
@@ -238,8 +268,9 @@ class CollectionItem(QTreeWidgetItem):
 
 
 class VocabularyItem(QTreeWidgetItem):
-    def __init__(self, parent, vocabulary:Vocabulary, mode, show_words = False):
+    def __init__(self, parent, collection, vocabulary:Vocabulary, mode, show_words = False):
         super(VocabularyItem, self).__init__(parent)
+        self.collection = collection
         self.vocabulary = vocabulary
         self.setText(0, vocabulary.name)
         self.items = dict()
@@ -281,7 +312,7 @@ class WordsList(QListWidget):
             self.addItem(w.name)
 
     def add_word(self, name="A New Word"):
-        self.vocabulary.create_word(name)
+        self.vocabulary.create_word(name, unique_id=str(uuid4()))
         self.redraw()
 
     def remove_word(self, word):

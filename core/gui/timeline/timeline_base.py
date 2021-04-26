@@ -9,7 +9,7 @@ from core.container.container_interfaces import ILockable
 from core.gui.context_menu import open_context_menu
 from core.gui.annotation_editor import AnnotationEditorPopup
 from core.gui.vocabulary_selector import VocabularySelectorDialog
-from core.container.vocabulary_library import global_library
+
 
 
 class TimelineControl(QtWidgets.QWidget):
@@ -139,7 +139,7 @@ class TimelineControl(QtWidgets.QWidget):
         self.timeline.update_ui()
 
     def show_vocabulary_setup(self):
-        dialog = VocabularySelectorDialog(self.timeline.main_window, self.item, global_library)
+        dialog = VocabularySelectorDialog(self.timeline.main_window, self.item, self.timeline.main_window.vocabulary_library)
         dialog.show()
 
     @pyqtSlot(bool)

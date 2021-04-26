@@ -103,7 +103,9 @@ class Vocabulary(IProjectContainer, IHasName):
 
         if dispatch:
             self.dispatch_on_changed(item=self)
+
         self.onVocabularyWordAdded.emit(word)
+        self.onVocabularyChanged.emit(self)
 
     def remove_word(self, word, dispatch = True):
         """
@@ -139,6 +141,7 @@ class Vocabulary(IProjectContainer, IHasName):
             self.dispatch_on_changed(item=self)
 
         self.onVocabularyWordRemoved.emit(word)
+        self.onVocabularyChanged.emit(self)
 
     def get_word_by_name(self, name):
         for w in self.words_plain:
@@ -214,10 +217,9 @@ class Vocabulary(IProjectContainer, IHasName):
         hierarchy_mapper[self.unique_id] = self
 
         for w in serialization['words']:
+
             parent = hierarchy_mapper[w['parent']]
 
-            # parent = self.project.get_by_id(w['parent'])
-            # If this is a root node in the Vocabulary
             if isinstance(parent, Vocabulary):
                 word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
                 hierarchy_mapper[word.unique_id] = word
@@ -361,7 +363,8 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def update_vocabulary(self, new_voc):
         for attr in VOC_COMPARE_ATTRS:
-            setattr(self, attr, getattr(new_voc, attr))
+            if hasattr(self, attr):
+                setattr(self, attr, getattr(new_voc, attr))
 
         words = dict()
         to_remove = []
@@ -374,6 +377,7 @@ class Vocabulary(IProjectContainer, IHasName):
                 for attr in WORD_COMPARE_ATTRS:
                     setattr(w, attr, getattr(words[w.unique_id], attr))
                 words.pop(w.unique_id)
+                w.parent = self
             else:
                 to_remove.append(w)
 
@@ -390,10 +394,11 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def set_name(self, name):
         base = name
-        counter = 0
-        while name in [v.name for v in self.project.vocabularies]:
-            counter += 1
-            name = base + "_" + str(counter).zfill(2)
+        if self.project is not None:
+            counter = 0
+            while name in [v.name for v in self.project.vocabularies]:
+                counter += 1
+                name = base + "_" + str(counter).zfill(2)
         self.name = name
         self.onVocabularyChanged.emit(self)
 
@@ -582,6 +587,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.onUniqueKeywordsChanged.emit(self)
             voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
             voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
+            print("Vocabulary added", voc.name)
             return keywords
         else:
             #Check if really there are new words in the vocabulary which are not yet added to the keywords.
@@ -633,7 +639,7 @@ class ClassificationObject(IProjectContainer, IHasName):
 
         voc.onVocabularyWordAdded.disconnect(self.on_vocabulary_word_added)
         voc.onVocabularyWordRemoved.disconnect(self.on_vocabulary_word_removed)
-
+        print("Vocabulary removed", voc.name)
         self.onUniqueKeywordsChanged.emit(self)
 
     def get_vocabularies(self):
@@ -749,7 +755,7 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.semantic_segmentation_labels = (serialization['semantic_segmentation_labels']['model'],
                                                      [t['label'] for t in serialization['semantic_segmentation_labels']['labels']])
             except Exception as e:
-                log_error("Importing old style SemanticSegmentation Labels", e)
+                log_debug("Importing old style SemanticSegmentation Labels", e)
                 self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
 
         except Exception as e:
@@ -799,7 +805,6 @@ class UniqueKeyword(IProjectContainer):
             class_obj = self.class_obj.unique_id,
             vian_webapp_external_id = self.external_id
         )
-
         return data
 
     def deserialize(self, serialization, project):
@@ -807,8 +812,6 @@ class UniqueKeyword(IProjectContainer):
         self.word_obj = project.get_by_id(serialization['word_obj'])
         self.voc_obj = self.word_obj.vocabulary
         self.class_obj = project.get_by_id(serialization['class_obj'])
-
-        print(self.word_obj, self.voc_obj, self.class_obj)
 
         try:
             self.external_id = deprecation_serialization(serialization,['vian_webapp_external_id', 'external_id'])
@@ -819,6 +822,7 @@ class UniqueKeyword(IProjectContainer):
         if self.voc_obj is None or self.word_obj is None or self.class_obj is None:
             raise ValueError("UniqueKeyword could not be resolved.")
 
+        print("UniqueKeyword", self.voc_obj.name, self.word_obj.name)
         self.set_project(project)
         self.word_obj._add_referenced_unique_keyword(self)
 
@@ -1384,7 +1388,6 @@ def merge_experiment_inspect(self:Experiment, other: Experiment):
 
 
 VOC_COMPARE_ATTRS = [
-    "uuid",
     "name",
     "comment",
     "info_url",
@@ -1393,7 +1396,6 @@ VOC_COMPARE_ATTRS = [
 ]
 
 WORD_COMPARE_ATTRS = [
-    "uuid",
     "name",
     "comment",
     "info_url",

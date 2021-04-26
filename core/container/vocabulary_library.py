@@ -3,12 +3,14 @@ from uuid import uuid4
 from PyQt5.QtCore import QObject, pyqtSignal
 from core.container.experiment import Vocabulary, VocabularyWord
 from typing import Dict, List
-
+from functools import partial
 from core.container.project import VIANProject
 
 # TODO Implement Copy Collection Behaviour
 # TODO Storing Behaviour
 # TODO Implement Trash
+
+from threading import Lock
 
 
 class VocabularyCollection(QObject):
@@ -25,17 +27,27 @@ class VocabularyCollection(QObject):
         self.name = name
         self.onCollectionChanged.emit(self)
 
+    def create_vocabulary(self, name="New Vocabulary"):
+        voc = Vocabulary(name, unique_id=str(uuid4()))
+        self.add_vocabulary(voc)
+
     def add_vocabulary(self, voc:Vocabulary, force = False):
         if voc.unique_id in self.vocabularies and not force:
             raise Exception("Vocabulary already in Collection")
         else:
             self.vocabularies[voc.unique_id] = voc
+            voc.onVocabularyChanged.connect(self.on_changed)
+
         self.onCollectionChanged.emit(self)
         return voc
 
+    def on_changed(self):
+        self.onCollectionChanged.emit(self)
+
     def remove_vocabulary(self, voc:Vocabulary):
+        voc.onVocabularyChanged.disconnect(self.on_changed)
         if voc.unique_id in self.vocabularies:
-            self.vocabularies.pop(voc)
+            self.vocabularies.pop(voc.unique_id)
         self.onCollectionChanged.emit(self)
         return voc
 
@@ -59,9 +71,10 @@ class VocabularyCollection(QObject):
         new_instance.is_editable = data['is_editable']
         new_instance.name = data['name']
         new_instance.unique_id = data['unique_id']
+
         for v in data['vocabularies']:
             voc = Vocabulary().deserialize(v, None)
-            new_instance.vocabularies[voc.unique_id] = voc
+            new_instance.add_vocabulary(voc)
 
         return new_instance
 
@@ -76,26 +89,44 @@ class VocabularyLibrary(QObject):
 
     def __init__(self):
         super(VocabularyLibrary, self).__init__()
+
+        self.file_path = None
         self.collections = dict()
         self.voc_index = dict()
-        self.onLibraryChanged.connect(self.reindex)
+        self.voc_name = dict()
+
+        self._write_lock = Lock()
 
     def reindex(self):
         self.voc_index = dict()
         for c in self.collections.values():
             for v in c.vocabularies.values():
-                self.voc_index[v.unique_id] = v
+                self.voc_index[str(v.unique_id)] = v
+                self.voc_name[v.name] = v
 
-        return voc
+    def on_change(self):
+        self.reindex()
+        if self.file_path is not None:
+            self.save()
+        self.onLibraryChanged.emit(self)
 
-    def get_vocabulary_by_id(self, unique_id:str) -> Vocabulary | None:
+    def get_vocabulary_by_id(self, unique_id:str) -> Vocabulary :
         """
         Returns a vocabulary by a given unique_id.
 
         :param unique_id: uuid
         :return:
         """
-        return self.voc_index.get(unique_id)
+        return self.voc_index.get(str(unique_id))
+
+    def get_vocabulary_by_name(self, name:str) -> Vocabulary :
+        """
+        Returns a vocabulary by a given unique_id.
+
+        :param unique_id: uuid
+        :return:
+        """
+        return self.voc_name.get(str(name))
 
     def create_collection(self, name) -> VocabularyCollection:
         """
@@ -105,8 +136,8 @@ class VocabularyLibrary(QObject):
         """
         col = VocabularyCollection(name)
         self.add_collection(col)
+        self.on_change()
 
-        self.onLibraryChanged.emit(self)
         return col
 
     def add_collection(self, col:VocabularyCollection) -> VocabularyCollection:
@@ -116,7 +147,8 @@ class VocabularyLibrary(QObject):
         :return:
         """
         self.collections[col.unique_id] = col
-        self.onLibraryChanged.emit(self)
+        col.onCollectionChanged.connect(self.on_change)
+        self.on_change()
         return col
 
     def remove_collection(self, col:VocabularyCollection):
@@ -127,28 +159,35 @@ class VocabularyLibrary(QObject):
         """
         if col.unique_id in self.collections:
             self.collections.pop(col.unique_id)
-        self.onLibraryChanged.emit(self)
+        self.on_change()
 
     def copy_collection(self, col):
         # TODO needs implementation
-        self.onLibraryChanged.emit(self)
+        self.on_change()
         pass
 
-    def save(self, filepath):
+    def save(self, filepath=None):
         """
         Serializes a collection into a JSON File
         :param filepath:
         :return:
         """
-        data = dict(
-            name="vian-vocabulary-library",
-            collections=[]
-        )
-        for i, t in self.collections.items():
-            data['collections'].append(t.serialize())
+        if filepath is None and self.file_path is not None:
+            filepath = self.file_path
 
-        with open(filepath, "w") as f:
-            json.dump(data, f)
+        if filepath is None:
+            raise Exception("VocabularyLibrary: Attempting to store without a given filename")
+
+        with self._write_lock:
+            data = dict(
+                name="vian-vocabulary-library",
+                collections=[]
+            )
+            for i, t in self.collections.items():
+                data['collections'].append(t.serialize())
+
+            with open(filepath, "w") as f:
+                json.dump(data, f)
 
         return data
 
@@ -161,14 +200,16 @@ class VocabularyLibrary(QObject):
         with open(filepath, "r") as f:
             data = json.load(f)
 
-        for json_data in data['collections']:
-            self.add_collection(VocabularyCollection.deserialize(json_data))
+        self.file_path = filepath
 
-        self.onLibraryChanged.emit(self)
+        for json_data in data['collections']:
+            col = self.add_collection(VocabularyCollection.deserialize(json_data))
+
+        self.on_change()
         return self
 
 
-global_library = None
+# global_library = None
 if __name__ == '__main__':
     p = VIANProject().load_project("C:/Users/gaude/Documents/VIAN/projects/project_name_netflix/project_name_netflix.eext")
 
@@ -179,13 +220,6 @@ if __name__ == '__main__':
         col.add_vocabulary(voc)
 
     library.save("../../data/library.json")
-else:
-    global_library = VocabularyLibrary().load("data/library.json")
-    # library = VocabularyLibrary().load("mylibrary.json")
-    # for i, col in library.collections.items():
-    #     print(col)
-        # col.add_vocabulary(voc)
-
 
 
 

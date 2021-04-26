@@ -52,11 +52,15 @@ class VocabularySelectorWidget(QWidget):
     def apply_changes(self, voc_selection):
         if self.selected_clobj is not None:
             obj_vocabulary = [v.unique_id for v in self.selected_clobj.get_vocabularies()]
+
             for v in voc_selection:
                 voc = v['vocabulary']
                 state = v['state']
                 if voc.unique_id not in obj_vocabulary and state == True:
+                    self.project.add_vocabulary(voc)
                     self.selected_clobj.add_vocabulary(voc)
+                elif voc.unique_id in obj_vocabulary and state == False:
+                    self.selected_clobj.remove_vocabulary(voc)
 
 
 class ClassificationObjectList(QWidget):
@@ -103,7 +107,6 @@ class ClassificationObjectList(QWidget):
         clobj = self.project.get_classification_object_global(self.input_line.text())
         clobj.target_container.append(self.target)
         self.update_list()
-
 
 
 class ClassificationObjectItem(QListWidgetItem):

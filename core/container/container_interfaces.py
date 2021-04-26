@@ -145,7 +145,6 @@ class IProjectContainer(QObject):
         for r in self.connected_analyses:
             if classification_object is None \
                     or classification_object == r.target_classification_object:
-                print(classification_object)
                 if r.analysis_job_class == class_name:
                     result = r
                     break
