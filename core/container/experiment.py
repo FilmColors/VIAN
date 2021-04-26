@@ -218,7 +218,10 @@ class Vocabulary(IProjectContainer, IHasName):
 
         for w in serialization['words']:
 
-            parent = hierarchy_mapper[w['parent']]
+            if w['parent'] in hierarchy_mapper:
+                parent = hierarchy_mapper[w['parent']]
+            else:
+                parent = self
 
             if isinstance(parent, Vocabulary):
                 word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
@@ -291,6 +294,7 @@ class Vocabulary(IProjectContainer, IHasName):
         except:
             log_warning("No UUID found in this vocabulary", self.name)
             pass
+
         # Replace all IDs with new one:
         for w in serialization['words']:
             old = w['unique_id']
