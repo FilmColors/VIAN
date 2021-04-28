@@ -273,6 +273,44 @@ class SegmentationExporter(ExportDevice):
             pd.DataFrame(result).to_csv(path)
 
 
+class SequenceProtocolExporter:
+    def __init__(self):
+        self.data = {}
+
+    def export(self, project: VIANProject, path: str):
+        """
+        exporting data from all Segmentations
+
+        For a first draft, no additional arguments
+        can be passed, such as specifying which
+        segmentation etc.
+
+        Args:
+            project: the container class of a VIAN project
+            path: a string for writing the export to
+        Returns:
+            None
+        """
+        for segmentation in project.segmentation:
+            segmentation_name = segmentation.name
+            segmentation_data = {}
+            for segment in segmentation.segments:
+                segment_name = segment.name
+                segment_data = {}
+                # export notes
+                segment_data["notes"] = segment.notes
+                # export free annotations
+                annos = []
+                for anno in segment._annotations:
+                   annos.append((anno.name, anno.content))
+                segment_data["free annotations"] = annos
+                # export classifications
+
+                segmentation_data[segment_name] = segment_data
+        self.data[segmentation_name] = segmentation_data
+        # import ipdb; ipdb.set_trace()
+
+
 class JsonExporter():
     def segment2json(self, segment):
         pass
@@ -399,11 +437,11 @@ class ColorimetryExporter(ExportDevice):
 def build_file_name(naming, screenshot, movie_descriptor):
     """
     Generates a Filename for the Screenshots by a given naming convention
-    
-    :param naming: 
-    :param screenshot: 
-    :param movie_descriptor: 
-    :return: 
+
+    :param naming:
+    :param screenshot:
+    :param movie_descriptor:
+    :return:
     """
     file_name = "/"
 
