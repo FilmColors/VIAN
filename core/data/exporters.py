@@ -2,18 +2,20 @@
 Contains all Export Classes and Export Functions of VIAN
 """
 
+import csv
 import cv2
 import numpy as np
-import pandas as pd
-from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
-from core.data.interfaces import IConcurrentJob
-from core.data.computation import *
-from core.container.project import *
 import os
-import csv
+import pandas as pd
+import random
 import shutil
 
+from core.container.project import *
+from core.data.computation import *
 from core.data.csv_helper import CSVFile
+from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
+from core.data.interfaces import IConcurrentJob
+from pathlib import Path
 
 
 DEFAULT_NAMING_SCREENSHOTS = [
@@ -277,6 +279,27 @@ class SequenceProtocolExporter:
     def __init__(self):
         self.data = {}
 
+    @staticmethod
+    def _write_screenshots(shots, path):
+        """
+        writing screenshots to disk
+
+        Args:
+            shots: list of screenshots (numpy.ndarray)
+            path: directory path (pathlib.PosixPath)
+        Returns:
+            None
+        """
+        compression = int(np.clip(float(100 - quality) / 10,0,9))
+
+        for i, screenshot in enumerate(shots):
+            outpath = path / ".VIAN_screenshot_" + str(i) + ".png"
+            cv2.imwrite(outpath, screenshot, [cv2.IMWRITE_PNG_COMPRESSION, compression])
+
+    @staticmethod
+    def _remove_screenshots():
+        Popen(["rm", ".VIAN_screenshot_*.png"])
+
     def export(self, project: VIANProject, path: str):
         """
         exporting data from all Segmentations
@@ -291,6 +314,8 @@ class SequenceProtocolExporter:
         Returns:
             None
         """
+        outpath = Path(path)
+
         for segmentation in project.segmentation:
             segmentation_name = segmentation.name
             segmentation_data = {}
@@ -305,10 +330,38 @@ class SequenceProtocolExporter:
                    annos.append((anno.name, anno.content))
                 segment_data["free annotations"] = annos
                 # export classifications
+                obj_key_w = []
+                for keyw in segment.tag_keywords:
+                    for uniq_k in keyw.word_obj.unique_keywords:
+                        obj = uniq_k.class_obj.name
+                        vocab = uniq_k.voc_obj.name
+                        keyword = uniq_k.word_obj.name
+                        obj_key_w.append((obj, vocab, keyword))
+                        # if vocab in voc_key:
+                        #     voc_key[keyw.voc_obj.name].append(keyw.word_obj.name)
+                        # else:
+                        #     voc_key[keyw.voc_obj.name] = [keyw.word_obj.name]
+
+                segment_data["vocabulary_keyword"] = sorted(obj_key_w)
+                # screenshots
+                shots = []
+                for screenshot in project.screenshots:
+                    t_screenshot =screenshot.movie_timestamp
+                    if t_screenshot > segment.end:
+                        break
+                    elif t_screenshot < segment.start:
+                        continue
+                    else:
+                        shots.append(screenshot)
+                segment_data["screenshot"] = shots[random.randrange(len(shots))].get_img_movie_orig_size()
 
                 segmentation_data[segment_name] = segment_data
         self.data[segmentation_name] = segmentation_data
-        # import ipdb; ipdb.set_trace()
+
+        self._write_screenshots(self.data, outpath.parent)
+        # TODO: create asciidoc document
+        self._remove_screenshots()
+        import ipdb; ipdb.set_trace()
 
 
 class JsonExporter():
