@@ -279,18 +279,22 @@ class SequenceProtocolExporter:
     def __init__(self):
         self.data = {}
 
-    @staticmethod
-    def _write_screenshots(shots, path):
+    def _write_screenshots(path):
         """
         writing screenshots to disk
 
         Args:
-            shots: list of screenshots (numpy.ndarray)
             path: directory path (pathlib.PosixPath)
         Returns:
             None
         """
         compression = int(np.clip(float(100 - quality) / 10,0,9))
+
+        shots = []
+
+        for segmentation in self.data.values():
+            for segment in segmentation.values():
+                shots.append(segment["screenshot"])
 
         for i, screenshot in enumerate(shots):
             outpath = path / ".VIAN_screenshot_" + str(i) + ".png"
@@ -337,10 +341,6 @@ class SequenceProtocolExporter:
                         vocab = uniq_k.voc_obj.name
                         keyword = uniq_k.word_obj.name
                         obj_key_w.append((obj, vocab, keyword))
-                        # if vocab in voc_key:
-                        #     voc_key[keyw.voc_obj.name].append(keyw.word_obj.name)
-                        # else:
-                        #     voc_key[keyw.voc_obj.name] = [keyw.word_obj.name]
 
                 segment_data["vocabulary_keyword"] = sorted(obj_key_w)
                 # screenshots
@@ -358,10 +358,10 @@ class SequenceProtocolExporter:
                 segmentation_data[segment_name] = segment_data
         self.data[segmentation_name] = segmentation_data
 
-        self._write_screenshots(self.data, outpath.parent)
+        import ipdb; ipdb.set_trace()
+        self._write_screenshots(outpath.parent)
         # TODO: create asciidoc document
         self._remove_screenshots()
-        import ipdb; ipdb.set_trace()
 
 
 class JsonExporter():
