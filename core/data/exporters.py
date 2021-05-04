@@ -16,6 +16,7 @@ from core.data.csv_helper import CSVFile
 from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
 from core.data.interfaces import IConcurrentJob
 from pathlib import Path
+from subprocess import Popen
 
 
 DEFAULT_NAMING_SCREENSHOTS = [
@@ -279,7 +280,7 @@ class SequenceProtocolExporter:
     def __init__(self):
         self.data = {}
         self.ascii_doc = []
-        self._to_delete_scrennshots = []
+        self._to_delete_screenshots = []
 
     @staticmethod
     def _write_screenshot(screenshot, path):
@@ -299,10 +300,9 @@ class SequenceProtocolExporter:
 
         cv2.imwrite(str(path), screenshot, [cv2.IMWRITE_PNG_COMPRESSION, compression])
 
-    @staticmethod
-    def _remove_screenshots():
-        for screenshot in self._to_delete_scrennshots:
-            Popen(["rm", screenshot])
+    def _remove_screenshots(self):
+        for screenshot in self._to_delete_screenshots:
+            Popen(["rm", str(screenshot)])
 
     def _build_datadict(self, project):
         """
@@ -383,6 +383,7 @@ class SequenceProtocolExporter:
             None
         """
         outpath = Path(path)
+        ascii_path = outpath / f"SequenceProtocol_{project.name}.adoc"
 
         self._build_datadict(project)
 
@@ -401,33 +402,39 @@ class SequenceProtocolExporter:
                     width = project.movie_descriptor.display_width / 2
                     height = project.movie_descriptor.display_height / 2
                     screenshot_name = outpath.parent / (str(uuid4()) + ".png")
-                    self._to_delete_scrennshots.append(screenshot_name)
+                    self._to_delete_screenshots.append(screenshot_name)
                     self._write_screenshot(screenshot, screenshot_name)
                     self.ascii_doc.append(f"image::{screenshot_name}[,{width},{height}]\n")
 
 
-                self.ascii_doc.append("==== Notes\n")
-                self.ascii_doc.append(data[segment]["notes"] + "\n")
+                if data[segment]["notes"]:
+                    self.ascii_doc.append("==== Notes\n")
+                    self.ascii_doc.append(data[segment]["notes"] + "\n")
 
-                self.ascii_doc.append("==== Free Annoations\n")
-                for anno in data[segment]["free annotations"]:
-                    self.ascii_doc.append(": ".join(anno))
-                    self.ascii_doc.append("\n")
+                if data[segment]["free annotations"]:
+                    self.ascii_doc.append("==== Free Annoations\n")
+                    for anno in data[segment]["free annotations"]:
+                        self.ascii_doc.append(": ".join(anno))
+                        self.ascii_doc.append("\n")
 
-                self.ascii_doc.append("==== Classification Annotations\n")
-                for obj, cl in data[segment]["vocabulary_keyword"].items():
-                    self.ascii_doc.append(f"* {obj}\n")
-                    for voc, kw in cl.items():
-                        self.ascii_doc.append(f"** {voc}\n")
-                        for keyword in kw:
-                            self.ascii_doc.append(f"*** {keyword}\n")
+                if data[segment]["vocabulary_keyword"]:
+                    self.ascii_doc.append("==== Classification Annotations\n")
+                    for obj, cl in data[segment]["vocabulary_keyword"].items():
+                        self.ascii_doc.append(f"* {obj}")
+                        for voc, kw in cl.items():
+                            self.ascii_doc.append(f"** {voc}")
+                            for keyword in kw:
+                                self.ascii_doc.append(f"*** {keyword}")
 
                 self.ascii_doc.append("\n'''\n\n")
 
+        with open(ascii_path, "w") as outf:
+            outf.write("\n".join(self.ascii_doc))
 
-        import ipdb; ipdb.set_trace()
-        self._write_screenshot(outpath.parent)
-        # TODO: create asciidoc document
+        Popen(["asciidoctor-pdf", ascii_path]).wait()
+
+        print("Sequence Protocol written to {ascii_path.rstrip('.adoc')+'.pdf'}.")
+
         self._remove_screenshots()
 
 
