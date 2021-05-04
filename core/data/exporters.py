@@ -278,33 +278,97 @@ class SegmentationExporter(ExportDevice):
 class SequenceProtocolExporter:
     def __init__(self):
         self.data = {}
+        self.ascii_doc = []
+        self._to_delete_scrennshots = []
 
-    def _write_screenshots(path):
+    @staticmethod
+    def _write_screenshot(screenshot, path):
         """
-        writing screenshots to disk
+        writes screenshots to disk
 
         Args:
             path: directory path (pathlib.PosixPath)
         Returns:
             None
         """
+        quality = 100
+
         compression = int(np.clip(float(100 - quality) / 10,0,9))
 
         shots = []
 
-        for segmentation in self.data.values():
-            for segment in segmentation.values():
-                shots.append(segment["screenshot"])
-
-        for i, screenshot in enumerate(shots):
-            outpath = path / ".VIAN_screenshot_" + str(i) + ".png"
-            cv2.imwrite(outpath, screenshot, [cv2.IMWRITE_PNG_COMPRESSION, compression])
+        cv2.imwrite(str(path), screenshot, [cv2.IMWRITE_PNG_COMPRESSION, compression])
 
     @staticmethod
     def _remove_screenshots():
-        Popen(["rm", ".VIAN_screenshot_*.png"])
+        for screenshot in self._to_delete_scrennshots:
+            Popen(["rm", screenshot])
 
-    def export(self, project: VIANProject, path: str):
+    def _build_datadict(self, project):
+        """
+        builds the self.data dictionary
+        which is used to write document
+
+        Args:
+            project: the VIAN project object
+        Returns:
+            None
+        """
+        if not len(project.segmentation) == 0:
+            for segmentation in project.segmentation:
+                segmentation_name = segmentation.name
+                segmentation_data = {}
+                for segment in segmentation.segments:
+                    segment_name = segment.name
+                    segment_data = {}
+                    # export notes
+                    segment_data["notes"] = segment.notes
+                    # export free annotations
+                    annos = []
+                    for anno in segment._annotations:
+                       annos.append((anno.name, anno.content))
+                    segment_data["free annotations"] = annos
+                    # export classifications
+                    obj_key_w = []
+                    for keyw in segment.tag_keywords:
+                        for uniq_k in keyw.word_obj.unique_keywords:
+                            obj = uniq_k.class_obj.name
+                            vocab = uniq_k.voc_obj.name
+                            keyword = uniq_k.word_obj.name
+                            obj_key_w.append((obj, vocab, keyword))
+
+                    obj_key_w.sort()
+
+                    dict_key_w = {x[0]: {} for x in obj_key_w}
+
+                    for item in obj_key_w:
+                            if item[1] in dict_key_w[item[0]]:
+                                    dict_key_w[item[0]][item[1]].append(item[2])
+                            else:
+                                    dict_key_w[item[0]][item[1]] = [item[2]]
+
+                    segment_data["vocabulary_keyword"] = dict_key_w
+                    # screenshots
+                    shots = []
+                    for screenshot in project.screenshots:
+                        t_screenshot =screenshot.movie_timestamp
+                        if t_screenshot > segment.end:
+                            break
+                        elif t_screenshot < segment.start:
+                            continue
+                        else:
+                            shots.append(screenshot)
+                    try:
+                        segment_data["screenshot"] = shots[random.randrange(len(shots))].get_img_movie_orig_size()
+                    except:
+                        segment_data["screenshot"] = None
+
+                    segmentation_data[segment_name] = segment_data
+            self.data[segmentation_name] = segmentation_data
+        else:
+            self.data = None
+
+    def export(self, project, path: str):
         """
         exporting data from all Segmentations
 
@@ -320,46 +384,49 @@ class SequenceProtocolExporter:
         """
         outpath = Path(path)
 
-        for segmentation in project.segmentation:
-            segmentation_name = segmentation.name
-            segmentation_data = {}
-            for segment in segmentation.segments:
-                segment_name = segment.name
-                segment_data = {}
-                # export notes
-                segment_data["notes"] = segment.notes
-                # export free annotations
-                annos = []
-                for anno in segment._annotations:
-                   annos.append((anno.name, anno.content))
-                segment_data["free annotations"] = annos
-                # export classifications
-                obj_key_w = []
-                for keyw in segment.tag_keywords:
-                    for uniq_k in keyw.word_obj.unique_keywords:
-                        obj = uniq_k.class_obj.name
-                        vocab = uniq_k.voc_obj.name
-                        keyword = uniq_k.word_obj.name
-                        obj_key_w.append((obj, vocab, keyword))
+        self._build_datadict(project)
 
-                segment_data["vocabulary_keyword"] = sorted(obj_key_w)
-                # screenshots
-                shots = []
-                for screenshot in project.screenshots:
-                    t_screenshot =screenshot.movie_timestamp
-                    if t_screenshot > segment.end:
-                        break
-                    elif t_screenshot < segment.start:
-                        continue
-                    else:
-                        shots.append(screenshot)
-                segment_data["screenshot"] = shots[random.randrange(len(shots))].get_img_movie_orig_size()
+        if not self.data:
+            return
 
-                segmentation_data[segment_name] = segment_data
-        self.data[segmentation_name] = segmentation_data
+        self.ascii_doc.append(f"= Sequence Protocol for '{project.name}'\n\n")
+
+        for seg, data in self.data.items():
+            self.ascii_doc.append(f"== Segmentation '{seg}'\n")
+            for segment in data:
+                self.ascii_doc.append(f"=== Segment '{segment}'\n")
+
+                screenshot = data[segment]["screenshot"]
+                if screenshot is not None:
+                    width = project.movie_descriptor.display_width / 2
+                    height = project.movie_descriptor.display_height / 2
+                    screenshot_name = outpath.parent / (str(uuid4()) + ".png")
+                    self._to_delete_scrennshots.append(screenshot_name)
+                    self._write_screenshot(screenshot, screenshot_name)
+                    self.ascii_doc.append(f"image::{screenshot_name}[,{width},{height}]\n")
+
+
+                self.ascii_doc.append("==== Notes\n")
+                self.ascii_doc.append(data[segment]["notes"] + "\n")
+
+                self.ascii_doc.append("==== Free Annoations\n")
+                for anno in data[segment]["free annotations"]:
+                    self.ascii_doc.append(": ".join(anno))
+                    self.ascii_doc.append("\n")
+
+                self.ascii_doc.append("==== Classification Annotations\n")
+                for obj, cl in data[segment]["vocabulary_keyword"].items():
+                    self.ascii_doc.append(f"* {obj}\n")
+                    for voc, kw in cl.items():
+                        self.ascii_doc.append(f"** {voc}\n")
+                        for keyword in kw:
+                            self.ascii_doc.append(f"*** {keyword}\n")
+
+                self.ascii_doc.append("\n'''\n\n")
+
 
         import ipdb; ipdb.set_trace()
-        self._write_screenshots(outpath.parent)
+        self._write_screenshot(outpath.parent)
         # TODO: create asciidoc document
         self._remove_screenshots()
 
