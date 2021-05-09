@@ -1,5 +1,5 @@
 import os
-
+from core.config import get_data_dir
 import cv2
 import enum
 import numpy as np
@@ -214,8 +214,9 @@ def create_hilbert_transform(s):
 
 
 def get_hilbert_lookup():
-    if os.path.isfile("data/hilbert_lookup.npy"):
-        return np.load("data/hilbert_lookup.npy")
+    p = os.path.join(get_data_dir(), "hilbert_lookup.npy")
+    if os.path.isfile(p):
+        return np.load(p)
     else:
          return None
 

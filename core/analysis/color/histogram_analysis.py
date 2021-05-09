@@ -32,7 +32,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
              - [2]: Bins B-Channel {-128.0, ..., 128.0}
     """
 
-    def __init__(self, resolution=30):
+    def __init__(self, resolution=30, coverage = None):
         super(ColorHistogramAnalysis, self).__init__("Color Histogram", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorHistograms",
                                                    dataset_shape=(16,16,16),
@@ -41,6 +41,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
                                                      version="1.0.0",
                                                      multiple_result=True)
         self.resolution = resolution
+        self.coverage = None
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
         fps = project.movie_descriptor.fps
@@ -70,6 +71,9 @@ class ColorHistogramAnalysis(IAnalysisJob):
             name, labels = self.target_class_obj.semantic_segmentation_labels
             mask = semseg.get_adata()
             bin_mask = labels_to_binary_mask(mask, labels)
+
+        if self.coverage is not None:
+            self.resolution = (stop - start) / ((stop - start) * self.coverage)
 
         for i in range(start, stop  + 1, self.resolution):
             sign_progress((c - start) / ((stop - start) + 1))

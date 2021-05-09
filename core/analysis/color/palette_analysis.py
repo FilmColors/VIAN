@@ -33,7 +33,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
             - [4] Cluster Color: R-Channel (BGR) {0, ..., 255}
             - [5] Number of Pixels
     """
-    def __init__(self, resolution = 30, input_width = 300, n_super_pixel = 200):
+    def __init__(self, resolution = 30, input_width = 300, n_super_pixel = 200, coverage = None):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorPalettes",
                                                    dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6), #(Distance, Layer, L, A, B, N)
@@ -44,6 +44,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         self.resolution = resolution
         self.seeds_input_width = input_width
         self.n_super_pixel = n_super_pixel
+        self.coverage = coverage
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
         fps = project.movie_descriptor.fps
@@ -74,6 +75,10 @@ class ColorPaletteAnalysis(IAnalysisJob):
         c = start
 
         model = None
+
+        if self.coverage is not None:
+            self.resolution = (stop - start) / ((stop - start) * self.coverage)
+
         for i in range(start, stop + 1, self.resolution):
             sign_progress((c - start) / ((stop - start) + 1))
 
