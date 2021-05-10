@@ -96,7 +96,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
             c = start
 
             if self.coverage is not None:
-                self.resolution = (stop - start) / ((stop - start) * self.coverage)
+                self.resolution = int((stop - start) / ((stop - start) * self.coverage))
 
             for i in range(start, stop  + 1, self.resolution):
                 sign_progress((c - start) / ((stop - start) + 1))

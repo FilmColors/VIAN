@@ -701,12 +701,20 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 result.append(a)
         return result
 
-    # def has_analysis(self, class_name):
-    #     for a in self.analysis:
-    #         if isinstance(a, IAnalysisJobAnalysis):
-    #             if a.analysis_job_class == class_name:
-    #                 return True
-    #     return False
+    def has_analysis(self, class_name):
+        for a in self.analysis:
+            if isinstance(a, IAnalysisJobAnalysis):
+                if a.analysis_job_class == class_name:
+                    return True
+        return False
+
+    def get_analyses_by_name(self, class_name):
+        resu = []
+        for a in self.analysis:
+            if isinstance(a, IAnalysisJobAnalysis):
+                if a.analysis_job_class == class_name:
+                    resu.append(a)
+        return resu
 
     def get_colormetry(self):
         """

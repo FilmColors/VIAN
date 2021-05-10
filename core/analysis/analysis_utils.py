@@ -33,6 +33,8 @@ def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IPro
         else:
             res = analysis.process(args, progress_dummy)
 
+        if not isinstance(targets, list):
+            targets = [targets]
         if isinstance(res, list):
             for r in res:
                 with PROJECT_LOCK:

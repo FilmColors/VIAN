@@ -109,7 +109,6 @@ class EyetrackingAnalysis(IAnalysisJob):
             parameters=dict(resolution=self.resolution)
         )
 
-
     def modify_project(self, project: VIANProject, result: IAnalysisJobAnalysis, main_window=None):
         """
         This Function will be called after the processing is completed. 
@@ -204,7 +203,10 @@ class RawPointsSpatialDataset(SpatialOverlayDataset):
         self.height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     def get_data_for_time(self, time_ms, frame):
-        pos = ms_to_frames(time_ms, self.fps)
+        if frame is None:
+            pos = ms_to_frames(time_ms, self.fps)
+        else:
+            pos = frame
 
         if self.fixations_sampled is not None:
             indices = np.where(np.logical_and(pos - (self.fps / 2) < self.time_np, self.time_np <  pos + (self.fps/2)))
@@ -249,7 +251,6 @@ class DialogImportEyetracking(EDialogWidget):
             self.stimuli_directory = directory
             self.lineEditStimuli.setText(self.stimuli_directory)
 
-
     def on_path_changed(self):
             df = pd.read_csv(self.import_path, delimiter="\t")
             print(df)
@@ -270,7 +271,6 @@ class DialogImportEyetracking(EDialogWidget):
         handler = XEyeTrackingHandler()
         handler.import_(self.import_path, delimiter="\t", sfilter=sfilter)
 
-
         stimuli = glob.glob(self.stimuli_directory + "/*")
         handler.import_movie_meta(stimuli)
 
@@ -287,18 +287,21 @@ class DialogImportEyetracking(EDialogWidget):
         corpus.save(c_file)
 
         for k, v in result.items():
+
             v_dir = os.path.join(p_dir, k)
             os.mkdir(v_dir)
             project_path = None
-            with VIANProject(k, folder=v_dir, movie_path=v['stimulus']['path']) as project:
 
+            with VIANProject(k, folder=v_dir, movie_path=v['stimulus']['path']) as project:
                 analysis = EyetrackingAnalysis().from_importer(v['df'])
                 project.add_analysis(analysis)
                 project.store_project()
                 project_path = project.path
+
             corpus.add_project(file=project_path)
 
         corpus.save(c_file)
+
         self.main_window.corpus_widget.load_corpus(corpus.file)
 
 

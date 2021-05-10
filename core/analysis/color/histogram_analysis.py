@@ -73,7 +73,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
             bin_mask = labels_to_binary_mask(mask, labels)
 
         if self.coverage is not None:
-            self.resolution = (stop - start) / ((stop - start) * self.coverage)
+            self.resolution = int((stop - start) / ((stop - start) * self.coverage))
 
         for i in range(start, stop  + 1, self.resolution):
             sign_progress((c - start) / ((stop - start) + 1))

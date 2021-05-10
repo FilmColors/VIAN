@@ -87,7 +87,7 @@ class Annotatable:
             self.add_annotation(a)
         return self._annotations
 
-    def get_annotations(self, mime_type = None, name = None):
+    def get_annotations(self, mime_type = None, name = None) -> List[AnnotationBody]:
         if mime_type is None and name is None:
             return self._annotations
         elif name is not None:
