@@ -9,7 +9,7 @@ import os
 import pandas as pd
 import random
 import shutil
-
+import typing
 from core.container.project import *
 from core.data.computation import *
 from core.data.csv_helper import CSVFile
@@ -277,10 +277,11 @@ class SegmentationExporter(ExportDevice):
 
 
 class SequenceProtocolExporter:
-    def __init__(self):
+    def __init__(self, mode="csv"):
         self.data = {}
         self.ascii_doc = []
         self._to_delete_screenshots = []
+        self.mode = mode
 
     @staticmethod
     def _write_screenshot(screenshot, path):
@@ -304,6 +305,65 @@ class SequenceProtocolExporter:
         for screenshot in self._to_delete_screenshots:
             Popen(["rm", str(screenshot)])
 
+    def _export_csv(self, project:VIANProject, path:str):
+        if not len(project.segmentation) == 0:
+            vocabulary_tree = dict()
+            import pandas as pd
+
+            df = pd.DataFrame()
+
+            n_segments = 0
+            for s in project.segmentation:
+                n_segments += len(s.segments)
+
+            for clobj in project.get_default_experiment().classification_objects:
+                if not clobj in vocabulary_tree:
+                    vocabulary_tree[clobj] = dict()
+                for voc in clobj.classification_vocabularies:
+                    vocabulary_tree[clobj][voc] = dict() #type: typing.Dict[Segment, typing.List[UniqueKeyword]]
+                    df[clobj.name + ":" + voc.name] = [""] * n_segments
+
+            segment_counter = 0
+            segment_columns = ["ClassificationObject:Vocabulary"]
+            for segmentation in project.segmentation:
+                segmentation_name = segmentation.name
+                segmentation_data = {}
+
+                for segment in segmentation.segments:
+                    segment_columns.append(segment.ID)
+                    segment_name = segment.name
+                    segment_data = {}
+                    # export notes
+                    segment_data["notes"] = segment.notes
+                    # export free annotations
+                    annos = []
+                    for anno in segment._annotations:
+                        annos.append((anno.name, anno.content))
+                    segment_data["free annotations"] = annos
+
+                    for kwd in segment.tag_keywords: #type:UniqueKeyword
+                        if kwd.class_obj not in vocabulary_tree:
+                            raise Exception("Classification Object not in Tree")
+                        if kwd.voc_obj not in vocabulary_tree[kwd.class_obj]:
+                            raise Exception("Vocabulary not in Tree, abort")
+                        if segment not in vocabulary_tree[kwd.class_obj][kwd.voc_obj]:
+                            vocabulary_tree[kwd.class_obj][kwd.voc_obj][segment] = []
+
+                        val = df[kwd.class_obj.name + ":" + kwd.voc_obj.name].iloc[segment_counter]
+                        if val != "":
+                            val += ", "
+                        val += kwd.word_obj.name
+                        df[kwd.class_obj.name + ":" + kwd.voc_obj.name].iloc[segment_counter] = val
+
+                    segment_counter += 1
+
+            df.replace("", np.nan, inplace=True)
+            df.dropna(how='all', axis=1, inplace=True)
+
+            df = df.transpose()
+            path = Path(path).with_suffix(".csv")
+            df.to_csv(path)
+
     def _build_datadict(self, project):
         """
         builds the self.data dictionary
@@ -318,6 +378,7 @@ class SequenceProtocolExporter:
             for segmentation in project.segmentation:
                 segmentation_name = segmentation.name
                 segmentation_data = {}
+
                 for segment in segmentation.segments:
                     segment_name = segment.name
                     segment_data = {}
@@ -328,6 +389,7 @@ class SequenceProtocolExporter:
                     for anno in segment._annotations:
                        annos.append((anno.name, anno.content))
                     segment_data["free annotations"] = annos
+
                     # export classifications
                     obj_key_w = []
                     for keyw in segment.tag_keywords:
@@ -382,60 +444,76 @@ class SequenceProtocolExporter:
         Returns:
             None
         """
-        outpath = Path(path)
-        ascii_path = outpath / f"SequenceProtocol_{project.name}.adoc"
 
-        self._build_datadict(project)
+        if self.mode == "csv":
+            self._export_csv(project, path)
+        else:
+            outpath = Path(path)
+            outpath.mkdir(parents=True, exist_ok=True)
 
-        if not self.data:
-            return
+            ascii_path = outpath / f"SequenceProtocol_{project.name}.adoc"
 
-        self.ascii_doc.append(f"= Sequence Protocol for '{project.name}'\n\n")
+            self._build_datadict2(project)
 
-        for seg, data in self.data.items():
-            self.ascii_doc.append(f"== Segmentation '{seg}'\n")
-            for segment in data:
-                self.ascii_doc.append(f"=== Segment '{segment}'\n")
+            if not self.data:
+                return
 
-                screenshot = data[segment]["screenshot"]
-                if screenshot is not None:
-                    width = project.movie_descriptor.display_width / 2
-                    height = project.movie_descriptor.display_height / 2
-                    screenshot_name = outpath.parent / (str(uuid4()) + ".png")
-                    self._to_delete_screenshots.append(screenshot_name)
-                    self._write_screenshot(screenshot, screenshot_name)
-                    self.ascii_doc.append(f"image::{screenshot_name}[,{width},{height}]\n")
+            self.ascii_doc.append(f"= Sequence Protocol for '{project.name}'\n\n")
+
+            for seg, data in self.data.items():
+                self.ascii_doc.append(f"== Segmentation '{seg}'\n")
+                for segment in data:
+                    self.ascii_doc.append(f"=== Segment '{segment}'\n")
+
+                    screenshot = data[segment]["screenshot"]
+                    if screenshot is not None:
+                        width = project.movie_descriptor.display_width / 2
+                        height = project.movie_descriptor.display_height / 2
+                        screenshot_name = outpath.parent / (str(uuid4()) + ".png")
+                        self._to_delete_screenshots.append(screenshot_name)
+                        self._write_screenshot(screenshot, screenshot_name)
+                        self.ascii_doc.append(f"image::{screenshot_name}[,{width},{height}]\n")
 
 
-                if data[segment]["notes"]:
-                    self.ascii_doc.append("==== Notes\n")
-                    self.ascii_doc.append(data[segment]["notes"] + "\n")
+                    if data[segment]["notes"]:
+                        self.ascii_doc.append("==== Notes\n")
+                        self.ascii_doc.append(data[segment]["notes"] + "\n")
 
-                if data[segment]["free annotations"]:
-                    self.ascii_doc.append("==== Free Annoations\n")
-                    for anno in data[segment]["free annotations"]:
-                        self.ascii_doc.append(": ".join(anno))
-                        self.ascii_doc.append("\n")
+                    if data[segment]["free annotations"]:
+                        self.ascii_doc.append("==== Free Annoations\n")
+                        for anno in data[segment]["free annotations"]:
+                            self.ascii_doc.append(": ".join(anno))
+                            self.ascii_doc.append("\n")
 
-                if data[segment]["vocabulary_keyword"]:
-                    self.ascii_doc.append("==== Classification Annotations\n")
-                    for obj, cl in data[segment]["vocabulary_keyword"].items():
-                        self.ascii_doc.append(f"* {obj}")
-                        for voc, kw in cl.items():
-                            self.ascii_doc.append(f"** {voc}")
-                            for keyword in kw:
-                                self.ascii_doc.append(f"*** {keyword}")
+                    if data[segment]["vocabulary_keyword"]:
+                        self.ascii_doc.append("==== Classification Annotations\n")
+                        for obj, cl in data[segment]["vocabulary_keyword"].items():
+                            self.ascii_doc.append(f"* {obj}")
+                            for voc, kw in cl.items():
+                                self.ascii_doc.append(f"** {voc}")
+                                for keyword in kw:
+                                    self.ascii_doc.append(f"*** {keyword}")
 
-                self.ascii_doc.append("\n'''\n\n")
+                    self.ascii_doc.append("\n'''\n\n")
 
-        with open(ascii_path, "w") as outf:
-            outf.write("\n".join(self.ascii_doc))
+            with open(ascii_path, "w") as outf:
+                outf.write("\n".join(self.ascii_doc))
 
-        Popen(["asciidoctor-pdf", ascii_path]).wait()
+            try:
+                from asciidoc3.asciidoc3 import asciidoc3
 
-        print("Sequence Protocol written to {ascii_path.rstrip('.adoc')+'.pdf'}.")
+                # Popen(["asciidoctor-pdf", ascii_path]).wait()
+                asciidoc3(None, None, [], ascii_path, None, [])
+                print("Sequence Protocol written to {ascii_path.rstrip('.adoc')+'.pdf'}.")
+            except Exception as e:
+                self._remove_screenshots()
+                if ascii_path.exists():
+                    os.remove(str(ascii_path))
+                outpath.rmdir()
 
-        self._remove_screenshots()
+                raise e
+
+            self._remove_screenshots()
 
 
 class JsonExporter():
