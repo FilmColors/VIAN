@@ -3,7 +3,7 @@ from core.container.project import *
 from core.data.exporters import SequenceProtocolExporter
 
 with VIANProject().load_project("/Users/Gaudenz/Documents/VIAN/projects/SampleProject3/SampleProject3.eext") as project:
-    project.export(SequenceProtocolExporter(mode="csv"), "export")
+    project.export(SequenceProtocolExporter(mode="pdf"), "output_pandoc")
 
 #
 # from pylatex import Document, Section, Subsection, Command

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1662</width>
-    <height>1395</height>
+    <height>1340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,6 +82,7 @@
      <addaction name="actionExportExperiment"/>
      <addaction name="actionExportVocabulary"/>
      <addaction name="separator"/>
+     <addaction name="actionSequence_Protocol"/>
      <addaction name="actionExportCSV"/>
      <addaction name="actionScreenshotsExport"/>
      <addaction name="action_ExportSegmentation"/>
@@ -92,6 +93,7 @@
      <addaction name="separator"/>
      <addaction name="actionExportColorimetry"/>
      <addaction name="actionExportVIANWebApp"/>
+     <addaction name="separator"/>
     </widget>
     <widget class="QMenu" name="menuRecently_Opened">
      <property name="title">
@@ -1091,6 +1093,11 @@
   <action name="actionExportVIANWebApp">
    <property name="text">
     <string>VIAN Webapp</string>
+   </property>
+  </action>
+  <action name="actionSequence_Protocol">
+   <property name="text">
+    <string>Sequence Protocol</string>
    </property>
   </action>
  </widget>

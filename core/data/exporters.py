@@ -294,7 +294,7 @@ class SequenceProtocolExporter:
             None
         """
         quality = 100
-
+        screenshot = resize_with_aspect(screenshot, width=200)
         compression = int(np.clip(float(100 - quality) / 10,0,9))
 
         shots = []
@@ -375,8 +375,8 @@ class SequenceProtocolExporter:
             None
         """
         if not len(project.segmentation) == 0:
-            for segmentation in project.segmentation:
-                segmentation_name = segmentation.name
+            for ix, segmentation in enumerate(project.segmentation):
+                segmentation_name = segmentation.name + str(ix)
                 segmentation_data = {}
 
                 for segment in segmentation.segments:
@@ -425,8 +425,9 @@ class SequenceProtocolExporter:
                     except:
                         segment_data["screenshot"] = None
 
-                    segmentation_data[segment_name] = segment_data
-            self.data[segmentation_name] = segmentation_data
+                    segmentation_data[segment.ID] = segment_data
+
+                self.data[segmentation_name] = segmentation_data
         else:
             self.data = None
 
@@ -447,23 +448,23 @@ class SequenceProtocolExporter:
 
         if self.mode == "csv":
             self._export_csv(project, path)
-        else:
+        elif self.mode == "pdf":
             outpath = Path(path)
             outpath.mkdir(parents=True, exist_ok=True)
 
-            ascii_path = outpath / f"SequenceProtocol_{project.name}.adoc"
+            ascii_path = outpath / f"SequenceProtocol_{project.name}.md"
 
-            self._build_datadict2(project)
+            self._build_datadict(project)
 
             if not self.data:
                 return
 
-            self.ascii_doc.append(f"= Sequence Protocol for '{project.name}'\n\n")
+            self.ascii_doc.append(f"# Sequence Protocol for '{project.name}'\n\n")
 
             for seg, data in self.data.items():
-                self.ascii_doc.append(f"== Segmentation '{seg}'\n")
+                self.ascii_doc.append(f"## Segmentation '{seg}'\n")
                 for segment in data:
-                    self.ascii_doc.append(f"=== Segment '{segment}'\n")
+                    self.ascii_doc.append(f"### Segment '{segment}'\n")
 
                     screenshot = data[segment]["screenshot"]
                     if screenshot is not None:
@@ -472,27 +473,26 @@ class SequenceProtocolExporter:
                         screenshot_name = outpath.parent / (str(uuid4()) + ".png")
                         self._to_delete_screenshots.append(screenshot_name)
                         self._write_screenshot(screenshot, screenshot_name)
-                        self.ascii_doc.append(f"image::{screenshot_name}[,{width},{height}]\n")
-
+                        self.ascii_doc.append(f"![]( {screenshot_name})\n")
 
                     if data[segment]["notes"]:
-                        self.ascii_doc.append("==== Notes\n")
+                        self.ascii_doc.append("#### Notes\n")
                         self.ascii_doc.append(data[segment]["notes"] + "\n")
 
                     if data[segment]["free annotations"]:
-                        self.ascii_doc.append("==== Free Annoations\n")
+                        self.ascii_doc.append("#### Free Annoations\n")
                         for anno in data[segment]["free annotations"]:
                             self.ascii_doc.append(": ".join(anno))
                             self.ascii_doc.append("\n")
 
                     if data[segment]["vocabulary_keyword"]:
-                        self.ascii_doc.append("==== Classification Annotations\n")
+                        self.ascii_doc.append("#### Classification Annotations\n")
                         for obj, cl in data[segment]["vocabulary_keyword"].items():
                             self.ascii_doc.append(f"* {obj}")
                             for voc, kw in cl.items():
-                                self.ascii_doc.append(f"** {voc}")
+                                self.ascii_doc.append(f"\t* {voc}")
                                 for keyword in kw:
-                                    self.ascii_doc.append(f"*** {keyword}")
+                                    self.ascii_doc.append(f"\t\t* {keyword}")
 
                     self.ascii_doc.append("\n'''\n\n")
 
@@ -500,21 +500,24 @@ class SequenceProtocolExporter:
                 outf.write("\n".join(self.ascii_doc))
 
             try:
-                from asciidoc3.asciidoc3 import asciidoc3
+                import pypandoc
+                print(ascii_path)
+                latex = pypandoc.convert_file(str(ascii_path), outputfile="result.pdf", to="pdf")
 
+                print(latex)
                 # Popen(["asciidoctor-pdf", ascii_path]).wait()
-                asciidoc3(None, None, [], ascii_path, None, [])
                 print("Sequence Protocol written to {ascii_path.rstrip('.adoc')+'.pdf'}.")
             except Exception as e:
                 self._remove_screenshots()
-                if ascii_path.exists():
-                    os.remove(str(ascii_path))
-                outpath.rmdir()
+                # if ascii_path.exists():
+                #     os.remove(str(ascii_path))
+                # outpath.rmdir()
 
                 raise e
 
             self._remove_screenshots()
-
+        else:
+            raise AttributeError("Mode is not supported:", self.mode)
 
 class JsonExporter():
     def segment2json(self, segment):
