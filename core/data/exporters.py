@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
+import pypandoc
 import random
 import shutil
 import typing
@@ -450,9 +451,10 @@ class SequenceProtocolExporter:
             self._export_csv(project, path)
         elif self.mode == "pdf":
             outpath = Path(path)
-            outpath.mkdir(parents=True, exist_ok=True)
+            outpath.parents[0].mkdir(parents=True, exist_ok=True)
+            file_name = outpath.name
 
-            ascii_path = outpath / f"SequenceProtocol_{project.name}.md"
+            markdown_path = outpath.parents[0] / (file_name.rstrip(".pdf") + ".md")
 
             self._build_datadict(project)
 
@@ -496,21 +498,19 @@ class SequenceProtocolExporter:
 
                     self.ascii_doc.append("\n'''\n\n")
 
-            with open(ascii_path, "w") as outf:
+            with open(markdown_path, "w") as outf:
                 outf.write("\n".join(self.ascii_doc))
 
             try:
-                import pypandoc
-                print(ascii_path)
-                latex = pypandoc.convert_file(str(ascii_path), outputfile="result.pdf", to="pdf")
+                latex = pypandoc.convert_file(str(markdown_path), outputfile=str(outpath), to="pdf")
 
                 print(latex)
-                # Popen(["asciidoctor-pdf", ascii_path]).wait()
-                print("Sequence Protocol written to {ascii_path.rstrip('.adoc')+'.pdf'}.")
+                # Popen(["asciidoctor-pdf", markdown_path]).wait()
+                print(f"Sequence Protocol written to {str(outpath)}.")
             except Exception as e:
                 self._remove_screenshots()
-                # if ascii_path.exists():
-                #     os.remove(str(ascii_path))
+                # if markdown_path.exists():
+                #     os.remove(str(markdown_path))
                 # outpath.rmdir()
 
                 raise e
