@@ -11,6 +11,7 @@ from random import randint
 
 from core import version
 from core.data.enums import *
+
 from .media_descriptor import MovieDescriptor
 from .hdf5_manager import HDF5Manager
 from .undo_redo_manager import UndoRedoManager
@@ -1471,8 +1472,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def __enter__(self):
         if self.folder is not None:
             self.create_file_structure()
-            self.connect_hdf5()
-            self.store_project()
+        # if not os.path.isfile(self.path):
+        #     self.store_project()
+        # self.connect_hdf5()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

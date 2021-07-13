@@ -25,16 +25,16 @@ class DialogPreferences(EDialogWidget):
         # self.settings = UserSettings()
 
 
-        self.naming_cbs = [self.cB_Naming1, self.cB_Naming2,
-                           self.cB_Naming3, self.cB_Naming4,
-                           self.cB_Naming5, self.cB_Naming6]
+        # self.naming_cbs = [self.cB_Naming1, self.cB_Naming2,
+        #                    self.cB_Naming3, self.cB_Naming4,
+        #                    self.cB_Naming5, self.cB_Naming6]
 
-        for i, cb in enumerate(self.naming_cbs):
-            for s in ScreenshotNamingConventionOptions:
-                cb.addItem(s.name)
-
-            index = cb.findText(self.settings.SCREENSHOTS_EXPORT_NAMING[i])
-            cb.setCurrentIndex(index)
+        # for i, cb in enumerate(self.naming_cbs):
+        #     for s in ScreenshotNamingConventionOptions:
+        #         cb.addItem(s.name)
+        #
+        #     index = cb.findText(self.settings.SCREENSHOTS_EXPORT_NAMING[i])
+        #     cb.setCurrentIndex(index)
 
         # Frame Source when Paused
         # This might cause an error when the version is older thant 0.4.1 as it once was a bool
@@ -57,8 +57,8 @@ class DialogPreferences(EDialogWidget):
         self.btn_Cancel.clicked.connect(self.on_cancel)
 
         # SCREENSHOT Nomenclature
-        for cb in self.naming_cbs:
-            cb.currentIndexChanged.connect(self.set_screenshot_export_naming)
+        # for cb in self.naming_cbs:
+        #     cb.currentIndexChanged.connect(self.set_screenshot_export_naming)
 
         self.spinBox_GridSize.valueChanged.connect(self.set_grid_size)
 
@@ -106,17 +106,17 @@ class DialogPreferences(EDialogWidget):
         state = self.comboBox_Source.currentIndex()
         self.settings.OPENCV_PER_FRAME = state
 
-    def set_screenshot_export_naming(self):
-
-        n1 = self.cB_Naming1.currentText()
-        n2 = self.cB_Naming2.currentText()
-        n3 = self.cB_Naming3.currentText()
-        n4 = self.cB_Naming4.currentText()
-        n5 = self.cB_Naming5.currentText()
-        n6 = self.cB_Naming6.currentText()
-
-        naming = [n1, n2, n3, n4, n5, n6]
-        self.settings.SCREENSHOTS_EXPORT_NAMING = naming
+    # def set_screenshot_export_naming(self):
+    #
+    #     n1 = self.cB_Naming1.currentText()
+    #     n2 = self.cB_Naming2.currentText()
+    #     n3 = self.cB_Naming3.currentText()
+    #     n4 = self.cB_Naming4.currentText()
+    #     n5 = self.cB_Naming5.currentText()
+    #     n6 = self.cB_Naming6.currentText()
+    #
+    #     naming = [n1, n2, n3, n4, n5, n6]
+    #     self.settings.SCREENSHOTS_EXPORT_NAMING = naming
 
     def apply_settings(self):
         self.settings.USER_NAME = self.lineEdit_UserName.text()

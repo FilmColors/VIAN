@@ -155,6 +155,7 @@ class TimelineControl(QtWidgets.QWidget):
         if self.item is not None:
             self.name = self.item.get_name()
             self.lbl_title.setText(self.name)
+            self.setToolTip(self.name)
 
     def update_info(self, layer):
         self.set_name()

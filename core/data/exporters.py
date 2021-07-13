@@ -5,7 +5,6 @@ Contains all Export Classes and Export Functions of VIAN
 import cv2
 import numpy as np
 import pandas as pd
-from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
 from core.data.interfaces import IConcurrentJob
 from core.data.computation import *
 from core.container.project import *
@@ -14,16 +13,6 @@ import csv
 import shutil
 
 from core.data.csv_helper import CSVFile
-
-
-DEFAULT_NAMING_SCREENSHOTS = [
-    ScreenshotNamingConventionOptions.Scene_ID.name,
-    ScreenshotNamingConventionOptions.Shot_ID_Segment.name,
-    ScreenshotNamingConventionOptions.Movie_ID.name,
-    ScreenshotNamingConventionOptions.Movie_Name.name,
-    ScreenshotNamingConventionOptions.Movie_Year.name,
-    ScreenshotNamingConventionOptions.Movie_Source.name,
-        ]
 
 
 def zip_project(output_file, project_folder):
@@ -43,47 +32,80 @@ class ExportDevice:
         pass
 
 
-class _ScreenshotExporter(ExportDevice):
+class ScreenshotExporter(ExportDevice):
     """
     A Class that is able to export Screenshots from a Project
     """
-    def __init__(self, naming, annotation_visibility = None,
-                 image_type = ImageType.JPG, quality = 100, smooth = False):
+    SemSeg_None = "None"
+    SemSeg_Outlines = "Outlines"
+    SemSeg_Filled = "Filled"
+    SemSeg_OutlinesFilled = "Both"
+
+
+    def __init__(self, naming, selection = None, quality = 100, semantic_segmentation=SemSeg_None):
         self.naming = naming
-        self.smooth = smooth
         self.quality = quality
-        self.image_type = image_type,
-        self.annotation_visibility = annotation_visibility,
+        self.selection = selection
+        self.semantic_segmentation = semantic_segmentation
 
     def export(self, project, path):
-        for s in project.screenshots:
-            if self.naming is None:
-                name = build_file_name(DEFAULT_NAMING_SCREENSHOTS, s, project.movie_descriptor)
-            else:
-                name = build_file_name(self.naming, s, project.movie_descriptor)
+        # If nothing is selected we export all screenshots
+        if self.selection is None:
+            self.selection = project.screenshots
+        else:
+            # Ensure only screenshots are in the selection
+            self.selection = [s for s in self.selection if isinstance(s, Screenshot)]
+            if len(self.selection) == 0:
+                self.selection = project.screenshots
+
+        for s in self.selection:
+            name = self.build_file_name(self.naming, s, project.movie_descriptor)
             file_name = os.path.join(path, name)
 
-            if self.annotation_visibility is None:
-                annotation_visibility = s.annotation_is_visible
+            img = s.get_img_movie_orig_size()
+            if self.semantic_segmentation == self.SemSeg_Filled or \
+                    self.semantic_segmentation == self.SemSeg_OutlinesFilled:
+                semantic_segmentations = s.get_connected_analysis("SemanticSegmentationAnalysis")
+                print(semantic_segmentations)
+                if len(semantic_segmentations) > 0:
+                    n = 20
+                    colormap = get_colormap(n)
+                    data = semantic_segmentations[0].get_adata()
+                    mask = np.zeros(shape=data.shape + (3,), dtype=np.float32)
+                    for i in range(n):
+                        mask[data == i] = colormap[i][:3]
+                    mask = (mask * 255).astype(np.uint8)
+                    mask = cv2.cvtColor(mask, cv2.COLOR_RGBA2BGR)
+                    img = img * 0.7 + mask * 0.3
 
-            if self.annotation_visibility:
-                img = s.img_blend
+            if self.semantic_segmentation == self.SemSeg_Outlines  or \
+                    self.semantic_segmentation == self.SemSeg_OutlinesFilled:
+                semantic_segmentations = s.get_connected_analysis("SemanticSegmentationAnalysis")
+                if len(semantic_segmentations) > 0:
+                    n = 20
+                    colormap = get_colormap(n)
+                    data = semantic_segmentations[0].get_adata()
+                    data = cv2.resize(data, img.shape[:2][::-1], interpolation=cv2.INTER_NEAREST)
+                    cnts = cv2.findContours(data, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+                    print(data.shape, img.shape)
+                    for i, c in enumerate(cnts):
+                        # col = tuple(np.array(colormap[0][:3] * 255).astype(np.uint8))
+                        # print(tuple((np.array(colormap[i][:3]) * 255).astype(np.uint8)))
+                        cv2.drawContours(img, [c], -1, (232, 255, 12), thickness=3)
+
+            if ".jpg" in file_name:
+                cv2.imwrite(file_name, img, [cv2.IMWRITE_JPEG_QUALITY, self.quality])
+
+            elif ".png" in file_name:
+                compression = int(np.clip(float(100 - self.quality) / 10,0,9))
+                cv2.imwrite(file_name, img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
             else:
-                img = s.get_img_movie_orig_size()
-
-            if self.smooth:
-                img = cv2.GaussianBlur(img, (3, 3), 0)
-            # Export depending on the image Type selected
-
-            if self.image_type == ImageType.JPG:
-                cv2.imwrite(file_name + ".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, self.quality])
-
-            if self.image_type == ImageType.PNG:
+                file_name += ".png"
                 compression = int(np.clip(float(100 - self.quality) / 10,0,9))
                 cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
 
-
-    def build_file_name(self, naming, screenshot, movie_descriptor):
+    def build_file_name(self, naming, screenshot:Screenshot, movie_descriptor:MovieDescriptor):
         """
         Generates a Filename for the Screenshots by a given naming convention
 
@@ -92,76 +114,15 @@ class _ScreenshotExporter(ExportDevice):
         :param movie_descriptor:
         :return:
         """
-        file_name = "/"
-
-        for i, name in enumerate(naming):
-            if name is not ScreenshotNamingConventionOptions.empty.name:
-                value = get_enum_value(ScreenshotNamingConventionOptions, name)
-                object_type = value[0]
-                object_attr = value[1]
-
-                if object_type == "Screenshot":
-                    if object_attr == "screenshot_group":
-                        file_name = file_name[:-1]
-                    file_name += str(getattr(screenshot, object_attr))
-
-                if object_type == "Movie":
-                    file_name += str(getattr(movie_descriptor, object_attr))
-
-                if i < len(naming) - 1:
-                    if get_enum_value(ScreenshotNamingConventionOptions, naming[i + 1])[1] == 0:
-                        break
-                    else:
-                        file_name += "_"
-
-        file_name = file_name.replace("__", "")
-        file_name = file_name.replace("All Shots_", "_")
-
-        return file_name
-
-
-class ScreenshotsExporter():
-    """
-    A Class that is able to export Screenshots from a Project
-    """
-    def __init__(self, settings, project, naming):
-        self.settings = settings
-        self.project = project
-        self.naming = naming
-
-    def export(self, screenshots, dir, annotation_visibility = None, image_type = ImageType.JPG, quality = 100, smooth = False, apply_letterbox=False):
-        lbox = None
-        if apply_letterbox is True:
-            lbox = self.project.movie_descriptor.get_letterbox_rect()
-            if lbox is None:
-                QMessageBox.warning(None, "No letterbox applied", "No letterbox has been applied, the default frame is used. To set a letterbox, go to Player/Set Letterbox prior to export.")
-        for s in screenshots:
-            if self.naming is None:
-                name = build_file_name(self.settings.SCREENSHOTS_EXPORT_NAMING, s, self.project.movie_descriptor)
-            else:
-                name = build_file_name(self.naming, s, self.project.movie_descriptor)
-            file_name = dir + name
-
-            if annotation_visibility is None:
-                annotation_visibility = s.annotation_is_visible
-
-            if annotation_visibility:
-                img = s.img_blend
-            else:
-                img = s.get_img_movie_orig_size()
-
-            if smooth:
-                img = cv2.GaussianBlur(img, (3, 3), 0)
-            # Export depending on the image Type selected
-
-            if lbox is not None:
-                img = img[lbox[1]:lbox[1] + lbox[3], lbox[0]:lbox[0] + lbox[2]]
-            if image_type.value == ImageType.JPG.value:
-                cv2.imwrite(file_name + ".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, quality])
-
-            if image_type.value == ImageType.PNG.value:
-                compression = int(np.clip(float(100 - quality) / 10,0,9))
-                cv2.imwrite(file_name + ".png", img, [cv2.IMWRITE_PNG_COMPRESSION, compression])
+        f = naming.format(ShotID=screenshot.shot_id_segm,
+                          SceneID = screenshot.scene_id,
+                          TimeMS=screenshot.get_start(),
+                          Timestamp=ms_to_string(screenshot.get_start()).replace(":", "_"),
+                          MovieID=movie_descriptor.movie_id,
+                          MovieName=movie_descriptor.movie_name,
+                          MovieYear=movie_descriptor.year,
+                          ShotGroup=screenshot.screenshot_group.name)
+        return f.replace("All Shots", "").replace("__", "_")
 
 
 class SegmentationExporter(ExportDevice):
@@ -432,49 +393,6 @@ class ColorimetryExporter(ExportDevice):
                                ))
 
         df.to_csv(os.path.join(project.export_dir, path), index_label="ID")
-
-
-def build_file_name(naming, screenshot, movie_descriptor):
-    """
-    Generates a Filename for the Screenshots by a given naming convention
-
-    :param naming:
-    :param screenshot:
-    :param movie_descriptor:
-    :return:
-    """
-    file_name = "/"
-
-    for i, name in enumerate(naming):
-        if name is not ScreenshotNamingConventionOptions.empty.name:
-            value = get_enum_value(ScreenshotNamingConventionOptions, name)
-            object_type = value[0]
-            object_attr = value[1]
-
-            if object_type == "Screenshot":
-
-                # This removed the underline for the ERC Screenshot Groups, but is unpredictable for other users.
-                # if object_attr == "screenshot_group":
-                #     file_name = file_name[:-1]
-
-                attr = getattr(screenshot, object_attr)
-                if isinstance(attr, ScreenshotGroup):
-                    attr = attr.get_name()
-                file_name += str(attr)
-
-            if object_type == "Movie":
-                file_name += str(getattr(movie_descriptor, object_attr))
-
-            if i < len(naming) - 1:
-                if get_enum_value(ScreenshotNamingConventionOptions, naming[i + 1])[1] == 0:
-                    break
-                else:
-                    file_name += "_"
-
-    file_name = file_name.replace("__", "")
-    file_name = file_name.replace("All Shots_", "_")
-
-    return file_name
 
 
 def build_segment_nomenclature(s:Segment):

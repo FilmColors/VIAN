@@ -10,7 +10,7 @@ from core.data.computation import ms_to_string
 from core.container.project import MOVIE_DESCRIPTOR
 from core.data.interfaces import IProjectChangeNotify, IAnalysisJob
 from core.data.enums import get_type_as_string
-from .ewidgetbase import EDockWidget, EDialogWidget
+from core.gui.ewidgetbase import EDockWidget, EDialogWidget
 
 
 class AnalysisDialog(EDialogWidget):
