@@ -186,7 +186,6 @@ class RawPointsSpatialDataset(SpatialOverlayDataset):
                                                       analysis,
                                                       vis_type=SpatialOverlayDataset.VIS_TYPE_HEATMAP)
         self.fixations_sampled = fixations_sampled
-
         self.time_np = np.zeros(len(self.fixations_sampled.index))
         self.fixations_np = np.zeros((len(self.fixations_sampled.index), 2))
 

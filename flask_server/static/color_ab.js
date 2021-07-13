@@ -52,8 +52,8 @@ class ColorAB {
 
         var r = this.plot.image_url({
             url: { field: "image" }, x: { field: "x" }, y: { field: "y" },
-            w: 20,
-            h: 20 * this.aspect,
+            w: 40,
+            h: 40 * this.aspect,
             anchor: "center",
             // global_alpha: 0.2,
             source: this.source

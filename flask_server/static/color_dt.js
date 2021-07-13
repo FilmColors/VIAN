@@ -83,8 +83,8 @@ class ColorDT {
         this.plot.line({x: { field: "x" }, y: { field: "y" }, line_color : "rgb(255,255,255)", line_alpha:0.2, source: this.source});
 
         var r = this.plot.image_url({url: { field: "url" },x: { field: "x" },y: { field: "y" },
-            w: 20,
-            h: 20 * this.aspect,
+            w: 40,
+            h: 40 * this.aspect,
             anchor: "center",
             global_alpha: 0.8,
             source: this.source

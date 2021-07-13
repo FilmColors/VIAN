@@ -3,8 +3,8 @@ import cv2
 import glob
 
 images = []
-for j, img in enumerate(glob.glob("C:\\Users\\Gaudenz Halter\Downloads\Bregt2\\*.TIF")):
+for j, img in enumerate(glob.glob("C:/Users/gaude/Desktop/Filmmaterial EYE Fotos/*.jpg")):
     p = img
-    print(p)
     images.append(cv2.imread(p))
-images_to_movie(images, "C:\\Users\\Gaudenz Halter\Downloads\Bregt2\\output.mp4", time_scale=150)
+
+images_to_movie(images, "C:/Users/gaude/Desktop/Filmmaterial EYE Fotos/output.mp4", time_scale=30, size=None)
