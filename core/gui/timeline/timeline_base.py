@@ -828,13 +828,6 @@ class TimebarSlice(QtWidgets.QWidget):
                                           multi_annotation=self.timeline.multi_annotation, timeline=self.timeline)
             popup.resize(int(self.timeline.width() / 2.5), popup.height())
 
-            x0 = popup.x()
-            y0 = popup.y()
-            if popup.x() + popup.width() > self.timeline.width():
-                x0 = self.timeline.width() - popup.width()
-            popup.move(x0, y0)
-            # popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
-
 
 class MediaObjectWidget(QWidget):
     def __init__(self, parent, media_object):
