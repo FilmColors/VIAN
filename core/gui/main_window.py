@@ -5,15 +5,13 @@ from core.concurrent.worker import WorkerManager, MinimalThreadWorker
 from core.concurrent.image_loader import ClassificationObjectChangedJob
 from core.concurrent.auto_screenshot import DialogAutoScreenshot
 from core.concurrent.auto_segmentation import DialogAutoSegmentation
-from core.analysis.analysis_import import *
-from core.data.computation import is_vian_light
+from core.config import *
 
 from core.gui.vian_webapp import *
 from core.data.cache import HDF5Cache
 from core.data.exporters import *
 from core.data.importers import *
 from core.data.corpus_client import WebAppCorpusInterface, get_vian_version
-from core.data.computation import version_check
 from core.data.settings import UserSettings, Contributor
 from core.data.audio_handler2 import AudioHandler
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
@@ -56,8 +54,7 @@ from core.gui.misc.filmography_widget import query_initial
 from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
-
-from core.container.vocabulary_library import VocabularyLibrary
+from core.container.vocabulary_library import VocabularyLibrary, VocabularyCollection
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses, get_all_analyses
 from core.gui.toolbar import WidgetsToolbar
@@ -246,7 +243,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.onStartFlaskServer.connect(self.flask_server.run_server)
             self.onStartFlaskServer.emit()
 
-        self.vocabulary_library = VocabularyLibrary().load("data/library.json")
+        self.vocabulary_library = VocabularyLibrary().load(os.path.join(get_data_dir(), "library.json"))
         self.vocabulary_library.onLibraryChanged.connect(self.on_vocabulary_library_changed)
 
         self.web_view = FlaskWebWidget(self)
@@ -354,7 +351,7 @@ class MainWindow(QtWidgets.QMainWindow):
         import glob
 
         templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
-        templates.extend(glob.glob("data/templates/" + "*.viant"))
+        templates.extend(glob.glob(get_templates_dir() + "/*.viant"))
         for t in templates:
             a = self.menuVIAN_Template.addAction(os.path.split(t)[1].split(".")[0])
             a.triggered.connect(partial(self.import_template, t))
@@ -2271,7 +2268,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def import_vocabulary(self, paths=None):
         if paths is None:
-            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("data/vocabularies/"))[0]
+            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath(get_voc_dir()))[0]
         try:
             self.project.inhibit_dispatch = True
             for p in paths:

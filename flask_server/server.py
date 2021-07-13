@@ -295,7 +295,6 @@ class FlaskWebWidget(EDockWidget):
 
         self.url = None
 
-
     def on_browser(self):
         import webbrowser
 

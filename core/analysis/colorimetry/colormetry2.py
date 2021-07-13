@@ -12,6 +12,7 @@ from core.analysis.misc import preprocess_frame
 
 YieldedResult = namedtuple("YieldedResult", ["frame_pos", "time_ms", "hist", "avg_color", "palette"])
 
+
 class ColormetryJob2(QObject):
     def __init__(self, resolution, main_window, max_width=1920):
         super(ColormetryJob2, self).__init__()
@@ -157,7 +158,11 @@ class ColormetryJob2(QObject):
                                   spatial_color=np.array([np.amax(cdenorm), np.mean(cdenorm)], dtype=np.float32),
                                   spatial_hue = np.array([np.amax(hdenorm), np.mean(hdenorm)], dtype=np.float32),
                                   spatial_luminance = np.array([np.amax(ldenorm), np.mean(ldenorm)], dtype=np.float32))
-            callback.emit([yielded_result, (i + start) / end])
+            if callback is not None:
+                callback.emit([yielded_result, (i + start) / end])
+            else:
+                self.colormetry_analysis.append_data(yielded_result)
+                print(yielded_result, (i + start) / end)
 
             t_store = time.time() -t
             if self.profile:
@@ -174,7 +179,8 @@ class ColormetryJob2(QObject):
     @pyqtSlot(object)
     def colormetry_callback(self, yielded_result):
         self.colormetry_analysis.append_data(yielded_result)
-        self.main_window.timeline.timeline.set_colormetry_progress(yielded_result.time_ms / self.duration)
+        if self.main_window is not None:
+            self.main_window.timeline.timeline.set_colormetry_progress(yielded_result.time_ms / self.duration)
 
     @pyqtSlot()
     def abort(self):

@@ -137,6 +137,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         if os.path.isfile(self.get_movie_path()):
             cap = cv2.VideoCapture(self.get_movie_path())
             self.fps = cap.get(cv2.CAP_PROP_FPS)
+            self.duration = int(self.fps * cap.get(cv2.CAP_PROP_FRAME_COUNT))
             self.display_width, self.display_height = self.get_frame_dimensions()
         else:
             self.fps = 30

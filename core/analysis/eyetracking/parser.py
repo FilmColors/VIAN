@@ -25,7 +25,6 @@ class XEyeTrackingHandler():
         if sfilter is not None:
             self.fixations = self.fixations[self.fixations['Stimulus'].str.contains(sfilter)]
 
-
     def import_movie_meta(self, files):
         """
         imports the necessary information about the movies for later computation.
@@ -49,12 +48,11 @@ class XEyeTrackingHandler():
                 continue
         return self.movie_meta
 
-
     def subsample(self, sample_fps = 0):
-        """-+6*-+
-        .30
+        """
         Samples the fixations to a given frame_rate
-Exception   Q        :param sample_fps: the sampling frequency, if higher than the FPS of the segmented movie, it is clamped, if sample_fps = 0, the frame rate is used, default: 0
+
+        :param sample_fps: the sampling frequency, if higher than the FPS of the segmented movie, it is clamped, if sample_fps = 0, the frame rate is used, default: 0
         :return:
         """
         if self.fixations is None:
@@ -89,8 +87,8 @@ Exception   Q        :param sample_fps: the sampling frequency, if higher than t
             fw = width / self.reference_frame[0]
             fh = height / self.reference_frame[1]
 
-            if stimulus not in result:
-                result[stimulus] = []
+            if stimulus + str(is_bw) not in result:
+                result[stimulus + str(is_bw)] = []
 
             n = ms_to_frames(t1 - t0, self.movie_meta[stimulus]['fps'])
             if sample_fps != 0:
@@ -103,7 +101,7 @@ Exception   Q        :param sample_fps: the sampling frequency, if higher than t
             # print(n)
 
             for i in range(n):
-                result[stimulus].append(dict(
+                result[stimulus + str(is_bw)].append(dict(
                     Stimulus = stimulus,
                     Variant = is_bw,
                     FixationX=int(x * fw),
@@ -115,7 +113,7 @@ Exception   Q        :param sample_fps: the sampling frequency, if higher than t
         for k, v in result.items():
             final[k] = dict(
                 df = pd.DataFrame(v),
-                stimulus = self.movie_meta[k]
+                stimulus = self.movie_meta[v[0]['Stimulus']]
             )
         return final
 

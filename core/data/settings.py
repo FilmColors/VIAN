@@ -62,6 +62,7 @@ else:
     CONFIG = None
     IS_DEV = False
 
+
 class UserSettings():
     """
     The UserSettings File contains information that persists over projects,

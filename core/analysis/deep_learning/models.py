@@ -1,12 +1,12 @@
+from core.config import get_models_dir
+
 from core.analysis.deep_learning.pspnet import *
 import cv2
-from core.analysis.import_tensortflow import tf
-from core.analysis.deep_learning.labels import *
 
 from core.data.log import log_info
 
-DIR_WEIGHTS_BUILT_IN = "/data/models/"
-KERAS_LIP_WEIGHTS = "data/models/semantic_segmentation/LIP_PSPNET50_Weights.hdf5"
+DIR_WEIGHTS_BUILT_IN = get_models_dir()
+KERAS_LIP_WEIGHTS = os.path.join(get_models_dir(), "semantic_segmentation/LIP_PSPNET50_Weights.hdf5")
 
 
 class VIANKerasModel():
@@ -76,8 +76,8 @@ class PSPNetModelVIAN(VIANKerasModel):
 
 
 class RealTimeHumanExtractor:
-    prototxt = "data/models/semantic_segmentation/MobileNetSSD_deploy.prototxt.txt"
-    model = "data/models/semantic_segmentation/MobileNetSSD_deploy.caffemodel"
+    prototxt = os.path.join(get_models_dir(), "semantic_segmentation/MobileNetSSD_deploy.prototxt.txt")
+    model = os.path.join(get_models_dir(), "semantic_segmentation/MobileNetSSD_deploy.caffemodel")
 
     def __init__(self, confidence = 0.5):
         self.confidence = confidence

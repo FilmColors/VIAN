@@ -2,6 +2,7 @@ if __name__ == '__main__':
     import sys, os
     os.chdir("../../../")
 
+import glob
 
 import cv2
 import numpy as np
@@ -12,19 +13,29 @@ from PyQt5.QtGui import *
 from PyQt5 import uic
 import os
 from core.data.plugin import *
-from core.data.computation import numpy_to_pixmap, ms_to_frames
+from core.data.computation import numpy_to_pixmap, ms_to_frames, lch_to_human_readable
 from core.gui.ewidgetbase import EGraphicsView
+from flask_server.server import FlaskWebWidget
 
-from core.gui.timeline.timeline import TimelineContainer
+from core.analysis.analysis_utils import run_analysis
+from core.analysis.analysis_import import ColormetryJob2
+from core.analysis.motion.optical_flow import OpticalFlowAnalysis
+
+from core.container.corpus import VIANProject, Corpus
+
 import pandas as pd
 from core.data.settings import UserSettings
-from extensions.plugins.eyetracking_comparator.eyetracking import XEyeTrackingHandler
+
+from core.analysis.eyetracking.parser import XEyeTrackingHandler
+from core.analysis.eyetracking.eyetracking import EyetrackingAnalysis
+# from extensions.plugins.eyetracking_comparator.eyetracking import XEyeTrackingHandler
+
 
 
 class EyetrackingComparatorPlugin(GAPlugin):
     def __init__(self, main_window):
         super(EyetrackingComparatorPlugin, self).__init__(main_window)
-        self.plugin_name = "Eyetracking Comparator"
+        self.plugin_name = "Eyetracking Comparator Bokeh"
         self.windowtype = GAPLUGIN_WNDTYPE_MAINWINDOW
 
     def get_window(self, parent):
@@ -56,11 +67,8 @@ class EyetrackingComparator(QMainWindow):
         self.settings = UserSettings()
         self.player = None
 
-        self.timeline = TimelineContainer(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.timeline)
-
-        self.fixations = None
-        self.fixations_sampled = None
+        self.brower = FlaskWebWidget(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea,self.brower )
 
         self.m_file = self.menuBar().addMenu("File")
         self.m_file.addAction("Open")
@@ -81,6 +89,11 @@ class EyetrackingComparator(QMainWindow):
         self.splitter.addWidget(self.view1)
         self.splitter.addWidget(self.view2)
         self.changer = QComboBox()
+
+        self.corpus = Corpus()
+        self.p1 = None
+        self.p1 = None
+
         self.changer.addItems([
             "14_1_2_UneFemmeEstUneFemme_1961_DVD",
             "16_1_3_AgeOfInnocence_1993_DVD",
@@ -101,15 +114,94 @@ class EyetrackingComparator(QMainWindow):
         self.r2 = None
         self.sample_fps = 30
 
-        self.open("E:\Programming\Git\ERC_FilmColors/resources\eyetracking\snippets/14_1_2_UneFemmeEstUneFemme_1961_DVD.mp4",
-                  None)
-        self.load_fixations("extensions/plugins/eyetracking_comparator/eyetracking-fixations.txt")
+        # self.load_corpus("C:/Users/gaude/Documents/VIAN/corpora/eyetracking_corpus/eyetracking_corpus.vian_corpus")
+
+        self.create_corpus("E:\Programming\Datasets\eye-tracking",
+                           "extensions/plugins/eyetracking_comparator/eyetracking-fixations.txt",
+                           "C:/Users/gaude/Documents/VIAN/corpora/eyetracking_corpus2")
+        self.load_corpus("C:/Users/gaude/Documents/VIAN/corpora/eyetracking_corpus2/eyetracking_corpus.vian_corpus")
+
+        # self.open("E:\Programming\Git\ERC_FilmColors/resources\eyetracking\snippets/14_1_2_UneFemmeEstUneFemme_1961_DVD.mp4", None)
+        # self.load_fixations("extensions/plugins/eyetracking_comparator/eyetracking-fixations.txt")
+
+    def create_corpus(self, stimuli_directory, import_path, corpus_dir):
+        if not os.path.isfile(import_path) or not os.path.isdir(stimuli_directory):
+            return
+
+        handler = XEyeTrackingHandler()
+        handler.import_(import_path, delimiter="\t", sfilter=None)
+
+        stimuli = glob.glob(stimuli_directory + "/*")
+        handler.import_movie_meta(stimuli)
+
+        result = handler.subsample()
+
+        c_dir = os.path.join(corpus_dir)
+        c_file = os.path.join(c_dir, "eyetracking_corpus")
+        os.mkdir(c_dir)
+
+        p_dir = os.path.join(c_dir, "projects")
+        os.mkdir(p_dir)
+
+        corpus = Corpus("Eyetracking Corpus", )
+        corpus.save(c_file)
+
+        for k, v in result.items():
+            v_dir = os.path.join(p_dir, k)
+            os.mkdir(v_dir)
+
+            project_path = None
+
+            with VIANProject(k, folder=v_dir, movie_path=v['stimulus']['path']) as project:
+                analysis = EyetrackingAnalysis().from_importer(v['df'])
+                project.add_analysis(analysis)
+                run_analysis(project, OpticalFlowAnalysis(), [project.movie_descriptor], None)
+
+                cmetry = ColormetryJob2(10, None)
+                args = cmetry.prepare(project)
+                cmetry.run_concurrent(args, None)
+
+                project.store_project()
+                project_path = project.path
+
+            corpus.add_project(file=project_path)
+
+        corpus.save(c_file)
+        self.load_corpus(c_file)
+
+    def load_corpus(self, path):
+        self.corpus.load(path)
+        self.corpus.reload()
+
+        self.changer.clear()
+
+        for k, p in self.corpus.projects_loaded.items():
+            self.changer.addItem(p.name.replace("True", "").replace("False", ""))
+            p.connect_hdf5()
+            for i, entry in enumerate(p.colormetry_analysis.iter_avg_color()):
+                l, c, h = lch_to_human_readable([entry['l'], entry['c'], entry['h']])
+                print(l, c, h)
+                # data[i] = [
+                #     entry['time_ms'],
+                #     entry['l'],
+                #     entry['a'],
+                #     entry['b'],
+                #     c,
+                #     h,
+                # ]
+                # timestamps.append(ms_to_string(entry['time_ms']))
 
     def on_interval_segment(self):
         pass
 
     def change_stimulus(self, s):
-        self.open( m1 = os.path.join("E:\Programming\Datasets\eye-tracking", s) + ".mp4")
+        name = self.changer.currentText()
+        projects = []
+        for p in self.corpus.projects_loaded.values():
+            if name in p.name:
+                projects.append(p)
+
+        self.open(m1 = os.path.join("E:\Programming\Datasets\eye-tracking", s) + ".mp4")
 
     def open(self, m1, m2 = None):
         self.r1 = cv2.VideoCapture(m1)
@@ -126,47 +218,7 @@ class EyetrackingComparator(QMainWindow):
         self.stimulus = os.path.split(m1)[1].split(".")[0]
 
     def load_fixations(self, file_path,  reference_frame = (1680, 1050)):
-        self.fixations = pd.read_csv(file_path, delimiter="\t")
-        self.fixations_sampled = pd.DataFrame(["Stimulus", "FixationX", "FixationY", "FramePos", "isBlackWhite"])
-
-        width = self.r1.get(cv2.CAP_PROP_FRAME_WIDTH)
-        height = self.r1.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-        fw = width / reference_frame[0]
-        fh = height / reference_frame[1]
-
-        q = []
-        for index, r in self.fixations.iterrows():
-            try:
-                is_bw = "bw_" in r.Stimulus
-                stimulus = os.path.splitext(r['Stimulus'])[0].replace("bw_", "")
-                x = int(round(float(r['Fixation Position X [px]'])))
-                y = int(round(float(r['Fixation Position Y [px]'])))
-                t0 = int(round(float(r['Event Start Trial Time [ms]'])))
-                t1 = int(round(float(r['Event End Trial Time [ms]'])))
-            except Exception as e:
-                continue
-
-            n = ms_to_frames(t1 - t0, self.sample_fps / 4)
-            if self.sample_fps != 0:
-                n = int(np.floor(n / (self.sample_fps / 4)))
-                f_step = self.sample_fps / 4
-            else:
-                f_step = 1
-
-            f0 = ms_to_frames(t0, self.sample_fps)
-            # print(n)
-
-            for i in range(n):
-                q.append(dict(
-                    Stimulus=stimulus,
-                    isBlackWhite=is_bw,
-                    FixationX=int(x * fw),
-                    FixationY=int(y * fh),
-                    FramePos=f0 + (i * f_step)
-                ))
-        self.fixations_sampled = pd.DataFrame(q)
-        self.fixations = self.fixations_sampled
+        pass
 
     def update_movie_position(self):
         pos = self.slider.value()
@@ -185,19 +237,6 @@ class EyetrackingComparator(QMainWindow):
 
         self.view1.set_image(numpy_to_pixmap(f1))
         self.view2.set_image(numpy_to_pixmap(f2))
-
-        if self.fixations_sampled is not None:
-            points = self.fixations_sampled[self.fixations_sampled.Stimulus == self.stimulus]\
-            [self.fixations_sampled.FramePos < pos + self.sample_fps]\
-            [self.fixations_sampled.FramePos > pos - self.sample_fps]
-            for i, d in points.iterrows():
-                if d.isBlackWhite:
-                    self.view2.add_point(d.FixationX, d.FixationY)
-                else:
-                    self.view1.add_point(d.FixationX, d.FixationY)
-        self.update()
-
-
 
 
 

@@ -1,17 +1,13 @@
 import glob
 import os
-import cv2
+from core import config
 
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea, QComboBox
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from core.container.project import VIANProject, VIAN_PROJECT_EXTENSION
 from core.data.enums import MovieSource
 from core.gui.ewidgetbase import EDialogWidget
 from core.data.importers import ELANProjectImporter
-from core.data.computation import images_to_movie
-
-from core.gui.misc.utils import dialog_with_margin
 
 
 class NewProjectDialog(EDialogWidget):
@@ -107,7 +103,7 @@ class NewProjectDialog(EDialogWidget):
 
     def find_templates(self):
         templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
-        templates.extend(glob.glob("data/templates/" + "*.viant"))
+        templates.extend(glob.glob(config.get_templates_dir() + "/*.viant"))
 
         self.templates.append(None)
         self.comboBox_Template.addItem("No Template")

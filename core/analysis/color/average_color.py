@@ -46,7 +46,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
             - [7] Average Value: Experimental Saturation (BGR) {0, ..., 1.0} (Deprecated, this will be removed at some point)
     """
 
-    def __init__(self, resolution = 30):
+    def __init__(self, resolution = 30, coverage = None):
         super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor",
                                                    [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorFeatures",
@@ -56,6 +56,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                                    version="1.0.0",
                                                    multiple_result=False)
         self.resolution = resolution
+        self.coverage = coverage
 
     def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
         """
@@ -93,6 +94,9 @@ class ColorFeatureAnalysis(IAnalysisJob):
                 cap = cv2.VideoCapture(movie_path)
             cap.set(cv2.CAP_PROP_POS_FRAMES, start)
             c = start
+
+            if self.coverage is not None:
+                self.resolution = int((stop - start) / ((stop - start) * self.coverage))
 
             for i in range(start, stop  + 1, self.resolution):
                 sign_progress((c - start) / ((stop - start) + 1))
