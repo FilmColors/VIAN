@@ -1,10 +1,13 @@
 import os
 from pymediainfo import MediaInfo
 
+from typing import Tuple
+
 import cv2
 from core.data.computation import ms_to_string, ms_to_frames
 from core.data.enums import MOVIE_DESCRIPTOR
 
+from core.data.log import log_error
 from .container_interfaces import IProjectContainer, ISelectable, IHasName, ITimeRange, \
     AutomatedTextSource, IClassifiable
 
@@ -46,9 +49,12 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         self.meta_data = dict()
         self.letterbox_rect = None
 
+        self.display_width = None
+        self.display_height = None
 
         self.frame_width = -1
         self.frame_height = -1
+        self.parse_movie()
 
     def set_letterbox_rect(self, rect):
         self.letterbox_rect = rect
@@ -87,6 +93,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
                 continue
 
         self.set_project(self.project)
+        self.parse_movie()
         return self
 
     def get_type(self):
@@ -112,16 +119,6 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         return ["Current Time", "Current Frame", "Movie Name", "Movie Path", "Movie ID", "Year", "Source", "Duration", "Notes"]
 
     def get_movie_path(self):
-        # if self.is_relative:
-        #     abs_path = os.path.normpath(self.project.folder + "/" + self.movie_path)
-        #     if os.path.isfile(abs_path):
-        #         return abs_path
-        #     elif os.path.isfile(self.movie_path):
-        #         self.is_relative = False
-        #         return self.movie_path
-        #     else:
-        #         return ""
-        # else:
         return os.path.normpath(self.movie_path)
 
     def set_movie_path(self, path):
@@ -131,36 +128,49 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
         :param path:
         :return:
         """
-        # if self.project.folder is not None and os.path.normpath(self.project.folder) in os.path.normpath(path):
-        #     common = os.path.commonpath([self.project.path, path])
-        #     self.movie_path = path.replace(common, "/")
-        #     self.is_relative = True
-        # else:
+
         self.movie_path = os.path.normpath(path)
-        # self.is_relative = False
-        # print("MoviePath set", self.movie_path, "Relative:", self.is_relative)
+        self.parse_movie()
+        return self.movie_path
 
-        cap = cv2.VideoCapture(self.get_movie_path())
-        self.fps = cap.get(cv2.CAP_PROP_FPS)
+    def parse_movie(self):
+        if os.path.isfile(self.get_movie_path()):
+            cap = cv2.VideoCapture(self.get_movie_path())
+            self.fps = cap.get(cv2.CAP_PROP_FPS)
+            self.display_width, self.display_height = self.get_frame_dimensions()
+        else:
+            self.fps = 30
+            self.display_height = None
+            self.display_width = None
+
+    def get_frame_dimensions(self) -> Tuple[int, int]:
+        """
+        Returns the display dimension of the movie based on the meta data.
+        if the meta data could not be parsed, it returns the storage dimensions.
+
+        :return: Tuple(width, height)
+        """
+        print("Getting Frame Dimensions")
         try:
-            # TODO
-            self.width, self.height = self.get_frame_dimensions(self.movie_path)
-        except Exception as e:
-            print(e)
+            media_info = MediaInfo.parse(self.movie_path)
 
-    def get_frame_dimensions(self, movie_path):
-        media_info = MediaInfo.parse(movie_path)
+            height = None
+            display_aspect = None
 
-        height = None
-        display_aspect = None
+            for t in media_info.to_data()['tracks']:
+                if t['track_type'] == "Video":
+                    height = int(t['sampled_height'])
+                    display_aspect = float(t['display_aspect_ratio'])
+                    break
+            return int(height * display_aspect), height
 
-        for t in media_info.to_data()['tracks']:
-            if t['track_type'] == "Video":
-                height = int(t['sampled_height'])
-                display_aspect = float(t['display_aspect_ratio'])
-                break
+        except RuntimeError as e:
+            log_error("Exception in MovieDescriptor.get_frame_dimensions", e)
 
-        return (int(height * display_aspect), height)
+            cap = cv2.VideoCapture(self.movie_path)
+            cap.read()
+
+            return int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     def get_movie_id_list(self):
         return self.movie_id.split("_")

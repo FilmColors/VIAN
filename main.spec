@@ -2,7 +2,7 @@
 import glob
 import sys
 
-from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files, collect_dynamic_libs
 
 block_cipher = None
 
@@ -19,10 +19,12 @@ else:
 
 librosa_data = collect_data_files('librosa')
 binaries = []
+binaries += collect_dynamic_libs("pymediainfo")
 hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
     'sklearn.utils.sparsetools._graph_tools',
     'sklearn.utils.lgamma',
+    'sklearn.utils.weight_vector'
     'sklearn.utils.weight_vector'
     'sklearn.neighbors._typedefs'
 ] + tf_hidden_imports

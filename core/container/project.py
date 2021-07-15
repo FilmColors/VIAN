@@ -22,6 +22,11 @@ from .analysis import *
 from .media_objects import *
 from .node_scripts import *
 
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core.container.vocabulary_library import VocabularyLibrary
+
 # from core.data.importers import ImportDevice
 # from core.data.exporters import ExportDevice
 VIAN_PROJECT_EXTENSION = ".eext"
@@ -464,29 +469,19 @@ class VIANProject(QObject, IHasName, IClassifiable):
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
         ret, frame = video_capture.read()
 
-        if ret:
-            # shot = Screenshot(title="New Screenshot", image=frame, img_blend=frame_annotated, timestamp=time, frame_pos=frame_pos, annotation_item_ids=annotation_ids)
+        video_capture.release()
 
-            new = Screenshot(name, frame, img_blend = None, timestamp=time_ms, frame_pos=frame_pos, unique_id=unique_id)
+        if ret:
+            new = Screenshot(name, frame,
+                             img_blend = None,
+                             timestamp=time_ms,
+                             frame_pos=frame_pos,
+                             unique_id=unique_id,
+                             display_width=self.movie_descriptor.display_width,
+                             display_height=self.movie_descriptor.display_height)
             self.add_screenshot(new)
             return new
         return None
-
-    def create_screenshot_headless(self, name, frame_pos = None, time_ms = None, fps = 29.0):
-        #TODO do we still need this?
-
-        if frame_pos is None and time_ms is None:
-            print("Either frame or ms has to be given")
-            return
-
-        if frame_pos is None:
-            frame_pos = ms_to_frames(time_ms, fps)
-        else:
-            time_ms = frame2ms(frame_pos, fps)
-
-        new = Screenshot(name, None, img_blend=None, timestamp=time_ms, frame_pos=frame_pos)
-        self.add_screenshot(new)
-        return new
 
     def add_screenshot(self, screenshot, group = 0) -> Screenshot:
         """
@@ -1113,7 +1108,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 raise e
         log_info("Project Stored to", path)
 
-    def load_project(self, path=None, main_window = None, serialization = None):
+    def load_project(self, path=None, main_window = None, serialization = None, library=None):
         """
         Loads a project from a given file.
 
@@ -1233,13 +1228,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.current_annotation_layer = None
         self.movie_descriptor = MovieDescriptor(project=self).deserialize(my_dict['movie_descriptor'])
 
-
-
         self.vocabularies = []
         for v in my_dict['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
+        if library is not None:
+            self.sync_with_library(library)
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
@@ -1284,15 +1279,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 self.current_script = old_script
         except Exception as e:
             print("Loading Node Scripts failed", e)
-            # self.main_window.print_message("Loading Node Scripts failed", "Red")
-            # self.main_window.print_message(e, "Red")
-
-        # try:
-        #     [self.add_pipeline_script(PipelineScript().deserialize(q, self.folder)) for q in my_dict['pipeline_scripts']]
-        #     self.active_pipeline_script = self.get_by_id(my_dict['active_pipeline_script'])
-        #     self.compute_pipeline_settings = my_dict['compute_pipeline_settings']
-        # except Exception as e:
-        #     print("Exception in Load Pipelines", str(e))
 
         try:
             for e in my_dict['experiments']:
@@ -1525,32 +1511,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param dispatch:
         :return: Vocabulary added
         """
-        not_ok = True
-        counter = 0
         name = voc.name
-        duplicate = None
-
-        # while(not_ok):
-        #     has_duplicate = False
-        #     for v in self.vocabularies:
-        #     #     if v.name == name:
-        #     #         name = voc.name + "_" + str(counter).zfill(2)
-        #     #         has_duplicate = True
-        #     #         counter += 1
-        #     #         duplicate = v
-        #     #         break
-        #     # if not has_duplicate:
-        #     #     not_ok = False
-        #     #     break
-        #     # else:
-        #         # If the Vocabulares are duplicates, we might want to replace the IDS in the Caller,
-        #         # Therefore we create a replacement table
-        #         x = [w.name for w in voc.words_plain]
-        #         y = [w.name for w in duplicate.words_plain]
-        #
-        #         if set(x) == set(y):
-        #             print("Vocabulary is duplicate")
-        #             return duplicate
 
         voc.name = name
         voc.set_project(self)
@@ -1584,6 +1545,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.vocabularies.remove(voc)
             self.remove_from_id_list(voc)
             self.onVocabularyRemoved.emit(voc)
+
         self.dispatch_changed()
 
     def copy_vocabulary(self, voc, add_to_global = True, replace_uuid = False):
@@ -1598,9 +1560,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         new = self.import_vocabulary(None, add_to_global, serialization=voc.serialize())
 
         if replace_uuid:
-            new.uuid = str(uuid4())
+            new.unique_id = str(uuid4())
             for w in new.words_plain:
-                w.uuid = str(uuid4())
+                w.unique_id = str(uuid4())
         self.inhibit_dispatch = False
         return new
 
@@ -1632,6 +1594,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
             return new_voc, id_table
         else:
             return new_voc
+
+    def sync_with_library(self,  library):
+        for v in self.vocabularies:
+            library_voc = library.get_vocabulary_by_id(v.unique_id)
+            if library_voc is None:
+                library_voc = library.get_vocabulary_by_name(v.name)
+            if library_voc is not None:
+                log_info("Found Vocabulary", v.name)
+                v.update_vocabulary(library_voc)
+            else:
+                log_warning("Vocabulary not found in Library:", v.name)
 
     #endregion
 
@@ -1727,6 +1700,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.onExperimentRemoved.emit(experiment)
             self.dispatch_changed()
 
+    def get_default_experiment(self) -> Experiment:
+        """
+        Returns the default experiment. If VIAN is run without multiple experiment mode, VIAN guarantees that
+        this function will always return an experiment, even if non exists yet.
+
+        :return:
+        """
+        if len(self.experiments) == 0:
+            return self.create_experiment("Default Experiment")
+        else:
+            return self.experiments[0]
+
     def get_classification_object_global(self, name) -> ClassificationObject:
         """
         Looks in all experiments if a specific classification object is present.
@@ -1741,11 +1726,22 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if t is not None:
                 cl_obj = t
                 break
+
         if cl_obj is None:
-            exp = self.create_experiment("Default Experiment")
+            exp = self.get_default_experiment()
             cl_obj = exp.create_class_object(name)
 
         return cl_obj
+
+    def get_all_classification_objects(self) -> List[ClassificationObject]:
+        """
+        Returns all available classification objects in the project.
+        :return:
+        """
+        res = []
+        for e in self.experiments:
+            res += [cl for cl in e.get_classification_objects_plain()]
+        return res
 
     def get_experiment_by_name(self, name):
         for e in self.experiments:
@@ -1873,6 +1869,39 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if exp.name == name:
                 return exp
         return None
+
+    def get_classification_objects_for_target(self, target) -> List[ClassificationObject]:
+        """
+        Returns all classification objects attached to a target.
+        :param target:
+        :return:
+        """
+        result = []
+        for e in self.experiments:
+            for clobj in e.get_classification_objects_plain():
+                if target in clobj.target_container or len(clobj.target_container) == 0:
+                    result.append(clobj)
+        return result
+
+    def get_vocabularies_for_target(self, target, clobjs=None) -> List[Vocabulary]:
+        """
+        Returns all vocabularies attached to a certain target.
+        Can additionally be filtered by the classification object.
+
+        :param target:
+        :param clobjs:
+        :return:
+        """
+        result = []
+        if clobjs is None:
+            clobjs = self.get_classification_objects_for_target(target)
+        elif isinstance(clobjs, ClassificationObject):
+            clobjs = [clobjs]
+
+        for c in clobjs:
+            result += c.get_vocabularies()
+        return result
+
     #endregion
 
     #region Dispatchers

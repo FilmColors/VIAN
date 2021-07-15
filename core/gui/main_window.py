@@ -48,7 +48,7 @@ from core.gui.player_vlc import Player_VLC, PlayerDockWidget
 from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from core.gui.timeline.timeline import TimelineContainer
-from core.gui.vocabulary import VocabularyManager, VocabularyExportDialog
+from core.gui.vocabulary import VocabularyManager #VocabularyExportDialog
 from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
 from core.gui.corpus_widget import CorpusDockWidget
 from core.gui.misc.filmography_widget import query_initial
@@ -57,6 +57,7 @@ from core.node_editor.node_editor import NodeEditorDock
 from core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 
+from core.container.vocabulary_library import VocabularyLibrary
 from core.concurrent.worker import Worker
 from core.container.hdf5_manager import print_registered_analyses, get_all_analyses
 from core.gui.toolbar import WidgetsToolbar
@@ -245,6 +246,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.onStartFlaskServer.connect(self.flask_server.run_server)
             self.onStartFlaskServer.emit()
 
+        self.vocabulary_library = VocabularyLibrary().load("data/library.json")
+        self.vocabulary_library.onLibraryChanged.connect(self.on_vocabulary_library_changed)
 
         self.web_view = FlaskWebWidget(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
@@ -253,6 +256,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.web_view.hide()
 
+        print("OK")
         self.create_widget_elan_status()
         self.create_widget_video_player()
         self.drawing_overlay = DrawingOverlay(self, self.player.videoframe, self.project)
@@ -369,6 +373,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
         self.actionProject_Summary.triggered.connect(self.on_export_summary)
         self.actionExportVIANWebApp.triggered.connect(self.on_export_vianwebapp)
+        self.actionSequence_Protocol.triggered.connect(self.on_export_sequence_protocol)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -685,7 +690,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_audio_extracting_progress(self, flt):
         self.concurrent_task_viewer.update_progress("audio-extraction-task", flt)
-
 
     def set_audio_extracting(self, state):
         if state:
@@ -1125,6 +1129,11 @@ class MainWindow(QtWidgets.QMainWindow):
     #endregion
 
     #region MainWindow Event Handlers
+
+    @pyqtSlot(object)
+    def on_vocabulary_library_changed(self, library):
+        if self.project is not None:
+            self.project.sync_with_library(library)
 
     def on_pipeline_settings_changed(self):
         if self.settings.USE_PIPELINES:
@@ -1857,6 +1866,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_export_vianwebapp(self):
         self.project.store_project(bake=True)
 
+    def on_export_sequence_protocol(self):
+        p = Path(QFileDialog.getSaveFileName(filter="*.csv *.pdf", caption="Select Save Path", directory=self.project.export_dir)[0])
+        if ".csv" in p.suffixes:
+            self.project.export(SequenceProtocolExporter(mode="csv"), p)
+        else:
+            self.project.export(SequenceProtocolExporter(mode="pdf"), p)
+
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))
 
@@ -2016,7 +2032,7 @@ class MainWindow(QtWidgets.QMainWindow):
         new = VIANProject()
         log_info("Loading Project Path", path)
         new.inhibit_dispatch = True
-        new.load_project(path, main_window=self)
+        new.load_project(path, main_window=self, library=self.vocabulary_library)
 
         self.project = new
         self.settings.add_to_recent_files(self.project)
@@ -2282,6 +2298,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def export_vocabulary(self):
+        return
+        #TODO
         dialog = VocabularyExportDialog(self)
         dialog.show()
 

@@ -370,6 +370,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     @pyqtSlot(object)
     def on_experiment_changed(self, e:Experiment):
         self.clear_sub_segmentation()
+        if self.project() is None:
+            return
 
         for e in self.project().experiments:
             for i, s in enumerate(self.project().segmentation):

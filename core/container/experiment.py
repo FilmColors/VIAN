@@ -55,7 +55,6 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def __init__(self, name="", unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
-        self.uuid = str(uuid4())
         self.name = name
         self.comment = ""
         self.info_url = ""
@@ -104,7 +103,9 @@ class Vocabulary(IProjectContainer, IHasName):
 
         if dispatch:
             self.dispatch_on_changed(item=self)
+
         self.onVocabularyWordAdded.emit(word)
+        self.onVocabularyChanged.emit(self)
 
     def remove_word(self, word, dispatch = True):
         """
@@ -133,12 +134,14 @@ class Vocabulary(IProjectContainer, IHasName):
         if word in self.words_plain:
             self.words_plain.remove(word)
 
-        self.project.remove_from_id_list(word)
+        if self.project is not None:
+            self.project.remove_from_id_list(word)
 
         if dispatch:
             self.dispatch_on_changed(item=self)
 
         self.onVocabularyWordRemoved.emit(word)
+        self.onVocabularyChanged.emit(self)
 
     def get_word_by_name(self, name):
         for w in self.words_plain:
@@ -171,7 +174,6 @@ class Vocabulary(IProjectContainer, IHasName):
             data = dict(
                 name = w.name,
                 unique_id = w.unique_id,
-                uuid = str(w.uuid),
                 parent = w.parent.unique_id,
                 children = [a.unique_id for a in w.children],
                 organization_group = w.organization_group,
@@ -184,7 +186,6 @@ class Vocabulary(IProjectContainer, IHasName):
 
         voc_data = dict(
             name = self.name,
-            uuid = str(self.uuid),
             category = self.category,
             unique_id = self.unique_id,
             words = words_data,
@@ -202,43 +203,39 @@ class Vocabulary(IProjectContainer, IHasName):
         self.category = serialization['category']
 
         try:
-            self.uuid = serialization['uuid']
-        except:
-            log_warning("No UUID found in this vocabulary", self.name)
-            pass
-
-        try:
             self.comment = serialization['comment']
         except:
             log_warning("No UUID found in this vocabulary", self.name)
             pass
 
+        # Probably we will not need the hierarchy anymore but for the sake of functionality
+        # we do a local unique_id to object resolving
+        # TODO whe should get rid of the old therausus data structures where words are hierachical trees.
+        # todo replace words_plain with words
+
+        hierarchy_mapper = dict()
+        hierarchy_mapper[self.unique_id] = self
+
         for w in serialization['words']:
-            # TODO whe should get rid of the old therausus data structures where words are hierachical trees.
-            # todo replace words_plain with words
-            parent = self
-            # parent = self.project.get_by_id(w['parent'])
-            # If this is a root node in the Vocabulary
+
+            if w['parent'] in hierarchy_mapper:
+                parent = hierarchy_mapper[w['parent']]
+            else:
+                parent = self
+
             if isinstance(parent, Vocabulary):
                 word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
-
+                hierarchy_mapper[word.unique_id] = word
                 # Fields introduced in 0.8.0
                 try:
                     word.complexity_lvl = int(w['complexity_lvl'])
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
-                    # print("Exception during Vocabulary:deserialize", e)
                     pass
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
-                    # print("Exception during Vocabulary:deserialize (II)", e)
-                    pass
-                try:
-                    word.uuid = w['uuid']
-                except:
-                    log_warning("No UUID found in this vocabulary", self.name)
                     pass
                 try:
                     word.comment = w['comment']
@@ -254,17 +251,12 @@ class Vocabulary(IProjectContainer, IHasName):
                     word.organization_group = int(w['organization_group'])
                     word.complexity_group = w['complexity_group']
                 except Exception as e:
+                    log_warning(e)
                     pass
-                    # print("Exception during Vocabulary:deserialize", e)
                 try:
                     word.image_urls = w['image_urls']
                 except Exception as e:
-                    pass
-                    # print("Exception during Vocabulary:deserialize (II)", e)
-                try:
-                    word.uuid = w['uuid']
-                except:
-                    # print("No UUID found in this vocabulary", self.name)
+                    log_warning(e)
                     pass
                 try:
                     word.comment = w['comment']
@@ -295,13 +287,14 @@ class Vocabulary(IProjectContainer, IHasName):
         old_id = serialization['unique_id']
         new_id = project.create_unique_id()
         self.unique_id = new_id
-        self.uuid = serialization['uuid']
+
         id_replacing_table.append([old_id, new_id])
         try:
             self.comment = serialization['comment']
         except:
             log_warning("No UUID found in this vocabulary", self.name)
             pass
+
         # Replace all IDs with new one:
         for w in serialization['words']:
             old = w['unique_id']
@@ -344,11 +337,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     pass
                     # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
-                    word.uuid = w['uuid']
-                except:
-                    print("No UUID found in this vocabulary", self.name)
-                    pass
-                try:
                     word.comment = w['comment']
                 except:
                     log_warning("No UUID found in this vocabulary", self.name)
@@ -370,11 +358,6 @@ class Vocabulary(IProjectContainer, IHasName):
                     pass
                     # print("Exception during Vocabulary:deserialize (II)", e)
                 try:
-                    word.uuid = w['uuid']
-                except:
-                    log_warning("No UUID found in this vocabulary", self.name)
-                    pass
-                try:
                     word.comment = w['comment']
                 except:
                     log_warning("No UUID found in this vocabulary", self.name)
@@ -384,18 +367,21 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def update_vocabulary(self, new_voc):
         for attr in VOC_COMPARE_ATTRS:
-            setattr(self, attr, getattr(new_voc, attr))
+            if hasattr(self, attr):
+                setattr(self, attr, getattr(new_voc, attr))
 
         words = dict()
         to_remove = []
 
         for w in new_voc.words_plain:
-            words[w.uuid] = w
+            words[w.unique_id] = w
+
         for w in self.words_plain:
-            if w.uuid in words:
+            if w.unique_id in words:
                 for attr in WORD_COMPARE_ATTRS:
-                    setattr(w, attr, getattr(words[w.uuid], attr))
-                words.pop(w.uuid)
+                    setattr(w, attr, getattr(words[w.unique_id], attr))
+                words.pop(w.unique_id)
+                w.parent = self
             else:
                 to_remove.append(w)
 
@@ -412,10 +398,11 @@ class Vocabulary(IProjectContainer, IHasName):
 
     def set_name(self, name):
         base = name
-        counter = 0
-        while name in [v.name for v in self.project.vocabularies]:
-            counter += 1
-            name = base + "_" + str(counter).zfill(2)
+        if self.project is not None:
+            counter = 0
+            while name in [v.name for v in self.project.vocabularies]:
+                counter += 1
+                name = base + "_" + str(counter).zfill(2)
         self.name = name
         self.onVocabularyChanged.emit(self)
 
@@ -459,7 +446,6 @@ class VocabularyWord(IProjectContainer, IHasName):
     def __init__(self, name, vocabulary, parent = None, is_checkable = False, unique_id=-1):
         IProjectContainer.__init__(self, unique_id=unique_id)
         self.name = name
-        self.uuid = str(uuid4())
         self.comment = ""
         self.info_url = ""
         self.vocabulary = vocabulary
@@ -605,6 +591,7 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.onUniqueKeywordsChanged.emit(self)
             voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
             voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
+            print("Vocabulary added", voc.name)
             return keywords
         else:
             #Check if really there are new words in the vocabulary which are not yet added to the keywords.
@@ -656,7 +643,7 @@ class ClassificationObject(IProjectContainer, IHasName):
 
         voc.onVocabularyWordAdded.disconnect(self.on_vocabulary_word_added)
         voc.onVocabularyWordRemoved.disconnect(self.on_vocabulary_word_removed)
-
+        print("Vocabulary removed", voc.name)
         self.onUniqueKeywordsChanged.emit(self)
 
     def get_vocabularies(self):
@@ -772,7 +759,7 @@ class ClassificationObject(IProjectContainer, IHasName):
                 self.semantic_segmentation_labels = (serialization['semantic_segmentation_labels']['model'],
                                                      [t['label'] for t in serialization['semantic_segmentation_labels']['labels']])
             except Exception as e:
-                log_error("Importing old style SemanticSegmentation Labels", e)
+                log_debug("Importing old style SemanticSegmentation Labels", e)
                 self.semantic_segmentation_labels = serialization['semantic_segmentation_labels']
 
         except Exception as e:
@@ -822,13 +809,13 @@ class UniqueKeyword(IProjectContainer):
             class_obj = self.class_obj.unique_id,
             vian_webapp_external_id = self.external_id
         )
-
         return data
 
     def deserialize(self, serialization, project):
         self.unique_id = serialization['unique_id']
         self.word_obj = project.get_by_id(serialization['word_obj'])
         self.voc_obj = self.word_obj.vocabulary
+        self.class_obj = project.get_by_id(serialization['class_obj'])
 
         try:
             self.external_id = deprecation_serialization(serialization,['vian_webapp_external_id', 'external_id'])
@@ -839,6 +826,7 @@ class UniqueKeyword(IProjectContainer):
         if self.voc_obj is None or self.word_obj is None or self.class_obj is None:
             raise ValueError("UniqueKeyword could not be resolved.")
 
+        print("UniqueKeyword", self.voc_obj.name, self.word_obj.name)
         self.set_project(project)
         self.word_obj._add_referenced_unique_keyword(self)
 
@@ -944,6 +932,21 @@ class Experiment(IProjectContainer, IHasName):
         result = []
         for clobj in self.classification_objects:
             result.extend(clobj.get_vocabularies())
+        return result
+
+    def get_vocabularies_for_target(self, target):
+        """
+        Returns all classification objects which are connected to a certain Segmentation or Screenshot Group.
+        Classification Objects with no target container defined, are assumed to be connected to all Segmentations and
+        Screenshot Groups.
+
+        :param target:
+        :return:
+        """
+        result = []
+        for clobj in self.get_classification_objects_plain():
+            if target in clobj.target_container or len(clobj.target_container) == 0:
+                result.append(target)
         return result
 
     def get_complexity_groups(self):
@@ -1248,15 +1251,14 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
         voc = self.project.get_by_id(entry.unique_id)
 
         if voc is None:
-            voc = self.project.get_by_id(entry.uuid)
+            voc = self.project.get_by_id(entry.unique_id)
             if voc is not None:
                 print("Found by uuid")
-                entry.unique_id = voc.uuid
+                entry.unique_id = voc.unique_id
 
         if voc is None:
             voc = Vocabulary(name=entry.name)
             voc.unique_id = entry.unique_id
-            voc.uuid = entry.unique_id
             self.project.add_vocabulary(voc)
             changes.append(("Added Vocabulary Object", voc))
 
@@ -1267,7 +1269,6 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
             if word is None:
                 word = VocabularyWord(name=w.name, vocabulary=voc)
                 word.unique_id = w.unique_id
-                word.uuid = w.unique_id
                 voc.add_word(word)
                 changes.append(("Added Vocabulary Word", voc))
 
@@ -1391,7 +1392,6 @@ def merge_experiment_inspect(self:Experiment, other: Experiment):
 
 
 VOC_COMPARE_ATTRS = [
-    "uuid",
     "name",
     "comment",
     "info_url",
@@ -1400,7 +1400,6 @@ VOC_COMPARE_ATTRS = [
 ]
 
 WORD_COMPARE_ATTRS = [
-    "uuid",
     "name",
     "comment",
     "info_url",
@@ -1421,11 +1420,11 @@ def compare_vocabularies(voc1: Vocabulary, voc2: Vocabulary):
 
     uuid_map_voc1 = dict()
     for w in voc1.words_plain: #type:VocabularyWord
-        uuid_map_voc1[w.uuid] = w
+        uuid_map_voc1[w.unique_id] = w
 
     uuid_map_voc2 = dict()
     for w in voc2.words_plain:  # type:VocabularyWord
-        uuid_map_voc2[w.uuid] = w
+        uuid_map_voc2[w.unique_id] = w
 
     words_to_add = []
     for uuid in uuid_map_voc1:

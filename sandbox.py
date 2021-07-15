@@ -1,35 +1,52 @@
-import cv2
-import pymediainfo
+#
+from core.container.project import *
+from core.data.exporters import SequenceProtocolExporter
 
+with VIANProject().load_project("/Users/Gaudenz/Documents/VIAN/projects/SampleProject3/SampleProject3.eext") as project:
+    project.export(SequenceProtocolExporter(mode="pdf"), "output_pandoc")
 
-
-from pprint import pprint
-from pymediainfo import MediaInfo
-
-movie_path = "C:/Users//gaude\Downloads/Solaris_cut.mov"
-
-
-def get_frame_dimensions(movie_path):
-    media_info = MediaInfo.parse(movie_path)
-
-    height = None
-    display_aspect = None
-
-    for t in media_info.to_data()['tracks']:
-        if t['track_type'] == "Video":
-            height = int(t['sampled_height'])
-            display_aspect = float(t['display_aspect_ratio'])
-            break
-
-    return (int(height * display_aspect), height)
-
-
-cap = cv2.VideoCapture(movie_path)
-final_width, height = get_frame_dimensions(movie_path)
-while True:
-    ret, frame = cap.read()
-
-
-    frame = cv2.resize(frame, (final_width, height), interpolation=cv2.INTER_CUBIC)
-    cv2.imshow("out", frame)
-    cv2.waitKey(5)
+#
+# from pylatex import Document, Section, Subsection, Command
+# from pylatex.utils import italic, NoEscape
+#
+#
+# def fill_document(doc):
+#     """Add a section, a subsection and some text to the document.
+#
+#     :param doc: the document
+#     :type doc: :class:`pylatex.document.Document` instance
+#     """
+#     with doc.create(Section('A section')):
+#         doc.append('Some regular text and some ')
+#         doc.append(italic('italic text. '))
+#
+#         with doc.create(Subsection('A subsection')):
+#             doc.append('Also some crazy characters: $&#{}')
+#
+#
+# if __name__ == '__main__':
+#     # Basic document
+#     doc = Document('basic')
+#     fill_document(doc)
+#
+#     doc.generate_pdf(clean_tex=False)
+#     doc.generate_tex()
+#
+#     # Document with `\maketitle` command activated
+#     doc = Document()
+#
+#     doc.preamble.append(Command('title', 'Awesome Title'))
+#     doc.preamble.append(Command('author', 'Anonymous author'))
+#     doc.preamble.append(Command('date', NoEscape(r'\today')))
+#     doc.append(NoEscape(r'\maketitle'))
+#
+#     fill_document(doc)
+#
+#     doc.generate_pdf('basic_maketitle', clean_tex=False)
+#
+#     # Add stuff to the document
+#     with doc.create(Section('A second section')):
+#         doc.append('Some text.')
+#
+#     doc.generate_pdf('basic_maketitle2', clean_tex=False)
+#     tex = doc.dumps()  # The document as string in LaTeX syntax

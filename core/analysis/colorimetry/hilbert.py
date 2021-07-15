@@ -214,8 +214,8 @@ def create_hilbert_transform(s):
 
 
 def get_hilbert_lookup():
-    if os.path.isfile("core/analysis/colorimetry/hilbert_lookup.npy"):
-        return np.load("core/analysis/colorimetry/hilbert_lookup.npy")
+    if os.path.isfile("data/hilbert_lookup.npy"):
+        return np.load("data/hilbert_lookup.npy")
     else:
          return None
 

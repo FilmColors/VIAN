@@ -26,10 +26,6 @@ class ImportDevice:
 class ELANImportDevice(ImportDevice):
     pass
 
-#
-# class CSVImportDevice(ImportDevice):
-#     pass
-
 
 class ScreenshotImportDevice(ImportDevice):
     pass
@@ -566,13 +562,13 @@ class ExperimentTemplateImporter(ImportDevice):
         with open(path, "r") as f:
             data = json.load(f)
         experiment = Experiment(data['experiment']['name'])
-        experiment.unique_id = data['experiment']['uuid']
+        experiment.unique_id = data['experiment']['unique_id']
         project.add_experiment(experiment)
         # experiment = project.create_experiment(data['experiment']['name'])
         cl_objs_index = dict()
         for entry in data['classification_objects']:
             clobj = ClassificationObject(entry['name'], experiment=experiment, parent=experiment)
-            clobj.unique_id = entry['uuid']
+            clobj.unique_id = entry['unique_id']
             clobj.set_project(project)
             experiment.add_classification_object(clobj)
             clobj.semantic_segmentation_labels = (entry['semantic_segmentation_dataset'], [lbl for lbl in entry['semantic_segmentation_label_ids']])
@@ -582,8 +578,7 @@ class ExperimentTemplateImporter(ImportDevice):
         for entry in data['vocabularies']:
             # voc = project.create_vocabulary(name=entry['name'])
             voc = Vocabulary(name=entry['name'])
-            voc.unique_id = entry['uuid']
-            voc.uuid = entry['uuid']
+            voc.unique_id = entry['unique_id']
             voc.category = entry['vocabulary_category']
             if voc.name in self.hidden_vocs:
                 voc.is_visible = False
@@ -591,8 +586,7 @@ class ExperimentTemplateImporter(ImportDevice):
             for w in entry['words']:
                 # word = voc.create_word(name = w['name'])
                 word = VocabularyWord(name = w['name'], vocabulary=voc)
-                word.unique_id = w['uuid']
-                word.uuid = w['uuid']
+                word.unique_id = w['unique_id']
                 voc.add_word(word)
 
                 word.complexity_group = w['complexity_group']['name']
@@ -604,7 +598,7 @@ class ExperimentTemplateImporter(ImportDevice):
         unique_keywords = dict()
         for entry in data['unique_keywords']:
             # Check if the keyword already exists in this experiment:
-            keyword = project.get_by_id(entry['uuid'])  # type:UniqueKeyword
+            keyword = project.get_by_id(entry['unique_id'])  # type:UniqueKeyword
             clobj = cl_objs_index[entry['classification_object']]
 
             if clobj.unique_id not in unique_keywords:
@@ -613,7 +607,7 @@ class ExperimentTemplateImporter(ImportDevice):
             word = words_index[entry['word']]
             if keyword is None:
                 if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj, unique_id=entry['uuid'])
+                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj, unique_id=entry['unique_id'])
             else:
                 clobj.remove_vocabulary(keyword.voc_obj)
 
@@ -635,17 +629,17 @@ class ExperimentTemplateUpdater(ImportDevice):
     def import_(self, project:VIANProject, path):
         with open(path, "r") as f:
             data = json.load(f)
-        experiment = project.get_by_id(data['experiment']['uuid'])
+        experiment = project.get_by_id(data['experiment']['unique_id'])
         if experiment is None:
-            raise ValueError("Experiment not found with uuid:" + data['experiment']['uuid'])
+            raise ValueError("Experiment not found with uuid:" + data['experiment']['unique_id'])
 
         cl_objs_index = dict()
         for entry in data['classification_objects']:
-            clobj = project.get_by_id(entry['uuid'])
+            clobj = project.get_by_id(entry['unique_id'])
             if clobj is None:
                 log_info("ExperimentTemplateUpdater: Creating Classification Object:", (entry['name']))
                 clobj = ClassificationObject(entry['name'], experiment=experiment, parent=experiment)
-                clobj.unique_id = entry['uuid']
+                clobj.unique_id = entry['unique_id']
                 clobj.set_project(project)
                 experiment.add_classification_object(clobj)
                 clobj.semantic_segmentation_labels = (entry['semantic_segmentation_dataset'], [lbl for lbl in entry['semantic_segmentation_label_ids']])
@@ -656,12 +650,11 @@ class ExperimentTemplateUpdater(ImportDevice):
         words_index = dict()
         for entry in data['vocabularies']:
 
-            voc = project.get_by_id(entry['uuid'])
+            voc = project.get_by_id(entry['unique_id'])
             if voc is None:
                 log_info("ExperimentTemplateUpdater: Creating Vocabulary Object:", (entry['name']))
                 voc = Vocabulary(name=entry['name'])
                 voc.unique_id = entry['unique_id']
-                voc.uuid = entry['uuid']
                 project.add_vocabulary(voc)
             else:
                 log_info("ExperimentTemplateUpdater: Found Vocabulary Object:", (entry['name']))
@@ -674,12 +667,11 @@ class ExperimentTemplateUpdater(ImportDevice):
 
             for w in entry['words']:
                 # word = voc.create_word(name = w['name'])
-                word = project.get_by_id(w['uuid'])
+                word = project.get_by_id(w['unique_id'])
                 if word is None:
                     log_info("ExperimentTemplateUpdater: Creating Word Object:", (w['name']))
                     word = VocabularyWord(name = w['name'], vocabulary=voc)
-                    word.unique_id = w['uuid']
-                    word.uuid = w['uuid']
+                    word.unique_id = w['unique_id']
                     voc.add_word(word)
                 else:
                     log_info("ExperimentTemplateUpdater: Found Word Object:", (w['name']))
@@ -694,7 +686,7 @@ class ExperimentTemplateUpdater(ImportDevice):
         unique_keywords = dict()
         for entry in data['unique_keywords']:
             # Check if the keyword already exists in this experiment:
-            keyword = project.get_by_id(entry['uuid'])
+            keyword = project.get_by_id(entry['unique_id'])
             clobj = cl_objs_index[entry['classification_object']]
 
             if clobj.unique_id not in unique_keywords:
@@ -703,7 +695,7 @@ class ExperimentTemplateUpdater(ImportDevice):
             word = words_index[entry['word']]
             if keyword is None:
                 if word not in [kwd.word_obj for kwd in clobj.unique_keywords]:
-                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj, unique_id=entry['uuid'])
+                    keyword = UniqueKeyword(self, word.vocabulary, word, clobj, unique_id=entry['unique_id'])
             else:
                 clobj.remove_vocabulary(keyword.voc_obj)
 
@@ -814,7 +806,6 @@ class WebAppProjectImporter(ImportDevice):
 class SRTImporter(ImportDevice):
     def __init__(self):
         super(SRTImporter, self).__init__()
-
 
     def import_(self, project: VIANProject, path):
         try:

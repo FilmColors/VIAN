@@ -55,7 +55,7 @@ class IProjectContainer(QObject):
 
     def __init__(self, unique_id = -1):
         QObject.__init__(self)
-        self.project = None
+        self.project = None #type: VIANProject
         self.outliner_expanded = False
         self.outliner_highlighted = False
         self.unique_id = unique_id
@@ -145,7 +145,6 @@ class IProjectContainer(QObject):
         for r in self.connected_analyses:
             if classification_object is None \
                     or classification_object == r.target_classification_object:
-                print(classification_object)
                 if r.analysis_job_class == class_name:
                     result = r
                     break

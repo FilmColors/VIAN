@@ -2,18 +2,22 @@
 Contains all Export Classes and Export Functions of VIAN
 """
 
+import csv
 import cv2
 import numpy as np
+import os
 import pandas as pd
+import pypandoc
+import random
+import shutil
+import typing
+from core.container.project import *
+from core.data.computation import *
+from core.data.csv_helper import CSVFile
 from core.data.enums import ScreenshotNamingConventionOptions, get_enum_value, ImageType, TargetContainerType
 from core.data.interfaces import IConcurrentJob
-from core.data.computation import *
-from core.container.project import *
-import os
-import csv
-import shutil
-
-from core.data.csv_helper import CSVFile
+from pathlib import Path
+from subprocess import Popen
 
 
 DEFAULT_NAMING_SCREENSHOTS = [
@@ -273,6 +277,248 @@ class SegmentationExporter(ExportDevice):
             pd.DataFrame(result).to_csv(path)
 
 
+class SequenceProtocolExporter:
+    def __init__(self, mode="csv"):
+        self.data = {}
+        self.ascii_doc = []
+        self._to_delete_screenshots = []
+        self.mode = mode
+
+    @staticmethod
+    def _write_screenshot(screenshot, path):
+        """
+        writes screenshots to disk
+
+        Args:
+            path: directory path (pathlib.PosixPath)
+        Returns:
+            None
+        """
+        quality = 100
+        screenshot = resize_with_aspect(screenshot, width=200)
+        compression = int(np.clip(float(100 - quality) / 10,0,9))
+
+        shots = []
+
+        cv2.imwrite(str(path), screenshot, [cv2.IMWRITE_PNG_COMPRESSION, compression])
+
+    def _remove_screenshots(self):
+        for screenshot in self._to_delete_screenshots:
+            Popen(["rm", str(screenshot)])
+
+    def _export_csv(self, project:VIANProject, path:str):
+        if not len(project.segmentation) == 0:
+            vocabulary_tree = dict()
+            import pandas as pd
+
+            df = pd.DataFrame()
+
+            n_segments = 0
+            for s in project.segmentation:
+                n_segments += len(s.segments)
+
+            for clobj in project.get_default_experiment().classification_objects:
+                if not clobj in vocabulary_tree:
+                    vocabulary_tree[clobj] = dict()
+                for voc in clobj.classification_vocabularies:
+                    vocabulary_tree[clobj][voc] = dict() #type: typing.Dict[Segment, typing.List[UniqueKeyword]]
+                    df[clobj.name + ":" + voc.name] = [""] * n_segments
+
+            segment_counter = 0
+            segment_columns = ["ClassificationObject:Vocabulary"]
+            for segmentation in project.segmentation:
+                segmentation_name = segmentation.name
+                segmentation_data = {}
+
+                for segment in segmentation.segments:
+                    segment_columns.append(segment.ID)
+                    segment_name = segment.name
+                    segment_data = {}
+                    # export notes
+                    segment_data["notes"] = segment.notes
+                    # export free annotations
+                    annos = []
+                    for anno in segment._annotations:
+                        annos.append((anno.name, anno.content))
+                    segment_data["free annotations"] = annos
+
+                    for kwd in segment.tag_keywords: #type:UniqueKeyword
+                        if kwd.class_obj not in vocabulary_tree:
+                            raise Exception("Classification Object not in Tree")
+                        if kwd.voc_obj not in vocabulary_tree[kwd.class_obj]:
+                            raise Exception("Vocabulary not in Tree, abort")
+                        if segment not in vocabulary_tree[kwd.class_obj][kwd.voc_obj]:
+                            vocabulary_tree[kwd.class_obj][kwd.voc_obj][segment] = []
+
+                        val = df[kwd.class_obj.name + ":" + kwd.voc_obj.name].iloc[segment_counter]
+                        if val != "":
+                            val += ", "
+                        val += kwd.word_obj.name
+                        df[kwd.class_obj.name + ":" + kwd.voc_obj.name].iloc[segment_counter] = val
+
+                    segment_counter += 1
+
+            df.replace("", np.nan, inplace=True)
+            df.dropna(how='all', axis=1, inplace=True)
+
+            df = df.transpose()
+            path = Path(path).with_suffix(".csv")
+            df.to_csv(path)
+
+    def _build_datadict(self, project):
+        """
+        builds the self.data dictionary
+        which is used to write document
+
+        Args:
+            project: the VIAN project object
+        Returns:
+            None
+        """
+        if not len(project.segmentation) == 0:
+            for ix, segmentation in enumerate(project.segmentation):
+                segmentation_name = segmentation.name + str(ix)
+                segmentation_data = {}
+
+                for segment in segmentation.segments:
+                    segment_name = segment.name
+                    segment_data = {}
+                    # export notes
+                    segment_data["notes"] = segment.notes
+                    # export free annotations
+                    annos = []
+                    for anno in segment._annotations:
+                       annos.append((anno.name, anno.content))
+                    segment_data["free annotations"] = annos
+
+                    # export classifications
+                    obj_key_w = []
+                    for keyw in segment.tag_keywords:
+                        for uniq_k in keyw.word_obj.unique_keywords:
+                            obj = uniq_k.class_obj.name
+                            vocab = uniq_k.voc_obj.name
+                            keyword = uniq_k.word_obj.name
+                            obj_key_w.append((obj, vocab, keyword))
+
+                    obj_key_w.sort()
+
+                    dict_key_w = {x[0]: {} for x in obj_key_w}
+
+                    for item in obj_key_w:
+                            if item[1] in dict_key_w[item[0]]:
+                                    dict_key_w[item[0]][item[1]].append(item[2])
+                            else:
+                                    dict_key_w[item[0]][item[1]] = [item[2]]
+
+                    segment_data["vocabulary_keyword"] = dict_key_w
+                    # screenshots
+                    shots = []
+                    for screenshot in project.screenshots:
+                        t_screenshot =screenshot.movie_timestamp
+                        if t_screenshot > segment.end:
+                            break
+                        elif t_screenshot < segment.start:
+                            continue
+                        else:
+                            shots.append(screenshot)
+                    try:
+                        segment_data["screenshot"] = shots[random.randrange(len(shots))].get_img_movie_orig_size()
+                    except:
+                        segment_data["screenshot"] = None
+
+                    segmentation_data[segment.ID] = segment_data
+
+                self.data[segmentation_name] = segmentation_data
+        else:
+            self.data = None
+
+    def export(self, project, path: str):
+        """
+        exporting data from all Segmentations
+
+        For a first draft, no additional arguments
+        can be passed, such as specifying which
+        segmentation etc.
+
+        Args:
+            project: the container class of a VIAN project
+            path: a string for writing the export to
+        Returns:
+            None
+        """
+
+        if self.mode == "csv":
+            self._export_csv(project, path)
+        elif self.mode == "pdf":
+            outpath = Path(path)
+            outpath.parents[0].mkdir(parents=True, exist_ok=True)
+            file_name = outpath.name
+
+            markdown_path = outpath.parents[0] / (file_name.rstrip(".pdf") + ".md")
+
+            self._build_datadict(project)
+
+            if not self.data:
+                return
+
+            self.ascii_doc.append(f"# Sequence Protocol for '{project.name}'\n\n")
+
+            for seg, data in self.data.items():
+                self.ascii_doc.append(f"## Segmentation '{seg}'\n")
+                for segment in data:
+                    self.ascii_doc.append(f"### Segment '{segment}'\n")
+
+                    screenshot = data[segment]["screenshot"]
+                    if screenshot is not None:
+                        width = project.movie_descriptor.display_width / 2
+                        height = project.movie_descriptor.display_height / 2
+                        screenshot_name = outpath.parent / (str(uuid4()) + ".png")
+                        self._to_delete_screenshots.append(screenshot_name)
+                        self._write_screenshot(screenshot, screenshot_name)
+                        self.ascii_doc.append(f"![]( {screenshot_name})\n")
+
+                    if data[segment]["notes"]:
+                        self.ascii_doc.append("#### Notes\n")
+                        self.ascii_doc.append(data[segment]["notes"] + "\n")
+
+                    if data[segment]["free annotations"]:
+                        self.ascii_doc.append("#### Free Annoations\n")
+                        for anno in data[segment]["free annotations"]:
+                            self.ascii_doc.append(": ".join(anno))
+                            self.ascii_doc.append("\n")
+
+                    if data[segment]["vocabulary_keyword"]:
+                        self.ascii_doc.append("#### Classification Annotations\n")
+                        for obj, cl in data[segment]["vocabulary_keyword"].items():
+                            self.ascii_doc.append(f"* {obj}")
+                            for voc, kw in cl.items():
+                                self.ascii_doc.append(f"\t* {voc}")
+                                for keyword in kw:
+                                    self.ascii_doc.append(f"\t\t* {keyword}")
+
+                    self.ascii_doc.append("\n'''\n\n")
+
+            with open(markdown_path, "w") as outf:
+                outf.write("\n".join(self.ascii_doc))
+
+            try:
+                latex = pypandoc.convert_file(str(markdown_path), outputfile=str(outpath), to="pdf")
+
+                print(latex)
+                # Popen(["asciidoctor-pdf", markdown_path]).wait()
+                print(f"Sequence Protocol written to {str(outpath)}.")
+            except Exception as e:
+                self._remove_screenshots()
+                # if markdown_path.exists():
+                #     os.remove(str(markdown_path))
+                # outpath.rmdir()
+
+                raise e
+
+            self._remove_screenshots()
+        else:
+            raise AttributeError("Mode is not supported:", self.mode)
+
 class JsonExporter():
     def segment2json(self, segment):
         pass
@@ -399,11 +645,11 @@ class ColorimetryExporter(ExportDevice):
 def build_file_name(naming, screenshot, movie_descriptor):
     """
     Generates a Filename for the Screenshots by a given naming convention
-    
-    :param naming: 
-    :param screenshot: 
-    :param movie_descriptor: 
-    :return: 
+
+    :param naming:
+    :param screenshot:
+    :param movie_descriptor:
+    :return:
     """
     file_name = "/"
 
