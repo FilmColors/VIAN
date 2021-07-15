@@ -17,7 +17,7 @@ class TimelineControl(QtWidgets.QWidget):
     onClassificationToggle = pyqtSignal(object, bool)
     onPinned = pyqtSignal(bool, object)
 
-    def __init__(self, parent, timeline, item = None, name = "No Name", height=45):
+    def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineControl, self).__init__(parent)
         self.timeline =  timeline
         self.item = item
@@ -65,7 +65,7 @@ class TimelineControl(QtWidgets.QWidget):
         self.set_name()
         self._add_spacer()
 
-        h = 4 *  QtWidgets.QDesktopWidget().fontMetrics().height()
+        h = 4 * QtWidgets.QDesktopWidget().fontMetrics().height()
 
         if self.item.strip_height == -1:
             self.resize(self.width(), h )
@@ -264,9 +264,6 @@ class TimelineControl(QtWidgets.QWidget):
         qp.setPen(pen)
         qp.drawLine(QtCore.QPoint(0,0), QtCore.QPoint(self.width(), 0))
 
-        # Title of the Control
-        # qp.drawText(QRect(self.text_loc[0], self.text_loc[1], self.width(), 25), Qt.AlignVCenter | Qt.AlignLeft, self.name)
-
         if isinstance(self.item, ILockable):
             if self.item.is_locked():
                 qp.drawPixmap(QtCore.QRect(self.width() - 20, 9, 16, 16), QPixmap("qt_ui/icons/icon_locked.png"))
@@ -287,7 +284,6 @@ class TimelineBar(QtWidgets.QFrame):
 
     def __init__(self, parent, timeline, control, height = 45):
         super(TimelineBar, self).__init__(parent)
-        self.resize(parent.width(), height)
         self.timeline = timeline
         self.orig_height = height
         self.setMouseTracking(True)
@@ -301,6 +297,7 @@ class TimelineBar(QtWidgets.QFrame):
         self.slices = []
         self.slices_index = dict()
         self.annotations = []
+        self.resize(parent.width(), height)
         self.show()
 
     def add_annotation(self, annotation, keys):

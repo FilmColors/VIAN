@@ -427,7 +427,7 @@ def set_frame(frame_pos):
     if spatial_ds1 is not None:
         data = spatial_ds1.get_data_for_time(None, frame_pos)
         source_spatial1.data = dict(
-            xs=data[:, 0],
+            xs= data[:, 0],
             ys=(data[:, 1] * -1) + height
         )
         hist = get_contour_data(contour_source1, data[:, 0], data[:, 1], width, height)

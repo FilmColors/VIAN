@@ -312,7 +312,7 @@ class WordsList(QListWidget):
             self.addItem(w.name)
 
     def add_word(self, name="A New Word"):
-        self.vocabulary.create_word(name, unique_id=str(uuid4()))
+        self.vocabulary.create_word(name, unique_id=str(uuid4()), rename_dups=True)
         self.redraw()
 
     def remove_word(self, word):

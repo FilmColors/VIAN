@@ -140,6 +140,7 @@ if __name__ == '__main__':
     print("ApplicationDone")
 
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
 
     print("Setting UI")
     print(os.getcwd())

@@ -210,9 +210,8 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # This is only for keeping the datasets when the timeline is forced to redraw
         self.visualization_datasets = []
 
-
         self.bar_height_min = 40
-        self.group_height = 25
+        self.group_height = self.fontMetrics().height() * 5
         self.controls_width = int(QApplication.desktop().screenGeometry().width() / 9) #200
         self.time_bar_height = 50
         self.timeline_tail = 100
@@ -684,9 +683,9 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 if (len(bars) >= 1 and isinstance(bars[0], TimelineAnnotationBar) and len(bars[0].annotations) > 0):
                     loc_y += self.group_height
                 elif isinstance(ctrl, TimelineControlParent):
-                    loc_y += ctrl.group_height
+                    loc_y += ctrl.group_height()
                 elif isinstance(ctrl, TimelineSubSegmentationControl):
-                    loc_y += ctrl.group_height
+                    loc_y += ctrl.group_height()
 
                 # Find the size of each bar
                 if len(ctrl.groups) > 0 and isinstance(bars[0], TimelineAnnotationBar):

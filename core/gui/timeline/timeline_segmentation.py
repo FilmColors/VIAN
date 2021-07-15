@@ -18,6 +18,7 @@ class TimelineSegmentationBar(TimelineBar):
     def __init__(self, parent, timeline, control, segmentation, height = 45):
         super(TimelineSegmentationBar, self).__init__(parent, timeline, control, height)
         self.segmentation = segmentation
+
         self.segmentation.onSegmentDeleted.connect(self.remove_slice)
         self.segmentation.onSegmentAdded.connect(self.add_slice)
 

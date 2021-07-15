@@ -62,8 +62,6 @@ class TimelineControlParent(QWidget):
         self.setMouseTracking(True)
 
         self.indent = 20
-        self.group_height = self.fontMetrics().height() * 3
-
         self.btn_expand = QtWidgets.QPushButton("+", self)
         self.btn_expand.clicked.connect(self.toggle_expand)
         self.btn_expand.setStyleSheet("QWidget{background:rgba(42, 116, 145, 100); margin:0pt; border-radius: 5px; font-size: 15pt;}")
@@ -96,6 +94,9 @@ class TimelineControlParent(QWidget):
 
         self.btn_expand.raise_()
         self.collapse()
+
+    def group_height(self):
+        return  self.fontMetrics().height() * 3
 
     def add_child(self, c):
         self.children.append(c)
@@ -139,7 +140,6 @@ class TimelineSubSegmentationControl(QWidget):
         self.parent_item = parent_item
         self.timeline = timeline
 
-        self.group_height = self.fontMetrics().height() * 3
         self.indent = 30
         self.is_expanded = False
 
@@ -177,6 +177,9 @@ class TimelineSubSegmentationControl(QWidget):
         self.is_resizing = False
         self.resize_offset = 0
         self.highlighted_entry = None
+
+    def group_height(self):
+        return self.fontMetrics().height() * 3
 
     def set_indent(self, d):
         self.indent = d
@@ -216,7 +219,7 @@ class TimelineSubSegmentationControl(QWidget):
 
     def update_strip_height(self):
         if len(self.sub.entries) > 0:
-            t = (self.height() - self.timeline.group_height) / len(self.sub.entries)
+            t = (self.height() - self.timeline.group_height()) / len(self.sub.entries)
             # if t < 20:
             #     return
             self.sub.strip_height = t
@@ -555,9 +558,5 @@ class TimebarSubSegmentationSlice(QWidget):
         qp.setPen(pen)
         qp.drawRect(QtCore.QRect(0, 0, self.width(), self.height()))
         qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), gradient)
-
-        # pen.setColor(QtGui.QColor(255, 255, 255))
-        # qp.setPen(pen)
-        # qp.drawText(5, (self.height() + self.text_size) // 2, self.text)
 
         qp.end()

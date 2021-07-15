@@ -708,6 +708,20 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #             if a.analysis_job_class == class_name:
     #                 return True
     #     return False
+    def has_analysis(self, class_name):
+        for a in self.analysis:
+            if isinstance(a, IAnalysisJobAnalysis):
+                if a.analysis_job_class == class_name:
+                    return True
+        return False
+
+    def get_analyses_by_name(self, class_name):
+        resu = []
+        for a in self.analysis:
+            if isinstance(a, IAnalysisJobAnalysis):
+                if a.analysis_job_class == class_name:
+                    resu.append(a)
+        return resu
 
     def get_colormetry(self):
         """
@@ -1603,7 +1617,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if library_voc is None:
                 library_voc = library.get_vocabulary_by_name(v.name)
             if library_voc is not None:
-                log_info("Found Vocabulary", v.name)
                 v.update_vocabulary(library_voc)
             else:
                 log_warning("Vocabulary not found in Library:", v.name)

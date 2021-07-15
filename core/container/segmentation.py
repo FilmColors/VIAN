@@ -145,13 +145,23 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         self.project.onSegmentAdded.emit(segment)
 
     def remove_segment(self, segment, dispatch = True):
+        import time
+        t = time.time()
         self.segments.remove(segment)
 
+        print("Remove Segment", time.time() - t)
+        t = time.time()
         self.update_segment_ids()
+        print("update_segment_ids Segment", time.time() - t)
+        t = time.time()
         self.project.sort_screenshots()
+        print("sort_screenshots Segment", time.time() - t)
+        t = time.time()
         if dispatch:
             self.project.undo_manager.to_undo((self.remove_segment, [segment]), (self.add_segment, [segment]))
             self.dispatch_on_changed(item=self)
+        print("dispatch_on_changed Segment", time.time() - t)
+
         self.onSegmentDeleted.emit(segment)
 
     def cut_segment(self, segm, time):

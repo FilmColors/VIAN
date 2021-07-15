@@ -172,6 +172,9 @@ class TimelineLinePlot(TimelineVisualization):
         self.update()
 
     def paintEvent(self, QPaintEvent):
+        if not hasattr(self, "timeline"):
+            #TODO Not really clear why I need this, since timeline is an attribute of type:TimelineBar
+            return
         t_start = self.timeline.get_current_t_start()
         t_end = self.timeline.get_current_t_end()
         values = (t_start, t_end, self.height(), self.width())
@@ -210,7 +213,6 @@ class TimelineLinePlot(TimelineVisualization):
 
             qp.setPen(pen)
             qp.drawLine(QPointF(0, point.y()), QPointF(self.width(), point.y()))
-
 
         r = self.rect()
         r.adjust(1, 1, -1, -1)

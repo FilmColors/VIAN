@@ -69,10 +69,18 @@ class Vocabulary(IProjectContainer, IHasName):
 
         self._path = ""
 
-    def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True):
-        if name in [w.name for w in self.words_plain]:
+    def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True, rename_dups = False):
+        tname = name
+        i = 0
+        if rename_dups:
+            while tname in [w.name for w in self.words_plain] :
+                tname = name + "_{f}".format(f=i)
+                i += 1
+            name = tname
+        elif name in [w.name for w in self.words_plain]:
             log_warning("Duplicate Word", name)
             return
+
         word = VocabularyWord(name, vocabulary=self, unique_id=unique_id)
         self.add_word(word, parent_word, dispatch)
         return word
@@ -578,17 +586,19 @@ class ClassificationObject(IProjectContainer, IHasName):
             self.classification_vocabularies.append(voc)
             keywords = []
             for i, w in enumerate(voc.words_plain):
+                print(i, w)
                 keyword = None
                 if keyword_override is not None and w.unique_id in keyword_override:
                     keyword = keyword_override[w.unique_id]
                 if keyword is None:
-                    keyword = UniqueKeyword(self.experiment, voc, w, self)
+                    keyword = UniqueKeyword(self.experiment, voc, w, self, emit_change=False)
                 if external_ids is not None:
                     keyword.external_id = external_ids[i]
                 keyword.set_project(self.project)
                 self.unique_keywords.append(keyword)
                 keywords.append(keyword)
             self.onUniqueKeywordsChanged.emit(self)
+
             voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
             voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
             print("Vocabulary added", voc.name)
@@ -780,7 +790,7 @@ class UniqueKeyword(IProjectContainer):
     :var class_obj: The ClassObj this keyword origins
     :var external_id: An External Key for the ERC-FilmColors Project
     """
-    def __init__(self, experiment,  voc_obj:Vocabulary = None, word_obj:VocabularyWord = None, class_obj:ClassificationObject = None, unique_id=-1):
+    def __init__(self, experiment,  voc_obj:Vocabulary = None, word_obj:VocabularyWord = None, class_obj:ClassificationObject = None, unique_id=-1, emit_change=True):
         IProjectContainer.__init__(self, unique_id=unique_id)
         self.experiment = experiment
         self.voc_obj = voc_obj
@@ -789,7 +799,7 @@ class UniqueKeyword(IProjectContainer):
         self.external_id = -1
         self.tagged_containers = []
 
-        if word_obj is not None:
+        if word_obj is not None and emit_change:
             self.word_obj._add_referenced_unique_keyword(self)
 
     def get_name(self):

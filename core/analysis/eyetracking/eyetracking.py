@@ -203,8 +203,10 @@ class RawPointsSpatialDataset(SpatialOverlayDataset):
         self.height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     def get_data_for_time(self, time_ms, frame):
-        pos = ms_to_frames(time_ms, self.fps)
-
+        if time_ms is not None:
+            pos = ms_to_frames(time_ms, self.fps)
+        else:
+            pos = frame
         if self.fixations_sampled is not None:
             indices = np.where(np.logical_and(pos - (self.fps / 2) < self.time_np, self.time_np <  pos + (self.fps/2)))
             points = self.fixations_np[indices]
