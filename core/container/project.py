@@ -1612,6 +1612,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
             return new_voc
 
     def sync_with_library(self,  library):
+        collection = None
+
         for v in self.vocabularies:
             library_voc = library.get_vocabulary_by_id(v.unique_id)
             if library_voc is None:
@@ -1619,8 +1621,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if library_voc is not None:
                 v.update_vocabulary(library_voc)
             else:
-                log_warning("Vocabulary not found in Library:", v.name)
-
+                if collection is None:
+                    collection = library.create_collection("Imported from Project {f}".format(f=self.name))
+                collection.add_vocabulary(v)
+                log_warning("Vocabulary not found in Library and imported:", v.name)
+        # print(library)
     #endregion
 
     #region MediaObjects

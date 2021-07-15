@@ -175,6 +175,7 @@ class TimelineLinePlot(TimelineVisualization):
         if not hasattr(self, "timeline"):
             #TODO Not really clear why I need this, since timeline is an attribute of type:TimelineBar
             return
+
         t_start = self.timeline.get_current_t_start()
         t_end = self.timeline.get_current_t_end()
         values = (t_start, t_end, self.height(), self.width())

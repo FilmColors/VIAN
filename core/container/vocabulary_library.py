@@ -1,6 +1,6 @@
 import json
 from uuid import uuid4
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from core.container.experiment import Vocabulary, VocabularyWord
 from typing import Dict, List
 from functools import partial
@@ -41,7 +41,10 @@ class VocabularyCollection(QObject):
         self.onCollectionChanged.emit(self)
         return voc
 
+    @pyqtSlot()
     def on_changed(self):
+        import time
+        print("Collection Changed", time.time())
         self.onCollectionChanged.emit(self)
 
     def remove_vocabulary(self, voc:Vocabulary):
@@ -136,8 +139,6 @@ class VocabularyLibrary(QObject):
         """
         col = VocabularyCollection(name)
         self.add_collection(col)
-        self.on_change()
-
         return col
 
     def add_collection(self, col:VocabularyCollection) -> VocabularyCollection:
@@ -208,6 +209,14 @@ class VocabularyLibrary(QObject):
         self.on_change()
         return self
 
+    def __str__(self):
+        res = ""
+        for c in self.collections.values():
+            res += c.name + "\n"
+            for v in c.vocabularies.values():
+                res += "- " + v.name + "\n"
+            res += "\n\n"
+        return res
 
 # global_library = None
 if __name__ == '__main__':

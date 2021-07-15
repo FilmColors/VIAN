@@ -41,7 +41,6 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
 
         self.show()
 
-
     def set_word_selected(self):
         word = self.word_list.get_selected_word()
         self.editor.set_word(word)
@@ -147,9 +146,9 @@ class VocabularyTreeView(QWidget):
         self.onCheckStateChanged.emit(self.get_check_state())
 
     def on_item_changed(self, itm):
-        if isinstance(itm, CollectionItem):
+        if isinstance(itm, CollectionItem) and itm.text(0) != itm.collection.name:
             itm.collection.set_name(itm.text(0))
-        elif isinstance(itm, VocabularyItem):
+        elif isinstance(itm, VocabularyItem) and itm.text(0) != itm.vocabulary.name:
             itm.vocabulary.set_name(itm.text(0))
 
     def new_collection(self, name="New Collection"):

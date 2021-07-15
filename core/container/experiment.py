@@ -412,6 +412,7 @@ class Vocabulary(IProjectContainer, IHasName):
                 counter += 1
                 name = base + "_" + str(counter).zfill(2)
         self.name = name
+        print("set name", self.sender())
         self.onVocabularyChanged.emit(self)
 
     def delete(self):
