@@ -10,7 +10,7 @@ __credits__ = [
     "Visualization and Multimedia Lab, University of Zurich"
 ]
 __license__ = "GPL"
-__version__ = "0.9.3"
+__version__ = "0.9.5"
 __maintainer__ = [
     "Gaudenz Halter",
     "Jonathan Schaber"

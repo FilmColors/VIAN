@@ -256,6 +256,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.is_resizing = False
 
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
+
         super(TimelineSubSegmentationControl, self).paintEvent(a0)
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
