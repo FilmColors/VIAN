@@ -25,7 +25,7 @@ class TimelineSubSegmentationEntry:
 
 
 class TimelineSubSegmentation:
-    def __init__(self, name):
+    def __init__(self, name, strip_height):
         self.name = name
         self.entries = []
 
@@ -96,7 +96,7 @@ class TimelineControlParent(QWidget):
         self.collapse()
 
     def group_height(self):
-        return  self.fontMetrics().height() * 3
+        return  self.fontMetrics().height() * 2
 
     def add_child(self, c):
         self.children.append(c)
@@ -179,7 +179,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.highlighted_entry = None
 
     def group_height(self):
-        return self.fontMetrics().height() * 3
+        return self.fontMetrics().height() * 2
 
     def set_indent(self, d):
         self.indent = d
@@ -276,7 +276,7 @@ class TimelineSubSegmentationControl(QWidget):
         qp.fillRect(QtCore.QRect(self.indent, 0, self.width(), self.height()), gradient)
 
         if self.is_expanded:
-            y = self.timeline.group_height + self.sub.strip_height
+            y = self.group_height()
             for i, s in enumerate(self.sub.entries):
                 text_rect = QtCore.QRect(0, y, self.width(), self.sub.strip_height)
                 if s.strip == self.highlighted_entry:

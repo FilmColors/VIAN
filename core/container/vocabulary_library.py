@@ -1,10 +1,8 @@
 import json
 from uuid import uuid4
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-from core.container.experiment import Vocabulary, VocabularyWord
-from typing import Dict, List
-from functools import partial
-from core.container.project import VIANProject
+from core.container.experiment import Vocabulary
+from typing import Dict
 
 # TODO Implement Copy Collection Behaviour
 # TODO Storing Behaviour
@@ -31,7 +29,7 @@ class VocabularyCollection(QObject):
         voc = Vocabulary(name, unique_id=str(uuid4()))
         self.add_vocabulary(voc)
 
-    def add_vocabulary(self, voc:Vocabulary, force = False):
+    def add_vocabulary(self, voc: Vocabulary, force=False):
         if voc.unique_id in self.vocabularies and not force:
             raise Exception("Vocabulary already in Collection")
         else:
@@ -47,7 +45,7 @@ class VocabularyCollection(QObject):
         print("Collection Changed", time.time())
         self.onCollectionChanged.emit(self)
 
-    def remove_vocabulary(self, voc:Vocabulary):
+    def remove_vocabulary(self, voc: Vocabulary):
         voc.onVocabularyChanged.disconnect(self.on_changed)
         if voc.unique_id in self.vocabularies:
             self.vocabularies.pop(voc.unique_id)
@@ -57,19 +55,19 @@ class VocabularyCollection(QObject):
     def __str__(self):
         s = "Vocabulary Collection {f}".format(f=self.name)
         for uid, voc in self.vocabularies.items():
-            s += "\n\t-{voc_name}".format(voc_name = voc.name)
+            s += "\n\t-{voc_name}".format(voc_name=voc.name)
         return s
 
     def serialize(self):
         return dict(
-            name = self.name,
-            unique_id = self.unique_id,
-            vocabularies = [v.serialize() for v in self.vocabularies.values()],
-            is_editable = self.is_editable
+            name=self.name,
+            unique_id=self.unique_id,
+            vocabularies=[v.serialize() for v in self.vocabularies.values()],
+            is_editable=self.is_editable
         )
 
     @staticmethod
-    def deserialize(data:Dict):
+    def deserialize(data: Dict):
         new_instance = VocabularyCollection()
         new_instance.is_editable = data['is_editable']
         new_instance.name = data['name']
@@ -83,7 +81,6 @@ class VocabularyCollection(QObject):
 
 
 class VocabularyLibrary(QObject):
-
     """
     The VocabularyLibrary is the central place where all vocabularies of a user are stored and shared between different
     project. Whenever a user loads a Project, the current versions of the vocabularies are fetched.
@@ -113,7 +110,7 @@ class VocabularyLibrary(QObject):
             self.save()
         self.onLibraryChanged.emit(self)
 
-    def get_vocabulary_by_id(self, unique_id:str) -> Vocabulary :
+    def get_vocabulary_by_id(self, unique_id: str) -> Vocabulary:
         """
         Returns a vocabulary by a given unique_id.
 
@@ -122,11 +119,11 @@ class VocabularyLibrary(QObject):
         """
         return self.voc_index.get(str(unique_id))
 
-    def get_vocabulary_by_name(self, name:str) -> Vocabulary :
+    def get_vocabulary_by_name(self, name: str) -> Vocabulary:
         """
-        Returns a vocabulary by a given unique_id.
+        Returns a vocabulary by a given name.
 
-        :param unique_id: uuid
+        :param name: the name of the vocabulary to find
         :return:
         """
         return self.voc_name.get(str(name))
@@ -141,7 +138,7 @@ class VocabularyLibrary(QObject):
         self.add_collection(col)
         return col
 
-    def add_collection(self, col:VocabularyCollection) -> VocabularyCollection:
+    def add_collection(self, col: VocabularyCollection) -> VocabularyCollection:
         """
         Adds a collection object to the library
         :param col:
@@ -152,7 +149,7 @@ class VocabularyLibrary(QObject):
         self.on_change()
         return col
 
-    def remove_collection(self, col:VocabularyCollection):
+    def remove_collection(self, col: VocabularyCollection):
         """
         Removes a collection from the library and puts it in the trash (todo)
         :param col:
@@ -204,7 +201,7 @@ class VocabularyLibrary(QObject):
         self.file_path = filepath
 
         for json_data in data['collections']:
-            col = self.add_collection(VocabularyCollection.deserialize(json_data))
+            self.add_collection(VocabularyCollection.deserialize(json_data))
 
         self.on_change()
         return self
@@ -218,23 +215,15 @@ class VocabularyLibrary(QObject):
             res += "\n\n"
         return res
 
-# global_library = None
-if __name__ == '__main__':
-    p = VIANProject().load_project("C:/Users/gaude/Documents/VIAN/projects/project_name_netflix/project_name_netflix.eext")
-
-    library = VocabularyLibrary()
-    col = library.create_collection("My Collection Number 1")
-
-    for voc in p.vocabularies:
-        col.add_vocabulary(voc)
-
-    library.save("../../data/library.json")
-
-
-
-
-
-
-
-
-
+# # global_library = None
+#
+# if __name__ == '__main__':
+#     p = VIANProject().load_project("C:/Users/gaude/Documents/VIAN/projects/project_name_netflix/project_name_netflix.eext")
+#
+#     library = VocabularyLibrary()
+#     col = library.create_collection("My Collection Number 1")
+#
+#     for voc in p.vocabularies:
+#         col.add_vocabulary(voc)
+#
+#     library.save("../../data/library.json")

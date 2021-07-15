@@ -394,7 +394,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
                 for j, t in subsegments.items():
                     for voc, (cl_obj, kwds) in subsegments[j].items():
-                        group = TimelineSubSegmentation(voc)
+                        group = TimelineSubSegmentation(voc, self.group_height)
                         for k in kwds:
                             group.add_entry(TimelineSubSegmentationEntry(k.word_obj.name, mime_data=dict(keyword = k)))
                         self.add_sub_segmentation(s, group, cat=cl_obj)
