@@ -51,6 +51,7 @@ class TimelineControlParent(QWidget):
         super(TimelineControlParent, self).__init__(parent)
         self.children = children
         self.name = name
+        self.setToolTip(self.name)
         self.is_expanded = False
         if self.children is None:
             self.children = []
@@ -96,7 +97,6 @@ class TimelineControlParent(QWidget):
         self.btn_expand.raise_()
         self.collapse()
 
-
     def add_child(self, c):
         self.children.append(c)
         c.set_indent(self.indent + 10)
@@ -134,6 +134,7 @@ class TimelineSubSegmentationControl(QWidget):
         self.setMouseTracking(True)
 
         self.name = sub.name
+        self.setToolTip(self.name)
 
         self.parent_item = parent_item
         self.timeline = timeline
@@ -406,7 +407,6 @@ class TimelineSubSegmentationBar(QWidget):
     def set_selecting(self, new_state):
         self.selection_update_state = new_state
         self.is_selecting = True
-
 
     def rescale(self):
         if self.control.is_expanded:

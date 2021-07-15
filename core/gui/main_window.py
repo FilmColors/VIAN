@@ -27,7 +27,7 @@ from core.gui.dialogs.preferences_dialog import DialogPreferences
 from core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
 from core.gui.dialogs.screenshot_importer_dialog import DialogScreenshotImport
 from core.gui.dialogs.letterbox_widget import LetterBoxWidget
-from core.gui.analyses_widget import AnalysisDialog
+from core.gui.dialogs.analyses_dialog import AnalysisDialog
 from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
 from core.gui.classification import ClassificationWindow
 from core.gui.colormetry_widget import *
@@ -1835,7 +1835,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player.on_loaded(self.project)
 
     def on_export_screenshots(self):
-        dialog = DialogScreenshotExporter(self, self.screenshots_manager)
+        dialog = DialogScreenshotExporter(self, self.project)
         dialog.show()
 
     def on_facial_reconition(self):

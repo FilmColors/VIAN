@@ -826,7 +826,7 @@ class UniqueKeyword(IProjectContainer):
         if self.voc_obj is None or self.word_obj is None or self.class_obj is None:
             raise ValueError("UniqueKeyword could not be resolved.")
 
-        print("UniqueKeyword", self.voc_obj.name, self.word_obj.name)
+
         self.set_project(project)
         self.word_obj._add_referenced_unique_keyword(self)
 

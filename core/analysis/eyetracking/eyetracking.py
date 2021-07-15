@@ -19,6 +19,7 @@ from matplotlib import cm
 
 colormap = cm.get_cmap("viridis")
 
+
 @vian_analysis
 class EyetrackingAnalysis(IAnalysisJob):
     def __init__(self, resolution=30):
@@ -38,7 +39,6 @@ class EyetrackingAnalysis(IAnalysisJob):
         """
         super(EyetrackingAnalysis, self).prepare(project, targets, fps, class_objs)
 
-
         cap = cv2.VideoCapture(project.movie_descriptor.movie_path)
         width, height = cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -49,6 +49,7 @@ class EyetrackingAnalysis(IAnalysisJob):
             height=height,
             target=targets[0]
         )
+
         return args
 
     def process(self, argst, sign_progress):
@@ -185,7 +186,6 @@ class RawPointsSpatialDataset(SpatialOverlayDataset):
                                                       analysis,
                                                       vis_type=SpatialOverlayDataset.VIS_TYPE_HEATMAP)
         self.fixations_sampled = fixations_sampled
-
         self.time_np = np.zeros(len(self.fixations_sampled.index))
         self.fixations_np = np.zeros((len(self.fixations_sampled.index), 2))
 

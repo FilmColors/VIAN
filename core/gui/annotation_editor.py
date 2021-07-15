@@ -25,7 +25,6 @@ class AnnotationEditorPopup(QMainWindow):
         self.setCentralWidget(self.inner)
         self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
 
-
         if timeline is not None:
             width = int(self.timeline.width() * 0.4)
             h_margin = 5
@@ -34,15 +33,12 @@ class AnnotationEditorPopup(QMainWindow):
             x0 = self.timeline.mapToGlobal(QPoint(self.timeline.width() - width, 0)).x()
             y0 = self.timeline.mapToGlobal(QPoint(0, 0)).y() + h_margin
 
-            # if popup.x() + popup.width() > self.timeline.width():
-            #     x0 = self.timeline.width() - popup.width()
             self.move(x0, y0)
         else:
             if pos is not None:
                 self.move(pos)
             if size is not None:
                 self.resize(size)
-
 
         self.show()
 

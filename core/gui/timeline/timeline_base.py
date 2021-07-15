@@ -155,6 +155,7 @@ class TimelineControl(QtWidgets.QWidget):
         if self.item is not None:
             self.name = self.item.get_name()
             self.lbl_title.setText(self.name)
+            self.setToolTip(self.name)
 
     def update_info(self, layer):
         self.set_name()
@@ -827,13 +828,6 @@ class TimebarSlice(QtWidgets.QWidget):
             popup = AnnotationEditorPopup(self, self.item, self.mapToGlobal(a0.pos()), size = None,
                                           multi_annotation=self.timeline.multi_annotation, timeline=self.timeline)
             popup.resize(int(self.timeline.width() / 2.5), popup.height())
-
-            x0 = popup.x()
-            y0 = popup.y()
-            if popup.x() + popup.width() > self.timeline.width():
-                x0 = self.timeline.width() - popup.width()
-            popup.move(x0, y0)
-            # popup = TextEditPopup(self, self.item.set_annotation_body, self.mapToGlobal(a0.pos()), text=self.item.get_annotation_body())
 
 
 class MediaObjectWidget(QWidget):
