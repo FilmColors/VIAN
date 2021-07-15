@@ -373,6 +373,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
         self.actionProject_Summary.triggered.connect(self.on_export_summary)
         self.actionExportVIANWebApp.triggered.connect(self.on_export_vianwebapp)
+        self.actionSequence_Protocol.triggered.connect(self.on_export_sequence_protocol)
 
         # Edit Menu
         self.actionUndo.triggered.connect(self.on_undo)
@@ -1864,6 +1865,13 @@ class MainWindow(QtWidgets.QMainWindow):
             log_error(e)
     def on_export_vianwebapp(self):
         self.project.store_project(bake=True)
+
+    def on_export_sequence_protocol(self):
+        p = Path(QFileDialog.getSaveFileName(filter="*.csv *.pdf", caption="Select Save Path", directory=self.project.export_dir)[0])
+        if ".csv" in p.suffixes:
+            self.project.export(SequenceProtocolExporter(mode="csv"), p)
+        else:
+            self.project.export(SequenceProtocolExporter(mode="pdf"), p)
 
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))
