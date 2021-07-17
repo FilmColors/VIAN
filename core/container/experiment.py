@@ -373,7 +373,7 @@ class Vocabulary(IProjectContainer, IHasName):
 
         return self, id_replacing_table
 
-    def update_vocabulary(self, new_voc):
+    def update_vocabulary(self, new_voc, compare_by_name = False):
         for attr in VOC_COMPARE_ATTRS:
             if hasattr(self, attr):
                 setattr(self, attr, getattr(new_voc, attr))
@@ -381,17 +381,45 @@ class Vocabulary(IProjectContainer, IHasName):
         words = dict()
         to_remove = []
 
-        for w in new_voc.words_plain:
-            words[w.unique_id] = w
+        if compare_by_name:
+            self.project.add_to_id_list(new_voc, self.unique_id)
+            self.unique_id = new_voc.unique_id
 
-        for w in self.words_plain:
-            if w.unique_id in words:
-                for attr in WORD_COMPARE_ATTRS:
-                    setattr(w, attr, getattr(words[w.unique_id], attr))
-                words.pop(w.unique_id)
-                w.parent = self
-            else:
-                to_remove.append(w)
+            for w in new_voc.words_plain:
+                words[w.name] = w
+
+            for w in self.words_plain:
+                if w.name in words:
+                    for attr in WORD_COMPARE_ATTRS:
+                        setattr(w, attr, getattr(words[w.name], attr))
+                    self.project.add_to_id_list(words[w.name], w.unique_id)
+
+                    w.unique_id = words[w.name].unique_id
+
+                    words.pop(w.name)
+                    w.parent = self
+                else:
+                    to_remove.append(w)
+
+        else:
+            for w in new_voc.words_plain:
+                words[w.unique_id] = w
+
+            for w in self.words_plain:
+                if w.unique_id in words:
+                    for attr in WORD_COMPARE_ATTRS:
+                        setattr(w, attr, getattr(words[w.unique_id], attr))
+                    words.pop(w.unique_id)
+                    w.parent = self
+                else:
+                    to_remove.append(w)
+
+        # print(self.name)
+        # if len(to_remove) > 0 or len(words.values()) > 0:
+        #
+        #     print("to_remove", [n.name for n in to_remove])
+        #     print("to_add", [n.name for n in words.values()])
+        #     print("\n")
 
         for w in to_remove:
             self.remove_word(w)
@@ -758,7 +786,12 @@ class ClassificationObject(IProjectContainer, IHasName):
             try:
                 self.unique_keywords.append(UniqueKeyword(self.experiment).deserialize(ser, project))
             except Exception as e:
-                log_error(e, ser['word_obj'])
+                log_error(e, ser['word_obj'], ser)
+
+        # Ensure that all keywords are created,
+        # also the ones which have not been in the serialization but the library!
+        for v in self.classification_vocabularies:
+            self.add_vocabulary(v)
 
         ts = [project.get_by_id(uid) for uid in serialization['target_container']]
 
@@ -1167,7 +1200,7 @@ class Experiment(IProjectContainer, IHasName):
         )
         return data
 
-    def deserialize(self, serialization, project):
+    def deserialize(self, serialization, project, unique_id_replacement = None):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
 
@@ -1264,7 +1297,6 @@ def merge_experiment(self:Experiment, other: Experiment, drop=False):
         if voc is None:
             voc = self.project.get_by_id(entry.unique_id)
             if voc is not None:
-                print("Found by uuid")
                 entry.unique_id = voc.unique_id
 
         if voc is None:

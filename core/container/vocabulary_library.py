@@ -1,4 +1,4 @@
-import json
+import json, os
 from uuid import uuid4
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from core.container.experiment import Vocabulary
@@ -195,8 +195,14 @@ class VocabularyLibrary(QObject):
         :param filepath:
         :return:
         """
-        with open(filepath, "r") as f:
-            data = json.load(f)
+        if os.path.isfile(filepath):
+            with open(filepath, "r") as f:
+                data = json.load(f)
+        else:
+            data = dict(
+                name="vian-vocabulary-library",
+                collections=[]
+            )
 
         self.file_path = filepath
 

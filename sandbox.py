@@ -11,13 +11,7 @@ from core.data.exporters import ScreenshotExporter
 # device = ScreenshotExporter("{Timestamp}.jpg", semantic_segmentation=ScreenshotExporter.SemSeg_Outlines)
 # project.export(device, "C:/Users/gaude\Documents\VIAN\projects\Demo-Swissuni\shots")
 
-with VIANProject().load_project("C:/Users/gaude\Documents\VIAN\projects\Demo-Swissuni/Demo-Swissuni.eext") as project:
+with VIANProject().load_project("C:/Users/gaude\Documents\VIAN\projects\megumi/4711_1_1_Saiyuki_1960_DVD - Kopie.eext") as project:
+    for v in project.vocabularies:
+        print(v.name)
     pass
-    for s in project.screenshots:
-        print(s.get_connected_analysis())
-
-    device = ScreenshotExporter("{Timestamp}_outline.jpg", semantic_segmentation=ScreenshotExporter.SemSeg_Outlines)
-    project.export(device, "C:/Users/gaude\Documents\VIAN\projects\Demo-Swissuni\shots")
-
-    device = ScreenshotExporter("{Timestamp}_both.jpg", semantic_segmentation=ScreenshotExporter.SemSeg_OutlinesFilled)
-    project.export(device, "C:/Users/gaude\Documents\VIAN\projects\Demo-Swissuni\shots")

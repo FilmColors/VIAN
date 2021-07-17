@@ -1248,8 +1248,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             voc = Vocabulary("voc").deserialize(v, self)
             self.add_vocabulary(voc)
 
-        if library is not None:
-            self.sync_with_library(library)
+        # If the vocabularies are merged by name, we have to update the unique ids in the keywords later
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
@@ -1302,6 +1301,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         except Exception as e:
             print("Exception in Load Experiment", e)
+
+        if library is not None:
+            self.sync_with_library(library)
 
         # Renaming the old analyzes to analyses due to a typo
         analyses_fix = "analyses"
@@ -1531,6 +1533,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         voc.name = name
         voc.set_project(self)
+        for w in voc.words_plain:
+            w.set_project(self)
 
         self.vocabularies.append(voc)
 
@@ -1613,13 +1617,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def sync_with_library(self,  library):
         collection = None
+        unique_id_replacements = dict()
 
         for v in self.vocabularies:
+            update_by_name = False
             library_voc = library.get_vocabulary_by_id(v.unique_id)
             if library_voc is None:
                 library_voc = library.get_vocabulary_by_name(v.name)
+                update_by_name = True
+                print("ID not Found", v.name, library_voc)
             if library_voc is not None:
-                v.update_vocabulary(library_voc)
+                v.update_vocabulary(library_voc, compare_by_name=update_by_name)
             else:
                 if collection is None:
                     collection = library.create_collection("Imported from Project {f}".format(f=self.name))

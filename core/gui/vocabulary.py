@@ -21,7 +21,7 @@ class VocabularyManager(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(VocabularyManager, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Vocabulary Library")
-
+        self.main_window = main_window
         self.library = main_window.vocabulary_library
         self.tree_view = VocabularyTreeView(self, self.library)
         self.word_list = WordsList(self)
@@ -73,6 +73,7 @@ class VocabularyTreeView(QWidget):
         self.tree.setSelectionMode(self.tree.ExtendedSelection)
         self.tree.onContextMenu.connect(self.context_menu)
         self.layout().addWidget(self.tree)
+        parent.main_window.onProjectOpened.connect(partial(self.recreate_tree))
 
         self.mode = mode
         self.recreate_tree()
