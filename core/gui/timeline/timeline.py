@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from core.gui.ewidgetbase import EDockWidget
-
+import typing
 from .timeline_base import TimelineControl, TimelineBar, TimelineScrubber, TimelineTimemark
 from .timeline_segmentation import TimelineSegmentationControl, TimelineSegmentationBar
 from .timeline_svg_annotation import TimelineAnnotationLayerControl, TimelineAnnotationBar
@@ -202,7 +202,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.item_segments = []
         self.item_screenshots = []
         self.item_ann_layers = []
-        self.item_sub_segmentations = dict()
+        self.item_sub_segmentations = dict()    # type: typing.Dict[str: typing.Dict[group:[TimelineControlParent, List, int], entries = List[ Tuple[TimelineSubSegmentationControl, List[TimelineSubSegmentationBar], int]]]]
         self.item_visualizations = dict()
         self.items = []
         self.item_pinned = None
@@ -633,8 +633,10 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         for lst in [self.item_segments, self.item_ann_layers, self.item_screenshots]:
             for s in lst:
                 self.items.append(s)
+
                 if s[0].item.get_id() in self.item_sub_segmentations:
-                    for cat, val in self.item_sub_segmentations[s[0].item.get_id()].items():
+
+                    for cat, val in self.item_sub_segmentations[s[0].item.get_id()].items(): #type: ClassificationObject.name, typing.Dict(entries=typing.List[TimelineSubSegmentationBar])
                         entries = val['entries']
                         group = val['group']
                         group[0].setVisible(s[0].show_classification)

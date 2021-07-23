@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import glob
 
 requirements = [
     'tensorflow',
@@ -16,20 +17,24 @@ requirements = [
     'librosa',
     'bokeh==2.2.1',
     'matplotlib',
-    'numpy'
+    'numpy',
+    'pymediainfo'
 ]
-
+print("Hello")
+print(glob.glob('data/**', recursive=True))
 setup(
     name='VIAN',
-    version='0.9.3',
+    version='0.9.5',
     packages=['core', 'core.gui', 'core.gui.misc', 'core.gui.dialogs', 'core.gui.timeline', 'core.data', 'core.data.io',
               'core.analysis', 'core.analysis.audio', 'core.analysis.color', 'core.analysis.colorimetry',
               'core.analysis.movie_mosaic', 'core.analysis.deep_learning', 'core.analysis.pipeline_scripts',
+              'core.analysis.eyetracking', 'core.analysis.motion',
               'core.container', 'core.concurrent', 'core.node_editor', 'core.visualization', 'extensions',
               'extensions.plugins', 'extensions.plugins.fiwi_tools', 'extensions.plugins.imdb_finder',
               'extensions.plugins.refactoring', 'extensions.scripts', 'extensions.analysis', 'extensions.pipelines',
               'flask_server'],
     url='www.vian.app',
+    data_files=[('data', glob.glob('data/**.*', recursive=True))],
     license='GPL',
     author='Gaudenz',
     install_requires=requirements,

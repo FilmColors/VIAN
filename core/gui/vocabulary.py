@@ -73,7 +73,10 @@ class VocabularyTreeView(QWidget):
         self.tree.setSelectionMode(self.tree.ExtendedSelection)
         self.tree.onContextMenu.connect(self.context_menu)
         self.layout().addWidget(self.tree)
-        parent.main_window.onProjectOpened.connect(partial(self.recreate_tree))
+
+        if hasattr(parent, "main_window"):
+            parent.main_window.onProjectOpened.connect(partial(self.recreate_tree))
+
 
         self.mode = mode
         self.recreate_tree()

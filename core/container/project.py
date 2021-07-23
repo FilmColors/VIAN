@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QApplication
 from random import randint
 
 from core import version
@@ -446,7 +446,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     # endregion
 
     # region Screenshots
-    def create_screenshot(self, name, frame_pos = None, time_ms = None, unique_id=-1) -> Screenshot:
+    def create_screenshot(self, name, frame_pos = None, time_ms = None, unique_id=-1, rel_pos=None, video_capture = None) -> Screenshot:
         """
         Creates a Screenshot within the project.
         Either frame_pos or time_ms has to be given,
@@ -457,10 +457,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param time_ms: The time in milliseconds of the new screenshot
         :return: a new instance of Screenshot
         """
-        if frame_pos is None and time_ms is None:
+        if frame_pos is None and time_ms is None and rel_pos is None:
             print("Either frame or ms has to be given")
             return
-        video_capture = cv2.VideoCapture(self.movie_descriptor.movie_path)
+
+        release_after = False
+        if video_capture is None:
+            release_after = True
+            video_capture = cv2.VideoCapture(self.movie_descriptor.movie_path)
+
+        if rel_pos is not None:
+            frame_pos = int(np.floor(rel_pos * video_capture.get(cv2.CAP_PROP_FRAME_COUNT)))
 
         if frame_pos is None:
             frame_pos = ms_to_frames(time_ms, video_capture.get(cv2.CAP_PROP_FPS))
@@ -470,7 +477,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
         ret, frame = video_capture.read()
 
-        video_capture.release()
+        if release_after:
+            video_capture.release()
 
         if ret:
             new = Screenshot(name, frame,
@@ -1294,6 +1302,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         except Exception as e:
             print("Loading Node Scripts failed", e)
 
+        if library is not None:
+            self.sync_with_library(library, main_window=main_window)
+
         try:
             for e in my_dict['experiments']:
                 new = Experiment().deserialize(e, self)
@@ -1301,9 +1312,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         except Exception as e:
             print("Exception in Load Experiment", e)
-
-        if library is not None:
-            self.sync_with_library(library)
 
         # Renaming the old analyzes to analyses due to a typo
         analyses_fix = "analyses"
@@ -1329,6 +1337,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 except Exception as e:
                     print("Exception in Load Analyses", str(e))
 
+        if "_contains_voc_dups" in self.meta_data:
+            for voc in set(self.meta_data["_contains_voc_dups"]['all_vocs']):
+                # v_uid = self.create_unique_id()
+                # voc.unique_id = v_uid
+                # self.add_to_id_list(voc, v_uid)
+
+                for w in voc.words_plain:
+                    uid = self.create_unique_id()
+                    w.unique_id = uid
+                    self.add_to_id_list(w, uid)
+            self.meta_data.pop("_contains_voc_dups")
+
         if self.colormetry_analysis is not None:
             if not self.hdf5_manager.has_colorimetry():
                 self.colormetry_analysis.clear()
@@ -1339,8 +1359,43 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         if has_file:
             self.sanitize_paths()
-
         return self
+
+    def log_env(self, title="New Log"):
+        print(title)
+        uids = [v.unique_id for v in self.vocabularies]
+        for i, uid in enumerate(uids):
+            print(self.vocabularies[i].name, uids.count(uid))
+
+        for v in self.vocabularies:
+            if "Surface" in v.name:
+                print(v.name)
+                for w in v.words_plain:
+                    print(w.name)
+                print("\n\n")
+
+        for clobj in self.get_default_experiment().classification_objects:
+            # voc = None
+            # all_words = []
+            # print(clobj.name)
+            # for kwd in sorted(clobj.unique_keywords, key=lambda x:(x.voc_obj.name, x.word_obj.name)):
+            #     if voc != kwd.voc_obj:
+            #         if voc is not None:
+            #             print("\t-- ", voc.name, "\t\t", all_words)
+            #
+            #         voc = kwd.voc_obj
+            #         all_words = []
+            #     all_words.append(kwd.word_obj.name)
+            # print("\n")
+            print(clobj.name)
+
+            ukws = [u.word_obj.unique_id for u in clobj.unique_keywords]
+            for v in clobj.classification_vocabularies:
+                print("\t --", v.name)
+                if "Surface" in v.name or "Pattern" in v.name:
+                    print("\t\t --", v.name, [(w.name, ukws.count(w.unique_id)) for w in v.words_plain])
+        print("\n\n\n")
+
 
     def get_template(self, segm = True, voc = True, ann = True, scripts = False, experiment = True, pipeline=True):
         """
@@ -1615,18 +1670,56 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             return new_voc
 
-    def sync_with_library(self,  library):
+    def sync_with_library(self,  library, review=True, main_window=None):
         collection = None
-        unique_id_replacements = dict()
 
         for v in self.vocabularies:
-            update_by_name = False
             library_voc = library.get_vocabulary_by_id(v.unique_id)
             if library_voc is None:
                 library_voc = library.get_vocabulary_by_name(v.name)
-                update_by_name = True
-                print("ID not Found", v.name, library_voc)
+
+            update_by_name = False
+            mode = "Import"
             if library_voc is not None:
+                if library_voc.name == v.name and library_voc.unique_id == v.unique_id:
+                    mode = "Update"
+                elif library_voc.name == v.name:
+                    msg =  "The Library contains a vocabulary with the same name {name} " \
+                           "as in the project, are these the same vocabularies?".format(name=v.name)
+                    if is_gui():
+                        state = QMessageBox.question(main_window,  "Import into Library", msg)
+                        if state == QMessageBox.Yes:
+                            mode = "Update"
+                        else:
+                            mode = "Import"
+                    else:
+                        state = input(msg + "(yes / no)")
+                        if state == "yes" or state == "y":
+                            mode = "Update"
+                        else:
+                            mode = "Import"
+                    if mode == "Update":
+                        update_by_name = True
+
+                elif library_voc.unique_id == v.unique_id:
+                    msg =  "The Library and the project contain two vocabularies ({name1}, {name2}) which appear to be same but with a different name, " \
+                           "are they the same? ".format(name1=v.name, name2=library_voc.name)
+                    if is_gui():
+                        state = QMessageBox.question(main_window,  "Import into Library", msg)
+                        print(state)
+                        if state == QMessageBox.Yes:
+                            mode = "Update"
+                        else:
+                            mode = "Import"
+                    else:
+                        state = input(msg + "(yes / no)")
+                        if state == "yes" or state == "y":
+                            mode = "Update"
+                        else:
+                            mode = "Import"
+
+            print("Mode", mode, library_voc)
+            if library_voc is not None and mode == "Update":
                 v.update_vocabulary(library_voc, compare_by_name=update_by_name)
             else:
                 if collection is None:
@@ -1847,7 +1940,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         is_unique = False
         item_id = 0
         while is_unique is False:
-            # item_id = randint(1000000000, 9999999999)
             item_id = str(uuid4())
             if self.get_by_id(item_id) is None:
                 is_unique = True

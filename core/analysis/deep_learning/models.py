@@ -4,9 +4,9 @@ from core.analysis.import_tensortflow import tf
 from core.analysis.deep_learning.labels import *
 
 from core.data.log import log_info
-
-DIR_WEIGHTS_BUILT_IN = "/data/models/"
-KERAS_LIP_WEIGHTS = "data/models/semantic_segmentation/LIP_PSPNET50_Weights.hdf5"
+from core.paths import get_root_dir
+DIR_WEIGHTS_BUILT_IN = get_root_dir() + "/data/models/"
+KERAS_LIP_WEIGHTS = get_root_dir() + "data/models/semantic_segmentation/LIP_PSPNET50_Weights.hdf5"
 
 
 class VIANKerasModel():

@@ -174,10 +174,11 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         # Resize the image to the CACHE_WIDTH (250px wide)
         self.img_movie = resize_with_aspect(img, width = CACHE_WIDTH)
 
-        if img.shape[2] == 3:
-            self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img))
-        elif img.shape[2] == 4:
-            self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
+        if self.receivers(self.onImageSet) > 0:
+            if img.shape[2] == 3:
+                self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img))
+            elif img.shape[2] == 4:
+                self.onImageSet.emit(self, self.img_movie, numpy_to_pixmap(img, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
 
     def get_img_movie_orig_size(self):
         """

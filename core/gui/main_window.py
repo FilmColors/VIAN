@@ -2497,6 +2497,7 @@ class MainWindow(QtWidgets.QMainWindow):
             log_info("Colorimetry:".rjust(15), self.project.colormetry_analysis.has_finished)
         log_info("\n")
 
+
     def dispatch_on_changed(self, receiver = None, item = None):
         if self.project is None or not self.allow_dispatch_on_change:
             return
@@ -2506,6 +2507,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             for o in self.i_project_notify_reciever:
                 o.on_changed(self.project, item)
+
 
     @pyqtSlot(object, object)
     def dispatch_on_selected(self, sender, selected):

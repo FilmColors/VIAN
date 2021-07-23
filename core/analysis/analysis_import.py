@@ -22,6 +22,7 @@ if not is_vian_light():
 
         tf_loaded = True
     except Exception as e:
+        raise e
         print("Import Failed", e)
         pass
 

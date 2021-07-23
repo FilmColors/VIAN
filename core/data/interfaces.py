@@ -158,7 +158,7 @@ class IAnalysisJob(QObject):
                  author="No Author",
                  version="1.0.0",
                  multiple_result=False,
-                 data_serialization=DataSerialization.HDF5_MULTIPLE):
+                 data_serialization=DataSerialization.HDF5_MULTIPLE, coverage=None):
         """
         
         :param name: The name of the Analysis, used in the UI.
@@ -184,6 +184,7 @@ class IAnalysisJob(QObject):
         self.help_path = help_path
         self.author = author
         self.version = version
+        self.coverage = coverage
         self.multiple_result = multiple_result
         self.data_serialization = data_serialization
         self.hdf5_manager = None

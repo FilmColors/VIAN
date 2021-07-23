@@ -32,10 +32,12 @@ from PyQt5.QtGui import QPixmap, QIcon
 
 from core.data.settings import UserSettings
 from core.gui.main_window import MainWindow, version
+from core.data.computation import is_gui
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ["QT_MAC_WANTS_LAYER"] = "1"
-
+os.environ["VIAN_GUI"] = "1"
+print("IS GUI", is_gui())
 
 from datetime import datetime
 from threading import Thread

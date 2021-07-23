@@ -12,6 +12,8 @@ def progress_dummy(args, **kwargs):
 def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IProjectContainer],
                  class_objs: List[ClassificationObject]=None):
     fps = project.movie_descriptor.fps
+    if not isinstance(class_objs, list):
+        class_objs = [class_objs]
 
     for clobj in class_objs:
         args = analysis.prepare(project, targets, fps, clobj)
@@ -25,11 +27,13 @@ def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IPro
 
         if isinstance(res, list):
             for r in res:
-                with PROJECT_LOCK:
-                    analysis.modify_project(project, r)
-                    project.add_analysis(r)
+                if r is not None:
+                    with PROJECT_LOCK:
+                        analysis.modify_project(project, r)
+                        project.add_analysis(r)
         else:
-            with PROJECT_LOCK:
-                analysis.modify_project(project, res)
-                project.add_analysis(res)
+            if res is not None:
+                with PROJECT_LOCK:
+                    analysis.modify_project(project, res)
+                    project.add_analysis(res)
 

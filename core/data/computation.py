@@ -732,3 +732,6 @@ def fir_lowpass_filter(sample_rate):
     # Use lfilter to filter x with the FIR filter.
     filtered_x = lfilter(taps, 1.0, x)
 
+
+def is_gui():
+    return "VIAN_GUI" in os.environ

@@ -36,6 +36,7 @@ CLASS_OBJ_SORTING_ERC = {
     "Lighting": 9,
     "Intertitle":10,
 }
+
 CATEGORY_SORTING_ERC = {
     "Location / Time": 0, "Key Words": 1, "Color": 2, "Color Contrasts": 3, "Composition": 4,
     "Depth of Field": 5, "Lighting": 6, "Textures": 7, "Materials": 8, "Faktura": 9, "Movement": 10
@@ -315,6 +316,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
 
         elif self.tab_sorting_mode == "class-obj":
             self.update_layout_class_obj(force)
+        self.main_window.project.log_env("Classification")
 
     def clear_view(self):
         self.tab_widget.clear()

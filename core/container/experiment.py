@@ -225,7 +225,11 @@ class Vocabulary(IProjectContainer, IHasName):
         hierarchy_mapper[self.unique_id] = self
 
         for w in serialization['words']:
-
+            if project is not None and project.get_by_id(w['unique_id']) is not None:
+                if "_contains_voc_dups" not in project.meta_data:
+                    project.meta_data["_contains_voc_dups"] = dict(has=True, all_vocs = [])
+                project.meta_data["_contains_voc_dups"]['all_vocs'].append(self)
+                print("ERROR, duplicate UID", self.name, w['name'])
             if w['parent'] in hierarchy_mapper:
                 parent = hierarchy_mapper[w['parent']]
             else:
@@ -402,8 +406,10 @@ class Vocabulary(IProjectContainer, IHasName):
                     to_remove.append(w)
 
         else:
+            words_by_name = dict()
             for w in new_voc.words_plain:
                 words[w.unique_id] = w
+                words_by_name[w.name] = w
 
             for w in self.words_plain:
                 if w.unique_id in words:
@@ -411,15 +417,22 @@ class Vocabulary(IProjectContainer, IHasName):
                         setattr(w, attr, getattr(words[w.unique_id], attr))
                     words.pop(w.unique_id)
                     w.parent = self
+                elif w.name in words_by_name:
+                    rpl = words_by_name[w.name]
+                    for attr in WORD_COMPARE_ATTRS:
+                        setattr(w, attr, getattr(rpl, attr))
+                    w.unique_id = rpl.unique_id
+                    words.pop(w.unique_id)
+                    w.parent = self
                 else:
                     to_remove.append(w)
 
-        # print(self.name)
-        # if len(to_remove) > 0 or len(words.values()) > 0:
-        #
-        #     print("to_remove", [n.name for n in to_remove])
-        #     print("to_add", [n.name for n in words.values()])
-        #     print("\n")
+        if "Surface" in self.name or "Texture" in self.name:
+            print(self.name)
+            print([w.name for w in self.words_plain])
+            print("to_remove", [n.name for n in to_remove])
+            print("to_add", [n.name for n in words.values()])
+            print("\n")
 
         for w in to_remove:
             self.remove_word(w)
@@ -613,6 +626,7 @@ class ClassificationObject(IProjectContainer, IHasName):
         """
         if voc not in self.classification_vocabularies:
             self.classification_vocabularies.append(voc)
+
             keywords = []
             for i, w in enumerate(voc.words_plain):
                 print(i, w)
@@ -633,11 +647,14 @@ class ClassificationObject(IProjectContainer, IHasName):
             print("Vocabulary added", voc.name)
             return keywords
         else:
+
             #Check if really there are new words in the vocabulary which are not yet added to the keywords.
             keywords = []
             all_words = [w.word_obj for w in self.unique_keywords]
+            all_word_uids = [kwd.word_obj.unique_id for kwd in self.unique_keywords]
+
             for i, w in enumerate(voc.words_plain):
-                if w not in all_words:
+                if w not in all_words and w.unique_id not in all_word_uids:
                     keyword = None
                     if keyword_override is not None and w.unique_id in keyword_override:
                         keyword = keyword_override[w.unique_id]
@@ -647,7 +664,6 @@ class ClassificationObject(IProjectContainer, IHasName):
                         keyword.external_id = external_ids[i]
                     keyword.set_project(self.project)
                     self.unique_keywords.append(keyword)
-
             for r in self.unique_keywords:
                 if r.voc_obj == voc:
                     keywords.append(r)
@@ -655,9 +671,10 @@ class ClassificationObject(IProjectContainer, IHasName):
             return keywords
 
     def on_vocabulary_word_added(self, w:VocabularyWord):
-        keyword = UniqueKeyword(self.experiment, w.vocabulary, w, self)
-        self.unique_keywords.append(keyword)
-        self.onUniqueKeywordsChanged.emit(self)
+        if w.unique_id not in [kwd.word_obj.unique_id for kwd in self.unique_keywords]:
+            keyword = UniqueKeyword(self.experiment, w.vocabulary, w, self)
+            self.unique_keywords.append(keyword)
+            self.onUniqueKeywordsChanged.emit(self)
 
     def on_vocabulary_word_removed(self, w:VocabularyWord):
         to_remove = None
@@ -782,9 +799,35 @@ class ClassificationObject(IProjectContainer, IHasName):
                 log_warning("Could not Resolve Vocabulary:", uid)
 
         self.unique_keywords = []
+        all_words = dict()
+        any_words = dict()
+
+        # Due to an bug in the copying of vocabularies, it can be durin 0.9.3, that
+        # copied vocabulary words share the same unique_ids, we thus have to prefer to tried to resolve this
+        cl_vocs_words = dict()
+        if "_contains_voc_dups" in project.meta_data:
+            for voc in self.classification_vocabularies:
+                cl_vocs_words[voc.unique_id] = dict()
+                for w in voc.words_plain:
+                    cl_vocs_words[voc.unique_id][w.unique_id] = w
+                    any_words[w.unique_id] = w
+
         for ser in serialization['unique_keywords']:
             try:
-                self.unique_keywords.append(UniqueKeyword(self.experiment).deserialize(ser, project))
+                if ser['word_obj'] not in all_words:
+                    vocc = cl_vocs_words.get(ser['voc_obj'])
+                    if vocc is not None:
+                        word_obj = vocc.get(ser["word_obj"])
+                    else:
+                        word_obj = None
+
+                    ukw = UniqueKeyword(self.experiment).deserialize(ser, project, word_obj)
+                    self.unique_keywords.append(ukw)
+                    all_words[(ser['voc_obj'], ser['word_obj'])] = ukw
+                else:
+                    ukw = all_words[(ser['voc_obj'], ser['word_obj'])]
+                    project.add_to_id_list(ukw, ser['unique_id'])
+                    print("Imported Duplicate", ukw.word_obj.name, ukw.voc_obj.name)
             except Exception as e:
                 log_error(e, ser['word_obj'], ser)
 
@@ -855,9 +898,12 @@ class UniqueKeyword(IProjectContainer):
         )
         return data
 
-    def deserialize(self, serialization, project):
+    def deserialize(self, serialization, project, word_obj = None):
         self.unique_id = serialization['unique_id']
-        self.word_obj = project.get_by_id(serialization['word_obj'])
+        if word_obj is None:
+            self.word_obj = project.get_by_id(serialization['word_obj'])
+        else:
+            self.word_obj = word_obj
         self.voc_obj = self.word_obj.vocabulary
         self.class_obj = project.get_by_id(serialization['class_obj'])
 
@@ -1250,7 +1296,7 @@ class Experiment(IProjectContainer, IHasName):
 
                 c = project.get_by_id(target_uuid)
                 try:
-                    k = keywords[keyword_uuid]
+                    k = project.get_by_id(keyword_uuid)
                 except:
                     k = None
                 if c is not None and k is not None:

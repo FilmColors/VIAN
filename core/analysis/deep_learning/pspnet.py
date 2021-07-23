@@ -11,7 +11,7 @@ import os
 
 import tensorflow as tf
 
-import keras.backend as K
+import tensorflow.keras.backend as K
 import numpy as np
 from tensorflow.keras.layers import Layer, InputSpec
 from tensorflow.keras.layers import ZeroPadding2D, Lambda, Conv2DTranspose
@@ -21,7 +21,8 @@ from tensorflow.keras.layers import multiply, add, concatenate
 from tensorflow.keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 
 from tensorflow.keras.models import Model
-from keras.utils import np_utils, conv_utils
+from tensorflow.python.keras.utils import conv_utils
+
 
 
 
