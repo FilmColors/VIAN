@@ -246,7 +246,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.onStartFlaskServer.connect(self.flask_server.run_server)
             self.onStartFlaskServer.emit()
 
-        self.vocabulary_library = VocabularyLibrary().load("data/library.json")
+
+        self.vocabulary_library = VocabularyLibrary().load(os.path.join(self.settings.DIR_TEMPLATES, "library.json"))
         self.vocabulary_library.onLibraryChanged.connect(self.on_vocabulary_library_changed)
 
         self.web_view = FlaskWebWidget(self)

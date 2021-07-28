@@ -799,8 +799,10 @@ class ClassificationObject(IProjectContainer, IHasName):
                 log_warning("Could not Resolve Vocabulary:", uid)
 
         self.unique_keywords = []
+        # All words which are attached to the Classification Object
+        # This is used to remove dangling Keywords, which belong to a vocabulary which is
+        # no longer attached to the ClassificationObject
         all_words = dict()
-        any_words = dict()
 
         # Due to an bug in the copying of vocabularies, it can be durin 0.9.3, that
         # copied vocabulary words share the same unique_ids, we thus have to prefer to tried to resolve this
@@ -810,7 +812,6 @@ class ClassificationObject(IProjectContainer, IHasName):
                 cl_vocs_words[voc.unique_id] = dict()
                 for w in voc.words_plain:
                     cl_vocs_words[voc.unique_id][w.unique_id] = w
-                    any_words[w.unique_id] = w
 
         for ser in serialization['unique_keywords']:
             try:
@@ -819,7 +820,8 @@ class ClassificationObject(IProjectContainer, IHasName):
                     if vocc is not None:
                         word_obj = vocc.get(ser["word_obj"])
                     else:
-                        word_obj = None
+                        # This UniqueKeyword is dangling and should be removed!
+                        continue
 
                     ukw = UniqueKeyword(self.experiment).deserialize(ser, project, word_obj)
                     self.unique_keywords.append(ukw)
@@ -900,10 +902,7 @@ class UniqueKeyword(IProjectContainer):
 
     def deserialize(self, serialization, project, word_obj = None):
         self.unique_id = serialization['unique_id']
-        if word_obj is None:
-            self.word_obj = project.get_by_id(serialization['word_obj'])
-        else:
-            self.word_obj = word_obj
+        self.word_obj = word_obj
         self.voc_obj = self.word_obj.vocabulary
         self.class_obj = project.get_by_id(serialization['class_obj'])
 
@@ -915,7 +914,6 @@ class UniqueKeyword(IProjectContainer):
 
         if self.voc_obj is None or self.word_obj is None or self.class_obj is None:
             raise ValueError("UniqueKeyword could not be resolved.")
-
 
         self.set_project(project)
         self.word_obj._add_referenced_unique_keyword(self)
