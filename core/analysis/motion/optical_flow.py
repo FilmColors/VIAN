@@ -30,7 +30,7 @@ array Structure:
 class OpticalFlowAnalysis(IAnalysisJob):
     def __init__(self, resolution=30):
         super(OpticalFlowAnalysis, self).__init__("Optical Flow", [MOVIE_DESCRIPTOR],
-                                                 menu=IAnalysisJob.M_MOVEMENT,
+                                                 menu = IAnalysisJob.M_MOVEMENT,
                                                  dataset_name="OpticalFlow",
                                                  dataset_shape=(1,),
                                                  dataset_dtype=np.float16,
@@ -99,6 +99,7 @@ class OpticalFlowAnalysis(IAnalysisJob):
 
         magnitudes[magnitudes == np.inf] = 0
         magnitudes = np.nan_to_num(magnitudes)
+
         result = IAnalysisJobAnalysis(
             name="Optical Flow",
             results=magnitudes,
@@ -156,6 +157,7 @@ class OpticalFlowAnalysis(IAnalysisJob):
         ]
 
     def get_hdf5_description(self):
+        #TODO
         return dict(
             title="Average Color Values",
             description="Contains a list of average color values. ",

@@ -12,11 +12,11 @@ from .container_interfaces import IProjectContainer, ISelectable, IHasName, ITim
     AutomatedTextSource, IClassifiable
 
 
-class MediaDescriptor():
-    """
-    TODO: BaseClass for MovieDescriptor and future media types
-    """
-    pass
+# class MediaDescriptor():
+#     """
+#     TODO: BaseClass for MovieDescriptor and future media types
+#     """
+#     pass
 
 
 class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
