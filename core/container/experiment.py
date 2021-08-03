@@ -59,7 +59,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
         self.comment = ""
         self.info_url = ""
         self.words = []
-        self.words_plain = [] #type:List[VocabularyWord]
+        self.words_plain = [] # type: List[VocabularyWord]
 
         self.image_urls = []
         self.category = "default"
@@ -530,14 +530,14 @@ class ClassificationObject(BaseProjectEntity, IHasName):
     
     The ClassificationTargets would therefore be "Foreground" and "Background", both will have "ColorVocabulary".
 
-    :var name: The Name of this ClassificationObject
-    :var experiment: A reference to the Experiment it belongs to
-    :var parent: A Parent Classification Object or an Experiment if it's at the root
-    :var children: A List of Chilren ClassificationObjects if any
-    :var classification_vocabularies: A List of Vocabularies attached to thsi ClassificationObject
-    :var unique_keywords: A List of Unique Keywords generated from this ClassificationObjects and its Vocabularies
-    :var target_container: A List of Target Containers to classify with this Classification Object
-    :var semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple ("<Name of Dataset>", [Indices of assigned Mask layers])
+    :var str name: The Name of this ClassificationObject
+    :var Experiment experiment: A reference to the Experiment it belongs to
+    :var ClassificationObject|Experiment parent: A Parent Classification Object or an Experiment if it's at the root
+    :var List[ClassificationObject] children: A List of Chilren ClassificationObjects if any
+    :var List[Vocabulary] classification_vocabularies: A List of Vocabularies attached to thsi ClassificationObject
+    :var List[UniqueKeyword] unique_keywords: A List of Unique Keywords generated from this ClassificationObjects and its Vocabularies
+    :var List[BaseProjectEntity] target_container: A List of Target Containers to classify with this Classification Object
+    :var Tuple[str, List[int]] semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple ("<Name of Dataset>", [Indices of assigned Mask layers])
 
     """
     # TODO Semantic Segmentation Refactor
@@ -561,18 +561,17 @@ class ClassificationObject(BaseProjectEntity, IHasName):
         """
         Adds a vocabulary to this classification object and generates the keywords.
 
-        :param voc:
-        :param dispatch:
-        :param external_ids:
-        :param keyword_override: A dict of keywords dict(w.unique_id : UniqueKeyword Object)
-        :return:
+        :param Vocabulary voc:
+        :param bool dispatch:
+        :param list external_ids:
+        :param dict[str, UniqueKeyword] keyword_override:
+        :return List[UniqueKeyword]::
         """
         if voc not in self.classification_vocabularies:
             self.classification_vocabularies.append(voc)
 
             keywords = []
             for i, w in enumerate(voc.words_plain):
-                print(i, w)
                 keyword = None
                 if keyword_override is not None and w.unique_id in keyword_override:
                     keyword = keyword_override[w.unique_id]
@@ -590,7 +589,6 @@ class ClassificationObject(BaseProjectEntity, IHasName):
             print("Vocabulary added", voc.name)
             return keywords
         else:
-
             #Check if really there are new words in the vocabulary which are not yet added to the keywords.
             keywords = []
             all_words = [w.word_obj for w in self.unique_keywords]
@@ -720,7 +718,6 @@ class ClassificationObject(BaseProjectEntity, IHasName):
         for clobj in self.experiment.get_classification_objects_plain():
             t[clobj.unique_id] = clobj
         t[self.experiment.unique_id] = self.experiment
-
         p = t[serialization['parent']]
 
         if isinstance(p, ClassificationObject):
@@ -738,7 +735,7 @@ class ClassificationObject(BaseProjectEntity, IHasName):
                 voc.onVocabularyWordAdded.connect(self.on_vocabulary_word_added)
                 voc.onVocabularyWordRemoved.connect(self.on_vocabulary_word_removed)
             else:
-                raise Exception("Could not Resolve Vocabulary", uid)
+                # raise Exception("Could not Resolve Vocabulary", uid)
                 log_warning("Could not Resolve Vocabulary:", uid)
 
         self.unique_keywords = []
@@ -750,11 +747,10 @@ class ClassificationObject(BaseProjectEntity, IHasName):
         # Due to an bug in the copying of vocabularies, it can be durin 0.9.3, that
         # copied vocabulary words share the same unique_ids, we thus have to tried to resolve this
         cl_vocs_words = dict()
-        if "_contains_voc_dups" in project.meta_data:
-            for voc in self.classification_vocabularies:
-                cl_vocs_words[voc.unique_id] = dict()
-                for w in voc.words_plain:
-                    cl_vocs_words[voc.unique_id][w.unique_id] = w
+        for voc in self.classification_vocabularies:
+            cl_vocs_words[voc.unique_id] = dict()
+            for w in voc.words_plain:
+                cl_vocs_words[voc.unique_id][w.unique_id] = w
 
         for ser in serialization['unique_keywords']:
             try:
@@ -765,8 +761,10 @@ class ClassificationObject(BaseProjectEntity, IHasName):
                     else:
                         # This UniqueKeyword is dangling and should be removed!
                         continue
-
+                    if ser['unique_id'] == "38a326f0-1260-4b66-9aec-df6805cec7ce":
+                        print("Hello")
                     ukw = UniqueKeyword(self.experiment).deserialize(ser, project, word_obj)
+                    project.add_to_id_list(ukw, ukw.unique_id)
                     self.unique_keywords.append(ukw)
                     all_words[(ser['voc_obj'], ser['word_obj'])] = ukw
                 else:
@@ -1187,7 +1185,7 @@ class Experiment(BaseProjectEntity, IHasName):
         )
         return data
 
-    def deserialize(self, serialization, project, unique_id_replacement = None):
+    def deserialize(self, serialization, project):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
 
