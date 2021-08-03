@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QLab
 from PyQt5.QtGui import QFont
 
 from core.data.computation import create_icon, parse_file_path, tuple2point, get_mouse_handle_by_location
-from core.container.annotation import Annotation, AnnotationLayer, ANNOTATION, AnnotationType
+from core.container.svg_annotation import SVGAnnotation, AnnotationLayer, ANNOTATION, AnnotationType
 from core.gui.perspectives import Perspective
 from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
 from core.gui.color_palette import ColorSelector
@@ -24,7 +24,7 @@ TIMELINE_SCALE_DEPENDENT = 2
 
 class AnnotationToolbar(EToolBar):
     def __init__(self, main_window, drawing_widget):
-        super(AnnotationToolbar, self).__init__(main_window, "Annotation Toolbar")
+        super(AnnotationToolbar, self).__init__(main_window, "SVGAnnotation Toolbar")
         self.drawing_widget = drawing_widget
 
         self.action_rect = self.addAction(create_icon("qt_ui/icons/icon_rectangle.png"), "")
@@ -90,7 +90,7 @@ class AnnotationOptionsDock(EDockWidget, IProjectChangeNotify):
 
     def __init__(self, main_window):
         super(AnnotationOptionsDock, self).__init__(main_window, limit_size=False)
-        self.setWindowTitle("Annotation Options")
+        self.setWindowTitle("SVGAnnotation Options")
         self.lwidget = QTabWidget()
         self.setWidget(self.lwidget)
         self.color_picker = HSVColorPicker(self)
@@ -189,7 +189,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
         self.show_annotations = True
 
-        # The current Values given by the Annotation Options Dock
+        # The current Values given by the SVGAnnotation Options Dock
         self.current_font_size = 12
         self.current_color = (0,0,0)
         self.current_line_thickness = 12
@@ -324,12 +324,12 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             line = 5
 
         if self.project.current_annotation_layer is not None:
-            rectangle = Annotation(AnnotationType.Rectangle,
-                                   size=(150,150),
-                                   color=color,
-                                   line_w=line,
-                                   name="New Rectangle",
-                                   t_start=start, t_end=end)
+            rectangle = SVGAnnotation(AnnotationType.Rectangle,
+                                      size=(150,150),
+                                      color=color,
+                                      line_w=line,
+                                      name="New Rectangle",
+                                      t_start=start, t_end=end)
             self.project.current_annotation_layer.add_annotation(rectangle)
             rectangle.set_project(self.project)
             # self.main_window.annotation_viewer.update_list()
@@ -348,8 +348,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             line = 5
 
         if self.project.current_annotation_layer is not None:
-            ellipse = Annotation(AnnotationType.Ellipse, (150, 150), color=color, line_w=line, name="New Ellipse",
-                                 t_start = start, t_end = end)
+            ellipse = SVGAnnotation(AnnotationType.Ellipse, (150, 150), color=color, line_w=line, name="New Ellipse",
+                                    t_start = start, t_end = end)
             ellipse.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(ellipse)
             # self.main_window.annotation_viewer.update_list()
@@ -364,9 +364,9 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             end = start + 1000
 
         if self.project.current_annotation_layer is not None:
-            a_text = Annotation(AnnotationType.Text, (200, 200), color=color, line_w=line,
-                                text="^This is some sample text", name="New Text",
-                                t_start=start, t_end=end)
+            a_text = SVGAnnotation(AnnotationType.Text, (200, 200), color=color, line_w=line,
+                                   text="^This is some sample text", name="New Text",
+                                   t_start=start, t_end=end)
             a_text.font = font
             a_text.font_size = font_size
 
@@ -394,8 +394,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                 return
 
             image_size = (img.shape[1], img.shape[0])
-            a_image = Annotation(AnnotationType.Image, image_size, resource_path=image_path, name="New Image",
-                                 t_start=start, t_end=end)
+            a_image = SVGAnnotation(AnnotationType.Image, image_size, resource_path=image_path, name="New Image",
+                                    t_start=start, t_end=end)
             a_image.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_image)
             self.update_annotation_widgets()
@@ -414,8 +414,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             line = 5
 
         if self.project.current_annotation_layer is not None:
-            a_hand = Annotation(AnnotationType.FreeHand, (200, 200), color=color, line_w=line, name= "New FreeHand",
-                                t_start=start, t_end=end)
+            a_hand = SVGAnnotation(AnnotationType.FreeHand, (200, 200), color=color, line_w=line, name="New FreeHand",
+                                   t_start=start, t_end=end)
             a_hand.set_project(self.project)
             self.project.current_annotation_layer.add_annotation(a_hand)
             # self.main_window.annotation_viewer.update_list()
@@ -453,7 +453,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
 
         if self.project.current_annotation_layer is None:
-            self.main_window.print_message("No Annotation Layer created yet", "red")
+            self.main_window.print_message("No SVGAnnotation Layer created yet", "red")
             return None, frame
         if len(self.project.current_annotation_layer.annotations) == 0:
             self.main_window.print_message("No Annotations found", "red")

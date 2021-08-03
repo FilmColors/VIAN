@@ -25,7 +25,7 @@ class %PIPELINE_NAME%(VIANPipeline):
         pass
 
     def on_svg_annotation_created(self, project, annotation, sub_img):
-        print("Hello Annotation")
+        print("Hello SVGAnnotation")
         pass
 
     def on_project_finalized(self, project):

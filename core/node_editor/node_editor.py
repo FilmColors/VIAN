@@ -1300,8 +1300,8 @@ class NodeEditorContextMenu(QMenu):
         self.project_menu = self.node_menu.addMenu("Project")
         self.a_create_segment = self.project_menu.addAction("Create Segment")
         self.a_add_segmentation = self.project_menu.addAction("Add Segmentation")
-        self.a_create_annotation = self.project_menu.addAction("Create Annotation")
-        self.a_add_annotation_layer = self.project_menu.addAction("Add Annotation Layer")
+        self.a_create_annotation = self.project_menu.addAction("Create SVGAnnotation")
+        self.a_add_annotation_layer = self.project_menu.addAction("Add SVGAnnotation Layer")
         self.a_create_screenshot = self.project_menu.addAction("Create Screenshot")
 
 

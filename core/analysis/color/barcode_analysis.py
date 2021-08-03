@@ -163,7 +163,7 @@ class BarcodeAnalysisJob(IAnalysisJob):
         This Function will be called after the processing is completed. 
         Since this function is called within the Main-Thread, we can modify our project here.
         """
-        # We want to create an Image Annotation with the Barcode in the upper part of the Display
+        # We want to create an Image SVGAnnotation with the Barcode in the upper part of the Display
         # barcode_colors = result.get_adata()["barcode"]
         # image_width = result.get_adata()["width"]
         #

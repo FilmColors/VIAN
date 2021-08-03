@@ -644,7 +644,7 @@ class SegmentOutlinerItem(AbstractOutlinerItem):
 class AnnotationLayerOutlinerRootItem(AbstractOutlinerItem):
     def __init__(self, parent, index):
         super(AnnotationLayerOutlinerRootItem, self).__init__(parent, index)
-        self.setText(0, "Annotation Layers")
+        self.setText(0, "SVGAnnotation Layers")
         self.setForeground(0, QtGui.QColor(174, 55, 55)) #133,42,42
 
 

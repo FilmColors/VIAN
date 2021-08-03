@@ -15,7 +15,7 @@ from functools import partial
 from core.gui.python_script_editor import PythonScriptEditor
 from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
 from core.data.log import log_error, log_info, log_warning
-from core.container.project import VIANProject, Screenshot, Annotation, Segment
+from core.container.project import VIANProject, Screenshot, SVGAnnotation, Segment
 from core.analysis.pipeline_scripts.pipeline_script import PipelineScript, PipelineScriptManager
 from core.data.computation import import_module_from_path, create_icon
 import numpy as np
@@ -514,7 +514,7 @@ class PipelineWidget(QWidget):
 
             scrs = [s for s in container if isinstance(s, Screenshot)]
             segments = [s for s in container if isinstance(s, Segment)]
-            annotations = [s for s in container if isinstance(s, Annotation)]
+            annotations = [s for s in container if isinstance(s, SVGAnnotation)]
 
             missing_info = self.project.get_missing_analyses(self.main_window.vian_event_handler.current_pipeline.requirements,
                                                              screenshots=scrs, annotations=annotations, segments=segments)

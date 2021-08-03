@@ -204,7 +204,7 @@ class ProjectNode(Operation):
                                                    [Slot("MoviePath", DT_Literal,"C:\\Users\\Gaudenz Halter\\Desktop\\Series_Movies\\input\\Frozen.mp4"),
                                                     Slot("Movie Duration", DT_Numeric, 0),
                                                     Slot("Segments", DT_VectorArray, 0),
-                                                    Slot("Annotation Layers", DT_VectorArray, 500),
+                                                    Slot("SVGAnnotation Layers", DT_VectorArray, 500),
                                                     ],
                                                     
                                           needs_project=True)
@@ -588,7 +588,7 @@ class OperationCreateSegment(Operation):
 class OperationAddAnnotationLayer(ProjectOperation):
     def __init__(self):
         super(OperationAddAnnotationLayer, self).__init__(
-            "Add Annotation Layer",
+            "Add SVGAnnotation Layer",
             [Slot("Name", DT_Literal, "New Segmentation"),
              Slot("Start", DT_Numeric, 0),
              Slot("End", DT_Numeric, 1000),
@@ -653,7 +653,7 @@ class OperationCreateScreenshot(Operation):
 
 class OperationCreateAnnotation(Operation):
     def __init__(self):
-        super(OperationCreateAnnotation, self).__init__("Create Annotation",
+        super(OperationCreateAnnotation, self).__init__("Create SVGAnnotation",
                                                      [Slot("Name", DT_Literal, "New Segmentation"),
                                                       Slot("Position", DT_Vector2, (0,0)),
                                                       Slot("Size", DT_Vector2, (50, 50))],

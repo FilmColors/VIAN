@@ -20,7 +20,7 @@ TGT_ENTRIES = [ 'All',
                 "All Annotations of ",
                 "All Screenshots of ",
                 "All Segments of <Create Segmentation>",
-                "All Annotations of <Create Annotation Layer",
+                "All Annotations of <Create SVGAnnotation Layer",
                 "All Screenshots of <Create Screenshots Group>"]
 
 

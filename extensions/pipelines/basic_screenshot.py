@@ -69,7 +69,7 @@ class BasicScreenshotPipeline(VIANPipeline):
         This event is yielded as soon as an svg annotation is created or changed.
 
         :param project: the VIANProject instance.
-        :param annotation: the Annotation instance created.
+        :param annotation: the SVGAnnotation instance created.
         :param sub_img: the image of the annotations bounding box
         :return: None
         """

@@ -214,7 +214,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.colorimetry_live = None
         self.query_widget = None
 
-        # This is the Widget created when Double Clicking on a Annotation
+        # This is the Widget created when Double Clicking on a SVGAnnotation
         # This is store here, because is has to be removed on click, and because the background of the DrawingWidget
         # is Transparent
         self.drawing_editor = None
@@ -1683,7 +1683,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # if arg is None or len(self.open_dialogs) != 0:
         #     self.set_overlay_visibility(False)
         # else:
-        #     if self.current_perspective in[Perspective.Annotation, Perspective.Segmentation]:
+        #     if self.current_perspective in[Perspective.SVGAnnotation, Perspective.Segmentation]:
         #         self.set_overlay_visibility(True)
         #         self.set_overlay_visibility(True)
         #         self.onOpenCVFrameVisibilityChanged.emit(True)
@@ -2366,7 +2366,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def get_version_as_string(self):
 
-        result = "VIAN - Visual Movie Annotation\n"
+        result = "VIAN - Visual Movie SVGAnnotation\n"
         result += "Version: ".ljust(15) + str(version.__version__) + "\n"
         result += "\n\n"
         result += "Author: ".ljust(15) + str(version.__author__) + "\n"

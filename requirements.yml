@@ -23,4 +23,5 @@ dependencies:
   - pip:
       - pysrt
       - python-vlc
+      - pymediainfo
 

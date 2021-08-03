@@ -16,7 +16,7 @@ from core.data.log import log_error, log_info, log_debug, log_warning
 from core.data.interfaces import IProjectChangeNotify
 from core.gui.ewidgetbase import EDockWidget
 from core.container.experiment import Experiment
-from core.container.project import Segment, Annotation, Screenshot, ClassificationObject, UniqueKeyword
+from core.container.project import Segment, SVGAnnotation, Screenshot, ClassificationObject, UniqueKeyword
 
 MATRIX_ORDER_PER_SEGMENT = 0
 MATRIX_ORDER_PER_TYPE = 1
@@ -342,7 +342,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             if self.current_container is None :
                 return
             if not (isinstance(self.current_container, Segment)
-                    or isinstance(self.current_container, Annotation)
+                    or isinstance(self.current_container, SVGAnnotation)
                     or isinstance(self.current_container, Screenshot)):
                 return
 
@@ -505,7 +505,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
             if self.current_container is None :
                 return
             if not (isinstance(self.current_container, Segment)
-                    or isinstance(self.current_container, Annotation)
+                    or isinstance(self.current_container, SVGAnnotation)
                     or isinstance(self.current_container, Screenshot)):
                 return
 

@@ -14,7 +14,7 @@ from scipy.signal import savgol_filter, resample
 from core.data.log import log_debug, log_info, log_error
 from core.container.container_interfaces import ITimelineItem
 from core.container.analysis import AnalysisContainer
-from core.container.project import Screenshot, ScreenshotGroup, Segment, Segmentation, Annotation, AnnotationLayer, \
+from core.container.project import Screenshot, ScreenshotGroup, Segment, Segmentation, SVGAnnotation, AnnotationLayer, \
     ITimeRange
 from core.data.computation import ms_to_frames
 
@@ -197,7 +197,7 @@ class IAnalysisJob(QObject):
     def get_name(self):
         return self.name
 
-    def prepare(self, project, targets, fps, class_objs=None) -> Tuple[List[Union[Screenshot, Annotation, Segment]], Dict]:
+    def prepare(self, project, targets, fps, class_objs=None) -> Tuple[List[Union[Screenshot, SVGAnnotation, Segment]], Dict]:
         """
         A step that should be performed in the main-thread before the processing takes place. 
         This is a good point to fetch all necessary data from the project and pack it to your needs.
@@ -216,7 +216,7 @@ class IAnalysisJob(QObject):
         res_targets = []
         for t in targets:
             if isinstance(t, Screenshot) \
-                    or isinstance(t, Annotation) \
+                    or isinstance(t, SVGAnnotation) \
                     or isinstance(t, Segment):
                 res_targets.append(t)
             elif isinstance(t, ScreenshotGroup):

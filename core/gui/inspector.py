@@ -120,7 +120,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             widgets = [AttributesITimeRange(self, target_item), AttributesSegment(self, target_item)]
 
         if s_type == ANNOTATION:
-            self.lbl_Type.setText("Annotation")
+            self.lbl_Type.setText("SVGAnnotation")
 
             if target_item.a_type == AnnotationType.Text:
                 widgets = [AttributesITimeRange(self, target_item), AttributesAnnotation(self, target_item), AttributesTextAnnotation(self, target_item)]
@@ -128,7 +128,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
                 widgets = [AttributesITimeRange(self, target_item), AttributesAnnotation(self, target_item)]
 
         if s_type == ANNOTATION_LAYER:
-            self.lbl_Type.setText("Annotation Layer")
+            self.lbl_Type.setText("SVGAnnotation Layer")
             widgets = [AttributesITimeRange(self, target_item)]
 
         if s_type == ANALYSIS_JOB_ANALYSIS:
@@ -331,7 +331,7 @@ class AttributesAnnotation(QWidget):
     def on_track(self):
         index =  self.comboBox_Tracking.currentIndex()
         if index != 0:
-            # Removing all keys from the Annotation
+            # Removing all keys from the SVGAnnotation
             self.annotation.remove_keys()
 
 

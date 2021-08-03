@@ -828,7 +828,7 @@ class CreateAnnotationLayerPopup(QMainWindow):
         self.project = project
         self.callback = callback
 
-        self.btn_ok = QPushButton("Create Annotation Layer", self)
+        self.btn_ok = QPushButton("Create SVGAnnotation Layer", self)
         self.btn_ok.clicked.connect(self.on_ok)
         self.setCentralWidget(QWidget(self))
         self.centralWidget().setLayout(QHBoxLayout(self))

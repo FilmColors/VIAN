@@ -243,9 +243,9 @@ class AnnotationContextMenu(ContextMenu):
         self.annotation = annotation
 
 
-        self.action_key = self.addAction("Key Annotation")
+        self.action_key = self.addAction("Key SVGAnnotation")
         self.action_remove_all_key = self.addAction("Remove all Keys")
-        self.action_delete = self.addAction("Remove Annotation")
+        self.action_delete = self.addAction("Remove SVGAnnotation")
 
         self.action_key.triggered.connect(self.on_key)
         self.action_remove_all_key.triggered.connect(self.remove_keys)

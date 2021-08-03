@@ -14,7 +14,7 @@ from core.data.log import log_error
 from core.container.experiment import Experiment
 from core.container.segmentation import Segment
 from core.container.screenshot import Screenshot
-from core.container.annotation import Annotation
+from core.container.svg_annotation import SVGAnnotation
 from core.visualization.feature_plot import GenericFeaturePlot, FeatureTuple, SegmentTuple
 from core.visualization.correlation_matrix import CorrelationVisualization, CorrelationVisualization, CorrelationFeatureTuple
 
@@ -124,7 +124,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
 
         for i, selector in enumerate(selectors):
             if isinstance(selector, Screenshot) \
-                    or isinstance(selector, Annotation) \
+                    or isinstance(selector, SVGAnnotation) \
                     or isinstance(selector, Segment):
                 for analysis in selector.connected_analyses:
                     if analysis.get_name() not in tabs:

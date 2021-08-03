@@ -15,7 +15,7 @@ from core.data.enums import *
 from .media_descriptor import MovieDescriptor
 from .hdf5_manager import HDF5Manager
 from .undo_redo_manager import UndoRedoManager
-from .annotation import *
+from .svg_annotation import *
 from .segmentation import *
 from .screenshot import *
 from .experiment import *
@@ -46,7 +46,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     :var folder: The Root Directory of the Project where the eext file lies inside
 
     :var movie_descriptor: The Movie Descriptor of this Project
-    :var annotation_layers: A List of Annotation Layers
+    :var annotation_layers: A List of SVGAnnotation Layers
     :var screenshots: A List of all Screenshots, without grouping
     :var segmentation: A List of all Segmentations
     :var analysis: A List of IAnalysisResult
@@ -60,7 +60,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     :var active_screenshot_group = self.screenshot_groups[0]
     :var active_screenshot_group.is_current = True
     :var main_segmentation_index: The index of the main Segmentation Layer in self.segmentations, by which Screenshots are sorted
-    :var current_annotation_layer: The Currently Selected Annotation Layer
+    :var current_annotation_layer: The Currently Selected SVGAnnotation Layer
     :var id_list: A list of [Unique-ID, IProjectContainer] tuples
     :var corpus_id: this is the VIANCorpus id of this project (default: -1)
     :var undo_manager = UndoRedoManager()
@@ -892,7 +892,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         """
         Removes an annotation from any annotation layer it belongs to.
 
-        :param annotation: Annotation instance to remove.
+        :param annotation: SVGAnnotation instance to remove.
         :return: None
         """
         for l in self.annotation_layers:
@@ -1499,7 +1499,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 new = self.get_by_id(l[1])
 
             if new is None:
-                merge_results.append(("Created Annotation Layer", l))
+                merge_results.append(("Created SVGAnnotation Layer", l))
                 new = AnnotationLayer(l[0])
                 new.unique_id = l[1]
                 self.add_annotation_layer(new)

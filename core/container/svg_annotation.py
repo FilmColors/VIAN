@@ -1,3 +1,11 @@
+"""
+SVGAnnotations are by now deprecated.
+
+
+
+"""
+
+
 import cv2
 from PyQt5.QtCore import pyqtSignal
 from core.data.computation import numpy_to_qt_image
@@ -7,36 +15,36 @@ from .container_interfaces import IProjectContainer, ITimeRange, IHasName, ISele
     IHasMediaObject, ITimelineItem
 
 
-class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, IHasMediaObject):
+class SVGAnnotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, IHasMediaObject):
     """
     :ivar name: name
     :ivar a_type: An AnnotationType Enum value:  { Rectangle = 0, Ellipse = 1, Line = 2, Text = 3, Image = 4, FreeHand = 5 }
     :ivar t_start: The Start Time in MS
     :ivar size: The Rect Size In original space
     :ivar curr_size: The Rect Size in relative space to the currently displayed movie frame
-    :ivar color: The Color of the Annotation
+    :ivar color: The Color of the SVGAnnotation
     :ivar orig_position: The Position in original space
     :ivar line_w: The Line thickness
-    :ivar resource_path: Ressource Path if there should be one (Image Annotation)
+    :ivar resource_path: Ressource Path if there should be one (Image SVGAnnotation)
     :ivar text: Text if any (TextAnnotation)
-    :ivar font_size: Font Size if any (Text Annotation)
+    :ivar font_size: Font Size if any (Text SVGAnnotation)
     :ivar font: FontFamily Name if any (Text Anntotation)
     :ivar has_key: If it is Keyed or not
     :ivar keys: A List of (Time, Position) Tuples
     :ivar free_hand_paths: A List of drawing Paths in form [path, color, width]
     :ivar notes: Additional notes set in the Inspector
-    :ivar is_automated: If this Annotation content is driven by another variable
+    :ivar is_automated: If this SVGAnnotation content is driven by another variable
     :ivar automated_source: The Source object hat is used in driving this ones content
     :ivar automate_property: The Source object's property that is driving this ones content
     :ivar tracking: tracking
-    :ivar annotation_layer: A Reference to it's parent Annotation Layer
+    :ivar annotation_layer: A Reference to it's parent SVGAnnotation Layer
     :ivar is_visible: If this is globaly visible or not
     :ivar widget: A Reference to it's widget in the DrawingOverlay
-    :ivar image: An Image data if there is any (Image Annotation)
+    :ivar image: An Image data if there is any (Image SVGAnnotation)
 
     """
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
-                 name = "New Annotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static", unique_id = -1):
+                 name = "New SVGAnnotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static", unique_id = -1):
         IProjectContainer.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         IClassifiable.__init__(self)
@@ -349,7 +357,7 @@ class Annotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable
 class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
     """
     Member Variables:
-    :var name: The Name of this Annotation Layer
+    :var name: The Name of this SVGAnnotation Layer
     :var t_start: Start Time in MS
     :var t_end: End Time in MS
     :var annotations: A List of Annotations
@@ -413,10 +421,10 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
             self.dispatch_on_changed(item=self)
 
     def create_annotation(self, type = AnnotationType.Rectangle, position = (150,150), size=(100,100),
-                          color = (255,255,255), line_width = 5, name = "New Annotation", font_size = 10,
+                          color = (255,255,255), line_width = 5, name = "New SVGAnnotation", font_size = 10,
                           resource_path = "", unique_id=-1):
-        annotation = Annotation(type, size = size, color=color, line_w=line_width, name=name,
-                                orig_position=position, font_size=font_size, resource_path=resource_path, unique_id=unique_id)
+        annotation = SVGAnnotation(type, size = size, color=color, line_w=line_width, name=name,
+                                   orig_position=position, font_size=font_size, resource_path=resource_path, unique_id=unique_id)
 
         self.add_annotation(annotation)
         annotation.set_project(self.project)
@@ -477,7 +485,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
 
 
         for a in serialization['annotations']:
-            new = Annotation()
+            new = SVGAnnotation()
             new.deserialize(a, self.project)
 
             new.annotation_layer = self

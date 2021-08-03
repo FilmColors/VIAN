@@ -353,7 +353,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
     :var end: Time end in MS
     :var segmentation: it's parent Segmentation, which it is grouped in
     :var ID: The Segments Index within the Segmentation {0, ..., n}
-    :var annotation_body: The Annotation body as string
+    :var annotation_body: The AnnotationBody as string
 
     Application Variables:
 

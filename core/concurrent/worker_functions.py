@@ -162,7 +162,7 @@ class LoadScreenshotsJob(IConcurrentJob):
             scr.movie_timestamp = frame2ms(scr.frame_pos, fps)
             ret, frame = video_capture.read()
 
-            # TODO this is related to the core.containers.Annotation and AnnotationLayer and is no longer of any use
+            # TODO this is related to the core.containers.SVGAnnotation and AnnotationLayer and is no longer of any use
             # a_dicts = []
             # if scr.annotation_item_ids is not None:
             #     for a_id in scr.annotation_item_ids:

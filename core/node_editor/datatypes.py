@@ -100,7 +100,7 @@ class DT_Annotation(DataType):
     def __init__(self,parent = None,  color = QColor(225, 82, 230), default_value = None):
         super(DT_Annotation, self).__init__(parent, color = color, default_value=default_value)
 
-        self.value = ["New Annotation", (0, 0), (100, 100)]
+        self.value = ["New SVGAnnotation", (0, 0), (100, 100)]
 
 
 class DT_Screenshot(DataType):

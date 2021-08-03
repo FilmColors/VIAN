@@ -29,7 +29,7 @@ class TimelineContainer(EDockWidget):
 
         self.menu_create = self.inner.menuBar().addMenu("Create")
         self.a_create_segmentation = self.menu_create.addAction("New Segmentation")
-        self.a_create_annotation_layer = self.menu_create.addAction("New Annotation Layer")
+        self.a_create_annotation_layer = self.menu_create.addAction("New SVGAnnotation Layer")
         self.a_create_annotation_layer.triggered.connect(partial(self.timeline.create_layer, []))
         self.a_create_segmentation.triggered.connect(self.timeline.create_segmentation)
 
@@ -73,7 +73,7 @@ class TimelineContainer(EDockWidget):
         self.a_inhibit_overlap.setChecked(True)
         self.a_inhibit_overlap.triggered.connect(self.update_settings)
 
-        self.a_use_multi_annotation = self.menu_options.addAction("\tUse Multi Annotation")
+        self.a_use_multi_annotation = self.menu_options.addAction("\tUse Multi SVGAnnotation")
         self.a_use_multi_annotation.setCheckable(True)
         self.a_use_multi_annotation.setChecked(False)
         self.a_use_multi_annotation.triggered.connect(self.update_settings)
@@ -476,7 +476,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
             self.main_window.print_message("Please set a Start Point First", "Orange")
 
-    def on_annotation_added(self, a:Annotation):
+    def on_annotation_added(self, a:SVGAnnotation):
         for [ctrl, bars, height] in self.item_ann_layers:
             if ctrl.layer == a.annotation_layer:
                 new = TimelineAnnotationBar(self.frame_Bars, self, ctrl, a, self.group_height)
@@ -1414,13 +1414,13 @@ class SelectorContextMenu(QtWidgets.QMenu):
         if self.selector.width() < 20:
             self.selector.end = self.selector.start + 100 * self.timeline.scale
 
-        self.action_add_layer = self.addAction("New Annotation Layer")
+        self.action_add_layer = self.addAction("New SVGAnnotation Layer")
         self.action_add_segmentation = self.addAction("New Segmentation")
 
         self.action_add_layer.triggered.connect(self.on_add_layer)
         self.action_add_segmentation.triggered.connect(self.on_add_segmentation)
 
-        self.annotation_menu = self.addMenu("Create Annotation")
+        self.annotation_menu = self.addMenu("Create SVGAnnotation")
         self.a_add_rectangle = self.annotation_menu.addAction("Rectangle")
         self.a_add_ellipse = self.annotation_menu.addAction("Ellipse")
         self.a_add_text = self.annotation_menu.addAction("Text")

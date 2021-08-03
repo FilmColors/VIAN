@@ -146,7 +146,7 @@ class UserSettings():
 
         self.AUTO_START_COLORMETRY = False
 
-        # Annotation Viewer
+        # SVGAnnotation Viewer
         self.AUTO_COLLAPSE = True
 
         if sys.platform == "darwin":

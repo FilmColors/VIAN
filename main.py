@@ -1,6 +1,6 @@
 #!bin/bash
 """
-VIAN - Visual Movie Annotation and Analysis
+VIAN - Visual Movie SVGAnnotation and Analysis
 
 
 copyright by pip
