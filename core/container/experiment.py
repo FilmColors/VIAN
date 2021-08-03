@@ -1,5 +1,6 @@
 import json
 import time
+import typing
 from uuid import uuid4
 import numpy as np
 
@@ -41,13 +42,12 @@ def delete_even_if_connected_msgbox(mode="word"):
 
 class Vocabulary(BaseProjectEntity, IHasName):
     """
-    :var name: The Name of the Vocabulary
-    :var comment: This is a generic field to put a description into about the Voc.
-    :var info_url: A URL to a description of this vocabulary
-    :var words: A List of VocabularyWords that sit in the root
-    :var words_plain: A List of All VocabularyWords that are in the Vocabulary
-    :var was_expanded: If it is expandend in the VocabularyManager
-    :var category: The Category it belongs to
+    :var str name: The Name of the Vocabulary
+    :var str comment: This is a generic field to put a description into about the Voc.
+    :var str info_url: A URL to a description of this vocabulary
+    :var List[VocabularyWord] words: The words in a hierachical form.
+    :var List[VocabularyWord] words_plain: A List of All VocabularyWords that are in the Vocabulary
+    :var string category: The Category it belongs to
     """
     onVocabularyChanged = pyqtSignal(object)
     onVocabularyWordAdded = pyqtSignal(object)
@@ -60,7 +60,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
         self.info_url = ""
         self.words = []
         self.words_plain = [] #type:List[VocabularyWord]
-        self.was_expanded = False
+
         self.image_urls = []
         self.category = "default"
 
@@ -70,11 +70,22 @@ class Vocabulary(BaseProjectEntity, IHasName):
         self._path = ""
 
     def create_word(self, name, parent_word = None, unique_id = -1, dispatch = True, rename_dups = False):
+        """
+        Creates a new word in the vocabulary.
+
+        :param str name: the name of word
+        :param Vocabulary|VocabularyWord parent_word:
+        :param str unique_id:
+        :param bool dispatch: Trigger an update event in the VIAN editor.
+        :param bool rename_dups: If True, the words are renamed if a duplicate exists, if False the duplicate is not added
+        :return VocabularyWord|None: the created word
+        """
+
         tname = name
         i = 0
         if rename_dups:
-            while tname in [w.name for w in self.words_plain] :
-                tname = name + "_{f}".format(f=i)
+            while tname in [w.name for w in self.words_plain]:
+                tname = name + f"_{i}"
                 i += 1
             name = tname
         elif name in [w.name for w in self.words_plain]:
@@ -87,9 +98,11 @@ class Vocabulary(BaseProjectEntity, IHasName):
 
     def add_word(self, word, parent_word = None, dispatch = True):
         """
-        
-        :param word: the Word object to add
-        :param parent_word: the parent Word, either as String or Word Object
+        Adds a word to the vocabulary.
+
+        :param VocabularyWord word: the Word object to add
+        :param Vocabulary|VocabularyWord parent_word: the parent Word, either as String or Word Object
+        :param bool dispatch: Trigger an update event in the VIAN editor.
         :return: None
         """
         if parent_word is None or isinstance(parent_word, Vocabulary):
@@ -119,8 +132,8 @@ class Vocabulary(BaseProjectEntity, IHasName):
         """
         Removes a word from the vocabulary, cleans up all references to this word.
 
-        :param word:
-        :param dispatch:
+        :param VocabularyWord word:
+        :param bool dispatch:
         :return:
         """
         children = []
@@ -133,15 +146,19 @@ class Vocabulary(BaseProjectEntity, IHasName):
         for w in children:
             self.words_plain.remove(w)
 
+        # If the word is directly attached to the Vocabulary we can simply remove it
         if word in self.words:
             self.words.remove(word)
         else:
+            # If the word is a child somewhere deeper in the tree, we have to remove it there.
             if word in word.parent.children:
                 word.parent.children.remove(word)
 
+        # Remove it from the words_plain list
         if word in self.words_plain:
             self.words_plain.remove(word)
 
+        # Remove it from the project
         if self.project is not None:
             self.project.remove_from_id_list(word)
 
@@ -152,18 +169,23 @@ class Vocabulary(BaseProjectEntity, IHasName):
         self.onVocabularyChanged.emit(self)
 
     def get_word_by_name(self, name):
+        """
+        Searches a word in the vocabulary by name.
+
+        :param str name:
+        :return VocabularyWord|None: A vocabulary if existent else None
+        """
         for w in self.words_plain:
             if w.name == name:
                 return w
         return None
 
-    def get_vocabulary_tree(self):
-        item = dict(name=self.name, vocabulary=self, children = [])
-        for w in self.words:
-            w.get_children(item)
-        return item
-
     def get_vocabulary_as_list(self):
+        """
+        Recursively traverses the complete Vocabulary tree and returns a list words.
+
+        :return List[VocabularyWord]: A list of words.
+        """
         result = []
         for w in self.words:
             w.get_children_plain(result)
@@ -172,31 +194,20 @@ class Vocabulary(BaseProjectEntity, IHasName):
     def get_complexity_groups(self):
         return [w.complexity_group for w in self.words]
 
-    def serialize(self):
-        words = []
-        for w in self.words:
-            w.get_children_plain(words)
+    def serialize(self) -> dict:
+        """
+        Returns the entity as json compliant values.
 
-        words_data = []
-        for w in words:
-            data = dict(
-                name = w.name,
-                unique_id = w.unique_id,
-                parent = w.parent.unique_id,
-                children = [a.unique_id for a in w.children],
-                organization_group = w.organization_group,
-                complexity_lvl = w.complexity_lvl,
-                complexity_group = w.complexity_group,
-                image_urls = w.image_urls,
-                comment=w.comment
-            )
-            words_data.append(data)
+        :return: the entity as json compliant values.
+        """
+
+        words = self.words_plain
 
         voc_data = dict(
             name = self.name,
             category = self.category,
             unique_id = self.unique_id,
-            words = words_data,
+            words = [ w.serialize() for w in words ],
             image_urls = self.image_urls,
             comment = self.comment,
             visible = self.is_visible
@@ -210,11 +221,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
         self.unique_id = serialization['unique_id']
         self.category = serialization['category']
 
-        try:
-            self.comment = serialization['comment']
-        except:
-            log_warning("No UUID found in this vocabulary", self.name)
-            pass
+        self.comment = deprecation_serialization(serialization, 'comment', "")
 
         # Probably we will not need the hierarchy anymore but for the sake of functionality
         # we do a local unique_id to object resolving
@@ -225,59 +232,23 @@ class Vocabulary(BaseProjectEntity, IHasName):
         hierarchy_mapper[self.unique_id] = self
 
         for w in serialization['words']:
+
+            # Due to a previous bug, there exist vocabularies with the same unique id.
+            # We have already imported one with this unique id, we have to generate new ids for the next.
+            # This will be done during the keyword serialization, now, we just collect them and keep it on the project
+            # level
             if project is not None and project.get_by_id(w['unique_id']) is not None:
                 if "_contains_voc_dups" not in project.meta_data:
                     project.meta_data["_contains_voc_dups"] = dict(has=True, all_vocs = [])
                 project.meta_data["_contains_voc_dups"]['all_vocs'].append(self)
-                print("ERROR, duplicate UID", self.name, w['name'])
-            if w['parent'] in hierarchy_mapper:
-                parent = hierarchy_mapper[w['parent']]
-            else:
-                parent = self
+                log_warning("ERROR, duplicate UID", self.name, w['name'])
 
-            if isinstance(parent, Vocabulary):
-                word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
-                hierarchy_mapper[word.unique_id] = word
-                # Fields introduced in 0.8.0
-                try:
-                    word.complexity_lvl = int(w['complexity_lvl'])
-                    word.organization_group = int(w['organization_group'])
-                    word.complexity_group = w['complexity_group']
-                except Exception as e:
-                    pass
-                try:
-                    word.image_urls = w['image_urls']
-                except Exception as e:
-                    pass
-                try:
-                    word.comment = w['comment']
-                except:
-                    pass
-            else:
-                # Fields introduced in 0.8.0
-                try:
-                    word = self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
+            parent = hierarchy_mapper[w['parent']]
+            word = VocabularyWord.deserialize(w, self)
+            self.add_word(word, parent_word=parent, dispatch=False)
+            hierarchy_mapper[word.unique_id] = word
 
-                    # Fields introduced in 0.8.0
-                    word.complexity_lvl = int(w['complexity_lvl'])
-                    word.organization_group = int(w['organization_group'])
-                    word.complexity_group = w['complexity_group']
-                except Exception as e:
-                    log_warning(e)
-                    pass
-                try:
-                    word.image_urls = w['image_urls']
-                except Exception as e:
-                    log_warning(e)
-                    pass
-                try:
-                    word.comment = w['comment']
-                except:
-                    pass
-        try:
-            self.is_visible = serialization['visible']
-        except Exception as e:
-            self.is_visible = True
+        self.is_visible = deprecation_serialization(serialization, 'visible', default=True)
         return self
 
     def export_vocabulary(self, path):
@@ -290,7 +261,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
             with open(path, "r") as f:
                 serialization = json.load(f)
 
-        id_replacing_table = []
+        id_replacing_table = dict()
 
         self.project = project
         self.name = serialization['name']
@@ -300,7 +271,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
         new_id = project.create_unique_id()
         self.unique_id = new_id
 
-        id_replacing_table.append([old_id, new_id])
+        id_replacing_table[old_id] = new_id
         try:
             self.comment = serialization['comment']
         except:
@@ -311,69 +282,16 @@ class Vocabulary(BaseProjectEntity, IHasName):
         for w in serialization['words']:
             old = w['unique_id']
             new = self.project.create_unique_id()
-            id_replacing_table.append([old, new])
+            id_replacing_table[old] = new
 
         for w in serialization['words']:
-            old_parent = w['parent']
-
-            new_parent = -1
-            for tpl in id_replacing_table:
-                if tpl[0] == old_parent:
-                    new_parent = tpl[1]
-                    break
-
-            old_id = w['unique_id']
-            new_id = -1
-            for tpl in id_replacing_table:
-                if tpl[0] == old_id:
-                    new_id = tpl[1]
-                    break
-
+            new_parent = id_replacing_table[w['parent']]
+            w['unique_id'] = id_replacing_table[w['unique_id']]
 
             parent = self.project.get_by_id(new_parent)
-            # If this is a root node in the Vocabulary
-            if isinstance(parent, Vocabulary):
-                word = self.create_word(w['name'], unique_id=w['unique_id'], dispatch=False)
 
-                # Fields introduced in 0.8.0
-                try:
-                    word.complexity_lvl = int(w['complexity_lvl'])
-                    word.organization_group = int(w['organization_group'])
-                    word.complexity_group = w['complexity_group']
-                except Exception as e:
-                    pass
-                    # print("Exception during Vocabulary:deserialize", e)
-                try:
-                    word.image_urls = w['image_urls']
-                except Exception as e:
-                    pass
-                    # print("Exception during Vocabulary:deserialize (II)", e)
-                try:
-                    word.comment = w['comment']
-                except:
-                    log_warning("No UUID found in this vocabulary", self.name)
-                    pass
-            else:
-
-                word = self.create_word(w['name'], parent, unique_id=w['unique_id'], dispatch=False)
-                # Fields introduced in 0.8.0
-                try:
-                    word.complexity_lvl = int(w['complexity_lvl'])
-                    word.organization_group = int(w['organization_group'])
-                    word.complexity_group = w['complexity_group']
-                except Exception as e:
-                    pass
-                    # print("Exception during Vocabulary:deserialize", e)
-                try:
-                    word.image_urls = w['image_urls']
-                except Exception as e:
-                    pass
-                    # print("Exception during Vocabulary:deserialize (II)", e)
-                try:
-                    word.comment = w['comment']
-                except:
-                    log_warning("No UUID found in this vocabulary", self.name)
-                    pass
+            word = VocabularyWord.deserialize(w, self)
+            self.add_word(word, parent_word=parent, dispatch=False)
 
         return self, id_replacing_table
 
@@ -427,6 +345,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
                 else:
                     to_remove.append(w)
 
+        # TODO
         if "Surface" in self.name or "Texture" in self.name:
             print(self.name)
             print([w.name for w in self.words_plain])
@@ -480,12 +399,11 @@ class Vocabulary(BaseProjectEntity, IHasName):
 
 class VocabularyWord(BaseProjectEntity, IHasName):
     """
+
     :var name: The Name of the Word
     :var comment: An additional field to add some info about it. In the ERC_FILM_COLORS this refers to the glossary ID
     :var info_url: A Url to the description of this Vocabulary
     :var vocabulary: It's parent Vocabulary
-    :var is_checkable: If this word is checkeable or not
-    :var was_expanded: If this word is expanded in the Vocabulary Manager
     :var parent: The Parent Word
     :var children: The Children Words
     :var connected_items: BaseProjectEntity objects that are connected with it # Obsolete
@@ -493,14 +411,12 @@ class VocabularyWord(BaseProjectEntity, IHasName):
     """
     onVocabularyWordChanged = pyqtSignal(object)
 
-    def __init__(self, name, vocabulary, parent = None, is_checkable = False, unique_id=-1):
+    def __init__(self, name, vocabulary, parent = None, unique_id=-1):
         BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.name = name
         self.comment = ""
         self.info_url = ""
         self.vocabulary = vocabulary
-        self.is_checkable = is_checkable
-        self.was_expanded = False
         self.parent = parent
         self.children = []
         self.image_urls = []
@@ -524,19 +440,18 @@ class VocabularyWord(BaseProjectEntity, IHasName):
         self.onVocabularyWordChanged.emit(self)
 
     def add_children(self, children):
+        """
+        Adds a VocabularyWord or list of as Child.
+
+        :param List[VocabularyWord]|VocabularyWord children:
+        :return:
+        """
         if isinstance(children, list):
             for c in children:
                 self.children.append(c)
                 c.parent = self
         else:
             self.children.append(children)
-
-    def get_children(self, parent_item):
-        item = dict(name=self.name, word=self, children = [])
-        parent_item['children'].append(item)
-        if len(self.children) > 0:
-            for c in self.children:
-                c.get_children(item)
 
     def get_children_plain(self, list):
         list.append(self)
@@ -551,6 +466,11 @@ class VocabularyWord(BaseProjectEntity, IHasName):
         return self.name
 
     def cleanup_referenced_keywords(self):
+        """
+        Removes all UniqueKeyword from unique_keywords, which do no longer exist.
+
+        :return:
+        """
         to_remove = []
         for ukw in self.unique_keywords:
             ukw.class_obj.unique_keywords = [x for x in ukw.class_obj.unique_keywords if not x.word_obj == self]
@@ -576,6 +496,29 @@ class VocabularyWord(BaseProjectEntity, IHasName):
         else:
             self.delete()
 
+    def serialize(self) -> dict:
+        return dict(
+            name = self.name,
+            unique_id = self.unique_id,
+            parent = self.parent.unique_id,
+            children = [a.unique_id for a in self.children],
+            organization_group = self.organization_group,
+            complexity_lvl = self.complexity_lvl,
+            complexity_group = self.complexity_group,
+            image_urls = self.image_urls,
+            comment=self.comment
+        )
+
+    @staticmethod
+    def deserialize(ser, voc):
+        self = VocabularyWord(ser['name'], voc, unique_id=ser['unique_id'])
+        self.complexity_lvl = deprecation_serialization(ser, 'complexity_lvl', 0, int)
+        self.organization_group = deprecation_serialization(ser, 'organization_group', 0, int)
+        self.complexity_group = deprecation_serialization(ser, 'complexity_group', "")
+        self.image_urls = deprecation_serialization(ser, 'image_urls', [])
+        self.comment = deprecation_serialization(ser, "comment")
+        return self
+
 
 class ClassificationObject(BaseProjectEntity, IHasName):
     """
@@ -597,7 +540,7 @@ class ClassificationObject(BaseProjectEntity, IHasName):
     :var semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple ("<Name of Dataset>", [Indices of assigned Mask layers])
 
     """
-    #TODO Semantic Segmentation Refactor
+    # TODO Semantic Segmentation Refactor
 
     onClassificationObjectChanged = pyqtSignal(object)
     onUniqueKeywordsChanged = pyqtSignal(object)
@@ -805,7 +748,7 @@ class ClassificationObject(BaseProjectEntity, IHasName):
         all_words = dict()
 
         # Due to an bug in the copying of vocabularies, it can be durin 0.9.3, that
-        # copied vocabulary words share the same unique_ids, we thus have to prefer to tried to resolve this
+        # copied vocabulary words share the same unique_ids, we thus have to tried to resolve this
         cl_vocs_words = dict()
         if "_contains_voc_dups" in project.meta_data:
             for voc in self.classification_vocabularies:

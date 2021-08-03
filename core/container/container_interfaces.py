@@ -322,8 +322,30 @@ class AutomatedTextSource():
         return ""
 
 
-def deprecation_serialization(d, keys):
-    for k in keys:
-        if k in d:
-            return d[k]
-    return None
+def deprecation_serialization(d, keys, default = None, cast=None):
+    """
+    Helper function do deserialize older version of the VIAN json.
+
+    If several keys are given all of them are checked and the first hit is resolved.
+    If nothing is found or the casting failed, a default is returned.
+
+    :param dict d:
+    :param str|List[str] keys:
+    :param Any default:
+    :param Any cast:
+    :return Any | default:
+    """
+    try:
+        if not isinstance(keys, list):
+            keys =[keys]
+
+        for k in keys:
+            if k in d:
+                if cast is not None:
+                    return cast(d[k])
+                else:
+                    return d[k]
+        return default
+    except Exception as e:
+        print(e)
+        return default

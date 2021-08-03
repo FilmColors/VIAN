@@ -1653,7 +1653,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             model.appendRow(QStandardItem(w.name))
         return model
 
-    def import_vocabulary(self, path, add_to_global = True, serialization = None, return_id_table = False) -> Vocabulary:
+    def import_vocabulary(self, path, add_to_global = True, serialization = None) -> Vocabulary:
         """
         Importing a Vocabulary from json
 
@@ -1665,10 +1665,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if add_to_global:
             self.add_vocabulary(new_voc)
 
-        if return_id_table:
-            return new_voc, id_table
-        else:
-            return new_voc
+        return new_voc
 
     def sync_with_library(self,  library, review=True, main_window=None):
         collection = None
