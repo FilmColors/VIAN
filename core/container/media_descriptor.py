@@ -8,7 +8,7 @@ from core.data.computation import ms_to_string, ms_to_frames
 from core.data.enums import MOVIE_DESCRIPTOR
 
 from core.data.log import log_error
-from .container_interfaces import IProjectContainer, ISelectable, IHasName, ITimeRange, \
+from .container_interfaces import BaseProjectEntity, ISelectable, IHasName, ITimeRange, \
     AutomatedTextSource, IClassifiable
 
 
@@ -19,7 +19,7 @@ from .container_interfaces import IProjectContainer, ISelectable, IHasName, ITim
 #     pass
 
 
-class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
+class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, AutomatedTextSource, IClassifiable):
     """
     :var movie_name: The Name of the Movie
     :var movie_path: The Path of the Movie
@@ -34,7 +34,7 @@ class MovieDescriptor(IProjectContainer, ISelectable, IHasName, ITimeRange, Auto
     """
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id="0_0_0", year=1800, source="",
                  duration=100, fps = 30, unique_id = -1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         IClassifiable.__init__(self)
         self.set_project(project)
         self.movie_name = movie_name

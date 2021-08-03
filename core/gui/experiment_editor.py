@@ -8,7 +8,7 @@ from core.gui.ewidgetbase import EDockWidget
 
 from core.data.interfaces import IProjectChangeNotify
 from core.container.project import SEGMENT, SCREENSHOT, ClassificationObject, \
-    ANNOTATION, ANNOTATION_LAYER, SCREENSHOT_GROUP, Experiment, IProjectContainer, EXPERIMENT, CLASSIFICATION_OBJECT
+    ANNOTATION, ANNOTATION_LAYER, SCREENSHOT_GROUP, Experiment, BaseProjectEntity, EXPERIMENT, CLASSIFICATION_OBJECT
 from core.analysis.deep_learning.labels import VIAN_SEGMENTATION_DATASETS
 
 
@@ -467,7 +467,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
             self.update_ui()
             return
 
-        if isinstance(item, IProjectContainer) and item.get_type() == EXPERIMENT or item.get_type() == CLASSIFICATION_OBJECT:
+        if isinstance(item, BaseProjectEntity) and item.get_type() == EXPERIMENT or item.get_type() == CLASSIFICATION_OBJECT:
             self.update_ui()
 
     def on_multi_experiment_changed(self, state):

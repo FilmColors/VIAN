@@ -11,11 +11,11 @@ from PyQt5.QtCore import pyqtSignal
 from core.data.computation import numpy_to_qt_image
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import AnnotationType, MediaObjectType, ANNOTATION, ANNOTATION_LAYER
-from .container_interfaces import IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, \
+from .container_interfaces import BaseProjectEntity, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, \
     IHasMediaObject, ITimelineItem
 
 
-class SVGAnnotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, IHasMediaObject):
+class SVGAnnotation(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, IHasMediaObject):
     """
     :ivar name: name
     :ivar a_type: An AnnotationType Enum value:  { Rectangle = 0, Ellipse = 1, Line = 2, Text = 3, Image = 4, FreeHand = 5 }
@@ -45,7 +45,7 @@ class SVGAnnotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILocka
     """
     def __init__(self, a_type = None, size = None, color = (255,255,255), orig_position = (50,50), t_start = 0, t_end = -1,
                  name = "New SVGAnnotation", text = "" , line_w = 2 ,font_size = 10, resource_path = "", tracking="Static", unique_id = -1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)
@@ -354,7 +354,7 @@ class SVGAnnotation(IProjectContainer, ITimeRange, IHasName, ISelectable, ILocka
         return self.annotation_layer
 
 
-class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
+class AnnotationLayer(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable):
     """
     Member Variables:
     :var name: The Name of this SVGAnnotation Layer
@@ -372,7 +372,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
     onAnnotationLayerChanged = pyqtSignal(object)
 
     def __init__(self, name = None, t_start = 0, t_end = 0, unique_id = -1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
 
         self.name = name
@@ -527,7 +527,7 @@ class AnnotationLayer(IProjectContainer, ITimeRange, IHasName, ISelectable, ITim
         return self.timeline_visibility
 
     def set_project(self, project):
-        IProjectContainer.set_project(self, project)
+        BaseProjectEntity.set_project(self, project)
         for a in self.annotations:
             a.set_project(project)
 

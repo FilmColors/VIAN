@@ -12,7 +12,7 @@ from typing import List
 import traceback
 
 from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS, DataSerialization
-from .container_interfaces import IProjectContainer, IHasName, ISelectable, _VIAN_ROOT, deprecation_serialization
+from .container_interfaces import BaseProjectEntity, IHasName, ISelectable, _VIAN_ROOT, deprecation_serialization
 from core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from core.data.interfaces import TimelineDataset, IAnalysisJob, SpatialOverlayDataset
 
 
-class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
+class AnalysisContainer(BaseProjectEntity, IHasName, ISelectable):
     """
     This is the BaseClass of all AnalysisContainers in the VIAN Project.
 
@@ -37,14 +37,14 @@ class AnalysisContainer(IProjectContainer, IHasName, ISelectable):
         :param name:
         :param data:
         """
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.name = name
         self.notes = ""
         self.data = data
         self.analysis_job_class = "Generic"
 
     def set_project(self, project):
-        IProjectContainer.set_project(self, project)
+        BaseProjectEntity.set_project(self, project)
 
         # The data is only set when the container is created,
         # else it should already be in the SQLite Database
@@ -118,7 +118,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
     """
     An analysis result which has been performed on some annotation and is stored as in the HDF5 format:
 
-    :var container: A IProjectContainer which has been analysed
+    :var container: A BaseProjectEntity which has been analysed
     :var analysis_job_class: The classname of the analysis which has been performed
     :var target_classification_object: The classification object which has been targeted, if the ClassificationObject has a semantic segmentation defined it has been used during analysis
 
@@ -129,7 +129,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
                  container=None, target_classification_object=None):
         super(IAnalysisJobAnalysis, self).__init__(name, results)
 
-        self.target_container = container  # type: IProjectContainer
+        self.target_container = container  # type: BaseProjectEntity
         if analysis_job_class is not None:
             self.analysis_job_class = analysis_job_class.__name__
         else:

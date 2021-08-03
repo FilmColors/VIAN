@@ -104,7 +104,7 @@
 #     # def start_worker(self, worker, name = "New Task"):
 #     #     self.thread_pool.start(worker)
 #
-#     def run_analysis(self, analysis:IAnalysisJob, targets:List[IProjectContainer], parameters:Dict, class_objs:List[ClassificationObject], fps):
+#     def run_analysis(self, analysis:IAnalysisJob, targets:List[BaseProjectEntity], parameters:Dict, class_objs:List[ClassificationObject], fps):
 #         for clobj in class_objs:
 #             args = analysis.prepare(self.project, targets, parameters, fps, clobj)
 #
@@ -125,7 +125,7 @@
 #                     analysis.modify_project(self.project, res)
 #                     self.project.add_analysis(res)
 #
-#     def run_analysis_threaded(self, analysis:IAnalysisJob, targets:List[IProjectContainer], parameters:Dict, class_objs:List[ClassificationObject], fps, n_threads = 5, n_targets = 1):
+#     def run_analysis_threaded(self, analysis:IAnalysisJob, targets:List[BaseProjectEntity], parameters:Dict, class_objs:List[ClassificationObject], fps, n_threads = 5, n_targets = 1):
 #         threads = []
 #         targets_thread = []
 #         for i, s in enumerate(targets):

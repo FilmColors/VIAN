@@ -14,6 +14,10 @@ print(_VIAN_ROOT,  os.path.split( __file__)[0] + "/../..")
 
 
 class IClassifiable():
+    """
+    An interface for entities which are classifiable using UniqueKeywords.
+
+    """
     onQueryHighlightChanged = pyqtSignal(bool)
     onClassificationChanged = pyqtSignal(object)
 
@@ -47,7 +51,10 @@ class IClassifiable():
             self.onClassificationChanged.emit(self.tag_keywords)
 
 
-class IProjectContainer(QObject):
+class BaseProjectEntity(QObject):
+    """
+
+    """
     onAnalysisAdded = pyqtSignal(object)
     onAnalysisRemoved = pyqtSignal(object)
 
@@ -234,6 +241,7 @@ class ITimeRange():
 
 class ILockable():
     onLockChanged = pyqtSignal(bool)
+
     def __init__(self):
         self.locked = False
 

@@ -41,7 +41,7 @@ if not tf_loaded:
                                                                version="1.0.0",
                                                                multiple_result=False)
 
-        def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs=None):
+        def prepare(self, project: VIANProject, targets: List[BaseProjectEntity], fps, class_objs=None):
             """
             This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project,
             and gather all data we need.

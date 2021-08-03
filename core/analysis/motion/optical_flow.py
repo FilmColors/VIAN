@@ -8,7 +8,7 @@ June 2018
 import numpy as np
 
 from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget, DataSerialization, TimelineDataset
-from core.container.project import MOVIE_DESCRIPTOR, IProjectContainer, VIANProject, SEGMENT
+from core.container.project import MOVIE_DESCRIPTOR, BaseProjectEntity, VIANProject, SEGMENT
 from core.container.analysis import IAnalysisJobAnalysis
 
 from core.analysis.color.palette_extraction import *
@@ -40,7 +40,7 @@ class OpticalFlowAnalysis(IAnalysisJob):
                                                  data_serialization=DataSerialization.HDF5_SINGLE)
         self.resolution = resolution
 
-    def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs=None):
+    def prepare(self, project: VIANProject, targets: List[BaseProjectEntity], fps, class_objs=None):
         """
         This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project,
         and gather all data we need.

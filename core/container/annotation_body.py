@@ -5,6 +5,14 @@ from typing import List
 
 
 class AnnotationBody(QObject):
+    """
+    An annotation body is the actual content of an Annotation which is added to an Annotatable.
+
+    :var name: The title of the annotation.
+    :var unique_id: UUID
+    :var content: The content based on the mime_type.
+    :var mime_type: The mime_type as string .
+    """
     onAnnotationChanged = pyqtSignal(object)
 
     MIMETYPE_TEXT_PLAIN = "text/plain"

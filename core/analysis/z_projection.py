@@ -24,7 +24,7 @@ class ZProjectionAnalysis(IAnalysisJob):
                                                   data_serialization=DataSerialization.FILE)
         self.resolution = resolution
 
-    def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
+    def prepare(self, project: VIANProject, targets: List[BaseProjectEntity], fps, class_objs = None):
         """
         This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project,
         and gather all data we need.

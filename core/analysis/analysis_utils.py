@@ -1,6 +1,6 @@
 from threading import Lock
 from core.data.interfaces import IAnalysisJob
-from core.container.container_interfaces import IProjectContainer
+from core.container.container_interfaces import BaseProjectEntity
 from typing import List, Dict
 from core.container.project import ClassificationObject, VIANProject
 
@@ -9,7 +9,7 @@ PROJECT_LOCK = Lock()
 def progress_dummy(args, **kwargs):
     pass
 
-def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[IProjectContainer],
+def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[BaseProjectEntity],
                  class_objs: List[ClassificationObject]=None):
     fps = project.movie_descriptor.fps
     if not isinstance(class_objs, list):

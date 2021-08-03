@@ -6,7 +6,7 @@ June 2018
 """
 
 from core.data.interfaces import IAnalysisJob, ParameterWidget, TimelineDataset, SpatialOverlayDataset
-from core.container.project import IProjectContainer, VIANProject, MOVIE_DESCRIPTOR, DataSerialization, FileAnalysis
+from core.container.project import BaseProjectEntity, VIANProject, MOVIE_DESCRIPTOR, DataSerialization, FileAnalysis
 from core.container.corpus import Corpus
 from core.container.analysis import IAnalysisJobAnalysis
 
@@ -31,7 +31,7 @@ class EyetrackingAnalysis(IAnalysisJob):
                                                   data_serialization=DataSerialization.FILE)
         self.resolution = resolution
 
-    def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs=None):
+    def prepare(self, project: VIANProject, targets: List[BaseProjectEntity], fps, class_objs=None):
         """
         This function is called before the analysis takes place. Since it is in the Main-Thread, we can access our project, 
         and gather all data we need.

@@ -1,16 +1,16 @@
 from core.data.enums import MEDIA_OBJECT, MediaObjectType
-from .container_interfaces import IProjectContainer, IHasName, IHasMediaObject
+from .container_interfaces import BaseProjectEntity, IHasName, IHasMediaObject
 from core.data.computation import *
 
 
-class AbstractMediaObject(IProjectContainer, IHasName):
+class AbstractMediaObject(BaseProjectEntity, IHasName):
     """
     :var name: The Name of this Object
     :var container: The Container it belongs to
     :var dtype: The Type of data stored in this MediaObject
     """
     def __init__(self, name, container:IHasMediaObject, dtype, unique_id=-1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.name = name
         self.container = container
         self.dtype = dtype

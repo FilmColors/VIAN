@@ -45,7 +45,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
         self.seeds_input_width = input_width
         self.n_super_pixel = n_super_pixel
 
-    def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
+    def prepare(self, project: VIANProject, targets: List[BaseProjectEntity], fps, class_objs = None):
         fps = project.movie_descriptor.fps
         targets, args = super(ColorPaletteAnalysis, self).prepare(project, targets, fps, class_objs)
         return args

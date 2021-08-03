@@ -42,7 +42,7 @@ class ColorHistogramAnalysis(IAnalysisJob):
                                                      multiple_result=True)
         self.resolution = resolution
 
-    def prepare(self, project: VIANProject, targets: List[IProjectContainer], fps, class_objs = None):
+    def prepare(self, project: VIANProject, targets: List[BaseProjectEntity], fps, class_objs = None):
         fps = project.movie_descriptor.fps
         targets, args = super(ColorHistogramAnalysis, self).prepare(project, targets, fps, class_objs)
         return args

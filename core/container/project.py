@@ -61,7 +61,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
     :var active_screenshot_group.is_current = True
     :var main_segmentation_index: The index of the main Segmentation Layer in self.segmentations, by which Screenshots are sorted
     :var current_annotation_layer: The Currently Selected SVGAnnotation Layer
-    :var id_list: A list of [Unique-ID, IProjectContainer] tuples
+    :var id_list: A list of [Unique-ID, BaseProjectEntity] tuples
     :var corpus_id: this is the VIANCorpus id of this project (default: -1)
     :var undo_manager = UndoRedoManager()
     :var main_window: A Reference to the Main Window
@@ -764,7 +764,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         Sets the current selected containers within the project.
 
         :param sender: The widget who sent the selection
-        :param selected: A list of IProjectContainer
+        :param selected: A list of BaseProjectEntity
         :return:
         """
 
@@ -809,12 +809,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.selected.remove(sel)
             self.dispatch_selected(None)
 
-    def get_selected(self, types = None) -> List[IProjectContainer]:
+    def get_selected(self, types = None) -> List[BaseProjectEntity]:
         """
         Returns all currently selected containers.
 
         :param types: if a type is given the result is filtered.
-        :return: List[IProjectContainer]
+        :return: List[BaseProjectEntity]
         """
         result = []
         if types != None:
@@ -1932,7 +1932,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def create_unique_id(self):
         """
-        Creates a new unique id for a given IProjectContainer within the project.
+        Creates a new unique id for a given BaseProjectEntity within the project.
         This should not be used from the outside.
 
         :return: a unique id
@@ -1960,11 +1960,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 new[itm] = val
         self.id_list = new
 
-    def get_by_id(self, item_id) -> IProjectContainer:
+    def get_by_id(self, item_id) -> BaseProjectEntity:
         """
-        Returns an item given by its IProjectContainer.unique_id
+        Returns an item given by its BaseProjectEntity.unique_id
 
-        :param id: IProjectContainer.unique_id
+        :param id: BaseProjectEntity.unique_id
         :return:
         """
         if item_id in self.id_list:

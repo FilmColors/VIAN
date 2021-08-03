@@ -204,7 +204,7 @@ class IAnalysisJob(QObject):
 
 
         :param project: The current Project
-        :param targets: The Target IProjectContainer Objects
+        :param targets: The Target BaseProjectEntity Objects
         :param parameters: Additional Parameters as returned from your ParameterWidget.get_parameters()
         :param fps: The FPS of the Movie. (This is used to convert Timestamps into Frame-Position)
         :param class_objs: The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)
@@ -385,7 +385,7 @@ class IAnalysisJob(QObject):
         Performs the analysis for given target containers and classification objects.
         If no classification object is given, a default one with the name "Global" is created.
 
-        :param targets: The Target IProjectContainer Objects
+        :param targets: The Target BaseProjectEntity Objects
         :param class_objs: The Classification Object assigned if any. (This is important to determine on which semantic segmentation mask label the analysis operates)
         """
         if isinstance(targets, list):

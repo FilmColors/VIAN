@@ -1,12 +1,12 @@
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
-from core.container.container_interfaces import IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, \
+from core.container.container_interfaces import BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, \
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
 from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
 from .annotation_body import AnnotationBody, Annotatable
 
-class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
+class Segmentation(BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     """
     :var name: The Name of the Segmentation
     :var segments: A List of Segments
@@ -23,7 +23,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
     onSegmentationChanged = pyqtSignal(object)
 
     def __init__(self, name = None, segments = None, unique_id=-1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         self.name = name
 
@@ -307,7 +307,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
         return self.timeline_visibility
 
     def set_project(self, project):
-        IProjectContainer.set_project(self, project)
+        BaseProjectEntity.set_project(self, project)
         for s in self.segments:
             s.set_project(project)
 
@@ -346,7 +346,7 @@ class Segmentation(IProjectContainer, IHasName, ISelectable, ITimelineItem, ILoc
                 target.create_segment2(s.get_start(), s.get_end(), body=s.get_annotations())
 
 
-class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject, Annotatable):
+class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineItem, ILockable, IClassifiable, IHasMediaObject, Annotatable):
     """
     :var name: the Name of the Segment
     :var start: Time start in MS
@@ -366,7 +366,7 @@ class Segment(IProjectContainer, ITimeRange, IHasName, ISelectable, ITimelineIte
 
     def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None,
                  annotation_body = "", name = "New Segment", unique_id = -1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
         IClassifiable.__init__(self)
         IHasMediaObject.__init__(self)

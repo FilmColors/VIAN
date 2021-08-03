@@ -1,12 +1,12 @@
 import numpy as np
 
 from core.data.enums import NODE_SCRIPT, NODE
-from .container_interfaces import IProjectContainer, IHasName, ISelectable
+from .container_interfaces import BaseProjectEntity, IHasName, ISelectable
 
 
-class NodeScript(IProjectContainer, IHasName, ISelectable):
+class NodeScript(BaseProjectEntity, IHasName, ISelectable):
     def __init__(self, name = ""):
-        IProjectContainer.__init__(self)
+        BaseProjectEntity.__init__(self)
         self.name = name
         self.notes = ""
         self.nodes = []
@@ -63,7 +63,7 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
         for n in self.nodes:
             self.nodes.remove(n)
 
-    #region IProjectContainer
+    #region BaseProjectEntity
     def get_name(self):
         return self.name
 
@@ -121,9 +121,9 @@ class NodeScript(IProjectContainer, IHasName, ISelectable):
         self.project.remove_script(self)
 
 
-class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
+class NodeDescriptor(BaseProjectEntity, IHasName, ISelectable):
     def __init__(self, operation = None, pos = (0, 0), unique_id = -1):
-        IProjectContainer.__init__(self)
+        BaseProjectEntity.__init__(self)
         self.unique_id = unique_id
         self.node_size = (200,200)
         self.node_script = None
@@ -150,7 +150,7 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
     def get_size(self):
         return (self.node_size[0], self.node_size[1])
 
-    #region IProjectContainer
+    #region BaseProjectEntity
     def get_type(self):
         return NODE
 
@@ -209,9 +209,9 @@ class NodeDescriptor(IProjectContainer, IHasName, ISelectable):
         self.node_script.remove_node(self, True)
 
 
-class ConnectionDescriptor(IProjectContainer):
+class ConnectionDescriptor(BaseProjectEntity):
     def __init__(self, input_pin=None, output_pin=None, input_pin_id=None, output_pin_id=None):
-        IProjectContainer.__init__(self)
+        BaseProjectEntity.__init__(self)
         if input_pin is not None:
             self.input_node = input_pin.node.node_object.unique_id
         if output_pin is not None:

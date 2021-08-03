@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
-from .container_interfaces import IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, \
+from .container_interfaces import BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, \
     deprecation_serialization
 from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from .analysis import SemanticSegmentationAnalysisContainer
@@ -15,7 +15,7 @@ from core.data.computation import resize_with_aspect
 CACHE_WIDTH = 250
 
 
-class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, Annotatable):
+class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, Annotatable):
     """
     :var title: The name of this Screenshot
     :var frame_pos: The Position of this Frame in Frames
@@ -47,7 +47,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
                  img_blend=None, timestamp="", scene_id=0, frame_pos=0, display_width = None, display_height = None,
                  shot_id_global=-1, shot_id_segm=-1, annotation_item_ids=None, unique_id=-1):
 
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         IClassifiable.__init__(self)
         Annotatable.__init__(self)
 
@@ -294,7 +294,7 @@ class Screenshot(IProjectContainer, IHasName, ITimeRange, ISelectable, ITimeline
         self.set_img_movie(frame)
 
 
-class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
+class ScreenshotGroup(BaseProjectEntity, IHasName, ISelectable):
     """
     :var name: The name of the ScreenshotGroup
     :var screenshots: A list of Screenshots
@@ -307,7 +307,7 @@ class ScreenshotGroup(IProjectContainer, IHasName, ISelectable):
     onScreenshotGroupChanged = pyqtSignal(object)
 
     def __init__(self, project, name="New Screenshot Group", unique_id=-1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.set_project(project)
         self.name = name
         self.screenshots = []

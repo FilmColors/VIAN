@@ -9,7 +9,7 @@ from core.data.log import log_warning, log_debug, log_info, log_error
 from core.container.analysis import AnalysisContainer
 from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
-from .container_interfaces import IProjectContainer, IHasName, IClassifiable, deprecation_serialization
+from .container_interfaces import BaseProjectEntity, IHasName, IClassifiable, deprecation_serialization
 from .hdf5_manager import get_analysis_by_name
 
 from core.analysis.deep_learning.labels import LIPLabels
@@ -39,7 +39,7 @@ def delete_even_if_connected_msgbox(mode="word"):
     return answer
 
 
-class Vocabulary(IProjectContainer, IHasName):
+class Vocabulary(BaseProjectEntity, IHasName):
     """
     :var name: The Name of the Vocabulary
     :var comment: This is a generic field to put a description into about the Voc.
@@ -54,7 +54,7 @@ class Vocabulary(IProjectContainer, IHasName):
     onVocabularyWordRemoved = pyqtSignal(object)
 
     def __init__(self, name="", unique_id=-1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.name = name
         self.comment = ""
         self.info_url = ""
@@ -478,7 +478,7 @@ class Vocabulary(IProjectContainer, IHasName):
             self.delete()
 
 
-class VocabularyWord(IProjectContainer, IHasName):
+class VocabularyWord(BaseProjectEntity, IHasName):
     """
     :var name: The Name of the Word
     :var comment: An additional field to add some info about it. In the ERC_FILM_COLORS this refers to the glossary ID
@@ -488,13 +488,13 @@ class VocabularyWord(IProjectContainer, IHasName):
     :var was_expanded: If this word is expanded in the Vocabulary Manager
     :var parent: The Parent Word
     :var children: The Children Words
-    :var connected_items: IProjectContainer objects that are connected with it # Obsolete
+    :var connected_items: BaseProjectEntity objects that are connected with it # Obsolete
 
     """
     onVocabularyWordChanged = pyqtSignal(object)
 
     def __init__(self, name, vocabulary, parent = None, is_checkable = False, unique_id=-1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.name = name
         self.comment = ""
         self.info_url = ""
@@ -577,7 +577,7 @@ class VocabularyWord(IProjectContainer, IHasName):
             self.delete()
 
 
-class ClassificationObject(IProjectContainer, IHasName):
+class ClassificationObject(BaseProjectEntity, IHasName):
     """
     A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
     Several ClassificationTargets may form a Tree. 
@@ -604,7 +604,7 @@ class ClassificationObject(IProjectContainer, IHasName):
     onSemanticLabelsChanged = pyqtSignal(object)
 
     def __init__(self, name, experiment, parent = None, unique_id = -1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.name = name
         self.experiment = experiment
         self.parent = parent
@@ -858,7 +858,7 @@ class ClassificationObject(IProjectContainer, IHasName):
         return self
 
 
-class UniqueKeyword(IProjectContainer):
+class UniqueKeyword(BaseProjectEntity):
     """
     Unique Keywords are generated when a Vocabulary is added to a Classification Object. 
     For each word in the Vocabulary a Unique Keyword is created to the Classification Object.
@@ -870,7 +870,7 @@ class UniqueKeyword(IProjectContainer):
     :var external_id: An External Key for the ERC-FilmColors Project
     """
     def __init__(self, experiment,  voc_obj:Vocabulary = None, word_obj:VocabularyWord = None, class_obj:ClassificationObject = None, unique_id=-1, emit_change=True):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.experiment = experiment
         self.voc_obj = voc_obj
         self.word_obj = word_obj
@@ -921,7 +921,7 @@ class UniqueKeyword(IProjectContainer):
         return self
 
 
-class Experiment(IProjectContainer, IHasName):
+class Experiment(BaseProjectEntity, IHasName):
     """
     An Experiment holds all information connected to Classification of Objects.
     As such it defines rules for an experiment and tracks the Progress.
@@ -938,7 +938,7 @@ class Experiment(IProjectContainer, IHasName):
     onClassificationObjectRemoved = pyqtSignal(object)
 
     def __init__(self, name="New Experiment", unique_id=-1):
-        IProjectContainer.__init__(self, unique_id=unique_id)
+        BaseProjectEntity.__init__(self, unique_id=unique_id)
         self.name = name
         self.classification_objects = []    #type:List[ClassificationObject]
         self.analyses = []
