@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from core.container.vocabulary_library import VocabularyLibrary
 
 # from core.data.importers import ImportDevice
-# from core.data.exporters import ExportDevice
+# from core.data.exporters import IExportDevice
 VIAN_PROJECT_EXTENSION = ".eext"
 
 
@@ -229,13 +229,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     result.append(itm)
         return result
 
-    def get_annotations(self):
+    def get_annotations(self) -> List[BaseProjectEntity]:
+        """
+        :return List[BaseProjectEntity]: Returns a single list of SVGAnnotations, Segments and Screenshots
+        """
         res = []
         for s in self.segmentation:
             res.extend(s.segments)
         for a in self.annotation_layers:
             res.extend(a.annotations)
         res.extend(self.screenshots)
+
         return res
 
     def print_all(self, type = None):
@@ -935,41 +939,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
     #endregion
 
     #region Python Scripts
-    # def create_pipeline_script(self, name:str, author="no_author", path = None, script = None, unique_id=-1) -> PipelineScript:
-    #     """
-    #     Creates a new PipelineScript given a name and a script content
-    #     :param name: The name of the script
-    #     :param script: The actual python script text
-    #     :return: a PipelineScript class
-    #     """
-    #     pipeline_script = PipelineScript(name, author, path=path, script=script, unique_id=unique_id)
-    #     return self.add_pipeline_script(pipeline_script)
-    #
-    # def add_pipeline_script(self, script:PipelineScript) -> PipelineScript:
-    #     """
-    #     Adds a script at a given path to the project.
-    #
-    #     :param path: Path to the pipeline python script.
-    #     :return: None
-    #     """
-    #     for s in self.pipeline_scripts:
-    #         if s.name == script.name and s.script == script.script:
-    #             return s
-    #
-    #     self.pipeline_scripts.append(script)
-    #     script.set_project(self)
-    #     return script
-    #
-    # def remove_pipeline_script(self, script:PipelineScript):
-    #     """
-    #     Removes a given script path from the project.
-    #
-    #     :param path: The path to remove.
-    #     :return: None
-    #     """
-    #
-    #     if script in self.pipeline_scripts:
-    #         self.pipeline_scripts.remove(script)
 
     def get_missing_analyses(self, requirements, segments = None, screenshots=None, annotations = None):
         # requirements = script.pipeline_type.requirements
@@ -1029,11 +998,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         return (missing_analyses, n_analyses, n_analyses_done)
 
-    # def get_pipeline_script_by_uuid(self, uuid):
-    #     for p in self.pipeline_scripts:
-    #         if p.uuid == uuid:
-    #             return p
-    #     return None
     #endregion
 
     #region IO
@@ -1042,9 +1006,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         Stores the project json to the given filepath.
         if no path is given, the default path is used.
 
-        :param settings:
-        :param path:
-        :param bake:
+        :param str path:  The filepath to store the file
+        :param bool bake:  if screenshots should be exported
+        :param bool return_dict: if true, the project is returned as dict, else it is stored in the file path
         :return:
         """
         project = self
@@ -1395,7 +1359,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 if "Surface" in v.name or "Pattern" in v.name:
                     print("\t\t --", v.name, [(w.name, ukws.count(w.unique_id)) for w in v.words_plain])
         print("\n\n\n")
-
 
     def get_template(self, segm = True, voc = True, ann = True, scripts = False, experiment = True, pipeline=True):
         """

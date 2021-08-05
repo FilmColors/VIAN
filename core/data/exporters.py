@@ -27,12 +27,12 @@ def get_keyword_columns(project:VIANProject, container_type = None):
     return keywords
 
 
-class ExportDevice:
+class IExportDevice:
     def export(self, project, path):
         pass
 
 
-class ScreenshotExporter(ExportDevice):
+class ScreenshotExporter(IExportDevice):
     """
     A Class that is able to export Screenshots from a Project
     """
@@ -40,7 +40,6 @@ class ScreenshotExporter(ExportDevice):
     SemSeg_Outlines = "Outlines"
     SemSeg_Filled = "Filled"
     SemSeg_OutlinesFilled = "Both"
-
 
     def __init__(self, naming, selection = None, quality = 100, semantic_segmentation=SemSeg_None):
         self.naming = naming
@@ -125,7 +124,7 @@ class ScreenshotExporter(ExportDevice):
         return f.replace("All Shots", "").replace("__", "_")
 
 
-class SegmentationExporter(ExportDevice):
+class SegmentationExporter(IExportDevice):
     """
     A Class that is able to export a Segmentation into CSV
     """
@@ -234,42 +233,29 @@ class SegmentationExporter(ExportDevice):
             pd.DataFrame(result).to_csv(path)
 
 
-class SequenceProtocolExporter:
-    def __init__(self):
-        self.data = {}
+class SequenceProtocolExporter(IExportDevice):
+    FORMAT_CSV = "csv"
+    FORMAT_PDF = "pdf"
+
+    def __init__(self, export_format=FORMAT_CSV):
+        self.export_format = export_format
 
     def export(self, project: VIANProject, path: str):
         """
-        exporting data from all Segmentations
+        Export the project into Sequence protocols.
 
-        For a first draft, no additional arguments
-        can be passed, such as specifying which
-        segmentation etc.
+        # TODO Pascal
 
-        Args:
-            project: the container class of a VIAN project
-            path: a string for writing the export to
-        Returns:
-            None
+        Here we would like to export the VIAN project based on the issue here:
+        https://github.com/ghalter/VIAN/issues/336
+
+        :param project:
+        :param path:
+        :return:
         """
-        for segmentation in project.segmentation:
-            segmentation_name = segmentation.name
-            segmentation_data = {}
-            for segment in segmentation.segments:
-                segment_name = segment.name
-                segment_data = {}
-                # export notes
-                segment_data["notes"] = segment.notes
-                # export free annotations
-                annos = []
-                for anno in segment._annotations:
-                   annos.append((anno.name, anno.content))
-                segment_data["free annotations"] = annos
-                # export classifications
 
-                segmentation_data[segment_name] = segment_data
-        self.data[segmentation_name] = segmentation_data
-        # import ipdb; ipdb.set_trace()
+        pass
+
 
 
 class JsonExporter():
@@ -278,7 +264,7 @@ class JsonExporter():
         # result = ""
 
 
-class CSVExporter(ExportDevice):
+class CSVExporter(IExportDevice):
     def __init__(self, export_segmentations = True, export_screenshots=True, export_annotations=True,
                  export_keywords = True, timestamp_format = "ms"):
         self.export_segm = export_segmentations
@@ -360,7 +346,7 @@ class CSVExporter(ExportDevice):
         f.save(path)
 
 
-class ColorimetryExporter(ExportDevice):
+class ColorimetryExporter(IExportDevice):
     def __init__(self):
         pass
 
