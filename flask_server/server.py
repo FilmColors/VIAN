@@ -235,6 +235,7 @@ class FlaskServer(QObject):
         return None
 
     def on_selected(self, sender, selected):
+        selected = list(selected)
         if sender is _server_data:
             return
 
