@@ -6,7 +6,7 @@ import pandas as pd
 from core.container.project import *
 import os
 import shutil
-from core.misc.ffmpeg_executor import ms_to_time_string
+from core.data.computation import ms_to_string
 
 from core.data.csv_helper import CSVFile
 
@@ -279,12 +279,14 @@ class SequenceProtocolExporter(IExportDevice):
             for segment in segmentation.segments:
                 entry = dict.fromkeys(headers.values())
                 entry["NO"] = segment.ID
-                entry["START"] = ms_to_time_string(segment.start)
-                entry["END"] = ms_to_time_string(segment.end)
+                entry["START"] = ms_to_string(segment.get_start())
+                entry["END"] = ms_to_string(segment.get_end())
+
+                # TODO Maybe it would be better to have a formatted timestring
+                # entry["DURATION"] = ms_to_string(segment.duration)
+
                 entry["DURATION"] = segment.duration//1000
-                annotation = ""
-                for annotation_body in segment.get_annotations():
-                    annotation = annotation + "\n" + annotation_body.content
+                annotation = "\n".join([a.content for a in segment.get_annotations()])
                 entry["ANNOTATION"] = annotation.lstrip()
 
                 for key_word in segment.tag_keywords:
@@ -303,6 +305,7 @@ class JsonExporter():
     def segment2json(self, segment):
         pass
         # result = ""
+
 
 class ColorimetryExporter(IExportDevice):
     def __init__(self):

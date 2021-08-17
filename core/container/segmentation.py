@@ -1,3 +1,5 @@
+import numpy as np
+
 from core.container.media_objects import FileMediaObject, DataMediaObject
 from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
 from core.container.container_interfaces import BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, \
@@ -5,6 +7,7 @@ from core.container.container_interfaces import BaseProjectEntity, IHasName, ISe
 from core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
 from .annotation_body import AnnotationBody, Annotatable
+
 
 class Segmentation(BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, AutomatedTextSource):
     """
@@ -421,10 +424,10 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def get_start(self):
-        return self.start
+        return np.clip(self.start, 0, None)
 
     def get_end(self):
-        return self.end
+        return np.clip(self.end, self.start + 1, None)
 
     def move(self, start, end, dispatch=True):
         self.project.undo_manager.to_undo((self.move, [start, end]), (self.move, [self.start, self.end]))

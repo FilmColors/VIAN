@@ -6,7 +6,6 @@ https://stackoverflow.com/questions/7632589/getting-realtime-output-from-ffmpeg-
 import subprocess
 import re
 from typing import Iterator
-import math
 
 DUR_REGEX = re.compile(
     r"Duration: (?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})\.(?P<ms>\d{2})"
@@ -33,14 +32,6 @@ def to_ms(s=None, des=None, **kwargs) -> float:
         return round(result, des)
     return result
 
-def ms_to_time_string(ms):
-    seconds = (ms / 1000) % 60
-    seconds = int(seconds)
-    minutes = (ms / (1000 * 60)) % 60
-    minutes = int(minutes)
-    hours = (ms / (1000 * 60 * 60)) % 24
-
-    return "%02d:%02d:%02d" % (hours, minutes, seconds)
 
 def run_ffmpeg_command(cmd: "list[str]") -> Iterator[float]:
     """

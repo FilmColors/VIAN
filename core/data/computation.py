@@ -76,6 +76,16 @@ def ms_to_string(ms, include_ms = False, include_frame = False, fps = 24):
         return str(hours).zfill(2) + ":" + str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
 
 
+# def ms_to_time_string(ms):
+#     seconds = (ms / 1000) % 60
+#     seconds = int(seconds)
+#     minutes = (ms / (1000 * 60)) % 60
+#     minutes = int(minutes)
+#     hours = (ms / (1000 * 60 * 60)) % 24
+#
+#     return "%02d:%02d:%02d" % (hours, minutes, seconds)
+
+
 def ts_to_ms(hour=0, min=0, sec=0, ms=0):
     """
     Converts a Timestamp to miliseconds
