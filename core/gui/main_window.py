@@ -2310,7 +2310,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_export_csv(self):
         file = QFileDialog.getSaveFileName(filter="*.csv")[0]
         try:
-            self.project.export(CSVExporter(), file)
+            self.project.export(SequenceProtocolExporter(), file)
         except Exception as e:
             log_error(e)
 

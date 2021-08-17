@@ -33,10 +33,7 @@ tests/is_dev.txt
 *.swp
 .notags
 comparison.html
-
-dist/*
-build/*
 flask_server/static/build/*
 flask_server/static/three/*
 venv2/*
-venv37/*
+projects/*

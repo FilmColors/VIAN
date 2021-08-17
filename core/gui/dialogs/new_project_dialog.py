@@ -208,9 +208,9 @@ class NewProjectDialog(EDialogWidget):
             self.settings.integritiy_check()
             self.project_dir = self.settings.DIR_PROJECTS
         try:
-            if not os.path.isdir(self.project_dir + "/" + self.project_name):
+            if not os.path.isdir(os.path.join(self.project_dir, self.project_name)):
                 try:
-                    os.mkdir(self.project_dir + "/" + self.project_name)
+                    os.makedirs(os.path.join(self.project_dir, self.project_name))
                 except Exception as e:
                     raise Exception("Access denied, the directory is probably locked.")
             else:

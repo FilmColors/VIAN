@@ -2,15 +2,11 @@
 Contains all Export Classes and Export Functions of VIAN
 """
 
-import cv2
-import numpy as np
 import pandas as pd
-from core.data.interfaces import IConcurrentJob
-from core.data.computation import *
 from core.container.project import *
 import os
-import csv
 import shutil
+from core.misc.ffmpeg_executor import ms_to_time_string
 
 from core.data.csv_helper import CSVFile
 
@@ -244,107 +240,69 @@ class SequenceProtocolExporter(IExportDevice):
         """
         Export the project into Sequence protocols.
 
-        # TODO Pascal
-
-        Here we would like to export the VIAN project based on the issue here:
-        https://github.com/ghalter/VIAN/issues/336
-
-        :param project:
-        :param path:
-        :return:
+        :param project: the VIANProject which the data is exported for
+        :param path: the destination path for the exported csv file
         """
+        f = CSVFile()
+        headers = {"NO":"NO", "START":"START", "END":"END", "DURATION":"DURATION", "ANNOTATION":"ANNOTATION"}
 
-        pass
+        # collect all unique_id of used keywords and collect additional headers
+        additional_headers = []
+        for segmentation in project.segmentation:
+            for segment in segmentation.segments:
+                for unique_keyword in segment.tag_keywords:
 
+                    # search for correct classification object
+                    for classification_object in project.experiments[0].classification_objects:
+                        found = False
+                        for keyword in classification_object.unique_keywords:
+                            if keyword.unique_id == unique_keyword.unique_id:
+                                additional_headers.append([classification_object, unique_keyword.voc_obj])
+                                found = True
+                                break
+                        if found:
+                            break
+
+        # set the additional header columns which were found above
+        unique_classification_objects = set()
+        for x in additional_headers: # if only one classification object is involved, its name is not exported
+            unique_classification_objects.add(x[0])
+        for additional_header in additional_headers:
+            if len(unique_classification_objects) > 1:
+                headers[additional_header[1]] = additional_header[0].name + ":" + additional_header[1].name
+            else:
+                headers[additional_header[1]] = additional_header[1].name
+
+        f.set_header(headers.values())
+
+        for segmentation in project.segmentation:
+            for segment in segmentation.segments:
+                entry = dict.fromkeys(headers.values())
+                entry["NO"] = segment.ID
+                entry["START"] = ms_to_time_string(segment.start)
+                entry["END"] = ms_to_time_string(segment.end)
+                entry["DURATION"] = segment.duration//1000
+                annotation = ""
+                for annotation_body in segment.get_annotations():
+                    annotation = annotation + "\n" + annotation_body.content
+                entry["ANNOTATION"] = annotation.lstrip()
+
+                for key_word in segment.tag_keywords:
+                    if key_word.voc_obj in headers.keys():
+                        if entry[headers[key_word.voc_obj]] is None:
+                            entry[headers[key_word.voc_obj]] = key_word.word_obj.name
+                        else:
+                            entry[headers[key_word.voc_obj]] = entry[headers[key_word.voc_obj]] + \
+                                                               ", " + key_word.word_obj.name
+
+                f.append(entry)
+        f.save(path, index=False)
 
 
 class JsonExporter():
     def segment2json(self, segment):
         pass
         # result = ""
-
-
-class CSVExporter(IExportDevice):
-    def __init__(self, export_segmentations = True, export_screenshots=True, export_annotations=True,
-                 export_keywords = True, timestamp_format = "ms"):
-        self.export_segm = export_segmentations
-        self.export_ann = export_annotations
-        self.export_scr = export_screenshots
-        self.export_keywords = export_keywords
-
-    def export(self, project, path):
-        f = CSVFile()
-
-        headers = ["ROW", "ID", "START_MS", "END_MS",
-                   "SELECTOR_TYPE", "ANNOTATION_MIME_TYPE", "ANNOTATION_BODY_ID", "ANNOTATION_BODY",
-                   "NOTES"]
-
-        if self.export_keywords:
-            keyword_mapping = get_keyword_columns(project)
-            keyword_columns = keyword_mapping.keys()
-            headers.extend(keyword_columns)
-
-        f.set_header(headers)
-
-        c = 0
-        if self.export_segm:
-            segments = []
-            [segments.extend(s.segments) for s in project.segmentation]
-
-            for segm in segments:  #type:Segment
-                bodies = segm.get_annotations()
-                if len(bodies) == 0:
-                    bodies = [AnnotationBody()]
-                for bd in bodies:
-                    r = dict(
-                        ROW = c,
-                        ID = segm.unique_id,
-                        START_MS = segm.get_start(),
-                        END_MS = segm.get_end(),
-                        SELECTOR_TYPE = "SEGMENT",
-                        ANNOTATION_MIME_TYPE = bd.mime_type,
-                        ANNOTATION_BODY_ID = bd.unique_id,
-                        ANNOTATION_BODY = bd.content,
-                        NOTES = segm.notes
-                    )
-
-                    if self.export_keywords:
-                        for k in keyword_columns:
-                            r[k] = 0
-                        for k in segm.tag_keywords:
-                            name = k.get_full_name()
-                            r[name] = 1
-                    f.append(r)
-                    c += 1
-
-        if self.export_scr:
-            for scr in project.screenshots:  #type:Screenshot
-                bodies = scr.get_annotations()
-                if len(bodies) == 0:
-                    bodies = [AnnotationBody()]
-
-                for bd in bodies:
-                    r = dict(
-                        ROW = c,
-                        ID = scr.unique_id,
-                        START_MS = scr.get_start(),
-                        END_MS = scr.get_end(),
-                        SELECTOR_TYPE = "SCREENSHOT",
-                        ANNOTATION_MIME_TYPE=bd.mime_type,
-                        ANNOTATION_BODY_ID=bd.unique_id,
-                        ANNOTATION_BODY=bd.content,
-                        NOTES = scr.notes
-                    )
-                    if self.export_keywords:
-                        for k in keyword_columns:
-                            r[k] = 0
-                        for k in scr.tag_keywords:
-                            name = k.get_full_name()
-                            r[name] = 1
-                    f.append(r)
-                    c += 1
-        f.save(path)
-
 
 class ColorimetryExporter(IExportDevice):
     def __init__(self):

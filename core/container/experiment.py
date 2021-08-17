@@ -45,7 +45,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
     :var str name: The Name of the Vocabulary
     :var str comment: This is a generic field to put a description into about the Voc.
     :var str info_url: A URL to a description of this vocabulary
-    :var List[VocabularyWord] words: The words in a hierachical form.
+    :var List[VocabularyWord] words: The words in a hierarchical form.
     :var List[VocabularyWord] words_plain: A List of All VocabularyWords that are in the Vocabulary
     :var string category: The Category it belongs to
     """
@@ -522,19 +522,19 @@ class VocabularyWord(BaseProjectEntity, IHasName):
 
 class ClassificationObject(BaseProjectEntity, IHasName):
     """
-    A ClassificationTarget is an Object that one wants to classify by a set of Vocabularies.
-    Several ClassificationTargets may form a Tree. 
+    A ClassificationObject is an Object that one wants to classify by a set of Vocabularies.
+    Several ClassificationObjects may form a Tree.
 
     Example: Say one wants to analyse the Foreground and Background Color of a given Film using his homemade 
     Vocabulary called "ColorVocabulary". 
     
-    The ClassificationTargets would therefore be "Foreground" and "Background", both will have "ColorVocabulary".
+    The ClassificationObjects would therefore be "Foreground" and "Background", both will have "ColorVocabulary".
 
     :var str name: The Name of this ClassificationObject
     :var Experiment experiment: A reference to the Experiment it belongs to
     :var ClassificationObject|Experiment parent: A Parent Classification Object or an Experiment if it's at the root
-    :var List[ClassificationObject] children: A List of Chilren ClassificationObjects if any
-    :var List[Vocabulary] classification_vocabularies: A List of Vocabularies attached to thsi ClassificationObject
+    :var List[ClassificationObject] children: A List of Children ClassificationObjects if any
+    :var List[Vocabulary] classification_vocabularies: A List of Vocabularies attached to this ClassificationObject
     :var List[UniqueKeyword] unique_keywords: A List of Unique Keywords generated from this ClassificationObjects and its Vocabularies
     :var List[BaseProjectEntity] target_container: A List of Target Containers to classify with this Classification Object
     :var Tuple[str, List[int]] semantic_segmentation_labels: The Semantic Segmentation assigned to it Tuple ("<Name of Dataset>", [Indices of assigned Mask layers])

@@ -43,12 +43,12 @@ class CSVFile:
 
         return self
 
-    def save(self, p):
+    def save(self, p, index=True):
         _, file_extension = os.path.splitext(p)
         if "json" in file_extension:
             pd.DataFrame(self._dataset).to_json(p)
         elif "csv" in file_extension:
-            pd.DataFrame(self._dataset).to_csv(p)
+            pd.DataFrame(self._dataset).to_csv(p, index=index)
 
     def set_header(self, header):
         self._header = header
