@@ -260,21 +260,19 @@ class SequenceProtocolExporter(IExportDevice):
                         found = False
                         for keyword in classification_object.unique_keywords:
                             if keyword.unique_id == unique_keyword.unique_id:
-                                additional_headers.append([classification_object, unique_keyword.voc_obj])
+                                additional_headers.append((classification_object, unique_keyword.voc_obj))
                                 found = True
                                 break
                         if found:
                             break
 
         # set the additional header columns which were found above
-        unique_classification_objects = set()
-        for x in additional_headers:  # if only one classification object is involved, its name is not exported
-            unique_classification_objects.add(x[0])
-        for additional_header in additional_headers:
+        unique_classification_objects = set([ah[0] for ah in additional_headers])
+        for additional_header in additional_headers: # if only one object is tagged, its name is not exported
             if len(unique_classification_objects) > 1:
-                headers[additional_header[1]] = additional_header[0].name + ":" + additional_header[1].name
+                headers[additional_header] = additional_header[0].name + ":" + additional_header[1].name
             else:
-                headers[additional_header[1]] = additional_header[1].name
+                headers[additional_header] = additional_header[1].name
 
         f.set_header(headers.values())
 
@@ -290,7 +288,8 @@ class SequenceProtocolExporter(IExportDevice):
                 annotation = "\n".join([a.content for a in segment.get_annotations()])
                 entry["ANNOTATIONS"] = annotation
 
-                if self.export_format == SequenceProtocolExporter.FORMAT_CSV:
+                if self.export_format == SequenceProtocolExporter.FORMAT_CSV \
+                        and bool(project.segment_screenshot_mapping):
                     screenshots = "\n".join(
                         ["{}_{}_{}_{}".format(ss.scene_id, ss.shot_id_segm,
                                               ss.screenshot_group.name, project.movie_descriptor.movie_id)
@@ -298,12 +297,12 @@ class SequenceProtocolExporter(IExportDevice):
                     entry["SCREENSHOTS"] = screenshots
 
                 for key_word in segment.tag_keywords:
-                    if key_word.voc_obj in headers.keys():
-                        if entry[headers[key_word.voc_obj]] is None:
-                            entry[headers[key_word.voc_obj]] = key_word.word_obj.name
+                    if (key_word.class_obj, key_word.voc_obj) in headers.keys():
+                        if entry[headers[(key_word.class_obj, key_word.voc_obj)]] is None:
+                            entry[headers[(key_word.class_obj, key_word.voc_obj)]] = key_word.word_obj.name
                         else:
-                            entry[headers[key_word.voc_obj]] = entry[headers[key_word.voc_obj]] + \
-                                                               ", " + key_word.word_obj.name
+                            entry[headers[(key_word.class_obj, key_word.voc_obj)]] = \
+                                entry[headers[(key_word.class_obj, key_word.voc_obj)]] + ", " + key_word.word_obj.name
 
                 f.append(entry)
 
@@ -312,6 +311,7 @@ class SequenceProtocolExporter(IExportDevice):
         elif self.export_format == SequenceProtocolExporter.FORMAT_EXCEL:
             df = f.get_data()
             writer = pd.ExcelWriter(path, engine='xlsxwriter')
+
             df.to_excel(writer, sheet_name='Sheet1', index=False)
             workbook = writer.book
             workbook.formats[0].set_text_wrap()

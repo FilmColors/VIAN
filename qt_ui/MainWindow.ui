@@ -83,6 +83,7 @@
      <addaction name="actionExportVocabulary"/>
      <addaction name="separator"/>
      <addaction name="actionExportCSV"/>
+     <addaction name="actionExportExcel"/>
      <addaction name="actionScreenshotsExport"/>
      <addaction name="action_ExportSegmentation"/>
      <addaction name="separator"/>
@@ -1007,6 +1008,11 @@
   <action name="actionExportCSV">
    <property name="text">
     <string>CSV</string>
+   </property>
+  </action>
+  <action name="actionExportExcel">
+   <property name="text">
+    <string>Excel</string>
    </property>
   </action>
   <action name="actionFind">

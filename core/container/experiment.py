@@ -576,7 +576,7 @@ class ClassificationObject(BaseProjectEntity, IHasName):
                 if keyword_override is not None and w.unique_id in keyword_override:
                     keyword = keyword_override[w.unique_id]
                 if keyword is None:
-                    keyword = UniqueKeyword(self.experiment, voc, w, self, emit_change=False)
+                    keyword = UniqueKeyword(self.experiment, voc, w, self, emit_change=False, unique_id=str(uuid4()))
                 if external_ids is not None:
                     keyword.external_id = external_ids[i]
                 keyword.set_project(self.project)

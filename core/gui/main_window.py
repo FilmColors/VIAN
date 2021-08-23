@@ -371,6 +371,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionScreenshotsExport.triggered.connect(self.on_export_screenshots)
         self.actionExportMovie_Segment.triggered.connect(self.on_export_movie_segments)
         self.actionExportCSV.triggered.connect(self.on_export_csv)
+        self.actionExportExcel.triggered.connect(self.on_export_excel)
         self.actionExportColorimetry.triggered.connect(self.on_export_colorimetry)
         self.actionProject_Summary.triggered.connect(self.on_export_summary)
         self.actionExportVIANWebApp.triggered.connect(self.on_export_vianwebapp)
@@ -2311,6 +2312,13 @@ class MainWindow(QtWidgets.QMainWindow):
         file = QFileDialog.getSaveFileName(filter="*.csv")[0]
         try:
             self.project.export(SequenceProtocolExporter(), file)
+        except Exception as e:
+            log_error(e)
+
+    def on_export_excel(self):
+        file = QFileDialog.getSaveFileName(filter="*.xlsx")[0]
+        try:
+            self.project.export(SequenceProtocolExporter(export_format=SequenceProtocolExporter.FORMAT_EXCEL), file)
         except Exception as e:
             log_error(e)
 
