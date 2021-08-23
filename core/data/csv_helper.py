@@ -62,6 +62,9 @@ class CSVFile:
         for k, v in r.items():
             self._dataset[k].append(v)
 
+    def get_data(self):
+        return pd.DataFrame(self._dataset)
+
     def header(self):
         return self._header
 

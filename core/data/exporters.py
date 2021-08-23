@@ -1,13 +1,14 @@
 """
 Contains all Export Classes and Export Functions of VIAN
 """
-
+import io
 import pandas as pd
 from core.container.project import *
 import os
 import shutil
-from core.data.computation import ms_to_string
+from PIL import Image
 
+from core.data.computation import ms_to_string
 from core.data.csv_helper import CSVFile
 
 
@@ -232,6 +233,7 @@ class SegmentationExporter(IExportDevice):
 class SequenceProtocolExporter(IExportDevice):
     FORMAT_CSV = "csv"
     FORMAT_PDF = "pdf"
+    FORMAT_EXCEL = "excel"
 
     def __init__(self, export_format=FORMAT_CSV):
         self.export_format = export_format
@@ -244,7 +246,8 @@ class SequenceProtocolExporter(IExportDevice):
         :param path: the destination path for the exported csv file
         """
         f = CSVFile()
-        headers = {"NO":"NO", "START":"START", "END":"END", "DURATION":"DURATION", "ANNOTATION":"ANNOTATION"}
+        headers = {"NO": "NO", "START": "START", "END": "END", "DURATION": "DURATION", "ANNOTATIONS": "ANNOTATIONS",
+                   "SCREENSHOTS": "SCREENSHOTS"}
 
         # collect all unique_id of used keywords and collect additional headers
         additional_headers = []
@@ -265,7 +268,7 @@ class SequenceProtocolExporter(IExportDevice):
 
         # set the additional header columns which were found above
         unique_classification_objects = set()
-        for x in additional_headers: # if only one classification object is involved, its name is not exported
+        for x in additional_headers:  # if only one classification object is involved, its name is not exported
             unique_classification_objects.add(x[0])
         for additional_header in additional_headers:
             if len(unique_classification_objects) > 1:
@@ -282,12 +285,14 @@ class SequenceProtocolExporter(IExportDevice):
                 entry["START"] = ms_to_string(segment.get_start())
                 entry["END"] = ms_to_string(segment.get_end())
 
-                # TODO Maybe it would be better to have a formatted timestring
-                # entry["DURATION"] = ms_to_string(segment.duration)
+                entry["DURATION"] = segment.duration // 1000
 
-                entry["DURATION"] = segment.duration//1000
                 annotation = "\n".join([a.content for a in segment.get_annotations()])
-                entry["ANNOTATION"] = annotation.lstrip()
+                entry["ANNOTATIONS"] = annotation.lstrip()
+
+                if self.export_format == SequenceProtocolExporter.FORMAT_CSV:
+                    screenshots = "\n".join([ss.get_name() for ss in project.segment_screenshot_mapping[segment]])
+                    entry["SCREENSHOTS"] = screenshots.lstrip()
 
                 for key_word in segment.tag_keywords:
                     if key_word.voc_obj in headers.keys():
@@ -298,7 +303,52 @@ class SequenceProtocolExporter(IExportDevice):
                                                                ", " + key_word.word_obj.name
 
                 f.append(entry)
-        f.save(path, index=False)
+
+        if self.export_format == SequenceProtocolExporter.FORMAT_CSV:
+            f.save(path, index=False)
+        elif self.export_format == SequenceProtocolExporter.FORMAT_EXCEL:
+            df = f.get_data()
+            writer = pd.ExcelWriter(path, engine='xlsxwriter')
+            df.to_excel(writer, sheet_name='Sheet1', index=False)
+            workbook = writer.book
+            workbook.formats[0].set_text_wrap()
+            worksheet = writer.sheets['Sheet1']
+            
+            for idx, col in enumerate(df):  # column width is set according to longest string
+                series = df[col]
+                single_items = [word for word_collection in series.array for word in str(word_collection).split("\n")]
+                max_len = max((
+                    pd.Series(single_items).astype(str).map(len).max(),  # length of largest item
+                    len(str(series.name))  # length of column header
+                )) + 1  # adding a bit of extra space
+                worksheet.set_column(idx, idx, max_len)  # set column width
+
+            df_counter = 1  # the excel file starts with the header at index 0
+            margin = 15
+            screenshots_exist = False
+            screenshots_index = df.columns.get_loc("SCREENSHOTS")
+            screenshot_width = 200
+            for segmentation in project.segmentation:
+                for segment in segmentation.segments:
+                    offset_y = 0
+                    for screenshot in project.segment_screenshot_mapping[segment]:
+                        screenshots_exist = True
+                        f = screenshot.get_img_movie_orig_size()
+                        imgByteArr = io.BytesIO()
+                        Image.fromarray(f[:,:,::-1], 'RGB').save(imgByteArr, format="png")
+                        scaling_factor = screenshot_width/f.shape[1]
+                        worksheet.insert_image(df_counter, screenshots_index, "", {'image_data': imgByteArr,
+                                                          'x_scale': scaling_factor, 'y_scale': scaling_factor,
+                                                          'y_offset' : offset_y * scaling_factor})
+                        offset_y += f.shape[0] + margin
+                    worksheet.set_row_pixels(df_counter, offset_y * scaling_factor)
+                    df_counter += 1
+            if screenshots_exist:
+                worksheet.set_column_pixels(screenshots_index, screenshots_index, screenshot_width)  # set column width
+            writer.close() # saves the file and closes all handles
+
+            print("done")
+
 
 
 class JsonExporter():
