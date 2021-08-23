@@ -285,14 +285,17 @@ class SequenceProtocolExporter(IExportDevice):
                 entry["START"] = ms_to_string(segment.get_start())
                 entry["END"] = ms_to_string(segment.get_end())
 
-                entry["DURATION"] = segment.duration // 1000
+                entry["DURATION"] = segment.duration // 1000  # convert ms to seconds (floor)
 
                 annotation = "\n".join([a.content for a in segment.get_annotations()])
-                entry["ANNOTATIONS"] = annotation.lstrip()
+                entry["ANNOTATIONS"] = annotation
 
                 if self.export_format == SequenceProtocolExporter.FORMAT_CSV:
-                    screenshots = "\n".join([ss.get_name() for ss in project.segment_screenshot_mapping[segment]])
-                    entry["SCREENSHOTS"] = screenshots.lstrip()
+                    screenshots = "\n".join(
+                        ["{}_{}_{}_{}".format(ss.scene_id, ss.shot_id_segm,
+                                              ss.screenshot_group.name, project.movie_descriptor.movie_id)
+                         for ss in project.segment_screenshot_mapping[segment]])
+                    entry["SCREENSHOTS"] = screenshots
 
                 for key_word in segment.tag_keywords:
                     if key_word.voc_obj in headers.keys():
@@ -341,14 +344,11 @@ class SequenceProtocolExporter(IExportDevice):
                                                           'x_scale': scaling_factor, 'y_scale': scaling_factor,
                                                           'y_offset' : offset_y * scaling_factor})
                         offset_y += f.shape[0] + margin
-                    worksheet.set_row_pixels(df_counter, offset_y * scaling_factor)
+                    worksheet.set_row_pixels(df_counter, offset_y * scaling_factor) # set row height
                     df_counter += 1
             if screenshots_exist:
                 worksheet.set_column_pixels(screenshots_index, screenshots_index, screenshot_width)  # set column width
             writer.close() # saves the file and closes all handles
-
-            print("done")
-
 
 
 class JsonExporter():
