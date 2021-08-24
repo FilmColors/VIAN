@@ -289,7 +289,7 @@ class SequenceProtocolExporter(IExportDevice):
                 entry["ANNOTATIONS"] = annotation
 
                 if self.export_format == SequenceProtocolExporter.FORMAT_CSV \
-                        and bool(project.segment_screenshot_mapping):
+                        and bool(project.segment_screenshot_mapping) and segment in project.segment_screenshot_mapping:
                     screenshots = "\n".join(
                         ["{}_{}_{}_{}".format(ss.scene_id, ss.shot_id_segm,
                                               ss.screenshot_group.name, project.movie_descriptor.movie_id)
@@ -327,7 +327,7 @@ class SequenceProtocolExporter(IExportDevice):
                 worksheet.set_column(idx, idx, max_len)  # set column width
 
             df_counter = 1  # the excel file starts with the header at index 0
-            margin = 15
+            margin = 15  # between the screenshots
             screenshots_exist = False
             screenshots_index = df.columns.get_loc("SCREENSHOTS")
             screenshot_width = 200
@@ -337,10 +337,10 @@ class SequenceProtocolExporter(IExportDevice):
                     for screenshot in project.segment_screenshot_mapping[segment]:
                         screenshots_exist = True
                         f = screenshot.get_img_movie_orig_size()
-                        imgByteArr = io.BytesIO()
-                        Image.fromarray(f[:,:,::-1], 'RGB').save(imgByteArr, format="png")
+                        img_byte_arr = io.BytesIO()
+                        Image.fromarray(f[:,:,::-1], 'RGB').save(img_byte_arr, format="png")
                         scaling_factor = screenshot_width/f.shape[1]
-                        worksheet.insert_image(df_counter, screenshots_index, "", {'image_data': imgByteArr,
+                        worksheet.insert_image(df_counter, screenshots_index, "", {'image_data': img_byte_arr,
                                                           'x_scale': scaling_factor, 'y_scale': scaling_factor,
                                                           'y_offset' : offset_y * scaling_factor})
                         offset_y += f.shape[0] + margin

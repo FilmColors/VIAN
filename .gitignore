@@ -21,7 +21,6 @@ data/models/
 idea/
 *.vscode/
 .DS_Store
-*.mp4
 install/.DS_Store
 _docs/build/*
 _docs/source/_build/*

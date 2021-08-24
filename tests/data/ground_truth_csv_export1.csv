@@ -1,2 +1,93 @@
-NO,START,END,DURATION,ANNOTATION,voc1
-1,00:00:01,00:00:02,1,test123,asdfas
+NO,START,END,DURATION,ANNOTATIONS,SCREENSHOTS,ClObj-0:voc1,ClObj-1:voc1,ClObj-2:voc2,ClObj-0:voc2,ClObj-2:voc1,ClObj-1:voc2
+1,00:00:00,00:00:08,8.0,"test123
+test123.1
+test123.2","1_1_All Shots_0_0_0
+1_2_All Shots_0_0_0",word1,,,,,
+2,00:00:08,00:00:24,15.0,"test123
+test123.1
+test123.2","2_1_All Shots_0_0_0
+2_2_All Shots_0_0_0
+2_3_All Shots_0_0_0
+2_4_All Shots_0_0_0",,word2,,,,
+3,00:00:24,00:00:40,16.0,"test123
+test123.1
+test123.2","3_1_All Shots_0_0_0
+3_2_All Shots_0_0_0
+3_3_All Shots_0_0_0
+3_4_All Shots_0_0_0
+3_5_All Shots_0_0_0",,,special:';12!@#$_)((**^characters,,,
+4,00:00:40,00:00:50,9.0,"test123
+test123.1
+test123.2","4_1_All Shots_0_0_0
+4_2_All Shots_0_0_0
+4_3_All Shots_0_0_0",word1,,,CAPITAL_WORD,,
+5,00:00:50,00:00:53,2.0,"test123
+test123.1
+test123.2",5_1_All Shots_0_0_0,,"word1, word2",,,,
+6,00:00:53,00:00:54,1.0,"test123
+test123.1
+test123.2",,,,special:';12!@#$_)((**^characters,,word2,
+7,00:00:54,00:01:00,6.0,"test123
+test123.1
+test123.2","7_1_All Shots_0_0_0
+7_2_All Shots_0_0_0",word1,,,special:';12!@#$_)((**^characters,,
+8,00:01:00,00:01:14,14.0,"test123
+test123.1
+test123.2","8_1_All Shots_0_0_0
+8_2_All Shots_0_0_0
+8_3_All Shots_0_0_0
+8_4_All Shots_0_0_0",,word2,,,,CAPITAL_WORD
+9,00:01:14,00:01:31,16.0,"test123
+test123.1
+test123.2","9_1_All Shots_0_0_0
+9_2_All Shots_0_0_0
+9_3_All Shots_0_0_0
+9_4_All Shots_0_0_0",,,special:';12!@#$_)((**^characters,,word1,
+10,00:01:31,00:01:43,12.0,"test123
+test123.1
+test123.2","10_1_All Shots_0_0_0
+10_2_All Shots_0_0_0
+10_3_All Shots_0_0_0
+10_4_All Shots_0_0_0","word2, word1",,,,,
+11,00:01:43,00:01:48,4.0,"test123
+test123.1
+test123.2",11_1_All Shots_0_0_0,,word2,,,,special:';12!@#$_)((**^characters
+12,00:01:48,00:01:48,0.0,"test123
+test123.1
+test123.2",,,,"CAPITAL_WORD, special:';12!@#$_)((**^characters",,,
+13,00:01:48,00:01:53,4.0,"test123
+test123.1
+test123.2","13_1_All Shots_0_0_0
+13_2_All Shots_0_0_0",word1,,,,,
+14,00:01:53,00:02:05,12.0,"test123
+test123.1
+test123.2","14_1_All Shots_0_0_0
+14_2_All Shots_0_0_0
+14_3_All Shots_0_0_0",,word2,,,,
+15,00:02:05,00:02:22,16.0,"test123
+test123.1
+test123.2","15_1_All Shots_0_0_0
+15_2_All Shots_0_0_0
+15_3_All Shots_0_0_0
+15_4_All Shots_0_0_0
+15_5_All Shots_0_0_0",,,special:';12!@#$_)((**^characters,,,
+16,00:02:22,00:02:36,14.0,"test123
+test123.1
+test123.2","16_1_All Shots_0_0_0
+16_2_All Shots_0_0_0
+16_3_All Shots_0_0_0
+16_4_All Shots_0_0_0",word1,,,CAPITAL_WORD,,
+17,00:02:36,00:02:42,6.0,"test123
+test123.1
+test123.2","17_1_All Shots_0_0_0
+17_2_All Shots_0_0_0",,"word1, word2",,,,
+18,00:02:42,00:02:43,1.0,"test123
+test123.1
+test123.2",,,,special:';12!@#$_)((**^characters,,word2,
+19,00:02:43,00:02:46,2.0,"test123
+test123.1
+test123.2",19_1_All Shots_0_0_0,word1,,,special:';12!@#$_)((**^characters,,
+20,00:02:46,00:02:56,9.0,"test123
+test123.1
+test123.2","20_1_All Shots_0_0_0
+20_2_All Shots_0_0_0",,word2,,,,CAPITAL_WORD
