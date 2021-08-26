@@ -1,0 +1,8 @@
+{"n_classes": 8, "dropout": 0.25, "labels": ["Female_01",
+  "Male_01",
+  "Male_02",
+  "Female_02",
+  "Male_03",
+  "Female_03",
+  "Female_04",
+  "Male_04" ]}

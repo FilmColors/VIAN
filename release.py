@@ -6,9 +6,10 @@ BUILD_PYTHON_WIN = "C:/Users/gaude/AppData/Local/Programs/Python/Python36/python
 BUILD_PYTHON_OSX = "/Users/Kris/Documents/Gaudenz/vian_env/bin/python"
 BUILD_PYTHON_OSX = "venv37/bin/python"
 
-SPEC_FILE = "main.spec"
+SPEC_FILE = "vian/main.spec"
 
 arguments = ["-y", "--debug=all", "--additional-hooks-dir=hooks"]
+
 if sys.platform.startswith("win"):
     build_python = BUILD_PYTHON_WIN
     build_dir = os.path.split(build_python)[0]
