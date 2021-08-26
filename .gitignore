@@ -32,7 +32,8 @@ tests/is_dev.txt
 *.swp
 .notags
 comparison.html
-flask_server/static/build/*
-flask_server/static/three/*
+vian/flask_server/static/build/*
+vian/flask_server/static/three/*
 venv2/*
 projects/*
+videos/*
