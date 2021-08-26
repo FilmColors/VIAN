@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from functools import partial
 
-from core.visualization.basic_vis import IVIANVisualization, MatrixPlot
-from core.visualization.bar_plot import BarPlot
+from vian.core.visualization.basic_vis import IVIANVisualization, MatrixPlot
+from vian.core.visualization.bar_plot import BarPlot
 from typing import *
 
 CorrelationFeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "id"])

@@ -4,10 +4,10 @@ import numpy as np
 from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import QComboBox, QSpinBox, QLayout
 
-from core.data.log import log_error, log_info
-from core.data.computation import ms_to_string
-from core.gui.ewidgetbase import EDockWidget
-from core.data.interfaces import ITimeStepDepending
+from vian.core.data.log import log_error, log_info
+from vian.core.data.computation import ms_to_string
+from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.data.interfaces import ITimeStepDepending
 
 
 class PlayerControls(EDockWidget, ITimeStepDepending):

@@ -8,9 +8,9 @@ from PyQt5 import uic
 from functools import partial
 import os
 
-from core.data.log import log_info, log_debug
+from vian.core.data.log import log_info, log_debug
 
-from core.gui.perspectives import *
+from vian.core.gui.perspectives import *
 import threading
 
 class StatusBar(QtWidgets.QWidget):

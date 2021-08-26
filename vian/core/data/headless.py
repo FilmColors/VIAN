@@ -4,15 +4,15 @@
 #
 # """
 #
-# from core.data.settings import Contributor
-# from core.container.hdf5_manager import *
+# from vian.core.data.settings import Contributor
+# from vian.core.container.hdf5_manager import *
 # from shutil import move
-# # from core.gui.main_window import *
+# # from vian.core.gui.main_window import *
 # from typing import Dict
-# from core.analysis.analysis_import import *
+# from vian.core.analysis.analysis_import import *
 # from threading import Lock, Thread
 # from random import sample
-# from core.data.corpus_client import WebAppCorpusInterface
+# from vian.core.data.corpus_client import WebAppCorpusInterface
 #
 # PROJECT_LOCK = Lock()
 # _INIT_LOCK = Lock()

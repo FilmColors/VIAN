@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 
-from core.container.annotation_body import AnnotationBody, Annotatable
+from vian.core.container.annotation_body import AnnotationBody, Annotatable
 
 MIME_TYPES = dict(
     Text = AnnotationBody.MIMETYPE_TEXT_PLAIN,

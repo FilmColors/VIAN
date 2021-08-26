@@ -1,4 +1,4 @@
-from core.data.computation import images_to_movie
+from vian.core.data.computation import images_to_movie
 import cv2
 import glob
 

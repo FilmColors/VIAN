@@ -4,7 +4,7 @@ This script has been used to fix the missing target_container in the experiments
 
 import glob
 
-from core.data.headless import *
+from vian.core.data.headless import *
 
 if __name__ == '__main__':
     for f in glob.glob("F:\\_projects\\*\\*.eext"):

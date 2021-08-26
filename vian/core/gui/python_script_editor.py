@@ -5,13 +5,13 @@ import re
 from uuid import uuid4
 import importlib.util
 import traceback
-from core.data.log import log_info, log_error, log_debug, log_warning
+from vian.core.data.log import log_info, log_error, log_debug, log_warning
 from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, \
     QCompleter,QSizePolicy, QDialog, QVBoxLayout, QLineEdit, QLabel, QPushButton, QComboBox
 from functools import partial
-from core.analysis.pipeline_scripts.pipeline_script import PipelineScript
+from vian.core.analysis.pipeline_scripts.pipeline_script import PipelineScript
 
 
 def format(r, g, b, style=''):

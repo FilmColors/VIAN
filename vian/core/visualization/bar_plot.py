@@ -1,4 +1,4 @@
-from core.visualization.basic_vis import IVIANVisualization
+from vian.core.visualization.basic_vis import IVIANVisualization
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *

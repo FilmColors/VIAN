@@ -1,8 +1,8 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from core.gui.ewidgetbase import EDockWidget
-from core.data.log import log_error
+from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.data.log import log_error
 import numpy as np
 import os
 """

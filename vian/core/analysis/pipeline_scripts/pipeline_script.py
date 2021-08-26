@@ -8,10 +8,10 @@ import os
 from uuid import uuid4
 from typing import List
 
-from core.container.container_interfaces import _VIAN_ROOT
+from vian.core.paths import get_vian_data
 
 
-with open(os.path.join(_VIAN_ROOT, "data/default_pipeline.py"), "r") as f:
+with open(os.path.join(get_vian_data("default_pipeline.py")), "r") as f:
     _PIPELINE_TEMPLATE = f.read()
 
 

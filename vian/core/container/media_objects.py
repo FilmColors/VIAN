@@ -1,6 +1,6 @@
-from core.data.enums import MEDIA_OBJECT, MediaObjectType
+from vian.core.data.enums import MEDIA_OBJECT, MediaObjectType
 from .container_interfaces import BaseProjectEntity, IHasName, IHasMediaObject
-from core.data.computation import *
+from vian.core.data.computation import *
 
 
 class AbstractMediaObject(BaseProjectEntity, IHasName):

@@ -3,12 +3,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from core.data.interfaces import TimelineDataset
-from core.container.project import *
-from core.container.container_interfaces import ILockable
-from core.gui.context_menu import open_context_menu
-from core.gui.annotation_editor import AnnotationEditorPopup
-from core.gui.vocabulary_selector import VocabularySelectorDialog
+from vian.core.data.interfaces import TimelineDataset
+from vian.core.container.project import *
+from vian.core.container.container_interfaces import ILockable
+from vian.core.gui.context_menu import open_context_menu
+from vian.core.gui.annotation_editor import AnnotationEditorPopup
+from vian.core.gui.vocabulary_selector import VocabularySelectorDialog
 
 
 

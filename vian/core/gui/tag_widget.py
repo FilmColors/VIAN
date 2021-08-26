@@ -3,7 +3,7 @@ import numpy as np
 
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QFrame
 
-from core.gui.misc.flow_layout import FlowLayout
+from vian.core.gui.misc.flow_layout import FlowLayout
 
 class TagWidget(QWidget):
     def __init__(self, parent):

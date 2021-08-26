@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
 from scipy.signal import savgol_filter
 
-from core.data.computation import *
-from core.visualization.basic_vis import VIANPlot
+from vian.core.data.computation import *
+from vian.core.visualization.basic_vis import VIANPlot
 SOURCE_FOREGROUND = 0
 
 LinePlotRawData = namedtuple("LinePlotRawData", ["x", "y", "z", "col", "mime_data", "curr_grid"])

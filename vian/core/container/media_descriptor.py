@@ -4,10 +4,10 @@ from pymediainfo import MediaInfo
 from typing import Tuple
 
 import cv2
-from core.data.computation import ms_to_string, ms_to_frames
-from core.data.enums import MOVIE_DESCRIPTOR
+from vian.core.data.computation import ms_to_string, ms_to_frames
+from vian.core.data.enums import MOVIE_DESCRIPTOR
 
-from core.data.log import log_error
+from vian.core.data.log import log_error
 from .container_interfaces import BaseProjectEntity, ISelectable, IHasName, ITimeRange, \
     AutomatedTextSource, IClassifiable
 

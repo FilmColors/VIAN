@@ -1,7 +1,7 @@
 import os
 import os.path
 import pickle
-from core.data.headless import load_project_headless, create_project_headless
+from vian.core.data.headless import load_project_headless, create_project_headless
 projects = []
 all_scrs = []
 # 122;1;1;2;1;default;880.0;F:/fiwi_datenbank/SCR/122_1_1\2_1_122_1_1.jpg

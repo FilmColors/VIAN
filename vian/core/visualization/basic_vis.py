@@ -3,10 +3,10 @@ from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import numpy as np
-from core.data.computation import get_heatmap_value, ms_to_string
-from core.gui.ewidgetbase import EGraphicsView
-from core.analysis.colorimetry.hilbert import create_hilbert_transform
-from core.gui.dialogs.image_export_dialog import ExportImageDialog
+from vian.core.data.computation import get_heatmap_value, ms_to_string
+from vian.core.gui.ewidgetbase import EGraphicsView
+from vian.core.analysis.colorimetry.hilbert import create_hilbert_transform
+from vian.core.gui.dialogs.image_export_dialog import ExportImageDialog
 
 class IVIANVisualization():
     def __init__(self, naming_fields = None):

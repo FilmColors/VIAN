@@ -7,8 +7,8 @@ from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseE
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
 
-from core.data.computation import *
-from core.visualization.basic_vis import IVIANVisualization
+from vian.core.data.computation import *
+from vian.core.visualization.basic_vis import IVIANVisualization
 SOURCE_FOREGROUND = 0
 SOURCE_BACKGROUND = 1
 SOURCE_COMPLETE = 2

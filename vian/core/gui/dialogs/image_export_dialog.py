@@ -6,9 +6,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QPoint
-from core.data.computation import pixmap_to_numpy
-from core.data.log import log_error
-from core.gui.ewidgetbase import EDialogWidget, EGraphicsView, FileBrowseBar
+from vian.core.data.computation import pixmap_to_numpy
+from vian.core.data.log import log_error
+from vian.core.gui.ewidgetbase import EDialogWidget, EGraphicsView, FileBrowseBar
 
 
 class ExportNamingConventionWidget(QWidget):

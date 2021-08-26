@@ -11,15 +11,15 @@ from uuid import uuid4
 from typing import List
 import traceback
 
-from core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS, DataSerialization
+from vian.core.data.enums import ANALYSIS_NODE_SCRIPT, ANALYSIS_JOB_ANALYSIS, DataSerialization
 from .container_interfaces import BaseProjectEntity, IHasName, ISelectable, _VIAN_ROOT, deprecation_serialization
-from core.data.computation import *
+from vian.core.data.computation import *
 from .hdf5_manager import get_analysis_by_name
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from core.data.interfaces import TimelineDataset, IAnalysisJob, SpatialOverlayDataset
+    from vian.core.data.interfaces import TimelineDataset, IAnalysisJob, SpatialOverlayDataset
 
 
 class AnalysisContainer(BaseProjectEntity, IHasName, ISelectable):

@@ -5,13 +5,13 @@ import cv2
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea, QComboBox
-from core.container.project import VIANProject, VIAN_PROJECT_EXTENSION
-from core.data.enums import MovieSource
-from core.gui.ewidgetbase import EDialogWidget
-from core.data.importers import ELANProjectImporter
-from core.data.computation import images_to_movie
-
-from core.gui.misc.utils import dialog_with_margin
+from vian.core.container.project import VIANProject, VIAN_PROJECT_EXTENSION
+from vian.core.data.enums import MovieSource
+from vian.core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.importers import ELANProjectImporter
+from vian.core.data.computation import images_to_movie
+from vian.core.paths import get_vian_data
+from vian.core.gui.misc.utils import dialog_with_margin
 
 
 class NewProjectDialog(EDialogWidget):
@@ -107,7 +107,7 @@ class NewProjectDialog(EDialogWidget):
 
     def find_templates(self):
         templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
-        templates.extend(glob.glob("data/templates/" + "*.viant"))
+        templates.extend(glob.glob(get_vian_data("templates/" + "*.viant")))
 
         self.templates.append(None)
         self.comboBox_Template.addItem("No Template")

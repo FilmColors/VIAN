@@ -1,6 +1,6 @@
 import glob
 import cv2
-from core.data.headless import *
+from vian.core.data.headless import *
 from threading import Thread
 
 IMPORT = False

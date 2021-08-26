@@ -2,9 +2,9 @@ import unittest
 import os
 import shutil
 
-import core.data.headless2 as vian
-from core.container.project import VIANProject
-from core.data.creation_events import ALL_REGISTERED_PIPELINES
+import vian.core.data.headless2 as vian
+from vian.core.container.project import VIANProject
+from vian.core.data.creation_events import ALL_REGISTERED_PIPELINES
 
 class TestCreate(unittest.TestCase):
     def setUp(self) -> None:

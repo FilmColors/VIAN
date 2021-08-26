@@ -11,9 +11,9 @@ import os
 import sys
 import json
 import hashlib
-from core.container.project import *
-from core.container.segmentation import *
-from core.data.settings import Contributor
+from vian.core.container.project import *
+from vian.core.container.segmentation import *
+from vian.core.data.settings import Contributor
 
 
 class WebAnnotationDevice():

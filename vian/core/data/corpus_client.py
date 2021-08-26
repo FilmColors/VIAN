@@ -1,13 +1,14 @@
 from PyQt5.QtCore import QObject, QThread, pyqtSlot, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
-from core.data.settings import UserSettings, Contributor, CONFIG, IS_DEV
-from core.container.project import VIANProject
-from core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
-from core.container.experiment import Experiment, VocabularyWord, Vocabulary
-from core.analysis.analysis_import import SemanticSegmentationAnalysis
-from core.data.log import log_info
-from core.data.importers import ExperimentTemplateUpdater
+from vian.core.paths import get_vian_data
+from vian.core.data.settings import UserSettings, Contributor, CONFIG, IS_DEV
+from vian.core.container.project import VIANProject
+from vian.core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
+from vian.core.container.experiment import Experiment, VocabularyWord, Vocabulary
+from vian.core.analysis.analysis_import import SemanticSegmentationAnalysis
+from vian.core.data.log import log_info
+from vian.core.data.importers import ExperimentTemplateUpdater
 
 import os
 import json
@@ -53,7 +54,7 @@ def check_erc_template(project:VIANProject):
     log_info("ERC Template detected, updating")
     r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/experiments/1")
     exchange_data = r.json()
-    temporary = "data/temp.json"
+    temporary = get_vian_data("temp.json")
     with open(temporary, "w") as f:
         json.dump(exchange_data, f)
     project.import_(ExperimentTemplateUpdater(), temporary)

@@ -12,11 +12,11 @@ import os
 import sys
 from collections import namedtuple
 
-from core.data.log import *
-from core.data.enums import ScreenshotNamingConventionOptions as naming
-from core.container.corpus import Corpus
+from vian.core.data.log import *
+from vian.core.data.enums import ScreenshotNamingConventionOptions as naming
+from vian.core.container.corpus import Corpus
 from PyQt5.QtGui import QFont, QColor
-
+from vian.core.paths import get_vian_data
 
 from PyQt5.QtWidgets import QApplication
 
@@ -47,13 +47,13 @@ if "Sphinx" not in os.environ:
 
     try:
         print(os.curdir)
-        print(os.path.abspath("data/config.json"))
-        with open("data/config.json", "r") as f:
+        print(os.path.abspath(get_vian_data("config.json")))
+        with open(get_vian_data("config.json"), "r") as f:
             CONFIG = json.load(f)
     except Exception as e:
         print(e)
         try:
-            with open("../data/config.json", "r") as f:
+            with open(get_vian_data("config.json"), "r") as f:
                 CONFIG = json.load(f)
         except Exception as e:
             raise e

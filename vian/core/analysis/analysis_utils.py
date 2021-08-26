@@ -1,8 +1,8 @@
 from threading import Lock
-from core.data.interfaces import IAnalysisJob
-from core.container.container_interfaces import BaseProjectEntity
+from vian.core.data.interfaces import IAnalysisJob
+from vian.core.container.container_interfaces import BaseProjectEntity
 from typing import List, Dict
-from core.container.project import ClassificationObject, VIANProject
+from vian.core.container.project import ClassificationObject, VIANProject
 
 PROJECT_LOCK = Lock()
 

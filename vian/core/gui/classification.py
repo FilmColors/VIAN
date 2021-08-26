@@ -11,12 +11,12 @@ from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QGrid
     QComboBox, QFrame
 
 
-from core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
-from core.data.log import log_error, log_info, log_debug, log_warning
-from core.data.interfaces import IProjectChangeNotify
-from core.gui.ewidgetbase import EDockWidget
-from core.container.experiment import Experiment
-from core.container.project import Segment, SVGAnnotation, Screenshot, ClassificationObject, UniqueKeyword
+from vian.core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
+from vian.core.data.log import log_error, log_info, log_debug, log_warning
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.container.experiment import Experiment
+from vian.core.container.project import Segment, SVGAnnotation, Screenshot, ClassificationObject, UniqueKeyword
 
 MATRIX_ORDER_PER_SEGMENT = 0
 MATRIX_ORDER_PER_TYPE = 1

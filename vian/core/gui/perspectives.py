@@ -3,7 +3,7 @@ import os
 from PyQt5 import uic
 from enum import Enum
 
-from core.gui.ewidgetbase import EDockWidget
+from vian.core.gui.ewidgetbase import EDockWidget
 from PyQt5.QtWidgets import QToolBar, QWidget, QHBoxLayout
 
 

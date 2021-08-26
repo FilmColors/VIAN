@@ -3,13 +3,13 @@ Contains all Export Classes and Export Functions of VIAN
 """
 import io
 import pandas as pd
-from core.container.project import *
+from vian.core.container.project import *
 import os
 import shutil
 from PIL import Image
 
-from core.data.computation import ms_to_string
-from core.data.csv_helper import CSVFile
+from vian.core.data.computation import ms_to_string
+from vian.core.data.csv_helper import CSVFile
 
 
 def zip_project(output_file, project_folder):

@@ -9,8 +9,8 @@ from functools import partial
 import numpy as np
 import networkx as nx
 
-from core.gui.ewidgetbase import EGraphicsView, line_separator
-from core.visualization.basic_vis import IVIANVisualization
+from vian.core.gui.ewidgetbase import EGraphicsView, line_separator
+from vian.core.visualization.basic_vis import IVIANVisualization
 #region DEFINITIONS
 DATA_SET = "../../results/result_fm_db_parser.pickle"
 

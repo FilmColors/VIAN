@@ -5,9 +5,9 @@ from PyQt5.QtCore import pyqtSignal
 import os
 
 from PyQt5 import uic
-from core.data.settings import COLORMAPS_SEQUENTIAL, UserSettings
-from core.data.enums import ScreenshotNamingConventionOptions
-from core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.settings import COLORMAPS_SEQUENTIAL, UserSettings
+from vian.core.data.enums import ScreenshotNamingConventionOptions
+from vian.core.gui.ewidgetbase import EDialogWidget
 
 from matplotlib import cm
 

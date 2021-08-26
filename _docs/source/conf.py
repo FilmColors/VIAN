@@ -79,7 +79,7 @@ author = 'Gaudenz Halter'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# from core.version import __version__
+# from vian.core.version import __version__
 # The short X.Y version.
 # version = ".".join(__version__.split(".")[:2])
 # The full version, including alpha/beta/rc tags.

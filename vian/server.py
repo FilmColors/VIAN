@@ -1,12 +1,12 @@
 # "C:/Users/gaude/Documents/VIAN/corpora/eyetracking_corpus2/eyetracking_corpus.vian_corpus"
-from core.container.corpus import Corpus, VIANProject
-from core.analysis.analysis_import import *
+from vian.core.container.corpus import Corpus, VIANProject
+from vian.core.analysis.analysis_import import *
 
 import numpy as np
 
 from bokeh.models import Slider, Select, ColumnDataSource, Slider, Tabs, Panel, Spinner
 from bokeh.plotting import figure
-from core.data.computation import lch_to_human_readable, ms2datetime
+from vian.core.data.computation import lch_to_human_readable, ms2datetime
 
 from matplotlib import pyplot as plt
 
@@ -18,7 +18,7 @@ from bokeh.colors import RGB
 from bokeh.palettes import RdYlBu3
 from bokeh.plotting import figure, curdoc
 
-from core.data.computation import resize_with_aspect
+from vian.core.data.computation import resize_with_aspect
 import pickle
 
 R_SIZE = 300

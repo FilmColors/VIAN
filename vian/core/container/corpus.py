@@ -15,8 +15,8 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 from .project import VIANProject, merge_experiment
 from .container_interfaces import IHasName
-from core.data.log import log_error, log_warning, log_info
-from core.data.enums import CORPUS
+from vian.core.data.log import log_error, log_warning, log_info
+from vian.core.data.enums import CORPUS
 
 
 class Corpus(QObject, IHasName):

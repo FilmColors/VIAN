@@ -2,10 +2,10 @@ from PyQt5.QtCore import *
 import cv2
 from PyQt5.QtGui import QPainter, QPainterPath, QColor
 from typing import Dict
-from core.data.computation import *
-from core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_spacial_frequency_heatmap2
-from core.container.project import VIANProject, IAnalysisJobAnalysis
-from core.data.interfaces import SpatialOverlayDataset
+from vian.core.data.computation import *
+from vian.core.analysis.spacial_frequency import get_spacial_frequency_heatmap, get_spacial_frequency_heatmap2
+from vian.core.container.project import VIANProject, IAnalysisJobAnalysis
+from vian.core.data.interfaces import SpatialOverlayDataset
 
 from matplotlib import cm
 

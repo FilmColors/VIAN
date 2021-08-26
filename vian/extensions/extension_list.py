@@ -6,9 +6,9 @@ import importlib
 import glob
 from functools import partial
 from PyQt5.QtWidgets import QMenu
-from core.data.interfaces import IAnalysisJob
-from core.data.plugin import GAPlugin
-from core.data.log import log_warning, log_error, log_info, log_debug
+from vian.core.data.interfaces import IAnalysisJob
+from vian.core.data.plugin import GAPlugin
+from vian.core.data.log import log_warning, log_error, log_info, log_debug
 
 
 class ExtensionList:

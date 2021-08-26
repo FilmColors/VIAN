@@ -5,11 +5,11 @@ from PyQt5.QtGui import QLinearGradient, QColor, QGradient, QPixmap
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from .timeline_base import TimelineControl, TimebarSlice, TimelineBar
-from core.container.project import Segmentation, UniqueKeyword, Segment, AnnotationBody
+from vian.core.container.project import Segmentation, UniqueKeyword, Segment, AnnotationBody
 import numpy as np
 from functools import partial
-from core.gui.annotation_editor import AnnotationEditorPopup
-from core.gui.ewidgetbase import TextEditPopup
+from vian.core.gui.annotation_editor import AnnotationEditorPopup
+from vian.core.gui.ewidgetbase import TextEditPopup
 
 
 class TimelineSubSegmentationEntry:

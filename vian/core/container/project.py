@@ -1,4 +1,4 @@
-# from core.node_editor.node_editor import *
+# from vian.core.node_editor.node_editor import *
 from shutil import copy2
 from typing import Union
 from threading import Lock
@@ -9,8 +9,8 @@ from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QFileDialog, QApplication
 from random import randint
 
-from core import version
-from core.data.enums import *
+from vian.core import version
+from vian.core.data.enums import *
 
 from .media_descriptor import MovieDescriptor
 from .hdf5_manager import HDF5Manager
@@ -26,10 +26,10 @@ from .node_scripts import *
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from core.container.vocabulary_library import VocabularyLibrary
+    from vian.core.container.vocabulary_library import VocabularyLibrary
 
-# from core.data.importers import ImportDevice
-# from core.data.exporters import IExportDevice
+# from vian.core.data.importers import ImportDevice
+# from vian.core.data.exporters import IExportDevice
 VIAN_PROJECT_EXTENSION = ".eext"
 
 

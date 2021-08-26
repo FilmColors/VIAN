@@ -2,12 +2,12 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import *
 
 from PyQt5.QtCore import pyqtSlot
-from core.gui.timeline.timeline_base import TimelineBar
+from vian.core.gui.timeline.timeline_base import TimelineBar
 
-from core.gui.context_menu import open_context_menu
-from core.container.project import Screenshot
-from core.gui.ewidgetbase import ImagePreviewPopup
-from core.data.computation import numpy_to_pixmap
+from vian.core.gui.context_menu import open_context_menu
+from vian.core.container.project import Screenshot
+from vian.core.gui.ewidgetbase import ImagePreviewPopup
+from vian.core.data.computation import numpy_to_pixmap
 
 
 class ScreenshotGroupBar(TimelineBar):

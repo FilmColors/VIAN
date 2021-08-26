@@ -1,9 +1,9 @@
-from core.visualization.basic_vis import IVIANVisualization
+from vian.core.visualization.basic_vis import IVIANVisualization
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import numpy as np
-from core.data.computation import rotate
+from vian.core.data.computation import rotate
 from collections import namedtuple
 
 DotPlotRawData = namedtuple("DotPlotRawData", ["x", "y", "z", "col", "mime_data", "curr_grid"])

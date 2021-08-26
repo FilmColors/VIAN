@@ -1,4 +1,4 @@
-from core.gui.ewidgetbase import EDockWidget
+from vian.core.gui.ewidgetbase import EDockWidget
 from collections import namedtuple
 from functools import partial
 from PyQt5.QtWidgets import *
@@ -8,15 +8,15 @@ from PyQt5.QtCore import *
 import time
 import numpy as np
 
-from core.container.analysis import IAnalysisJobAnalysis
-from core.data.interfaces import IProjectChangeNotify
-from core.data.log import log_error
-from core.container.experiment import Experiment
-from core.container.segmentation import Segment
-from core.container.screenshot import Screenshot
-from core.container.svg_annotation import SVGAnnotation
-from core.visualization.feature_plot import GenericFeaturePlot, FeatureTuple, SegmentTuple
-from core.visualization.correlation_matrix import CorrelationVisualization, CorrelationVisualization, CorrelationFeatureTuple
+from vian.core.container.analysis import IAnalysisJobAnalysis
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.data.log import log_error
+from vian.core.container.experiment import Experiment
+from vian.core.container.segmentation import Segment
+from vian.core.container.screenshot import Screenshot
+from vian.core.container.svg_annotation import SVGAnnotation
+from vian.core.visualization.feature_plot import GenericFeaturePlot, FeatureTuple, SegmentTuple
+from vian.core.visualization.correlation_matrix import CorrelationVisualization, CorrelationVisualization, CorrelationFeatureTuple
 
 FilterTuple = namedtuple("FilterTuple", ["name", "word_obj"])
 

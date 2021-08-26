@@ -4,8 +4,8 @@ import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog, QComboBox
 
-from core.data.importers import VocabularyCSVImporter
-from core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.importers import VocabularyCSVImporter
+from vian.core.gui.ewidgetbase import EDialogWidget
 
 
 class CSVVocabularyImportDialog(EDialogWidget):

@@ -9,20 +9,20 @@ from collections import namedtuple
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QColor
-from core.data.enums import DataSerialization
+from vian.core.data.enums import DataSerialization
 from scipy.signal import savgol_filter, resample
-from core.data.log import log_debug, log_info, log_error
-from core.container.container_interfaces import ITimelineItem
-from core.container.analysis import AnalysisContainer
-from core.container.project import Screenshot, ScreenshotGroup, Segment, Segmentation, SVGAnnotation, AnnotationLayer, \
+from vian.core.data.log import log_debug, log_info, log_error
+from vian.core.container.container_interfaces import ITimelineItem
+from vian.core.container.analysis import AnalysisContainer
+from vian.core.container.project import Screenshot, ScreenshotGroup, Segment, Segmentation, SVGAnnotation, AnnotationLayer, \
     ITimeRange
-from core.data.computation import ms_to_frames
+from vian.core.data.computation import ms_to_frames
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from core.container.project import VIANProject
-    from core.container.analysis import AnalysisContainer
+    from vian.core.container.project import VIANProject
+    from vian.core.container.analysis import AnalysisContainer
 
 VisualizationTab = namedtuple("VisualizationTab", ["name", "widget", "use_filter", "controls"])
 

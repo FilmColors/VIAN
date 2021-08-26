@@ -5,14 +5,14 @@ from PyQt5.QtWidgets import *
 
 import webbrowser
 
-from core.data.log import log_error
-from core.data.computation import pixmap_to_numpy, numpy_to_pixmap
-from core.container.project import VIANProject
+from vian.core.data.log import log_error
+from vian.core.data.computation import pixmap_to_numpy, numpy_to_pixmap
+from vian.core.container.project import VIANProject
 import cv2
 from functools import partial
 from PyQt5 import uic
 import os
-from core.gui.misc.utils import dialog_with_margin
+from vian.core.gui.misc.utils import dialog_with_margin
 
 import sys
 # if sys.platform == "darwin":

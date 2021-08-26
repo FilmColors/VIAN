@@ -7,10 +7,10 @@ from bokeh.palettes import Category20
 from bokeh.transform import factor_cmap
 
 
-from core.container.project import *
+from vian.core.container.project import *
 import cv2
 from random import sample
-from core.data.computation import resize_with_aspect
+from vian.core.data.computation import resize_with_aspect
 
 
 def ms2datetime(time_ms):

@@ -3,21 +3,21 @@ import glob
 import sys
 import importlib
 
-from core.gui.ewidgetbase import EDockWidget, EToolBar
+from vian.core.gui.ewidgetbase import EDockWidget, EToolBar
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QRect, QRectF, QEvent, QTimer
 from PyQt5.QtGui import QColor, QPixmap, QIcon, QMouseEvent, QPaintEvent, QPainter, QPen, QTextOption
-from core.data.interfaces import IProjectChangeNotify
+from vian.core.data.interfaces import IProjectChangeNotify
 
 from functools import partial
-from core.gui.python_script_editor import PythonScriptEditor
-from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
-from core.data.log import log_error, log_info, log_warning
-from core.container.project import VIANProject, Screenshot, SVGAnnotation, Segment
-from core.analysis.pipeline_scripts.pipeline_script import PipelineScript, PipelineScriptManager
-from core.data.computation import import_module_from_path, create_icon
+from vian.core.gui.python_script_editor import PythonScriptEditor
+from vian.core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES, get_path_of_pipeline_script, get_name_of_script_by_path
+from vian.core.data.log import log_error, log_info, log_warning
+from vian.core.container.project import VIANProject, Screenshot, SVGAnnotation, Segment
+from vian.core.analysis.pipeline_scripts.pipeline_script import PipelineScript, PipelineScriptManager
+from vian.core.data.computation import import_module_from_path, create_icon
 import numpy as np
 
 

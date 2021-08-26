@@ -6,11 +6,12 @@ from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5 import uic
 
-from core.gui.ewidgetbase import EDockWidget, EditableListWidget
-from core.gui.misc.filmography_widget import FilmographyWidget2
-from core.container.corpus import Corpus
-from core.container.project import VIANProject
-from core.data.log import log_error
+from vian.core.gui.ewidgetbase import EDockWidget, EditableListWidget
+from vian.core.gui.misc.filmography_widget import FilmographyWidget2
+from vian.core.container.corpus import Corpus
+from vian.core.container.project import VIANProject
+from vian.core.data.log import log_error
+from core.paths import get_vian_data
 
 
 class CorpusDockWidget(EDockWidget):
@@ -67,7 +68,7 @@ class CorpusDockWidget(EDockWidget):
     def on_new_corpus(self):
         location = QFileDialog().getExistingDirectory(self, directory=self.main_window.settings.DIR_CORPORA)
         if os.path.isdir(location):
-            self.corpus = Corpus("New Corpus", location, template_movie_path="data/template.mp4")
+            self.corpus = Corpus("New Corpus", location, template_movie_path=get_vian_data("template.mp4"))
             self.corpus.save(os.path.join(self.corpus.directory, self.corpus.name))
             self.onCorpusChanged.emit(self.corpus)
             self.show()
@@ -162,7 +163,7 @@ class CorpusDockWidget(EDockWidget):
         self.on_close_template()
 
     def import_template(self):
-        file = QFileDialog.getOpenFileName(self, directory="data/templates", filter="*.viant")[0]
+        file = QFileDialog.getOpenFileName(self, directory=get_vian_data("templates"), filter="*.viant")[0]
         if not os.path.isfile(file):
             return
         self.corpus.import_template(file)

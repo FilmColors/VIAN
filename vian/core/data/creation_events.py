@@ -6,9 +6,9 @@ as within VIAN to be called once a selector is created.
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QMessageBox
-from core.container.project import VIANProject, Segment, SVGAnnotation, Screenshot, Experiment
-from core.analysis.pipeline_scripts.pipeline_script import PipelineScript
-from core.data.log import log_info, log_error, log_debug, log_warning
+from vian.core.container.project import VIANProject, Segment, SVGAnnotation, Screenshot, Experiment
+from vian.core.analysis.pipeline_scripts.pipeline_script import PipelineScript
+from vian.core.data.log import log_info, log_error, log_debug, log_warning
 
 import traceback
 import cv2

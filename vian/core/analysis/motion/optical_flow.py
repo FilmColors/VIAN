@@ -7,16 +7,16 @@ June 2018
 """
 import numpy as np
 
-from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget, DataSerialization, TimelineDataset
-from core.container.project import MOVIE_DESCRIPTOR, BaseProjectEntity, VIANProject, SEGMENT
-from core.container.analysis import IAnalysisJobAnalysis
+from vian.core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget, DataSerialization, TimelineDataset
+from vian.core.container.project import MOVIE_DESCRIPTOR, BaseProjectEntity, VIANProject, SEGMENT
+from vian.core.container.analysis import IAnalysisJobAnalysis
 
-from core.analysis.color.palette_extraction import *
-from core.container.hdf5_manager import vian_analysis
-from core.visualization.palette_plot import *
+from vian.core.analysis.color.palette_extraction import *
+from vian.core.container.hdf5_manager import vian_analysis
+from vian.core.visualization.palette_plot import *
 
 import librosa
-from core.analysis.misc import preprocess_frame
+from vian.core.analysis.misc import preprocess_frame
 
 """
 array Structure: 

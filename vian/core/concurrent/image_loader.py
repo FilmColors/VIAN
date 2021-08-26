@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from core.data.interfaces import *
-from core.gui.ewidgetbase import *
-from core.analysis.informative import select_rows
-from core.data.computation import ms_to_frames
-from core.container.project import *
+from vian.core.data.interfaces import *
+from vian.core.gui.ewidgetbase import *
+from vian.core.analysis.informative import select_rows
+from vian.core.data.computation import ms_to_frames
+from vian.core.container.project import *
 
 
 class ClassificationObjectChangedJob(IConcurrentJob):

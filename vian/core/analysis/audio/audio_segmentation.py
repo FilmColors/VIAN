@@ -4,15 +4,15 @@ import os
 
 from PyQt5.QtCore import QObject
 
-from core.data.enums import *
-from core.data.log import log_info, log_warning, log_error, log_debug
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from vian.core.data.enums import *
+from vian.core.data.log import log_info, log_warning, log_error, log_debug
+from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 
-from core.gui.ewidgetbase import EGraphicsView
+from vian.core.gui.ewidgetbase import EGraphicsView
 
-from core.container.hdf5_manager import vian_analysis
-from core.container.analysis import IAnalysisJobAnalysis
-from core.container.project import VIANProject, Segmentation
+from vian.core.container.hdf5_manager import vian_analysis
+from vian.core.container.analysis import IAnalysisJobAnalysis
+from vian.core.container.project import VIANProject, Segmentation
 
 # Uncomment to enable the Analysis in VIAN
 # @vian_analysis

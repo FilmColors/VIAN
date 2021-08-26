@@ -7,12 +7,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon
 
 
-from core.container.experiment import Vocabulary, VocabularyWord
-from core.gui.ewidgetbase import EDockWidget
-from core.data.interfaces import IProjectChangeNotify
-from core.container.project import Segmentation, VIANProject
+from vian.core.container.experiment import Vocabulary, VocabularyWord
+from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.container.project import Segmentation, VIANProject
 
-from core.container.vocabulary_library import VocabularyLibrary, VocabularyCollection
+from vian.core.container.vocabulary_library import VocabularyLibrary, VocabularyCollection
 
 
 class VocabularyManager(EDockWidget, IProjectChangeNotify):

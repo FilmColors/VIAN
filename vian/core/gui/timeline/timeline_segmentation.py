@@ -1,8 +1,8 @@
 from PyQt5.QtCore import pyqtSlot
-from core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
+from vian.core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
 
-from core.analysis.color.average_color import ColorFeatureAnalysis
-from core.container.project import *
+from vian.core.analysis.color.average_color import ColorFeatureAnalysis
+from vian.core.container.project import *
 
 class TimelineSegmentationControl(TimelineControl):
     onHeightChanged = pyqtSignal(int)

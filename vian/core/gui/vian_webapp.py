@@ -1,14 +1,14 @@
 import numpy as np
-from core.data.log import log_debug
-from core.data.computation import create_icon
-from core.data.corpus_client import CorpusClient
-from core.data.interfaces import IProjectChangeNotify
-from core.gui.ewidgetbase import *
+from vian.core.data.log import log_debug
+from vian.core.data.computation import create_icon
+from vian.core.data.corpus_client import CorpusClient
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.gui.ewidgetbase import *
 from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
-from core.gui.misc.filmography_widget import FilmographyWidget2
-from core.container.project import VIANProject
+from vian.core.gui.misc.filmography_widget import FilmographyWidget2
+from vian.core.container.project import VIANProject
 
-from core.data.log import log_warning, log_info
+from vian.core.data.log import log_warning, log_info
 
 class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
     runAllAnalyses = pyqtSignal()

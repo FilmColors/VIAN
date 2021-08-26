@@ -3,9 +3,9 @@ import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog
 
-from core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum
-from core.gui.ewidgetbase import EDialogWidget
-from core.data.exporters import ScreenshotExporter
+from vian.core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum
+from vian.core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.exporters import ScreenshotExporter
 
 
 class DialogScreenshotExporter(EDialogWidget):

@@ -4,11 +4,11 @@ from PyQt5.QtGui import *
 from PyQt5 import uic
 import os
 import csv
-from core.data.plugin import *
+from vian.core.data.plugin import *
 from imdb import IMDb
 import requests
-from core.concurrent.worker import MinimalThreadWorker
-from core.data.computation import open_web_browser
+from vian.core.concurrent.worker import MinimalThreadWorker
+from vian.core.data.computation import open_web_browser
 from collections import namedtuple
 
 

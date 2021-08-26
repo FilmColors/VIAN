@@ -6,14 +6,14 @@ import numpy as np
 
 from typing import List, Tuple
 
-from core.data.log import log_warning, log_debug, log_info, log_error
-from core.container.analysis import AnalysisContainer
-from core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
+from vian.core.data.log import log_warning, log_debug, log_info, log_error
+from vian.core.container.analysis import AnalysisContainer
+from vian.core.data.enums import VOCABULARY, VOCABULARY_WORD, CLASSIFICATION_OBJECT, EXPERIMENT, SEGMENTATION, \
     ANNOTATION_LAYER, SCREENSHOT_GROUP, SEGMENT
 from .container_interfaces import BaseProjectEntity, IHasName, IClassifiable, deprecation_serialization
 from .hdf5_manager import get_analysis_by_name
 
-from core.analysis.deep_learning.labels import LIPLabels
+from vian.core.analysis.deep_learning.labels import LIPLabels
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMessageBox

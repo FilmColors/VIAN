@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxL
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QEvent
 from PyQt5.QtGui import QPixmap, QMouseEvent, QPainter, QColor, QPen
 
-from core.container.project import Segment, VIANProject, Screenshot, UniqueKeyword, Annotatable
+from vian.core.container.project import Segment, VIANProject, Screenshot, UniqueKeyword, Annotatable
 
 
 class SearchWindow(QMainWindow):

@@ -3,20 +3,20 @@ import numpy as np
 
 from PyQt5.QtCore import QObject
 
-from core.data.enums import *
-from core.data.log import log_info, log_warning, log_error, log_debug
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from vian.core.data.enums import *
+from vian.core.data.log import log_info, log_warning, log_error, log_debug
+from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 
-from core.gui.ewidgetbase import EGraphicsView
+from vian.core.gui.ewidgetbase import EGraphicsView
 
-from core.container.hdf5_manager import vian_analysis
-from core.container.analysis import IAnalysisJobAnalysis, AnalysisContainer
-from core.container.project import VIANProject, Segmentation
-from core.data.computation import floatify_img, frame2ms
+from vian.core.container.hdf5_manager import vian_analysis
+from vian.core.container.analysis import IAnalysisJobAnalysis, AnalysisContainer
+from vian.core.container.project import VIANProject, Segmentation
+from vian.core.data.computation import floatify_img, frame2ms
 
 
 import cv2
-from core.analysis.colorimetry.computation import calculate_histogram
+from vian.core.analysis.colorimetry.computation import calculate_histogram
 from sklearn.cluster import AgglomerativeClustering
 
 MAX_CLUSTER = 500

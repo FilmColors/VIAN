@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import h5py
 import cv2
-from core.data.computation import ms_to_frames
+from vian.core.data.computation import ms_to_frames
 
 
 class XEyeTrackingHandler():

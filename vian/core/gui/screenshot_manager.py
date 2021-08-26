@@ -2,16 +2,16 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import *
-from core.data.enums import *
+from vian.core.data.enums import *
 
-from core.data.computation import *
-from core.container.project import VIANProject
-from core.container.screenshot import Screenshot
-from core.data.interfaces import IProjectChangeNotify
-from core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
-from core.visualization.image_plots import ImagePlotCircular, ImagePlotTime, ImagePlotPlane
-from core.analysis.color.average_color import ColorFeatureAnalysis
-from core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
+from vian.core.data.computation import *
+from vian.core.container.project import VIANProject
+from vian.core.container.screenshot import Screenshot
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
+from vian.core.visualization.image_plots import ImagePlotCircular, ImagePlotTime, ImagePlotPlane
+from vian.core.analysis.color.average_color import ColorFeatureAnalysis
+from vian.core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
 
 SCALING_MODE_NONE = 0
 SCALING_MODE_WIDTH = 1

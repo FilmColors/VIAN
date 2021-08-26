@@ -4,12 +4,10 @@ These operations can be of arbitrary type and are not categorized.
 """
 from datetime import datetime
 
-from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QImage, QPixmap, QIcon
-from core.data.log import *
+from vian.core.data.log import *
 import PyQt5.QtCore as QtCore
 import subprocess
-import cv2
 import inspect
 import importlib
 import random
@@ -18,13 +16,12 @@ import random
 import numpy as np
 import cv2
 import sys
-import argparse
 import os
 import webbrowser
-import shutil
 from zipfile import ZipFile
 import math
-from scipy.signal import kaiserord, lfilter, firwin, freqz
+from scipy.signal import kaiserord, lfilter, firwin
+
 
 def is_vian_light():
     return os.environ.get("VIAN_LIGHT") is not None

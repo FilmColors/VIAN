@@ -4,8 +4,8 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QHBoxLayout, QMessageBox
 from PyQt5 import QtWidgets
 
-from core.data.plugin import *
-from core.data.interfaces import IConcurrentJob
+from vian.core.data.plugin import *
+from vian.core.data.interfaces import IConcurrentJob
 
 class RenamerExtension(GAPlugin):
     def __init__(self, main_window):

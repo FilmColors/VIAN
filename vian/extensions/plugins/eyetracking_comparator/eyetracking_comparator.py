@@ -11,13 +11,13 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 import os
-from core.data.plugin import *
-from core.data.computation import numpy_to_pixmap, ms_to_frames
-from core.gui.ewidgetbase import EGraphicsView
+from vian.core.data.plugin import *
+from vian.core.data.computation import numpy_to_pixmap, ms_to_frames
+from vian.core.gui.ewidgetbase import EGraphicsView
 
-from core.gui.timeline.timeline import TimelineContainer
+from vian.core.gui.timeline.timeline import TimelineContainer
 import pandas as pd
-from core.data.settings import UserSettings
+from vian.core.data.settings import UserSettings
 from extensions.plugins.eyetracking_comparator.eyetracking import XEyeTrackingHandler
 
 

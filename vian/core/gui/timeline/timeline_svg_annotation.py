@@ -1,5 +1,5 @@
 from PyQt5.QtCore import pyqtSignal
-from core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
+from vian.core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
 
 
 class TimelineAnnotationLayerControl(TimelineControl):

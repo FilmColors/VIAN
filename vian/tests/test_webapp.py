@@ -2,9 +2,9 @@ import unittest
 import os
 import cv2
 import shutil
-from core.data.corpus_client import WebAppCorpusInterface
-from core.container.project import VIANProject
-from core.data.settings import UserSettings
+from vian.core.data.corpus_client import WebAppCorpusInterface
+from vian.core.container.project import VIANProject
+from vian.core.data.settings import UserSettings
 from uuid import uuid4
 uuid = "83646205-fcb7-4311-8bb7-2c5a3a7feaa4"
 PROJECT = "C:\\Users\\gaude\\Documents\\VIAN\\projects\\TemplateProject22\\TemplateProject22.eext"

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QCompleter, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
 from PyQt5.QtCore import pyqtSignal
 
-from core.gui.ewidgetbase import MultiItemTextInput, QLabel
+from vian.core.gui.ewidgetbase import MultiItemTextInput, QLabel
 
 # We query the database at startup once
 _persons = None

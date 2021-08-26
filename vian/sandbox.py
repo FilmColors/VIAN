@@ -1,8 +1,8 @@
-from core.analysis.analysis_import import *
+from vian.core.analysis.analysis_import import *
 
-from core.container.project import *
-from core.container.vocabulary_library import VocabularyLibrary
-from core.data.exporters import ScreenshotExporter
+from vian.core.container.project import *
+from vian.core.container.vocabulary_library import VocabularyLibrary
+from vian.core.data.exporters import ScreenshotExporter
 
 # project =  VIANProject().load_project("C:/Users/gaude\Documents\VIAN\projects\Demo-Swissuni/Demo-Swissuni.eext")
 #

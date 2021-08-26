@@ -1,75 +1,76 @@
-from core.concurrent.worker_functions import *
-from core.concurrent.update_erc_template import ERCUpdateJob
-from core.concurrent.timestep_update import TimestepUpdateWorkerSingle
-from core.concurrent.worker import WorkerManager, MinimalThreadWorker
-from core.concurrent.image_loader import ClassificationObjectChangedJob
-from core.concurrent.auto_screenshot import DialogAutoScreenshot
-from core.concurrent.auto_segmentation import DialogAutoSegmentation
-from core.analysis.analysis_import import *
-from core.data.computation import is_vian_light
+from vian.core.concurrent.worker_functions import *
+from vian.core.concurrent.update_erc_template import ERCUpdateJob
+from vian.core.concurrent.timestep_update import TimestepUpdateWorkerSingle
+from vian.core.concurrent.worker import WorkerManager, MinimalThreadWorker
+from vian.core.concurrent.image_loader import ClassificationObjectChangedJob
+from vian.core.concurrent.auto_screenshot import DialogAutoScreenshot
+from vian.core.concurrent.auto_segmentation import DialogAutoSegmentation
+from vian.core.analysis.analysis_import import *
+from vian.core.data.computation import is_vian_light
 
-from core.gui.vian_webapp import *
-from core.data.cache import HDF5Cache
-from core.data.exporters import *
-from core.data.importers import *
-from core.data.corpus_client import WebAppCorpusInterface, get_vian_version
-from core.data.computation import version_check
-from core.data.settings import UserSettings, Contributor
-from core.data.audio_handler2 import AudioHandler
-from core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
+from vian.core.gui.vian_webapp import *
+from vian.core.data.cache import HDF5Cache
+from vian.core.data.exporters import *
+from vian.core.data.importers import *
+from vian.core.data.corpus_client import WebAppCorpusInterface, get_vian_version
+from vian.core.data.computation import version_check
+from vian.core.data.settings import UserSettings, Contributor
+from vian.core.data.audio_handler2 import AudioHandler
+from vian.core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
-from core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
-from core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
-from core.gui.dialogs.export_template_dialog import ExportTemplateDialog
-from core.gui.dialogs.new_project_dialog import NewProjectDialog
-from core.gui.dialogs.preferences_dialog import DialogPreferences
-from core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
-from core.gui.dialogs.screenshot_importer_dialog import DialogScreenshotImport
-from core.gui.dialogs.letterbox_widget import LetterBoxWidget
-from core.gui.dialogs.analyses_dialog import AnalysisDialog
-from core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
-from core.gui.classification import ClassificationWindow
-from core.gui.colormetry_widget import *
-from core.gui.concurrent_tasks import ConcurrentTaskDock
-from core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, \
+from vian.core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
+from vian.core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
+from vian.core.gui.dialogs.export_template_dialog import ExportTemplateDialog
+from vian.core.gui.dialogs.new_project_dialog import NewProjectDialog
+from vian.core.gui.dialogs.preferences_dialog import DialogPreferences
+from vian.core.gui.dialogs.screenshot_exporter_dialog import DialogScreenshotExporter
+from vian.core.gui.dialogs.screenshot_importer_dialog import DialogScreenshotImport
+from vian.core.gui.dialogs.letterbox_widget import LetterBoxWidget
+from vian.core.gui.dialogs.analyses_dialog import AnalysisDialog
+from vian.core.gui.analysis_results import AnalysisResultsDock, AnalysisResultsWidget
+from vian.core.gui.classification import ClassificationWindow
+from vian.core.gui.colormetry_widget import *
+from vian.core.gui.concurrent_tasks import ConcurrentTaskDock
+from vian.core.gui.drawing_widget import DrawingOverlay, DrawingEditorWidget, AnnotationToolbar, AnnotationOptionsDock, \
     ALWAYS_VLC
-from core.analysis.analysis_import import *
-from core.gui.search_window import SearchWindow
-from core.gui.experiment_editor import ExperimentEditorDock
-# from core.gui.face_identificator import FaceIdentificatorDock
-from core.gui.history import HistoryView
-from core.gui.inspector import Inspector
-from core.gui.outliner import Outliner
-from core.gui.perspectives import PerspectiveManager, Perspective
-from core.gui.player_controls import PlayerControls
-from core.gui.player_vlc import Player_VLC, PlayerDockWidget
+from vian.core.analysis.analysis_import import *
+from vian.core.gui.search_window import SearchWindow
+from vian.core.gui.experiment_editor import ExperimentEditorDock
+# from vian.core.gui.face_identificator import FaceIdentificatorDock
+from vian.core.gui.history import HistoryView
+from vian.core.gui.inspector import Inspector
+from vian.core.gui.outliner import Outliner
+from vian.core.gui.perspectives import PerspectiveManager, Perspective
+from vian.core.gui.player_controls import PlayerControls
+from vian.core.gui.player_vlc import Player_VLC, PlayerDockWidget
 
-from core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
-from core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
-from core.gui.timeline.timeline import TimelineContainer
-from core.gui.vocabulary import VocabularyManager #VocabularyExportDialog
-from core.gui.pipeline_widget import PipelineDock, PipelineToolbar
-from core.gui.corpus_widget import CorpusDockWidget
-from core.gui.misc.filmography_widget import query_initial
+from vian.core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
+from vian.core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
+from vian.core.gui.timeline.timeline import TimelineContainer
+from vian.core.gui.vocabulary import VocabularyManager #VocabularyExportDialog
+from vian.core.gui.pipeline_widget import PipelineDock, PipelineToolbar
+from vian.core.gui.corpus_widget import CorpusDockWidget
+from vian.core.gui.misc.filmography_widget import query_initial
 
-from core.node_editor.node_editor import NodeEditorDock
-from core.node_editor.script_results import NodeEditorResults
+from vian.core.node_editor.node_editor import NodeEditorDock
+from vian.core.node_editor.script_results import NodeEditorResults
 from extensions.extension_list import ExtensionList
 
-from core.container.vocabulary_library import VocabularyLibrary
-from core.concurrent.worker import Worker
-from core.container.hdf5_manager import print_registered_analyses, get_all_analyses
-from core.gui.toolbar import WidgetsToolbar
-from core.data.log import log_info
+from vian.core.container.vocabulary_library import VocabularyLibrary
+from vian.core.concurrent.worker import Worker
+from vian.core.container.hdf5_manager import print_registered_analyses, get_all_analyses
+from vian.core.gui.toolbar import WidgetsToolbar
+from vian.core.data.log import log_info
 
+from vian.core.paths import get_vian_data
 try:
     import keras.backend as K
-    from core.analysis.semantic_segmentation import *
+    from vian.core.analysis.semantic_segmentation import *
     log_info("KERAS Found, Deep Learning available.")
     KERAS_AVAILABLE = True
 except Exception as e:
-    from core.analysis.deep_learning.labels import *
+    from vian.core.analysis.deep_learning.labels import *
     log_info("Could not import Deep-Learning Module, features disabled.")
     log_info(e)
     KERAS_AVAILABLE = False
@@ -355,7 +356,7 @@ class MainWindow(QtWidgets.QMainWindow):
         import glob
 
         templates = glob.glob(self.settings.DIR_TEMPLATES + "*.viant")
-        templates.extend(glob.glob("data/templates/" + "*.viant"))
+        templates.extend(glob.glob(get_vian_data("templates/" + "*.viant")))
         for t in templates:
             a = self.menuVIAN_Template.addAction(os.path.split(t)[1].split(".")[0])
             a.triggered.connect(partial(self.import_template, t))
@@ -1176,7 +1177,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_compare(self):
         if self.project is None:
             return
-        from core.visualization.bokeh_timeline import compare_with_project
+        from vian.core.visualization.bokeh_timeline import compare_with_project
         f2 = QFileDialog.getOpenFileName(self, filter="*.eext")[0]
         compare_with_project(self.project, f2)
 
@@ -1859,7 +1860,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         p = QFileDialog.getSaveFileName(filter="*.html", caption="Select Save Path", directory=self.project.export_dir)[0]
         try:
-            from core.visualization.bokeh_timeline import generate_plot
+            from vian.core.visualization.bokeh_timeline import generate_plot
             generate_plot(self.project, file_name=p)
             QMessageBox.information(self, "Summary Exported", "The Summary has been exported to {f}".format(f=p))
         except Exception as e:
@@ -2273,7 +2274,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def import_vocabulary(self, paths=None):
         if paths is None:
-            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath("data/vocabularies/"))[0]
+            paths = QFileDialog.getOpenFileNames(directory=os.path.abspath(get_vian_data("vocabularies/")))[0]
         try:
             self.project.inhibit_dispatch = True
             for p in paths:

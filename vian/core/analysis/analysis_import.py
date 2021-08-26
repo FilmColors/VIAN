@@ -1,24 +1,24 @@
-# from core.analysis.movie_mosaic.movie_mosaic import *
-from core.analysis.colorimetry.colormetry2 import *
-from core.container.hdf5_manager import vian_analysis
-from core.data.computation import is_vian_light
+# from vian.core.analysis.movie_mosaic.movie_mosaic import *
+from vian.core.analysis.colorimetry.colormetry2 import *
+from vian.core.container.hdf5_manager import vian_analysis
+from vian.core.data.computation import is_vian_light
 
-from core.analysis.color.average_color import *
-from core.analysis.color.histogram_analysis import *
-from core.analysis.color.palette_analysis import *
-from core.analysis.z_projection import *
-from core.analysis.eyetracking.eyetracking import *
+from vian.core.analysis.color.average_color import *
+from vian.core.analysis.color.histogram_analysis import *
+from vian.core.analysis.color.palette_analysis import *
+from vian.core.analysis.z_projection import *
+from vian.core.analysis.eyetracking.eyetracking import *
 
 
-from core.analysis.motion.optical_flow import *
+from vian.core.analysis.motion.optical_flow import *
 import os
 
 
 tf_loaded = False
 if not is_vian_light():
     try:
-        from core.analysis.import_tensortflow import tf
-        from core.analysis.semantic_segmentation import *
+        from vian.core.analysis.import_tensortflow import tf
+        from vian.core.analysis.semantic_segmentation import *
 
         tf_loaded = True
     except Exception as e:
@@ -27,8 +27,8 @@ if not is_vian_light():
         pass
 
 if not tf_loaded:
-    from core.data.enums import DataSerialization
-    from core.analysis.deep_learning.labels import *
+    from vian.core.data.enums import DataSerialization
+    from vian.core.analysis.deep_learning.labels import *
 
     @vian_analysis
     class SemanticSegmentationAnalysis(IAnalysisJob):
@@ -103,6 +103,6 @@ if not tf_loaded:
             return pickle.dumps(container_data)
 
 
-from core.analysis.audio.audio_tempo import AudioTempoAnalysis
-from core.analysis.audio.audio_volume import AudioVolumeAnalysis
+from vian.core.analysis.audio.audio_tempo import AudioTempoAnalysis
+from vian.core.analysis.audio.audio_volume import AudioVolumeAnalysis
 

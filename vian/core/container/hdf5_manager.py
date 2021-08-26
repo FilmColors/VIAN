@@ -4,8 +4,8 @@ import os
 import gc
 import numpy as np
 
-from core.data.enums import DataSerialization
-from core.data.log import log_info, log_warning
+from vian.core.data.enums import DataSerialization
+from vian.core.data.log import log_info, log_warning
 
 ALL_REGISTERED_ANALYSES = dict()
 

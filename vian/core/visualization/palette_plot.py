@@ -9,12 +9,12 @@ import pickle
 import sys
 import cv2
 
-from core.analysis.colorimetry.hilbert import *
-from core.visualization.basic_vis import IVIANVisualization, ExportImageDialog
-from core.data.computation import *
-from core.gui.ewidgetbase import EGraphicsView, ExpandableWidget
-from core.visualization.dot_plot import DotPlot
-from core.data.log import log_error, log_info
+from vian.core.analysis.colorimetry.hilbert import *
+from vian.core.visualization.basic_vis import IVIANVisualization, ExportImageDialog
+from vian.core.data.computation import *
+from vian.core.gui.ewidgetbase import EGraphicsView, ExpandableWidget
+from vian.core.visualization.dot_plot import DotPlot
+from vian.core.data.log import log_error, log_info
 
 from random import randint
 import numpy as np

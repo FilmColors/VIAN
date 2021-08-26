@@ -8,8 +8,8 @@
 # from sqlalchemy import create_engine
 # from sqlalchemy.orm import sessionmaker
 #
-# from core.corpus.legacy.sqlalchemy_entities import *
-# from core.data.headless import *
+# from vian.core.corpus.legacy.sqlalchemy_entities import *
+# from vian.core.data.headless import *
 #
 #
 # def fm_unique_keywords(path="resources/fm2gl.csv"):

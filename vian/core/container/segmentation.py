@@ -1,10 +1,10 @@
 import numpy as np
 
-from core.container.media_objects import FileMediaObject, DataMediaObject
-from core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
-from core.container.container_interfaces import BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, \
+from vian.core.container.media_objects import FileMediaObject, DataMediaObject
+from vian.core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectType, SEGMENT
+from vian.core.container.container_interfaces import BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, \
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
-from core.data.log import log_error
+from vian.core.data.log import log_error
 from PyQt5.QtCore import pyqtSignal
 from .annotation_body import AnnotationBody, Annotatable
 

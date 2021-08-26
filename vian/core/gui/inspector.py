@@ -1,13 +1,13 @@
-from core.container.media_objects import AbstractMediaObject
-from core.data.computation import ms_to_string
-from core.data.tracking import BasicTrackingJob
-from core.gui.context_menu import open_context_menu
-from core.gui.perspectives import Perspective
-from core.node_editor.node_editor import *
-from core.gui.annotation_editor import AnnotationEditor
-from core.gui.misc.filmography_widget import FilmographyWidget2
+from vian.core.container.media_objects import AbstractMediaObject
+from vian.core.data.computation import ms_to_string
+from vian.core.data.tracking import BasicTrackingJob
+from vian.core.gui.context_menu import open_context_menu
+from vian.core.gui.perspectives import Perspective
+from vian.core.node_editor.node_editor import *
+from vian.core.gui.annotation_editor import AnnotationEditor
+from vian.core.gui.misc.filmography_widget import FilmographyWidget2
 
-from core.gui.tag_widget import TagWidget
+from vian.core.gui.tag_widget import TagWidget
 from PyQt5 import QtCore
 
 class Inspector(EDockWidget, IProjectChangeNotify):

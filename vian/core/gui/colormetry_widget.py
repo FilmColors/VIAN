@@ -1,19 +1,19 @@
-from core.gui.ewidgetbase import EDockWidget
+from vian.core.gui.ewidgetbase import EDockWidget
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from core.data.interfaces import IProjectChangeNotify
-from core.data.log import log_error, log_info
-from core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_mapping_3d, HilbertMode
-from core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
-from core.visualization.basic_vis import HistogramVis
-from core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
-from core.visualization.line_plot import LinePlot
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.data.log import log_error, log_info
+from vian.core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_mapping_3d, HilbertMode
+from vian.core.visualization.palette_plot import PaletteWidget, PaletteLABWidget, PaletteTimeWidget
+from vian.core.visualization.basic_vis import HistogramVis
+from vian.core.gui.ewidgetbase import ExpandableWidget, ESimpleDockWidget
+from vian.core.visualization.line_plot import LinePlot
 import cv2
 import numpy as np
-from core.data.computation import is_vian_light
+from vian.core.data.computation import is_vian_light
 
-from core.visualization.basic_vis import *
+from vian.core.visualization.basic_vis import *
 
 
 class ColorimetryWorker(QObject):

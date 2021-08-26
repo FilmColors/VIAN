@@ -8,10 +8,10 @@ import numpy as np
 from moviepy.editor import *
 from typing import List, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
-from core.data.interfaces import TimelineDataset
-from core.data.log import log_error, log_info, log_warning, log_debug
-from core.container.project import VIANProject
-from core.container.hdf5_manager import HDF5_FILE_LOCK
+from vian.core.data.interfaces import TimelineDataset
+from vian.core.data.log import log_error, log_info, log_warning, log_debug
+from vian.core.container.project import VIANProject
+from vian.core.container.hdf5_manager import HDF5_FILE_LOCK
 from scipy.signal import savgol_filter
 
 

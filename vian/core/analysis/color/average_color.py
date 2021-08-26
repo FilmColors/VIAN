@@ -5,15 +5,15 @@ June 2018
 
 """
 
-from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
-from core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, BaseProjectEntity, VIANProject
-from core.container.analysis import IAnalysisJobAnalysis
+from vian.core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
+from vian.core.container.project import SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP, BaseProjectEntity, VIANProject
+from vian.core.container.analysis import IAnalysisJobAnalysis
 
-from core.analysis.color.palette_extraction import *
-from core.container.hdf5_manager import vian_analysis
-from core.visualization.palette_plot import *
+from vian.core.analysis.color.palette_extraction import *
+from vian.core.container.hdf5_manager import vian_analysis
+from vian.core.visualization.palette_plot import *
 
-from core.analysis.misc import preprocess_frame
+from vian.core.analysis.misc import preprocess_frame
 
 """
 array Structure: 

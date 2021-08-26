@@ -5,7 +5,7 @@ This change has been happening in the 0.7.0
 
 import glob
 
-from core.data.headless import *
+from vian.core.data.headless import *
 
 if __name__ == '__main__':
     for f in glob.glob("F:\\_webapp\\old\\229_1_1_Jigokumon_1953\\*.eext"):

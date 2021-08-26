@@ -3,9 +3,9 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from random import randint
 import traceback, sys
 import cv2
-from core.data.log import log_info, log_error
-from core.data.computation import numpy_to_pixmap, generate_id
-from core.data.interfaces import IProjectChangeNotify
+from vian.core.data.log import log_info, log_error
+from vian.core.data.computation import numpy_to_pixmap, generate_id
+from vian.core.data.interfaces import IProjectChangeNotify
 
 
 class WorkerSignals(QObject):

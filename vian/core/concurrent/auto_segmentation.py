@@ -1,15 +1,15 @@
 from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 
-from core.gui.ewidgetbase import *
+from vian.core.gui.ewidgetbase import *
 from PyQt5.QtCore import QRect, Qt
-from core.data.interfaces import IConcurrentJob
-from core.data.enums import *
-from core.container.project import VIANProject
-from core.analysis.misc import preprocess_frame
-from core.data.computation import frame2ms, floatify_img, ms_to_frames
+from vian.core.data.interfaces import IConcurrentJob
+from vian.core.data.enums import *
+from vian.core.container.project import VIANProject
+from vian.core.analysis.misc import preprocess_frame
+from vian.core.data.computation import frame2ms, floatify_img, ms_to_frames
 
-from core.gui.misc.utils import dialog_with_margin
+from vian.core.gui.misc.utils import dialog_with_margin
 
 AUTO_SEGM_EVEN = 0
 AUTO_SEGM_CHIST = 1

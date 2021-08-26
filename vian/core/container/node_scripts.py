@@ -4,7 +4,7 @@ TODO: DEPRECATED Don't worry about this code
 
 import numpy as np
 
-from core.data.enums import NODE_SCRIPT, NODE
+from vian.core.data.enums import NODE_SCRIPT, NODE
 from .container_interfaces import BaseProjectEntity, IHasName, ISelectable
 
 

@@ -6,11 +6,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QPushButton, QTreeWidgetItem, QLineEdit, QMainWindow, QListWidget, QListWidgetItem, QHBoxLayout, QFrame, QWidget, QSizePolicy, QVBoxLayout, QSpacerItem
 from PyQt5.QtGui import QFont
 
-from core.data.computation import ms_to_string
-from core.container.project import MOVIE_DESCRIPTOR
-from core.data.interfaces import IProjectChangeNotify, IAnalysisJob
-from core.data.enums import get_type_as_string
-from core.gui.ewidgetbase import EDockWidget, EDialogWidget
+from vian.core.data.computation import ms_to_string
+from vian.core.container.project import MOVIE_DESCRIPTOR
+from vian.core.data.interfaces import IProjectChangeNotify, IAnalysisJob
+from vian.core.data.enums import get_type_as_string
+from vian.core.gui.ewidgetbase import EDockWidget, EDialogWidget
 
 
 class AnalysisDialog(EDialogWidget):

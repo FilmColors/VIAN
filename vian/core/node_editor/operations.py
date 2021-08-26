@@ -3,11 +3,11 @@ import numpy as np
 # from matplotlib import pyplot as plt
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import *
-from core.data.computation import numpy_to_qt_image
+from vian.core.data.computation import numpy_to_qt_image
 from random import randint
-from core.node_editor.datatypes import *
-from core.node_editor.script_results import *
-from core.data.enums import *
+from vian.core.node_editor.datatypes import *
+from vian.core.node_editor.script_results import *
+from vian.core.data.enums import *
 
 class Slot():
     def __init__(self, name, data_type, default_value):

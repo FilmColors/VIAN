@@ -4,15 +4,15 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QPen, QColor, QPainter, QPainterPath, QResizeEvent
 from PyQt5 import QtCore
 
-from core.container.project import MovieDescriptor
+from vian.core.container.project import MovieDescriptor
 import cv2
 import os
 import numpy as np
 import typing
 
-from core.data.computation import numpy_to_pixmap
-from core.gui.ewidgetbase import EDialogWidget
-from core.gui.misc.utils import dialog_with_margin
+from vian.core.data.computation import numpy_to_pixmap
+from vian.core.gui.ewidgetbase import EDialogWidget
+from vian.core.gui.misc.utils import dialog_with_margin
 
 class LetterBoxWidget(EDialogWidget):
     onFrameChanged = pyqtSignal(object)

@@ -1,5 +1,5 @@
 import csv
-from core.container.experiment import Vocabulary, VocabularyWord
+from vian.core.container.experiment import Vocabulary, VocabularyWord
 
 
 class Converter():

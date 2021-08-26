@@ -5,10 +5,10 @@ import shutil
 import json
 import requests
 
-from core.data.importers import ExperimentTemplateImporter, WebAppProjectImporter
-from core.container.project import VIANProject
-from core.container.experiment import merge_experiment, merge_experiment_inspect
-from core.data.creation_events import get_path_of_pipeline_script
+from vian.core.data.importers import ExperimentTemplateImporter, WebAppProjectImporter
+from vian.core.container.project import VIANProject
+from vian.core.container.experiment import merge_experiment, merge_experiment_inspect
+from vian.core.data.creation_events import get_path_of_pipeline_script
 
 
 class TestImportMethods(unittest.TestCase):

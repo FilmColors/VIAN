@@ -3,13 +3,13 @@ import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import QFileDialog
 
-from core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum
-from core.gui.ewidgetbase import EDialogWidget
-from core.data.importers import ScreenshotImporter
-from core.data.log import log_error, log_info
-from core.data.computation import ts_to_ms, ms_to_frames
+from vian.core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum
+from vian.core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.importers import ScreenshotImporter
+from vian.core.data.log import log_error, log_info
+from vian.core.data.computation import ts_to_ms, ms_to_frames
 from functools import partial
-from core.container.project import VIANProject
+from vian.core.container.project import VIANProject
 
 
 class DialogScreenshotImport(EDialogWidget):

@@ -12,11 +12,11 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEng
 from PyQt5 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
 
-from core.data.log import log_error, log_info
-from core.gui.ewidgetbase import EDockWidget
-from core.container.project import VIANProject, Screenshot, Segment
-from core.analysis.analysis_import import ColorFeatureAnalysis, ColorPaletteAnalysis, get_palette_at_merge_depth
-from core.data.computation import lab_to_lch, lab_to_sat, ms2datetime
+from vian.core.data.log import log_error, log_info
+from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.container.project import VIANProject, Screenshot, Segment
+from vian.core.analysis.analysis_import import ColorFeatureAnalysis, ColorPaletteAnalysis, get_palette_at_merge_depth
+from vian.core.data.computation import lab_to_lch, lab_to_sat, ms2datetime
 
 app = Flask(__name__)
 app.root_path = os.path.split(__file__)[0]
@@ -368,7 +368,7 @@ def set_selection():
 
 @app.route("/summary/")
 def summary():
-    from core.visualization.bokeh_timeline import generate_plot
+    from vian.core.visualization.bokeh_timeline import generate_plot
     html, script = generate_plot(_server_data.project, return_mode="components")
     return render_template("template_inject.tmpl.html",script=html + script)
     # return render_template("summary.tmpl.html")

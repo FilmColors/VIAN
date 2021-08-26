@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
 
-from core.data.creation_events import VIANPipeline, vian_pipeline
-from core.container.project import *
-from core.analysis.analysis_import import *
-from core.analysis.analysis_utils import run_analysis
+from vian.core.data.creation_events import VIANPipeline, vian_pipeline
+from vian.core.container.project import *
+from vian.core.analysis.analysis_import import *
+from vian.core.analysis.analysis_utils import run_analysis
 
 @vian_pipeline
 class %PIPELINE_NAME%(VIANPipeline):

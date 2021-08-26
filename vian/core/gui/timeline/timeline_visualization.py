@@ -2,10 +2,10 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QSlider, QLabel
-from core.gui.timeline.timeline_base import TimelineControl, TimelineBar, QPushButton
+from vian.core.gui.timeline.timeline_base import TimelineControl, TimelineBar, QPushButton
 
-from core.data.interfaces import TimelineDataset
-from core.container.project import *
+from vian.core.data.interfaces import TimelineDataset
+from vian.core.container.project import *
 
 
 class TimelineVisualizationControl(TimelineControl):

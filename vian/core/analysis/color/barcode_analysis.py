@@ -12,12 +12,12 @@ The Goal is:
 
 from typing import List
 
-from core.data.computation import ms_to_frames, numpy_to_pixmap
-from core.container.project import *
-from core.gui.ewidgetbase import EGraphicsView
+from vian.core.data.computation import ms_to_frames, numpy_to_pixmap
+from vian.core.container.project import *
+from vian.core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 
 BARCODE_MODE_BOTH = 0
 BARCODE_MODE_HORIZONTAL = 1
@@ -27,7 +27,7 @@ BARCODE_MAX_LENGTH = 1000
 # from bokeh.layouts import layout
 # from bokeh.colors import RGB
 
-from core.container.hdf5_manager import vian_analysis
+from vian.core.container.hdf5_manager import vian_analysis
 
 @vian_analysis
 class BarcodeAnalysisJob(IAnalysisJob):

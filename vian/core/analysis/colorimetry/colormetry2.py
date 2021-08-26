@@ -1,14 +1,14 @@
-from core.container.project import VIANProject
-from core.analysis.colorimetry.computation import calculate_histogram
-from core.data.computation import frame2ms, ms_to_frames, lab_to_sat
-from core.analysis.spacial_frequency import get_spacial_frequency_heatmap
-from core.analysis.color.palette_extraction import *
+from vian.core.container.project import VIANProject
+from vian.core.analysis.colorimetry.computation import calculate_histogram
+from vian.core.data.computation import frame2ms, ms_to_frames, lab_to_sat
+from vian.core.analysis.spacial_frequency import get_spacial_frequency_heatmap
+from vian.core.analysis.color.palette_extraction import *
 import cv2
 import numpy as np
 from collections import namedtuple
 from PyQt5.QtCore import pyqtSlot, QObject
 
-from core.analysis.misc import preprocess_frame
+from vian.core.analysis.misc import preprocess_frame
 
 YieldedResult = namedtuple("YieldedResult", ["frame_pos", "time_ms", "hist", "avg_color", "palette"])
 

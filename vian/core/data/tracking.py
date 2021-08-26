@@ -1,10 +1,10 @@
 import cv2
 import sys
 import numpy as np
-from core.data.computation import frame2ms, ms_to_frames
+from vian.core.data.computation import frame2ms, ms_to_frames
 
 
-from core.data.interfaces import IConcurrentJob
+from vian.core.data.interfaces import IConcurrentJob
 
 
 class BasicTrackingJob(IConcurrentJob):

@@ -1,6 +1,6 @@
 # import glob
-# from core.data.headless import *
-# from core.data.log import log_warning, log_error
+# from vian.core.data.headless import *
+# from vian.core.data.log import log_warning, log_error
 # from threading import Thread
 #
 # ALL_ANALYSES = [BarcodeAnalysisJob, MovieMosaicAnalysis, ColorHistogramAnalysis, ColorFeatureAnalysis, ColorPaletteAnalysis, SemanticSegmentationAnalysis]

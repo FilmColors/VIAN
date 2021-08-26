@@ -3,13 +3,13 @@ import json
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 
-from core import version
-from core.gui.main_window import *
-from core.data.interfaces import IConcurrentJob
-from core.data.computation import *
-from core.container.screenshot import *
-from core.data.computation import frame2ms
-from core.container.project import VIAN_PROJECT_EXTENSION
+from vian.core import version
+from vian.core.gui.main_window import *
+from vian.core.data.interfaces import IConcurrentJob
+from vian.core.data.computation import *
+from vian.core.container.screenshot import *
+from vian.core.data.computation import frame2ms
+from vian.core.container.project import VIAN_PROJECT_EXTENSION
 
 
 def create_screenshot(args, sign_progress):
@@ -162,7 +162,7 @@ class LoadScreenshotsJob(IConcurrentJob):
             scr.movie_timestamp = frame2ms(scr.frame_pos, fps)
             ret, frame = video_capture.read()
 
-            # TODO this is related to the core.containers.SVGAnnotation and AnnotationLayer and is no longer of any use
+            # TODO this is related to the vian.core.containers.SVGAnnotation and AnnotationLayer and is no longer of any use
             # a_dicts = []
             # if scr.annotation_item_ids is not None:
             #     for a_id in scr.annotation_item_ids:

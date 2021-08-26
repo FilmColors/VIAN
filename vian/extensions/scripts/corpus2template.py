@@ -1,12 +1,12 @@
 import os
 import csv
 import json
-from core.container.project import EXPERIMENT, VIANProject
-from core.container.experiment import Vocabulary, VocabularyWord, ClassificationObject, Experiment
-from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
-from core.gui.ewidgetbase import *
-from core.analysis.analysis_import import *
-from core.analysis.deep_learning.labels import *
+from vian.core.container.project import EXPERIMENT, VIANProject
+from vian.core.container.experiment import Vocabulary, VocabularyWord, ClassificationObject, Experiment
+from vian.core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
+from vian.core.gui.ewidgetbase import *
+from vian.core.analysis.analysis_import import *
+from vian.core.analysis.deep_learning.labels import *
 #
 #
 # # TODO Implement the Plugin

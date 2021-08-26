@@ -4,13 +4,13 @@ from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon
 
-from core.container.project import Segmentation, ScreenshotGroup, ClassificationObject, VIANProject
-from core.container.experiment import Vocabulary, VocabularyWord
-from core.gui.ewidgetbase import EDialogWidget
-from core.data.interfaces import IProjectChangeNotify
-from core.gui.misc.utils import dialog_with_margin
-from core.gui.vocabulary import VocabularyTreeView
-from core.container.vocabulary_library import VocabularyLibrary, VocabularyCollection
+from vian.core.container.project import Segmentation, ScreenshotGroup, ClassificationObject, VIANProject
+from vian.core.container.experiment import Vocabulary, VocabularyWord
+from vian.core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.gui.misc.utils import dialog_with_margin
+from vian.core.gui.vocabulary import VocabularyTreeView
+from vian.core.container.vocabulary_library import VocabularyLibrary, VocabularyCollection
 
 
 class VocabularySelectorDialog(EDialogWidget):

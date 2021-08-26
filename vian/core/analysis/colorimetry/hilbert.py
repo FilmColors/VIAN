@@ -3,6 +3,9 @@ import os
 import cv2
 import enum
 import numpy as np
+from core.paths import get_vian_data
+
+
 # from bokeh import colors
 
 
@@ -214,8 +217,9 @@ def create_hilbert_transform(s):
 
 
 def get_hilbert_lookup():
-    if os.path.isfile("data/hilbert_lookup.npy"):
-        return np.load("data/hilbert_lookup.npy")
+    p = get_vian_data("hilbert_lookup.npy")
+    if os.path.isfile(p):
+        return np.load(p)
     else:
          return None
 

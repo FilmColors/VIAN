@@ -2,15 +2,15 @@ import cv2
 import sys
 import numpy as np
 
-from core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
+from vian.core.data.enums import SCREENSHOT, SCREENSHOT_GROUP
 from .container_interfaces import BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimelineItem, IClassifiable, \
     deprecation_serialization
-from core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
+from vian.core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from .analysis import SemanticSegmentationAnalysisContainer
 from .annotation_body import Annotatable
 from PyQt5.QtCore import pyqtSignal
 import datetime
-from core.data.computation import resize_with_aspect
+from vian.core.data.computation import resize_with_aspect
 
 CACHE_WIDTH = 250
 

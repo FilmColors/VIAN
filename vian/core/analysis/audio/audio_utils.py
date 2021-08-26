@@ -1,6 +1,6 @@
 import os
 import librosa
-from core.container.project import VIANProject
+from vian.core.container.project import VIANProject
 from moviepy.editor import *
 
 def get_audio_for_project(project:VIANProject):

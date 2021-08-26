@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QFileDialog,QDialog, QComboBox, QFrame, QFormLayout, QHBoxLayout, QMessageBox, QPushButton, QLabel
 from PyQt5 import uic
-from core.gui.ewidgetbase import EDialogWidget
-# from core.data.exporters import ExperimentExporter
+from vian.core.gui.ewidgetbase import EDialogWidget
+# from vian.core.data.exporters import ExperimentExporter
 import os
 import json
 

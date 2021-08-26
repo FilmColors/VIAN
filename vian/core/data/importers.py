@@ -6,17 +6,18 @@ import csv
 import cv2
 
 import pickle
+from vian.core.paths import get_vian_data
 import xml.dom.minidom
 
-from core.container.analysis import IAnalysisJobAnalysis
-from core.data.interfaces import *
-from core.data.computation import *
-from core.container.segmentation import Segment
-from core.data.log import log_info, log_warning, log_error
-from core.container.project import *
-from core.visualization.feature_plot import *
-from core.visualization.image_plots import *
-from core.data.csv_helper import CSVFile
+from vian.core.container.analysis import IAnalysisJobAnalysis
+from vian.core.data.interfaces import *
+from vian.core.data.computation import *
+from vian.core.container.segmentation import Segment
+from vian.core.data.log import log_info, log_warning, log_error
+from vian.core.container.project import *
+from vian.core.visualization.feature_plot import *
+from vian.core.visualization.image_plots import *
+from vian.core.data.csv_helper import CSVFile
 
 class ImportDevice:
     def import_(self, project, path):
@@ -815,8 +816,8 @@ class SRTImporter(ImportDevice):
             return
 
         import pysrt
-        from core.data.computation import ts_to_ms
-        path = "data/examples/paris_texas_en.srt"
+        from vian.core.data.computation import ts_to_ms
+        path = get_vian_data("examples/paris_texas_en.srt")
 
         codecs = ["utf-8", "iso-8859-1"]
         try:

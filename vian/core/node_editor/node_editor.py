@@ -4,17 +4,17 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import os
 from functools import partial
-from core.node_editor.operations import *
-from core.node_editor.datatypes import *
-from core.gui.ewidgetbase import EDockWidget
-from core.data.interfaces import *
-from core.data.computation import tuple2point
+from vian.core.node_editor.operations import *
+from vian.core.node_editor.datatypes import *
+from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.data.interfaces import *
+from vian.core.data.computation import tuple2point
 
 import json
 NODETYPE_INPUT_NODE = 0
 NODETYPE_OUTPUT_NODE = 1
 
-# These are duplicates of the NODE and NODE_SCRIPT in core/data/containers.py!!!
+# These are duplicates of the NODE and NODE_SCRIPT in vian.core/data/containers.py!!!
 NODE = 8
 NODE_SCRIPT = 9
 

@@ -7,13 +7,13 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFontDialog, QSizePolicy, QTabWidget, QSlider
 from PyQt5.QtGui import QFont
 
-from core.data.computation import create_icon, parse_file_path, tuple2point, get_mouse_handle_by_location
-from core.container.svg_annotation import SVGAnnotation, AnnotationLayer, ANNOTATION, AnnotationType
-from core.gui.perspectives import Perspective
-from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
-from core.gui.color_palette import ColorSelector
-from core.gui.context_menu import open_context_menu
-from core.gui.misc.hsv_color_picker import HSVColorPicker
+from vian.core.data.computation import create_icon, parse_file_path, tuple2point, get_mouse_handle_by_location
+from vian.core.container.svg_annotation import SVGAnnotation, AnnotationLayer, ANNOTATION, AnnotationType
+from vian.core.gui.perspectives import Perspective
+from vian.core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
+from vian.core.gui.color_palette import ColorSelector
+from vian.core.gui.context_menu import open_context_menu
+from vian.core.gui.misc.hsv_color_picker import HSVColorPicker
 
 from .ewidgetbase import EDockWidget, EToolBar
 

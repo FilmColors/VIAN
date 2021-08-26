@@ -3,8 +3,8 @@ import os
 import shutil
 import time
 
-from core.container.corpus import Corpus
-from core.container.project import VIANProject
+from vian.core.container.corpus import Corpus
+from vian.core.container.project import VIANProject
 
 p0 = "C:\\Users\\gaude\\Documents\\VIAN\\projects\\trailer.mp4"
 p1 = "C:\\Users\\gaude\\Documents\\VIAN\\projects\\Blade_Runner_2049.mkv"

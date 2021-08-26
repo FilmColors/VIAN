@@ -3,8 +3,8 @@ import os
 import shutil
 import time
 
-from core.analysis.shot_segmentation import ShotSegmentationAnalysis
-from core.container.project import VIANProject
+from vian.core.analysis.shot_segmentation import ShotSegmentationAnalysis
+from vian.core.container.project import VIANProject
 p0 = "C:\\Users\\gaude\\Documents\\VIAN\\projects\\trailer.mp4"
 p1 = "C:\\Users\\gaude\\Documents\\VIAN\\projects\\Blade_Runner_2049.mkv"
 p2 = "E:\\Video\\New Girl Season 1  Paramount Comedy\\new.girl.s01e01.web-dlrip.rus.eng.paramount.comedy.avi"

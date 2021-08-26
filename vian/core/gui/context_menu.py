@@ -2,11 +2,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMenu
 from functools import partial
 from typing import List
-from core.container.media_objects import AbstractMediaObject
-from core.container.project import MOVIE_DESCRIPTOR, SEGMENTATION, ANNOTATION, SEGMENT, ANNOTATION_LAYER, \
+from vian.core.container.media_objects import AbstractMediaObject
+from vian.core.container.project import MOVIE_DESCRIPTOR, SEGMENTATION, ANNOTATION, SEGMENT, ANNOTATION_LAYER, \
     SCREENSHOT, SCREENSHOT_GROUP, NODE_SCRIPT,MEDIA_OBJECT,EXPERIMENT, CLASSIFICATION_OBJECT, VIANProject, Screenshot,\
     Experiment
-from core.data.log import log_error, log_info, log_debug, log_warning
+from vian.core.data.log import log_error, log_info, log_debug, log_warning
 
 
 def open_context_menu(main_window, pos, containers, project, screenshot_root = False, scripts_root=False):

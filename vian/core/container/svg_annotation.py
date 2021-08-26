@@ -8,9 +8,9 @@ SVGAnnotations are by now deprecated.
 
 import cv2
 from PyQt5.QtCore import pyqtSignal
-from core.data.computation import numpy_to_qt_image
-from core.container.media_objects import FileMediaObject, DataMediaObject
-from core.data.enums import AnnotationType, MediaObjectType, ANNOTATION, ANNOTATION_LAYER
+from vian.core.data.computation import numpy_to_qt_image
+from vian.core.container.media_objects import FileMediaObject, DataMediaObject
+from vian.core.data.enums import AnnotationType, MediaObjectType, ANNOTATION, ANNOTATION_LAYER
 from .container_interfaces import BaseProjectEntity, ITimeRange, IHasName, ISelectable, ILockable, IClassifiable, \
     IHasMediaObject, ITimelineItem
 

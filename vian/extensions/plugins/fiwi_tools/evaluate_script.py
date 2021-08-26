@@ -13,13 +13,13 @@ import csv
 import os
 from sys import stdout as console
 
-from core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
-from core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
+from vian.core.gui.ewidgetbase import EDialogWidget
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from PyQt5 import uic
-from core.data.interfaces import IConcurrentJob
+from vian.core.data.interfaces import IConcurrentJob
 
 ## TODO Remove this code
 ## This is deprecated

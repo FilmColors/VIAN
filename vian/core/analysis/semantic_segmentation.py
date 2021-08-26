@@ -8,18 +8,18 @@ June 2018
 from typing import List
 import pickle
 
-from core.data.computation import ms_to_frames, numpy_to_pixmap, get_colormap
-from core.container.project import *
-from core.container.analysis import SemanticSegmentationAnalysisContainer
-from core.gui.ewidgetbase import EGraphicsView
+from vian.core.data.computation import ms_to_frames, numpy_to_pixmap, get_colormap
+from vian.core.container.project import *
+from vian.core.container.analysis import SemanticSegmentationAnalysisContainer
+from vian.core.gui.ewidgetbase import EGraphicsView
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from core.analysis.deep_learning.labels import *
-from core.analysis.deep_learning.models import *
+from vian.core.analysis.deep_learning.labels import *
+from vian.core.analysis.deep_learning.models import *
 
-from core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
-from core.data.enums import DataSerialization
-from core.container.hdf5_manager import vian_analysis
+from vian.core.data.interfaces import IAnalysisJob, VisualizationTab, ParameterWidget
+from vian.core.data.enums import DataSerialization
+from vian.core.container.hdf5_manager import vian_analysis
 
 # from matplotlib import cm
 # from matplotlib.colors import ListedColormap, LinearSegmentedColormap

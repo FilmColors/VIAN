@@ -5,14 +5,14 @@ June 2018
 
 """
 
-from core.data.interfaces import IAnalysisJob, ParameterWidget, TimelineDataset, SpatialOverlayDataset
-from core.container.project import BaseProjectEntity, VIANProject, MOVIE_DESCRIPTOR, DataSerialization, FileAnalysis
-from core.container.corpus import Corpus
-from core.container.analysis import IAnalysisJobAnalysis
+from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, TimelineDataset, SpatialOverlayDataset
+from vian.core.container.project import BaseProjectEntity, VIANProject, MOVIE_DESCRIPTOR, DataSerialization, FileAnalysis
+from vian.core.container.corpus import Corpus
+from vian.core.container.analysis import IAnalysisJobAnalysis
 
-from core.analysis.color.palette_extraction import *
-from core.container.hdf5_manager import vian_analysis
-from core.visualization.palette_plot import *
+from vian.core.analysis.color.palette_extraction import *
+from vian.core.container.hdf5_manager import vian_analysis
+from vian.core.visualization.palette_plot import *
 
 import pandas as pd
 from matplotlib import cm
@@ -216,10 +216,10 @@ class RawPointsSpatialDataset(SpatialOverlayDataset):
             return None
 
 
-from core.data.importers import ImportDevice
-from core.gui.ewidgetbase import EDialogWidget
+from vian.core.data.importers import ImportDevice
+from vian.core.gui.ewidgetbase import EDialogWidget
 from PyQt5 import uic
-from core.analysis.eyetracking.parser import XEyeTrackingHandler
+from vian.core.analysis.eyetracking.parser import XEyeTrackingHandler
 import glob
 
 

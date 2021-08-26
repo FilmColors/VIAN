@@ -1,16 +1,16 @@
-from core.container.project import *
+from vian.core.container.project import *
 import cv2
 import numpy as np
 from PyQt5 import uic
 import pickle
 
-from core.analysis.colorimetry.computation import *
-from core.data.enums import DataSerialization
-from core.data.computation import ms_to_frames
-from core.container.project import *
-from core.gui.ewidgetbase import EGraphicsView  # , GraphicsViewDockWidget
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
-from core.container.hdf5_manager import vian_analysis
+from vian.core.analysis.colorimetry.computation import *
+from vian.core.data.enums import DataSerialization
+from vian.core.data.computation import ms_to_frames
+from vian.core.container.project import *
+from vian.core.gui.ewidgetbase import EGraphicsView  # , GraphicsViewDockWidget
+from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from vian.core.container.hdf5_manager import vian_analysis
 
 
 @vian_analysis

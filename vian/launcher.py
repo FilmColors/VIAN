@@ -53,6 +53,7 @@ if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
     os.chdir(application_path)
 
+
 logging.getLogger('tensorfyylow').disabled = True
 
 DEBUG = os.path.isfile("is_dev.txt")

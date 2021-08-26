@@ -1,15 +1,15 @@
 import numpy as np
 import cv2
-from core.container.project import VIANProject, SEGMENT
+from vian.core.container.project import VIANProject, SEGMENT
 from collections import namedtuple
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from core.visualization.basic_vis import IVIANVisualization
-from core.visualization.image_plots import VIANPixmapGraphicsItem, VIANPixmapGraphicsItemSignals, ImagePlotRawData
-from core.data.computation import *
+from vian.core.visualization.basic_vis import IVIANVisualization
+from vian.core.visualization.image_plots import VIANPixmapGraphicsItem, VIANPixmapGraphicsItemSignals, ImagePlotRawData
+from vian.core.data.computation import *
 from typing import *
 
 FeatureTuple = namedtuple("FeatureTuple", ["name", "voc_name", "class_obj", "segment_ids"])

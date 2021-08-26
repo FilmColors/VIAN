@@ -9,14 +9,14 @@ from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
 from PyQt5.QtGui import QFont, QColor, QKeySequence
 from PyQt5.QtWidgets import *
-from core.data.enums import *
+from vian.core.data.enums import *
 from collections import namedtuple
-from core.gui.perspectives import Perspective
+from vian.core.gui.perspectives import Perspective
 
-from core.gui.ewidgetbase import EToolBar
-from core.data.computation import create_icon, is_vian_light
+from vian.core.gui.ewidgetbase import EToolBar
+from vian.core.data.computation import create_icon, is_vian_light
 if TYPE_CHECKING:
-    from core.gui.main_window import MainWindow
+    from vian.core.gui.main_window import MainWindow
 
 
 class WidgetsToolbar(EToolBar):

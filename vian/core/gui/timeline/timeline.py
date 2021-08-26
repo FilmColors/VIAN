@@ -3,7 +3,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from core.gui.ewidgetbase import EDockWidget
+from vian.core.gui.ewidgetbase import EDockWidget
 import typing
 from .timeline_base import TimelineControl, TimelineBar, TimelineScrubber, TimelineTimemark
 from .timeline_segmentation import TimelineSegmentationControl, TimelineSegmentationBar
@@ -13,10 +13,10 @@ from .timeline_screnshots import ScreenshotGroupBar
 from .timeline_subsegmentation import TimelineSubSegmentation, TimelineSubSegmentationEntry, \
     TimelineSubSegmentationBar, TimelineSubSegmentationControl, TimelineControlParent
 
-from core.data.interfaces import TimelineDataset
-from core.container.project import *
-from core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
-from core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
+from vian.core.data.interfaces import TimelineDataset
+from vian.core.container.project import *
+from vian.core.gui.drawing_widget import TIMELINE_SCALE_DEPENDENT
+from vian.core.data.interfaces import IProjectChangeNotify, ITimeStepDepending
 
 
 class TimelineContainer(EDockWidget):

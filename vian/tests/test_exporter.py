@@ -5,7 +5,7 @@ import difflib
 import pandas as pd
 
 from utils import *
-from core.data.exporters import SequenceProtocolExporter
+from vian.core.data.exporters import SequenceProtocolExporter
 
 
 class TestExporterMethods(unittest.TestCase):

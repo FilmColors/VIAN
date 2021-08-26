@@ -9,13 +9,13 @@ from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
 # from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 
-from core.gui.ewidgetbase import EDockWidget
-from core.data.computation import parse_file_path, is_vian_light
-from core.data.interfaces import IProjectChangeNotify
-from core.data.log import log_error, log_info, log_debug
+from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.data.computation import parse_file_path, is_vian_light
+from vian.core.data.interfaces import IProjectChangeNotify
+from vian.core.data.log import log_error, log_info, log_debug
 
 import vlc
-# from core.vlc.v3_0_3 import vlc
+# from vian.core.vlc.v3_0_3 import vlc
 import os
 
 class PlayerDockWidget(EDockWidget):

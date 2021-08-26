@@ -1,6 +1,6 @@
-from core.gui.ewidgetbase import EDockWidget
+from vian.core.gui.ewidgetbase import EDockWidget
 from PyQt5 import uic, QtWidgets
-from core.data.interfaces import IProjectChangeNotify
+from vian.core.data.interfaces import IProjectChangeNotify
 import os
 
 class HistoryView(EDockWidget, IProjectChangeNotify):

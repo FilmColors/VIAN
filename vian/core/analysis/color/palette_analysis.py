@@ -8,13 +8,13 @@ COLOR_PALETTES_MAX_LENGTH = 1024
 
 import cv2
 
-from core.container.project import *
-from core.analysis.color.palette_extraction import *
-from core.visualization.palette_plot import *
-from core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
-from core.container.hdf5_manager import vian_analysis
+from vian.core.container.project import *
+from vian.core.analysis.color.palette_extraction import *
+from vian.core.visualization.palette_plot import *
+from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
+from vian.core.container.hdf5_manager import vian_analysis
 
-from core.analysis.misc import preprocess_frame
+from vian.core.analysis.misc import preprocess_frame
 
 @vian_analysis
 class ColorPaletteAnalysis(IAnalysisJob):
