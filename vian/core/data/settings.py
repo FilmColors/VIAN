@@ -57,10 +57,8 @@ if "Sphinx" not in os.environ:
                 CONFIG = json.load(f)
         except Exception as e:
             raise e
-    IS_DEV = os.path.isfile("is_dev.txt")
 else:
     CONFIG = None
-    IS_DEV = False
 
 class UserSettings():
     """

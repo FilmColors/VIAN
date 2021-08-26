@@ -2321,7 +2321,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.project.export(SequenceProtocolExporter(export_format=SequenceProtocolExporter.FORMAT_EXCEL), file)
         except Exception as e:
-            log_error(e)
+            raise
 
     def on_export_movie_segments(self):
         if self.project is not None:

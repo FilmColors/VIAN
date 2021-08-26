@@ -2,7 +2,7 @@ from PyQt5.QtCore import QObject, QThread, pyqtSlot, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
 from vian.core.paths import get_vian_data
-from vian.core.data.settings import UserSettings, Contributor, CONFIG, IS_DEV
+from vian.core.data.settings import UserSettings, Contributor, CONFIG
 from vian.core.container.project import VIANProject
 from vian.core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
 from vian.core.container.experiment import Experiment, VocabularyWord, Vocabulary
@@ -22,7 +22,7 @@ import requests
 
 PAL_WIDTH = 720
 
-if IS_DEV:
+if CONFIG["dev_mode"]:
     EP_ROOT = CONFIG['localhost']
 else:
     EP_ROOT = CONFIG['webapp_root']

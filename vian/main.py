@@ -28,7 +28,7 @@ import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
 from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtGui import QPixmap, QIcon
-
+from vian.core.data.settings import CONFIG
 
 from vian.core.data.settings import UserSettings
 from vian.core.gui.main_window import MainWindow, version
@@ -55,7 +55,6 @@ if getattr(sys, 'frozen', False):
 
 logging.getLogger('tensorfyylow').disabled = True
 
-DEBUG = os.path.isfile("is_dev.txt")
 MAIN_WINDOW = None
 
 
@@ -73,7 +72,7 @@ def vian_exception_hook(exctype, value, traceback):
     # Print the error and traceback
     print((exctype, value, traceback))
     # Call the normal Exception hook after
-    if DEBUG:
+    if CONFIG["dev_mode"]:
         sys._excepthook(exctype, value, traceback)
         sys.exit(1)
     else:
