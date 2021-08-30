@@ -1,6 +1,6 @@
 """
 The UserSettings Class is used to Store Variables from VIAN. 
-DockWidgets States, Options etc.
+DockWidgets States, Options etc. 
 
 Everything is serialized to the settings.json file in the UserDirectory/VIAN.
 
