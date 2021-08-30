@@ -436,7 +436,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
     def get_segment_of_main_segmentation(self, index) -> Segment:
         """
-        Returns the segment of the Main Segmentation that is at index "index".
+        Returns the segment of the Main Segmentation that is at index "index". 
         Be aware, that the segment_id = <list_index> + 1. Since Segment IDS are counted from 1
 
         :param index: the index of the segment to choose within the main segmentation
@@ -1009,7 +1009,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param str path:  The filepath to store the file
         :param bool bake:  if screenshots should be exported
         :param bool return_dict: if true, the project is returned as dict, else it is stored in the file path
-        :return:
+        :return: 
         """
         project = self
 
@@ -1925,7 +1925,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         Returns an item given by its BaseProjectEntity.unique_id
 
         :param id: BaseProjectEntity.unique_id
-        :return:
+        :return: 
         """
         if item_id in self.id_list:
             return self.id_list[item_id]
