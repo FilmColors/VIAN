@@ -10,9 +10,10 @@ on:
     branches: [ develop ]
 
 jobs:
-  build:
-
+  test:
+    name: Run tests
     runs-on: ubuntu-latest
-
     steps:
-    - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+    - uses: actions/checkout@master
+    - name: Test
+      uses: skx/github-action-tester@master
