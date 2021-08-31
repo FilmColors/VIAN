@@ -8,6 +8,10 @@ from vian.core.data.enums import GENERIC
 from vian.core.data.log import log_error, log_warning
 from .annotation_body import AnnotationBody
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .project import *
+
 
 _VIAN_ROOT = os.path.abspath(os.path.split( __file__)[0] + "/../..")
 print(_VIAN_ROOT,  os.path.split( __file__)[0] + "/../..")
@@ -31,21 +35,44 @@ class IClassifiable():
     def get_parent_container(self):
         return None
 
-    def has_word(self, keyword):
+    def has_word(self, keyword: 'UniqueKeyword'):
         return keyword in self.tag_keywords
 
-    def toggle_word(self, keyword):
+    def toggle_word(self, keyword: 'UniqueKeyword'):
         if self.has_word(keyword):
-            self.remove_word(keyword)
+            self._remove_word(keyword)
         else:
-            self.add_word(keyword)
+            self._add_word(keyword)
 
-    def add_word(self, keyword):
+    def add_tag(self, keyword: 'UniqueKeyword'):
+        """
+        Adds a UniqueKeywords as tag to this container.
+
+        :param UniqueKeyword keyword:
+        :return: None
+        """
+        if keyword not in self.tag_keywords:
+            keyword.class_obj.experiment.tag_container(self, keyword)
+
+    def remove_tag(self, keyword: 'UniqueKeyword'):
+        if keyword in self.tag_keywords:
+            keyword.class_obj.experiment.remove_tag(self, keyword)
+
+    def _add_word(self, keyword: 'UniqueKeyword'):
+        """
+        Adds the keyword only to the list of this container, but does not
+        ensure that it is synchronized with the Experiment.classification_results.
+
+        Use IClassifiable.add_tag() to add perform classification.
+
+        :param keyword:
+        :return:
+        """
         if keyword not in self.tag_keywords:
             self.tag_keywords.append(keyword)
             self.onClassificationChanged.emit(self.tag_keywords)
 
-    def remove_word(self, keyword):
+    def _remove_word(self, keyword: 'UniqueKeyword'):
         if keyword in self.tag_keywords:
             self.tag_keywords.remove(keyword)
             self.onClassificationChanged.emit(self.tag_keywords)

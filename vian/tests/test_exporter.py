@@ -10,11 +10,10 @@ from vian.core.data.exporters import SequenceProtocolExporter
 
 class TestExporterMethods(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_temp_folder = os.path.join(os.getcwd(), "temp")
+        self.test_temp_folder = os.path.join(os.getcwd(), "temp2")
 
         if not os.path.exists(self.test_temp_folder):
             os.mkdir(self.test_temp_folder)
-
 
     def tearDown(self) -> None:
         #pass

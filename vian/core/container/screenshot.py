@@ -185,8 +185,10 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         Returns the screenshots image data in the original size.
         :return:
         """
+
         cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
         cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos)
+
         ret, frame = cap.read()
         frame = cv2.resize(frame, (self.display_width, self.display_height), interpolation=cv2.INTER_CUBIC)
         cap.release()

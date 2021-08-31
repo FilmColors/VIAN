@@ -1088,6 +1088,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     with open(self.get_bake_path(self.name, ".json"), 'w') as f:
                         json.dump(data, f)
                 else:
+                    if not os.path.isdir(os.path.split(project_path)[0]):
+                        os.makedirs(os.path.split(project_path)[0])
                     with open(project_path, 'w') as f:
                         json.dump(data, f)
             except Exception as e:
@@ -1095,7 +1097,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 raise e
         log_info("Project Stored to", path)
 
-    def load_project(self, path=None, main_window = None, serialization = None, library=None):
+    def load_project(self, path=None, main_window = None, serialization = None, library=None, vocabulary_update_scheme = "cu"):
         """
         Loads a project from a given file.
 
@@ -1267,7 +1269,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             print("Loading Node Scripts failed", e)
 
         if library is not None:
-            self.sync_with_library(library, main_window=main_window)
+            self.sync_with_library(library, main_window=main_window, update_scheme=vocabulary_update_scheme)
 
         try:
             for e in my_dict['experiments']:
@@ -1547,6 +1549,9 @@ class VIANProject(QObject, IHasName, IClassifiable):
         :param dispatch:
         :return: Vocabulary added
         """
+        if voc in self.vocabularies:
+            return voc
+
         name = voc.name
 
         voc.name = name
@@ -1630,7 +1635,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
         return new_voc
 
-    def sync_with_library(self,  library, review=True, main_window=None):
+    def sync_with_library(self,  library, main_window=None, update_scheme="cud"):
         collection = None
 
         for v in self.vocabularies:
@@ -1680,7 +1685,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
             print("Mode", mode, library_voc)
             if library_voc is not None and mode == "Update":
-                v.update_vocabulary(library_voc, compare_by_name=update_by_name)
+                if is_gui():
+                    update_scheme = "cud"
+                if update_by_name:
+                    merge_field = "name"
+                else:
+                    merge_field = "unique_id"
+                v.update_vocabulary2(library_voc, merge_field, update_scheme)
             else:
                 if collection is None:
                     collection = library.create_collection("Imported from Project {f}".format(f=self.name))
