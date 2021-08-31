@@ -4,7 +4,7 @@ import shutil
 import difflib
 import pandas as pd
 
-from utils import *
+from vian.tests.utils import *
 from vian.core.data.exporters import SequenceProtocolExporter
 
 

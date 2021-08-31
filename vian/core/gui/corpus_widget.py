@@ -11,7 +11,7 @@ from vian.core.gui.misc.filmography_widget import FilmographyWidget2
 from vian.core.container.corpus import Corpus
 from vian.core.container.project import VIANProject
 from vian.core.data.log import log_error
-from core.paths import get_vian_data
+from vian.core.paths import get_vian_data
 
 
 class CorpusDockWidget(EDockWidget):
