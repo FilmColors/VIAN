@@ -20,5 +20,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: vian-conda
+          environment-file: requirements.yml
       - name: Test with unittest
         run: python -m unittest vian.tests.test_exporter.TestExporterMethods
