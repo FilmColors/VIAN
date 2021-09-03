@@ -16,11 +16,5 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: vian-conda
-          environment-file: requirements.yml
-      - run: conda init
-      - run: activate vian-conda
-      - name: Test with unittest
-        run: python -m unittest vian.tests.test_exporter.TestExporterMethods
+      - uses: python -m pip install --requirement requirements.txt
+      - run: python -m unittest vian.tests.test_exporter.TestExporterMethods
