@@ -16,5 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: python -m pip install --requirement requirements.txt
+      - uses: actions/setup-python@v1
+      - uses: BSFishy/pip-action@v1
+        with:
+          requirements: requirements.txt
       - run: python -m unittest vian.tests.test_exporter.TestExporterMethods
