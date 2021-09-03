@@ -10,7 +10,8 @@ from vian.core.data.exporters import SequenceProtocolExporter
 
 class TestExporterMethods(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_temp_folder = os.path.join(os.getcwd(), "temp")
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        self.test_temp_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
 
         if not os.path.exists(self.test_temp_folder):
             os.mkdir(self.test_temp_folder)
@@ -22,7 +23,8 @@ class TestExporterMethods(unittest.TestCase):
 
     def test_csv_sequence_export(self):
         # arrange
-        self.ground_truth_csv = os.path.join(os.getcwd(), os.path.join("data", "ground_truth_csv_export1.csv"))
+        self.ground_truth_csv = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                             "data", "ground_truth_csv_export1.csv")
         self.project = get_VIANProject1_exporter()
         self.path = os.path.join(self.test_temp_folder, "test_csv_export.csv")
 
@@ -48,9 +50,12 @@ class TestExporterMethods(unittest.TestCase):
 
     def test_csv_netflix_project(self):
         # arrange
-        self.ground_truth_csv = os.path.join(os.getcwd(), os.path.join("data", "ground_truth_csv_export_netflix.csv"))
+        self.ground_truth_csv = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                             "data", "ground_truth_csv_export_netflix.csv")
         self.project = VIANProject()
-        self.project.load_project(path = os.path.join(os.getcwd(), os.path.join("data", "NETFLIX_VOCABULARY.eext")))
+        self.project.load_project(path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                    "data", "NETFLIX_VOCABULARY.eext"))
+
         self.path = os.path.join(self.test_temp_folder, "test_csv_export.csv")
 
         # act
@@ -75,9 +80,12 @@ class TestExporterMethods(unittest.TestCase):
 
     def test_csv_excel_netflix_export(self):
         # arrange
-        self.ground_truth_xlsx = os.path.join(os.getcwd(), os.path.join("data", "ground_truth_csv_excel_netflix.xlsx"))
+        self.ground_truth_xlsx = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                              "data", "ground_truth_csv_excel_netflix.xlsx")
         self.project = VIANProject()
-        self.project.load_project(path=os.path.join(os.getcwd(), os.path.join("data", "NETFLIX_VOCABULARY.eext")))
+        self.project.load_project(path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                    "data", "NETFLIX_VOCABULARY.eext"))
+
         self.path = os.path.join(self.test_temp_folder, "test_csv_export.xlsx")
 
         # act

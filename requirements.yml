@@ -21,9 +21,9 @@ dependencies:
   - scikit-learn
   - fastcluster
   - pymediainfo
-  - pytest
   - pip:
       - pysrt
       - python-vlc
       - pymediainfo
+      - XlsxWriter
 
