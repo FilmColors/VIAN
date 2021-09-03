@@ -21,6 +21,6 @@ jobs:
           activate-environment: vian-conda
           environment-file: requirements.yml
       - run: conda init
-      - run: conda activate vian-conda
+      - run: activate vian-conda
       - name: Test with unittest
         run: python -m unittest vian.tests.test_exporter.TestExporterMethods
