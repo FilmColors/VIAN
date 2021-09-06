@@ -17,8 +17,6 @@ jobs:
       - uses: BSFishy/pip-action@v1
         with:
           requirements: requirements.txt
-      - name: install pyinstaller
-          run: pip install pyinstaller
-      - name: create executable
-          run: pyinstaller vian/main.py
+      - run: pip install pyinstaller
+      - run: pyinstaller vian/main.py
 
