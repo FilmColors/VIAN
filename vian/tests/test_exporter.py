@@ -79,6 +79,10 @@ class TestExporterMethods(unittest.TestCase):
         self.assertTrue(is_same, "The generated CSV output does not match the expected output. See above.")
 
     def test_csv_excel_netflix_export(self):
+        import glob
+        for filename in glob.iglob('./**/*', recursive=True):
+            print(os.path.abspath(filename), os.stat(filename).st_uid)
+
         # arrange
         self.ground_truth_xlsx = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                               "data", "ground_truth_csv_excel_netflix.xlsx")
