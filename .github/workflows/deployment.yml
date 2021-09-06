@@ -7,9 +7,13 @@ on:
   push:
     branches: [ develop ]
 
+strategy:
+  matrix:
+    os: [macos-latest, windows-latest, ubuntu-latest]
+
 jobs:
   build_application:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +25,7 @@ jobs:
       - run: pyinstaller --onefile --name exetest123 vian/main.py
       - uses: actions/upload-artifact@v2
         with:
-          name: exetest123
-          path: dist/exetest123.exe
+          name: ${{ matrix.os }}_executable 
+          path: dist/exetest123
           if-no-files-found: error
 
