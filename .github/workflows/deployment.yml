@@ -22,6 +22,6 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: exetest123
-          path: vian/dist/exetest123.exe
+          path: dist/exetest123.exe
           if-no-files-found: error
 
