@@ -21,6 +21,6 @@ jobs:
       - run: pyinstaller --onefile --name exetest123 vian/main.py
       - uses: actions/upload-artifact@v2
         with:
-          - name: exetest123
-          - path: vian/exetest123.exe
+          name: exetest123
+          path: vian/exetest123.exe
 
