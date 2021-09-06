@@ -8,7 +8,7 @@ on:
     branches: [ develop ]
 
 jobs:
-  build:
+  build application:
     runs-on: windows-latest
 
     steps:
@@ -18,5 +18,9 @@ jobs:
         with:
           requirements: requirements.txt
       - run: pip install pyinstaller
-      - run: pyinstaller vian/main.py
+      - run: pyinstaller --onefile --name exetest123 vian/main.py
+      - uses: actions/upload-artifact@v2
+        with:
+          - name: exetest123
+          - path: vian/exetest123.exe
 
