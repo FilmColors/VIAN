@@ -26,4 +26,5 @@ dependencies:
       - python-vlc
       - pymediainfo
       - XlsxWriter
+      - openpyxl
 
