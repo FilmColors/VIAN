@@ -194,6 +194,12 @@ class IAnalysisJob(QObject):
 
         self.max_width = 1920
 
+    def resolution_from_coverage(self, f_start=None, f_end=None, f_duration=None):
+        if f_duration is None:
+            f_duration = f_end - f_start
+
+        return int(np.floor(f_duration*self.coverage))
+
     def get_name(self):
         return self.name
 

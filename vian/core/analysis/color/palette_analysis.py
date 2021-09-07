@@ -74,6 +74,9 @@ class ColorPaletteAnalysis(IAnalysisJob):
         c = start
 
         model = None
+        if self.coverage is not None:
+            self.resolution = self.resolution_from_coverage(start, stop + 1)
+
         for i in range(start, stop + 1, self.resolution):
             sign_progress((c - start) / ((stop - start) + 1))
 

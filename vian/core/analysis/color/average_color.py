@@ -94,6 +94,9 @@ class ColorFeatureAnalysis(IAnalysisJob):
             cap.set(cv2.CAP_PROP_POS_FRAMES, start)
             c = start
 
+            if self.coverage is not None:
+                self.resolution = self.resolution_from_coverage(start, stop + 1)
+
             for i in range(start, stop  + 1, self.resolution):
                 sign_progress((c - start) / ((stop - start) + 1))
                 cap.set(cv2.CAP_PROP_POS_FRAMES, i)

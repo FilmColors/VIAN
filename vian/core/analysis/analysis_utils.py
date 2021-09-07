@@ -6,12 +6,21 @@ from vian.core.container.project import ClassificationObject, VIANProject
 
 PROJECT_LOCK = Lock()
 
+
 def progress_dummy(args, **kwargs):
     pass
 
-def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[BaseProjectEntity],
-                 class_objs: List[ClassificationObject]=None):
+
+def run_analysis(project:VIANProject,
+                 analysis: IAnalysisJob,
+                 targets: List[BaseProjectEntity],
+                 class_objs: List[ClassificationObject]=None,
+                 progress_callback=None):
+
+    if progress_callback is None:
+        progress_callback = progress_dummy
     fps = project.movie_descriptor.fps
+
     if not isinstance(class_objs, list):
         class_objs = [class_objs]
 
@@ -21,9 +30,9 @@ def run_analysis(project:VIANProject, analysis: IAnalysisJob, targets: List[Base
         res = []
         if analysis.multiple_result:
             for i, arg in enumerate(args):
-                res.append(analysis.process(arg, progress_dummy))
+                res.append(analysis.process(arg, progress_callback))
         else:
-            res = analysis.process(args, progress_dummy)
+            res = analysis.process(args, progress_callback)
 
         if isinstance(res, list):
             for r in res:
