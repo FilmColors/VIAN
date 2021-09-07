@@ -18,7 +18,7 @@ requirements = [
     'bokeh==2.2.1',
     'matplotlib',
     'numpy',
-    'pymediainfo'
+    'pymediainfo',
     'pandas'
 ]
 
