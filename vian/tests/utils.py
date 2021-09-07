@@ -19,14 +19,13 @@ def get_VIANProject1_exporter():
     project.add_vocabulary(voc2)
 
     # experiment with classification objects
-    e = Experiment()
+    e = project.get_default_experiment()
     for c in range(4):
         classification_object = ClassificationObject(name="ClObj-"+str(c), experiment=e, unique_id=str(uuid4()))
+        e.add_classification_object(classification_object)
         classification_object.add_vocabulary(voc)
         classification_object.add_vocabulary(voc2)
         e.add_classification_object(classification_object)
-
-    project.add_experiment(e)
 
     # segmentation
     segmentation = Segmentation()
@@ -38,8 +37,8 @@ def get_VIANProject1_exporter():
         t = Segment(ID=s, start=time_elapsed, end=time_elapsed + segment_duration, duration=segment_duration,
                     annotation_body=["test123", "test123.1", "test123.2"])
         time_elapsed += segment_duration
-        t.add_word(e.classification_objects[s%3].unique_keywords[s%4])
-        t.add_word(e.classification_objects[s%3].unique_keywords[s%3])
+        t.add_tag(e.classification_objects[s % 3].unique_keywords[s % 4])
+        t.add_tag(e.classification_objects[s % 3].unique_keywords[s % 3])
         segmentation.add_segment(t)
 
     project.add_segmentation(segmentation)

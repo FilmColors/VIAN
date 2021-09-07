@@ -16,7 +16,6 @@ class TestExporterMethods(unittest.TestCase):
         if not os.path.exists(self.test_temp_folder):
             os.mkdir(self.test_temp_folder)
 
-
     def tearDown(self) -> None:
         #pass
         shutil.rmtree(self.test_temp_folder)

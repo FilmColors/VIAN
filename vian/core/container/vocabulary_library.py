@@ -25,11 +25,12 @@ class VocabularyCollection(QObject):
         self.name = name
         self.onCollectionChanged.emit(self)
 
-    def create_vocabulary(self, name="New Vocabulary"):
+    def create_vocabulary(self, name="New Vocabulary") -> 'Vocabulary':
         voc = Vocabulary(name, unique_id=str(uuid4()))
         self.add_vocabulary(voc)
+        return voc
 
-    def add_vocabulary(self, voc: Vocabulary, force=False):
+    def add_vocabulary(self, voc: Vocabulary, force=False) -> 'Vocabulary':
         if voc.unique_id in self.vocabularies and not force:
             raise Exception("Vocabulary already in Collection")
         else:
@@ -45,7 +46,7 @@ class VocabularyCollection(QObject):
         print("Collection Changed", time.time())
         self.onCollectionChanged.emit(self)
 
-    def remove_vocabulary(self, voc: Vocabulary):
+    def remove_vocabulary(self, voc: Vocabulary) -> 'Vocabulary':
         voc.onVocabularyChanged.disconnect(self.on_changed)
         if voc.unique_id in self.vocabularies:
             self.vocabularies.pop(voc.unique_id)
@@ -67,7 +68,7 @@ class VocabularyCollection(QObject):
         )
 
     @staticmethod
-    def deserialize(data: Dict):
+    def deserialize(data: Dict) -> 'VocabularyCollection':
         new_instance = VocabularyCollection()
         new_instance.is_editable = data['is_editable']
         new_instance.name = data['name']
