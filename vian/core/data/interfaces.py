@@ -198,7 +198,7 @@ class IAnalysisJob(QObject):
         if f_duration is None:
             f_duration = f_end - f_start
 
-        return int(np.floor(f_duration*self.coverage))
+        return  int(f_duration / np.clip(int(np.ceil(f_duration * self.coverage)), 1, None))
 
     def get_name(self):
         return self.name

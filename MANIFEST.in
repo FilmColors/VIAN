@@ -1,0 +1,4 @@
+include requirements.txt
+recursive-include vian/data *
+recursive-include vian/qt_ui *
+include vian/*
