@@ -46,7 +46,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
             - [7] Average Value: Experimental Saturation (BGR) {0, ..., 1.0} (Deprecated, this will be removed at some point)
     """
 
-    def __init__(self, resolution = 30):
+    def __init__(self, resolution = 30, coverage=None):
         super(ColorFeatureAnalysis, self).__init__("Color Feature Extractor",
                                                    [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorFeatures",
@@ -54,6 +54,7 @@ class ColorFeatureAnalysis(IAnalysisJob):
                                                    dataset_dtype=np.float16,
                                                    author="Gaudenz Halter",
                                                    version="1.0.0",
+                                                   coverage=coverage,
                                                    multiple_result=False)
         self.resolution = resolution
 

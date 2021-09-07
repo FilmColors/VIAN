@@ -32,13 +32,14 @@ class ColorHistogramAnalysis(IAnalysisJob):
              - [2]: Bins B-Channel {-128.0, ..., 128.0}
     """
 
-    def __init__(self, resolution=30):
+    def __init__(self, resolution=30,coverage=None):
         super(ColorHistogramAnalysis, self).__init__("Color Histogram", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorHistograms",
                                                    dataset_shape=(16,16,16),
                                                    dataset_dtype=np.float32,
                                                    author="Gaudenz Halter",
                                                      version="1.0.0",
+                                                     coverage=coverage,
                                                      multiple_result=True)
         self.resolution = resolution
 

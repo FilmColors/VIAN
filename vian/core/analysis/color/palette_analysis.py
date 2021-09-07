@@ -33,13 +33,14 @@ class ColorPaletteAnalysis(IAnalysisJob):
             - [4] Cluster Color: R-Channel (BGR) {0, ..., 255}
             - [5] Number of Pixels
     """
-    def __init__(self, resolution = 30, input_width = 300, n_super_pixel = 200):
+    def __init__(self, resolution = 30, input_width = 300, n_super_pixel = 200, coverage=None):
         super(ColorPaletteAnalysis, self).__init__("Color Palette", [SEGMENTATION, SEGMENT, SCREENSHOT, SCREENSHOT_GROUP],
                                                    dataset_name="ColorPalettes",
                                                    dataset_shape=(COLOR_PALETTES_MAX_LENGTH, 6), #(Distance, Layer, L, A, B, N)
                                                    dataset_dtype=np.float16,
                                                    author="Gaudenz Halter",
                                                    version="1.0.0",
+                                                   coverage=coverage,
                                                    multiple_result=True)
         self.resolution = resolution
         self.seeds_input_width = input_width

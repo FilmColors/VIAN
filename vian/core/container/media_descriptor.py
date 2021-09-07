@@ -134,6 +134,7 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         return self.movie_path
 
     def parse_movie(self):
+        print("Movie Exists", os.path.isfile(self.get_movie_path()))
         if os.path.isfile(self.get_movie_path()):
             cap = cv2.VideoCapture(self.get_movie_path())
             self.fps = cap.get(cv2.CAP_PROP_FPS)

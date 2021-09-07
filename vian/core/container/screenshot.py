@@ -53,8 +53,8 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
 
         self.title = title
 
-        self.display_width = display_width
-        self.display_height = display_height
+        # self.display_width = display_width
+        # self.display_height = display_height
 
         self.img_movie = None
         self.set_img_movie(image)
@@ -79,15 +79,24 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
 
         self.masked_cache = dict()
 
+    @property
+    def display_width(self):
+        return self.project.movie_descriptor.display_width
+
+    @property
+    def display_height(self):
+        return self.project.movie_descriptor.display_height
+
     def set_title(self, title):
         self.title = title
         self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
+
     def set_project(self, project):
         super(Screenshot, self).set_project(project)
-        self.display_width = self.project.movie_descriptor.display_width
-        self.display_height = self.project.movie_descriptor.display_height
+        # self.display_width = self.project.movie_descriptor.display_width
+        # self.display_height = self.project.movie_descriptor.display_height
 
     def set_annotation_visibility(self, visibility):
         self.annotation_is_visible = visibility
