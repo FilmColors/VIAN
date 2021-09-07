@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from vian.core.data.interfaces import TimelineDataset, IAnalysisJob, SpatialOverlayDataset
+    from vian.core.container.project import VIANProject
 
 
 class AnalysisContainer(BaseProjectEntity, IHasName, ISelectable):
@@ -235,7 +236,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
                 name=self.name,
                 unique_id=self.unique_id,
 
-                data=self.get_data_raw().tolist(),
+                data=self.get_adata(raw=True).tolist(),
 
                 vian_serialization_type=self.__class__.__name__,
                 vian_analysis_type=self.analysis_job_class,
@@ -265,7 +266,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
 
         return data
 
-    def deserialize(self, serialization, project):
+    def deserialize(self, serialization, project:'VIANProject'):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.analysis_job_class = deprecation_serialization(serialization, ['vian_analysis_type', 'analysis_job_class'])
@@ -276,10 +277,12 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         except Exception as e:
             log_error("Exception in IAnalysisContainerAnalysis.deserialize()", e)
             pass
-        self.parameters = serialization['parameters']
 
+        self.parameters = serialization['parameters']
         self.set_target_container(project.get_by_id(serialization['container']))
 
+        if project.is_baked and self.__class__ == IAnalysisJobAnalysis:
+            self.set_adata(np.array(serialization['data']), raw=True)
         return self
 
     def unload_container(self, data=None, sync=False):
@@ -288,7 +291,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         if self.data is None:
             return
 
-    def get_adata(self):
+    def get_adata(self, raw= False):
         """
         Load the data from the HDF5 File and returns it as described by IAnalysisJob.from_hdf5().
         This function returns the value formatted as described in the IAnalysisJob instance.
@@ -298,20 +301,18 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         """
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
-            return self.a_class().from_hdf5(self.project.hdf5_manager.load(self.unique_id))
-        else:
-            return self.a_class().from_hdf5(self.project.hdf5_manager.load_single(self.unique_id))
 
-    def get_data_raw(self):
-        if self.a_class is None:
-            self.a_class = get_analysis_by_name(self.analysis_job_class)
         if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
-            return np.array(self.project.hdf5_manager.load(self.unique_id))
+            data = np.array(self.project.hdf5_manager.load(self.unique_id))
         else:
-            return np.array(self.project.hdf5_manager.load_single(self.unique_id))
+            data = np.array(self.project.hdf5_manager.load_single(self.unique_id))
 
-    def set_adata(self, d:np.ndarray):
+        if raw:
+            return data
+        else:
+            self.a_class().from_hdf5(data)
+
+    def set_adata(self, d:np.ndarray, raw = False):
         """
         Sets the data of this container and dumps in the HDF5 file.
 
@@ -321,12 +322,15 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
 
-        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
-            self.project.hdf5_manager.dump(self.a_class().to_hdf5(d), self.a_class().dataset_name, self.unique_id)
+        if raw:
+            data = d
         else:
-            self.project.hdf5_manager.dump_single(self.a_class().to_hdf5(d), self.a_class().dataset_name,
-                                                  self.unique_id)
+            data = self.a_class().to_hdf5(d)
 
+        if self.a_class().data_serialization == DataSerialization.HDF5_MULTIPLE:
+            self.project.hdf5_manager.dump(data, self.a_class().dataset_name, self.unique_id)
+        else:
+            self.project.hdf5_manager.dump_single(data, self.a_class().dataset_name, self.unique_id)
         self.data = None
 
     def delete(self):
@@ -544,10 +548,11 @@ class ColormetryAnalysis(AnalysisContainer):
         )
         return serialization
 
-    def deserialize(self, serialization, project):
+    def deserialize(self, serialization, project: 'VIANProject'):
         self.name = serialization['name']
         self.unique_id = serialization['unique_id']
         self.notes = serialization['notes']
+
 
         try:
             self.has_finished = serialization['has_finished']
@@ -557,6 +562,11 @@ class ColormetryAnalysis(AnalysisContainer):
             self.end_idx = serialization['end_idx']
         except Exception as e:
             log_error("Exception in Loading Analysis", str(e))
+
+        if project.hdf5_manager.has_colorimetry() is False:
+            log_error("Could not find colorimetry, continuing without deserialization")
+            return None
+
         self.current_idx = project.hdf5_manager.get_colorimetry_length() - 1
         self.time_ms = project.hdf5_manager.get_colorimetry_times()[:self.current_idx + 1].tolist()
         self.check_finished()

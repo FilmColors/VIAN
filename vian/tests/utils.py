@@ -1,8 +1,12 @@
 import math
+import os
 from uuid import uuid4
 from vian.core.container.project import VIANProject, Screenshot
 from vian.core.container.experiment import Experiment, ClassificationObject, Vocabulary
 from vian.core.container.segmentation import Segmentation, Segment
+
+def get_test_data_dir():
+    return os.path.join(os.path.dirname(__file__), "data")
 
 def get_VIANProject1_exporter():
     project: VIANProject = VIANProject()

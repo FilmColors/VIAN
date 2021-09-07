@@ -24,6 +24,7 @@ def get_analysis_by_name(name):
 def get_all_analyses():
     return ALL_REGISTERED_ANALYSES
 
+
 DEFAULT_SIZE = (50,)
 DS_MOVIE = "movie"
 DS_COL_HIST = "col_histograms"

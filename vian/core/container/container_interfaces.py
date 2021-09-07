@@ -26,7 +26,7 @@ class IClassifiable():
     onClassificationChanged = pyqtSignal(object)
 
     def __init__(self):
-        self.tag_keywords = []
+        self.tag_keywords = []  # type: typing.List['UniqueKeyword']
         self.is_query_highlighted = False
 
     def set_classification_highlight(self, state):

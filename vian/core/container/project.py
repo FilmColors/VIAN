@@ -1,4 +1,5 @@
 # from vian.core.node_editor.node_editor import *
+import shutil
 from shutil import copy2
 from typing import Union
 from threading import Lock
@@ -160,6 +161,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.active_classification_object = None
         # self.folder = path.split("/")[len(path.split("/")) - 1]
         self.notes = ""
+        self.is_baked = False
 
         self.colormetry_analysis = None         # type: Union[ColormetryAnalysis|None]
         self.global_analyses = dict()
@@ -209,10 +211,28 @@ class VIANProject(QObject, IHasName, IClassifiable):
         if not os.path.isdir(self.export_dir):
             os.mkdir(self.export_dir)
 
-    def get_bake_path(self, entity, file_extension):
-        directory = os.path.join(self.export_dir, "bake")
+    def get_bake_path(self, entity, file_extension, filename_only = False):
+        """
+        Returns the default bake path where a files should be placed during the serialization of a project
+        in bake mode.
+
+        By default, the full path to the entity is returned. Use filename_only to only return the name of a
+        specific file within the bake directory.
+
+        :param entity:
+        :param file_extension:
+        :param filename_only:
+        :return:
+        """
+        if not filename_only:
+            directory = os.path.dirname(self.path)
+            directory = os.path.join(directory, "bake")
+        else:
+            directory = ""
+
         if not os.path.isdir(directory):
-            os.mkdir(directory)
+            os.makedirs(directory)
+
         if isinstance(entity, str):
             return os.path.join(directory, entity + file_extension)
         else:
@@ -1071,6 +1091,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             experiments=experiments,
             meta_data = project.meta_data,
             hdf_indices = hdf_indices,
+            is_baked = bake
         )
 
         if return_dict:
@@ -1085,7 +1106,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
             try:
                 if bake:
-                    with open(self.get_bake_path(self.name, ".json"), 'w') as f:
+                    with open(f"{os.path.dirname(project_path)}/{self.name}_baked.eext", 'w') as f:
                         json.dump(data, f)
                 else:
                     if not os.path.isdir(os.path.split(project_path)[0]):
@@ -1125,6 +1146,12 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.path = path
         self.name = my_dict['name']
         self.main_segmentation_index = my_dict['main_segmentation_index']
+
+
+        if "is_baked" in my_dict:
+            self.is_baked = my_dict['is_baked']
+        else:
+            self.is_baked = False
 
         if "uuid" in my_dict:
             self.uuid = my_dict['uuid']
@@ -1288,6 +1315,10 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 try:
                     t = deprecation_serialization(d, ['vian_serialization_type', 'analysis_container_class'])
                     new = eval(t)().deserialize(d, self)
+
+                    if new is None:
+                        continue
+
                     if isinstance(new, ColormetryAnalysis):
                         try:
                             # If the Project is older than 0.6.0 we want to explicitly override the Colorimetry
@@ -1301,6 +1332,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     else:
                         self.add_analysis(new)
                 except Exception as e:
+                    raise e
                     print("Exception in Load Analyses", str(e))
 
         if "_contains_voc_dups" in self.meta_data:

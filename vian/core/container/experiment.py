@@ -826,8 +826,7 @@ class ClassificationObject(BaseProjectEntity, IHasName):
                     else:
                         # This UniqueKeyword is dangling and should be removed!
                         continue
-                    if ser['unique_id'] == "38a326f0-1260-4b66-9aec-df6805cec7ce":
-                        print("Hello")
+
                     ukw = UniqueKeyword(self.experiment).deserialize(ser, project, word_obj)
                     project.add_to_id_list(ukw, ukw.unique_id)
                     self.unique_keywords.append(ukw)
