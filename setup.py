@@ -19,6 +19,7 @@ requirements = [
     'matplotlib',
     'numpy',
     'pymediainfo'
+    'pandas'
 ]
 
 print(glob.glob('vian/data/**', recursive=True))
@@ -53,7 +54,8 @@ setup(
               'vian.extensions.scripts',
               'vian.extensions.analysis',
               'vian.extensions.pipelines',
-              'vian.flask_server'],
+              'vian.flask_server'
+              ],
     url='www.vian.app',
     data_files=[('data', glob.glob('vian/data/**.*', recursive=True))],
     license='GPL',
